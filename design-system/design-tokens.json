@@ -193,13 +193,13 @@
     },
     "typography": {
       "--font-family-primary": {
-        "value": "'Polysans', sans-serif",
+        "value": "polysans, polysans-fallback, sans-serif",
         "usage": "All body copy, headings, buttons, forms",
         "evidence": "style.css body/h1-h5; document.fonts loaded 300/400/500/800",
         "confidence": "High"
       },
       "--font-family-display": {
-        "value": "'RecklessNeue', serif",
+        "value": "recklessneue, serif",
         "usage": "Editorial serif accent (offer card titles)",
         "evidence": "style.css @font-face RecklessNeue-Book; computed H3 on home/offers",
         "confidence": "High"

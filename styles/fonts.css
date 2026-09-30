@@ -1,1 +1,58 @@
-/* brand @font-face declarations go here (loaded by scripts.js) */
+/* PolySans (weights mapped as on the source site: Slim 300, Neutral 400, Median 500, Bulky 800) */
+@font-face {
+  font-family: polysans;
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('fonts/polysans-slim-webfont.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: polysans;
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/polysans-neutral-webfont.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: polysans;
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('fonts/polysans-medium-webfont.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: polysans;
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('fonts/polysans-bulky-webfont.woff2') format('woff2');
+}
+
+/* Reckless Neue Book (editorial accent) */
+@font-face {
+  font-family: recklessneue;
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/RecklessNeue-Book.woff') format('woff');
+}
+
+/* Montserrat variable font (SIL OFL, see fonts/OFL.txt) */
+@font-face {
+  font-family: montserrat;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('fonts/montserrat.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: montserrat;
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('fonts/montserrat-italic.woff2') format('woff2');
+}

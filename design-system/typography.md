@@ -4,8 +4,8 @@
 
 | Token | Stack | Role | Source | Confidence |
 | --- | --- | --- | --- | --- |
-| `--font-family-primary` | `'Polysans', sans-serif` | Everything: body, headings, buttons, forms | `style.css` `body`, `h1–h5`. Self-hosted `@font-face` from `assets.plazapremiumlounge.com/content/webfonts/` | High |
-| `--font-family-display` | `'RecklessNeue', serif` | Editorial serif accent: offer card titles ("Online Exclusive Offer") | `@font-face RecklessNeue-Book.woff`. Source has no fallback, so `serif` is added | High |
+| `--font-family-primary` | `polysans, polysans-fallback, sans-serif` | Everything: body, headings, buttons, forms | `style.css` `body`, `h1–h5`. Self-hosted `@font-face` from `assets.plazapremiumlounge.com/content/webfonts/` | High |
+| `--font-family-display` | `recklessneue, serif` | Editorial serif accent: offer card titles ("Online Exclusive Offer") | `@font-face RecklessNeue-Book.woff`. Source has no fallback, so `serif` is added | High |
 | `--font-family-nav` | `helvetica, sans-serif` | Navigation links (desktop and mobile), mega menu | Computed on `.wsmenu-list > li > a` (WebSlideMenu CSS) | High |
 
 **Polysans faces declared** (woff2 + woff):
@@ -21,7 +21,7 @@ Loaded at runtime (`document.fonts`): Polysans 300, 400, 500, 800 and RecklessNe
 
 `style.css` also `@import`s **Bitter** and **Inter** from Google Fonts, but no measured element on the 11 pages used them. Treat them as unused and **do not** carry them over.
 
-**Licensing:** Polysans (Wide Type) and Reckless Neue (Displaay) are commercial typefaces. Font Awesome 6 Pro is commercial too. Confirm the licence before self-hosting any of them in the new site.
+**Licensing:** Polysans (Wide Type) and Reckless Neue (Displaay) are commercial typefaces. Font Awesome 6 Pro is commercial too. The PolySans and Reckless Neue files in `styles/fonts/` were supplied by the project team. Montserrat (also supplied) is SIL OFL, with the licence in `styles/fonts/OFL.txt`. It isn't used on the source site and has no token yet.
 
 **Divergent pages:**
 - `/en-uk/airport-lounge-passes` embeds an app that uses a separate family, `"PolySans Median"`, at 38/22/18px with a different palette.

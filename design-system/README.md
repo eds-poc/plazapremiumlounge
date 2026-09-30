@@ -2,7 +2,7 @@
 
 This design system was reverse-engineered from **https://www.plazapremiumlounge.com/en-uk** on 2026-09-30, for the Edge Delivery Services rebuild.
 
-> **Status: applied to global styles.** All tokens are declared as CSS custom properties in the `:root` of [`/styles/styles.css`](../styles/styles.css), with responsive overrides. The global rules use them: body, headings, links, focus, buttons, sections and section metadata (`grey`, `maroon`, `wide`). Blocks (header, footer, cards, hero, columns) are **not** restyled yet and still use the neutral `--base-*` variables. Brand fonts are not loaded yet (licensing), so text falls back to the system sans-serif. There is no separate `design-tokens.css`, because `styles.css` is the single CSS source. This folder is excluded from publishing via `.hlxignore`.
+> **Status: applied to global styles.** All tokens are declared as CSS custom properties in the `:root` of [`/styles/styles.css`](../styles/styles.css), with responsive overrides. The global rules use them: body, headings, links, focus, buttons, sections and section metadata (`grey`, `maroon`, `wide`). Blocks (header, footer, cards, hero, columns) are **not** restyled yet and still use the neutral `--base-*` variables. Brand fonts are self-hosted from `styles/fonts/` and declared in `styles/fonts.css`: PolySans, Reckless Neue and Montserrat. A size-adjusted Arial fallback limits layout shift while they load. There is no separate `design-tokens.css`, because `styles.css` is the single CSS source. This folder is excluded from publishing via `.hlxignore`.
 
 ## Files
 
@@ -54,7 +54,7 @@ Type steps down at 768px (body 14px, H1 30px, section H2 18px, hero 32px). H2 is
 ### Technical
 - **Source stack:** Kentico CMS, Bootstrap 5.3.2, jQuery UI, WebSlideMenu (navigation), Owl Carousel and Swiper, Fancybox, daterangepicker, intl-tel-input.
 - **CSS:** hand-written global `style.css` with no custom properties and no methodology such as BEM.
-- **Fonts:** self-hosted woff2/woff. Commercial licences are needed. Bitter and Inter are imported but unused.
+- **Fonts:** self-hosted woff2/woff on the source. Bitter and Inter are imported there but unused. In this project the font files are in `styles/fonts/`.
 - **Icons:** Font Awesome 6 Pro, light style. Commercial licence needed. Plan to replace with SVG icons.
 - **Recommended EDS architecture:** tokens and globals in `styles/styles.css`, fonts in `styles/fonts.css`, one folder per component under `blocks/`, non-critical globals in `lazy-styles.css`. See [implementation-guide.md](implementation-guide.md).
 

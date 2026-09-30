@@ -6,16 +6,15 @@ This guide is for a developer or AI coding agent building the new Plaza Premium 
 
 | What | Where |
 | --- | --- |
-| Design tokens (CSS custom properties) | `styles/styles.css` → `:root` (after the baseline block), plus the `/* design token responsive overrides */` media queries |
+| Design tokens (CSS custom properties) | `styles/styles.css` → `:root` (after the baseline block), plus the `/* design token overrides (mobile-first …) */` `min-width` media queries |
 | Machine-readable tokens | `design-system/design-tokens.json` (same values, plus usage/evidence/confidence) |
-| Brand fonts | `styles/fonts.css` (currently empty, loaded by `scripts/scripts.js` → `loadFonts()`) and a `fonts/` folder |
+| Brand fonts | `styles/fonts.css` (`@font-face` rules, loaded by `scripts/scripts.js` → `loadFonts()`) and the files in `styles/fonts/`. The size-adjusted `polysans-fallback` face is in `styles/styles.css` |
 | Global element styles | `styles/styles.css` (body, headings, links, buttons, sections) |
 | Below-the-fold global CSS | `styles/lazy-styles.css` |
 | Component styles | `blocks/{name}/{name}.css`, scoped to `.{name}` |
 | Icons | `icons/*.svg`, referenced as `:icon-name:` in content |
 
-**Current state:** steps 2–6 below are done in `styles/styles.css`: body, headings, links and focus, the three button variants plus disabled, sections, and the `grey` / `maroon` / `wide` section styles. Still open:
-- **Step 1 (fonts):** waiting on licences. Text renders in the fallback sans-serif until the Polysans files are added.
+**Current state:** steps 1–6 below are done in `styles/styles.css`: body, headings, links and focus, the three button variants plus disabled, sections, and the `grey` / `maroon` / `wide` section styles. Still open:
 - **Step 7 (header height):** deferred to the header block migration. `--nav-height` is still 64px so the boilerplate header keeps its layout.
 - **Blocks:** header, footer, cards, hero and columns still use the neutral `--base-*` variables. Replace those with brand tokens as each block is restyled, then delete the `--base-*` variables.
 
@@ -25,7 +24,13 @@ Two deliberate differences from the source, for accessibility:
 
 ## 2. Applying the tokens (the next phase)
 
-1. **Fonts.** Once the Polysans and RecklessNeue licences are confirmed, add the woff2 files to `fonts/` and declare them in `styles/fonts.css` with `font-display: swap`. Declare only the weights you use: 300, 400, 500 and optionally 800. Add size-adjusted fallbacks in `styles.css` (`@font-face { font-family: polysans-fallback; src: local('Arial'); size-adjust: …; }`) and set `--font-family-primary: 'Polysans', polysans-fallback, sans-serif` to limit CLS.
+1. **Fonts** (done).
+   - `styles/fonts.css` declares these faces, all with `font-display: swap`:
+     - `polysans`: Slim 300, Neutral 400, Median 500, Bulky 800 (the site's own weight mapping)
+     - `recklessneue`: 400
+     - `montserrat`: variable 100–900, upright and italic (SIL OFL)
+   - `styles.css` declares a `polysans-fallback` face (Arial, `size-adjust: 102.84%`, `ascent-override: 106.97%`, `descent-override: 26.26%`) to limit layout shift during the swap. These values were computed from PolySans Neutral as rendered and Arial's standard advance widths.
+   - `--font-family-primary` is `polysans, polysans-fallback, sans-serif`, and `--font-family-display` is `recklessneue, serif`.
 2. **Body and text.** `body { font-family: var(--font-family-primary); font-size: var(--body-font-size); line-height: var(--line-height-body); color: var(--color-text); }`
 3. **Headings.**
    - `h1 { font-size: var(--heading-page-size); }`

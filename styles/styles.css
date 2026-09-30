@@ -67,8 +67,8 @@
   --color-focus-ring: rgb(13 110 253 / 25%);
 
   /* typography */
-  --font-family-primary: 'Polysans', sans-serif;
-  --font-family-display: 'RecklessNeue', serif;
+  --font-family-primary: polysans, polysans-fallback, sans-serif;
+  --font-family-display: recklessneue, serif;
   --font-family-nav: helvetica, sans-serif;
   --font-weight-light: 300;
   --font-weight-regular: 400;
@@ -147,6 +147,15 @@
   --duration-slow: 0.5s;
   --ease-standard: ease-in-out;
   --ease-emphasized: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* fallback font sized to PolySans Neutral metrics (vs Arial) to limit layout shift */
+@font-face {
+  font-family: polysans-fallback;
+  size-adjust: 102.84%;
+  ascent-override: 106.97%;
+  descent-override: 26.26%;
+  src: local('Arial');
 }
 
 /* design token overrides (mobile-first: :root holds mobile values) */
