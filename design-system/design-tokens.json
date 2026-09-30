@@ -1,0 +1,655 @@
+{
+  "$schema": "Plaza Premium Lounge design tokens",
+  "source": "https://www.plazapremiumlounge.com/en-uk",
+  "extracted": "2026-09-30",
+  "status": "extracted - declared in styles/styles.css :root, not yet consumed by any rule",
+  "breakpoints": {
+    "sm": "576px",
+    "md": "768px",
+    "lg": "992px",
+    "xl": "1200px",
+    "xxl": "1400px",
+    "note": "Bootstrap 5.3.2 defaults, confirmed in style.css media queries. Desktop navigation switches at 1200px."
+  },
+  "tokens": {
+    "brand colors": {
+      "--color-brand-primary": {
+        "value": "#530e2a",
+        "usage": "Brand maroon: links, active states, scrolled header, newsletter panel, outline buttons, breadcrumb active",
+        "evidence": "style.css (#530e2a x163); computed on 11 pages",
+        "confidence": "High"
+      },
+      "--color-brand-primary-action": {
+        "value": "#681235",
+        "usage": "Filled primary button background (.btn-primary)",
+        "evidence": "style.css .btn-primary; computed rgb(104 18 53)",
+        "confidence": "High"
+      },
+      "--color-brand-primary-dark": {
+        "value": "#5c0f2d",
+        "usage": "Mobile navigation drawer background",
+        "evidence": "computed .wsmenu-list rgb(92 15 45) at 375px; style.css #5c0f2d x5",
+        "confidence": "Medium"
+      },
+      "--color-brand-primary-deep": {
+        "value": "#4a0d26",
+        "usage": "Promotional sub-banner background",
+        "evidence": "custom.css section.sub-banner",
+        "confidence": "Low"
+      },
+      "--color-brand-tint": {
+        "value": "rgb(104 18 53 / 10%)",
+        "usage": "Secondary button and feature-tag background (maroon at 10%)",
+        "evidence": "style.css .btn-secondary; computed .tag.pink on lounge pages (x18)",
+        "confidence": "High"
+      },
+      "--color-brand-blush": {
+        "value": "#f3d7d3",
+        "usage": "Soft pink accent surfaces (offer highlights, sub-banner button)",
+        "evidence": "computed rgb(243 215 211) on home/offers; custom.css #f3d6d3",
+        "confidence": "Medium"
+      },
+      "--color-brand-coral": {
+        "value": "#ea7368",
+        "usage": "Coral accent in offer promotion panels",
+        "evidence": "computed rgb(234 115 104) on home/offers",
+        "confidence": "Low"
+      }
+    },
+    "surface colors": {
+      "--color-background": {
+        "value": "#fff",
+        "usage": "Page background, cards, accordion rows",
+        "evidence": "computed body background",
+        "confidence": "High"
+      },
+      "--color-surface-warm": {
+        "value": "#f5f4f1",
+        "usage": "Alternate section background (.greyBg) and form input fill",
+        "evidence": "style.css section.greyBg; computed inputs on contact/sign-up/group booking",
+        "confidence": "High"
+      },
+      "--color-surface-footer": {
+        "value": "#1b1b1b",
+        "usage": "Footer background",
+        "evidence": "style.css footer; computed rgb(27 27 27)",
+        "confidence": "High"
+      },
+      "--color-overlay-hero": {
+        "value": "rgb(0 0 0 / 35%)",
+        "usage": "Dark scrim over hero imagery",
+        "evidence": "computed on home hero (x2)",
+        "confidence": "Medium"
+      },
+      "--color-overlay-nav": {
+        "value": "rgb(0 0 0 / 45%)",
+        "usage": "Backdrop behind the open mobile menu",
+        "evidence": "computed .overlapblackbg at 375px",
+        "confidence": "Medium"
+      }
+    },
+    "text colors": {
+      "--color-text": {
+        "value": "#333",
+        "usage": "Body text and default headings",
+        "evidence": "style.css body; computed body color",
+        "confidence": "High"
+      },
+      "--color-text-strong": {
+        "value": "#000",
+        "usage": "Lounge card titles, underline links",
+        "evidence": "computed H3 on lounge pages; style.css a.txt-link",
+        "confidence": "Medium"
+      },
+      "--color-text-secondary": {
+        "value": "#666",
+        "usage": "Accordion answers, secondary copy",
+        "evidence": "style.css .accordion-body; computed",
+        "confidence": "High"
+      },
+      "--color-text-muted": {
+        "value": "#6b6b6b",
+        "usage": "Card subtitles and meta text",
+        "evidence": "computed .bw-featured-subtitle",
+        "confidence": "Medium"
+      },
+      "--color-text-subtle": {
+        "value": "#999",
+        "usage": "Link hover color",
+        "evidence": "style.css a:hover",
+        "confidence": "High"
+      },
+      "--color-text-inverse": {
+        "value": "#fff",
+        "usage": "Text on maroon, hero and footer",
+        "evidence": "computed on header, footer, newsletter",
+        "confidence": "High"
+      },
+      "--color-link": {
+        "value": "var(--color-brand-primary)",
+        "usage": "Default link color",
+        "evidence": "style.css a { color: #530e2a }",
+        "confidence": "High"
+      },
+      "--color-link-hover": {
+        "value": "var(--color-text-subtle)",
+        "usage": "Link hover color",
+        "evidence": "style.css a:hover { color: #999 }",
+        "confidence": "High"
+      }
+    },
+    "border colors": {
+      "--color-border": {
+        "value": "#d8d8d8",
+        "usage": "Default 1px borders (chips, dividers in booking card)",
+        "evidence": "computed 1px solid rgb(216 216 216) on home",
+        "confidence": "Medium"
+      },
+      "--color-border-subtle": {
+        "value": "#dee2e6",
+        "usage": "Accordion row separators",
+        "evidence": "computed .accordion-item border-bottom (Bootstrap default)",
+        "confidence": "High"
+      },
+      "--color-border-strong": {
+        "value": "var(--color-brand-primary)",
+        "usage": "Outline buttons, radio/checkbox borders",
+        "evidence": "computed .btn-primary.outline and .form-check-input",
+        "confidence": "High"
+      },
+      "--color-divider-inverse": {
+        "value": "rgb(0 0 0 / 13%)",
+        "usage": "Row dividers inside the mobile menu",
+        "evidence": "computed mobile nav items border-bottom",
+        "confidence": "Medium"
+      }
+    },
+    "state colors": {
+      "--color-error": {
+        "value": "#dc3545",
+        "usage": "Validation messages (.text-danger)",
+        "evidence": "computed .field-validation-valid on contact form",
+        "confidence": "High"
+      },
+      "--color-disabled-bg": {
+        "value": "#ccc",
+        "usage": "Disabled button background",
+        "evidence": "style.css .btn:disabled",
+        "confidence": "High"
+      },
+      "--color-disabled-text": {
+        "value": "#666",
+        "usage": "Disabled button text",
+        "evidence": "style.css .btn:disabled",
+        "confidence": "High"
+      },
+      "--color-focus-ring": {
+        "value": "rgb(13 110 253 / 25%)",
+        "usage": "Input focus ring (Bootstrap default, not rebranded)",
+        "evidence": "computed input:focus box-shadow",
+        "confidence": "High"
+      }
+    },
+    "typography": {
+      "--font-family-primary": {
+        "value": "'Polysans', sans-serif",
+        "usage": "All body copy, headings, buttons, forms",
+        "evidence": "style.css body/h1-h5; document.fonts loaded 300/400/500/800",
+        "confidence": "High"
+      },
+      "--font-family-display": {
+        "value": "'RecklessNeue', serif",
+        "usage": "Editorial serif accent (offer card titles)",
+        "evidence": "style.css @font-face RecklessNeue-Book; computed H3 on home/offers",
+        "confidence": "High"
+      },
+      "--font-family-nav": {
+        "value": "helvetica, sans-serif",
+        "usage": "Desktop and mobile navigation links (WebSlideMenu)",
+        "evidence": "computed .wsmenu-list > li > a",
+        "confidence": "High"
+      },
+      "--font-weight-light": {
+        "value": "300",
+        "usage": "Footer links, intro paragraphs, form inputs in hero",
+        "evidence": "Polysans Neutral light face; computed",
+        "confidence": "High"
+      },
+      "--font-weight-regular": {
+        "value": "400",
+        "usage": "Body copy, buttons",
+        "evidence": "computed",
+        "confidence": "High"
+      },
+      "--font-weight-medium": {
+        "value": "500",
+        "usage": "Headings, labels, links, strong",
+        "evidence": "style.css h1-h5, a, b/strong",
+        "confidence": "High"
+      },
+      "--font-weight-bold": {
+        "value": "800",
+        "usage": "Polysans Bulky (display emphasis)",
+        "evidence": "style.css @font-face weight 800",
+        "confidence": "Medium"
+      },
+      "--font-size-2xs": {
+        "value": "10px",
+        "usage": "Mobile tags and footer brand captions",
+        "evidence": "computed at 375px",
+        "confidence": "Medium"
+      },
+      "--font-size-xs": {
+        "value": "12px",
+        "usage": "Form labels, tags, eyebrow text",
+        "evidence": "computed .form-label, .tag",
+        "confidence": "High"
+      },
+      "--font-size-sm": {
+        "value": "14px",
+        "usage": "Buttons, nav links, footer links, mobile body",
+        "evidence": "computed",
+        "confidence": "High"
+      },
+      "--font-size-md": {
+        "value": "16px",
+        "usage": "Desktop body copy, breadcrumbs",
+        "evidence": "style.css body",
+        "confidence": "High"
+      },
+      "--font-size-lg": {
+        "value": "18px",
+        "usage": "Card subtitles, mobile section titles",
+        "evidence": "computed",
+        "confidence": "High"
+      },
+      "--font-size-xl": {
+        "value": "20px",
+        "usage": "Accordion questions, intro text, mobile menu items",
+        "evidence": "computed .accordion-button; style.css p.intro",
+        "confidence": "High"
+      },
+      "--font-size-2xl": {
+        "value": "24px",
+        "usage": "H3, card titles, newsletter heading",
+        "evidence": "style.css h3",
+        "confidence": "High"
+      },
+      "--font-size-3xl": {
+        "value": "32px",
+        "usage": "Section titles (H2) on desktop",
+        "evidence": "computed h2 2rem at >=1200px",
+        "confidence": "High"
+      },
+      "--font-size-4xl": {
+        "value": "40px",
+        "usage": "Hero title",
+        "evidence": "computed hero H2 at >=768px",
+        "confidence": "High"
+      },
+      "--font-size-5xl": {
+        "value": "42px",
+        "usage": "Page title (h1.title)",
+        "evidence": "style.css h1.title",
+        "confidence": "High"
+      },
+      "--line-height-tight": {
+        "value": "1.15",
+        "usage": "Hero title",
+        "evidence": "computed 46px / 40px",
+        "confidence": "Medium"
+      },
+      "--line-height-heading": {
+        "value": "1.2",
+        "usage": "Headings",
+        "evidence": "computed 38.4/32, 28.8/24, 21.6/18, 50.4/42",
+        "confidence": "High"
+      },
+      "--line-height-body": {
+        "value": "1.4",
+        "usage": "Body copy and list items",
+        "evidence": "style.css body line-height 1.4",
+        "confidence": "High"
+      },
+      "--letter-spacing-label": {
+        "value": "1px",
+        "usage": "Uppercase form labels and tags",
+        "evidence": "computed .form-label, .tag",
+        "confidence": "High"
+      },
+      "--letter-spacing-eyebrow": {
+        "value": "2px",
+        "usage": "Uppercase footer column headings",
+        "evidence": "style.css footer .ft-col h3",
+        "confidence": "High"
+      },
+      "--body-font-size": {
+        "value": "16px",
+        "responsive": {
+          "(width < 768px)": "14px"
+        },
+        "usage": "Body copy (responsive)",
+        "evidence": "style.css body 16px; 14px at <=767.98px",
+        "confidence": "High"
+      },
+      "--heading-page-size": {
+        "value": "42px",
+        "responsive": {
+          "(width < 768px)": "30px"
+        },
+        "usage": "H1 page title (responsive)",
+        "evidence": "style.css h1.title 42px; 30px at <=767.98px",
+        "confidence": "High"
+      },
+      "--heading-section-size": {
+        "value": "32px",
+        "responsive": {
+          "(width < 768px)": "18px",
+          "(768px <= width < 1200px)": "calc(1.325rem + 0.9vw)"
+        },
+        "usage": "Section H2 (responsive; Bootstrap RFS between 768 and 1199px)",
+        "evidence": "computed 18px @375, 28.1px @768, 30.4px @1024, 32px @1200+",
+        "confidence": "High"
+      },
+      "--heading-hero-size": {
+        "value": "40px",
+        "responsive": {
+          "(width < 768px)": "32px"
+        },
+        "usage": "Hero H2 (responsive)",
+        "evidence": "computed 32px @375, 40px @768+",
+        "confidence": "High"
+      },
+      "--heading-card-size": {
+        "value": "24px",
+        "responsive": {
+          "(width < 1200px)": "18px"
+        },
+        "usage": "Offer/news card H4 (responsive)",
+        "evidence": "computed 18px below 1200px, 24px at 1200px+",
+        "confidence": "High"
+      }
+    },
+    "spacing": {
+      "--spacing-1": {
+        "value": "2px",
+        "usage": "Label-to-input gap, list item block padding, tag block padding",
+        "evidence": "computed (x48 on home)",
+        "confidence": "High"
+      },
+      "--spacing-2": {
+        "value": "5px",
+        "usage": "Button block padding, breadcrumb item padding",
+        "evidence": "computed; style.css .btn",
+        "confidence": "High"
+      },
+      "--spacing-3": {
+        "value": "8px",
+        "usage": "Heading margin-bottom (H3/H4), icon gaps",
+        "evidence": "computed",
+        "confidence": "High"
+      },
+      "--spacing-4": {
+        "value": "10px",
+        "usage": "Small gaps, button inline padding in header",
+        "evidence": "computed",
+        "confidence": "High"
+      },
+      "--spacing-5": {
+        "value": "12px",
+        "usage": "Container padding (Bootstrap half gutter), select padding",
+        "evidence": "computed .container-fluid padding",
+        "confidence": "High"
+      },
+      "--spacing-6": {
+        "value": "15px",
+        "usage": "Footer heading margin, mobile container padding",
+        "evidence": "computed",
+        "confidence": "High"
+      },
+      "--spacing-7": {
+        "value": "20px",
+        "usage": "Paragraph margin-bottom, card padding, button inline padding",
+        "evidence": "style.css p { margin-bottom: 20px }",
+        "confidence": "High"
+      },
+      "--spacing-8": {
+        "value": "25px",
+        "usage": "Input inline padding, accordion row padding, mobile section padding",
+        "evidence": "computed",
+        "confidence": "High"
+      },
+      "--spacing-9": {
+        "value": "30px",
+        "usage": "Title-wrapper margin, button padding (lg)",
+        "evidence": "style.css section .title-wrapper",
+        "confidence": "High"
+      },
+      "--spacing-10": {
+        "value": "35px",
+        "usage": "Section H2 margin-bottom (desktop), default section padding",
+        "evidence": "style.css section / section h2",
+        "confidence": "High"
+      },
+      "--spacing-11": {
+        "value": "50px",
+        "usage": "Section padding (desktop), wide container padding, footer top padding",
+        "evidence": "style.css section @>=992px, footer",
+        "confidence": "High"
+      },
+      "--spacing-12": {
+        "value": "80px",
+        "usage": "Large feature section padding",
+        "evidence": "computed (x8 on home); custom.css .chef-section",
+        "confidence": "Medium"
+      },
+      "--section-padding-block": {
+        "value": "50px",
+        "responsive": {
+          "(width < 768px)": "25px",
+          "(768px <= width < 992px)": "35px"
+        },
+        "usage": "Vertical section padding (responsive)",
+        "evidence": "style.css section: 25px @<=767, 35px default, 50px @>=992",
+        "confidence": "High"
+      },
+      "--section-title-gap": {
+        "value": "35px",
+        "responsive": {
+          "(width < 992px)": "25px"
+        },
+        "usage": "Space below a section H2 (responsive)",
+        "evidence": "style.css section h2: 25px default, 35px @>=992",
+        "confidence": "High"
+      }
+    },
+    "layout": {
+      "--container-max-width": {
+        "value": "1390px",
+        "usage": "Standard content container (.container-fluid)",
+        "evidence": "style.css .container-fluid max-width",
+        "confidence": "High"
+      },
+      "--container-wide-max-width": {
+        "value": "1490px",
+        "usage": "Wide container used by newsletter/feature bands",
+        "evidence": "style.css .container-fluid.long-container",
+        "confidence": "High"
+      },
+      "--container-narrow-max-width": {
+        "value": "860px",
+        "usage": "Narrow reading container (.sm-container)",
+        "evidence": "style.css .container.sm-container @>=992px",
+        "confidence": "Low"
+      },
+      "--container-padding": {
+        "value": "12px",
+        "responsive": {
+          "(width < 768px)": "15px"
+        },
+        "usage": "Container inline padding (responsive)",
+        "evidence": "computed 12px @>=768, 15px @<768",
+        "confidence": "High"
+      },
+      "--container-wide-padding": {
+        "value": "50px",
+        "responsive": {
+          "(width < 768px)": "0"
+        },
+        "usage": "Wide container inline padding (responsive)",
+        "evidence": "computed 50px @>=768, 0 @<768",
+        "confidence": "High"
+      },
+      "--grid-gutter": {
+        "value": "24px",
+        "usage": "Bootstrap 5 row gutter (1.5rem)",
+        "evidence": "bootstrap.min.css v5.3.2 --bs-gutter-x",
+        "confidence": "High"
+      },
+      "--nav-height-desktop": {
+        "value": "108px",
+        "usage": "Desktop header height, top of page (>=1200px)",
+        "evidence": "computed .wsmainfull; style.css",
+        "confidence": "High"
+      },
+      "--nav-height-desktop-scrolled": {
+        "value": "70px",
+        "usage": "Desktop header height after scroll (.fixedTop)",
+        "evidence": "computed after scrollY 600",
+        "confidence": "High"
+      },
+      "--nav-height-mobile": {
+        "value": "122px",
+        "usage": "Mobile promo strip (40px) + mobile header (82px)",
+        "evidence": "computed at 375px",
+        "confidence": "High"
+      },
+      "--z-header": {
+        "value": "99",
+        "usage": "Fixed desktop header",
+        "evidence": "computed .wsmainfull z-index",
+        "confidence": "High"
+      },
+      "--z-megamenu": {
+        "value": "1000",
+        "usage": "Mega menu / mobile drawer",
+        "evidence": "computed .wsmegamenu, .wsmenu",
+        "confidence": "High"
+      }
+    },
+    "radius": {
+      "--radius-xs": {
+        "value": "6px",
+        "usage": "Pagination links, help cards, badges",
+        "evidence": "computed .page-link, .helpCard (Bootstrap)",
+        "confidence": "High"
+      },
+      "--radius-sm": {
+        "value": "12px",
+        "usage": "Select fields in booking widget",
+        "evidence": "computed select",
+        "confidence": "Medium"
+      },
+      "--radius-md": {
+        "value": "15px",
+        "usage": "Offer images, partner cards",
+        "evidence": "style.css .offerImg; computed .partners-card",
+        "confidence": "High"
+      },
+      "--radius-lg": {
+        "value": "20px",
+        "usage": "Tags, newsletter inputs, rounded utility",
+        "evidence": "style.css .tag, .rounded",
+        "confidence": "High"
+      },
+      "--radius-input": {
+        "value": "25px",
+        "usage": "Form inputs, selects and textareas",
+        "evidence": "computed contact/sign-up/group booking",
+        "confidence": "High"
+      },
+      "--radius-xl": {
+        "value": "30px",
+        "usage": "Buttons (pill), newsletter panel",
+        "evidence": "style.css .btn-primary, .newsletter",
+        "confidence": "High"
+      },
+      "--radius-pill": {
+        "value": "999px",
+        "usage": "Fully rounded chips",
+        "evidence": "computed (x7 home, x20 passes)",
+        "confidence": "Medium"
+      },
+      "--radius-circle": {
+        "value": "50%",
+        "usage": "Avatars, radio/checkbox, icon buttons",
+        "evidence": "computed .form-check-input",
+        "confidence": "High"
+      }
+    },
+    "shadows": {
+      "--shadow-image": {
+        "value": "0 5px 12px rgb(0 0 0 / 30%)",
+        "usage": "Offer card images",
+        "evidence": "style.css .offerImg; computed x12 on home",
+        "confidence": "High"
+      },
+      "--shadow-card": {
+        "value": "0 4px 24px rgb(0 0 0 / 10%)",
+        "usage": "Elevated booking/product card",
+        "evidence": "computed .booking-widget-featured-card",
+        "confidence": "Medium"
+      },
+      "--shadow-sm": {
+        "value": "0 4px 6px -1px rgb(0 0 0 / 5%)",
+        "usage": "Lounge listing cards",
+        "evidence": "computed on city/lounge page (x4)",
+        "confidence": "Low"
+      },
+      "--shadow-focus": {
+        "value": "0 0 0 4px var(--color-focus-ring)",
+        "usage": "Focus ring for inputs (Bootstrap default)",
+        "evidence": "computed input:focus",
+        "confidence": "High"
+      }
+    },
+    "motion": {
+      "--duration-fast": {
+        "value": "0.15s",
+        "usage": "Form controls, button color transitions (Bootstrap)",
+        "evidence": "computed .btn/.form-control transition",
+        "confidence": "High"
+      },
+      "--duration-normal": {
+        "value": "0.25s",
+        "usage": "Links and most interactive elements",
+        "evidence": "style.css a { transition: all 0.25s ease-in-out }",
+        "confidence": "High"
+      },
+      "--duration-medium": {
+        "value": "0.3s",
+        "usage": "Button hover inversion",
+        "evidence": "style.css .btn-primary:hover transition 0.3s",
+        "confidence": "High"
+      },
+      "--duration-slow": {
+        "value": "0.5s",
+        "usage": "Header background, nav links, mega menu",
+        "evidence": "computed .wsmainfull, .wsmegamenu",
+        "confidence": "High"
+      },
+      "--ease-standard": {
+        "value": "ease-in-out",
+        "usage": "Default easing across the site",
+        "evidence": "computed (all 0.25s ease-in-out x58)",
+        "confidence": "High"
+      },
+      "--ease-emphasized": {
+        "value": "cubic-bezier(0.22, 0.61, 0.36, 1)",
+        "usage": "Carousel/slide transform",
+        "evidence": "computed transform 0.65s (x1)",
+        "confidence": "Low"
+      }
+    }
+  }
+}
