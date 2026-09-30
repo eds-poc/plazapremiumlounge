@@ -68,7 +68,7 @@
 
   /* typography */
   --font-family-primary: polysans, polysans-fallback, sans-serif;
-  --font-family-display: recklessneue, serif;
+  --font-family-display: recklessneue, sans-serif;
   --font-family-nav: helvetica, sans-serif;
   --font-weight-light: 300;
   --font-weight-regular: 400;

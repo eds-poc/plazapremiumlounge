@@ -30,7 +30,7 @@ Two deliberate differences from the source, for accessibility:
      - `recklessneue`: 400
      - `montserrat`: variable 100–900, upright and italic (SIL OFL)
    - `styles.css` declares a `polysans-fallback` face (Arial, `size-adjust: 102.84%`, `ascent-override: 106.97%`, `descent-override: 26.26%`) to limit layout shift during the swap. These values were computed from PolySans Neutral as rendered and Arial's standard advance widths.
-   - `--font-family-primary` is `polysans, polysans-fallback, sans-serif`, and `--font-family-display` is `recklessneue, serif`.
+   - `--font-family-primary` is `polysans, polysans-fallback, sans-serif`, and `--font-family-display` is `recklessneue, sans-serif` (all fallbacks are sans-serif).
 2. **Body and text.** `body { font-family: var(--font-family-primary); font-size: var(--body-font-size); line-height: var(--line-height-body); color: var(--color-text); }`
 3. **Headings.**
    - `h1 { font-size: var(--heading-page-size); }`

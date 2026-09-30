@@ -5,7 +5,7 @@
 | Token | Stack | Role | Source | Confidence |
 | --- | --- | --- | --- | --- |
 | `--font-family-primary` | `polysans, polysans-fallback, sans-serif` | Everything: body, headings, buttons, forms | `style.css` `body`, `h1–h5`. Self-hosted `@font-face` from `assets.plazapremiumlounge.com/content/webfonts/` | High |
-| `--font-family-display` | `recklessneue, serif` | Editorial serif accent: offer card titles ("Online Exclusive Offer") | `@font-face RecklessNeue-Book.woff`. Source has no fallback, so `serif` is added | High |
+| `--font-family-display` | `recklessneue, sans-serif` | Editorial serif accent: offer card titles ("Online Exclusive Offer") | `@font-face RecklessNeue-Book.woff`. Source has no fallback, so generic `sans-serif` is added (project rule: all fallbacks are sans-serif) | High |
 | `--font-family-nav` | `helvetica, sans-serif` | Navigation links (desktop and mobile), mega menu | Computed on `.wsmenu-list > li > a` (WebSlideMenu CSS) | High |
 
 **Polysans faces declared** (woff2 + woff):
