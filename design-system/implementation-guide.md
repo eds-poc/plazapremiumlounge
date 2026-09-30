@@ -14,7 +14,14 @@ This guide is for a developer or AI coding agent building the new Plaza Premium 
 | Component styles | `blocks/{name}/{name}.css`, scoped to `.{name}` |
 | Icons | `icons/*.svg`, referenced as `:icon-name:` in content |
 
-**Current state:** global styles are a neutral baseline, using the `--base-*` variables and a system font. The `--base-*` variables exist only so the boilerplate header, footer, cards and hero keep rendering. Replace them with brand tokens as each piece is restyled, then delete them.
+**Current state:** steps 2–6 below are done in `styles/styles.css`: body, headings, links and focus, the three button variants plus disabled, sections, and the `grey` / `maroon` / `wide` section styles. Still open:
+- **Step 1 (fonts):** waiting on licences. Text renders in the fallback sans-serif until the Polysans files are added.
+- **Step 7 (header height):** deferred to the header block migration. `--nav-height` is still 64px so the boilerplate header keeps its layout.
+- **Blocks:** header, footer, cards, hero and columns still use the neutral `--base-*` variables. Replace those with brand tokens as each block is restyled, then delete the `--base-*` variables.
+
+Two deliberate differences from the source, for accessibility:
+- Link hover **underlines** instead of turning `#999`.
+- A visible `:focus-visible` outline is kept: 2px brand maroon, white inside maroon sections.
 
 ## 2. Applying the tokens (the next phase)
 
@@ -40,7 +47,9 @@ This guide is for a developer or AI coding agent building the new Plaza Premium 
    - Add section-metadata styles: `.section.grey` → `--color-surface-warm`, `.section.maroon` → `--color-brand-primary` with `--color-text-inverse`, `.section.wide > div` → `--container-wide-max-width` / `--container-wide-padding`.
 7. **Header height.** Set `--nav-height` to `var(--nav-height-mobile)` below 1200px and `var(--nav-height-desktop)` at 1200px and up, so the reserved `header { height }` matches.
 
-## 3. Breakpoints
+## 3. Breakpoints (mobile-first)
+All styles are **mobile-first**. The base rules and the `:root` token values describe the mobile layout (<768px). Larger screens are layered on with `min-width` queries (`(width >= …)`) in ascending order. Don't write `max-width` or `width <` queries. Most responsive changes should come for free from the tokens, which already switch at 768, 992 and 1200px, so reach for a block-level media query only when the layout itself changes.
+
 CSS custom properties can't be used inside media queries, so use literal values that match the source:
 
 | Name | Query | Use for |

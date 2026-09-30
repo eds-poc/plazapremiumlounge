@@ -80,6 +80,8 @@ Weights: `--font-weight-light` 300, `--font-weight-regular` 400, `--font-weight-
 
 ## Responsive tokens (declared in `styles/styles.css`)
 
+Mobile-first: the `:root` value is the <768px value, with `min-width` overrides at 768 and 1200px.
+
 | Token | ≥1200px | 768–1199px | <768px |
 | --- | --- | --- | --- |
 | `--body-font-size` | 16px | 16px | 14px |

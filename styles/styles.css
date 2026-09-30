@@ -24,7 +24,7 @@
   --nav-height: 64px;
 
   /* ---------------------------------------------------------------
-   * Plaza Premium Lounge design tokens (extracted, not yet applied).
+   * Plaza Premium Lounge design tokens (extracted from the source site).
    * Source: https://www.plazapremiumlounge.com/en-uk - see /design-system/
    * --------------------------------------------------------------- */
 
@@ -89,11 +89,11 @@
   --line-height-body: 1.4;
   --letter-spacing-label: 1px;
   --letter-spacing-eyebrow: 2px;
-  --body-font-size: 16px;
-  --heading-page-size: 42px;
-  --heading-section-size: 32px;
-  --heading-hero-size: 40px;
-  --heading-card-size: 24px;
+  --body-font-size: 14px;
+  --heading-page-size: 30px;
+  --heading-section-size: 18px;
+  --heading-hero-size: 32px;
+  --heading-card-size: 18px;
 
   /* spacing */
   --spacing-1: 2px;
@@ -108,15 +108,15 @@
   --spacing-10: 35px;
   --spacing-11: 50px;
   --spacing-12: 80px;
-  --section-padding-block: 50px;
-  --section-title-gap: 35px;
+  --section-padding-block: 25px;
+  --section-title-gap: 25px;
 
   /* layout */
   --container-max-width: 1390px;
   --container-wide-max-width: 1490px;
   --container-narrow-max-width: 860px;
-  --container-padding: 12px;
-  --container-wide-padding: 50px;
+  --container-padding: 15px;
+  --container-wide-padding: 0;
   --grid-gutter: 24px;
   --nav-height-desktop: 108px;
   --nav-height-desktop-scrolled: 70px;
@@ -149,51 +149,41 @@
   --ease-emphasized: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-/* design token responsive overrides */
-@media (width < 768px) {
+/* design token overrides (mobile-first: :root holds mobile values) */
+@media (width >= 768px) {
   :root {
-    --body-font-size: 14px;
-    --heading-page-size: 30px;
-    --heading-section-size: 18px;
-    --heading-hero-size: 32px;
-    --section-padding-block: 25px;
-    --container-padding: 15px;
-    --container-wide-padding: 0;
-  }
-}
-
-@media (768px <= width < 1200px) {
-  :root {
+    --body-font-size: 16px;
+    --heading-page-size: 42px;
     --heading-section-size: calc(1.325rem + 0.9vw);
-  }
-}
-
-@media (width < 1200px) {
-  :root {
-    --heading-card-size: 18px;
-  }
-}
-
-@media (768px <= width < 992px) {
-  :root {
+    --heading-hero-size: 40px;
     --section-padding-block: 35px;
+    --container-padding: 12px;
+    --container-wide-padding: 50px;
   }
 }
 
-@media (width < 992px) {
+@media (width >= 992px) {
   :root {
-    --section-title-gap: 25px;
+    --section-padding-block: 50px;
+    --section-title-gap: 35px;
+  }
+}
+
+@media (width >= 1200px) {
+  :root {
+    --heading-section-size: 32px;
+    --heading-card-size: 24px;
   }
 }
 
 body {
   display: none;
   margin: 0;
-  background-color: var(--base-background);
-  color: var(--base-text);
-  font-family: var(--base-font-family);
-  font-size: var(--base-font-size);
-  line-height: 1.5;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-family-primary);
+  font-size: var(--body-font-size);
+  line-height: var(--line-height-body);
 }
 
 body.appear {
@@ -220,10 +210,26 @@ h3,
 h4,
 h5,
 h6 {
-  margin-top: 0.8em;
-  margin-bottom: 0.25em;
+  margin-top: 0;
+  margin-bottom: var(--spacing-3);
+  color: inherit;
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
   scroll-margin: 40px;
 }
+
+h1 { font-size: var(--heading-page-size); }
+
+h2 {
+  margin-bottom: var(--section-title-gap);
+  font-size: var(--heading-section-size);
+}
+
+h3 { font-size: var(--font-size-2xl); }
+h4 { font-size: var(--heading-card-size); }
+h5 { font-size: var(--font-size-xl); }
+h6 { font-size: var(--font-size-md); }
 
 p,
 dl,
@@ -231,12 +237,24 @@ ol,
 ul,
 pre,
 blockquote {
-  margin-top: 0.8em;
-  margin-bottom: 0.25em;
+  margin-top: 0;
+  margin-bottom: var(--spacing-7);
+}
+
+b,
+strong {
+  font-weight: var(--font-weight-medium);
+}
+
+code,
+pre {
+  font-size: var(--font-size-sm);
 }
 
 pre {
-  padding: 16px;
+  padding: var(--spacing-6);
+  border-radius: var(--radius-xs);
+  background-color: var(--color-surface-warm);
   overflow-x: auto;
   white-space: pre;
 }
@@ -254,13 +272,25 @@ button {
 
 /* links */
 a:any-link {
-  color: inherit;
+  color: var(--color-link);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
   overflow-wrap: break-word;
+  transition: color var(--duration-normal) var(--ease-standard);
 }
 
-/* buttons (structure only, no brand colors) */
+a:hover {
+  text-decoration: underline;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+}
+
+/* buttons */
 p.button-wrapper {
-  margin: 12px 0;
+  margin: 0 0 var(--spacing-6);
 }
 
 a.button:any-link,
@@ -270,23 +300,77 @@ button.button {
   align-items: center;
   justify-content: center;
   max-width: 100%;
+  min-width: 120px;
   margin: 0;
-  border: 1px solid currentcolor;
-  padding: 0.5em 1.2em;
-  font: inherit;
-  line-height: 1.25;
+  border: 1px solid transparent;
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-2) var(--spacing-7);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.5;
+  text-align: center;
   text-decoration: none;
+  text-transform: capitalize;
   cursor: pointer;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  transition:
+    color var(--duration-medium) var(--ease-standard),
+    background-color var(--duration-medium) var(--ease-standard),
+    border-color var(--duration-medium) var(--ease-standard);
+}
+
+/* primary: filled maroon, inverts to white on hover */
+a.button.primary,
+button.button.primary {
+  background-color: var(--color-brand-primary-action);
+  color: var(--color-text-inverse);
+}
+
+a.button.primary:hover,
+a.button.primary:focus-visible,
+button.button.primary:hover,
+button.button.primary:focus-visible {
+  border-color: var(--color-brand-primary);
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
+}
+
+/* secondary: maroon outline, fills on hover */
+a.button.secondary,
+button.button.secondary {
+  border-color: var(--color-border-strong);
+  background-color: transparent;
+  color: var(--color-brand-primary);
+}
+
+/* accent: maroon tint, fills on hover */
+a.button.accent,
+button.button.accent {
+  background-color: var(--color-brand-tint);
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+a.button.secondary:hover,
+a.button.secondary:focus-visible,
+button.button.secondary:hover,
+button.button.secondary:focus-visible,
+a.button.accent:hover,
+a.button.accent:focus-visible,
+button.button.accent:hover,
+button.button.accent:focus-visible {
+  border-color: var(--color-brand-primary);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
 }
 
 a.button[aria-disabled="true"],
 button.button:disabled {
+  border-color: transparent;
+  background-color: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
   cursor: not-allowed;
   pointer-events: none;
-  opacity: 0.5;
 }
 
 main img {
@@ -308,21 +392,52 @@ main img {
 
 /* sections */
 main > .section {
-  margin: 40px 0;
+  margin: 0;
+  padding-block: var(--section-padding-block);
 }
 
 main > .section > div {
-  max-width: 1200px;
+  box-sizing: border-box;
+  max-width: var(--container-max-width);
   margin: auto;
-  padding: 0 24px;
+  padding-inline: var(--container-padding);
 }
 
-main > .section:first-of-type {
-  margin-top: 0;
+/* section metadata */
+main .section.grey {
+  background-color: var(--color-surface-warm);
 }
 
-@media (width >= 900px) {
-  main > .section > div {
-    padding: 0 32px;
-  }
+main .section.maroon {
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+main .section.maroon a:any-link,
+main .section.maroon :focus-visible {
+  color: var(--color-text-inverse);
+  outline-color: var(--color-text-inverse);
+}
+
+main .section.maroon a.button.primary {
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
+}
+
+main .section.maroon a.button.secondary {
+  border-color: var(--color-text-inverse);
+}
+
+main .section.maroon a.button.primary:hover,
+main .section.maroon a.button.primary:focus-visible,
+main .section.maroon a.button.secondary:hover,
+main .section.maroon a.button.secondary:focus-visible {
+  border-color: var(--color-text-inverse);
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
+}
+
+main .section.wide > div {
+  max-width: var(--container-wide-max-width);
+  padding-inline: var(--container-wide-padding);
 }

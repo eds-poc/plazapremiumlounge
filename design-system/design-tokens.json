@@ -2,7 +2,8 @@
   "$schema": "Plaza Premium Lounge design tokens",
   "source": "https://www.plazapremiumlounge.com/en-uk",
   "extracted": "2026-09-30",
-  "status": "extracted - declared in styles/styles.css :root, not yet consumed by any rule",
+  "status": "declared in styles/styles.css :root; applied to global styles (body, headings, links, buttons, sections); blocks not yet restyled",
+  "approach": "mobile-first: each token value is the mobile (<768px) value; responsive entries are min-width overrides applied in ascending order",
   "breakpoints": {
     "sm": "576px",
     "md": "768px",
@@ -324,48 +325,48 @@
         "confidence": "High"
       },
       "--body-font-size": {
-        "value": "16px",
+        "value": "14px",
         "responsive": {
-          "(width < 768px)": "14px"
+          "(width >= 768px)": "16px"
         },
-        "usage": "Body copy (responsive)",
+        "usage": "Body copy (mobile-first)",
         "evidence": "style.css body 16px; 14px at <=767.98px",
         "confidence": "High"
       },
       "--heading-page-size": {
-        "value": "42px",
+        "value": "30px",
         "responsive": {
-          "(width < 768px)": "30px"
+          "(width >= 768px)": "42px"
         },
-        "usage": "H1 page title (responsive)",
+        "usage": "H1 page title (mobile-first)",
         "evidence": "style.css h1.title 42px; 30px at <=767.98px",
         "confidence": "High"
       },
       "--heading-section-size": {
-        "value": "32px",
+        "value": "18px",
         "responsive": {
-          "(width < 768px)": "18px",
-          "(768px <= width < 1200px)": "calc(1.325rem + 0.9vw)"
+          "(width >= 768px)": "calc(1.325rem + 0.9vw)",
+          "(width >= 1200px)": "32px"
         },
-        "usage": "Section H2 (responsive; Bootstrap RFS between 768 and 1199px)",
+        "usage": "Section H2 (mobile-first; Bootstrap RFS between 768 and 1199px)",
         "evidence": "computed 18px @375, 28.1px @768, 30.4px @1024, 32px @1200+",
         "confidence": "High"
       },
       "--heading-hero-size": {
-        "value": "40px",
+        "value": "32px",
         "responsive": {
-          "(width < 768px)": "32px"
+          "(width >= 768px)": "40px"
         },
-        "usage": "Hero H2 (responsive)",
+        "usage": "Hero H2 (mobile-first)",
         "evidence": "computed 32px @375, 40px @768+",
         "confidence": "High"
       },
       "--heading-card-size": {
-        "value": "24px",
+        "value": "18px",
         "responsive": {
-          "(width < 1200px)": "18px"
+          "(width >= 1200px)": "24px"
         },
-        "usage": "Offer/news card H4 (responsive)",
+        "usage": "Offer/news card H4 (mobile-first)",
         "evidence": "computed 18px below 1200px, 24px at 1200px+",
         "confidence": "High"
       }
@@ -444,21 +445,21 @@
         "confidence": "Medium"
       },
       "--section-padding-block": {
-        "value": "50px",
+        "value": "25px",
         "responsive": {
-          "(width < 768px)": "25px",
-          "(768px <= width < 992px)": "35px"
+          "(width >= 768px)": "35px",
+          "(width >= 992px)": "50px"
         },
-        "usage": "Vertical section padding (responsive)",
+        "usage": "Vertical section padding (mobile-first)",
         "evidence": "style.css section: 25px @<=767, 35px default, 50px @>=992",
         "confidence": "High"
       },
       "--section-title-gap": {
-        "value": "35px",
+        "value": "25px",
         "responsive": {
-          "(width < 992px)": "25px"
+          "(width >= 992px)": "35px"
         },
-        "usage": "Space below a section H2 (responsive)",
+        "usage": "Space below a section H2 (mobile-first)",
         "evidence": "style.css section h2: 25px default, 35px @>=992",
         "confidence": "High"
       }
@@ -483,20 +484,20 @@
         "confidence": "Low"
       },
       "--container-padding": {
-        "value": "12px",
+        "value": "15px",
         "responsive": {
-          "(width < 768px)": "15px"
+          "(width >= 768px)": "12px"
         },
-        "usage": "Container inline padding (responsive)",
+        "usage": "Container inline padding (mobile-first)",
         "evidence": "computed 12px @>=768, 15px @<768",
         "confidence": "High"
       },
       "--container-wide-padding": {
-        "value": "50px",
+        "value": "0",
         "responsive": {
-          "(width < 768px)": "0"
+          "(width >= 768px)": "50px"
         },
-        "usage": "Wide container inline padding (responsive)",
+        "usage": "Wide container inline padding (mobile-first)",
         "evidence": "computed 50px @>=768, 0 @<768",
         "confidence": "High"
       },

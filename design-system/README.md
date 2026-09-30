@@ -2,7 +2,7 @@
 
 This design system was reverse-engineered from **https://www.plazapremiumlounge.com/en-uk** on 2026-09-30, for the Edge Delivery Services rebuild.
 
-> **Status: extracted, not applied.** All tokens are declared as CSS custom properties in the `:root` of [`/styles/styles.css`](../styles/styles.css), with responsive overrides. No element or block uses them yet. That is the next phase. There is no separate `design-tokens.css`, because `styles.css` is the single CSS source. This folder is excluded from publishing via `.hlxignore`.
+> **Status: applied to global styles.** All tokens are declared as CSS custom properties in the `:root` of [`/styles/styles.css`](../styles/styles.css), with responsive overrides. The global rules use them: body, headings, links, focus, buttons, sections and section metadata (`grey`, `maroon`, `wide`). Blocks (header, footer, cards, hero, columns) are **not** restyled yet and still use the neutral `--base-*` variables. Brand fonts are not loaded yet (licensing), so text falls back to the system sans-serif. There is no separate `design-tokens.css`, because `styles.css` is the single CSS source. This folder is excluded from publishing via `.hlxignore`.
 
 ## Files
 
