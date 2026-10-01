@@ -6,11 +6,19 @@
   font-family: var(--font-family-primary);
 }
 
-.footer .footer-inner {
+.footer .footer-band {
   box-sizing: border-box;
   max-width: var(--container-max-width);
-  margin: 0 auto;
-  padding: 0 var(--container-padding);
+  margin-inline: auto;
+  padding-inline: var(--container-padding);
+}
+
+.footer .footer-divider {
+  margin: 1rem 0;
+  color: var(--base-background);
+  border: 0;
+  border-top: var(--base-border-width) solid;
+  opacity: .25;
 }
 
 .footer a:any-link {
@@ -44,7 +52,7 @@
 .footer .footer-columns {
   display: flex;
   flex-wrap: wrap;
-  margin: 0 calc(var(--grid-gutter) / -2);
+  padding-inline: calc(var(--container-padding) - var(--grid-gutter) / 2);
 }
 
 .footer .footer-column {
@@ -131,8 +139,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 13px;
-  margin-inline-start: -5px;
+  gap: var(--spacing-3);
 }
 
 .footer .footer-media-list li {
@@ -155,13 +162,6 @@
   width: auto;
   max-width: 100px;
   height: auto;
-}
-
-/* band 2: brand family (stacked on mobile) */
-.footer .footer-brands {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgb(255 255 255 / 25%);
 }
 
 .footer .footer-brand-family {
@@ -189,7 +189,8 @@
 .footer .footer-brand-groups {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-7);
+  gap: var(--spacing-8);
+  margin-bottom: var(--spacing-7);
 }
 
 .footer .footer-brand-caption {
@@ -209,7 +210,7 @@
 }
 
 .footer .footer-brand-logos a:any-link,
-.footer .footer-brand-logos > picture {
+.footer .footer-brand-logos>picture {
   display: inline-flex;
 }
 
@@ -223,10 +224,7 @@
 
 /* band 3: legal */
 .footer .footer-legal {
-  margin-top: 1rem;
-  padding-top: 1rem;
   padding-right: 30%;
-  border-top: 1px solid rgb(255 255 255 / 25%);
   font-size: var(--font-size-xs);
   line-height: var(--line-height-heading);
   opacity: 0.5;
@@ -287,7 +285,7 @@
 }
 
 /* breakpoint-exception: design-system breakpoint (768px, source Bootstrap md) */
-@media (width >= 768px) {
+@media (width >=768px) {
   .footer .footer-column {
     flex-basis: 25%;
     margin-bottom: 0;
@@ -371,6 +369,6 @@
   }
 
   .footer .footer-legal {
-    padding-right: 0;
+    padding-right: var(--container-padding);
   }
 }
