@@ -60,45 +60,95 @@ function buildCard({ img, label, link }, eager) {
 }
 
 /**
- * Adds carousel dots for the mobile swipe layout; the active dot follows the scroll position.
+ * Turns the list into an endless mobile carousel: below 768px a copy of the card set is
+ * added before and after the real cards (inert and hidden from assistive tech), and a
+ * settled scroll inside a copy jumps to the same card in the real set. Dots track the
+ * real card. From 768px the copies are removed and the list is the desktop grid.
  * @param {HTMLElement} block
  * @param {HTMLUListElement} list
  */
-function addDots(block, list) {
+function setupCarousel(block, list) {
   const items = [...list.children];
   if (items.length < 2) return;
+  const mobile = window.matchMedia('(width < 768px)');
   const dots = el('div', 'lounge-list-dots');
   const buttons = items.map((item, i) => {
     const btn = el('button', 'lounge-list-dot');
     btn.type = 'button';
     const name = item.querySelector('.lounge-list-tag')?.textContent || `${i + 1}`;
     btn.setAttribute('aria-label', `Show ${name} (${i + 1} of ${items.length})`);
-    btn.addEventListener('click', () => {
-      list.scrollTo({ left: item.offsetLeft - list.offsetLeft - parseFloat(getComputedStyle(list).paddingLeft), behavior: 'smooth' });
-    });
     dots.append(btn);
     return btn;
   });
 
+  const padding = () => parseFloat(getComputedStyle(list).paddingLeft) || 0;
+  const scrollFor = (item) => item.offsetLeft - padding();
+  const step = () => items[1].offsetLeft - items[0].offsetLeft;
+  const jumpTo = (left) => list.scrollTo({ left, behavior: 'instant' });
+
+  const makeClones = () => items.map((item) => {
+    const clone = item.cloneNode(true);
+    clone.classList.add('is-clone');
+    clone.setAttribute('aria-hidden', 'true');
+    clone.inert = true;
+    return clone;
+  });
+
   const setActive = () => {
-    const step = items[1].offsetLeft - items[0].offsetLeft;
-    const maxScroll = list.scrollWidth - list.clientWidth;
-    let index = 0;
-    if (step > 0 && maxScroll > 0) {
-      index = list.scrollLeft >= maxScroll - 2
-        ? items.length - 1
-        : Math.round(list.scrollLeft / step);
-    }
+    const s = step();
+    if (!(s > 0)) return;
+    const raw = Math.round((list.scrollLeft - scrollFor(items[0])) / s);
+    const index = ((raw % items.length) + items.length) % items.length;
     buttons.forEach((b, i) => b.setAttribute('aria-current', i === index ? 'true' : 'false'));
   };
+
+  const recenter = () => {
+    const s = step();
+    if (!mobile.matches || !(s > 0)) return;
+    const setWidth = s * items.length;
+    const start = scrollFor(items[0]);
+    if (list.scrollLeft < start - s / 2) jumpTo(list.scrollLeft + setWidth);
+    else if (list.scrollLeft > start + setWidth - s / 2) jumpTo(list.scrollLeft - setWidth);
+  };
+
+  const enable = () => {
+    if (list.querySelector('.is-clone')) return;
+    list.prepend(...makeClones());
+    list.append(...makeClones());
+    jumpTo(scrollFor(items[0]));
+    setActive();
+  };
+  const disable = () => list.querySelectorAll('.is-clone').forEach((c) => c.remove());
+  const sync = () => (mobile.matches ? enable() : disable());
+
+  buttons.forEach((btn, i) => btn.addEventListener('click', () => {
+    list.scrollTo({ left: scrollFor(items[i]), behavior: 'smooth' });
+  }));
+
   let ticking = false;
+  let settle;
   list.addEventListener('scroll', () => {
+    clearTimeout(settle);
+    settle = setTimeout(recenter, 120);
     if (ticking) return;
     ticking = true;
     requestAnimationFrame(() => { setActive(); ticking = false; });
   }, { passive: true });
-  new ResizeObserver(setActive).observe(list);
+  list.addEventListener('scrollend', () => { clearTimeout(settle); recenter(); });
+
+  mobile.addEventListener('change', sync);
   block.append(dots);
+  // sections stay hidden until loaded, so position the carousel once the list has a size
+  let ready = false;
+  new ResizeObserver(() => {
+    if (!list.clientWidth) return;
+    if (!ready) {
+      ready = true;
+      sync();
+    } else if (mobile.matches) {
+      setActive();
+    }
+  }).observe(list);
 }
 
 /**
@@ -113,5 +163,5 @@ export default function decorate(block) {
     list.append(buildCard(data, false));
   });
   block.replaceChildren(list);
-  addDots(block, list);
+  setupCarousel(block, list);
 }

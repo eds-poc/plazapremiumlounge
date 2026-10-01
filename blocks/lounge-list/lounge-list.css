@@ -5,6 +5,7 @@
 }
 
 .lounge-list .lounge-list-items {
+  position: relative;
   display: flex;
   gap: var(--lounge-card-gap);
   margin: 0 calc(var(--container-padding) * -1);

@@ -1,6 +1,6 @@
 # Lounge List: authoring guide
 
-A grid of lounge photos with a city label. On desktop (768px and up) every 5 lounges form a group (two stacked cards, one tall card, two stacked cards). On mobile the same list becomes a swipeable row of square cards with dots.
+A grid of lounge photos with a city label. On desktop (768px and up) every 5 lounges form a group (two stacked cards, one tall card, two stacked cards). On mobile the same list becomes an endless swipeable row of square cards with dots (it loops back to the first lounge after the last).
 
 ## Table: one row per lounge, 2 cells
 
