@@ -426,35 +426,35 @@ main>.section>div {
   padding-inline: var(--container-padding);
 }
 
-/* section metadata */
-main .section.grey {
+/* section metadata: Style classes, or the background / title-position keys */
+main .section:is(.grey, [data-background='grey']) {
   background-color: var(--color-surface-warm);
 }
 
-main .section.maroon {
+main .section:is(.maroon, [data-background='maroon']) {
   background-color: var(--color-brand-primary);
   color: var(--color-text-inverse);
 }
 
-main .section.maroon a:any-link,
-main .section.maroon :focus-visible {
+main .section:is(.maroon, [data-background='maroon']) a:any-link,
+main .section:is(.maroon, [data-background='maroon']) :focus-visible {
   color: var(--color-text-inverse);
   outline-color: var(--color-text-inverse);
 }
 
-main .section.maroon a.button.primary {
+main .section:is(.maroon, [data-background='maroon']) a.button.primary {
   background-color: var(--color-background);
   color: var(--color-brand-primary);
 }
 
-main .section.maroon a.button.secondary {
+main .section:is(.maroon, [data-background='maroon']) a.button.secondary {
   border-color: var(--color-text-inverse);
 }
 
-main .section.maroon a.button.primary:hover,
-main .section.maroon a.button.primary:focus-visible,
-main .section.maroon a.button.secondary:hover,
-main .section.maroon a.button.secondary:focus-visible {
+main .section:is(.maroon, [data-background='maroon']) a.button.primary:hover,
+main .section:is(.maroon, [data-background='maroon']) a.button.primary:focus-visible,
+main .section:is(.maroon, [data-background='maroon']) a.button.secondary:hover,
+main .section:is(.maroon, [data-background='maroon']) a.button.secondary:focus-visible {
   border-color: var(--color-text-inverse);
   background-color: var(--color-background);
   color: var(--color-brand-primary);
@@ -463,4 +463,11 @@ main .section.maroon a.button.secondary:focus-visible {
 main .section.wide>div {
   max-width: var(--container-wide-max-width);
   padding-inline: var(--container-wide-padding);
+}
+
+/* title-position: center centres the section heading from 768px (left on mobile, as on the source) */
+@media (width >= 768px) {
+  main .section[data-title-position='center'] .default-content-wrapper > :is(h1, h2, h3, h4, h5, h6) {
+    text-align: center;
+  }
 }

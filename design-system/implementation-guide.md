@@ -50,6 +50,7 @@ Two deliberate differences from the source, for accessibility:
    - `main > .section { padding-block: var(--section-padding-block); margin: 0; }`
    - `main > .section > div { max-width: var(--container-max-width); padding-inline: var(--container-padding); }`
    - Add section-metadata styles: `.section.grey` → `--color-surface-warm`, `.section.maroon` → `--color-brand-primary` with `--color-text-inverse`, `.section.wide > div` → `--container-wide-max-width` / `--container-wide-padding`.
+   - Authors can also use Section Metadata keys (Edge Delivery turns them into `data-*` attributes on the section): `background: grey | maroon` matches the `grey` / `maroon` styles, and `title-position: center` centres the section heading from 768px (left on mobile).
 7. **Header height.** Set `--nav-height` to `var(--nav-height-mobile)` below 1200px and `var(--nav-height-desktop)` at 1200px and up, so the reserved `header { height }` matches.
 
 ## 3. Breakpoints (mobile-first)
