@@ -19,6 +19,7 @@
   --base-font-family: system-ui, -apple-system, 'Segoe UI', arial, sans-serif;
   --base-font-size: 16px;
   --base-font-size-s: 14px;
+  --base-border-width: 1px;
 
   /* nav height */
   --nav-height: 64px;
@@ -159,7 +160,7 @@
 }
 
 /* design token overrides (mobile-first: :root holds mobile values) */
-@media (width >= 768px) {
+@media (width >=768px) {
   :root {
     --body-font-size: 16px;
     --heading-page-size: 42px;
@@ -171,14 +172,14 @@
   }
 }
 
-@media (width >= 992px) {
+@media (width >=992px) {
   :root {
     --section-padding-block: 50px;
     --section-title-gap: 35px;
   }
 }
 
-@media (width >= 1200px) {
+@media (width >=1200px) {
   :root {
     --heading-section-size: 32px;
     --heading-card-size: 24px;
@@ -228,17 +229,30 @@ h6 {
   scroll-margin: 40px;
 }
 
-h1 { font-size: var(--heading-page-size); }
+h1 {
+  font-size: var(--heading-page-size);
+}
 
 h2 {
   margin-bottom: var(--section-title-gap);
   font-size: var(--heading-section-size);
 }
 
-h3 { font-size: var(--font-size-2xl); }
-h4 { font-size: var(--heading-card-size); }
-h5 { font-size: var(--font-size-xl); }
-h6 { font-size: var(--font-size-md); }
+h3 {
+  font-size: var(--font-size-2xl);
+}
+
+h4 {
+  font-size: var(--heading-card-size);
+}
+
+h5 {
+  font-size: var(--font-size-xl);
+}
+
+h6 {
+  font-size: var(--font-size-md);
+}
 
 p,
 dl,
@@ -268,7 +282,7 @@ pre {
   white-space: pre;
 }
 
-main > div {
+main>div {
   margin: 40px 16px;
 }
 
@@ -400,12 +414,12 @@ main img {
 }
 
 /* sections */
-main > .section {
+main>.section {
   margin: 0;
   padding-block: var(--section-padding-block);
 }
 
-main > .section > div {
+main>.section>div {
   box-sizing: border-box;
   max-width: var(--container-max-width);
   margin: auto;
@@ -446,7 +460,7 @@ main .section.maroon a.button.secondary:focus-visible {
   color: var(--color-brand-primary);
 }
 
-main .section.wide > div {
+main .section.wide>div {
   max-width: var(--container-wide-max-width);
   padding-inline: var(--container-wide-padding);
 }

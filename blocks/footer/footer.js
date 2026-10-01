@@ -346,8 +346,10 @@ export default async function decorate(block) {
     if (i === 0) band = buildColumns(section);
     else if (i === sections.length - 1) band = buildLegal(section);
     else band = buildBrands(section);
+    band.classList.add('footer-band');
     if (section.dataset.sectionName) band.dataset.sectionName = section.dataset.sectionName;
     inner.append(band);
+    if (i < sections.length - 1) inner.append(el('hr', 'footer-divider'));
   });
 
   block.append(inner);
