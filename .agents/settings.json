@@ -1,0 +1,6 @@
+{
+  "enabledPlugins": {
+    "forms-excat@excat-extended": true,
+    "excat-commerce@excat-extended": true
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "sites": {
+    "plazapremiumlounge": {
+      "previewOrg": "eds-poc",
+      "previewSite": "plazapremiumlounge",
+      "contentHostUrl": "https://content.da.live/eds-poc/plazapremiumlounge/",
+      "botProtected": true
+    }
+  }
+}
