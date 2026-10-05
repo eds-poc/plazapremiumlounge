@@ -68,6 +68,11 @@
   margin-inline: 0;
 }
 
+/* text-large already ends with its own trailing space */
+.featured-carousel.text-first.text-large .featured-carousel-media {
+  margin-top: 0;
+}
+
 /* image-inset: fixed-height image, centred, width from its own ratio */
 .featured-carousel.image-inset .featured-carousel-media img {
   width: auto;
@@ -91,7 +96,10 @@
   max-width: 500px;
 }
 
+/* text-large: the source text box ends with 20px plus one blank line (42px mobile, 48px desktop),
+   which sets the mobile gap above the image and the desktop centring */
 .featured-carousel.text-large .featured-carousel-content {
+  padding-bottom: calc(1.4em + 20px);
   font-size: var(--font-size-md);
 }
 
@@ -107,6 +115,11 @@
   font-size: 0.875em;
   font-weight: var(--font-weight-regular);
   text-transform: uppercase;
+}
+
+/* text-large: the eyebrow fills one body-text line (22.4px mobile, 28px desktop) */
+.featured-carousel.text-large .featured-carousel-eyebrow {
+  line-height: 1.6;
 }
 
 /* logo eyebrow keeps its 400px size on every screen; the card clips it on narrow phones */
@@ -149,6 +162,10 @@
 
 .featured-carousel .featured-carousel-content p:not(.featured-carousel-cta, .featured-carousel-subtitle) {
   font-weight: var(--font-weight-regular);
+}
+
+.featured-carousel.text-large .featured-carousel-content p:not(.featured-carousel-cta, .featured-carousel-subtitle, .featured-carousel-eyebrow) {
+  font-weight: var(--font-weight-light);
 }
 
 .featured-carousel .featured-carousel-content > .featured-carousel-cta {
@@ -394,8 +411,9 @@
     font-size: var(--font-size-xl);
   }
 
+  /* 7/12 + 5/12 columns measured gutter-inclusive, as the source's Bootstrap grid does */
   .featured-carousel.image-narrow .featured-carousel-slide {
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    grid-template-columns: calc((100% + var(--fc-gutter)) * 7 / 12 - var(--fc-gutter)) minmax(0, 1fr);
   }
 
   .featured-carousel .featured-carousel-content > .featured-carousel-subtitle {

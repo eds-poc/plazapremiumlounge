@@ -32,4 +32,4 @@ Add these to the block name, e.g. `Featured Carousel (image-narrow, rounded, tex
 | `image-inset` | Portrait image at a fixed height (220px on mobile, growing with the screen up to 550px), centred. Extra space above the button | Your destination before departure |
 | `rounded` | Rounded image corners | About us |
 | `text-first` | On mobile the text is shown above the image | About us |
-| `text-large` | Larger body text (20px from 768px), more space under the title, text centred in its column | About us |
+| `text-large` | Larger, light body text (20px from 768px), more space under the title, extra space after the text, text centred in its column | About us |
