@@ -393,6 +393,13 @@
   }
 }
 
+/* breakpoint-exception: source card padding steps 30px -> 50px above 650px */
+@media (width >= 651px) {
+  .featured-carousel {
+    --fc-padding: 50px;
+  }
+}
+
 /* breakpoint-exception: design-system breakpoint (768px) */
 @media (width >= 768px) {
   .featured-carousel {
