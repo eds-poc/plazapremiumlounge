@@ -26,14 +26,20 @@ function isImageOnly(node) {
 }
 
 /**
- * Rebuilds an authored image as an optimized picture.
+ * Rebuilds an authored image as an optimized picture, keeping the authored width and height
+ * so the browser reserves its space before it loads (no layout shift).
  * @param {HTMLImageElement} img
  * @param {boolean} eager
  * @param {{media?: string, width: string}[]} breakpoints
  * @returns {HTMLPictureElement}
  */
 function optimize(img, eager, breakpoints) {
-  return createOptimizedPicture(img.src, img.alt, eager, breakpoints);
+  const picture = createOptimizedPicture(img.src, img.alt, eager, breakpoints);
+  const optimized = picture.querySelector('img');
+  ['width', 'height'].forEach((attr) => {
+    if (img.hasAttribute(attr)) optimized.setAttribute(attr, img.getAttribute(attr));
+  });
+  return picture;
 }
 
 /**
