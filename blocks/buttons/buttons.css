@@ -1,0 +1,48 @@
+/* buttons: group layout only; the button styles are the global .button classes */
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--spacing-3);
+}
+
+.buttons > .button-wrapper {
+  max-width: 100%;
+}
+
+.buttons > .button-wrapper:has(.full-width) {
+  flex-basis: 100%;
+}
+
+.buttons.center {
+  justify-content: center;
+}
+
+.buttons.stacked {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.buttons.stacked.center {
+  align-items: center;
+}
+
+/* full width on mobile, as the source does for form buttons */
+.buttons.full-width-mobile > .button-wrapper {
+  flex-basis: 100%;
+}
+
+.buttons.full-width-mobile .button {
+  width: 100%;
+}
+
+/* breakpoint-exception: design-system breakpoint (768px) */
+@media (width >= 768px) {
+  .buttons.full-width-mobile > .button-wrapper:not(:has(.full-width)) {
+    flex-basis: auto;
+  }
+
+  .buttons.full-width-mobile .button:not(.full-width) {
+    width: var(--button-width, auto);
+  }
+}
