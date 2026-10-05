@@ -1,0 +1,222 @@
+/* carousel-cards: mobile-first; values measured from the source homepage offer carousel
+   (Owl: 1 card below 650px, 2 from 650px, 30px gap, 50px arrow gutters, 250ms slide) */
+.carousel-cards {
+  --cc-per-view: 1;
+  --cc-gap: 30px;
+}
+
+.carousel-cards .carousel-cards-stage {
+  position: relative;
+  padding: 0 50px;
+}
+
+.carousel-cards .carousel-cards-viewport {
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.carousel-cards .carousel-cards-viewport.is-grabbing {
+  cursor: grab;
+}
+
+.carousel-cards .carousel-cards-list {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cc-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.carousel-cards .carousel-cards-list.is-animating {
+  transition: transform var(--duration-normal) ease;
+}
+
+.carousel-cards .carousel-cards-card {
+  flex: 0 0 calc((100% - var(--cc-gap) * (var(--cc-per-view) - 1)) / var(--cc-per-view));
+  min-width: 0;
+  color: var(--color-text);
+  font-size: var(--body-font-size);
+  line-height: var(--line-height-body);
+}
+
+/* as on the source (Owl): cards can be dragged, so their text isn't selectable */
+.carousel-cards.is-carousel .carousel-cards-card {
+  user-select: none;
+}
+
+/* image: 5:3, rounded, with the image shadow; the tag sits top left */
+.carousel-cards .carousel-cards-media {
+  position: relative;
+  aspect-ratio: 5 / 3;
+  margin-bottom: var(--spacing-7);
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-image);
+}
+
+.carousel-cards .carousel-cards-media picture,
+.carousel-cards .carousel-cards-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.carousel-cards .carousel-cards-media img {
+  object-fit: cover;
+  object-position: center;
+}
+
+.carousel-cards .carousel-cards-tag {
+  position: absolute;
+  top: var(--spacing-6);
+  left: var(--spacing-6);
+  padding: var(--spacing-2) var(--spacing-7);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+/* text: typography by role, independent of the authored heading level */
+.carousel-cards .carousel-cards-body > .carousel-cards-title {
+  margin: 0 0 var(--spacing-3);
+  color: var(--color-text);
+  font-family: var(--font-family-primary);
+  font-size: var(--heading-card-size);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+/* the source shows at most 2 lines of description, with an ellipsis */
+.carousel-cards .carousel-cards-description {
+  display: -webkit-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.carousel-cards .carousel-cards-description > * {
+  margin: 0;
+}
+
+.carousel-cards .carousel-cards-link {
+  margin: var(--spacing-6) 0 0;
+}
+
+/* the source "Explore Offer →" link: maroon, grey on hover, no underline */
+.carousel-cards .carousel-cards-link a:not(.button):any-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-link);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  transition: color var(--duration-normal) var(--ease-standard);
+}
+
+.carousel-cards .carousel-cards-link a:not(.button):hover {
+  color: var(--color-link-hover);
+  text-decoration: none;
+}
+
+.carousel-cards .carousel-cards-link a:not(.button)::after {
+  content: '';
+  width: 0.875em;
+  height: 0.875em;
+
+  /* the source has a space plus a 4px margin before the arrow */
+  margin-left: calc(0.272em + 4px);
+  background-color: currentcolor;
+  mask: url('../../icons/arrow-right-solid.svg') center / contain no-repeat;
+}
+
+/* arrows: in the side gutters, 35% down the cards; only when the cards don't all fit */
+.carousel-cards .carousel-cards-prev,
+.carousel-cards .carousel-cards-next {
+  position: absolute;
+  top: 35%;
+  z-index: 1;
+  display: none;
+  width: 24.5px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.carousel-cards .carousel-cards-prev {
+  left: 0;
+}
+
+.carousel-cards .carousel-cards-next {
+  right: 0;
+}
+
+.carousel-cards.is-carousel .carousel-cards-prev,
+.carousel-cards.is-carousel .carousel-cards-next {
+  display: block;
+}
+
+.carousel-cards .carousel-cards-prev::before,
+.carousel-cards .carousel-cards-next::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 21px;
+  background-color: currentcolor;
+  mask: url('../../icons/arrow-long-right.svg') center / contain no-repeat;
+}
+
+.carousel-cards .carousel-cards-prev::before {
+  transform: scaleX(-1);
+}
+
+/* optional buttons, centred 30px below the cards (source "Explore Latest Offers") */
+.carousel-cards .carousel-cards-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: var(--spacing-3);
+  margin-top: var(--spacing-9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carousel-cards .carousel-cards-list.is-animating {
+    transition: none;
+  }
+}
+
+/* breakpoint-exception: source carousel switches from 1 to 2 cards at 650px */
+@media (width >= 650px) {
+  .carousel-cards {
+    --cc-per-view: 2;
+  }
+}
+
+/* breakpoint-exception: design-system breakpoint (768px): source tag and arrow sizes step up */
+@media (width >= 768px) {
+  .carousel-cards .carousel-cards-tag {
+    padding: var(--spacing-1) var(--spacing-7);
+    font-size: var(--font-size-xs);
+  }
+
+  .carousel-cards .carousel-cards-prev,
+  .carousel-cards .carousel-cards-next {
+    width: 28px;
+  }
+
+  .carousel-cards .carousel-cards-prev::before,
+  .carousel-cards .carousel-cards-next::before {
+    height: 24px;
+  }
+}

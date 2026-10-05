@@ -1,10 +1,8 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
-import { buildButton, styleWords } from '../../scripts/buttons.js';
+import { readNestedButtons } from '../../scripts/buttons.js';
 
-// a Buttons table nested in a row ("Buttons" or "Buttons (options)" as its first row) adds
-// buttons below the lounges; without options the source homepage look is used: a large
-// outline button ("Book Now", opening the booking modal)
-const BUTTONS_HEADER = /^buttons?\s*(?:\(([^)]*)\))?$/i;
+// a Buttons table nested in a row adds buttons below the lounges; without options the source
+// homepage look is used: a large outline button ("Book Now", opening the booking modal)
 const SOURCE_DEFAULT = ['outline', 'large'];
 
 /**
@@ -32,30 +30,6 @@ function readRow(row) {
   const link = (textCell || row).querySelector('a[href]');
   const label = (textCell ? textCell.textContent : '').trim() || (img && img.alt) || '';
   return { img, label, link };
-}
-
-/**
- * Reads a Buttons table nested in a row, with the same rules as the Buttons block: each row is a
- * link and an optional style cell, and the header's options are the defaults. Without options, a
- * row without its own style gets the source look.
- * @param {Element} row
- * @returns {HTMLElement[]|null} The buttons, or null when the row holds no Buttons table
- */
-function readNestedButtons(row) {
-  const table = row.querySelector('table');
-  const rows = table ? [...table.querySelectorAll(':scope > tbody > tr, :scope > tr')] : [];
-  const match = rows[0]?.textContent.trim().match(BUTTONS_HEADER);
-  if (!match) return null;
-  const options = styleWords(match[1]);
-  return rows.slice(1).map((tr) => {
-    const source = tr.querySelector('a[href]');
-    if (!source) return null;
-    const styleCell = [...tr.children].find((c) => !c.contains(source));
-    const own = styleWords(styleCell?.textContent);
-    return options.length
-      ? buildButton(source, own, options)
-      : buildButton(source, own.length ? own : SOURCE_DEFAULT);
-  }).filter(Boolean);
 }
 
 /**
@@ -190,7 +164,7 @@ export default function decorate(block) {
   const list = el('ul', 'lounge-list-items');
   const buttons = [];
   [...block.children].forEach((row) => {
-    const nested = readNestedButtons(row);
+    const nested = readNestedButtons(row, SOURCE_DEFAULT);
     if (nested) {
       buttons.push(...nested);
       return;
