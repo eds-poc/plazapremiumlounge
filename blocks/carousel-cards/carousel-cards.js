@@ -88,14 +88,14 @@ function buildBody(cell) {
  * Builds one card from an authored row: an image cell and a text cell, in either order.
  * @param {Element} row
  * @param {boolean} eager
- * @returns {HTMLLIElement|null}
+ * @returns {HTMLElement|null}
  */
 function buildCard(row, eager) {
   const cells = [...row.children];
   const mediaCell = cells.find((c) => isImageOnly(c));
   const textCell = cells.find((c) => c !== mediaCell && c.textContent.trim());
   if (!mediaCell && !textCell) return null;
-  const card = el('li', 'carousel-cards-card');
+  const card = el('div', 'carousel-cards-card');
   const { tag, body } = textCell ? buildBody(textCell) : { tag: '', body: null };
   const img = mediaCell?.querySelector('img');
   if (img) {
@@ -132,7 +132,7 @@ function arrow(dir) {
  * @param {HTMLElement} block
  * @param {HTMLElement} stage The positioned area holding the cards and the arrows
  * @param {HTMLElement} viewport
- * @param {HTMLUListElement} list
+ * @param {HTMLElement} list
  */
 function setupCarousel(block, stage, viewport, list) {
   const cards = [...list.children];
@@ -286,7 +286,8 @@ function setupCarousel(block, stage, viewport, list) {
  */
 export default function decorate(block) {
   const eager = !!block.closest('main > .section:first-child');
-  const list = el('ul', 'carousel-cards-list');
+  // plain containers: each card is a carousel slide (role group), which a list item can't be
+  const list = el('div', 'carousel-cards-list');
   const buttons = [];
   [...block.children].forEach((row) => {
     const nested = readNestedButtons(row, BUTTON_DEFAULT);
