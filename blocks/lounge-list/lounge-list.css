@@ -105,6 +105,24 @@
   background-color: var(--color-brand-primary);
 }
 
+/* optional buttons: centred, 24px above and below (source .text-center.my-4) */
+.lounge-list .lounge-list-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-6) var(--spacing-3);
+  margin: 24px 0;
+}
+
+.lounge-list .lounge-list-actions > .button-wrapper {
+  margin: 0;
+}
+
+/* the source dot row is 25px tall, 5px more than ours, so the button keeps its source position */
+.lounge-list .lounge-list-dots + .lounge-list-actions {
+  margin-top: 29px;
+}
+
 @media (hover: hover) {
   .lounge-list .lounge-list-dot:hover::before {
     background-color: var(--color-brand-primary);
@@ -151,6 +169,10 @@
 
   .lounge-list .lounge-list-dots {
     display: none;
+  }
+
+  .lounge-list .lounge-list-dots + .lounge-list-actions {
+    margin-top: 24px;
   }
 }
 
