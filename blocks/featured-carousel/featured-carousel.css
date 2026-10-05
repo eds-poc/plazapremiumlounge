@@ -1,0 +1,416 @@
+/* featured-carousel: mobile-first; values measured from the source featured card (375px base, 576/768/992px) */
+.featured-carousel {
+  --fc-padding: 30px;
+  --fc-padding-inline: var(--fc-padding);
+  --fc-gutter: 48px;
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin-inline: calc(var(--container-padding) * -1);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+/* background layer: shrunk to the bottom on mobile, cover from 576px */
+.featured-carousel .featured-carousel-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.featured-carousel .featured-carousel-bg img {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 245%;
+  max-width: none;
+  height: auto;
+  transform: translateX(-50%);
+}
+
+/* slide layout: stacked on mobile, image first unless text-first */
+.featured-carousel .featured-carousel-slide {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: var(--fc-padding) var(--fc-padding-inline);
+}
+
+.featured-carousel .featured-carousel-media {
+  order: -1;
+
+  /* the source image spans the text width plus its 32px row gutters on each side */
+  margin: 0 -32px var(--fc-padding);
+}
+
+.featured-carousel .featured-carousel-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* single cards bleed 5px past the viewport on the source (margin -20px in a 15px container):
+   same text box and background scale, without horizontal scrolling */
+.featured-carousel.is-single {
+  --fc-padding-inline: calc(var(--fc-padding) - 5px);
+}
+
+.featured-carousel.is-single .featured-carousel-bg img {
+  width: calc((100% + 10px) * 2.45);
+}
+
+.featured-carousel.text-first .featured-carousel-media {
+  order: 0;
+  margin: 24px 0 0;
+}
+
+.featured-carousel.image-inset .featured-carousel-media {
+  margin-inline: 0;
+}
+
+/* text-large already ends with its own trailing space */
+.featured-carousel.text-first.text-large .featured-carousel-media {
+  margin-top: 0;
+}
+
+/* image-inset: fixed-height image, centred, width from its own ratio */
+.featured-carousel.image-inset .featured-carousel-media img {
+  width: auto;
+  max-width: 100%;
+  height: 220px;
+  margin-inline: auto;
+  object-fit: contain;
+}
+
+.featured-carousel.rounded .featured-carousel-media img {
+  border-radius: var(--radius-lg);
+}
+
+/* text: typography by role, independent of the authored heading level */
+.featured-carousel .featured-carousel-content {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-body);
+}
+
+.featured-carousel.image-inset .featured-carousel-content {
+  max-width: 500px;
+}
+
+/* text-large: the source text box ends with 20px plus one blank line (42px mobile, 48px desktop),
+   which sets the mobile gap above the image and the desktop centring */
+.featured-carousel.text-large .featured-carousel-content {
+  padding-bottom: calc(1.4em + 20px);
+  font-size: var(--font-size-md);
+}
+
+.featured-carousel .featured-carousel-content > * {
+  margin: 0;
+}
+
+.featured-carousel .featured-carousel-content > p + p {
+  margin-top: 1.4em;
+}
+
+/* the eyebrow fills one body-text line: 1.6 x 0.875em = 1.4em */
+.featured-carousel .featured-carousel-eyebrow {
+  font-size: 0.875em;
+  font-weight: var(--font-weight-regular);
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+
+/* logo eyebrow keeps its 400px size on every screen; the card clips it on narrow phones */
+.featured-carousel .featured-carousel-eyebrow.has-image img {
+  display: block;
+  width: 400px;
+  max-width: none;
+  height: auto;
+}
+
+.featured-carousel .featured-carousel-content > .featured-carousel-title {
+  margin: 0 0 var(--section-title-gap);
+  color: inherit;
+  font-family: var(--font-family-primary);
+  font-size: min(calc(1.325rem + 0.9vw), 2rem);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.featured-carousel .featured-carousel-eyebrow + .featured-carousel-title {
+  margin-top: 24px;
+}
+
+.featured-carousel.text-large .featured-carousel-content > .featured-carousel-title {
+  margin: 0 0 48px;
+}
+
+.featured-carousel .featured-carousel-content > .featured-carousel-subtitle {
+  margin-bottom: 18px;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+}
+
+.featured-carousel .featured-carousel-subtitle strong,
+.featured-carousel .featured-carousel-subtitle b {
+  font-weight: inherit;
+}
+
+.featured-carousel .featured-carousel-content p:not(.featured-carousel-cta, .featured-carousel-subtitle) {
+  font-weight: var(--font-weight-regular);
+}
+
+.featured-carousel.text-large .featured-carousel-content p:not(.featured-carousel-cta, .featured-carousel-subtitle, .featured-carousel-eyebrow) {
+  font-weight: var(--font-weight-light);
+}
+
+/* a blank line plus 20px above the button, 8px below it */
+.featured-carousel .featured-carousel-content > .featured-carousel-cta {
+  margin-top: calc(1.4em + 20px);
+  margin-bottom: 8px;
+}
+
+.featured-carousel .featured-carousel-cta + .featured-carousel-cta {
+  margin-top: var(--spacing-4);
+}
+
+
+.featured-carousel .featured-carousel-cta a.button:any-link {
+  min-width: 260px;
+  border: 1px solid var(--color-text-inverse);
+  border-radius: var(--radius-xl);
+  padding: 9px var(--spacing-7);
+  background-color: transparent;
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.5;
+  text-transform: capitalize;
+}
+
+.featured-carousel .featured-carousel-cta a.button:hover,
+.featured-carousel .featured-carousel-cta a.button:focus-visible {
+  border-color: var(--color-text-inverse);
+  background-color: transparent;
+  color: var(--color-text-inverse);
+  opacity: 0.8;
+}
+
+.featured-carousel :focus-visible {
+  outline: 2px solid var(--color-text-inverse);
+  outline-offset: 2px;
+}
+
+/* carousel track */
+.featured-carousel .featured-carousel-viewport {
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.featured-carousel .featured-carousel-track {
+  display: flex;
+  align-items: stretch;
+  transition: transform 0.65s var(--ease-emphasized);
+}
+
+.featured-carousel.is-carousel .featured-carousel-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+}
+
+/* controls */
+.featured-carousel .featured-carousel-prev,
+.featured-carousel .featured-carousel-next {
+  position: absolute;
+  top: 35%;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 38px;
+  height: 38px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 85%);
+  border-radius: var(--radius-circle);
+  background-color: rgb(0 0 0 / 35%);
+  color: var(--color-text-inverse);
+
+  /* the source stack: PolySans has no arrow glyphs, so they come from the system sans-serif */
+  font-family: polysans, sans-serif;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.featured-carousel .featured-carousel-prev {
+  left: var(--spacing-4);
+}
+
+.featured-carousel .featured-carousel-next {
+  right: var(--spacing-4);
+}
+
+.featured-carousel .featured-carousel-prev::before {
+  content: '\2190';
+}
+
+.featured-carousel .featured-carousel-next::before {
+  content: '\2192';
+}
+
+.featured-carousel .featured-carousel-prev:hover,
+.featured-carousel .featured-carousel-prev:focus-visible,
+.featured-carousel .featured-carousel-next:hover,
+.featured-carousel .featured-carousel-next:focus-visible {
+  border-color: var(--color-brand-primary);
+  background-color: var(--color-brand-primary);
+}
+
+.featured-carousel .featured-carousel-controls {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  gap: 8px;
+  transform: translateX(-50%);
+}
+
+/* dots as on the source: 9px, the active one 26px and white; a wider invisible hit area */
+.featured-carousel .featured-carousel-dot {
+  position: relative;
+  width: 9px;
+  height: 9px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  background-color: rgb(255 255 255 / 55%);
+  cursor: pointer;
+  transition: width 0.25s, background-color 0.25s;
+}
+
+.featured-carousel .featured-carousel-dot::after {
+  content: '';
+  position: absolute;
+  inset: -8px -4px;
+}
+
+.featured-carousel .featured-carousel-dot[aria-current='true'] {
+  width: 26px;
+  background-color: var(--color-text-inverse);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .featured-carousel .featured-carousel-track {
+    transition: none;
+  }
+}
+
+/* breakpoint-exception: source Bootstrap sm (576px) two-column layout */
+@media (width >= 576px) {
+  .featured-carousel,
+  .featured-carousel.is-single {
+    --fc-padding-inline: var(--fc-padding);
+
+    margin-inline: 0;
+    border-radius: var(--radius-xl);
+  }
+
+  .featured-carousel .featured-carousel-bg img,
+  .featured-carousel.is-single .featured-carousel-bg img {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transform: none;
+  }
+
+  .featured-carousel .featured-carousel-slide {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    column-gap: var(--fc-gutter);
+  }
+
+  .featured-carousel .featured-carousel-slide.no-image {
+    grid-template-columns: 1fr;
+  }
+
+  .featured-carousel .featured-carousel-media,
+  .featured-carousel.text-first .featured-carousel-media {
+    order: 0;
+    margin: 0;
+  }
+
+  .featured-carousel.image-inset .featured-carousel-media img {
+    height: min(40vw, 550px);
+  }
+
+  .featured-carousel.text-large .featured-carousel-content {
+    max-width: 500px;
+    margin-inline: auto;
+  }
+}
+
+/* breakpoint-exception: source card padding steps 30px -> 50px above 650px */
+@media (width >= 651px) {
+  .featured-carousel {
+    --fc-padding: 50px;
+  }
+}
+
+/* breakpoint-exception: design-system breakpoint (768px) */
+@media (width >= 768px) {
+  .featured-carousel {
+    --fc-padding: 80px;
+  }
+
+  .featured-carousel .featured-carousel-content {
+    max-width: 480px;
+  }
+
+  .featured-carousel.image-inset .featured-carousel-content {
+    max-width: 500px;
+  }
+
+  .featured-carousel.text-large .featured-carousel-content {
+    font-size: var(--font-size-xl);
+  }
+
+  /* 7/12 + 5/12 columns measured gutter-inclusive, as the source's Bootstrap grid does */
+  .featured-carousel.image-narrow .featured-carousel-slide {
+    grid-template-columns: calc((100% + var(--fc-gutter)) * 7 / 12 - var(--fc-gutter)) minmax(0, 1fr);
+  }
+
+  .featured-carousel .featured-carousel-content > .featured-carousel-subtitle {
+    font-size: var(--font-size-lg);
+  }
+
+  .featured-carousel .featured-carousel-prev,
+  .featured-carousel .featured-carousel-next {
+    top: 50%;
+    width: 46px;
+    height: 46px;
+  }
+
+  .featured-carousel .featured-carousel-prev {
+    left: var(--spacing-7);
+  }
+
+  .featured-carousel .featured-carousel-next {
+    right: var(--spacing-7);
+  }
+
+  .featured-carousel .featured-carousel-controls {
+    bottom: var(--spacing-7);
+  }
+}
