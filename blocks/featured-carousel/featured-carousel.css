@@ -40,7 +40,9 @@
 
 .featured-carousel .featured-carousel-media {
   order: -1;
-  margin: 0 calc(var(--fc-padding-inline) * -1) var(--fc-padding);
+
+  /* the source image spans the text width plus its 32px row gutters on each side */
+  margin: 0 -32px var(--fc-padding);
 }
 
 .featured-carousel .featured-carousel-media img {
@@ -111,16 +113,14 @@
   margin-top: 1.4em;
 }
 
+/* the eyebrow fills one body-text line: 1.6 x 0.875em = 1.4em */
 .featured-carousel .featured-carousel-eyebrow {
   font-size: 0.875em;
   font-weight: var(--font-weight-regular);
+  line-height: 1.6;
   text-transform: uppercase;
 }
 
-/* text-large: the eyebrow fills one body-text line (22.4px mobile, 28px desktop) */
-.featured-carousel.text-large .featured-carousel-eyebrow {
-  line-height: 1.6;
-}
 
 /* logo eyebrow keeps its 400px size on every screen; the card clips it on narrow phones */
 .featured-carousel .featured-carousel-eyebrow.has-image img {
@@ -168,8 +168,9 @@
   font-weight: var(--font-weight-light);
 }
 
+/* a blank line plus 20px above the button, 8px below it */
 .featured-carousel .featured-carousel-content > .featured-carousel-cta {
-  margin-top: 20px;
+  margin-top: calc(1.4em + 20px);
   margin-bottom: 8px;
 }
 
@@ -177,10 +178,6 @@
   margin-top: var(--spacing-4);
 }
 
-/* image-inset: a blank line plus 20px above the button */
-.featured-carousel.image-inset .featured-carousel-content > .featured-carousel-cta {
-  margin-top: calc(1.4em + 20px);
-}
 
 .featured-carousel .featured-carousel-cta a.button:any-link {
   min-width: 260px;
