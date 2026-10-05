@@ -1,0 +1,117 @@
+/* modal dialog, measured from the source Bootstrap modal (Log In): 500px panel, maroon header */
+body.modal-open {
+  overflow: hidden;
+}
+
+dialog.modal {
+  box-sizing: border-box;
+  width: calc(100% - 16px);
+  max-width: 500px;
+  max-height: calc(100% - 16px);
+  margin: 8px auto auto;
+  border: 0;
+  padding: 0;
+  overflow: visible auto;
+  background: none;
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+dialog.modal::backdrop {
+  background-color: rgb(0 0 0 / 50%);
+}
+
+dialog.modal[open] {
+  animation: modal-slide-in var(--duration-medium) ease-out;
+}
+
+dialog.modal[open]::backdrop {
+  animation: modal-fade-in var(--duration-fast) linear;
+}
+
+dialog.modal .modal-content {
+  border: 1px solid rgb(0 0 0 / 17.6%);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-color: var(--color-background);
+}
+
+dialog.modal .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-6);
+  padding: 16px;
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+/* the title keeps one look whatever heading level was authored */
+dialog.modal .modal-header .modal-title {
+  margin: 0;
+  color: inherit;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.5;
+}
+
+dialog.modal .modal-close {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin: 0 0 0 auto;
+  border: 0;
+  padding: 0;
+  background-color: currentcolor;
+  color: var(--color-text-inverse);
+  cursor: pointer;
+  mask: url('../icons/close.svg') center / 16px no-repeat;
+  transition: opacity var(--duration-normal) var(--ease-standard);
+}
+
+dialog.modal .modal-close:hover {
+  opacity: 0.8;
+}
+
+dialog.modal :focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+}
+
+dialog.modal .modal-close:focus-visible {
+  outline-color: var(--color-text-inverse);
+}
+
+dialog.modal .modal-body {
+  padding: 16px;
+}
+
+dialog.modal .modal-body :is(p, ul, ol):last-child {
+  margin-bottom: 0;
+}
+
+@keyframes modal-slide-in {
+  from { transform: translateY(-50px); }
+}
+
+@keyframes modal-fade-in {
+  from { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog.modal[open],
+  dialog.modal[open]::backdrop {
+    animation: none;
+  }
+}
+
+/* breakpoint-exception: source Bootstrap modal breakpoint (576px) */
+@media (width >= 576px) {
+  dialog.modal {
+    width: 500px;
+    max-height: calc(100% - 56px);
+    margin-top: 28px;
+  }
+}

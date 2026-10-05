@@ -317,6 +317,7 @@ p.button-wrapper {
 }
 
 a.button:any-link,
+a.button[aria-disabled='true'],
 button.button {
   box-sizing: border-box;
   display: inline-flex;
@@ -366,12 +367,86 @@ button.button.secondary {
   color: var(--color-brand-primary);
 }
 
-/* accent: maroon tint, fills on hover */
+/* accent: maroon tint (source .btn-secondary), fills on hover */
 a.button.accent,
 button.button.accent {
+  padding: var(--spacing-6) var(--spacing-9);
   background-color: var(--color-brand-tint);
   color: var(--color-brand-primary);
   font-weight: var(--font-weight-medium);
+}
+
+/* tertiary: white with a maroon border (source .btn-tertiary, 15px text and 24px corners are one-offs) */
+a.button.tertiary,
+button.button.tertiary {
+  --button-width: 240px;
+
+  width: var(--button-width);
+  border-color: var(--color-border-strong);
+  border-radius: 24px;
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
+  font-size: 15px;
+  font-weight: var(--font-weight-medium);
+}
+
+a.button.tertiary:hover,
+a.button.tertiary:focus-visible,
+button.button.tertiary:hover,
+button.button.tertiary:focus-visible {
+  border-color: var(--color-text-inverse);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+/* white: white outline for dark backgrounds (source .outline.white), dims on hover */
+a.button.white,
+button.button.white {
+  border-color: var(--color-text-inverse);
+  background-color: transparent;
+  color: var(--color-text-inverse);
+  transition: opacity var(--duration-medium) var(--ease-standard);
+}
+
+a.button.white:hover,
+a.button.white:focus-visible,
+button.button.white:hover,
+button.button.white:focus-visible {
+  opacity: 0.8;
+}
+
+/* large (source .btnLg); the filled primary hovers to #eee at this size */
+a.button.large,
+button.button.large {
+  min-width: 260px;
+  padding: 9px var(--spacing-7);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+}
+
+a.button.primary.large:hover,
+a.button.primary.large:focus-visible,
+button.button.primary.large:hover,
+button.button.primary.large:focus-visible {
+  background-color: #eee;
+}
+
+/* full width (source .fullWidth) */
+a.button.full-width,
+button.button.full-width {
+  width: 100%;
+}
+
+/* arrow: an arrow after the label, 10px away, in the text colour */
+a.button.arrow::after,
+button.button.arrow::after {
+  content: '';
+  flex: none;
+  width: 1em;
+  height: 1em;
+  margin-left: var(--spacing-4);
+  background-color: currentcolor;
+  mask: url('../icons/arrow-right.svg') center / contain no-repeat;
 }
 
 a.button.secondary:hover,
@@ -394,6 +469,18 @@ button.button:disabled {
   color: var(--color-disabled-text);
   cursor: not-allowed;
   pointer-events: none;
+}
+
+/* text for screen readers only */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 main img {
@@ -458,6 +545,21 @@ main .section:is(.maroon, [data-background='maroon']) a.button.secondary:focus-v
   border-color: var(--color-text-inverse);
   background-color: var(--color-background);
   color: var(--color-brand-primary);
+}
+
+/* tertiary keeps its maroon text on its white fill inside maroon sections */
+main .section:is(.maroon, [data-background='maroon']) a.button.tertiary {
+  color: var(--color-brand-primary);
+}
+
+main .section:is(.maroon, [data-background='maroon']) a.button.tertiary:hover,
+main .section:is(.maroon, [data-background='maroon']) a.button.tertiary:focus-visible {
+  color: var(--color-text-inverse);
+}
+
+/* section metadata "modal": the section is modal content, shown only inside a modal dialog */
+main .section[data-modal] {
+  display: none;
 }
 
 main .section.wide>div {
