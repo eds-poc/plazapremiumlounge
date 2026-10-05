@@ -1,6 +1,6 @@
 # Featured Carousel: authoring guide
 
-A maroon feature card with text and an image side by side. With one slide it's a single card. With two or more it becomes a carousel that changes slide every 5 seconds and loops. It has previous/next arrows, dots and a pause button. On mobile (below 576px) the card spans the full width and the text and image stack.
+A maroon feature card with text and an image side by side. With one slide it's a single card. With two or more it becomes a carousel that changes slide every 5 seconds and loops. It has previous/next arrows and one dot per slide (the current slide's dot is wider and white). It pauses while the pointer or keyboard focus is on it, and doesn't move on its own for visitors who turned on reduced motion. On mobile (below 576px) the card spans the full width and the text and image stack.
 
 ## Table: optional background row, then one row per slide
 

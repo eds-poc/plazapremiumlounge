@@ -115,9 +115,8 @@ function button(className, label) {
 }
 
 /**
- * Turns the slides into a carousel: sliding track, previous/next, dots, pause/play, swipe and
- * autoplay. Autoplay is off for reduced motion, pauses on hover, focus and when off-screen,
- * and stays paused once the user presses pause.
+ * Turns the slides into a carousel: sliding track, previous/next, one dot per slide, swipe and
+ * autoplay. Autoplay is off for reduced motion and pauses on hover, focus and when off-screen.
  * @param {HTMLElement} block
  * @param {HTMLElement[]} slides
  */
@@ -136,12 +135,11 @@ function buildCarousel(block, slides) {
   const prev = button('featured-carousel-prev', 'Previous slide');
   const next = button('featured-carousel-next', 'Next slide');
   const controls = el('div', 'featured-carousel-controls');
-  const pause = button('featured-carousel-pause', 'Pause automatic slide show');
   const dots = slides.map((slide, i) => {
     const title = slide.querySelector('.featured-carousel-title')?.textContent.trim();
     return button('featured-carousel-dot', `Show slide ${i + 1}${title ? `: ${title}` : ''}`);
   });
-  controls.append(pause, ...dots);
+  controls.append(...dots);
 
   block.setAttribute('role', 'region');
   block.setAttribute('aria-roledescription', 'carousel');
@@ -151,7 +149,7 @@ function buildCarousel(block, slides) {
 
   let index = 0;
   let timer = null;
-  let userPaused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let hovering = false;
   let focused = false;
   let visible = true;
@@ -165,18 +163,15 @@ function buildCarousel(block, slides) {
   const stop = () => { clearInterval(timer); timer = null; };
   const sync = () => {
     stop();
-    const running = !userPaused && !hovering && !focused && visible && !document.hidden;
+    const running = !reducedMotion && !hovering && !focused && visible && !document.hidden;
     if (running) timer = setInterval(() => show(index + 1), AUTOPLAY_MS);
     track.setAttribute('aria-live', running ? 'off' : 'polite');
-    pause.classList.toggle('is-paused', userPaused);
-    pause.setAttribute('aria-label', userPaused ? 'Play automatic slide show' : 'Pause automatic slide show');
   };
   const go = (i) => { show(i); sync(); };
 
   prev.addEventListener('click', () => go(index - 1));
   next.addEventListener('click', () => go(index + 1));
   dots.forEach((d, n) => d.addEventListener('click', () => go(n)));
-  pause.addEventListener('click', () => { userPaused = !userPaused; sync(); });
 
   block.addEventListener('mouseenter', () => { hovering = true; sync(); });
   block.addEventListener('mouseleave', () => { hovering = false; sync(); });

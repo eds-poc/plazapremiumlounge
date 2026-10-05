@@ -220,9 +220,6 @@
 .featured-carousel.is-carousel .featured-carousel-slide {
   flex: 0 0 100%;
   min-width: 0;
-
-  /* room for the dots below the content */
-  padding-bottom: max(var(--fc-padding), 64px);
 }
 
 /* controls */
@@ -242,6 +239,9 @@
   border-radius: var(--radius-circle);
   background-color: rgb(0 0 0 / 35%);
   color: var(--color-text-inverse);
+
+  /* the source stack: PolySans has no arrow glyphs, so they come from the system sans-serif */
+  font-family: polysans, sans-serif;
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
@@ -279,62 +279,33 @@
   left: 50%;
   z-index: 1;
   display: flex;
-  align-items: center;
   gap: 8px;
   transform: translateX(-50%);
 }
 
-.featured-carousel .featured-carousel-dot,
-.featured-carousel .featured-carousel-pause {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 24px;
+/* dots as on the source: 9px, the active one 26px and white; a wider invisible hit area */
+.featured-carousel .featured-carousel-dot {
+  position: relative;
+  width: 9px;
+  height: 9px;
   margin: 0;
   padding: 0;
   border: 0;
-  background: none;
-  cursor: pointer;
-}
-
-.featured-carousel .featured-carousel-dot {
-  min-width: 9px;
-}
-
-.featured-carousel .featured-carousel-dot::before {
-  content: '';
-  width: 9px;
-  height: 9px;
   border-radius: 20px;
   background-color: rgb(255 255 255 / 55%);
+  cursor: pointer;
   transition: width 0.25s, background-color 0.25s;
 }
 
-.featured-carousel .featured-carousel-dot[aria-current='true']::before {
+.featured-carousel .featured-carousel-dot::after {
+  content: '';
+  position: absolute;
+  inset: -8px -4px;
+}
+
+.featured-carousel .featured-carousel-dot[aria-current='true'] {
   width: 26px;
   background-color: var(--color-text-inverse);
-}
-
-/* pause / play: two bars, or a triangle when paused */
-.featured-carousel .featured-carousel-pause {
-  width: 24px;
-  margin-right: var(--spacing-1);
-}
-
-.featured-carousel .featured-carousel-pause::before {
-  content: '';
-  width: 8px;
-  height: 10px;
-  border-inline: 3px solid var(--color-text-inverse);
-  box-sizing: border-box;
-}
-
-.featured-carousel .featured-carousel-pause.is-paused::before {
-  width: 0;
-  height: 0;
-  border-block: 5px solid transparent;
-  border-inline: 9px solid var(--color-text-inverse);
-  border-inline-end-width: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
