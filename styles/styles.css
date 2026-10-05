@@ -557,8 +557,9 @@ main .section:is(.maroon, [data-background='maroon']) a.button.tertiary:focus-vi
   color: var(--color-text-inverse);
 }
 
-/* section metadata "modal": the section is modal content, shown only inside a modal dialog */
-main .section[data-modal] {
+/* section metadata "modal": the section is modal content, shown only inside a modal dialog,
+   wherever it is authored (page, nav, footer or a fragment) */
+.section[data-modal] {
   display: none;
 }
 

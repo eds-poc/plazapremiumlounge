@@ -98,9 +98,14 @@ export default async function decorate(block) {
 
   // decorate nav DOM
   block.textContent = '';
+  if (!fragment) return;
   const nav = document.createElement('nav');
   nav.id = 'nav';
-  while (fragment.firstElementChild) nav.append(fragment.firstElementChild);
+  // modal sections (section metadata "modal") are already registered as modals; keep them out of
+  // the brand / sections / tools layout, which is assigned by position
+  [...fragment.children].forEach((section) => {
+    if (!section.matches('.section[data-modal]')) nav.append(section);
+  });
 
   const classes = ['brand', 'sections', 'tools'];
   classes.forEach((c, i) => {
@@ -112,7 +117,8 @@ export default async function decorate(block) {
   const brandLink = navBrand.querySelector('.button');
   if (brandLink) {
     brandLink.className = '';
-    brandLink.closest('.button-container').className = '';
+    const wrapper = brandLink.closest('.button-wrapper, .button-container');
+    if (wrapper) wrapper.className = '';
   }
 
   const navSections = nav.querySelector('.nav-sections');
