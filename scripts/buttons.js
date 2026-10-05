@@ -72,3 +72,31 @@ export function buildButtonFromRow(row, defaults = []) {
   const styleCell = [...row.children].find((c) => !c.contains(source));
   return buildButton(source, styleWords(styleCell?.textContent), defaults);
 }
+
+const BUTTONS_HEADER = /^buttons?\s*(?:\(([^)]*)\))?$/i;
+
+/**
+ * Reads a Buttons table nested in a block row, with the same rules as the Buttons block: the
+ * first row is "Buttons" or "Buttons (options)", then each row is a link and an optional style
+ * cell. Header options are the defaults; without options, a row without its own style gets
+ * `fallback` (the look the hosting block uses on the source site).
+ * @param {Element} row A row of the hosting block
+ * @param {string[]} [fallback]
+ * @returns {HTMLElement[]|null} The buttons, or null when the row holds no Buttons table
+ */
+export function readNestedButtons(row, fallback = []) {
+  const table = row.querySelector('table');
+  const rows = table ? [...table.querySelectorAll(':scope > tbody > tr, :scope > tr')] : [];
+  const match = rows[0]?.textContent.trim().match(BUTTONS_HEADER);
+  if (!match) return null;
+  const options = styleWords(match[1]);
+  return rows.slice(1).map((tr) => {
+    const source = tr.querySelector('a[href]');
+    if (!source) return null;
+    const styleCell = [...tr.children].find((c) => !c.contains(source));
+    const own = styleWords(styleCell?.textContent);
+    return options.length
+      ? buildButton(source, own, options)
+      : buildButton(source, own.length ? own : fallback);
+  }).filter(Boolean);
+}
