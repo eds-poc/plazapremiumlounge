@@ -11,6 +11,8 @@ import {
   loadCSS,
   buildBlock,
 } from './aem.js';
+// eslint-disable-next-line import/no-cycle
+import { installModalLinks, registerModalSections } from './modal.js';
 
 if (window.trustedTypes && window.trustedTypes.createPolicy) {
   const innerTT = window.trustedTypes.createPolicy('tt-inner', {
@@ -151,6 +153,8 @@ export function decorateMain(main) {
   decorateIcons(main);
   buildAutoBlocks(main);
   decorateSections(main);
+  // modal sections (section metadata "modal") in the page or any fragment, e.g. the nav
+  registerModalSections(main);
   decorateBlocks(main);
   decorateButtons(main);
 }
@@ -162,6 +166,7 @@ export function decorateMain(main) {
 async function loadEager(doc) {
   document.documentElement.lang = 'en';
   decorateTemplateAndTheme();
+  installModalLinks();
   const main = doc.querySelector('main');
   if (main) {
     decorateMain(main);

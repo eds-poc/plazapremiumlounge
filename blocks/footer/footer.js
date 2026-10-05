@@ -339,7 +339,8 @@ export default async function decorate(block) {
   if (!fragment) return;
 
   removeBrokenImages(fragment);
-  const sections = [...fragment.querySelectorAll(':scope > .section')];
+  // modal sections (section metadata "modal") are registered as modals, not footer bands
+  const sections = [...fragment.querySelectorAll(':scope > .section:not([data-modal])')];
   const inner = el('div', 'footer-inner');
   sections.forEach((section, i) => {
     let band;

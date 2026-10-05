@@ -23,17 +23,22 @@ One or more buttons, in the site's button styles. What a button does depends onl
 | --- | --- |
 | A page on this site (`/offers`) | Goes to the page |
 | Another website (`https://…`) | Opens in a new tab (screen readers hear "opens in a new tab") |
-| `#name` matching a modal section on the page | Opens that section in a modal; the page stays where it is |
+| `#name` matching a modal section (on the page, or in the nav or footer) | Opens that section in a modal; the page stays where it is |
 | A page in a `/modals/` folder (`/modals/terms`) | Opens that page's content in a modal |
 | `#name` with no matching modal | Scrolls to that part of the page |
 | `mailto:` / `tel:` | Opens email / calls, as normal |
 
 ### Authoring a modal
 
-- **On the same page:** put the modal content in its own section and add **Section Metadata** with `modal` = a name, e.g. `login`. The section is hidden on the page. Any button linking to `#login` opens it.
-- **Reusable on many pages:** create a page in a `/modals/` folder (e.g. `/modals/terms`) and link buttons to it.
+- **In a section:** put the modal content in its own section and add **Section Metadata** with `modal` = a name, e.g. `book-now`. The section is hidden. Any link to `#book-now` opens it: a Buttons block, a nav menu item, a footer link or a link in body text.
+- **Where the section can live:**
+  - **On the page:** the modal is only available on that page.
+  - **In the nav (or footer):** the modal is available on **every page that uses that nav**. Example: put the Book Now block in a `modal = book-now` section of the nav page; the nav's Book Now button and any `[Book Now](#book-now)` on any page open that same modal.
+- **On its own page:** create a page in a `/modals/` folder (e.g. `/modals/terms`) and link to it. Its content loads only when the modal opens, so this suits large or rarely used modals.
+- **One modal per name:** every link to the same name opens the same modal. If a page and the nav both define a modal with the same name, the page's one is used.
+- **Names vs headings:** a `#name` link opens a matching modal instead of scrolling, so don't reuse a modal name as a heading anchor.
 - **The first heading** of the content becomes the modal title, in the maroon header. Any heading level looks the same.
-- Modals close with the ✕, the Esc key, or a click outside.
+- Modals close with the ✕, the Esc key, or a click outside. Ctrl/Cmd-click keeps the normal browser behaviour.
 
 ## Style words
 
