@@ -3,6 +3,8 @@ import { IMAGE_LINK, enableLightbox } from '../../scripts/lightbox.js';
 
 const HEADINGS = 'h1, h2, h3, h4, h5, h6';
 const DRAG_THRESHOLD = 30;
+// region names used so far on the page, so two sliders with the same title stay distinguishable
+const regionNames = new Map();
 // social networks shown as round icons: matched by the link's host, else by its text
 const SOCIAL = [
   { name: 'facebook', hosts: ['facebook.com', 'fb.com'], words: ['facebook'] },
@@ -293,8 +295,11 @@ export default function decorate(block) {
   block.replaceChildren(...[text, slider].filter(Boolean));
   if (text) {
     const title = text.querySelector('.media-slider-title');
+    const name = title ? `${title.textContent.trim()}: images` : 'Images';
+    const count = (regionNames.get(name) || 0) + 1;
+    regionNames.set(name, count);
     viewport.setAttribute('role', 'region');
-    viewport.setAttribute('aria-label', title ? `${title.textContent.trim()}: images` : 'Images');
+    viewport.setAttribute('aria-label', count > 1 ? `${name} (${count})` : name);
   }
   if (list.children.length > 1) setupSlider(viewport, list);
 }
