@@ -10,6 +10,8 @@ const IMAGE_LINK = /\.(jpe?g|png|webp|gif|avif)(\?|#|$)/i;
  */
 function removeBrokenImages(root) {
   root.querySelectorAll('img').forEach((img) => {
+    // icons get their source once the icon library is known (scripts/icons.js)
+    if (img.closest('span.icon')) return;
     const src = img.getAttribute('src') || '';
     if (src && !src.startsWith('about:')) return;
     const holder = img.closest('picture') || img;

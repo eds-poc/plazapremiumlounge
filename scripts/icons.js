@@ -9,6 +9,21 @@ const LIBRARY_FOLDER = '/docs/library/icons';
 const CACHE_KEY = 'icon-library';
 
 let keysPromise;
+let knownKeys;
+
+/**
+ * The icon library names already known this visit (from the session cache), or undefined.
+ * @returns {Set<string>|undefined}
+ */
+function cachedKeys() {
+  if (!knownKeys) {
+    try {
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      if (cached) knownKeys = new Set(JSON.parse(cached));
+    } catch { /* storage unavailable */ }
+  }
+  return knownKeys;
+}
 
 /**
  * The icon names available in the DA icon library.
@@ -17,10 +32,7 @@ let keysPromise;
 function libraryKeys() {
   if (!keysPromise) {
     keysPromise = (async () => {
-      try {
-        const cached = sessionStorage.getItem(CACHE_KEY);
-        if (cached) return new Set(JSON.parse(cached));
-      } catch { /* storage unavailable */ }
+      if (cachedKeys()) return knownKeys;
       try {
         const resp = await fetch(LIBRARY_INDEX);
         if (!resp.ok) return new Set();
@@ -32,7 +44,8 @@ function libraryKeys() {
         try {
           sessionStorage.setItem(CACHE_KEY, JSON.stringify(keys));
         } catch { /* storage full */ }
-        return new Set(keys);
+        knownKeys = new Set(keys);
+        return knownKeys;
       } catch {
         return new Set();
       }
@@ -76,6 +89,12 @@ export function decorateIcons(element) {
     })
     .filter(Boolean);
   if (!imgs.length) return;
+  // after the first page of a visit the index is cached: set the sources straight away
+  const known = cachedKeys();
+  if (known) {
+    imgs.forEach((img) => { img.src = iconUrl(img.dataset.iconName, known); });
+    return;
+  }
   libraryKeys().then((keys) => {
     imgs.forEach((img) => { img.src = iconUrl(img.dataset.iconName, keys); });
   });
