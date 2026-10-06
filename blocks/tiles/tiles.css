@@ -1,0 +1,229 @@
+/* tiles: text-only coloured tiles, as the source homepage "Latest Offers" cards
+   (stacked with 15px gaps on mobile; from 768px all tiles in one row, equal height, 15px apart) */
+.tiles .tiles-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tiles .tiles-tile {
+  margin-bottom: var(--spacing-6);
+  padding: var(--spacing-7) var(--spacing-6);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+.tiles .tiles-tile.tiles-blush {
+  background-color: var(--color-brand-blush);
+  color: var(--color-brand-primary);
+}
+
+.tiles .tiles-tile.tiles-coral {
+  background-color: var(--color-brand-coral);
+  color: var(--color-brand-primary);
+}
+
+/* title (7 of 12 columns) with the tag and info icon at the right, over a dashed line */
+.tiles .tiles-head {
+  display: grid;
+  grid-template-columns: calc((100% + var(--grid-gutter)) * 7 / 12 - var(--grid-gutter)) 1fr;
+  column-gap: var(--grid-gutter);
+  align-items: start;
+  margin-bottom: var(--spacing-7);
+  padding-bottom: var(--spacing-4);
+  border-bottom: 1px dashed var(--color-text-secondary);
+}
+
+.tiles .tiles-title {
+  margin: 0 0 var(--spacing-3);
+  color: inherit;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.tiles .tiles-tags {
+  font-size: var(--body-font-size);
+  text-align: right;
+}
+
+.tiles .tiles-tag {
+  display: inline-block;
+  width: 85px;
+  vertical-align: middle;
+}
+
+.tiles .tiles-tag img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* 12px thin info icon, with a 24px hit area */
+.tiles .tiles-info {
+  position: relative;
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin: 2px 0 0;
+  padding: 0;
+  border: 0;
+  background-color: currentcolor;
+  vertical-align: middle;
+  cursor: pointer;
+  mask: url('../../icons/info-circle-thin.svg') center / contain no-repeat;
+}
+
+.tiles .tiles-info::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+
+/* the subtitle margin meets the line's 20px margin: 25px, as on the source */
+.tiles .tiles-body {
+  min-height: 150px;
+}
+
+.tiles .tiles-subtitle {
+  margin: var(--spacing-8) 0 var(--spacing-4);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.tiles .tiles-body p:not(.tiles-subtitle) {
+  margin: 0 0 var(--spacing-7);
+}
+
+.tiles .tiles-action {
+  margin: 0;
+  line-height: 0;
+}
+
+/* full-width rounded button: light grey, maroon on hover and focus; inline-block as on the
+   source, so its 30px margin adds to the text's 20px when the text is longer than the tile */
+.tiles .tiles-button:any-link,
+.tiles button.tiles-button {
+  box-sizing: border-box;
+  display: inline-block;
+  width: 100%;
+  vertical-align: top;
+  margin-top: var(--spacing-9);
+  padding: 9px var(--spacing-7);
+  border: 1px solid transparent;
+  border-radius: var(--radius-xl);
+  background-color: var(--color-surface-warm);
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: 24px;
+  text-align: center;
+  text-decoration: none;
+  text-transform: capitalize;
+  transition: all var(--duration-medium);
+}
+
+.tiles .tiles-button:hover,
+.tiles .tiles-button:focus-visible {
+  border-color: var(--color-brand-primary);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+  text-decoration: none;
+}
+
+/* the info popover: shown above the icon (below it when there is no room), with an arrow;
+   not scoped to the block, as the fallback for browsers without popover moves it to the body */
+.tiles-popover {
+  position: absolute;
+  inset: auto;
+  box-sizing: border-box;
+  max-width: 276px;
+  margin: 0;
+  padding: var(--spacing-6);
+  overflow: visible;
+
+  /* one-off: the source popover border and radius */
+  border: 1px solid rgb(0 0 0 / 17.6%);
+  border-radius: 8px;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.5;
+  text-align: start;
+}
+
+.tiles-popover:not(.is-open) {
+  display: none;
+}
+
+.tiles-popover:popover-open {
+  display: block;
+}
+
+.tiles-popover > :last-child {
+  margin-bottom: 0;
+}
+
+.tiles-popover::before,
+.tiles-popover::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: var(--arrow-x, 50%);
+  border: 8px solid transparent;
+  border-bottom-width: 0;
+  translate: -50% 0;
+}
+
+.tiles-popover::before {
+  border-top-color: rgb(0 0 0 / 17.6%);
+}
+
+.tiles-popover::after {
+  margin-top: -1px;
+  border-top-color: var(--color-background);
+}
+
+.tiles-popover.is-below::before,
+.tiles-popover.is-below::after {
+  top: auto;
+  bottom: 100%;
+  border-width: 0 8px 8px;
+  border-top-color: transparent;
+}
+
+.tiles-popover.is-below::before {
+  border-bottom-color: rgb(0 0 0 / 17.6%);
+}
+
+.tiles-popover.is-below::after {
+  margin: 0 0 -1px;
+  border-bottom-color: var(--color-background);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tiles .tiles-button:any-link,
+  .tiles button.tiles-button {
+    transition: none;
+  }
+}
+
+@media (width >= 768px) {
+  .tiles .tiles-list {
+    display: flex;
+    gap: var(--spacing-6);
+  }
+
+  .tiles .tiles-tile {
+    flex: 1 1 0;
+    min-width: 0;
+    margin-bottom: 0;
+  }
+}
