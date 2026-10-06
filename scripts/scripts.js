@@ -1,7 +1,6 @@
 import {
   loadHeader,
   loadFooter,
-  decorateIcons,
   decorateSections,
   decorateBlocks,
   decorateTemplateAndTheme,
@@ -13,6 +12,8 @@ import {
 } from './aem.js';
 // eslint-disable-next-line import/no-cycle
 import { installModalLinks, registerModalSections } from './modal.js';
+// icons: the DA icon library first, then the code /icons folder
+import { decorateIcons } from './icons.js';
 
 if (window.trustedTypes && window.trustedTypes.createPolicy) {
   const innerTT = window.trustedTypes.createPolicy('tt-inner', {
