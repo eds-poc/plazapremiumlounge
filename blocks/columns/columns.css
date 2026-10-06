@@ -31,3 +31,185 @@
     order: unset;
   }
 }
+
+/* media-image variation: evenly sized image cards (e.g. logos) in a centred, wrapping grid, as the source partners
+   cards (up to 850px wide; 1 per row, 2 from 576px, 3 from 768px; a short last row is centred) */
+.columns.media-image {
+  --columns-media-image-per-row: 1;
+  --columns-media-image-gap: var(--grid-gutter);
+  --columns-media-image-slider: 0;
+
+  /* one-off: the source partners grid width */
+  max-width: 850px;
+  margin-inline: auto;
+}
+
+.columns.media-image .columns-media-image-viewport {
+  display: block;
+}
+
+.columns.media-image .columns-media-image-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-9) var(--columns-media-image-gap);
+
+  /* the source cards keep their 30px bottom margin below the last row */
+  margin: 0 0 var(--spacing-9);
+  padding: 0;
+  list-style: none;
+}
+
+.columns.media-image .columns-media-image-item {
+  flex: 0 0 calc((100% - var(--columns-media-image-gap) * (var(--columns-media-image-per-row) - 1)) / var(--columns-media-image-per-row));
+  min-width: 0;
+}
+
+.columns.media-image .columns-media-image-card {
+  box-sizing: border-box;
+  display: flex;
+  align-items: safe center;
+  justify-content: safe center;
+  height: 165px;
+  padding: var(--spacing-11) var(--spacing-9);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background);
+  transition: transform var(--duration-slow) var(--ease-standard);
+}
+
+.columns.media-image .columns-media-image-card:hover {
+  transform: scale(1.1);
+}
+
+.columns.media-image .columns-media-image-card picture {
+  display: contents;
+}
+
+.columns.media-image .columns-media-image-card img {
+  width: auto;
+  height: auto;
+  max-width: 125px;
+  max-height: 100px;
+  object-fit: contain;
+}
+
+/* option "slider": below 768px the images become a looping, swipeable row with dots, as on the
+   source homepage (cards 250px, 300px from 520px, 15px apart, running off the right edge) */
+.columns.media-image.slider {
+  --columns-media-image-slider: 1;
+}
+
+.columns.media-image.slider .columns-media-image-viewport {
+  margin-right: calc(-1 * var(--container-padding));
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.columns.media-image.slider .columns-media-image-viewport.is-grabbing {
+  cursor: grab;
+}
+
+.columns.media-image.slider .columns-media-image-list {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: var(--spacing-6);
+}
+
+.columns.media-image.slider .columns-media-image-list.is-animating {
+  transition: transform var(--duration-normal) ease;
+}
+
+.columns.media-image.slider .columns-media-image-item {
+  flex: 0 0 250px;
+}
+
+.columns.media-image.is-slider .columns-media-image-item {
+  user-select: none;
+}
+
+.columns.media-image .columns-media-image-dots {
+  display: none;
+  margin: var(--spacing-7) 0;
+  text-align: center;
+}
+
+/* centred across the same bleed as the images, as on the source */
+.columns.media-image.is-slider .columns-media-image-dots {
+  display: block;
+  margin-right: calc(-1 * var(--container-padding));
+}
+
+.columns.media-image .columns-media-image-dot {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+/* source dots: 10px, grey, maroon when active or hovered, in a 24 x 20px button */
+.columns.media-image .columns-media-image-dot::before {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 10px;
+  margin: var(--spacing-2) 7px;
+  border-radius: var(--radius-xl);
+
+  /* one-off: the source dot grey */
+  background-color: #d6d6d6;
+}
+
+.columns.media-image .columns-media-image-dot:hover::before,
+.columns.media-image .columns-media-image-dot[aria-current='true']::before {
+  background-color: var(--color-brand-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .columns.media-image .columns-media-image-card,
+  .columns.media-image.slider .columns-media-image-list.is-animating {
+    transition: none;
+  }
+}
+
+/* breakpoint-exception: source logo slider cards widen at 520px */
+@media (width >= 520px) {
+  .columns.media-image.slider .columns-media-image-item {
+    flex-basis: 300px;
+  }
+}
+
+/* breakpoint-exception: source partners grid (Bootstrap col-sm-6) goes to 2 per row at 576px */
+@media (width >= 576px) {
+  .columns.media-image {
+    --columns-media-image-per-row: 2;
+  }
+}
+
+/* from 768px every media-image block is the grid again, with 3 per row */
+@media (width >= 768px) {
+  .columns.media-image {
+    --columns-media-image-per-row: 3;
+  }
+
+  .columns.media-image.slider {
+    --columns-media-image-slider: 0;
+  }
+
+  .columns.media-image.slider .columns-media-image-viewport {
+    margin-right: 0;
+    overflow: visible;
+    touch-action: auto;
+  }
+
+  .columns.media-image.slider .columns-media-image-list {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--spacing-9) var(--columns-media-image-gap);
+  }
+
+  .columns.media-image.slider .columns-media-image-item {
+    flex-basis: calc((100% - var(--columns-media-image-gap) * (var(--columns-media-image-per-row) - 1)) / var(--columns-media-image-per-row));
+  }
+}
