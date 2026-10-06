@@ -25,3 +25,237 @@
   aspect-ratio: 4 / 3;
   object-fit: cover;
 }
+
+/* text-tile variation: text-only coloured tiles, as the source homepage "Latest Offers" cards
+   (stacked with 15px gaps on mobile; from 768px all tiles in one row, equal height, 15px apart) */
+.cards.text-tile > ul {
+  display: block;
+}
+
+.cards.text-tile > ul > li {
+  border: 0;
+}
+
+.cards.text-tile .cards-tile {
+  margin-bottom: var(--spacing-6);
+  padding: var(--spacing-7) var(--spacing-6);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+.cards.text-tile .cards-tile.cards-tile-blush {
+  background-color: var(--color-brand-blush);
+  color: var(--color-brand-primary);
+}
+
+.cards.text-tile .cards-tile.cards-tile-coral {
+  background-color: var(--color-brand-coral);
+  color: var(--color-brand-primary);
+}
+
+/* title (7 of 12 columns) with the badge and info icon at the right, over a dashed line */
+.cards.text-tile .cards-tile-head {
+  display: grid;
+  grid-template-columns: calc((100% + var(--grid-gutter)) * 7 / 12 - var(--grid-gutter)) 1fr;
+  column-gap: var(--grid-gutter);
+  align-items: start;
+  margin-bottom: var(--spacing-7);
+  padding-bottom: var(--spacing-4);
+  border-bottom: 1px dashed var(--color-text-secondary);
+}
+
+.cards.text-tile .cards-tile-title {
+  margin: 0 0 var(--spacing-3);
+  color: inherit;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.cards.text-tile .cards-tile-tags {
+  font-size: var(--body-font-size);
+  text-align: right;
+}
+
+.cards.text-tile .cards-tile-badge {
+  display: inline-block;
+  width: 85px;
+  vertical-align: middle;
+}
+
+.cards.text-tile .cards-tile-badge img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: auto;
+  object-fit: fill;
+}
+
+/* 12px thin info icon, with a 24px hit area */
+.cards.text-tile .cards-tile-info {
+  position: relative;
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin: 2px 0 0;
+  padding: 0;
+  border: 0;
+  background-color: currentcolor;
+  vertical-align: middle;
+  cursor: pointer;
+  mask: url('../../icons/info-circle-thin.svg') center / contain no-repeat;
+}
+
+.cards.text-tile .cards-tile-info::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+
+/* the subtitle margin meets the line's 20px margin: 25px, as on the source */
+.cards.text-tile .cards-tile-body {
+  min-height: 150px;
+}
+
+.cards.text-tile .cards-tile-subtitle {
+  margin: var(--spacing-8) 0 var(--spacing-4);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.cards.text-tile .cards-tile-body p:not(.cards-tile-subtitle) {
+  margin: 0 0 var(--spacing-7);
+}
+
+.cards.text-tile .cards-tile-action {
+  margin: 0;
+  line-height: 0;
+}
+
+/* full-width rounded button: light grey, maroon on hover and focus; inline-block as on the
+   source, so its 30px margin adds to the text's 20px when the text is longer than the tile */
+.cards.text-tile .cards-tile-button:any-link,
+.cards.text-tile button.cards-tile-button {
+  box-sizing: border-box;
+  display: inline-block;
+  width: 100%;
+  vertical-align: top;
+  margin-top: var(--spacing-9);
+  padding: 9px var(--spacing-7);
+  border: 1px solid transparent;
+  border-radius: var(--radius-xl);
+  background-color: var(--color-surface-warm);
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: 24px;
+  text-align: center;
+  text-decoration: none;
+  text-transform: capitalize;
+  transition: all var(--duration-medium);
+}
+
+.cards.text-tile .cards-tile-button:hover,
+.cards.text-tile .cards-tile-button:focus-visible {
+  border-color: var(--color-brand-primary);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+  text-decoration: none;
+}
+
+/* the info popover: shown above the icon (below it when there is no room), with an arrow;
+   not scoped to the block, as the fallback for browsers without popover moves it to the body */
+.cards-tile-popover {
+  position: absolute;
+  inset: auto;
+  box-sizing: border-box;
+  max-width: 276px;
+  margin: 0;
+  padding: var(--spacing-6);
+  overflow: visible;
+
+  /* one-off: the source popover border and radius */
+  border: 1px solid rgb(0 0 0 / 17.6%);
+  border-radius: 8px;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.5;
+  text-align: start;
+}
+
+.cards-tile-popover:not(.is-open) {
+  display: none;
+}
+
+.cards-tile-popover:popover-open {
+  display: block;
+}
+
+.cards-tile-popover > :last-child {
+  margin-bottom: 0;
+}
+
+.cards-tile-popover::before,
+.cards-tile-popover::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: var(--arrow-x, 50%);
+  border: 8px solid transparent;
+  border-bottom-width: 0;
+  translate: -50% 0;
+}
+
+.cards-tile-popover::before {
+  border-top-color: rgb(0 0 0 / 17.6%);
+}
+
+.cards-tile-popover::after {
+  margin-top: -1px;
+  border-top-color: var(--color-background);
+}
+
+.cards-tile-popover.is-below::before,
+.cards-tile-popover.is-below::after {
+  top: auto;
+  bottom: 100%;
+  border-width: 0 8px 8px;
+  border-top-color: transparent;
+}
+
+.cards-tile-popover.is-below::before {
+  border-bottom-color: rgb(0 0 0 / 17.6%);
+}
+
+.cards-tile-popover.is-below::after {
+  margin: 0 0 -1px;
+  border-bottom-color: var(--color-background);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cards.text-tile .cards-tile-button:any-link,
+  .cards.text-tile button.cards-tile-button {
+    transition: none;
+  }
+}
+
+@media (width >= 768px) {
+  .cards.text-tile > ul {
+    display: flex;
+    gap: var(--spacing-6);
+  }
+
+  .cards.text-tile .cards-tile {
+    flex: 1 1 0;
+    min-width: 0;
+    margin-bottom: 0;
+  }
+}
