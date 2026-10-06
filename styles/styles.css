@@ -569,8 +569,18 @@ main .section.wide>div {
 }
 
 /* title-position: center centres the section heading from 768px (left on mobile, as on the source) */
-@media (width >= 768px) {
-  main .section[data-title-position='center'] .default-content-wrapper > :is(h1, h2, h3, h4, h5, h6) {
+@media (width >=768px) {
+  main .section[data-title-position='center'] .default-content-wrapper> :is(h1, h2, h3, h4, h5, h6) {
     text-align: center;
   }
+}
+
+
+/* Block spacing: adds consistent spacing between blocks within a section */
+.space-bottom-30 {
+  margin-bottom: var(--spacing-7);
+}
+
+.space-bottom-50 {
+  margin-bottom: var(--spacing-11);
 }
