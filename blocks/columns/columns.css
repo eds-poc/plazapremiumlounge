@@ -32,27 +32,27 @@
   }
 }
 
-/* logos variation: evenly sized logo cards in a centred, wrapping grid, as the source partners
+/* media-image variation: evenly sized image cards (e.g. logos) in a centred, wrapping grid, as the source partners
    cards (up to 850px wide; 1 per row, 2 from 576px, 3 from 768px; a short last row is centred) */
-.columns.logos {
-  --columns-logos-per-row: 1;
-  --columns-logos-gap: var(--grid-gutter);
-  --columns-logos-carousel: 0;
+.columns.media-image {
+  --columns-media-image-per-row: 1;
+  --columns-media-image-gap: var(--grid-gutter);
+  --columns-media-image-slider: 0;
 
   /* one-off: the source partners grid width */
   max-width: 850px;
   margin-inline: auto;
 }
 
-.columns.logos .columns-logos-viewport {
+.columns.media-image .columns-media-image-viewport {
   display: block;
 }
 
-.columns.logos .columns-logos-list {
+.columns.media-image .columns-media-image-list {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: var(--spacing-9) var(--columns-logos-gap);
+  gap: var(--spacing-9) var(--columns-media-image-gap);
 
   /* the source cards keep their 30px bottom margin below the last row */
   margin: 0 0 var(--spacing-9);
@@ -60,12 +60,12 @@
   list-style: none;
 }
 
-.columns.logos .columns-logos-item {
-  flex: 0 0 calc((100% - var(--columns-logos-gap) * (var(--columns-logos-per-row) - 1)) / var(--columns-logos-per-row));
+.columns.media-image .columns-media-image-item {
+  flex: 0 0 calc((100% - var(--columns-media-image-gap) * (var(--columns-media-image-per-row) - 1)) / var(--columns-media-image-per-row));
   min-width: 0;
 }
 
-.columns.logos .columns-logos-card {
+.columns.media-image .columns-media-image-card {
   box-sizing: border-box;
   display: flex;
   align-items: safe center;
@@ -77,15 +77,15 @@
   transition: transform var(--duration-slow) var(--ease-standard);
 }
 
-.columns.logos .columns-logos-card:hover {
+.columns.media-image .columns-media-image-card:hover {
   transform: scale(1.1);
 }
 
-.columns.logos .columns-logos-card picture {
+.columns.media-image .columns-media-image-card picture {
   display: contents;
 }
 
-.columns.logos .columns-logos-card img {
+.columns.media-image .columns-media-image-card img {
   width: auto;
   height: auto;
   max-width: 125px;
@@ -93,53 +93,53 @@
   object-fit: contain;
 }
 
-/* option "carousel": below 768px the logos become a looping, swipeable row with dots, as on the
+/* option "slider": below 768px the images become a looping, swipeable row with dots, as on the
    source homepage (cards 250px, 300px from 520px, 15px apart, running off the right edge) */
-.columns.logos.carousel {
-  --columns-logos-carousel: 1;
+.columns.media-image.slider {
+  --columns-media-image-slider: 1;
 }
 
-.columns.logos.carousel .columns-logos-viewport {
+.columns.media-image.slider .columns-media-image-viewport {
   margin-right: calc(-1 * var(--container-padding));
   overflow: hidden;
   touch-action: pan-y;
 }
 
-.columns.logos.carousel .columns-logos-viewport.is-grabbing {
+.columns.media-image.slider .columns-media-image-viewport.is-grabbing {
   cursor: grab;
 }
 
-.columns.logos.carousel .columns-logos-list {
+.columns.media-image.slider .columns-media-image-list {
   flex-wrap: nowrap;
   justify-content: flex-start;
   gap: var(--spacing-6);
 }
 
-.columns.logos.carousel .columns-logos-list.is-animating {
+.columns.media-image.slider .columns-media-image-list.is-animating {
   transition: transform var(--duration-normal) ease;
 }
 
-.columns.logos.carousel .columns-logos-item {
+.columns.media-image.slider .columns-media-image-item {
   flex: 0 0 250px;
 }
 
-.columns.logos.is-carousel .columns-logos-item {
+.columns.media-image.is-slider .columns-media-image-item {
   user-select: none;
 }
 
-.columns.logos .columns-logos-dots {
+.columns.media-image .columns-media-image-dots {
   display: none;
   margin: var(--spacing-7) 0;
   text-align: center;
 }
 
-/* centred across the same bleed as the logos, as on the source */
-.columns.logos.is-carousel .columns-logos-dots {
+/* centred across the same bleed as the images, as on the source */
+.columns.media-image.is-slider .columns-media-image-dots {
   display: block;
   margin-right: calc(-1 * var(--container-padding));
 }
 
-.columns.logos .columns-logos-dot {
+.columns.media-image .columns-media-image-dot {
   display: inline-block;
   margin: 0;
   padding: 0;
@@ -149,7 +149,7 @@
 }
 
 /* source dots: 10px, grey, maroon when active or hovered, in a 24 x 20px button */
-.columns.logos .columns-logos-dot::before {
+.columns.media-image .columns-media-image-dot::before {
   content: '';
   display: block;
   width: 10px;
@@ -161,55 +161,55 @@
   background-color: #d6d6d6;
 }
 
-.columns.logos .columns-logos-dot:hover::before,
-.columns.logos .columns-logos-dot[aria-current='true']::before {
+.columns.media-image .columns-media-image-dot:hover::before,
+.columns.media-image .columns-media-image-dot[aria-current='true']::before {
   background-color: var(--color-brand-primary);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .columns.logos .columns-logos-card,
-  .columns.logos.carousel .columns-logos-list.is-animating {
+  .columns.media-image .columns-media-image-card,
+  .columns.media-image.slider .columns-media-image-list.is-animating {
     transition: none;
   }
 }
 
-/* breakpoint-exception: source logo carousel cards widen at 520px */
+/* breakpoint-exception: source logo slider cards widen at 520px */
 @media (width >= 520px) {
-  .columns.logos.carousel .columns-logos-item {
+  .columns.media-image.slider .columns-media-image-item {
     flex-basis: 300px;
   }
 }
 
 /* breakpoint-exception: source partners grid (Bootstrap col-sm-6) goes to 2 per row at 576px */
 @media (width >= 576px) {
-  .columns.logos {
-    --columns-logos-per-row: 2;
+  .columns.media-image {
+    --columns-media-image-per-row: 2;
   }
 }
 
-/* from 768px every logos block is the grid again, with 3 per row */
+/* from 768px every media-image block is the grid again, with 3 per row */
 @media (width >= 768px) {
-  .columns.logos {
-    --columns-logos-per-row: 3;
+  .columns.media-image {
+    --columns-media-image-per-row: 3;
   }
 
-  .columns.logos.carousel {
-    --columns-logos-carousel: 0;
+  .columns.media-image.slider {
+    --columns-media-image-slider: 0;
   }
 
-  .columns.logos.carousel .columns-logos-viewport {
+  .columns.media-image.slider .columns-media-image-viewport {
     margin-right: 0;
     overflow: visible;
     touch-action: auto;
   }
 
-  .columns.logos.carousel .columns-logos-list {
+  .columns.media-image.slider .columns-media-image-list {
     flex-wrap: wrap;
     justify-content: center;
-    gap: var(--spacing-9) var(--columns-logos-gap);
+    gap: var(--spacing-9) var(--columns-media-image-gap);
   }
 
-  .columns.logos.carousel .columns-logos-item {
-    flex-basis: calc((100% - var(--columns-logos-gap) * (var(--columns-logos-per-row) - 1)) / var(--columns-logos-per-row));
+  .columns.media-image.slider .columns-media-image-item {
+    flex-basis: calc((100% - var(--columns-media-image-gap) * (var(--columns-media-image-per-row) - 1)) / var(--columns-media-image-per-row));
   }
 }
