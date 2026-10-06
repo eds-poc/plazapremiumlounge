@@ -576,7 +576,7 @@ main .section.wide>div {
 }
 
 
-/*Block spacing: adds consistent spacing between blocks within a section */
+/* Block spacing: adds consistent spacing between blocks within a section */
 .space-bottom-30 {
   margin-bottom: var(--spacing-7);
 }
