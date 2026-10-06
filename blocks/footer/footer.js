@@ -36,7 +36,9 @@ function el(tag, className) {
  * @returns {string}
  */
 function labelFromIconName(name) {
-  return name.split(/[-_]/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  // a colour suffix is not part of the name (`facebook-white` is read as "Facebook")
+  return name.replace(/[-_](white|black)$/, '')
+    .split(/[-_]/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
 /**

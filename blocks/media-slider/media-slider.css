@@ -25,7 +25,7 @@
   line-height: var(--line-height-body);
 }
 
-/* social icons (links to known networks): 35px maroon circles with an 18px white brand icon;
+/* icon links (a link holding only an icon): 35px maroon circles with an 18px white icon;
    each line is 39px tall with the icons 2px down, and a space plus 10px between them, as the
    source's inline items */
 .media-slider .media-slider-social {
@@ -53,21 +53,6 @@
   text-decoration: none;
   transition: all var(--duration-normal) var(--ease-standard);
 }
-
-/* brand icons: Font Awesome Free brand glyphs (CC BY 4.0), as on the source */
-.media-slider .media-slider-social-icon::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-color: currentcolor;
-  mask: var(--media-slider-icon) center / 22.5px no-repeat;
-}
-
-.media-slider .media-slider-social-facebook { --media-slider-icon: url('../../icons/social-facebook.svg'); }
-.media-slider .media-slider-social-instagram { --media-slider-icon: url('../../icons/social-instagram.svg'); }
-.media-slider .media-slider-social-wechat { --media-slider-icon: url('../../icons/social-wechat.svg'); }
-.media-slider .media-slider-social-linkedin { --media-slider-icon: url('../../icons/social-linkedin.svg'); }
-.media-slider .media-slider-social-x { --media-slider-icon: url('../../icons/social-x.svg'); }
 
 /* images: 30px below the text, running off the right edge */
 .media-slider .media-slider-slider {
@@ -123,6 +108,24 @@
 .media-slider .media-slider-media img {
   object-fit: cover;
   object-position: center;
+}
+
+/* the icon (from the DA icon library or the code icons) shown white, whatever its colour; the
+   icon files have the glyph at 0.8 of their box, so 22.5px gives the source's 18px glyph */
+.media-slider .media-slider-social-icon .icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.media-slider .media-slider-social-icon .icon img {
+  width: 22.5px;
+  height: 22.5px;
+  filter: brightness(0) invert(1);
 }
 
 @media (prefers-reduced-motion: reduce) {

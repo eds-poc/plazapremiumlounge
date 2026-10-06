@@ -5,15 +5,6 @@ const HEADINGS = 'h1, h2, h3, h4, h5, h6';
 const DRAG_THRESHOLD = 30;
 // region names used so far on the page, so two sliders with the same title stay distinguishable
 const regionNames = new Map();
-// social networks shown as round icons: matched by the link's host, else by its text
-const SOCIAL = [
-  { name: 'facebook', hosts: ['facebook.com', 'fb.com'], words: ['facebook'] },
-  { name: 'instagram', hosts: ['instagram.com'], words: ['instagram'] },
-  { name: 'linkedin', hosts: ['linkedin.com'], words: ['linkedin'] },
-  { name: 'x', hosts: ['x.com', 'twitter.com'], words: ['x', 'twitter'] },
-  { name: 'wechat', hosts: ['wechat.com', 'weixin.qq.com'], words: ['wechat', 'weixin'] },
-];
-
 /**
  * Creates an element with an optional class name.
  * @param {string} tag
@@ -27,23 +18,21 @@ function el(tag, className) {
 }
 
 /**
- * The social network a link points to, if any.
+ * The name to read out for an icon-only link: its title, else the icon name without a colour
+ * suffix (`facebook` or `facebook-white` → "Facebook").
  * @param {HTMLAnchorElement} link
- * @returns {string|null}
+ * @param {string} icon Icon name
+ * @returns {string}
  */
-function socialName(link) {
-  let host = '';
-  try {
-    host = new URL(link.href).hostname.replace(/^www\./, '');
-  } catch { /* not a URL */ }
-  const text = (link.title || link.textContent).trim().toLowerCase();
-  const match = SOCIAL.find((s) => s.hosts.some((h) => host === h || host.endsWith(`.${h}`)))
-    || SOCIAL.find((s) => s.words.includes(text));
-  return match ? match.name : null;
+function iconLabel(link, icon) {
+  if (link.title.trim()) return link.title.trim();
+  const word = icon.replace(/-(white|black)$/, '').split('-').pop();
+  return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
 /**
- * Turns the links of a paragraph made only of links into the round social icons.
+ * Turns a paragraph of links into the icon row: links that hold only an icon (`:name:`) become
+ * round icon buttons; any other link stays a text link.
  * @param {HTMLAnchorElement[]} links
  * @returns {HTMLUListElement}
  */
@@ -51,17 +40,20 @@ function buildSocial(links) {
   const list = el('ul', 'media-slider-social');
   links.forEach((link) => {
     const li = el('li');
-    const name = socialName(link);
-    const label = (link.textContent || link.title).trim();
+    const icon = link.querySelector('span.icon');
+    const name = icon && !link.textContent.trim()
+      && [...icon.classList].find((c) => c.startsWith('icon-'))?.substring(5);
     link.className = 'media-slider-social-link';
+    let label = link.textContent.trim();
     if (name) {
-      link.classList.add('media-slider-social-icon', `media-slider-social-${name}`);
+      label = iconLabel(link, name);
+      link.classList.add('media-slider-social-icon');
       const text = el('span', 'visually-hidden');
       text.textContent = label;
-      link.replaceChildren(text);
+      link.append(text);
     }
     if (!link.title) link.title = label;
-    // an image link (the WeChat QR code) opens in a lightbox; other sites open in a new tab
+    // an image link (e.g. a WeChat QR code) opens in a lightbox; other sites open in a new tab
     if (IMAGE_LINK.test(new URL(link.href).pathname)) enableLightbox(link, `${label} QR code`);
     else applyButtonAction(link);
     li.append(link);
