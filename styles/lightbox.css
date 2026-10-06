@@ -1,0 +1,44 @@
+/* image lightbox (scripts/lightbox.js): the image on a white card, as the source fancybox */
+.lightbox {
+  padding: var(--spacing-7);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-background);
+}
+
+.lightbox::backdrop {
+  background-color: var(--color-overlay-nav);
+}
+
+.lightbox img {
+  display: block;
+  width: min(344px, 70vw);
+  height: auto;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: var(--spacing-2);
+  right: var(--spacing-2);
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.lightbox-close::before,
+.lightbox-close::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 25%;
+  width: 50%;
+  height: 2px;
+  background-color: var(--color-text);
+  transform: rotate(45deg);
+}
+
+.lightbox-close::after {
+  transform: rotate(-45deg);
+}

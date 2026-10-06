@@ -1,0 +1,157 @@
+/* media-slider: text panel beside a looping row of square images, as the source homepage
+   "Let's connect!" (stacked on mobile; from 768px text in 4 of 12 columns, images in the rest) */
+.media-slider {
+  --media-slider-item: 280px;
+  --media-slider-gap: var(--spacing-6);
+
+  display: grid;
+  align-items: center;
+}
+
+/* title: the section heading size at every width (the source doesn't shrink it on mobile) */
+.media-slider .media-slider-title {
+  margin: 0 0 var(--spacing-6);
+  color: var(--color-text);
+  font-family: var(--font-family-primary);
+  font-size: calc(1.325rem + 0.9vw);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.media-slider .media-slider-intro {
+  margin: 0 0 var(--spacing-7);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-body);
+}
+
+/* social icons (links to known networks): 35px maroon circles with an 18px white brand icon;
+   each line is 39px tall with the icons 2px down, and a space plus 10px between them, as the
+   source's inline items */
+.media-slider .media-slider-social {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px calc(var(--spacing-4) + 0.2875em);
+  margin: 40px 0 0;
+  padding: var(--spacing-1) 0;
+  font-size: var(--body-font-size);
+  list-style: none;
+}
+
+.media-slider .media-slider-social-icon:any-link {
+  position: relative;
+  display: block;
+  width: 35px;
+  height: 35px;
+  border-radius: var(--radius-circle);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-lg);
+  line-height: 35px;
+  text-align: center;
+  text-decoration: none;
+  transition: all var(--duration-normal) var(--ease-standard);
+}
+
+/* brand icons: Font Awesome Free brand glyphs (CC BY 4.0), as on the source */
+.media-slider .media-slider-social-icon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: currentcolor;
+  mask: var(--media-slider-icon) center / 22.5px no-repeat;
+}
+
+.media-slider .media-slider-social-facebook { --media-slider-icon: url('../../icons/social-facebook.svg'); }
+.media-slider .media-slider-social-instagram { --media-slider-icon: url('../../icons/social-instagram.svg'); }
+.media-slider .media-slider-social-wechat { --media-slider-icon: url('../../icons/social-wechat.svg'); }
+.media-slider .media-slider-social-linkedin { --media-slider-icon: url('../../icons/social-linkedin.svg'); }
+.media-slider .media-slider-social-x { --media-slider-icon: url('../../icons/social-x.svg'); }
+
+/* images: 30px below the text, running off the right edge */
+.media-slider .media-slider-slider {
+  min-width: 0;
+  margin-top: var(--spacing-9);
+}
+
+.media-slider .media-slider-viewport {
+  margin-right: calc(-1 * var(--container-padding));
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.media-slider .media-slider-viewport.is-grabbing {
+  cursor: grab;
+}
+
+.media-slider .media-slider-list {
+  display: flex;
+  gap: var(--media-slider-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.media-slider .media-slider-list.is-animating {
+  transition: transform var(--duration-normal) ease;
+}
+
+.media-slider .media-slider-item {
+  flex: 0 0 var(--media-slider-item);
+  padding-bottom: var(--spacing-7);
+}
+
+.media-slider .media-slider-viewport.is-slider .media-slider-item {
+  user-select: none;
+}
+
+.media-slider .media-slider-media {
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+
+.media-slider .media-slider-media picture,
+.media-slider .media-slider-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.media-slider .media-slider-media img {
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media-slider .media-slider-social-icon:any-link,
+  .media-slider .media-slider-list.is-animating {
+    transition: none;
+  }
+}
+
+@media (width >= 768px) {
+  .media-slider {
+    --media-slider-item: 320px;
+
+    grid-template-columns: calc((100% + var(--grid-gutter)) * 4 / 12 - var(--grid-gutter)) minmax(0, 1fr);
+    column-gap: var(--grid-gutter);
+  }
+
+  .media-slider .media-slider-title {
+    font-size: var(--heading-section-size);
+  }
+
+  /* the source bleeds 15px past the content edge here; never past the screen edge */
+  .media-slider .media-slider-viewport {
+    margin-right: calc(-1 * min(var(--spacing-6), var(--container-padding) + max(0px, (100vw - var(--container-max-width)) / 2)));
+  }
+}
+
+@media (width >= 992px) {
+  .media-slider .media-slider-title {
+    margin-bottom: var(--spacing-4);
+  }
+}
