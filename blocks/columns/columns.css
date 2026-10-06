@@ -31,3 +31,185 @@
     order: unset;
   }
 }
+
+/* logos variation: evenly sized logo cards in a centred, wrapping grid, as the source partners
+   cards (up to 850px wide; 1 per row, 2 from 576px, 3 from 768px; a short last row is centred) */
+.columns.logos {
+  --columns-logos-per-row: 1;
+  --columns-logos-gap: var(--grid-gutter);
+  --columns-logos-carousel: 0;
+
+  /* one-off: the source partners grid width */
+  max-width: 850px;
+  margin-inline: auto;
+}
+
+.columns.logos .columns-logos-viewport {
+  display: block;
+}
+
+.columns.logos .columns-logos-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-9) var(--columns-logos-gap);
+
+  /* the source cards keep their 30px bottom margin below the last row */
+  margin: 0 0 var(--spacing-9);
+  padding: 0;
+  list-style: none;
+}
+
+.columns.logos .columns-logos-item {
+  flex: 0 0 calc((100% - var(--columns-logos-gap) * (var(--columns-logos-per-row) - 1)) / var(--columns-logos-per-row));
+  min-width: 0;
+}
+
+.columns.logos .columns-logos-card {
+  box-sizing: border-box;
+  display: flex;
+  align-items: safe center;
+  justify-content: safe center;
+  height: 165px;
+  padding: var(--spacing-11) var(--spacing-9);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background);
+  transition: transform var(--duration-slow) var(--ease-standard);
+}
+
+.columns.logos .columns-logos-card:hover {
+  transform: scale(1.1);
+}
+
+.columns.logos .columns-logos-card picture {
+  display: contents;
+}
+
+.columns.logos .columns-logos-card img {
+  width: auto;
+  height: auto;
+  max-width: 125px;
+  max-height: 100px;
+  object-fit: contain;
+}
+
+/* option "carousel": below 768px the logos become a looping, swipeable row with dots, as on the
+   source homepage (cards 250px, 300px from 520px, 15px apart, running off the right edge) */
+.columns.logos.carousel {
+  --columns-logos-carousel: 1;
+}
+
+.columns.logos.carousel .columns-logos-viewport {
+  margin-right: calc(-1 * var(--container-padding));
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.columns.logos.carousel .columns-logos-viewport.is-grabbing {
+  cursor: grab;
+}
+
+.columns.logos.carousel .columns-logos-list {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: var(--spacing-6);
+}
+
+.columns.logos.carousel .columns-logos-list.is-animating {
+  transition: transform var(--duration-normal) ease;
+}
+
+.columns.logos.carousel .columns-logos-item {
+  flex: 0 0 250px;
+}
+
+.columns.logos.is-carousel .columns-logos-item {
+  user-select: none;
+}
+
+.columns.logos .columns-logos-dots {
+  display: none;
+  margin: var(--spacing-7) 0;
+  text-align: center;
+}
+
+/* centred across the same bleed as the logos, as on the source */
+.columns.logos.is-carousel .columns-logos-dots {
+  display: block;
+  margin-right: calc(-1 * var(--container-padding));
+}
+
+.columns.logos .columns-logos-dot {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+/* source dots: 10px, grey, maroon when active or hovered, in a 24 x 20px button */
+.columns.logos .columns-logos-dot::before {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 10px;
+  margin: var(--spacing-2) 7px;
+  border-radius: var(--radius-xl);
+
+  /* one-off: the source dot grey */
+  background-color: #d6d6d6;
+}
+
+.columns.logos .columns-logos-dot:hover::before,
+.columns.logos .columns-logos-dot[aria-current='true']::before {
+  background-color: var(--color-brand-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .columns.logos .columns-logos-card,
+  .columns.logos.carousel .columns-logos-list.is-animating {
+    transition: none;
+  }
+}
+
+/* breakpoint-exception: source logo carousel cards widen at 520px */
+@media (width >= 520px) {
+  .columns.logos.carousel .columns-logos-item {
+    flex-basis: 300px;
+  }
+}
+
+/* breakpoint-exception: source partners grid (Bootstrap col-sm-6) goes to 2 per row at 576px */
+@media (width >= 576px) {
+  .columns.logos {
+    --columns-logos-per-row: 2;
+  }
+}
+
+/* from 768px every logos block is the grid again, with 3 per row */
+@media (width >= 768px) {
+  .columns.logos {
+    --columns-logos-per-row: 3;
+  }
+
+  .columns.logos.carousel {
+    --columns-logos-carousel: 0;
+  }
+
+  .columns.logos.carousel .columns-logos-viewport {
+    margin-right: 0;
+    overflow: visible;
+    touch-action: auto;
+  }
+
+  .columns.logos.carousel .columns-logos-list {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--spacing-9) var(--columns-logos-gap);
+  }
+
+  .columns.logos.carousel .columns-logos-item {
+    flex-basis: calc((100% - var(--columns-logos-gap) * (var(--columns-logos-per-row) - 1)) / var(--columns-logos-per-row));
+  }
+}
