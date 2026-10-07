@@ -5,7 +5,9 @@ let count = 0;
 
 /**
  * Builds a modal dialog: maroon header with the title and a close button, then the content.
- * Closes on the close button, Esc (native cancel) and a click on the backdrop.
+ * Closes on the close button, Esc (native cancel), a `#close` link in the content and a click on
+ * the backdrop. A modal with a form keeps open on a backdrop click (as the source's static login
+ * modal), so typed values aren't lost; it gives a small bounce instead.
  * @param {string} key Unique key for this modal, so it is built once and reused
  * @param {Node[]} content Nodes to show in the modal body
  * @returns {HTMLDialogElement}
@@ -43,8 +45,30 @@ function buildModal(key, content) {
   panel.append(header, body);
   dialog.append(panel);
 
+  const isStatic = !!body.querySelector('form');
+  if (isStatic) dialog.classList.add('is-static');
   // a click outside the panel lands on the dialog itself, which is the backdrop area
-  dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+  dialog.addEventListener('click', (e) => {
+    if (e.target !== dialog) {
+      // `#close` links in the content (e.g. Back) close the modal
+      const link = e.target.closest('a[href]');
+      if (link && link.getAttribute('href') === '#close') {
+        e.preventDefault();
+        dialog.close();
+      }
+      return;
+    }
+    if (!isStatic) {
+      dialog.close();
+      return;
+    }
+    dialog.classList.remove('is-bouncing');
+    // restart the animation
+    // eslint-disable-next-line no-unused-expressions
+    dialog.offsetWidth;
+    dialog.classList.add('is-bouncing');
+  });
+  dialog.addEventListener('animationend', () => dialog.classList.remove('is-bouncing'));
   dialog.addEventListener('close', () => {
     // when another modal replaced this one, keep the lock and leave focus in the new modal
     if (document.querySelector('dialog.modal[open]')) return;
@@ -68,16 +92,20 @@ function buildModal(key, content) {
 // eslint-disable-next-line import/prefer-default-export
 export async function openModal({ key, content, trigger }) {
   await loadCSS(`${window.hlx.codeBasePath}/styles/modal.css`);
-  // one modal at a time: opening another closes the current one
-  document.querySelectorAll('dialog.modal[open]').forEach((d) => d.close());
+  // opened from inside another modal (e.g. Forgot Password? in the login modal): when this one
+  // closes, focus goes back to what opened the first modal
+  const host = trigger?.closest('dialog.modal');
+  const returnTo = host?.trigger || trigger;
   let dialog = modals.get(key);
   if (!dialog) {
     const nodes = await content();
     if (!nodes || !nodes.length) return null;
     dialog = buildModal(key, nodes);
   }
+  // one modal at a time: opening another closes the current one
+  document.querySelectorAll('dialog.modal[open]').forEach((d) => { if (d !== dialog) d.close(); });
   if (dialog.open) return dialog;
-  dialog.trigger = trigger;
+  dialog.trigger = returnTo;
   if (trigger) trigger.setAttribute('aria-controls', dialog.id);
   document.body.classList.add('modal-open');
   dialog.showModal();

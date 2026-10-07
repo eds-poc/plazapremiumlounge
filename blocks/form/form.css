@@ -1,0 +1,152 @@
+/* form: measured from the source login and forgot-password forms (Bootstrap fields, 16px apart) */
+.form .form-form {
+  /* one-off: the source (Bootstrap) input text colour and focus rings */
+  --form-input-color: #212529;
+  --form-focus-ring: 0 0 0 4px rgb(13 110 253 / 25%);
+  --form-button-focus-ring: 0 0 0 4px rgb(49 132 253 / 50%);
+
+  /* one-off: the source (Bootstrap g-3) 16px gap between rows */
+  --form-gap: 16px;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--form-gap) 0;
+  margin: 0;
+}
+
+/* fields: an uppercase label over a rounded, warm grey input */
+.form .form-label {
+  display: block;
+  margin: 0 0 var(--spacing-3);
+  color: var(--color-text);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+.form .form-input {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  height: 45px;
+  margin: 0;
+  padding: var(--spacing-5) var(--spacing-8);
+  border: 0;
+  border-radius: var(--radius-input);
+  background-color: var(--color-surface-warm);
+  color: var(--form-input-color);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.5;
+  transition: box-shadow 0.15s var(--ease-standard), background-color 0.15s var(--ease-standard);
+}
+
+.form .form-input:focus {
+  outline: none;
+  background-color: var(--color-background);
+  box-shadow: var(--form-focus-ring);
+}
+
+.form .form-error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: inherit;
+  line-height: var(--line-height-body);
+}
+
+/* checkbox: a 1em maroon ring that fills when checked, its label 0.5em + 5px after it */
+.form .form-field-checkbox {
+  display: flex;
+  align-items: flex-start;
+  min-height: 24px;
+  margin-bottom: 2px;
+}
+
+.form .form-check-input {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 1em;
+  height: 1em;
+  margin: 1px 0 0;
+  border: 1px solid var(--color-brand-primary);
+  border-radius: var(--radius-circle);
+  background-color: var(--color-background);
+  appearance: none;
+  transition: background-color 0.15s var(--ease-standard), box-shadow 0.15s var(--ease-standard);
+}
+
+.form .form-check-input:checked {
+  background-color: var(--color-brand-primary);
+}
+
+.form .form-check-input:focus {
+  outline: none;
+  box-shadow: var(--form-focus-ring);
+}
+
+.form .form-check-label {
+  margin-left: calc(0.5em + 5px);
+  color: var(--color-text);
+  line-height: var(--line-height-body);
+}
+
+/* content rows: text with black underlined links that turn maroon on hover */
+.form .form-content p {
+  margin: 0;
+}
+
+.form .form-content a:any-link {
+  color: var(--color-text-strong);
+  font-weight: var(--font-weight-medium);
+  text-decoration: underline;
+  transition: color var(--duration-normal) var(--ease-standard);
+}
+
+.form .form-content a:hover {
+  color: var(--color-brand-primary);
+}
+
+/* the button: full width; after fields it has 20px more space above it */
+.form .form-submit.is-after-field {
+  margin-top: var(--spacing-7);
+}
+
+.form .form-submit:last-child {
+  padding-bottom: var(--form-gap);
+}
+
+.form .form-submit .button {
+  width: 100%;
+  margin: 0 0 var(--spacing-6);
+}
+
+.form .form-submit .button:focus-visible {
+  outline: none;
+  box-shadow: var(--form-button-focus-ring);
+}
+
+/* content after the button (e.g. Back): centred maroon links, right under the button */
+.form .form-footer {
+  margin-top: calc(-1 * var(--form-gap));
+  text-align: center;
+}
+
+.form .form-footer a:any-link {
+  color: var(--color-brand-primary);
+  text-decoration: none;
+}
+
+.form .form-footer a:hover {
+  color: var(--color-brand-primary);
+  text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .form .form-input,
+  .form .form-check-input {
+    transition: none;
+  }
+}

@@ -32,20 +32,23 @@ names, the sections are read in this order:
 3. **Actions:** one link per line.
    - **Bold** links are buttons: `**[Your Destination Before Departure](/en-uk/your-destination-before-departure)**`,
      `**[Book Now](#book-now)**`. With two or more, the first is the phone bar above the header.
-   - A link starting with an icon is an icon action: `[:user: Log In](#login)`,
+   - A link starting with an icon is an icon action: `[:user: Log In](/modals/login)`,
      `[:globe: Language](#language)`, `[:cart: Cart](#cart)`. The text is the screen-reader label
      (and is hidden). Icons come from the icon library, then the code icons; they take the header's
      text colour.
 4. **Menu footer (mobile and tablet):** the links at the bottom of the open menu, e.g.
    `[:globe: English](#language)` and `[USD](#currency)`. An icon action that links to the same
    place (Language) is hidden from the mobile bar.
-5. **Modals (any number, anywhere):** sections with Section Metadata `modal` = a name, e.g. `login`,
+5. **Modals (any number, anywhere):** sections with Section Metadata `modal` = a name, e.g.
    `language`, `currency`, `cart`, `book-now` (plus a `name` and `description` for authors). They
-   are not shown in the header.
+   are not shown in the header. Modals used across the site (e.g. Log In) are pages in the
+   `/modals/` folder instead, authored once.
 
 ## What links do
 
 - A page link (`/en-uk/offers`) opens the page; a link to another website opens in a new tab.
+- A link to a `/modals/` page (e.g. `/modals/login`) opens that page as a modal; the menu or any
+  dropdown closes first, and focus returns to the link when the modal closes.
 - `#name` opens the modal section named `name` from the nav page (or the current page). The cart
   shows its `cart` section as a dropdown on desktop and as a modal on mobile.
 - `#name` with no modal of that name fires a `header:action` event on `document`
