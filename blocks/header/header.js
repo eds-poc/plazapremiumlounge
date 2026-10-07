@@ -6,6 +6,7 @@ import {
 } from '../../scripts/modal.js';
 import { CURRENCY_EVENT, getCurrency } from '../../scripts/currency.js';
 import { getLoggedInUser, initialsFrom } from '../../scripts/logged-in-user.js';
+import { setIconSources } from '../../scripts/icons.js';
 
 // desktop layout from 1200px, as the source (webslidemenu breakpoint)
 const desktop = window.matchMedia('(width >= 1200px)');
@@ -658,6 +659,9 @@ export default async function decorate(block) {
   if (promo) bar.append(promo);
   bar.append(inner);
   block.append(bar, ...drills, ...(account?.panel ? [account.panel] : []));
+  // the menus hold copies of the nav's icons (e.g. lounge badges), made before the icon
+  // library index may have loaded: give the copies their sources too
+  setIconSources(block);
   maskIcons(block);
 
   // --- behaviour -----------------------------------------------------------------------------

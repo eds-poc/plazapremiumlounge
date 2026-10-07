@@ -67,11 +67,29 @@ function iconUrl(name, keys) {
 }
 
 /**
+ * Sets the source of every icon image in an element that has none yet (by its data-icon-name),
+ * now if the library index is known, else once it has loaded. Code that copies icons before
+ * their source is set (e.g. the header building its menus from the nav) calls this on the
+ * copies.
+ * @param {Element} root
+ */
+export function setIconSources(root) {
+  const pending = () => [...root.querySelectorAll('img[data-icon-name]:not([src])')];
+  const known = cachedKeys();
+  if (known) {
+    pending().forEach((img) => { img.src = iconUrl(img.dataset.iconName, known); });
+    return;
+  }
+  libraryKeys().then((keys) => {
+    pending().forEach((img) => { img.src = iconUrl(img.dataset.iconName, keys); });
+  });
+}
+
+/**
  * Adds an <img> to every undecorated icon in an element (`span.icon.icon-<name>`), as the
  * boilerplate does, and sets its source once the library index is known.
  * @param {Element} element Element containing icons
  */
-// eslint-disable-next-line import/prefer-default-export
 export function decorateIcons(element) {
   const imgs = [...element.querySelectorAll('span.icon')]
     .filter((span) => !span.hasChildNodes())
@@ -97,5 +115,7 @@ export function decorateIcons(element) {
   }
   libraryKeys().then((keys) => {
     imgs.forEach((img) => { img.src = iconUrl(img.dataset.iconName, keys); });
+    // and any copies of them already on the page (copied before the index arrived)
+    setIconSources(document);
   });
 }
