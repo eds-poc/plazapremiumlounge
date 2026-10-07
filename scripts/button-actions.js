@@ -8,6 +8,7 @@
 import {
   markModalTrigger, modalPageUrl, openPageModal, preloadPageModal,
 } from './modal.js';
+import { translate } from './i18n.js';
 
 const actions = [];
 
@@ -103,7 +104,7 @@ registerButtonAction({
     if (!link.querySelector('.visually-hidden')) {
       const note = document.createElement('span');
       note.className = 'visually-hidden';
-      note.textContent = ' (opens in a new tab)';
+      note.textContent = translate('opensInNewTab');
       link.append(note);
     }
     return link;

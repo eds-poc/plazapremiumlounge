@@ -14,6 +14,7 @@ import {
 import { installModalLinks, registerModalSections } from './modal.js';
 // icons: the DA icon library first, then the code /icons folder
 import { decorateIcons } from './icons.js';
+import { getLanguage } from './i18n.js';
 
 if (window.trustedTypes && window.trustedTypes.createPolicy) {
   const innerTT = window.trustedTypes.createPolicy('tt-inner', {
@@ -165,7 +166,8 @@ export function decorateMain(main) {
  * @param {Element} doc The container element
  */
 async function loadEager(doc) {
-  document.documentElement.lang = 'en';
+  // the page language: page metadata `language`, else the site folder (e.g. /zh-cn/ → zh-CN)
+  document.documentElement.lang = getLanguage();
   decorateTemplateAndTheme();
   installModalLinks();
   const main = doc.querySelector('main');
