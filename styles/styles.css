@@ -44,6 +44,7 @@
   --color-surface-footer: #1b1b1b;
   --color-overlay-hero: rgb(0 0 0 / 35%);
   --color-overlay-nav: rgb(0 0 0 / 45%);
+  --color-overlay-backdrop: rgb(0 0 0 / 50%);
 
   /* text colors */
   --color-text: #333;
@@ -60,6 +61,7 @@
   --color-border-subtle: #dee2e6;
   --color-border-strong: var(--color-brand-primary);
   --color-divider-inverse: rgb(0 0 0 / 13%);
+  --color-border-translucent: rgb(0 0 0 / 17.6%);
 
   /* state colors */
   --color-error: #dc3545;
@@ -88,6 +90,7 @@
   --line-height-tight: 1.15;
   --line-height-heading: 1.2;
   --line-height-body: 1.4;
+  --line-height-relaxed: 1.5;
   --letter-spacing-label: 1px;
   --letter-spacing-eyebrow: 2px;
   --body-font-size: 14px;
@@ -109,6 +112,8 @@
   --spacing-10: 35px;
   --spacing-11: 50px;
   --spacing-12: 80px;
+  --spacing-stack: 24px;
+  --button-large-padding-block: 9px;
   --section-padding-block: 25px;
   --section-title-gap: 25px;
 
@@ -122,6 +127,8 @@
   --nav-height-desktop: 108px;
   --nav-height-desktop-scrolled: 70px;
   --nav-height-mobile: 122px;
+  --modal-padding: 16px;
+  --modal-margin-top: 28px;
   --z-header: 99;
   --z-megamenu: 1000;
 
@@ -143,6 +150,7 @@
 
   /* motion */
   --duration-fast: 0.15s;
+  --duration-short: 0.2s;
   --duration-normal: 0.25s;
   --duration-medium: 0.3s;
   --duration-slow: 0.5s;
@@ -360,7 +368,7 @@ button.button {
   font-family: var(--font-family-primary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
-  line-height: 1.5;
+  line-height: var(--line-height-relaxed);
   text-align: center;
   text-decoration: none;
   text-transform: capitalize;
@@ -447,7 +455,7 @@ button.button.white:focus-visible {
 a.button.large,
 button.button.large {
   min-width: 260px;
-  padding: 9px var(--spacing-7);
+  padding: var(--button-large-padding-block) var(--spacing-7);
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-medium);
 }

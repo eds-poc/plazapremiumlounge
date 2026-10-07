@@ -15,7 +15,7 @@
 
 .footer .footer-divider {
   margin: 1rem 0;
-  color: var(--base-background);
+  color: var(--color-text-inverse);
   border: 0;
   border-top: var(--base-border-width) solid;
   opacity: .25;
@@ -129,7 +129,7 @@
 }
 
 .footer .footer-column-text {
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-stack);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-light);
   line-height: var(--line-height-body);

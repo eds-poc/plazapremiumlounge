@@ -382,7 +382,7 @@ header .header-dropdown {
   display: none;
   max-height: 300px;
   margin: 0;
-  padding: 0 0 50px;
+  padding: 0 0 var(--spacing-11);
   overflow-y: auto;
   background-color: var(--header-maroon);
   list-style: none;
@@ -616,11 +616,11 @@ header .header-account-panel {
   height: 100%;
   max-height: none;
   margin: 0;
-  padding: 0 0 50px;
+  padding: 0 0 var(--spacing-11);
   overflow: auto;
 
   /* the background runs under the 1px border, as the source, so it shows as a darker line */
-  border: 1px solid rgb(0 0 0 / 17.6%);
+  border: 1px solid var(--color-border-translucent);
   border-radius: 0;
   background-color: var(--header-maroon);
   color: var(--color-text-inverse);
@@ -628,19 +628,19 @@ header .header-account-panel {
 }
 
 header .header-account-panel::backdrop {
-  background-color: rgb(0 0 0 / 50%);
+  background-color: var(--color-overlay-backdrop);
 }
 
 header .header-account-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 16px 25px;
+  padding: var(--modal-padding) var(--modal-padding) var(--spacing-8);
 }
 
 header .header-account-back {
   position: relative;
-  top: 10px;
+  top: var(--spacing-4);
   display: inline-flex;
   align-items: center;
   padding: 0;
@@ -665,7 +665,7 @@ header .header-account-close {
   box-sizing: content-box;
   width: 1em;
   height: 1em;
-  margin: var(--spacing-4) -8px -8px auto;
+  margin: var(--spacing-4) calc(-1 * var(--spacing-3)) calc(-1 * var(--spacing-3)) auto;
   padding: var(--spacing-3);
   border: 0;
   border-radius: var(--radius-xs);
@@ -676,14 +676,14 @@ header .header-account-close {
 
 header .header-account-list {
   margin: 0;
-  padding: 16px;
+  padding: var(--modal-padding);
   list-style: none;
 }
 
 header .header-account-panel .header-account-list > li {
   position: relative;
   margin-bottom: var(--spacing-6);
-  padding: 2px var(--spacing-2);
+  padding: var(--spacing-1) var(--spacing-2);
 }
 
 header .header-account-link:is(:any-link, button) {
@@ -694,7 +694,7 @@ header .header-account-link:is(:any-link, button) {
   background: none;
   color: var(--color-text-inverse);
   font-family: inherit;
-  font-size: 24px;
+  font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-body);
   text-align: left;
@@ -776,7 +776,7 @@ header .header-cart-dropdown p {
     max-width: calc(100% - 16px);
     height: fit-content;
     max-height: calc(100% - 56px);
-    margin: 28px auto auto;
+    margin: var(--modal-margin-top) auto auto;
     border-radius: 22px;
   }
 }
@@ -966,7 +966,7 @@ header .header-cart-dropdown p {
     visibility: hidden;
     transform: rotateX(-75deg);
     transform-origin: 0 0;
-    transition: transform var(--duration-slow) var(--ease-standard) 0.3s, opacity var(--duration-slow) var(--ease-standard) 0.3s, visibility 0s linear 0.8s;
+    transition: transform var(--duration-slow) var(--ease-standard) var(--duration-medium), opacity var(--duration-slow) var(--ease-standard) var(--duration-medium), visibility 0s linear 0.8s;
   }
 
   header .header-item:hover > :is(.header-dropdown, .header-mega),
@@ -974,7 +974,7 @@ header .header-cart-dropdown p {
     opacity: 1;
     visibility: visible;
     transform: rotateX(0deg);
-    transition: transform var(--duration-slow) var(--ease-standard) 0.3s, opacity var(--duration-slow) var(--ease-standard) 0.3s, visibility 0s linear 0s;
+    transition: transform var(--duration-slow) var(--ease-standard) var(--duration-medium), opacity var(--duration-slow) var(--ease-standard) var(--duration-medium), visibility 0s linear 0s;
   }
 
   header .header-dropdown {
@@ -1023,7 +1023,7 @@ header .header-cart-dropdown p {
   header .header-mega-list:has(> .header-mega-leaf) {
     display: flex;
     flex-flow: column;
-    gap: 2px 10px;
+    gap: var(--spacing-1) var(--spacing-4);
     min-height: 120px;
     padding: 0 var(--spacing-2);
   }
@@ -1129,7 +1129,7 @@ header .header-cart-dropdown p {
     right: var(--spacing-6);
     z-index: 1;
     display: block;
-    padding: 35px 0;
+    padding: var(--spacing-10) 0;
     transition: all var(--duration-slow) var(--ease-standard);
   }
 
@@ -1189,7 +1189,7 @@ header .header-cart-dropdown p {
 
   /* icons 2px below the top of the line, as the source */
   header .header-utility .icon {
-    margin-top: 2px;
+    margin-top: var(--spacing-1);
     vertical-align: top;
   }
 
@@ -1206,11 +1206,11 @@ header .header-cart-dropdown p {
 
   header .header-initials {
     /* one-offs: the source's white-bar filter (invert, greyscale) applied to the badge */
-    --header-initials-bg: #000;
+    --header-initials-bg: var(--color-text-strong);
     --header-initials-color: #e0e0e0;
 
     display: inline-block;
-    margin-top: 2px;
+    margin-top: var(--spacing-1);
     color: var(--header-initials-color);
     vertical-align: top;
   }

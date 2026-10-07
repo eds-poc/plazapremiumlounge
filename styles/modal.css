@@ -4,14 +4,14 @@ body.modal-open {
 }
 
 dialog.modal {
-  /* one-off: the source (Bootstrap) modal header line */
-  --modal-header-line: #dee2e6;
+  /* the source (Bootstrap) modal header line */
+  --modal-header-line: var(--color-border-subtle);
 
   box-sizing: border-box;
   width: calc(100% - 16px);
   max-width: 500px;
   max-height: calc(100% - 16px);
-  margin: 8px auto auto;
+  margin: var(--spacing-3) auto auto;
   border: 0;
   padding: 0;
   overflow: visible auto;
@@ -22,7 +22,7 @@ dialog.modal {
 }
 
 dialog.modal::backdrop {
-  background-color: rgb(0 0 0 / 50%);
+  background-color: var(--color-overlay-backdrop);
 }
 
 dialog.modal[open] {
@@ -35,7 +35,7 @@ dialog.modal[open]::backdrop {
 
 /* the translucent border sits over the backdrop, not the white panel (no light ring), as the source */
 dialog.modal .modal-content {
-  border: 1px solid rgb(0 0 0 / 17.6%);
+  border: 1px solid var(--color-border-translucent);
   border-radius: var(--radius-lg);
   overflow: hidden;
   background-color: var(--color-background);
@@ -47,7 +47,7 @@ dialog.modal .modal-header {
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-6);
-  padding: 16px;
+  padding: var(--modal-padding);
   border-bottom: 1px solid var(--modal-header-line);
   background-color: var(--color-brand-primary);
   color: var(--color-text-inverse);
@@ -60,7 +60,7 @@ dialog.modal .modal-header .modal-title {
   font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-medium);
-  line-height: 1.5;
+  line-height: var(--line-height-relaxed);
 }
 
 /* close: the solid cross the source shows (21px glyph box), grey on hover */
@@ -68,7 +68,7 @@ dialog.modal .modal-close {
   flex: none;
   width: 16px;
   height: 21px;
-  margin: -2px 0 0 auto;
+  margin: calc(-1 * var(--spacing-1)) 0 0 auto;
   border: 0;
   padding: 0;
   background-color: currentcolor;
@@ -78,9 +78,9 @@ dialog.modal .modal-close {
   transition: color var(--duration-normal) var(--ease-standard);
 }
 
-/* one-off: the source's grey close hover */
+/* the source's grey close hover */
 dialog.modal .modal-close:hover {
-  color: #999;
+  color: var(--color-text-subtle);
 }
 
 dialog.modal :focus-visible {
@@ -93,7 +93,7 @@ dialog.modal .modal-close:focus-visible {
 }
 
 dialog.modal .modal-body {
-  padding: 16px;
+  padding: var(--modal-padding);
 }
 
 /* no trailing space at the very end of the modal body */
@@ -130,7 +130,7 @@ dialog.modal.is-bouncing .modal-content {
   dialog.modal {
     width: 500px;
     max-height: calc(100% - 56px);
-    margin-top: 28px;
+    margin-top: var(--modal-margin-top);
   }
 }
 
