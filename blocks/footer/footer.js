@@ -263,7 +263,6 @@ function buildBrands(section) {
     caption.textContent = heading.textContent.trim();
     const row = el('div', 'footer-brand-logos');
     logos.forEach((item) => { decorateMediaItem(item); row.append(item); });
-    group.style.setProperty('--logo-count', Math.max(logos.length, 1));
     group.append(caption, row);
     groups.append(group);
   };
