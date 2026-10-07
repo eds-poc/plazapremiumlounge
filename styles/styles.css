@@ -21,8 +21,8 @@
   --base-font-size-s: 14px;
   --base-border-width: 1px;
 
-  /* nav height */
-  --nav-height: 64px;
+  /* nav height: the header's height, reserved before it loads (mobile-first, see below) */
+  --nav-height: var(--nav-height-mobile);
 
   /* ---------------------------------------------------------------
    * Plaza Premium Lounge design tokens (extracted from the source site).
@@ -202,6 +202,34 @@ body.appear {
 
 header {
   height: var(--nav-height);
+}
+
+/* header height by breakpoint, as the source: promo bar + 82px row on small phones, 71px row
+   from 381px (smaller logo), no promo bar from 768px, the 108px desktop bar from 1200px */
+
+/* breakpoint-exception: source logo padding changes at 381px */
+@media (width >= 381px) {
+  :root {
+    --nav-height: 111px;
+  }
+}
+
+@media (width >= 768px) {
+  :root {
+    --nav-height: 71px;
+  }
+}
+
+/* breakpoint-exception: source desktop menu from 1200px */
+@media (width >= 1200px) {
+  :root {
+    --nav-height: var(--nav-height-desktop);
+  }
+
+  /* page metadata header = transparent: the bar sits over the page's hero */
+  html:has(meta[name="header" i][content="transparent" i]) header {
+    height: 0;
+  }
 }
 
 header .header,
