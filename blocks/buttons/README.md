@@ -9,7 +9,7 @@ One or more buttons, in the site's button styles. What a button does depends onl
 | [Book Now](/book) | primary |
 | [Find a lounge](/find) |  |
 | [Log in](#login) | outline large |
-| [Terms](/modals/terms) | tertiary |
+| [Terms](/en-uk/modals/terms) | tertiary |
 | [Our story](https://www.plazapremiumgroup.com/) | white arrow |
 
 - **Cell 1:** the button, written as a link. The link text is the label.
@@ -24,7 +24,7 @@ One or more buttons, in the site's button styles. What a button does depends onl
 | A page on this site (`/offers`) | Goes to the page |
 | Another website (`https://…`) | Opens in a new tab (screen readers hear "opens in a new tab") |
 | `#name` matching a modal section (on the page, or in the nav or footer) | Opens that section in a modal; the page stays where it is |
-| A page in a `/modals/` folder (`/modals/terms`) | Opens that page's content in a modal |
+| A page in a `modals` folder (`/en-uk/modals/terms`) | Opens that page's content in a modal |
 | `#name` with no matching modal | Scrolls to that part of the page |
 | `mailto:` / `tel:` | Opens email / calls, as normal |
 
@@ -34,7 +34,7 @@ One or more buttons, in the site's button styles. What a button does depends onl
 - **Where the section can live:**
   - **On the page:** the modal is only available on that page.
   - **In the nav (or footer):** the modal is available on **every page that uses that nav**. Example: put the Book Now block in a `modal = book-now` section of the nav page; the nav's Book Now button and any `[Book Now](#book-now)` on any page open that same modal.
-- **On its own page:** create a page in a `/modals/` folder (e.g. `/modals/terms`) and link to it. Its content loads only when the modal opens, so this suits large or rarely used modals.
+- **On its own page:** create a page in the site's `modals` folder (e.g. `/en-uk/modals/terms`) and link to it. Its content loads only when the modal opens, so this suits large or rarely used modals.
 - **One modal per name:** every link to the same name opens the same modal. If a page and the nav both define a modal with the same name, the page's one is used.
 - **Names vs headings:** a `#name` link opens a matching modal instead of scrolling, so don't reuse a modal name as a heading anchor.
 - **The first heading** of the content becomes the modal title, in the maroon header. Any heading level looks the same.

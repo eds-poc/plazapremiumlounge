@@ -173,7 +173,7 @@ export function preloadPageModal(url) {
 
 /**
  * Shows one view of a modal page: `#name` keeps only the part marked `data-modal-view="name"`
- * (e.g. the Currency group of /modals/language-currency), titled with its label.
+ * (e.g. the Currency group of /en-uk/modals/language-currency), titled with its label.
  * @param {HTMLElement} fragment
  * @param {string} view
  */

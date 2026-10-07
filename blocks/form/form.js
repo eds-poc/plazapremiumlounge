@@ -13,12 +13,13 @@ const NAME_HINTS = [[/last name|surname|family name/i, 'family-name'], [/first n
 let formCount = 0;
 
 /**
- * A slug for names and ids ("Email Address" → "email-address").
+ * A slug for names and ids ("Email Address" → "email-address"); '' for labels without Latin
+ * letters or digits (e.g. Chinese), which get a `name:` option or a numbered name instead.
  * @param {string} text
  * @returns {string}
  */
 function slug(text) {
-  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'field';
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
 /**
@@ -44,18 +45,19 @@ function readOptions(cell) {
 /**
  * Builds one field: a label and an input (or a checkbox with its label after it), plus the place
  * for its error message.
- * @param {{label: string, type: string, options: Map<string, string>, id: string}} field
+ * @param {{label: string, type: string, options: Map<string, string>, id: string, name: string}}
+ *   field
  * @returns {HTMLElement}
  */
 function buildField({
-  label, type, options, id,
+  label, type, options, id, name,
 }) {
   const wrap = document.createElement('div');
   wrap.className = `form-field form-field-${type}`;
   const input = document.createElement('input');
   input.type = type;
   input.id = id;
-  input.name = slug(label);
+  input.name = name;
   const labelEl = document.createElement('label');
   labelEl.htmlFor = id;
   labelEl.textContent = label;
@@ -93,18 +95,40 @@ function firstSegment(href) {
 }
 
 /**
+ * The choice lines of a choice cell, and its `name:` line if any (e.g. `name: currency`, for
+ * labels in other languages).
+ * @param {Element} [cell]
+ * @returns {{lines: HTMLElement[], name: string}}
+ */
+function readChoiceCell(cell) {
+  let name = '';
+  // one choice per paragraph or line break
+  const lines = (cell?.innerHTML || '').split(/<br\s*\/?>|<\/p>/i).map((html) => {
+    const line = document.createElement('div');
+    line.innerHTML = html;
+    return line;
+  }).filter((line) => {
+    const m = line.textContent.trim().match(/^name\s*:\s*(.+)$/i);
+    if (m && !line.querySelector('a')) { name = slug(m[1]); return false; }
+    return true;
+  });
+  return { lines, name };
+}
+
+/**
  * Builds a choice group: its label, then one box per choice (radio buttons), three to a row. The
  * choices are the lines of column 3: text, or a link (e.g. a language and its site). The current
  * one is selected: for a group named Currency the visitor's currency, for links the one matching
  * this page's first path segment, else a choice marked "(selected)", else the first.
- * @param {{label: string, cell: Element, id: string}} group
+ * @param {{label: string, lines: HTMLElement[], id: string, name: string}} group
  * @returns {HTMLElement}
  */
-function buildChoice({ label, cell, id }) {
-  const name = slug(label);
+function buildChoice({
+  label, lines, id, name,
+}) {
   const fieldset = document.createElement('fieldset');
   fieldset.className = 'form-field form-field-choice';
-  // a modal page can open on one group (e.g. /modals/language-currency#currency)
+  // a modal page can open on one group (e.g. /en-uk/modals/language-currency#currency)
   fieldset.dataset.modalView = name;
   fieldset.dataset.modalViewTitle = label;
   const legend = document.createElement('legend');
@@ -112,12 +136,6 @@ function buildChoice({ label, cell, id }) {
   legend.textContent = label;
   const list = document.createElement('ul');
   list.className = 'form-choice-list';
-  // one choice per paragraph or line break
-  const lines = (cell?.innerHTML || '').split(/<br\s*\/?>|<\/p>/i).map((html) => {
-    const line = document.createElement('div');
-    line.innerHTML = html;
-    return line;
-  });
   const items = lines.map((line) => {
     const link = line.querySelector('a[href]');
     const raw = line.textContent.trim();
@@ -188,6 +206,15 @@ function setError(input, message) {
  */
 export default function decorate(block) {
   formCount += 1;
+  const used = new Set();
+  // a field's name: its `name:` option, else from its label, else numbered; unique in the form
+  const nameFor = (explicit, label) => {
+    const base = explicit || slug(label) || 'field';
+    let name = base;
+    for (let n = 2; used.has(name); n += 1) name = `${base}-${n}`;
+    used.add(name);
+    return name;
+  };
   const form = document.createElement('form');
   form.className = 'form-form';
   form.noValidate = true;
@@ -207,7 +234,12 @@ export default function decorate(block) {
     const label = cells[0].textContent.trim();
     const type = (cells[1]?.textContent.trim() || 'text').toLowerCase();
     if (type === 'choice') {
-      if (label) form.append(buildChoice({ label, cell: cells[2], id: `form-${formCount}-${slug(label)}` }));
+      if (!label) return;
+      const { lines, name: explicit } = readChoiceCell(cells[2]);
+      const name = nameFor(explicit, label);
+      form.append(buildChoice({
+        label, lines, name, id: `form-${formCount}-${name}`,
+      }));
       return;
     }
     const options = readOptions(cells[2]);
@@ -227,11 +259,13 @@ export default function decorate(block) {
       return;
     }
     if (!label) return;
+    const name = nameFor(options.has('name') ? slug(options.get('name')) : '', label);
     form.append(buildField({
       label,
       type: FIELD_TYPES.includes(type) ? type : 'text',
       options,
-      id: `form-${formCount}-${slug(label)}`,
+      name,
+      id: `form-${formCount}-${name}`,
     }));
   });
 

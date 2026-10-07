@@ -1,4 +1,5 @@
 import { loadCSS } from './aem.js';
+import { translate } from './i18n.js';
 
 const modals = new Map();
 let count = 0;
@@ -40,7 +41,7 @@ function buildModal(key, content) {
   const close = document.createElement('button');
   close.type = 'button';
   close.className = 'modal-close';
-  close.setAttribute('aria-label', 'Close');
+  close.setAttribute('aria-label', translate('close'));
   close.addEventListener('click', () => dialog.close());
   header.append(close);
 
