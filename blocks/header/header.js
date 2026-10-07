@@ -5,6 +5,7 @@ import {
   modalNameFromHref, openNamedModal, whenModal,
 } from '../../scripts/modal.js';
 import { CURRENCY_EVENT, getCurrency } from '../../scripts/currency.js';
+import { getLoggedInUser, initialsFrom } from '../../scripts/logged-in-user.js';
 
 // desktop layout from 1200px, as the source (webslidemenu breakpoint)
 const desktop = window.matchMedia('(width >= 1200px)');
@@ -385,6 +386,7 @@ function buildMenuFooter(section) {
 async function toggleCartDropdown(trigger, header) {
   const existing = header.querySelector('.header-cart-dropdown');
   if (existing) { existing.remove(); trigger.setAttribute('aria-expanded', 'false'); return true; }
+  header.closeAccount?.();
   const section = await whenModal('cart');
   if (!section) return false;
   const dropdown = el('div', 'header-cart-dropdown');
@@ -424,6 +426,98 @@ function wireAction(link, header) {
     if (section) openNamedModal(name, link);
     else document.dispatchEvent(new CustomEvent('header:action', { detail: { name, trigger: link } }));
   });
+}
+
+/**
+ * The logged-in user's badge and account menu, in place of the Log In icon: the initials in a
+ * circle; on desktop a dropdown under it, on tablet and mobile a "View Profile" panel (the source
+ * #mobileProfileNavModal). The menu items are the links of the nav's Account menu section;
+ * `#name` items (e.g. `#logout`) fire `header:action`.
+ * @param {{fullName: string, initials: string, section: HTMLElement|null, header: HTMLElement}} o
+ * @returns {{wrapper: HTMLElement, panel: HTMLDialogElement|null}}
+ */
+function buildAccount({
+  fullName, initials, section, header,
+}) {
+  const wrapper = el('span', 'header-account');
+  const button = el('button', 'header-utility is-account');
+  button.type = 'button';
+  button.setAttribute('aria-label', `${fullName}, account`);
+  const badge = el('span', 'header-initials');
+  badge.setAttribute('aria-hidden', 'true');
+  badge.textContent = initials;
+  button.append(badge);
+  wrapper.append(button);
+
+  const links = [...(section?.querySelectorAll('li > a[href]') || [])];
+  if (!links.length) return { wrapper, panel: null };
+  const title = section.querySelector('h1, h2, h3, h4, h5, h6')?.textContent.trim() || 'Account';
+  button.setAttribute('aria-expanded', 'false');
+
+  // desktop: the dropdown
+  const dropdown = el('ul', 'header-account-dropdown');
+  dropdown.id = nextId('account');
+  dropdown.hidden = true;
+  // tablet and mobile: the panel, a modal dialog (focus kept inside, Esc closes)
+  const panel = el('dialog', 'header-account-panel');
+  panel.id = nextId('account-panel');
+  panel.setAttribute('aria-label', title);
+  const toolbar = el('div', 'header-account-toolbar');
+  const back = el('button', 'header-account-back');
+  back.type = 'button';
+  back.append(chromeIcon('arrow-left'), Object.assign(el('span'), { textContent: title }));
+  const close = el('button', 'header-account-close');
+  close.type = 'button';
+  close.setAttribute('aria-label', 'Close');
+  toolbar.append(back, close);
+  const list = el('ul', 'header-account-list');
+  panel.append(toolbar, list);
+
+  const closeAccount = () => {
+    dropdown.hidden = true;
+    button.setAttribute('aria-expanded', 'false');
+    if (panel.open) panel.close();
+  };
+  links.forEach((authored) => {
+    [[dropdown, false], [list, true]].forEach(([target, inPanel]) => {
+      let link = el('a', inPanel ? 'header-account-link' : 'header-account-dropdown-link');
+      link.href = authored.getAttribute('href');
+      link.textContent = authored.textContent.trim();
+      // pages get an arrow in the panel; actions (e.g. Logout) don't, as the source
+      if (inPanel && !link.getAttribute('href').startsWith('#')) link.append(chromeIcon('arrow-right'));
+      link = applyButtonAction(link);
+      link.addEventListener('click', closeAccount);
+      wireAction(link, header);
+      const li = el('li');
+      li.append(link);
+      target.append(li);
+    });
+  });
+  wrapper.append(dropdown);
+
+  back.addEventListener('click', closeAccount);
+  close.addEventListener('click', closeAccount);
+  // a click on the backdrop lands on the dialog itself
+  panel.addEventListener('click', (e) => { if (e.target === panel) closeAccount(); });
+  panel.addEventListener('close', () => {
+    button.setAttribute('aria-expanded', 'false');
+    button.focus();
+  });
+  button.addEventListener('click', () => {
+    const open = button.getAttribute('aria-expanded') === 'true';
+    header.closeDropdowns();
+    if (open) return;
+    if (desktop.matches) {
+      button.setAttribute('aria-controls', dropdown.id);
+      dropdown.hidden = false;
+    } else {
+      button.setAttribute('aria-controls', panel.id);
+      panel.showModal();
+    }
+    button.setAttribute('aria-expanded', 'true');
+  });
+  header.closeAccount = closeAccount;
+  return { wrapper, panel };
 }
 
 /**
@@ -489,6 +583,7 @@ export default async function decorate(block) {
   const navSection = pick('menu');
   const actionsSection = pick('actions');
   const footerSection = pick('menu-footer');
+  const accountSection = hasNames ? named('account-menu') : null;
 
   const bar = el('div', 'header-bar');
   const inner = el('div', 'header-inner');
@@ -514,9 +609,20 @@ export default async function decorate(block) {
   const pageOf = (href) => href.split('#')[0] || href;
   const footerLinks = [...(menuFooter?.querySelectorAll('.header-menu-footer-link') || [])];
   const footerHrefs = new Set(footerLinks.map((l) => pageOf(hrefOf(l))));
+  // logged in: the user icon action becomes the initials badge with the account menu
+  const user = getLoggedInUser();
+  const initials = user ? initialsFrom(user.fullName) : '';
+  let account = null;
   if (utilities.length) {
     const wrap = el('div', 'header-utilities');
     utilities.forEach((u) => {
+      if (initials && !account && u.querySelector('.icon-user')) {
+        account = buildAccount({
+          fullName: user.fullName, initials, section: accountSection, header,
+        });
+        wrap.append(account.wrapper);
+        return;
+      }
       if (footerHrefs.has(pageOf(hrefOf(u)))) u.classList.add('is-in-menu-footer');
       wrap.append(u);
     });
@@ -551,7 +657,7 @@ export default async function decorate(block) {
   inner.append(brand, nav, actions, toggle);
   if (promo) bar.append(promo);
   bar.append(inner);
-  block.append(bar, ...drills);
+  block.append(bar, ...drills, ...(account?.panel ? [account.panel] : []));
   maskIcons(block);
 
   // --- behaviour -----------------------------------------------------------------------------
@@ -563,6 +669,7 @@ export default async function decorate(block) {
     });
     if (!except) {
       header.querySelector('.header-cart-dropdown')?.remove();
+      header.closeAccount?.();
       header.querySelectorAll('.header-utility[aria-expanded="true"]').forEach((u) => u.setAttribute('aria-expanded', 'false'));
     }
   };
@@ -584,7 +691,7 @@ export default async function decorate(block) {
   };
   toggle.addEventListener('click', () => setMenu(!header.classList.contains('is-menu-open')));
 
-  [...buttons, ...utilities, ...(promo ? [promo.firstElementChild] : []), ...(menuFooter?.querySelectorAll('.header-menu-footer-link') || [])]
+  [...buttons, ...utilities.filter((u) => u.isConnected), ...(promo ? [promo.firstElementChild] : []), ...(menuFooter?.querySelectorAll('.header-menu-footer-link') || [])]
     .forEach((link) => wireAction(link, header));
 
   document.addEventListener('keydown', (e) => {

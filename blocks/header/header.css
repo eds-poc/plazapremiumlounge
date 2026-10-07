@@ -575,6 +575,135 @@ header .header .header-badge {
   color: var(--color-text-inverse);
 }
 
+/* --- logged-in user: the initials badge and the account menu ------------------------------- */
+
+/* the badge (source .loggedIn-user): a 20px circle with 11px initials; dark navy with white
+   initials on the white bar */
+header .header-account {
+  position: relative;
+  display: inline-flex;
+}
+
+header .header-initials {
+  /* one-off: the source mobile badge colour */
+  --header-initials-bg: #001c2a;
+
+  box-sizing: border-box;
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-circle);
+  background-color: var(--header-initials-bg);
+  color: var(--color-text-inverse);
+  font-family: var(--font-family-primary);
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.9;
+  text-align: center;
+}
+
+/* the desktop dropdown is only used from 1200px */
+header .header-account-dropdown {
+  display: none;
+}
+
+/* tablet and mobile: the "View Profile" panel (source #mobileProfileNavModal), full screen on
+   phones, a 500px rounded box over the dimmed page from 576px */
+header .header-account-panel {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: 0 0 50px;
+  overflow: auto;
+  border: 0;
+  border-radius: 0;
+  background-color: var(--header-maroon);
+  color: var(--color-text-inverse);
+  font-family: var(--font-family-primary);
+}
+
+header .header-account-panel::backdrop {
+  background-color: rgb(0 0 0 / 50%);
+}
+
+header .header-account-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 25px;
+}
+
+header .header-account-back {
+  position: relative;
+  top: 10px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-inverse);
+  font-family: inherit;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+header .header-account-back .header-chrome-icon {
+  margin-right: var(--spacing-2);
+}
+
+/* the close cross (Bootstrap btn-close, inverted): a 16px cross in a 24px button */
+header .header-account-close {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  margin: var(--spacing-4) -8px 0 auto;
+  padding: 0;
+  border: 0;
+  background-color: var(--color-text-inverse);
+  cursor: pointer;
+  mask: url('../../icons/close.svg') center / 26px no-repeat;
+}
+
+header .header-account-list {
+  margin: 0;
+  padding: 16px;
+  list-style: none;
+}
+
+header .header-account-panel .header-account-list > li {
+  position: relative;
+  margin-bottom: var(--spacing-6);
+}
+
+header .header-account-link:is(:any-link, button) {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-inverse);
+  font-family: inherit;
+  font-size: 24px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.5;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+header .header-account-link .header-chrome-icon {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  font-size: 1em;
+  translate: 0 -50%;
+}
+
 /* --- cart dropdown (desktop) ------------------------------------------------------------------- */
 header .header-cart-dropdown {
   position: absolute;
@@ -634,6 +763,18 @@ header .header-cart-dropdown p {
   }
 }
 
+/* breakpoint-exception: source (Bootstrap) modal breakpoint, 576px */
+@media (width >= 576px) {
+  header .header-account-panel {
+    width: 500px;
+    max-width: calc(100% - 16px);
+    height: fit-content;
+    max-height: calc(100% - 56px);
+    margin: 28px auto auto;
+    border-radius: 22px;
+  }
+}
+
 @media (width >= 768px) {
   header .header-promo {
     display: none;
@@ -681,7 +822,7 @@ header .header-cart-dropdown p {
 
   /* maroon on hover, after scrolling, or while a menu is open (keyboard) */
   header .header-bar:hover,
-  header .header-bar:focus-within,
+  header .header-bar:has(:focus-visible),
   header.is-scrolled .header-bar {
     background-color: var(--header-maroon);
   }
@@ -747,7 +888,7 @@ header .header-cart-dropdown p {
   header.is-transparent .header .header-logo img,
   header.is-scrolled .header .header-logo img,
   header .header-bar:hover .header-logo img,
-  header .header-bar:focus-within .header-logo img {
+  header .header-bar:has(:focus-visible) .header-logo img {
     filter: invert(1) grayscale(1) brightness(100);
   }
 
@@ -797,7 +938,7 @@ header .header-cart-dropdown p {
   header.is-transparent a.header-link:any-link,
   header.is-scrolled a.header-link:any-link,
   header .header-bar:hover .header-link,
-  header .header-bar:focus-within .header-link {
+  header .header-bar:has(:focus-visible) .header-link {
     color: var(--color-text-inverse);
   }
 
@@ -1011,7 +1152,7 @@ header .header-cart-dropdown p {
   /* white with maroon text on the maroon bar */
   header.is-scrolled .header-button:is(:any-link, button),
   header .header-bar:hover .header-button:is(:any-link, button),
-  header .header-bar:focus-within .header-button:is(:any-link, button) {
+  header .header-bar:has(:focus-visible) .header-button:is(:any-link, button) {
     background-color: var(--color-background);
     color: var(--header-maroon);
   }
@@ -1046,6 +1187,97 @@ header .header-cart-dropdown p {
     vertical-align: top;
   }
 
+  /* logged in: the badge sits like the icons; white with maroon initials on the maroon bar, and
+     on the white bar what the source's colour filter makes of it (black, light grey initials) */
+  header .header-account {
+    display: inline-block;
+    vertical-align: top;
+  }
+
+  header .header-account + .header-utility {
+    margin-left: 4.6px;
+  }
+
+  header .header-initials {
+    /* one-offs: the source's white-bar filter (invert, greyscale) applied to the badge */
+    --header-initials-bg: #000;
+    --header-initials-color: #e0e0e0;
+
+    display: inline-block;
+    margin-top: 2px;
+    color: var(--header-initials-color);
+    vertical-align: top;
+  }
+
+  header.is-transparent .header-initials,
+  header.is-scrolled .header-initials,
+  header .header-bar:hover .header-initials,
+  header .header-bar:has(:focus-visible) .header-initials {
+    --header-initials-bg: var(--color-background);
+    --header-initials-color: var(--header-maroon);
+  }
+
+  /* the account dropdown (source .dropdown-menu): under the badge, 200px wide, centred items
+     with lines between them */
+  header .header-account-dropdown {
+    /* one-offs: the source dropdown border, item lines and text */
+    --header-account-border: #666;
+    --header-account-line: #ccc;
+    --header-account-text: #1b1b1b;
+    --header-account-radius: 10px;
+
+    position: absolute;
+    top: calc(100% + 1px);
+    left: var(--spacing-2);
+    z-index: var(--z-megamenu);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+    margin: 0;
+    padding: 2px 0;
+    border: 1px solid var(--header-account-border);
+    border-radius: var(--header-account-radius);
+    background-color: var(--color-background);
+    list-style: none;
+    text-align: center;
+  }
+
+  header .header-account-dropdown[hidden] {
+    display: none;
+  }
+
+  header .header-account-dropdown li {
+    margin: var(--spacing-2);
+  }
+
+  header .header-account-dropdown li + li {
+    border-top: 1px solid var(--header-account-line);
+  }
+
+  header .header-account-dropdown-link:is(:any-link, button) {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    padding: 4px 16px;
+    border: 0;
+    background: none;
+    color: var(--header-account-text);
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-regular);
+    line-height: 1.35;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: opacity var(--duration-normal) var(--ease-standard);
+  }
+
+  header .header-account-dropdown-link:hover {
+    opacity: 0.8;
+  }
+
   header .header-utility:has(.icon-globe) {
     font-size: var(--font-size-lg);
   }
@@ -1053,7 +1285,7 @@ header .header-cart-dropdown p {
   header.is-transparent .header-utility:is(:any-link, button),
   header.is-scrolled .header-utility:is(:any-link, button),
   header .header-bar:hover .header-utility:is(:any-link, button),
-  header .header-bar:focus-within .header-utility:is(:any-link, button) {
+  header .header-bar:has(:focus-visible) .header-utility:is(:any-link, button) {
     color: var(--color-text-inverse);
   }
 
