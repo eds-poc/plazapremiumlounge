@@ -33,16 +33,18 @@ names, the sections are read in this order:
    - **Bold** links are buttons: `**[Your Destination Before Departure](/en-uk/your-destination-before-departure)**`,
      `**[Book Now](#book-now)**`. With two or more, the first is the phone bar above the header.
    - A link starting with an icon is an icon action: `[:user: Log In](/modals/login)`,
-     `[:globe: Language](#language)`, `[:cart: Cart](#cart)`. The text is the screen-reader label
+     `[:globe: Language](/modals/language-currency)`, `[:cart: Cart](#cart)`. The text is the screen-reader label
      (and is hidden). Icons come from the icon library, then the code icons; they take the header's
      text colour.
 4. **Menu footer (mobile and tablet):** the links at the bottom of the open menu, e.g.
-   `[:globe: English](#language)` and `[USD](#currency)`. An icon action that links to the same
-   place (Language) is hidden from the mobile bar.
+   `[:globe: English](/modals/language-currency#language)` and
+   `[USD](/modals/language-currency#currency)`. A currency link written as a code shows the
+   visitor's currency (the one they applied, else the one for their location). An icon action that
+   links to the same page (Language) is hidden from the mobile bar.
 5. **Modals (any number, anywhere):** sections with Section Metadata `modal` = a name, e.g.
-   `language`, `currency`, `cart`, `book-now` (plus a `name` and `description` for authors). They
-   are not shown in the header. Modals used across the site (e.g. Log In) are pages in the
-   `/modals/` folder instead, authored once.
+   `cart`, `book-now` (plus a `name` and `description` for authors). They are not shown in the
+   header. Modals used across the site (Log In, Language and currency) are pages in the `/modals/`
+   folder instead, authored once.
 
 ## What links do
 

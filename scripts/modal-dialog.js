@@ -9,13 +9,15 @@ let count = 0;
  * the backdrop. A modal with a form keeps open on a backdrop click (as the source's static login
  * modal), so typed values aren't lost; it gives a small bounce instead.
  * @param {string} key Unique key for this modal, so it is built once and reused
- * @param {Node[]} content Nodes to show in the modal body
+ * @param {Node[]} content Nodes to show in the modal body; `content.styles` are extra classes
+ *   for the dialog (a modal page's section style, e.g. `square`)
  * @returns {HTMLDialogElement}
  */
 function buildModal(key, content) {
   count += 1;
   const dialog = document.createElement('dialog');
   dialog.className = 'modal';
+  if (content.styles) dialog.classList.add(...content.styles);
   dialog.id = `modal-${count}`;
 
   const panel = document.createElement('div');

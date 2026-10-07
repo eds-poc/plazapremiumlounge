@@ -4,6 +4,8 @@
  * values and sends nothing, so a later script can handle it.
  */
 
+import { CURRENCY_EVENT, getCurrency, setCurrency } from '../../scripts/currency.js';
+
 const FIELD_TYPES = ['text', 'email', 'password', 'tel', 'number', 'checkbox'];
 // autofill hints by type, or by label for name fields
 const AUTOCOMPLETE = { email: 'email', password: 'current-password', tel: 'tel' };
@@ -78,6 +80,84 @@ function buildField({
 }
 
 /**
+ * The first path segment of a link ("/en-uk/about" → "en-uk"), to find the current language.
+ * @param {string} href
+ * @returns {string}
+ */
+function firstSegment(href) {
+  try {
+    return new URL(href, window.location.href).pathname.split('/').filter(Boolean)[0] || '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Builds a choice group: its label, then one box per choice (radio buttons), three to a row. The
+ * choices are the lines of column 3: text, or a link (e.g. a language and its site). The current
+ * one is selected: for a group named Currency the visitor's currency, for links the one matching
+ * this page's first path segment, else a choice marked "(selected)", else the first.
+ * @param {{label: string, cell: Element, id: string}} group
+ * @returns {HTMLElement}
+ */
+function buildChoice({ label, cell, id }) {
+  const name = slug(label);
+  const fieldset = document.createElement('fieldset');
+  fieldset.className = 'form-field form-field-choice';
+  // a modal page can open on one group (e.g. /modals/language-currency#currency)
+  fieldset.dataset.modalView = name;
+  fieldset.dataset.modalViewTitle = label;
+  const legend = document.createElement('legend');
+  legend.className = 'form-choice-label';
+  legend.textContent = label;
+  const list = document.createElement('ul');
+  list.className = 'form-choice-list';
+  // one choice per paragraph or line break
+  const lines = (cell?.innerHTML || '').split(/<br\s*\/?>|<\/p>/i).map((html) => {
+    const line = document.createElement('div');
+    line.innerHTML = html;
+    return line;
+  });
+  const items = lines.map((line) => {
+    const link = line.querySelector('a[href]');
+    const raw = line.textContent.trim();
+    return {
+      text: raw.replace(/\s*\(selected\)\s*$/i, ''),
+      marked: /\(selected\)\s*$/i.test(raw),
+      href: link?.getAttribute('href') || '',
+    };
+  }).filter((item) => item.text);
+
+  const current = name === 'currency' ? getCurrency() : '';
+  const segment = firstSegment(window.location.href);
+  const selected = items.find((item) => current && item.text.toUpperCase() === current)
+    || items.find((item) => item.href && segment && firstSegment(item.href) === segment)
+    || items.find((item) => item.marked)
+    || items[0];
+
+  items.forEach((item, i) => {
+    const li = document.createElement('li');
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.className = 'form-choice-input';
+    input.name = name;
+    input.id = `${id}-${i}`;
+    input.value = item.href || item.text;
+    input.checked = item === selected;
+    if (item.href) input.dataset.href = item.href;
+    const box = document.createElement('label');
+    box.className = 'form-choice-box';
+    box.htmlFor = input.id;
+    box.textContent = item.text;
+    box.title = item.text;
+    li.append(input, box);
+    list.append(li);
+  });
+  fieldset.append(legend, list);
+  return fieldset;
+}
+
+/**
  * Shows or clears a field's error message.
  * @param {HTMLInputElement} input
  * @param {string} message Empty to clear
@@ -126,6 +206,10 @@ export default function decorate(block) {
     }
     const label = cells[0].textContent.trim();
     const type = (cells[1]?.textContent.trim() || 'text').toLowerCase();
+    if (type === 'choice') {
+      if (label) form.append(buildChoice({ label, cell: cells[2], id: `form-${formCount}-${slug(label)}` }));
+      return;
+    }
     const options = readOptions(cells[2]);
     if (type === 'submit') {
       const wrap = document.createElement('div');
@@ -134,7 +218,8 @@ export default function decorate(block) {
       wrap.className = `form-submit${prev && prev.classList.contains('form-field') ? ' is-after-field' : ''}`;
       const button = document.createElement('button');
       button.type = 'submit';
-      button.className = `button ${options.has('outline') ? 'secondary' : 'primary'}`;
+      button.className = `button ${options.has('outline') ? 'secondary' : 'primary'}${options.has('large') ? ' large' : ''}`;
+      if (options.has('close')) form.dataset.closeOnSubmit = 'true';
       button.textContent = label || 'Submit';
       wrap.append(button);
       form.append(wrap);
@@ -149,6 +234,15 @@ export default function decorate(block) {
       id: `form-${formCount}-${slug(label)}`,
     }));
   });
+
+  // a currency applied elsewhere (e.g. another view of the same modal) is selected here too
+  if (form.querySelector('.form-choice-input[name="currency"]')) {
+    document.addEventListener(CURRENCY_EVENT, (e) => {
+      form.querySelectorAll('.form-choice-input[name="currency"]').forEach((input) => {
+        input.checked = input.value.toUpperCase() === e.detail.currency;
+      });
+    });
+  }
 
   form.addEventListener('input', (e) => {
     if (e.target.matches('[aria-invalid="true"]') && e.target.value.trim()) setError(e.target, '');
@@ -166,7 +260,10 @@ export default function decorate(block) {
     }
     // no submission yet: other scripts can listen for this event and send the values
     const values = Object.fromEntries(new FormData(form));
+    // a currency choice is remembered for the visitor (the header shows it)
+    if (values.currency) setCurrency(values.currency);
     form.dispatchEvent(new CustomEvent('form:submit', { bubbles: true, detail: { values, form } }));
+    if (form.dataset.closeOnSubmit) form.closest('dialog')?.close();
   });
 
   block.replaceChildren(form);

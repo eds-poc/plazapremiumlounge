@@ -8,6 +8,13 @@
   /* one-off: the source (Bootstrap g-3) 16px gap between rows */
   --form-gap: 16px;
 
+  /* one-off: the source language and currency choices and Apply button */
+  --form-choice-selected: #711b45;
+  --form-choice-text: #666;
+  --form-choice-line: #eee;
+  --form-apply-hover-bg: #d4d4d4;
+  --form-apply-hover-border: #8c8c8c;
+
   display: flex;
   flex-direction: column;
   gap: var(--form-gap) 0;
@@ -114,7 +121,8 @@
   margin-top: var(--spacing-7);
 }
 
-.form .form-submit:last-child {
+/* room for a result message under the button, in forms that stay open after submitting */
+.form .form-form:not([data-close-on-submit]) > .form-submit:last-child {
   padding-bottom: var(--form-gap);
 }
 
@@ -142,6 +150,113 @@
 .form .form-footer a:hover {
   color: var(--color-brand-primary);
   text-decoration: underline;
+}
+
+/* choice groups (e.g. Language, Currency): a label over a line, then boxes three to a row; the
+   selected box (and the one pointed at) is filled maroon. Groups are 30px apart, as the source */
+.form .form-field-choice {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.form .form-field-choice + .form-field-choice,
+.form .form-field-choice + .form-submit.is-after-field {
+  margin-top: calc(30px - var(--form-gap));
+}
+
+.form .form-choice-label {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0 0 var(--spacing-4);
+  padding: 0;
+  border-bottom: 1px solid var(--form-choice-line);
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+}
+
+.form .form-choice-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 calc(-1 * var(--spacing-2));
+  padding: 0;
+  list-style: none;
+}
+
+.form .form-choice-list li {
+  box-sizing: border-box;
+  width: 33.33%;
+  padding: 0 var(--spacing-2);
+}
+
+/* a modal opened on one group (e.g. Currency) shows its label as the modal title instead */
+.form .is-modal-view .form-choice-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* the radio stays focusable for the keyboard, its box shows the state */
+.form .form-choice-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+}
+
+.form .form-choice-box {
+  display: block;
+  margin: 0 0 var(--spacing-4);
+  overflow: hidden;
+  padding: var(--spacing-2) var(--spacing-7);
+  border: 1px solid var(--color-text);
+  border-radius: 3px;
+  background-color: var(--color-background);
+  color: var(--form-choice-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-light);
+  line-height: 1.5;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.form .form-choice-box:hover,
+.form .form-choice-input:checked + .form-choice-box {
+  background-color: var(--form-choice-selected);
+  color: var(--color-text-inverse);
+}
+
+.form .form-choice-input:focus-visible + .form-choice-box {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+}
+
+/* the large button (e.g. Apply): 42px, light uppercase text, grey on hover */
+.form .form-submit .button.large {
+  min-width: 0;
+  padding: var(--spacing-3) var(--spacing-6);
+  border-color: transparent;
+  background-color: var(--form-choice-selected);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-light);
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.form .form-submit .button.large:hover {
+  border-color: var(--form-apply-hover-border);
+  background-color: var(--form-apply-hover-bg);
+  color: var(--color-text);
 }
 
 @media (prefers-reduced-motion: reduce) {

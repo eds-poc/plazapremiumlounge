@@ -139,3 +139,14 @@ dialog.modal.is-bouncing .modal-content {
     font-size: var(--font-size-xl);
   }
 }
+
+/* square (modal page Section Metadata style): square corners and a 21px title at every width,
+   as the source Language and currency modal */
+dialog.modal.square .modal-content {
+  border-radius: 0;
+}
+
+/* one-off: the source (Bootstrap h4) 21px title */
+dialog.modal.square .modal-header .modal-title {
+  font-size: 21px;
+}
