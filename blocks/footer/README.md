@@ -29,12 +29,13 @@ Each top-level bullet is a column. Its first line is the column title, and a nes
 - **A cell with a heading** is a brand group: the heading is the caption, followed by one or more logos.
 - **To link a logo**, link the image itself, or put the URL on its own line directly under the image.
 - Give every logo **alt text** (the brand name).
+- **Order matters**, as on the source: the groups are laid out by position (the 1st and 2nd share the first row, 60% and 35%; the 3rd, 4th and 5th share the second, 35/35/25%), and each position has the source's logo sizes. A 6th or later group gets the 35% width and the default logo size.
 
 ### 3. Legal: one paragraph
 The copyright text, with inline links. These links open in a new tab.
 
 ## Behaviour
-- **Desktop (768px and up):** 4 columns, then the brand band (group logo, then captioned groups with dividers), then the legal row.
-- **Mobile:** the column titles become accordions (several can be open at once), and the brand band stacks.
+- **Desktop (768px and up):** 4 columns, then the brand band, then the legal row. From 992px the brand band is full width: the group logo at the left, then the captioned groups in two rows with dividers. From 768px to 991px the group logo sits above the groups, without dividers.
+- **Mobile:** the column titles become accordions (several can be open at once), and the brand band stacks, one group per row with an underlined caption (320px wide from 576px, 220px below).
 - **Hover:** links and logos fade to 80% opacity.
 - **Adding or removing** a column, brand group or logo only needs a content edit, never code.

@@ -175,8 +175,12 @@
 
 .footer .footer-brand-lead {
   display: flex;
-  justify-content: center;
   align-items: center;
+}
+
+/* centred, or from the left when wider than the band (as the source on small phones) */
+.footer .footer-brand-lead > * {
+  margin-inline: auto;
 }
 
 .footer .footer-brand-lead img {
@@ -189,8 +193,14 @@
 .footer .footer-brand-groups {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-8);
+}
+
+.footer .footer-brand-group {
   margin-bottom: var(--spacing-7);
+}
+
+.footer .footer-brand-group:first-child {
+  margin-bottom: var(--spacing-8);
 }
 
 .footer .footer-brand-caption {
@@ -205,8 +215,13 @@
 .footer .footer-brand-logos {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
+  gap: var(--spacing-6);
+}
+
+.footer .footer-brand-group:first-child .footer-brand-logos {
+  justify-content: space-evenly;
 }
 
 .footer .footer-brand-logos a:any-link,
@@ -217,9 +232,70 @@
 .footer .footer-brand-logos img {
   display: block;
   width: auto;
-  max-width: 85px;
+  max-width: var(--logo-max-width, 85px);
   height: auto;
-  max-height: 57px;
+  max-height: var(--logo-max-height, 80px);
+}
+
+/* logo sizes per group, as the source sizes its five groups (lounge, passenger services, hotel,
+   dining, digital) */
+.footer .footer-brand-group:nth-child(2) {
+  --logo-max-width: 75px;
+  --logo-max-height: 90px;
+}
+
+.footer .footer-brand-group:nth-child(3) {
+  --logo-max-width: 80px;
+  --logo-max-height: 60px;
+}
+
+.footer .footer-brand-group:nth-child(4) {
+  --logo-max-width: 85px;
+  --logo-max-height: 55px;
+}
+
+.footer .footer-brand-group:nth-child(5) {
+  --logo-max-width: 125px;
+}
+
+@media (width < 341px) {
+  .footer .footer-brand-logos {
+    gap: var(--spacing-2);
+  }
+
+  .footer .footer-brand-group:first-child {
+    --logo-max-width: 80px;
+  }
+
+  .footer .footer-brand-group:nth-child(2) {
+    --logo-max-width: 65px;
+  }
+
+  .footer .footer-brand-group:nth-child(3) {
+    --logo-max-height: 55px;
+  }
+
+  .footer .footer-brand-group:nth-child(5) {
+    --logo-max-width: 105px;
+  }
+}
+
+@media (width >=576px) {
+  .footer .footer-brand-family {
+    max-width: 320px;
+  }
+
+  .footer .footer-brand-group:first-child {
+    --logo-max-width: 140px;
+  }
+
+  .footer .footer-brand-group:nth-child(2) {
+    --logo-max-width: 115px;
+  }
+
+  .footer .footer-brand-group:nth-child(3) {
+    --logo-max-width: 145px;
+  }
 }
 
 /* band 3: legal */
@@ -315,8 +391,69 @@
   }
 
   .footer .footer-brand-family {
+    max-width: none;
+    padding: var(--spacing-7) 0 0;
+  }
+
+  .footer .footer-brand-groups {
+    flex-flow: row wrap;
+  }
+
+  .footer .footer-brand-group,
+  .footer .footer-brand-group:first-child {
+    --logo-max-width: 115px;
+    --logo-max-height: 80px;
+
+    box-sizing: border-box;
+    flex: 1 1 35%;
+    margin-bottom: 0;
+  }
+
+  .footer .footer-brand-group:first-child {
+    flex-basis: 60%;
+  }
+
+  .footer .footer-brand-group:nth-child(2),
+  .footer .footer-brand-group:nth-child(3) {
+    --logo-max-width: 115px;
+    --logo-max-height: 90px;
+  }
+
+  .footer .footer-brand-group:nth-child(4) {
+    --logo-max-width: 115px;
+    --logo-max-height: 60px;
+  }
+
+  .footer .footer-brand-group:nth-child(5) {
+    --logo-max-width: 115px;
+    --logo-max-height: 80px;
+
+    flex-basis: 25%;
+  }
+
+  .footer .footer-brand-caption {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: 0;
+    font-size: var(--font-size-xs);
+  }
+
+  .footer .footer-brand-logos,
+  .footer .footer-brand-group:first-child .footer-brand-logos {
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    gap: 0;
+    margin-bottom: var(--spacing-8);
+  }
+
+  .footer .footer-legal {
+    padding-right: var(--container-padding);
+  }
+}
+
+@media (width >=992px) {
+  .footer .footer-brand-family {
     flex-direction: row;
-    max-width: 990px;
     padding: var(--spacing-7) 0;
   }
 
@@ -335,40 +472,51 @@
 
   .footer .footer-brand-groups {
     flex: 1 1 auto;
-    flex-flow: row wrap;
-    gap: 0;
     overflow: hidden;
   }
 
-  .footer .footer-brand-group {
-    box-sizing: border-box;
-    flex: 1 1 calc(var(--logo-count, 1) * 150px);
-    min-width: min-content;
-    min-height: 84px;
+  /* a divider before each group; the first in each row is hidden past the row's left edge */
+  .footer .footer-brand-group,
+  .footer .footer-brand-group:first-child {
+    --logo-max-width: 180px;
+    --logo-max-height: 70px;
+
     margin-left: -1px;
     padding: 0 var(--spacing-4) 0 var(--spacing-6);
     border-left: 1px solid var(--color-text-inverse);
   }
 
-  .footer .footer-brand-caption {
+  .footer .footer-brand-group:nth-child(2) {
+    --logo-max-width: 105px;
+    --logo-max-height: 70px;
+  }
+
+  .footer .footer-brand-group:nth-child(3),
+  .footer .footer-brand-group:nth-child(4) {
+    --logo-max-width: 180px;
+    --logo-max-height: 70px;
+  }
+
+  .footer .footer-brand-group:nth-child(5) {
+    --logo-max-width: 130px;
+    --logo-max-height: 70px;
+  }
+
+  .footer .footer-brand-logos,
+  .footer .footer-brand-group:first-child .footer-brand-logos {
     margin-bottom: 0;
-    padding-bottom: 0;
-    border-bottom: 0;
-    font-size: var(--font-size-xs);
-    white-space: nowrap;
   }
 
-  .footer .footer-brand-logos {
-    flex-wrap: nowrap;
-    min-height: 70px;
+  .footer .footer-brand-group:nth-child(4) .footer-brand-logos> :first-child {
+    --logo-max-height: 50px;
   }
 
-  .footer .footer-brand-logos img {
-    max-width: 105px;
-    max-height: 70px;
+  .footer .footer-brand-group:nth-child(4) .footer-brand-logos> :nth-child(2) {
+    --logo-max-width: 100px;
   }
 
-  .footer .footer-legal {
-    padding-right: var(--container-padding);
+  .footer .footer-brand-group:nth-child(5) .footer-brand-logos {
+    justify-content: flex-start;
+    align-items: flex-start;
   }
 }
