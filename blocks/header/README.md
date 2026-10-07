@@ -56,6 +56,21 @@ names, the sections are read in this order:
 - `#name` with no modal of that name fires a `header:action` event on `document`
   (`event.detail.name`, `event.detail.trigger`) for other scripts to handle, e.g. a future cart.
 
+## Logged-in user
+
+When a user is logged in, the user icon action (the link with `:user:`) shows their initials in
+a circle (e.g. "KJ") instead, and clicking it opens the account menu: a dropdown under the badge
+on desktop, a "View Profile" panel on tablet and mobile (full screen on phones).
+
+- **Account menu section** in the nav page (Section Metadata `name` = Account menu): a heading
+  (the panel title, e.g. View Profile) and a bulleted list of links, e.g.
+  `[Profile](/en-uk/membership/update-profile)`, `[Change Password](…)`, `[Manage Booking](…)`,
+  `[Logout](#logout)`. Page links show an arrow in the panel; `#logout` (no modal of that name)
+  fires `header:action` with `name: 'logout'` for the login code.
+- **Not connected to a real login yet:** `scripts/logged-in-user.js` holds a temporary flag
+  (off) and a sample name. Add `?logged-in` to a page address to preview the logged-in header.
+  Logged out, nothing changes and the Account menu section isn't shown.
+
 ## Page options
 
 - **Transparent header:** page metadata `header` = `transparent`. From 1200px the bar sits over
