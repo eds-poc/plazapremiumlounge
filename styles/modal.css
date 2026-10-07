@@ -33,11 +33,13 @@ dialog.modal[open]::backdrop {
   animation: modal-fade-in var(--duration-fast) linear;
 }
 
+/* the translucent border sits over the backdrop, not the white panel (no light ring), as the source */
 dialog.modal .modal-content {
   border: 1px solid rgb(0 0 0 / 17.6%);
   border-radius: var(--radius-lg);
   overflow: hidden;
   background-color: var(--color-background);
+  background-clip: padding-box;
 }
 
 dialog.modal .modal-header {
