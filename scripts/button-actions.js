@@ -5,7 +5,9 @@
  * Modal links (`#name`, `/modals/…`) are opened by the site-wide handler in modal.js, so a modal
  * that registers later (for example from the nav) still opens.
  */
-import { markModalTrigger, modalPageUrl, openPageModal } from './modal.js';
+import {
+  markModalTrigger, modalPageUrl, openPageModal, preloadPageModal,
+} from './modal.js';
 
 const actions = [];
 
@@ -71,9 +73,14 @@ registerButtonAction({
     btn.className = link.className;
     btn.append(...link.childNodes);
     if (link.title) btn.title = link.title;
+    [...link.attributes].filter((a) => a.name.startsWith('aria-')).forEach((a) => btn.setAttribute(a.name, a.value));
     btn.dataset.href = link.getAttribute('href');
     btn.setAttribute('aria-haspopup', 'dialog');
     btn.addEventListener('click', () => openPageModal(url, btn));
+    // load the modal page as soon as it is likely to be opened
+    ['pointerenter', 'focus', 'touchstart'].forEach((type) => {
+      btn.addEventListener(type, () => preloadPageModal(url), { once: true, passive: true });
+    });
     return btn;
   },
 });

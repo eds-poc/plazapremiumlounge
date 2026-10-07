@@ -77,8 +77,18 @@ header .header .icon.is-masked {
   mask: var(--header-icon) center / contain no-repeat;
 }
 
+/* links that open a modal page are buttons: reset them to look like the links */
+header button:is(.header-promo-link, .header-button, .header-utility, .header-dropdown-link, .header-menu-footer-link, .header-mega-link) {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+
 /* --- promo bar (phones): the first button full width above the header ------------------- */
-header .header-promo-link:any-link {
+header .header-promo-link:is(:any-link, button) {
   display: block;
   padding: var(--spacing-4) var(--spacing-6);
   border-bottom: 1px solid transparent;
@@ -148,7 +158,7 @@ header .header-actions {
   margin-left: auto;
 }
 
-header .header-button:any-link {
+header .header-button:is(:any-link, button) {
   box-sizing: border-box;
   display: inline-block;
   min-width: 80px;
@@ -190,7 +200,7 @@ header .header-utilities {
   align-items: center;
 }
 
-header .header-utility:any-link {
+header .header-utility:is(:any-link, button) {
   position: relative;
   display: inline-flex;
   margin: 0 0 0 var(--spacing-3);
@@ -384,7 +394,7 @@ header .header-item.is-open > .header-dropdown {
   display: block;
 }
 
-header .header-dropdown-link:any-link {
+header .header-dropdown-link:is(:any-link, button) {
   display: block;
   padding: var(--spacing-4) 0 var(--spacing-4) 16px;
   color: var(--color-text-inverse);
@@ -415,7 +425,7 @@ header.is-menu-open .header-menu-footer {
   display: flex;
 }
 
-header .header-menu-footer-link:any-link {
+header .header-menu-footer-link:is(:any-link, button) {
   flex: 1 1 50%;
   padding: var(--spacing-6);
   background-color: var(--color-background);
@@ -615,7 +625,7 @@ header .header-cart-dropdown p {
 
 /* breakpoint-exception: source button width and menu-button spacing change at 651px */
 @media (width >= 651px) {
-  header .header-button:any-link {
+  header .header-button:is(:any-link, button) {
     max-width: none;
   }
 
@@ -638,7 +648,7 @@ header .header-cart-dropdown p {
     font-size: var(--font-size-md);
   }
 
-  header .header-menu-footer-link:any-link {
+  header .header-menu-footer-link:is(:any-link, button) {
     line-height: 25px;
   }
 
@@ -825,7 +835,7 @@ header .header-cart-dropdown p {
     width: max-content;
   }
 
-  header .header-dropdown-link:any-link {
+  header .header-dropdown-link:is(:any-link, button) {
     padding: var(--spacing-3) var(--spacing-8);
     line-height: 22px;
   }
@@ -942,7 +952,7 @@ header .header-cart-dropdown p {
     display: inline-block;
   }
 
-  header .header-mega-link:any-link {
+  header .header-mega-link:is(:any-link, button) {
     display: inline-block;
     padding: var(--spacing-3) 0;
     color: var(--color-text-inverse);
@@ -980,7 +990,7 @@ header .header-cart-dropdown p {
     padding: var(--spacing-7) 0;
   }
 
-  header .header-button:any-link,
+  header .header-button:is(:any-link, button),
   header .header-button.is-first {
     display: inline-block;
     min-width: 120px;
@@ -999,9 +1009,9 @@ header .header-cart-dropdown p {
   }
 
   /* white with maroon text on the maroon bar */
-  header.is-scrolled .header-button:any-link,
-  header .header-bar:hover .header-button:any-link,
-  header .header-bar:focus-within .header-button:any-link {
+  header.is-scrolled .header-button:is(:any-link, button),
+  header .header-bar:hover .header-button:is(:any-link, button),
+  header .header-bar:focus-within .header-button:is(:any-link, button) {
     background-color: var(--color-background);
     color: var(--header-maroon);
   }
@@ -1015,7 +1025,7 @@ header .header-cart-dropdown p {
     vertical-align: middle;
   }
 
-  header .header-utility:any-link,
+  header .header-utility:is(:any-link, button),
   header .header-utility.is-in-menu-footer {
     display: inline-block;
     margin: 0;
@@ -1040,10 +1050,10 @@ header .header-cart-dropdown p {
     font-size: var(--font-size-lg);
   }
 
-  header.is-transparent .header-utility:any-link,
-  header.is-scrolled .header-utility:any-link,
-  header .header-bar:hover .header-utility:any-link,
-  header .header-bar:focus-within .header-utility:any-link {
+  header.is-transparent .header-utility:is(:any-link, button),
+  header.is-scrolled .header-utility:is(:any-link, button),
+  header .header-bar:hover .header-utility:is(:any-link, button),
+  header .header-bar:focus-within .header-utility:is(:any-link, button) {
     color: var(--color-text-inverse);
   }
 

@@ -403,6 +403,15 @@ async function toggleCartDropdown(trigger, header) {
  * @param {HTMLElement} header
  */
 function wireAction(link, header) {
+  // a `/modals/` page link is a button that opens its modal itself; first (capture, so before
+  // its own handler) close the menu and any dropdown, leaving focus for the modal
+  if (link.dataset.action === 'modal-page') {
+    link.addEventListener('click', () => {
+      header.closeDropdowns();
+      header.closeMenu(false);
+    }, { capture: true });
+    return;
+  }
   const name = modalNameFromHref(link.getAttribute('href') || '');
   if (!name) return;
   link.addEventListener('click', async (e) => {
@@ -498,11 +507,13 @@ export default async function decorate(block) {
     actions.append(b);
   });
   // actions also offered in the menu footer (e.g. language) are shown there on mobile instead
-  const footerHrefs = new Set([...(menuFooter?.querySelectorAll('a') || [])].map((a) => a.getAttribute('href')));
+  // links that open a modal page are buttons, with the link in data-href
+  const hrefOf = (node) => node.getAttribute('href') || node.dataset.href;
+  const footerHrefs = new Set([...(menuFooter?.querySelectorAll('.header-menu-footer-link') || [])].map(hrefOf));
   if (utilities.length) {
     const wrap = el('div', 'header-utilities');
     utilities.forEach((u) => {
-      if (footerHrefs.has(u.getAttribute('href'))) u.classList.add('is-in-menu-footer');
+      if (footerHrefs.has(hrefOf(u))) u.classList.add('is-in-menu-footer');
       wrap.append(u);
     });
     actions.append(wrap);
@@ -554,10 +565,14 @@ export default async function decorate(block) {
       header.closeDropdowns();
     }
   };
-  header.closeMenu = () => { if (header.classList.contains('is-menu-open') || header.classList.contains('is-drill-open')) { setMenu(false); toggle.focus(); } };
+  header.closeMenu = (focus = true) => {
+    if (!header.classList.contains('is-menu-open') && !header.classList.contains('is-drill-open')) return;
+    setMenu(false);
+    if (focus) toggle.focus();
+  };
   toggle.addEventListener('click', () => setMenu(!header.classList.contains('is-menu-open')));
 
-  [...buttons, ...utilities, ...(promo ? [promo.firstElementChild] : []), ...(menuFooter?.querySelectorAll('a') || [])]
+  [...buttons, ...utilities, ...(promo ? [promo.firstElementChild] : []), ...(menuFooter?.querySelectorAll('.header-menu-footer-link') || [])]
     .forEach((link) => wireAction(link, header));
 
   document.addEventListener('keydown', (e) => {

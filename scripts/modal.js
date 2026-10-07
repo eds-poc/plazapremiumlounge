@@ -150,6 +150,25 @@ export async function openNamedModal(name, trigger) {
   openModal({ key: `#${name}`, content: () => [...section.children], trigger });
 }
 
+const pages = new Map();
+
+/**
+ * Starts loading a `/modals/` page (once), e.g. when the pointer reaches its link, so the modal
+ * opens without waiting.
+ * @param {URL} url
+ * @returns {Promise<HTMLElement|null>} The loaded page content
+ */
+export function preloadPageModal(url) {
+  if (!pages.has(url.pathname)) {
+    pages.set(url.pathname, (async () => {
+      // eslint-disable-next-line import/no-cycle
+      const { loadFragment } = await import('../blocks/fragment/fragment.js');
+      return loadFragment(url.pathname);
+    })());
+  }
+  return pages.get(url.pathname);
+}
+
 /**
  * Opens a page from a `/modals/` folder as a modal.
  * @param {URL} url
@@ -161,9 +180,8 @@ export async function openPageModal(url, trigger) {
     key: url.pathname,
     trigger,
     content: async () => {
-      // eslint-disable-next-line import/no-cycle
-      const { loadFragment } = await import('../blocks/fragment/fragment.js');
-      const fragment = await loadFragment(url.pathname);
+      const fragment = await preloadPageModal(url);
+      if (!fragment) pages.delete(url.pathname);
       return fragment ? [...fragment.querySelectorAll(':scope > .section > div')] : [];
     },
   });
