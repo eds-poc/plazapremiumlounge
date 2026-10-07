@@ -20,7 +20,7 @@
 const TEMP_IS_LOGGED_IN = false;
 
 // TEMPORARY: a sample name for styling and testing ("KJ"). Remove it and use the real user's name.
-const TEMP_USER_FULL_NAME = 'Kim Jones';
+const TEMP_USER_FULL_NAME = 'Kunal Jaiswal';
 
 /**
  * TEMPORARY: `?logged-in` in the page URL shows the logged-in header on any preview without a
