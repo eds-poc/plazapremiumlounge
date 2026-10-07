@@ -618,9 +618,10 @@ header .header-account-panel {
   margin: 0;
   padding: 0 0 50px;
   overflow: auto;
-  border: 0;
+  border: 1px solid rgb(0 0 0 / 17.6%);
   border-radius: 0;
   background-color: var(--header-maroon);
+  background-clip: padding-box;
   color: var(--color-text-inverse);
   font-family: var(--font-family-primary);
 }
@@ -648,25 +649,28 @@ header .header-account-back {
   font-family: inherit;
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-medium);
-  line-height: 1.5;
+  line-height: var(--line-height-body);
   cursor: pointer;
 }
 
+/* the arrow's 5px padding plus the space after it, as the source */
 header .header-account-back .header-chrome-icon {
-  margin-right: var(--spacing-2);
+  margin-right: calc(var(--spacing-2) + 0.27em);
 }
 
-/* the close cross (Bootstrap btn-close, inverted): a 16px cross in a 24px button */
+/* the close cross (source Bootstrap btn-close, inverted): a 1em cross with 8px around it */
 header .header-account-close {
   flex: 0 0 auto;
-  width: 24px;
-  height: 24px;
-  margin: var(--spacing-4) -8px 0 auto;
-  padding: 0;
+  box-sizing: content-box;
+  width: 1em;
+  height: 1em;
+  margin: var(--spacing-4) -8px -8px auto;
+  padding: var(--spacing-3);
   border: 0;
+  border-radius: var(--radius-xs);
   background-color: var(--color-text-inverse);
   cursor: pointer;
-  mask: url('../../icons/close.svg') center / 26px no-repeat;
+  mask: url('../../icons/close-thin.svg') center / 1em auto no-repeat;
 }
 
 header .header-account-list {
@@ -678,6 +682,7 @@ header .header-account-list {
 header .header-account-panel .header-account-list > li {
   position: relative;
   margin-bottom: var(--spacing-6);
+  padding: 2px var(--spacing-2);
 }
 
 header .header-account-link:is(:any-link, button) {
@@ -690,7 +695,7 @@ header .header-account-link:is(:any-link, button) {
   font-family: inherit;
   font-size: 24px;
   font-weight: var(--font-weight-medium);
-  line-height: 1.5;
+  line-height: var(--line-height-body);
   text-align: left;
   text-decoration: none;
   cursor: pointer;
