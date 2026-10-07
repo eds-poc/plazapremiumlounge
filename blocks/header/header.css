@@ -618,10 +618,11 @@ header .header-account-panel {
   margin: 0;
   padding: 0 0 50px;
   overflow: auto;
+
+  /* the background runs under the 1px border, as the source, so it shows as a darker line */
   border: 1px solid rgb(0 0 0 / 17.6%);
   border-radius: 0;
   background-color: var(--header-maroon);
-  background-clip: padding-box;
   color: var(--color-text-inverse);
   font-family: var(--font-family-primary);
 }
@@ -1223,7 +1224,7 @@ header .header-cart-dropdown p {
   }
 
   /* the account dropdown (source .dropdown-menu): under the badge, 200px wide, centred items
-     with lines between them */
+     with lines between them; the items' 5px margins collapse between them, as the source */
   header .header-account-dropdown {
     /* one-offs: the source dropdown border, item lines and text */
     --header-account-border: #666;
@@ -1236,11 +1237,10 @@ header .header-cart-dropdown p {
     left: var(--spacing-2);
     z-index: var(--z-megamenu);
     box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
+    display: block;
     min-width: 200px;
     margin: 0;
-    padding: 2px 0;
+    padding: 0;
     border: 1px solid var(--header-account-border);
     border-radius: var(--header-account-radius);
     background-color: var(--color-background);
@@ -1264,14 +1264,14 @@ header .header-cart-dropdown p {
     box-sizing: border-box;
     display: block;
     width: 100%;
-    padding: 4px 16px;
+    padding: 6px 16px;
     border: 0;
     background: none;
     color: var(--header-account-text);
     font-family: var(--font-family-primary);
     font-size: var(--font-size-md);
     font-weight: var(--font-weight-regular);
-    line-height: 1.35;
+    line-height: var(--line-height-body);
     text-align: center;
     text-decoration: none;
     white-space: nowrap;
