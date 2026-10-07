@@ -1,5 +1,5 @@
-import { getMetadata } from '../../scripts/aem.js';
 import { loadFragment } from '../fragment/fragment.js';
+import { getDefaultSharedPagePath, getSharedPagePath } from '../../scripts/i18n.js';
 
 const HEADINGS = 'h1, h2, h3, h4, h5, h6';
 const IMAGE_LINK = /\.(jpe?g|png|webp|gif|avif)(\?|#|$)/i;
@@ -335,10 +335,11 @@ function enableImageLightbox(block) {
  * @param {Element} block The footer block element
  */
 export default async function decorate(block) {
-  // load footer as fragment
-  const footerMeta = getMetadata('footer');
-  const footerPath = footerMeta ? new URL(footerMeta, window.location).pathname : '/footer';
-  const fragment = await loadFragment(footerPath);
+  // the page's site footer (metadata `footer`, else /<site>/footer), else the default site's
+  const footerPath = getSharedPagePath('footer');
+  const fallback = getDefaultSharedPagePath('footer');
+  const fragment = await loadFragment(footerPath)
+    || (footerPath !== fallback ? await loadFragment(fallback) : null);
   block.textContent = '';
   if (!fragment) return;
 

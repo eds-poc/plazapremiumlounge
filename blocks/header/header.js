@@ -6,6 +6,7 @@ import {
 } from '../../scripts/modal.js';
 import { CURRENCY_EVENT, getCurrency } from '../../scripts/currency.js';
 import { getLoggedInUser, initialsFrom } from '../../scripts/logged-in-user.js';
+import { getDefaultSharedPagePath, getSharedPagePath, translate } from '../../scripts/i18n.js';
 import { setIconSources } from '../../scripts/icons.js';
 
 // desktop layout from 1200px, as the source (webslidemenu breakpoint)
@@ -80,7 +81,11 @@ function maskIcons(root) {
  * @returns {string}
  */
 function iconLabel(name) {
-  const words = name.replace(/-(white|black)$/, '').split('-').join(' ');
+  const base = name.replace(/-(white|black)$/, '');
+  // in the page's language when known (e.g. railway-lounge), else from the name
+  const translated = translate(base.replace(/-(\w)/g, (all, c) => c.toUpperCase()));
+  if (translated) return translated;
+  const words = base.split('-').join(' ');
   return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
@@ -227,13 +232,13 @@ function drillPanel(li, closeAll) {
     const toolbar = el('div', 'header-drill-toolbar');
     const back = el('button', 'header-drill-back');
     back.type = 'button';
-    back.setAttribute('aria-label', 'Back');
+    back.setAttribute('aria-label', translate('back'));
     back.append(chromeIcon('arrow-left'));
     if (!parent) back.classList.add('is-hidden');
     back.addEventListener('click', () => (parent ? show(parent) : null));
     const close = el('button', 'header-drill-close');
     close.type = 'button';
-    close.setAttribute('aria-label', 'Close');
+    close.setAttribute('aria-label', translate('close'));
     close.append(chromeIcon('close'));
     close.addEventListener('click', closeAll);
     toolbar.append(back, close);
@@ -443,7 +448,7 @@ function buildAccount({
   const wrapper = el('span', 'header-account');
   const button = el('button', 'header-utility is-account');
   button.type = 'button';
-  button.setAttribute('aria-label', `${fullName}, account`);
+  button.setAttribute('aria-label', translate('account', { name: fullName }));
   const badge = el('span', 'header-initials');
   badge.setAttribute('aria-hidden', 'true');
   badge.textContent = initials;
@@ -452,7 +457,7 @@ function buildAccount({
 
   const links = [...(section?.querySelectorAll('li > a[href]') || [])];
   if (!links.length) return { wrapper, panel: null };
-  const title = section.querySelector('h1, h2, h3, h4, h5, h6')?.textContent.trim() || 'Account';
+  const title = section.querySelector('h1, h2, h3, h4, h5, h6')?.textContent.trim() || translate('accountTitle');
   button.setAttribute('aria-expanded', 'false');
 
   // desktop: the dropdown
@@ -469,7 +474,7 @@ function buildAccount({
   back.append(chromeIcon('arrow-left'), Object.assign(el('span'), { textContent: title }));
   const close = el('button', 'header-account-close');
   close.type = 'button';
-  close.setAttribute('aria-label', 'Close');
+  close.setAttribute('aria-label', translate('close'));
   toolbar.append(back, close);
   const list = el('ul', 'header-account-list');
   panel.append(toolbar, list);
@@ -541,10 +546,10 @@ function buildBrand(section) {
       link.classList.add('has-mobile-logo');
     }
     const img = pictures[0].querySelector('img');
-    link.setAttribute('aria-label', img?.alt || authored?.textContent.trim() || 'Home');
+    link.setAttribute('aria-label', img?.alt || authored?.textContent.trim() || translate('home'));
     link.querySelectorAll('img').forEach((i) => { i.loading = 'eager'; });
   } else {
-    link.textContent = authored?.textContent.trim() || section?.textContent.trim() || 'Home';
+    link.textContent = authored?.textContent.trim() || section?.textContent.trim() || translate('home');
     link.classList.add('is-text');
   }
   brand.append(link);
@@ -557,9 +562,11 @@ function buildBrand(section) {
  * @param {Element} block The header block element
  */
 export default async function decorate(block) {
-  const navMeta = getMetadata('nav');
-  const navPath = navMeta ? new URL(navMeta, window.location).pathname : '/nav';
-  const fragment = await loadFragment(navPath);
+  // the page's language site nav (metadata `nav`, else /<site>/nav), else the default site's
+  const navPath = getSharedPagePath('nav');
+  const fallback = getDefaultSharedPagePath('nav');
+  const fragment = await loadFragment(navPath)
+    || (navPath !== fallback ? await loadFragment(fallback) : null);
   block.textContent = '';
   if (!fragment) return;
 
@@ -591,7 +598,7 @@ export default async function decorate(block) {
   const brand = buildBrand(brandSection);
   const nav = el('nav', 'header-nav');
   nav.id = nextId('nav');
-  nav.setAttribute('aria-label', 'Main');
+  nav.setAttribute('aria-label', translate('mainNav'));
   const { menu, drills } = navSection ? buildMenu(navSection, header) : { menu: el('ul', 'header-menu'), drills: [] };
   nav.append(menu);
   const menuFooter = buildMenuFooter(footerSection);
@@ -605,7 +612,7 @@ export default async function decorate(block) {
   });
   // actions also offered in the menu footer (e.g. language) are shown there on mobile instead
   // links that open a modal page are buttons, with the link in data-href; a `#view` of a modal
-  // page counts as the page (e.g. /modals/language-currency#language)
+  // page counts as the page (e.g. /en-uk/modals/language-currency#language)
   const hrefOf = (node) => node.getAttribute('href') || node.dataset.href || '';
   const pageOf = (href) => href.split('#')[0] || href;
   const footerLinks = [...(menuFooter?.querySelectorAll('.header-menu-footer-link') || [])];
@@ -652,7 +659,7 @@ export default async function decorate(block) {
   toggle.type = 'button';
   toggle.setAttribute('aria-controls', nav.id);
   toggle.setAttribute('aria-expanded', 'false');
-  toggle.setAttribute('aria-label', 'Open menu');
+  toggle.setAttribute('aria-label', translate('openMenu'));
   toggle.append(el('span', 'header-toggle-lines'));
 
   inner.append(brand, nav, actions, toggle);
@@ -681,7 +688,7 @@ export default async function decorate(block) {
     header.classList.toggle('is-menu-open', open);
     document.body.classList.toggle('header-menu-open', open);
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    toggle.setAttribute('aria-label', translate(open ? 'closeMenu' : 'openMenu'));
     if (!open) {
       drills.forEach((d) => { d.hidden = true; });
       header.classList.remove('is-drill-open');

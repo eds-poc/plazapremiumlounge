@@ -1,6 +1,6 @@
 # Footer: authoring guide
 
-The footer is a single Document Authoring (DA) document, `/footer` by default. A page can use a different footer document through the `footer` page metadata, for example `/en-uk/footer`. The block loads it with `loadFragment`, so write plain content. You don't need class names, and you don't need any tables except the brand table.
+The footer is a Document Authoring (DA) document per language site: `/en-uk/footer`, `/zh-cn/footer`. A page uses the one set in the metadata `footer` (the bulk metadata sheet sets it per site folder; a page's own `footer` metadata wins), else the footer of its site folder, else `/en-uk/footer`; a site without a footer page yet gets the English one. The block loads it with `loadFragment`, so write plain content. You don't need class names, and you don't need any tables except the brand table.
 
 ## Structure: 3 sections, in this order (separate them with `---`)
 
@@ -12,7 +12,7 @@ Each top-level bullet is a column. Its first line is the column title, and a nes
   - [About](/en-uk/about-us)
   - [Offers](/en-uk/offers)
 - Social
-  - [:facebook:](https://www.facebook.com/…) [:instagram:](https://www.instagram.com/…) [:wechat:](/footer/wechat-qr.jpeg)
+  - [:facebook:](https://www.facebook.com/…) [:instagram:](https://www.instagram.com/…) [:wechat:](/.footer/wechat-qr.jpeg)
 - Downloads
   - Join Smart Traveller, the largest global travel membership.
   - [:appstore:](https://apps.apple.com/…) [:playstore:](https://play.google.com/…)

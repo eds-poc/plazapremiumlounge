@@ -14,7 +14,10 @@ nav page drives every screen size:
 
 ## The nav page
 
-The header reads the `/nav` page (or the page set in the page metadata `nav`). Each section ends
+Each language site has its own nav page: `/en-uk/nav`, `/zh-cn/nav`. The header reads the page
+set in the metadata `nav` (the bulk metadata sheet sets it per site folder; a page's own `nav`
+metadata wins), else the nav page of the page's site folder, else `/en-uk/nav`; a site without a
+nav page yet gets the English one. Each section ends
 with Section Metadata `name` (Brand, Menu, Actions, Menu footer) and a `description` that explains
 what it is for; the header finds its sections by name, so their order doesn't matter. Without
 names, the sections are read in this order:
@@ -32,24 +35,25 @@ names, the sections are read in this order:
 3. **Actions:** one link per line.
    - **Bold** links are buttons: `**[Your Destination Before Departure](/en-uk/your-destination-before-departure)**`,
      `**[Book Now](#book-now)**`. With two or more, the first is the phone bar above the header.
-   - A link starting with an icon is an icon action: `[:user: Log In](/modals/login)`,
-     `[:globe: Language](/modals/language-currency)`, `[:cart: Cart](#cart)`. The text is the screen-reader label
+   - A link starting with an icon is an icon action: `[:user: Log In](/en-uk/modals/login)`,
+     `[:globe: Language](/en-uk/modals/language-currency)`, `[:cart: Cart](#cart)`. The text is the screen-reader label
      (and is hidden). Icons come from the icon library, then the code icons; they take the header's
      text colour.
 4. **Menu footer (mobile and tablet):** the links at the bottom of the open menu, e.g.
-   `[:globe: English](/modals/language-currency#language)` and
-   `[USD](/modals/language-currency#currency)`. A currency link written as a code shows the
+   `[:globe: English](/en-uk/modals/language-currency#language)` and
+   `[USD](/en-uk/modals/language-currency#currency)`. A currency link written as a code shows the
    visitor's currency (the one they applied, else the one for their location). An icon action that
    links to the same page (Language) is hidden from the mobile bar.
 5. **Modals (any number, anywhere):** sections with Section Metadata `modal` = a name, e.g.
    `cart`, `book-now` (plus a `name` and `description` for authors). They are not shown in the
-   header. Modals used across the site (Log In, Language and currency) are pages in the `/modals/`
-   folder instead, authored once.
+   header. Modals used across the site (Log In, Language and currency) are pages in the site's
+   `modals` folder instead (`/en-uk/modals/`, `/zh-cn/modals/`), authored once per language; each
+   language's nav links to its own.
 
 ## What links do
 
 - A page link (`/en-uk/offers`) opens the page; a link to another website opens in a new tab.
-- A link to a `/modals/` page (e.g. `/modals/login`) opens that page as a modal; the menu or any
+- A link to a `modals` folder page (e.g. `/en-uk/modals/login`) opens that page as a modal; the menu or any
   dropdown closes first, and focus returns to the link when the modal closes.
 - `#name` opens the modal section named `name` from the nav page (or the current page). The cart
   shows its `cart` section as a dropdown on desktop and as a modal on mobile.
