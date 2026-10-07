@@ -4,6 +4,7 @@ import { applyButtonAction } from '../../scripts/button-actions.js';
 import {
   modalNameFromHref, openNamedModal, whenModal,
 } from '../../scripts/modal.js';
+import { CURRENCY_EVENT, getCurrency } from '../../scripts/currency.js';
 
 // desktop layout from 1200px, as the source (webslidemenu breakpoint)
 const desktop = window.matchMedia('(width >= 1200px)');
@@ -507,17 +508,28 @@ export default async function decorate(block) {
     actions.append(b);
   });
   // actions also offered in the menu footer (e.g. language) are shown there on mobile instead
-  // links that open a modal page are buttons, with the link in data-href
-  const hrefOf = (node) => node.getAttribute('href') || node.dataset.href;
-  const footerHrefs = new Set([...(menuFooter?.querySelectorAll('.header-menu-footer-link') || [])].map(hrefOf));
+  // links that open a modal page are buttons, with the link in data-href; a `#view` of a modal
+  // page counts as the page (e.g. /modals/language-currency#language)
+  const hrefOf = (node) => node.getAttribute('href') || node.dataset.href || '';
+  const pageOf = (href) => href.split('#')[0] || href;
+  const footerLinks = [...(menuFooter?.querySelectorAll('.header-menu-footer-link') || [])];
+  const footerHrefs = new Set(footerLinks.map((l) => pageOf(hrefOf(l))));
   if (utilities.length) {
     const wrap = el('div', 'header-utilities');
     utilities.forEach((u) => {
-      if (footerHrefs.has(hrefOf(u))) u.classList.add('is-in-menu-footer');
+      if (footerHrefs.has(pageOf(hrefOf(u)))) u.classList.add('is-in-menu-footer');
       wrap.append(u);
     });
     actions.append(wrap);
   }
+
+  // a menu footer link to the currency (authored as a code, e.g. USD) shows the visitor's currency
+  const currencyLabels = footerLinks.filter((l) => hrefOf(l).toLowerCase().endsWith('#currency'))
+    .map((l) => [...l.childNodes].find((n) => n.nodeType === 3 && /^[A-Z]{3}$/.test(n.textContent.trim())))
+    .filter(Boolean);
+  const showCurrency = () => currencyLabels.forEach((t) => { t.textContent = getCurrency(); });
+  showCurrency();
+  if (currencyLabels.length) document.addEventListener(CURRENCY_EVENT, showCurrency);
 
   // the first button is also the full-width bar above the header on phones (source "ydbd")
   let promo = null;

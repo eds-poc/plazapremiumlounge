@@ -1046,7 +1046,7 @@ header .header-cart-dropdown p {
     vertical-align: top;
   }
 
-  header .header-utility[href='#language'] {
+  header .header-utility:has(.icon-globe) {
     font-size: var(--font-size-lg);
   }
 

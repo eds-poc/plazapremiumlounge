@@ -159,30 +159,58 @@ const pages = new Map();
  * @returns {Promise<HTMLElement|null>} The loaded page content
  */
 export function preloadPageModal(url) {
-  if (!pages.has(url.pathname)) {
-    pages.set(url.pathname, (async () => {
+  // each view (`#name`) is its own copy of the page, so both can be open in turn
+  const key = url.pathname + url.hash;
+  if (!pages.has(key)) {
+    pages.set(key, (async () => {
       // eslint-disable-next-line import/no-cycle
       const { loadFragment } = await import('../blocks/fragment/fragment.js');
       return loadFragment(url.pathname);
     })());
   }
-  return pages.get(url.pathname);
+  return pages.get(key);
 }
 
 /**
- * Opens a page from a `/modals/` folder as a modal.
+ * Shows one view of a modal page: `#name` keeps only the part marked `data-modal-view="name"`
+ * (e.g. the Currency group of /modals/language-currency), titled with its label.
+ * @param {HTMLElement} fragment
+ * @param {string} view
+ */
+function applyView(fragment, view) {
+  const parts = [...fragment.querySelectorAll('[data-modal-view]')];
+  const match = parts.find((p) => p.dataset.modalView === view);
+  if (!match) return;
+  parts.filter((p) => p !== match).forEach((p) => p.remove());
+  match.classList.add('is-modal-view');
+  const heading = fragment.querySelector('h1, h2, h3, h4, h5, h6');
+  if (heading && match.dataset.modalViewTitle) heading.textContent = match.dataset.modalViewTitle;
+}
+
+/**
+ * Opens a page from a `/modals/` folder as a modal. The page's section style (Section Metadata
+ * `style`, e.g. `square`) styles the modal; `#name` opens one view of it.
  * @param {URL} url
  * @param {HTMLElement} [trigger]
  */
 export async function openPageModal(url, trigger) {
   const { openModal } = await import('./modal-dialog.js');
+  const key = url.pathname + url.hash;
   openModal({
-    key: url.pathname,
+    key,
     trigger,
     content: async () => {
       const fragment = await preloadPageModal(url);
-      if (!fragment) pages.delete(url.pathname);
-      return fragment ? [...fragment.querySelectorAll(':scope > .section > div')] : [];
+      if (!fragment) {
+        pages.delete(key);
+        return [];
+      }
+      if (url.hash.length > 1) applyView(fragment, toModalName(url.hash.slice(1)));
+      const section = fragment.querySelector(':scope > .section');
+      const styles = [...(section?.classList || [])].filter((c) => c !== 'section' && !c.endsWith('-container'));
+      const nodes = [...fragment.querySelectorAll(':scope > .section > div')];
+      nodes.styles = styles;
+      return nodes;
     },
   });
 }
