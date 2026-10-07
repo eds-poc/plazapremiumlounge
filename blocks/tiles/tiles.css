@@ -69,7 +69,7 @@
   display: inline-block;
   width: 12px;
   height: 12px;
-  margin: 2px 0 0;
+  margin: var(--spacing-1) 0 0;
   padding: 0;
   border: 0;
   background-color: currentcolor;
@@ -114,7 +114,7 @@
   width: 100%;
   vertical-align: top;
   margin-top: var(--spacing-9);
-  padding: 9px var(--spacing-7);
+  padding: var(--button-large-padding-block) var(--spacing-7);
   border: 1px solid transparent;
   border-radius: var(--radius-xl);
   background-color: var(--color-surface-warm);
@@ -148,14 +148,14 @@
   overflow: visible;
 
   /* one-off: the source popover border and radius */
-  border: 1px solid rgb(0 0 0 / 17.6%);
+  border: 1px solid var(--color-border-translucent);
   border-radius: 8px;
   background-color: var(--color-background);
   color: var(--color-text);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
-  line-height: 1.5;
+  line-height: var(--line-height-relaxed);
   text-align: start;
 }
 
@@ -183,7 +183,7 @@
 }
 
 .tiles-popover::before {
-  border-top-color: rgb(0 0 0 / 17.6%);
+  border-top-color: var(--color-border-translucent);
 }
 
 .tiles-popover::after {
@@ -200,7 +200,7 @@
 }
 
 .tiles-popover.is-below::before {
-  border-bottom-color: rgb(0 0 0 / 17.6%);
+  border-bottom-color: var(--color-border-translucent);
 }
 
 .tiles-popover.is-below::after {

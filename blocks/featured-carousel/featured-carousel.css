@@ -63,7 +63,7 @@
 
 .featured-carousel.text-first .featured-carousel-media {
   order: 0;
-  margin: 24px 0 0;
+  margin: var(--spacing-stack) 0 0;
 }
 
 .featured-carousel.image-inset .featured-carousel-media {
@@ -101,7 +101,7 @@
 /* text-large: the source text box ends with 20px plus one blank line (42px mobile, 48px desktop),
    which sets the mobile gap above the image and the desktop centring */
 .featured-carousel.text-large .featured-carousel-content {
-  padding-bottom: calc(1.4em + 20px);
+  padding-bottom: calc(1.4em + var(--spacing-7));
   font-size: var(--font-size-md);
 }
 
@@ -142,7 +142,7 @@
 }
 
 .featured-carousel .featured-carousel-eyebrow + .featured-carousel-title {
-  margin-top: 24px;
+  margin-top: var(--spacing-stack);
 }
 
 .featured-carousel.text-large .featured-carousel-content > .featured-carousel-title {
@@ -170,8 +170,8 @@
 
 /* a blank line plus 20px above the button, 8px below it */
 .featured-carousel .featured-carousel-content > .featured-carousel-cta {
-  margin-top: calc(1.4em + 20px);
-  margin-bottom: 8px;
+  margin-top: calc(1.4em + var(--spacing-7));
+  margin-bottom: var(--spacing-3);
 }
 
 .featured-carousel .featured-carousel-cta + .featured-carousel-cta {
@@ -183,12 +183,12 @@
   min-width: 260px;
   border: 1px solid var(--color-text-inverse);
   border-radius: var(--radius-xl);
-  padding: 9px var(--spacing-7);
+  padding: var(--button-large-padding-block) var(--spacing-7);
   background-color: transparent;
   color: var(--color-text-inverse);
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-medium);
-  line-height: 1.5;
+  line-height: var(--line-height-relaxed);
   text-transform: capitalize;
 }
 
@@ -237,7 +237,7 @@
   padding: 0;
   border: 1px solid rgb(255 255 255 / 85%);
   border-radius: var(--radius-circle);
-  background-color: rgb(0 0 0 / 35%);
+  background-color: var(--color-overlay-hero);
   color: var(--color-text-inverse);
 
   /* the source stack: PolySans has no arrow glyphs, so they come from the system sans-serif */
@@ -246,7 +246,7 @@
   line-height: 1;
   cursor: pointer;
   transform: translateY(-50%);
-  transition: background-color 0.2s, border-color 0.2s;
+  transition: background-color var(--duration-short), border-color var(--duration-short);
 }
 
 .featured-carousel .featured-carousel-prev {
@@ -275,11 +275,11 @@
 
 .featured-carousel .featured-carousel-controls {
   position: absolute;
-  bottom: 12px;
+  bottom: var(--spacing-5);
   left: 50%;
   z-index: 1;
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-3);
   transform: translateX(-50%);
 }
 
@@ -291,10 +291,10 @@
   margin: 0;
   padding: 0;
   border: 0;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   background-color: rgb(255 255 255 / 55%);
   cursor: pointer;
-  transition: width 0.25s, background-color 0.25s;
+  transition: width var(--duration-normal), background-color var(--duration-normal);
 }
 
 .featured-carousel .featured-carousel-dot::after {

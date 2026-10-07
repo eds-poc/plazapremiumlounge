@@ -2,7 +2,7 @@
   "$schema": "Plaza Premium Lounge design tokens",
   "source": "https://www.plazapremiumlounge.com/en-uk",
   "extracted": "2026-09-30",
-  "status": "declared in styles/styles.css :root; applied to global styles (body, headings, links, buttons, sections); blocks not yet restyled",
+  "status": "declared in styles/styles.css :root; applied to global styles and all blocks (the home banner, blocks/hero, is still in progress)",
   "approach": "mobile-first: each token value is the mobile (<768px) value; responsive entries are min-width overrides applied in ascending order",
   "breakpoints": {
     "sm": "576px",
@@ -87,6 +87,12 @@
         "usage": "Backdrop behind the open mobile menu",
         "evidence": "computed .overlapblackbg at 375px",
         "confidence": "Medium"
+      },
+      "--color-overlay-backdrop": {
+        "value": "rgb(0 0 0 / 50%)",
+        "usage": "Modal and View Profile panel backdrop (Bootstrap modal backdrop)",
+        "evidence": "refactor 2026-10-07: shared by several components",
+        "confidence": "High"
       }
     },
     "text colors": {
@@ -163,6 +169,12 @@
         "usage": "Row dividers inside the mobile menu",
         "evidence": "computed mobile nav items border-bottom",
         "confidence": "Medium"
+      },
+      "--color-border-translucent": {
+        "value": "rgb(0 0 0 / 17.6%)",
+        "usage": "Modal, View Profile panel and tiles popover border (Bootstrap modal border)",
+        "evidence": "refactor 2026-10-07: shared by several components",
+        "confidence": "High"
       }
     },
     "state colors": {
@@ -369,6 +381,12 @@
         "usage": "Offer/news card H4 (mobile-first)",
         "evidence": "computed 18px below 1200px, 24px at 1200px+",
         "confidence": "High"
+      },
+      "--line-height-relaxed": {
+        "value": "1.5",
+        "usage": "Buttons, form inputs and choices, tiles popover, modal title",
+        "evidence": "refactor 2026-10-07: shared by several components",
+        "confidence": "High"
       }
     },
     "spacing": {
@@ -462,6 +480,18 @@
         "usage": "Space below a section H2 (mobile-first)",
         "evidence": "style.css section h2: 25px default, 35px @>=992",
         "confidence": "High"
+      },
+      "--spacing-stack": {
+        "value": "24px",
+        "usage": "Space between stacked content: featured carousel media and heading, footer column text, lounge list actions",
+        "evidence": "refactor 2026-10-07: shared by several components",
+        "confidence": "High"
+      },
+      "--button-large-padding-block": {
+        "value": "9px",
+        "usage": "Large buttons (source .btnLg): block padding, also the featured carousel and tiles buttons",
+        "evidence": "refactor 2026-10-07: shared by several components",
+        "confidence": "High"
       }
     },
     "layout": {
@@ -535,6 +565,18 @@
         "value": "1000",
         "usage": "Mega menu / mobile drawer",
         "evidence": "computed .wsmegamenu, .wsmenu",
+        "confidence": "High"
+      },
+      "--modal-padding": {
+        "value": "16px",
+        "usage": "Modal and View Profile panel header and body padding (Bootstrap modal)",
+        "evidence": "refactor 2026-10-07: shared by several components",
+        "confidence": "High"
+      },
+      "--modal-margin-top": {
+        "value": "28px",
+        "usage": "Modal and View Profile panel top margin from 576px (Bootstrap modal)",
+        "evidence": "refactor 2026-10-07: shared by several components",
         "confidence": "High"
       }
     },
@@ -650,6 +692,12 @@
         "usage": "Carousel/slide transform",
         "evidence": "computed transform 0.65s (x1)",
         "confidence": "Low"
+      },
+      "--duration-short": {
+        "value": "0.2s",
+        "usage": "Featured carousel arrows, lounge list dots",
+        "evidence": "refactor 2026-10-07: shared by several components",
+        "confidence": "High"
       }
     }
   }
