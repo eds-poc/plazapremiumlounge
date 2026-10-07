@@ -53,10 +53,16 @@ function maskIcons(root) {
   root.querySelectorAll('span.icon').forEach((span) => {
     const img = span.querySelector('img');
     if (!img) return;
-    const apply = () => {
-      if (!img.getAttribute('src')) return false;
+    // load now (icons in closed menus would wait), and mask once loaded so no empty box shows
+    img.loading = 'eager';
+    const mask = () => {
       span.style.setProperty('--header-icon', `url("${img.src}")`);
       span.classList.add('is-masked');
+    };
+    const apply = () => {
+      if (!img.getAttribute('src')) return false;
+      if (img.complete && img.naturalWidth) mask();
+      else img.addEventListener('load', mask, { once: true });
       return true;
     };
     if (apply()) return;

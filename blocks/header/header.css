@@ -69,15 +69,12 @@ header .header .icon img {
   display: block;
   width: 100%;
   height: 100%;
+  visibility: hidden;
 }
 
 header .header .icon.is-masked {
   background-color: currentcolor;
   mask: var(--header-icon) center / contain no-repeat;
-}
-
-header .header .icon.is-masked img {
-  visibility: hidden;
 }
 
 /* --- promo bar (phones): the first button full width above the header ------------------- */
@@ -97,7 +94,7 @@ header .header-promo-link:any-link {
 
 header .header-promo-link .header-chrome-icon {
   margin-left: 0.29em;
-  vertical-align: -0.15em;
+  vertical-align: -0.25em;
 }
 
 /* --- mobile and tablet bar ------------------------------------------------------------------- */
@@ -154,6 +151,7 @@ header .header-actions {
 header .header-button:any-link {
   box-sizing: border-box;
   display: inline-block;
+  min-width: 80px;
   max-width: 80px;
   height: 28px;
   overflow: hidden;
@@ -194,20 +192,18 @@ header .header-utilities {
 
 header .header-utility:any-link {
   position: relative;
-  display: inline-block;
-  margin: 0 var(--spacing-3);
+  display: inline-flex;
+  margin: 0 0 0 var(--spacing-3);
   color: var(--header-maroon);
-  font-size: var(--font-size-sm);
-  line-height: 1.4;
+  font-size: var(--font-size-md);
+  line-height: 1;
   text-decoration: none;
 }
 
-header .header-utility:last-child {
-  margin-left: var(--spacing-3);
-}
-
+/* the first icon (right-most, the user icon) is 14px on phones, 8px from the menu button */
 header .header-utility:first-child {
-  margin-right: 0;
+  margin-right: var(--spacing-3);
+  font-size: var(--font-size-sm);
 }
 
 /* icon actions keep their glyph's proportions (user 14 x 16, cart 18 x 16 at 16px) */
@@ -253,7 +249,7 @@ header .header-toggle-lines::after {
 }
 
 header .header-toggle-lines {
-  top: 15px;
+  top: 16px;
 }
 
 header .header-toggle-lines::before {
@@ -268,9 +264,13 @@ header.is-menu-open .header-toggle-lines {
   background-color: transparent;
 }
 
+header.is-menu-open .header-toggle {
+  translate: -5px 0;
+}
+
 header.is-menu-open .header-toggle-lines::before,
 header.is-menu-open .header-toggle-lines::after {
-  top: 0;
+  top: 7px;
   background-color: var(--color-text-inverse);
   transform: rotate(45deg);
 }
@@ -421,9 +421,9 @@ header .header-menu-footer-link:any-link {
   background-color: var(--color-background);
   color: var(--header-maroon);
   font-family: var(--font-family-primary);
-  font-size: var(--font-size-sm);
+  font-size: inherit;
   font-weight: var(--font-weight-medium);
-  line-height: var(--line-height-body);
+  line-height: 21px;
   text-align: center;
   text-decoration: none;
 }
@@ -561,7 +561,7 @@ header .header .header-badge {
   flex: 0 0 auto;
   width: 25px;
   height: 25px;
-  margin-left: var(--spacing-2);
+  margin-left: 13px;
   color: var(--color-text-inverse);
 }
 
@@ -632,6 +632,20 @@ header .header-cart-dropdown p {
   header .header-button.is-first {
     display: inline-block;
     margin-right: var(--spacing-3);
+  }
+
+  header .header-utility:first-child {
+    font-size: var(--font-size-md);
+  }
+
+  header .header-menu-footer-link:any-link {
+    line-height: 25px;
+  }
+
+  header .header-drill-close {
+    min-width: 24px;
+    min-height: 24px;
+    font-size: 23px;
   }
 }
 
@@ -854,6 +868,7 @@ header .header-cart-dropdown p {
     flex-flow: column;
     gap: 2px 10px;
     min-height: 120px;
+    padding: 0 var(--spacing-2);
   }
 
   /* columns: the first list a third wide, each further level splits the rest, with dividers */
@@ -902,6 +917,7 @@ header .header-cart-dropdown p {
     box-sizing: border-box;
     display: block;
     width: 100%;
+    margin-bottom: -1px;
     padding: var(--spacing-5) var(--spacing-9) var(--spacing-5) 0;
     border: 0;
     background: none;
@@ -967,6 +983,7 @@ header .header-cart-dropdown p {
   header .header-button:any-link,
   header .header-button.is-first {
     display: inline-block;
+    min-width: 120px;
     max-width: none;
     height: 33px;
     margin: 0;
@@ -978,7 +995,7 @@ header .header-cart-dropdown p {
 
   /* the space between the inline buttons, as the source */
   header .header-button.is-first {
-    margin-right: 4px;
+    margin-right: 4.6px;
   }
 
   /* white with maroon text on the maroon bar */
@@ -992,6 +1009,7 @@ header .header-cart-dropdown p {
   header .header-utilities {
     position: relative;
     display: inline-block;
+    margin-left: 4.6px;
     padding: 4px var(--spacing-4) 4px 0;
     border-radius: var(--radius-lg);
     vertical-align: middle;
@@ -1004,7 +1022,17 @@ header .header-cart-dropdown p {
     padding: 0 var(--spacing-2);
     color: var(--header-link-color);
     font-size: var(--font-size-md);
-    line-height: 1.2;
+    line-height: 22.4px;
+    vertical-align: top;
+  }
+
+  header .header-utility + .header-utility {
+    margin-left: 4.6px;
+  }
+
+  /* icons 2px below the top of the line, as the source */
+  header .header-utility .icon {
+    margin-top: 2px;
     vertical-align: top;
   }
 
