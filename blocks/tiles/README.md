@@ -27,6 +27,7 @@ height.
 - **Column 3, colour (optional):** `blush` (pink), `coral` (red), or empty for white.
 - **The look is fixed:** headings, bold or other formatting in the title and subtitle don't change
   their size or style.
-- **Heading and section:** put the section heading above the block as normal text, and use Section
-  Metadata `background` = `grey`, as on the homepage.
+- **Heading and section:** put a [Title](../title/README.md) block above the tiles, e.g.
+  `Title (left, short, large)` with the `LATEST OFFERS` eyebrow, and use Section Metadata
+  `background` = `grey`, as on the homepage.
 - Empty rows are skipped.
