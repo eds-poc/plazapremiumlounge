@@ -32,6 +32,153 @@
   }
 }
 
+/* text-image variation: two columns, as the source About and landing pages. The image-only column
+   takes 5 of 12 columns and the other 7 (either order; without one, the last is the narrow one).
+   Stacked in the authored order on mobile, side by side from 768px. Images keep their own size;
+   an image-only column is aligned to its outer edge (left when first, right when last) */
+.columns.text-image {
+  --text-image-wide: calc((100% + var(--grid-gutter)) * 7 / 12 - var(--grid-gutter));
+  --text-image-narrow: calc((100% + var(--grid-gutter)) * 5 / 12 - var(--grid-gutter));
+}
+
+.columns.text-image > div {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+
+.columns.text-image > div > div,
+.columns.text-image > div > .columns-img-col {
+  box-sizing: border-box;
+  flex: none;
+  order: unset;
+}
+
+.columns.text-image > div > div img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+}
+
+.columns.text-image > div > .columns-img-col {
+  display: flex;
+}
+
+.columns.text-image > div > .columns-img-col:last-child {
+  justify-content: flex-end;
+}
+
+.columns.text-image > div > div > p:has(picture) {
+  margin-bottom: 0;
+}
+
+/* an image after text in a column: 50px below the text, as the source spacer */
+.columns.text-image > div > div > p:has(picture):not(:first-child) {
+  margin-top: var(--spacing-11);
+}
+
+/* text options: text-large (the source .fs-5, 16px on mobile, 20px from 768px) and text-medium (18px) */
+.columns.text-large > div > div {
+  font-size: var(--font-size-md);
+}
+
+.columns.text-medium > div > div {
+  font-size: var(--font-size-lg);
+}
+
+/* option row-spacing: the source landing pages' spacers, 30px below an image-only column and 40px
+   between rows */
+.columns.text-image.row-spacing > div > .columns-img-col {
+  padding-bottom: var(--spacing-9);
+}
+
+.columns.text-image.row-spacing > div + div {
+  /* one-off: the source landing pages' 40px between rows */
+  margin-top: 40px;
+}
+
+/* the source landing pages' text wrapper: text up to 700px wide (the column keeps its width) */
+.columns.text-image.row-spacing > div > div:not(.columns-img-col) > * {
+  /* one-off: the source .txtWrapper width */
+  max-width: 700px;
+}
+
+/* breakpoint-exception: option halves-on-mobile, the source's col-sm-6 halves from 576px */
+@media (width >= 576px) {
+  .columns.text-image.halves-on-mobile > div {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--grid-gutter);
+  }
+
+  .columns.text-image.halves-on-mobile > div > div {
+    flex: 0 0 calc((100% - var(--grid-gutter)) / 2);
+  }
+
+  .columns.text-image.halves-on-mobile.vertical-center > div {
+    align-items: center;
+  }
+}
+
+@media (width >= 768px) {
+  .columns.text-large > div > div {
+    font-size: var(--font-size-xl);
+  }
+
+  .columns.text-image:not(.stack-on-tablet) > div {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--grid-gutter);
+  }
+
+  .columns.text-image:not(.stack-on-tablet) > div > div {
+    flex: 0 0 var(--text-image-wide);
+  }
+
+  .columns.text-image.vertical-center:not(.stack-on-tablet) > div {
+    align-items: center;
+  }
+
+  .columns.text-image:not(.stack-on-tablet) > div > .columns-img-col,
+  .columns.text-image:not(.stack-on-tablet) > div:not(:has(> .columns-img-col)) > div:last-child {
+    flex-basis: var(--text-image-narrow);
+  }
+}
+
+/* option row-spacing from 992px: 50px between an image column and the text after it (source .txtWrapper) */
+@media (width >= 992px) {
+  .columns.text-image.row-spacing > div > .columns-img-col + div {
+    padding-left: var(--spacing-11);
+  }
+
+  /* the 700px wrapper includes that space */
+  .columns.text-image.row-spacing > div > .columns-img-col + div > * {
+    max-width: calc(700px - var(--spacing-11));
+  }
+}
+
+/* option stack-on-tablet: stacked until 992px (the source's col-lg columns) */
+@media (width >= 992px) {
+  .columns.text-image.stack-on-tablet > div {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--grid-gutter);
+  }
+
+  .columns.text-image.stack-on-tablet > div > div {
+    flex: 0 0 var(--text-image-wide);
+  }
+
+  .columns.text-image.stack-on-tablet.vertical-center > div {
+    align-items: center;
+  }
+
+  .columns.text-image.stack-on-tablet > div > .columns-img-col,
+  .columns.text-image.stack-on-tablet > div:not(:has(> .columns-img-col)) > div:last-child {
+    flex-basis: var(--text-image-narrow);
+  }
+}
+
 /* media-image variation: evenly sized image cards (e.g. logos) in a centred, wrapping grid, as the source partners
    cards (up to 850px wide; 1 per row, 2 from 576px, 3 from 768px; a short last row is centred) */
 .columns.media-image {
