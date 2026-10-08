@@ -53,13 +53,9 @@
     font-size: var(--font-size-3xl);
   }
 
-  .title .title-intro {
+  .title.center .title-intro {
     margin-inline: auto;
     font-size: var(--font-size-xl);
-  }
-
-  .title.left .title-intro {
-    margin-inline: 0;
   }
 }
 
@@ -69,9 +65,9 @@
     margin-bottom: var(--spacing-9);
   }
 
-  /* option short: at most 600px wide, from the left (source `.title-wrapper.short`) */
-  .title.short {
-    /* one-off: the source's 600px short title width */
+  /* option compact: at most 600px wide, from the left (source `.title-wrapper.compact`) */
+  .title.compact {
+    /* one-off: the source's 600px compact title width */
     max-width: 600px;
   }
 }
