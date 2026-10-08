@@ -213,6 +213,8 @@ async function loadLazy(doc) {
  */
 function loadDelayed() {
   import('./consent-check.js');
+  // the back to top button, on every page
+  import('./back-to-top.js').then(({ default: initBackToTop }) => initBackToTop());
   // load anything that can be postponed to the latest here
 }
 
