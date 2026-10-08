@@ -1,0 +1,87 @@
+/* title: the source's section and page titles (title-wrapper). Left-aligned on mobile and
+   centred from 768px (option left: always left); the heading uses the global heading sizes */
+.title {
+  text-align: left;
+}
+
+/* eyebrow: the small line above the heading (source `.title small`), maroon on mobile */
+.title .title-eyebrow {
+  margin: 0 0 var(--spacing-4);
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-light);
+  line-height: 1;
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: capitalize;
+}
+
+/* option large: the section heading stays 32px on mobile (source "Latest Offers") */
+.title.large h2.title-heading {
+  font-size: var(--font-size-3xl);
+}
+
+/* intro text under the heading (source `.fs-5.my-4.width500`) */
+.title .title-intro {
+  /* one-off: the source's 500px intro width */
+  max-width: 500px;
+  margin: var(--spacing-stack) 0;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+.title .title-intro > :last-child {
+  margin-bottom: 0;
+}
+
+@media (width >=768px) {
+  .title {
+    text-align: center;
+  }
+
+  .title.left {
+    text-align: left;
+  }
+
+  .title .title-eyebrow {
+    color: inherit;
+    font-size: var(--font-size-xl);
+    line-height: var(--line-height-heading);
+  }
+
+  .title.large h2.title-heading {
+    font-size: var(--heading-section-size);
+  }
+
+  /* page title (h1.title): 32px until the 42px desktop size */
+  .title h1.title-heading {
+    font-size: var(--font-size-3xl);
+  }
+
+  .title .title-intro {
+    margin-inline: auto;
+    font-size: var(--font-size-xl);
+  }
+
+  .title.left .title-intro {
+    margin-inline: 0;
+  }
+}
+
+@media (width >=992px) {
+  /* at least 30px to what follows (the heading's own 35px gap wins) */
+  .title {
+    margin-bottom: var(--spacing-9);
+  }
+
+  /* option short: at most 600px wide, from the left (source `.title-wrapper.short`) */
+  .title.short {
+    /* one-off: the source's 600px short title width */
+    max-width: 600px;
+  }
+}
+
+@media (width >=1200px) {
+  .title h1.title-heading {
+    font-size: var(--heading-page-size);
+  }
+}
