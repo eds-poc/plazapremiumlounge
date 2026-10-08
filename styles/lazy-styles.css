@@ -32,13 +32,13 @@
   transition: opacity 0.4s var(--ease-standard), visibility 0s;
 }
 
-/* the source's thin up chevron (19 x 10px) */
+/* the source's up chevron: 18 x 10px, a pointed tip and round ends, 14.75px from the top */
 .back-to-top::before {
   content: '';
   position: absolute;
   inset: 0;
   background-color: currentcolor;
-  mask: url('../icons/angle-up.svg') 50% 53% / 19px 10px no-repeat;
+  mask: url('../icons/angle-up.svg') 50% 49.2% / 18px 10px no-repeat;
 }
 
 @media (prefers-reduced-motion: reduce) {
