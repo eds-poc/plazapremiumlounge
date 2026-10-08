@@ -604,6 +604,44 @@ main .section.wide>div {
   padding-inline: var(--container-wide-padding);
 }
 
+/* section style fixed-width: the source landing pages' fixed container (Bootstrap .container, nested
+   in a second one, so double padding): full width on mobile, then 540/720/960/1140/1320px */
+main .section.fixed-width>div {
+  padding-inline: calc(var(--container-padding) * 2);
+}
+
+/* breakpoint-exception: Bootstrap container widths at 576px */
+@media (width >=576px) {
+  main .section.fixed-width>div {
+    max-width: 540px;
+  }
+}
+
+@media (width >=768px) {
+  main .section.fixed-width>div {
+    max-width: 720px;
+  }
+}
+
+@media (width >=992px) {
+  main .section.fixed-width>div {
+    max-width: 960px;
+  }
+}
+
+@media (width >=1200px) {
+  main .section.fixed-width>div {
+    max-width: 1140px;
+  }
+}
+
+/* breakpoint-exception: Bootstrap container width at 1400px */
+@media (width >=1400px) {
+  main .section.fixed-width>div {
+    max-width: 1320px;
+  }
+}
+
 /* title-position: center centres the section heading from 768px (left on mobile, as on the source) */
 @media (width >=768px) {
   main .section[data-title-position='center'] .default-content-wrapper> :is(h1, h2, h3, h4, h5, h6) {

@@ -12,6 +12,43 @@ such as logos.
 
 A cell that holds only an image is shown first on mobile.
 
+## Text-image variation
+
+A text column and a narrower image column, as the source About page ("The Company") and landing pages
+(e.g. "How to Connect to WiFi"). The column holding only an image is the narrow one (5 of 12) and
+the other column the wide one (7 of 12), whichever side the image is on. On mobile the columns
+stack in the order you wrote them; from 768px they sit side by side.
+
+| Columns (text-image, vertical-center, stack-on-tablet, text-large) |                |
+|-----------------------------------------------|----------------|
+| ## The Company<br>Text…<br>*image*             | *image*        |
+
+| Columns (text-image, halves-on-mobile, text-medium, row-spacing) |                 |
+|------------------------------------------------|-----------------|
+| ### Elevate your Travels…<br>Text…<br>**[Join Smart Traveller Today](…)** | *image* |
+| *image*                                         | Step 1:<br>Text… |
+
+- **Each row is a pair of columns.** Put the image first or second; it decides the order, not the
+  widths. Without an image-only column, the second column is the narrow one.
+- **Images** keep their own size (never wider than their column). An image on its own in a column
+  is aligned to the column's outer edge: left in the first column, right in the second.
+- **An image after text** in the same column sits 50px below it.
+
+### Options
+
+Add any of them after `text-image`, e.g. `Columns (text-image, vertical-center, text-large)`.
+
+| Option | Effect | Source example |
+| --- | --- | --- |
+| `vertical-center` | Columns centred vertically (default: aligned to the top) | About, The Company |
+| `stack-on-tablet` | Stay stacked until 992px | About, The Company |
+| `halves-on-mobile` | Side by side as two halves from 576px (7/5 from 768px) | WiFi page |
+| `text-large` | Text 16px on mobile, 20px from 768px | About, The Company |
+| `text-medium` | Text 18px | WiFi page |
+| `row-spacing` | Landing page spacing: 30px below an image-only column, 40px between rows, text up to 700px wide, and 50px between an image and the text after it from 992px | WiFi page |
+
+For the source landing pages' narrower page width, use Section Metadata `style` = `fixed-width`.
+
 ## Media-image variation
 
 A centred grid of evenly sized image cards, for partner or brand logos, airlines, awards or any
