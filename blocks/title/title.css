@@ -29,17 +29,13 @@
   line-height: var(--line-height-body);
 }
 
-.title .title-intro > :last-child {
+.title .title-intro> :last-child {
   margin-bottom: 0;
 }
 
 @media (width >=768px) {
-  .title {
+  .title.center {
     text-align: center;
-  }
-
-  .title.left {
-    text-align: left;
   }
 
   .title .title-eyebrow {
@@ -68,8 +64,8 @@
 }
 
 @media (width >=992px) {
-  /* at least 30px to what follows (the heading's own 35px gap wins) */
   .title {
+    /* at least 30px to what follows (the heading's own 35px gap wins) */
     margin-bottom: var(--spacing-9);
   }
 
