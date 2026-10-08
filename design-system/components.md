@@ -178,6 +178,11 @@ On mobile the columns stack into single-column lists.
 ## Carousel controls
 Owl Carousel and Swiper both appear. Dots are small circles (50% radius), white on imagery and grey/maroon on light surfaces. Arrows are Font Awesome light icons. The offer carousel has 50px inline padding for its arrows.
 
+## Back to top
+Source `#back-top`: a 40px circle, bg `#681235` (`--color-brand-primary-action`), white Font Awesome light `angle-up` (25px), `position: fixed`, 5px from the right and 120px from the bottom at every width, `z-index: 500`. It fades in (jQuery, 400ms) once the page is scrolled more than 100px and out again at 100px or less. Clicking scrolls to the top in 500ms (jQuery "swing"), with no `#top` in the URL. Hover and focus don't change its look. Below 1200px the source scrolls `body`, so its button only reacts to touch scrolling there.
+
+**In this project:** `scripts/back-to-top.js` (loaded on every page from `loadDelayed`) and `styles/lazy-styles.css`. It's a `<button>` named "Back to top" in the page language, with an SVG chevron (`icons/angle-up.svg`). It works the same on every device and stays out of the tab order while hidden. Reduced motion jumps to the top. After use, focus moves to the first visible item at the top of the page. It sits just below the header (`calc(var(--z-header) - 1)`), so the mobile menu and modals cover it.
+
 ## Modal
 Bootstrap modals (Log In, Forgot Password): title 20px/500, fixed centred. They weren't opened during the audit, so their dimensions are not verified.
 

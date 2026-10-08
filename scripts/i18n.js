@@ -53,6 +53,9 @@ const TEXTS = {
   accountTitle: {
     en: 'Account', zh: '账户', 'zh-HK': '帳戶', ja: 'アカウント', pt: 'Conta',
   },
+  backToTop: {
+    en: 'Back to top', zh: '返回顶部', 'zh-HK': '返回頂部', ja: 'ページの先頭へ戻る', pt: 'Voltar ao topo',
+  },
   // lounge badges in the menu (icon name in camel case)
   railwayLounge: {
     en: 'Railway lounge', zh: '铁路贵宾室', 'zh-HK': '鐵路貴賓室', ja: '鉄道ラウンジ', pt: 'Lounge ferroviário',
