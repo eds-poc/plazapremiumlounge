@@ -41,6 +41,58 @@ if (window.trustedTypes && window.trustedTypes.createPolicy) {
   });
 }
 
+const LOADER_ID = 'spinner-overlay';
+let loader;
+
+/**
+ * Shows the full-page loader (styled in styles.css), creating it on first use.
+ */
+export function showLoader() {
+  if (!loader) {
+    loader = document.getElementById(LOADER_ID);
+    if (!loader) {
+      loader = document.createElement('div');
+      loader.id = LOADER_ID;
+      loader.innerHTML = '<div id="global-spinner"><img src="/icons/PPL-loading-v2.webp" width="320" height="auto" alt="Loading..."></div>';
+    }
+  }
+  if (!loader.isConnected) document.body.prepend(loader);
+}
+
+/**
+ * Hides the full-page loader.
+ */
+export function hideLoader() {
+  loader?.remove();
+}
+
+/**
+ * Shows the loader as soon as a link click leaves the page, and hides it again when the
+ * browser restores the page from its back/forward cache.
+ */
+function installNavigationLoader() {
+  // on window, so it runs after the document-level handlers (e.g. modal links) had their say
+  window.addEventListener('click', (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+      return;
+    }
+    const link = e.target.closest('a[href]');
+    if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
+    const url = new URL(link.href, window.location.href);
+    // mailto:, tel:, javascript: etc. don't leave the page
+    if (!['http:', 'https:'].includes(url.protocol)) return;
+    // an anchor on the current page doesn't load a new page
+    const { origin, pathname, search } = window.location;
+    if (url.hash && url.origin === origin && url.pathname === pathname && url.search === search) {
+      return;
+    }
+    showLoader();
+  });
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) hideLoader();
+  });
+}
+
 /**
  * load fonts.css and set a session storage flag
  */
@@ -219,8 +271,14 @@ function loadDelayed() {
 }
 
 async function loadPage() {
-  await loadEager(document);
-  await loadLazy(document);
+  showLoader();
+  try {
+    await loadEager(document);
+    await loadLazy(document);
+    installNavigationLoader();
+  } finally {
+    hideLoader();
+  }
   loadDelayed();
 }
 
