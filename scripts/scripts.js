@@ -272,13 +272,10 @@ function loadDelayed() {
 
 async function loadPage() {
   showLoader();
-  try {
-    await loadEager(document);
-    await loadLazy(document);
-    installNavigationLoader();
-  } finally {
-    hideLoader();
-  }
+  await loadEager(document);
+  hideLoader();
+  await loadLazy(document);
+  installNavigationLoader();
   loadDelayed();
 }
 
