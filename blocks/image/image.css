@@ -1,0 +1,37 @@
+/* image: one authored image at the full content width, at its own shape. Option offer-banner:
+   the source offer page banner (`.pagebannerImg`), a fixed 5:2 shape, centred and cropped to fill,
+   30px above what follows. Option border-rounded: the source's 20px rounded corners */
+.image .image-media picture,
+.image .image-media img {
+  display: block;
+  width: 100%;
+}
+
+.image .image-media img {
+  height: auto;
+}
+
+.image .image-link {
+  display: block;
+}
+
+.image .image-link:focus-visible {
+  outline-offset: 2px;
+}
+
+.image.offer-banner {
+  margin-bottom: var(--spacing-9);
+}
+
+.image.offer-banner .image-media img {
+  /* one-off: the source banner's 40% height (padding-bottom: 40%) */
+  aspect-ratio: 5 / 2;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* (on the link too, so its focus ring follows the corners) */
+.image.border-rounded .image-link,
+.image.border-rounded .image-media img {
+  border-radius: var(--radius-lg);
+}
