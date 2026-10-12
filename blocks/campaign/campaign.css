@@ -4,33 +4,33 @@
    campaign's own palette and type scale (in pt, as the source) are block variables. Text uses
    Arial, as the source renders it (its Plus Jakarta Sans never loads); headings keep the site font */
 .campaign {
-  --campaign-font-text: arial, sans-serif;
+  --campaign-font-text: var(--font-family-campaign);
   --campaign-font-accent: georgia, serif;
   --campaign-maroon: var(--color-brand-primary);
   --campaign-maroon-wash: rgb(83 14 42 / 5%);
   --campaign-maroon-line: rgb(83 14 42 / 10%);
-  --campaign-gold: #ae8f5e;
-  --campaign-cream: #faf6f4;
-  --campaign-ink: #1d1d1d;
-  --campaign-grey: #585956;
-  --campaign-line: #efefef;
-  --campaign-weight-bold: 700;
+  --campaign-gold: var(--color-campaign-gold);
+  --campaign-cream: var(--color-campaign-cream);
+  --campaign-ink: var(--color-campaign-ink);
+  --campaign-grey: var(--color-campaign-grey);
+  --campaign-line: var(--color-campaign-line);
+  --campaign-weight-bold: var(--font-weight-campaign-bold);
   --campaign-size-heading: 28pt;
   --campaign-size-item-title: 12.5pt;
   --campaign-size-text: 11.5pt;
-  --campaign-size-small: 11pt;
-  --campaign-size-label: 10pt;
-  --campaign-letter-spacing-wide: 2px;
-  --campaign-letter-spacing: 1.5px;
-  --campaign-radius-lg: 16px;
+  --campaign-size-small: var(--font-size-campaign-small);
+  --campaign-size-label: var(--font-size-campaign-label);
+  --campaign-letter-spacing-wide: var(--letter-spacing-eyebrow);
+  --campaign-letter-spacing: var(--letter-spacing-campaign);
+  --campaign-radius-lg: var(--radius-campaign);
   --campaign-radius-box: 8px;
   --campaign-icon-box: 44px;
   --campaign-icon: 20px;
-  --campaign-band-padding: 40px 8%;
-  --campaign-gap-lg: 40px;
+  --campaign-band-padding: var(--spacing-campaign-band);
+  --campaign-gap-lg: var(--spacing-campaign-columns);
   --campaign-gap: 18px;
   --campaign-gap-xs: 4px;
-  --campaign-gap-2xs: 6px;
+  --campaign-gap-2xs: var(--spacing-campaign-xs);
   --campaign-shadow-panel: 0 4px 16px rgb(0 0 0 / 3%);
 
   display: flex;

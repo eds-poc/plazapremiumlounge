@@ -55,6 +55,12 @@
         "usage": "Coral accent in offer promotion panels",
         "evidence": "computed rgb(234 115 104) on home/offers",
         "confidence": "Low"
+      },
+      "--color-campaign-gold": {
+        "value": "#ae8f5e",
+        "usage": "Campaign accent: eyebrows, serif accent words, planner thumb and number",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
+        "confidence": "High"
       }
     },
     "surface colors": {
@@ -92,6 +98,12 @@
         "value": "rgb(0 0 0 / 50%)",
         "usage": "Modal and View Profile panel backdrop (Bootstrap modal backdrop)",
         "evidence": "refactor 2026-10-07: shared by several components",
+        "confidence": "High"
+      },
+      "--color-campaign-cream": {
+        "value": "#faf6f4",
+        "usage": "Campaign surfaces: the Campaign panel, the Planner band",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
         "confidence": "High"
       }
     },
@@ -149,6 +161,18 @@
         "usage": "Link hover color",
         "evidence": "style.css a:hover { color: #999 }",
         "confidence": "High"
+      },
+      "--color-campaign-ink": {
+        "value": "#1d1d1d",
+        "usage": "Campaign body text",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
+        "confidence": "High"
+      },
+      "--color-campaign-grey": {
+        "value": "#585956",
+        "usage": "Campaign secondary text: intro, item and planner text, slider ticks",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
+        "confidence": "High"
       }
     },
     "border colors": {
@@ -180,6 +204,12 @@
         "value": "rgb(0 0 0 / 17.6%)",
         "usage": "Modal, View Profile panel and tiles popover border (Bootstrap modal border)",
         "evidence": "refactor 2026-10-07: shared by several components",
+        "confidence": "High"
+      },
+      "--color-campaign-line": {
+        "value": "#efefef",
+        "usage": "Campaign panel and planner card borders, the Campaign band line",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
         "confidence": "High"
       }
     },
@@ -408,6 +438,36 @@
         "usage": "Buttons, form inputs and choices, tiles popover, modal title",
         "evidence": "refactor 2026-10-07: shared by several components",
         "confidence": "High"
+      },
+      "--font-family-campaign": {
+        "value": "arial, sans-serif",
+        "usage": "Campaign text (the source renders its campaigns in Arial)",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
+        "confidence": "High"
+      },
+      "--font-weight-campaign-bold": {
+        "value": "700",
+        "usage": "Campaign bold text and labels",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
+        "confidence": "High"
+      },
+      "--font-size-campaign-small": {
+        "value": "11pt",
+        "usage": "Campaign small text: item and planner text, badges",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
+        "confidence": "High"
+      },
+      "--font-size-campaign-label": {
+        "value": "10pt",
+        "usage": "Campaign labels: eyebrows, panel title, slider label",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
+        "confidence": "High"
+      },
+      "--letter-spacing-campaign": {
+        "value": "1.5px",
+        "usage": "Campaign label spacing: panel title, summary eyebrow",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
+        "confidence": "High"
       }
     },
     "spacing": {
@@ -534,6 +594,24 @@
         "value": "9px",
         "usage": "Large buttons (source .btnLg): block padding, also the featured carousel and tiles buttons",
         "evidence": "refactor 2026-10-07: shared by several components",
+        "confidence": "High"
+      },
+      "--spacing-campaign-band": {
+        "value": "40px 8%",
+        "usage": "Campaign band padding (Campaign and Planner blocks)",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
+        "confidence": "High"
+      },
+      "--spacing-campaign-columns": {
+        "value": "40px",
+        "usage": "Gap between the 7:5 columns from 768px",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
+        "confidence": "High"
+      },
+      "--spacing-campaign-xs": {
+        "value": "6px",
+        "usage": "Campaign small gaps: eyebrow pill padding, eyebrow/heading margins",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
         "confidence": "High"
       }
     },
@@ -670,6 +748,12 @@
         "value": "50%",
         "usage": "Avatars, radio/checkbox, icon buttons",
         "evidence": "computed .form-check-input",
+        "confidence": "High"
+      },
+      "--radius-campaign": {
+        "value": "16px",
+        "usage": "Campaign panel and planner card corners",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
         "confidence": "High"
       }
     },
