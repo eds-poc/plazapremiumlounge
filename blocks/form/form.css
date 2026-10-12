@@ -5,8 +5,8 @@
   --form-focus-ring: var(--shadow-focus);
   --form-button-focus-ring: 0 0 0 4px rgb(49 132 253 / 50%);
 
-  /* one-off: the source (Bootstrap g-3) 16px gap between rows */
-  --form-gap: 16px;
+  /* the source (Bootstrap g-3) gap between rows */
+  --form-gap: var(--spacing-bootstrap-3);
 
   /* one-off: the source language and currency choices and Apply button */
   --form-choice-selected: #711b45;

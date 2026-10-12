@@ -312,6 +312,12 @@
         "evidence": "style.css h1.title",
         "confidence": "High"
       },
+      "--font-size-6xl": {
+        "value": "50px",
+        "usage": "Large multi-line heading (Title option large-multiline-heading) from 768px",
+        "evidence": "About page Core Values heading lines (computed 50px/60px)",
+        "confidence": "High"
+      },
       "--line-height-tight": {
         "value": "1.15",
         "usage": "Hero title",
@@ -491,6 +497,18 @@
         "value": "24px",
         "usage": "Space between stacked content: featured carousel media and heading, footer column text, lounge list actions",
         "evidence": "refactor 2026-10-07: shared by several components",
+        "confidence": "High"
+      },
+      "--spacing-bootstrap-3": {
+        "value": "16px",
+        "usage": "Bootstrap spacer 3 (1rem): form row gap, space above a large multi-line title",
+        "evidence": "source utility classes g-3, mt-3 (form, About Core Values)",
+        "confidence": "High"
+      },
+      "--spacing-bootstrap-5": {
+        "value": "48px",
+        "usage": "Bootstrap spacer 5 (3rem): featured carousel gutter and large-text title gap, space below a large multi-line title",
+        "evidence": "source utility classes gx-5, mb-5 (featured card, About Core Values)",
         "confidence": "High"
       },
       "--button-large-padding-block": {

@@ -6,7 +6,7 @@ title, e.g. the homepage Explore, Latest Offers and Our Brands titles.
 
 ## Table: one cell
 
-| Title (left, short, large) |
+| Title (compact, large) |
 | --- |
 | LATEST OFFERS<br>## Relax, eat, drink, work and refresh before flying. |
 
@@ -20,14 +20,15 @@ title, e.g. the homepage Explore, Latest Offers and Our Brands titles.
 
 ## Options
 
-Add them in brackets after the block name, e.g. `Title (left, short)`.
+Add them in brackets after the block name, e.g. `Title (center, compact)`.
 
 | Option | Effect | Source example |
 | --- | --- | --- |
-| *(none)* | Left on mobile, centred from 768px | Explore, Our Brands |
-| `left` | Always left-aligned | Offers, FAQ titles |
-| `short` | At most 600px wide from 992px | Latest Offers, The Company |
+| *(none)* | Always left-aligned | Offers, FAQ titles |
+| `center` | Left on mobile, centred from 768px | Explore, Our Brands |
+| `compact` | At most 600px wide from 992px | Latest Offers, The Company |
 | `large` | A heading 2 stays 32px on mobile, too | Latest Offers |
+| `large-multiline-heading` | A large heading over several lines: 32px on mobile, 50px from 768px, with 16px above and 48px below the title. Put each line on its own soft line break (Shift+Enter); lines are 5px apart | About, Core Values |
 
 ## Spacing
 

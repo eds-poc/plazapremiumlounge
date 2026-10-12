@@ -8,6 +8,12 @@
   flex-direction: column;
 }
 
+/* text right before the accordion (About "Explore"): the source's 20px spacer below it */
+.default-content-wrapper + .accordion-wrapper > .accordion {
+  /* padding, so it adds to the text's own margin rather than collapsing into it */
+  padding-top: var(--spacing-7);
+}
+
 .accordion .accordion-item {
   border-bottom: var(--base-border-width) solid var(--color-border-subtle);
   background-color: var(--color-background);
