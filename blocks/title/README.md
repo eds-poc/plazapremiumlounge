@@ -29,6 +29,7 @@ Add them in brackets after the block name, e.g. `Title (center, compact)`.
 | `compact` | At most 600px wide from 992px | Latest Offers, The Company |
 | `large` | A heading 2 stays 32px on mobile, too | Latest Offers |
 | `large-multiline-heading` | A large heading over several lines: 32px on mobile, 50px from 768px, with 16px above and 48px below the title. Put each line on its own soft line break (Shift+Enter); lines are 5px apart | About, Core Values |
+| `text-lg` | A large title: 28px, 40px from 1200px, the same at every heading level, in the font's own line height | Offer page titles (Rogers Bank) |
 
 ## Spacing
 

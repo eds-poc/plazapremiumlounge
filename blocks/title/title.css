@@ -35,6 +35,16 @@
   line-height: calc(var(--line-height-heading) * 1em + var(--spacing-2));
 }
 
+/* option text-lg: a large title, 28px and 40px from 1200px, the same for every heading level
+   (source `h2.title.text-lg`, e.g. the offer page titles) */
+.title.text-lg .title-heading {
+  margin-bottom: var(--section-title-gap);
+  font-size: var(--heading-large-size);
+
+  /* the font's own line height, as the source */
+  line-height: normal;
+}
+
 /* intro text under the heading (source `.fs-5.my-4.width500`) */
 .title .title-intro {
   /* one-off: the source's 500px intro width */

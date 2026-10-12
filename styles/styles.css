@@ -100,6 +100,7 @@
   --heading-section-size: 18px;
   --heading-hero-size: 32px;
   --heading-card-size: 18px;
+  --heading-large-size: 28px;
 
   /* spacing */
   --spacing-1: 2px;
@@ -120,6 +121,7 @@
   --button-large-padding-block: 9px;
   --section-padding-block: 25px;
   --section-title-gap: 25px;
+  --section-inset-padding: 0;
 
   /* layout */
   --container-max-width: 1390px;
@@ -181,6 +183,7 @@
     --section-padding-block: 35px;
     --container-padding: 12px;
     --container-wide-padding: 50px;
+    --section-inset-padding: 15px;
   }
 }
 
@@ -188,6 +191,7 @@
   :root {
     --section-padding-block: 50px;
     --section-title-gap: 35px;
+    --section-inset-padding: 70px;
   }
 }
 
@@ -195,6 +199,7 @@
   :root {
     --heading-section-size: 32px;
     --heading-card-size: 24px;
+    --heading-large-size: 40px;
   }
 }
 
@@ -601,6 +606,20 @@ main .section:is(.maroon, [data-background='maroon']) a.button.tertiary:focus-vi
    wherever it is authored (page, nav, footer or a fragment) */
 .section[data-modal] {
   display: none;
+}
+
+/* section style inset: the source offer pages' body section (`section.offer`), narrower than the
+   standard container (15px more at the sides from 768px, 70px from 992px), 25px above and below,
+   no space above from 992px (it follows the banner section) */
+main>.section.inset {
+  padding: var(--spacing-8) var(--section-inset-padding);
+}
+
+@media (width >=992px) {
+  main>.section.inset {
+    padding-top: 0;
+    padding-bottom: var(--section-padding-block);
+  }
 }
 
 main .section.wide>div {
