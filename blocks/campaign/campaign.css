@@ -1,0 +1,180 @@
+/* campaign: the intro of a partner campaign, as the source offer pages' `#ppl-campaign-container`
+   first band (e.g. Rogers Bank): an eyebrow pill, a light maroon heading with a gold serif accent,
+   intro and text, beside a cream panel with icon items. Stacked on mobile, 7:5 from 768px. The
+   campaign's own palette and type scale (in pt, as the source) are block variables. Text uses
+   Arial, as the source renders it (its Plus Jakarta Sans never loads); headings keep the site font */
+.campaign {
+  --campaign-font-text: arial, sans-serif;
+  --campaign-font-accent: georgia, serif;
+  --campaign-maroon: var(--color-brand-primary);
+  --campaign-maroon-wash: rgb(83 14 42 / 5%);
+  --campaign-maroon-line: rgb(83 14 42 / 10%);
+  --campaign-gold: #ae8f5e;
+  --campaign-cream: #faf6f4;
+  --campaign-ink: #1d1d1d;
+  --campaign-grey: #585956;
+  --campaign-line: #efefef;
+  --campaign-weight-bold: 700;
+  --campaign-size-heading: 28pt;
+  --campaign-size-item-title: 12.5pt;
+  --campaign-size-text: 11.5pt;
+  --campaign-size-small: 11pt;
+  --campaign-size-label: 10pt;
+  --campaign-letter-spacing-wide: 2px;
+  --campaign-letter-spacing: 1.5px;
+  --campaign-radius-lg: 16px;
+  --campaign-radius-box: 8px;
+  --campaign-icon-box: 44px;
+  --campaign-icon: 20px;
+  --campaign-band-padding: 40px 8%;
+  --campaign-gap-lg: 40px;
+  --campaign-gap: 18px;
+  --campaign-gap-xs: 4px;
+  --campaign-gap-2xs: 6px;
+  --campaign-shadow-panel: 0 4px 16px rgb(0 0 0 / 3%);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-9);
+  padding: var(--campaign-band-padding);
+  border-bottom: var(--base-border-width) solid var(--campaign-line);
+  background-color: var(--color-background);
+  color: var(--campaign-ink);
+  font-family: var(--campaign-font-text);
+}
+
+.campaign * {
+  box-sizing: border-box;
+}
+
+/* the source's 30px spacer between the page title and the campaign */
+.title-wrapper + .campaign-wrapper {
+  padding-top: var(--spacing-9);
+}
+
+/* eyebrow pill (source `.eyebrow-tag`) */
+.campaign .campaign-tag {
+  display: inline-block;
+  margin: 0 0 var(--campaign-gap);
+  padding: var(--campaign-gap-2xs) var(--spacing-bootstrap-3);
+  border: var(--base-border-width) solid var(--campaign-maroon-line);
+  border-radius: var(--radius-pill);
+  background-color: var(--campaign-maroon-wash);
+  color: var(--campaign-maroon);
+  font-size: var(--campaign-size-label);
+  font-weight: var(--campaign-weight-bold);
+  letter-spacing: var(--campaign-letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+.campaign .campaign-heading {
+  margin: 0 0 var(--campaign-gap);
+  color: var(--campaign-maroon);
+  font-size: var(--campaign-size-heading);
+  font-weight: var(--font-weight-light);
+  line-height: 1.3;
+}
+
+/* italic text in the heading: the gold serif accent (source `.text-serif-italic`) */
+.campaign .campaign-heading em {
+  color: var(--campaign-gold);
+  font-family: var(--campaign-font-accent);
+  font-weight: var(--font-weight-regular);
+}
+
+.campaign .campaign-intro {
+  margin: 0 0 var(--campaign-gap);
+  color: var(--campaign-grey);
+  font-size: var(--font-size-xl);
+  line-height: 1.6;
+}
+
+.campaign .campaign-text {
+  margin: 0 0 var(--campaign-gap);
+  font-size: var(--campaign-size-text);
+  line-height: 1.7;
+}
+
+/* (the site's strong is medium, the campaign's bold) */
+.campaign .campaign-text strong {
+  color: var(--campaign-maroon);
+  font-weight: var(--campaign-weight-bold);
+}
+
+/* the panel (source `.access-panel`) */
+.campaign .campaign-panel {
+  position: relative;
+  overflow: hidden;
+  padding: var(--spacing-9);
+  border: var(--base-border-width) solid var(--campaign-line);
+  border-radius: var(--campaign-radius-lg);
+  background-color: var(--campaign-cream);
+  box-shadow: var(--campaign-shadow-panel);
+}
+
+.campaign .campaign-panel-title {
+  margin: 0 0 var(--spacing-stack);
+  color: var(--campaign-gold);
+  font-family: var(--font-family-primary);
+  font-size: var(--campaign-size-label);
+  font-weight: var(--campaign-weight-bold);
+  line-height: var(--line-height-heading);
+  letter-spacing: var(--campaign-letter-spacing);
+  text-transform: uppercase;
+}
+
+.campaign .campaign-items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.campaign .campaign-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-bootstrap-3);
+  margin-bottom: var(--spacing-stack);
+}
+
+.campaign .campaign-item:last-child {
+  margin-bottom: 0;
+}
+
+.campaign .campaign-icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--campaign-icon-box);
+  height: var(--campaign-icon-box);
+  border-radius: var(--campaign-radius-box);
+  background-color: var(--campaign-maroon-wash);
+}
+
+.campaign .campaign-icon .icon {
+  width: var(--campaign-icon);
+  height: var(--campaign-icon);
+}
+
+.campaign .campaign-item-title {
+  margin: 0 0 var(--campaign-gap-xs);
+  color: var(--campaign-maroon);
+  font-size: var(--campaign-size-item-title);
+  font-weight: var(--campaign-weight-bold);
+}
+
+.campaign .campaign-item-body p {
+  margin: 0;
+  color: var(--campaign-grey);
+  font-size: var(--campaign-size-small);
+  line-height: 1.5;
+}
+
+@media (width >=768px) {
+  .campaign {
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    gap: var(--campaign-gap-lg);
+    align-items: center;
+  }
+}

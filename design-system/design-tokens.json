@@ -394,6 +394,15 @@
         "evidence": "computed 18px below 1200px, 24px at 1200px+",
         "confidence": "High"
       },
+      "--heading-large-size": {
+        "value": "28px",
+        "responsive": {
+          "(width >= 1200px)": "40px"
+        },
+        "usage": "Large titles (Title option text-lg): offer page titles, any heading level",
+        "evidence": "source h2.title.text-lg on the offer pages (28px, 40px from 1200px)",
+        "confidence": "High"
+      },
       "--line-height-relaxed": {
         "value": "1.5",
         "usage": "Buttons, form inputs and choices, tiles popover, modal title",
@@ -491,6 +500,16 @@
         },
         "usage": "Space below a section H2 (mobile-first)",
         "evidence": "style.css section h2: 25px default, 35px @>=992",
+        "confidence": "High"
+      },
+      "--section-inset-padding": {
+        "value": "0",
+        "responsive": {
+          "(width >= 768px)": "15px",
+          "(width >= 992px)": "70px"
+        },
+        "usage": "Side padding of the inset section style (the source offer page body, section.offer)",
+        "evidence": "source section.offer padding: 25px 0 / 25px 15px @768 / 0 70px 50px @992",
         "confidence": "High"
       },
       "--spacing-stack": {
