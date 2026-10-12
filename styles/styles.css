@@ -52,6 +52,13 @@
   --color-text-secondary: #666;
   --color-text-muted: #6b6b6b;
   --color-text-control: #212529;
+
+  /* partner campaign palette (offer pages, e.g. Rogers Bank): Campaign and Planner blocks */
+  --color-campaign-gold: #ae8f5e;
+  --color-campaign-cream: #faf6f4;
+  --color-campaign-ink: #1d1d1d;
+  --color-campaign-grey: #585956;
+  --color-campaign-line: #efefef;
   --color-text-subtle: #999;
   --color-text-inverse: #fff;
   --color-link: var(--color-brand-primary);
@@ -74,6 +81,9 @@
   --font-family-primary: polysans, polysans-fallback, sans-serif;
   --font-family-display: recklessneue, sans-serif;
   --font-family-nav: helvetica, sans-serif;
+
+  /* the campaign text font: the source renders its campaigns in Arial (its Plus Jakarta Sans never loads) */
+  --font-family-campaign: arial, sans-serif;
   --font-weight-light: 300;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
@@ -95,6 +105,10 @@
   --line-height-relaxed: 1.5;
   --letter-spacing-label: 1px;
   --letter-spacing-eyebrow: 2px;
+  --letter-spacing-campaign: 1.5px;
+  --font-weight-campaign-bold: 700;
+  --font-size-campaign-small: 11pt;
+  --font-size-campaign-label: 10pt;
   --body-font-size: 14px;
   --heading-page-size: 30px;
   --heading-section-size: 18px;
@@ -119,6 +133,9 @@
   --spacing-bootstrap-3: 16px;
   --spacing-bootstrap-5: 48px;
   --button-large-padding-block: 9px;
+  --spacing-campaign-band: 40px 8%;
+  --spacing-campaign-columns: 40px;
+  --spacing-campaign-xs: 6px;
   --section-padding-block: 25px;
   --section-title-gap: 25px;
   --section-inset-padding: 0;
@@ -146,6 +163,7 @@
   --radius-input: 25px;
   --radius-xl: 30px;
   --radius-pill: 999px;
+  --radius-campaign: 16px;
   --radius-circle: 50%;
 
   /* shadows */

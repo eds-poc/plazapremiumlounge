@@ -1,0 +1,225 @@
+/* planner: the source offer pages' pass planner (`.planner-card` on a cream band, e.g. Rogers
+   Bank): a centred header, a guest slider with stop labels, and a maroon summary that updates.
+   Stacked on mobile, slider and summary side by side (7:5) from 768px. Campaign palette and type
+   from the shared campaign tokens; planner-only values are block variables (in pt, as the source) */
+.planner {
+  --planner-maroon: var(--color-brand-primary);
+  --planner-maroon-light: var(--color-brand-primary-action);
+  --planner-gold-wash: rgb(174 143 94 / 15%);
+  --planner-pink: #e0b2d3;
+  --planner-blush: #f2d6d3;
+  --planner-mist: #ccc;
+  --planner-track: #e8e8e8;
+  --planner-badge-bg: rgb(0 0 0 / 25%);
+  --planner-size-heading: 21pt;
+  --planner-size-number: 44pt;
+  --planner-size-tick: 9.5pt;
+  --planner-badge-padding-inline: 14px;
+  --planner-badge-padding-block: 4px;
+  --planner-track-height: 6px;
+  --planner-thumb: 20px;
+  --planner-thumb-moz: 18px;
+  --planner-thumb-border: 2.5px;
+  --planner-shadow-card: 0 8px 32px rgb(0 0 0 / 6%);
+  --planner-shadow-summary: 0 8px 24px rgb(83 14 42 / 20%);
+  --planner-shadow-thumb: 0 2px 8px rgb(83 14 42 / 30%);
+
+  padding: var(--spacing-campaign-band);
+  background-color: var(--color-campaign-cream);
+  color: var(--color-campaign-ink);
+  font-family: var(--font-family-campaign);
+}
+
+.planner * {
+  box-sizing: border-box;
+}
+
+.planner .planner-card {
+  padding: var(--spacing-9);
+  border: var(--base-border-width) solid var(--color-campaign-line);
+  border-radius: var(--radius-campaign);
+  background-color: var(--color-background);
+  box-shadow: var(--planner-shadow-card);
+}
+
+/* header: gold eyebrow, light maroon heading (the same at every level), grey subtitle */
+.planner .planner-header {
+  margin-bottom: var(--spacing-9);
+  text-align: center;
+}
+
+.planner .planner-eyebrow {
+  margin: 0 0 var(--spacing-campaign-xs);
+  color: var(--color-campaign-gold);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-campaign-label);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: var(--line-height-heading);
+  letter-spacing: var(--letter-spacing-eyebrow);
+  text-transform: uppercase;
+}
+
+.planner .planner-heading {
+  margin: 0 0 var(--spacing-campaign-xs);
+  color: var(--planner-maroon);
+  font-size: var(--planner-size-heading);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-heading);
+}
+
+.planner .planner-sub {
+  margin: 0;
+  color: var(--color-campaign-grey);
+  font-size: var(--font-size-campaign-small);
+}
+
+.planner .planner-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-9);
+}
+
+/* the slider: a column, so the range's margins add to the label row's instead of collapsing (as
+   the source's inline range input); the 24px below is part of the box, as the source */
+.planner .planner-controls {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--spacing-stack);
+}
+
+.planner .planner-slider-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-5);
+}
+
+.planner .planner-slider-label {
+  color: var(--planner-maroon);
+  font-size: var(--font-size-campaign-label);
+  font-weight: var(--font-weight-campaign-bold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+.planner .planner-slider-badge {
+  padding: var(--planner-badge-padding-block) var(--planner-badge-padding-inline);
+  border-radius: var(--radius-pill);
+  background-color: var(--planner-gold-wash);
+  color: var(--planner-maroon);
+  font-size: var(--font-size-campaign-small);
+  font-weight: var(--font-weight-campaign-bold);
+}
+
+.planner .planner-slider {
+  width: 100%;
+  height: var(--planner-track-height);
+  margin: var(--spacing-6) 0;
+  border-radius: calc(var(--planner-track-height) / 2);
+  background: var(--planner-track);
+  appearance: none;
+  cursor: pointer;
+}
+
+/* the source hides the focus outline; keep it for keyboard users only */
+.planner .planner-slider:focus-visible {
+  outline: 2px solid var(--planner-maroon);
+  outline-offset: var(--spacing-3);
+}
+
+.planner .planner-slider:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.planner .planner-slider::-webkit-slider-thumb {
+  width: var(--planner-thumb);
+  height: var(--planner-thumb);
+  border: var(--planner-thumb-border) solid var(--color-background);
+  border-radius: var(--radius-circle);
+  background: var(--color-campaign-gold);
+  box-shadow: var(--planner-shadow-thumb);
+  appearance: none;
+}
+
+.planner .planner-slider::-moz-range-thumb {
+  width: var(--planner-thumb-moz);
+  height: var(--planner-thumb-moz);
+  border: var(--planner-thumb-border) solid var(--color-background);
+  border-radius: var(--radius-circle);
+  background: var(--color-campaign-gold);
+  box-shadow: var(--planner-shadow-thumb);
+}
+
+.planner .planner-ticks {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-campaign-grey);
+  font-size: var(--planner-size-tick);
+  font-weight: var(--font-weight-campaign-bold);
+}
+
+/* the summary box */
+.planner .planner-summary {
+  padding: var(--spacing-9);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--planner-maroon) 0%, var(--planner-maroon-light) 100%);
+  box-shadow: var(--planner-shadow-summary);
+  color: var(--color-text-inverse);
+  text-align: center;
+}
+
+.planner .planner-summary-eyebrow {
+  margin: 0 0 var(--spacing-4);
+  color: var(--planner-pink);
+  font-size: var(--font-size-campaign-label);
+  font-weight: var(--font-weight-campaign-bold);
+  letter-spacing: var(--letter-spacing-campaign);
+  text-transform: uppercase;
+}
+
+.planner .planner-summary-number {
+  margin: 0;
+  color: var(--color-campaign-gold);
+  font-size: var(--planner-size-number);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: 1;
+}
+
+.planner .planner-summary-label {
+  margin: var(--planner-badge-padding-block) 0 var(--spacing-bootstrap-3);
+  color: var(--planner-mist);
+  font-size: var(--font-size-campaign-label);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+.planner .planner-summary-badge {
+  display: inline-block;
+  margin: 0 0 var(--spacing-bootstrap-3);
+  padding: var(--spacing-campaign-xs) var(--planner-badge-padding-inline);
+  border-radius: var(--radius-xs);
+  background-color: var(--planner-badge-bg);
+  font-family: monospace;
+  font-size: var(--font-size-campaign-small);
+}
+
+.planner .planner-summary-text {
+  margin: 0;
+  color: var(--planner-blush);
+  font-size: var(--font-size-campaign-small);
+  font-style: italic;
+  line-height: var(--line-height-relaxed);
+}
+
+@media (width >=768px) {
+  .planner .planner-card {
+    padding: var(--spacing-campaign-columns);
+  }
+
+  .planner .planner-grid {
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    gap: var(--spacing-campaign-columns);
+    align-items: center;
+  }
+}
