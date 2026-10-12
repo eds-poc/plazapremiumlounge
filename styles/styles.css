@@ -216,20 +216,20 @@ header {
    from 381px (smaller logo), no promo bar from 768px, the 108px desktop bar from 1200px */
 
 /* breakpoint-exception: source logo padding changes at 381px */
-@media (width >= 381px) {
+@media (width >=381px) {
   :root {
     --nav-height: 111px;
   }
 }
 
-@media (width >= 768px) {
+@media (width >=768px) {
   :root {
     --nav-height: 71px;
   }
 }
 
 /* breakpoint-exception: source desktop menu from 1200px */
-@media (width >= 1200px) {
+@media (width >=1200px) {
   :root {
     --nav-height: var(--nav-height-desktop);
   }
@@ -665,7 +665,7 @@ main .section.fixed-width>div {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(244,243,240,.95);
+  background: rgb(244 243 240 / 95%);
   z-index: 99999;
   display: flex;
   align-items: center;
