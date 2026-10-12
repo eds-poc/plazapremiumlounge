@@ -30,6 +30,17 @@ Add them in brackets after the block name, e.g. `Title (center, compact)`.
 | `large` | A heading 2 stays 32px on mobile, too | Latest Offers |
 | `large-multiline-heading` | A large heading over several lines: 32px on mobile, 50px from 768px, with 16px above and 48px below the title. Put each line on its own soft line break (Shift+Enter); lines are 5px apart | About, Core Values |
 | `text-lg` | A large title: 28px, 40px from 1200px, the same at every heading level, in the font's own line height | Offer page titles (Rogers Bank) |
+| `editorial` | A campaign feature header: the eyebrow as a small gold label, a light maroon 28pt heading where *italic* words become a gold serif accent, and the intro as small grey text. The same at every width and heading level. It adds the campaign band spacing: 40px above, 8% at the sides and 40px to what follows | Offer pages, Rogers Bank "Exquisite Comfort" |
+| `center-all` | Centred at every width (`center` is left-aligned on mobile) | Rogers Bank "Exquisite Comfort" |
+
+### Example: editorial
+
+| Title (editorial, center-all) |
+| --- |
+| Exquisite Comfort<br>### More than a lounge. *A legendary experience.*<br>Enjoy exclusive privileges designed to elevate every moment of your pre-departure journey: |
+
+Leave out `center-all` for a left-aligned header, e.g. "Extended Journey Privileges". On an offer
+page, put it in the `inset` section after the Planner, as on the source.
 
 ## Spacing
 

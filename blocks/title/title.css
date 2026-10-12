@@ -58,6 +58,56 @@
   margin-bottom: 0;
 }
 
+/* option editorial: a campaign feature header (source offer pages, e.g. Rogers Bank "Exquisite
+   Comfort"): a small gold label eyebrow, a light maroon heading with *italic* words as a gold
+   serif accent, and a small grey subtitle. The same at every width and heading level; it sits in a
+   campaign band (40px above, 8% at the sides, 40px to what follows) */
+.title.editorial {
+  margin-bottom: var(--spacing-campaign-band-block);
+  padding: var(--spacing-campaign-band-block) var(--spacing-campaign-band-inline) 0;
+}
+
+.title.editorial .title-eyebrow {
+  margin: 0 0 var(--spacing-campaign-xs);
+  color: var(--color-campaign-gold);
+  font-size: var(--font-size-campaign-label);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: var(--line-height-heading);
+  letter-spacing: var(--letter-spacing-eyebrow);
+  text-transform: uppercase;
+}
+
+.title.editorial .title-heading {
+  margin: 0 0 var(--spacing-campaign-gap);
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-campaign-heading);
+  font-weight: var(--font-weight-light);
+  line-height: 1.3;
+}
+
+.title.editorial .title-heading em {
+  color: var(--color-campaign-gold);
+  font-family: var(--font-family-campaign-accent);
+  font-weight: var(--font-weight-regular);
+}
+
+.title.editorial .title-intro {
+  max-width: none;
+  margin: 0;
+  color: var(--color-campaign-grey);
+  font-family: var(--font-family-campaign);
+  font-size: var(--font-size-campaign-small);
+}
+
+/* option center-all: centred at every width (option center is left-aligned on mobile) */
+.title.center-all {
+  text-align: center;
+}
+
+.title.center-all .title-intro {
+  margin-inline: auto;
+}
+
 @media (width >=768px) {
   .title.center {
     text-align: center;

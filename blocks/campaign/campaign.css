@@ -5,7 +5,7 @@
    Arial, as the source renders it (its Plus Jakarta Sans never loads); headings keep the site font */
 .campaign {
   --campaign-font-text: var(--font-family-campaign);
-  --campaign-font-accent: georgia, serif;
+  --campaign-font-accent: var(--font-family-campaign-accent);
   --campaign-maroon: var(--color-brand-primary);
   --campaign-maroon-wash: rgb(83 14 42 / 5%);
   --campaign-maroon-line: rgb(83 14 42 / 10%);
@@ -15,7 +15,7 @@
   --campaign-grey: var(--color-campaign-grey);
   --campaign-line: var(--color-campaign-line);
   --campaign-weight-bold: var(--font-weight-campaign-bold);
-  --campaign-size-heading: 28pt;
+  --campaign-size-heading: var(--font-size-campaign-heading);
   --campaign-size-item-title: 12.5pt;
   --campaign-size-text: 11.5pt;
   --campaign-size-small: var(--font-size-campaign-small);
@@ -28,7 +28,7 @@
   --campaign-icon: 20px;
   --campaign-band-padding: var(--spacing-campaign-band);
   --campaign-gap-lg: var(--spacing-campaign-columns);
-  --campaign-gap: 18px;
+  --campaign-gap: var(--spacing-campaign-gap);
   --campaign-gap-xs: 4px;
   --campaign-gap-2xs: var(--spacing-campaign-xs);
   --campaign-shadow-panel: 0 4px 16px rgb(0 0 0 / 3%);
