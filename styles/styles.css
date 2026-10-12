@@ -88,6 +88,7 @@
   --font-size-3xl: 32px;
   --font-size-4xl: 40px;
   --font-size-5xl: 42px;
+  --font-size-6xl: 50px;
   --line-height-tight: 1.15;
   --line-height-heading: 1.2;
   --line-height-body: 1.4;
@@ -114,6 +115,8 @@
   --spacing-11: 50px;
   --spacing-12: 80px;
   --spacing-stack: 24px;
+  --spacing-bootstrap-3: 16px;
+  --spacing-bootstrap-5: 48px;
   --button-large-padding-block: 9px;
   --section-padding-block: 25px;
   --section-title-gap: 25px;

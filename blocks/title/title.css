@@ -1,5 +1,5 @@
-/* title: the source's section and page titles (title-wrapper). Left-aligned on mobile and
-   centred from 768px (option left: always left); the heading uses the global heading sizes */
+/* title: the source's section and page titles (title-wrapper). Left-aligned (option center:
+   centred from 768px); the heading uses the global heading sizes */
 .title {
   text-align: left;
 }
@@ -18,6 +18,21 @@
 /* option large: the section heading stays 32px on mobile (source "Latest Offers") */
 .title.large h2.title-heading {
   font-size: var(--font-size-3xl);
+}
+
+/* option large-multiline-heading: a large heading over several lines (soft line breaks), 32px on
+   mobile and 50px from 768px, lines 5px apart, with the source's space around it (About "Core
+   Values", `.mt-3.mb-5`) */
+.title.large-multiline-heading {
+  margin-top: var(--spacing-bootstrap-3);
+  margin-bottom: var(--spacing-bootstrap-5);
+}
+
+.title.large-multiline-heading .title-heading {
+  /* the 5px line gap is extra line height; trim its half above the first and below the last line */
+  margin: calc(var(--spacing-2) / -2) 0;
+  font-size: var(--font-size-3xl);
+  line-height: calc(var(--line-height-heading) * 1em + var(--spacing-2));
 }
 
 /* intro text under the heading (source `.fs-5.my-4.width500`) */
@@ -46,6 +61,10 @@
 
   .title.large h2.title-heading {
     font-size: var(--heading-section-size);
+  }
+
+  .title.large-multiline-heading .title-heading {
+    font-size: var(--font-size-6xl);
   }
 
   /* page title (h1.title): 32px until the 42px desktop size */

@@ -2,7 +2,7 @@
 .featured-carousel {
   --fc-padding: 30px;
   --fc-padding-inline: var(--fc-padding);
-  --fc-gutter: 48px;
+  --fc-gutter: var(--spacing-bootstrap-5);
 
   position: relative;
   isolation: isolate;
@@ -146,7 +146,7 @@
 }
 
 .featured-carousel.text-large .featured-carousel-content > .featured-carousel-title {
-  margin: 0 0 48px;
+  margin: 0 0 var(--spacing-bootstrap-5);
 }
 
 .featured-carousel .featured-carousel-content > .featured-carousel-subtitle {
