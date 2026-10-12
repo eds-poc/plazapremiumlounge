@@ -1,7 +1,7 @@
 /* form: measured from the source login and forgot-password forms (Bootstrap fields, 16px apart) */
 .form .form-form {
   /* one-off: the source (Bootstrap) input text colour and button focus ring */
-  --form-input-color: #212529;
+  --form-input-color: var(--color-text-control);
   --form-focus-ring: var(--shadow-focus);
   --form-button-focus-ring: 0 0 0 4px rgb(49 132 253 / 50%);
 
