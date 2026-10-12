@@ -1,0 +1,152 @@
+/* accordion: flush items with a line under each, as the source accordions (About "Awards and
+   Milestones"): 20px question, an arrow that turns down when open, grey answer text. Mobile-first:
+   1 item per row; option columns-2: 2 from 576px; option columns-3: 2 from 576px, 3 from 768px */
+.accordion {
+  /* the open/close height animation (browsers without it open instantly) */
+  interpolate-size: allow-keywords;
+  display: flex;
+  flex-direction: column;
+}
+
+.accordion .accordion-item {
+  border-bottom: var(--base-border-width) solid var(--color-border-subtle);
+  background-color: var(--color-background);
+}
+
+/* the darker line above the first row */
+.accordion .accordion-item:first-child {
+  /* one-off: the source's #999 top line */
+  border-top: var(--base-border-width) solid #999;
+}
+
+.accordion .accordion-question {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-8) 0;
+  color: var(--color-text-control);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-heading);
+  list-style: none;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.accordion .accordion-question::-webkit-details-marker {
+  display: none;
+}
+
+/* the arrow (source Font Awesome arrow-right), turning down when open */
+.accordion .accordion-question::after {
+  content: '';
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0 var(--spacing-6) 0 auto;
+  background-color: currentcolor;
+  mask: url('../../icons/nav-arrow-right.svg') center / contain no-repeat;
+  transition: transform var(--duration-short) var(--ease-standard);
+}
+
+.accordion .accordion-question:focus-visible {
+  outline-offset: -2px;
+}
+
+.accordion .accordion-item[open] > .accordion-question {
+  color: var(--color-brand-primary);
+}
+
+.accordion .accordion-item[open] > .accordion-question::after {
+  transform: rotate(90deg);
+}
+
+/* the answer slides open and closed (source Bootstrap collapse: 0.35s ease) */
+.accordion .accordion-item::details-content {
+  block-size: 0;
+  overflow: hidden;
+
+  /* one-off: the source's 0.35s collapse */
+  transition: block-size 0.35s ease, content-visibility 0.35s ease allow-discrete;
+}
+
+.accordion .accordion-item[open]::details-content {
+  block-size: auto;
+}
+
+.accordion .accordion-answer {
+  padding: var(--spacing-4) 0 var(--spacing-7);
+  color: var(--color-text-secondary);
+  font-size: var(--body-font-size);
+  line-height: var(--line-height-body);
+}
+
+.accordion .accordion-answer ul,
+.accordion .accordion-answer ol {
+  margin: 0;
+  padding-left: var(--spacing-7);
+}
+
+/* source list items: 2px 5px padding */
+.accordion .accordion-answer li {
+  padding: var(--spacing-1) var(--spacing-2);
+}
+
+/* a list with a nested list has its item text in paragraphs: no gap below them */
+.accordion .accordion-answer li > p {
+  margin: 0;
+}
+
+.accordion .accordion-answer > :last-child {
+  margin-bottom: 0;
+}
+
+/* columns: items side by side with 20px between them, filling the rows in authored order */
+.accordion.columns-2,
+.accordion.columns-3 {
+  flex-flow: row wrap;
+  margin: 0 calc(-1 * var(--spacing-4));
+}
+
+.accordion.columns-2 .accordion-item,
+.accordion.columns-3 .accordion-item {
+  flex: 0 1 auto;
+  width: 100%;
+  margin: 0 var(--spacing-4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .accordion .accordion-question,
+  .accordion .accordion-question::after,
+  .accordion .accordion-item::details-content {
+    transition: none;
+  }
+}
+
+/* breakpoint-exception: the source accordion columns go to two per row at 576px */
+@media (width >= 576px) {
+  .accordion.columns-2 .accordion-item {
+    /* source .twoCol: two growing items per row */
+    flex: 1 0 40%;
+  }
+
+  .accordion.columns-3 .accordion-item {
+    /* source .threeCol: two per row until 768px */
+    width: 46%;
+  }
+
+  .accordion.columns-2 .accordion-item:nth-child(-n+2),
+  .accordion.columns-3 .accordion-item:nth-child(-n+2) {
+    border-top: var(--base-border-width) solid #999;
+  }
+}
+
+@media (width >= 768px) {
+  .accordion.columns-3 .accordion-item {
+    /* source .threeCol: three per row */
+    width: 30%;
+  }
+
+  .accordion.columns-3 .accordion-item:nth-child(-n+3) {
+    border-top: var(--base-border-width) solid #999;
+  }
+}

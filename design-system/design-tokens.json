@@ -120,6 +120,12 @@
         "evidence": "computed .bw-featured-subtitle",
         "confidence": "Medium"
       },
+      "--color-text-control": {
+        "value": "#212529",
+        "usage": "Form input text, accordion questions (source Bootstrap body colour)",
+        "evidence": "computed .form-control and .accordion-button colour (About, contact forms)",
+        "confidence": "High"
+      },
       "--color-text-subtle": {
         "value": "#999",
         "usage": "Link hover color",
