@@ -1,4 +1,4 @@
-.cards > ul {
+.cards>ul {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -7,7 +7,7 @@
   gap: var(--grid-gutter);
 }
 
-.cards > ul > li {
+.cards>ul>li {
   border: 1px solid var(--base-border);
   background-color: var(--color-background);
 }
@@ -20,7 +20,7 @@
   line-height: 0;
 }
 
-.cards > ul > li img {
+.cards>ul>li img {
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
@@ -38,12 +38,12 @@
   --cards-privilege-shadow-hover: 0 12px 28px rgb(83 14 42 / 8%);
 }
 
-.cards.privilege > ul {
+.cards.privilege>ul {
   grid-template-columns: 1fr;
   gap: var(--spacing-7);
 }
 
-.cards.privilege > ul > li {
+.cards.privilege>ul>li {
   padding: var(--spacing-stack);
   border: var(--base-border-width) solid var(--color-campaign-line);
   border-radius: var(--radius-sm);
@@ -72,7 +72,7 @@
   height: 100%;
 }
 
-.cards.privilege > ul > li .cards-card-image img {
+.cards.privilege>ul>li .cards-card-image img {
   width: 100%;
   height: 100%;
   aspect-ratio: auto;
@@ -83,7 +83,7 @@
   height: var(--cards-privilege-icon);
 }
 
-.cards.privilege > ul > li .cards-card-icon img {
+.cards.privilege>ul>li .cards-card-icon img {
   object-fit: contain;
 }
 
@@ -99,6 +99,12 @@
   line-height: var(--line-height-heading);
 }
 
+.cards-card-icon {
+  p {
+    margin: 0;
+  }
+}
+
 .cards.privilege .cards-card-body p {
   margin: 0;
   color: var(--color-campaign-grey);
@@ -106,31 +112,31 @@
   line-height: var(--line-height-relaxed);
 }
 
-.cards.privilege > ul > li:hover {
+.cards.privilege>ul>li:hover {
   box-shadow: var(--cards-privilege-shadow-hover);
   transform: translateY(var(--cards-privilege-lift));
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cards.privilege > ul > li {
+  .cards.privilege>ul>li {
     transition: none;
   }
 
-  .cards.privilege > ul > li:hover {
+  .cards.privilege>ul>li:hover {
     transform: none;
   }
 }
 
 /* breakpoint-exception: the source privileges grid has 2 columns from 550px */
 @media (width >=550px) {
-  .cards.privilege > ul {
+  .cards.privilege>ul {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-stack);
   }
 }
 
 @media (width >=992px) {
-  .cards.privilege > ul {
+  .cards.privilege>ul {
     grid-template-columns: repeat(4, 1fr);
   }
 }
