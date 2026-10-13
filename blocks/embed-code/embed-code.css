@@ -1,3 +1,7 @@
+.embed-code-container {
+  --section-padding-block: 0;
+}
+
 .embed-code:has(iframe) {
   display: flex;
   flex-direction: column;
