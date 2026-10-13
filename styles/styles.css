@@ -61,6 +61,9 @@
   --color-campaign-line: #efefef;
   --color-campaign-blush-wash: rgb(242 214 211 / 25%);
   --color-campaign-maroon-wash: rgb(83 14 42 / 5%);
+  --color-campaign-gold-tint: rgb(174 143 94 / 12%);
+  --color-campaign-note: #888;
+  --color-campaign-divider: #f0f0f0;
   --color-text-subtle: #999;
   --color-text-inverse: #fff;
   --color-link: var(--color-brand-primary);
@@ -106,6 +109,7 @@
   --line-height-heading: 1.2;
   --line-height-body: 1.4;
   --line-height-relaxed: 1.5;
+  --line-height-loose: 1.6;
   --letter-spacing-label: 1px;
   --letter-spacing-eyebrow: 2px;
   --letter-spacing-campaign: 1.5px;
@@ -113,6 +117,9 @@
   --font-size-campaign-small: 11pt;
   --font-size-campaign-label: 10pt;
   --font-size-campaign-heading: 28pt;
+  --font-size-campaign-card-title: 16pt;
+  --font-size-campaign-text: 11.5pt;
+  --font-size-campaign-note: 9.5pt;
   --body-font-size: 14px;
   --heading-page-size: 30px;
   --heading-section-size: 18px;
@@ -143,6 +150,8 @@
   --spacing-campaign-columns: 40px;
   --spacing-campaign-xs: 6px;
   --spacing-campaign-gap: 18px;
+  --spacing-campaign-card: 36px;
+  --size-campaign-icon-box: 44px;
   --section-padding-block: 25px;
   --section-title-gap: 25px;
   --section-inset-padding: 0;
@@ -171,12 +180,14 @@
   --radius-xl: 30px;
   --radius-pill: 999px;
   --radius-campaign: 16px;
+  --radius-campaign-icon: 8px;
   --radius-circle: 50%;
 
   /* shadows */
   --shadow-image: 0 5px 12px rgb(0 0 0 / 30%);
   --shadow-card: 0 4px 24px rgb(0 0 0 / 10%);
   --shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 5%);
+  --shadow-campaign-card: 0 4px 16px rgb(0 0 0 / 2%);
   --shadow-focus: 0 0 0 4px var(--color-focus-ring);
 
   /* motion */

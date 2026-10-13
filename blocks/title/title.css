@@ -98,6 +98,12 @@
   font-size: var(--font-size-campaign-small);
 }
 
+/* option gap-small: 30px to what follows instead of the usual space (e.g. Title editorial's 40px),
+   as the source "Extended Journey Privileges" header above its cards */
+.title.gap-small {
+  margin-bottom: var(--spacing-9);
+}
+
 /* option center-all: centred at every width (option center is left-aligned on mobile) */
 .title.center-all {
   text-align: center;
