@@ -111,6 +111,12 @@
         "usage": "Campaign band background 'blush' (over the campaign cream), section style band",
         "evidence": "source .bg-champagne-band rgba(242, 214, 211, 0.25) on #ppl-campaign-container #faf6f4",
         "confidence": "High"
+      },
+      "--color-campaign-maroon-wash": {
+        "value": "rgb(83 14 42 / 5%)",
+        "usage": "Faint maroon wash: the Campaign eyebrow pill and item icon boxes, the Cards (privilege) icon badge",
+        "evidence": "source #ppl-campaign-container .eyebrow-tag, .parameter-icon-box, .privilege-icon-circle rgba(83, 14, 42, 0.05)",
+        "confidence": "High"
       }
     },
     "text colors": {
