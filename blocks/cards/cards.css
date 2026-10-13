@@ -26,12 +26,118 @@
   object-fit: cover;
 }
 
+/* an icon cell: no paragraph margin around the icon */
+.cards-card-icon {
+  p {
+    margin: 0;
+  }
+}
+
+/* option connectivity: wide white cards, as the source offer pages' connectivity grid (Rogers Bank
+   "Extended Journey Privileges", `.connectivity-grid`): a gold-tinted icon box (an icon or image in
+   cell 1), a maroon title, grey text and an optional footnote (an italic paragraph) under a thin
+   line at the bottom. 1 per row on mobile, 2 from 768px; cards in a row are the same height */
+.cards.connectivity>ul {
+  grid-template-columns: 1fr;
+  gap: var(--spacing-7);
+}
+
+.cards.connectivity>ul>li {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-9);
+  border: var(--base-border-width) solid var(--color-campaign-line);
+  border-radius: var(--radius-campaign);
+  background-color: var(--color-background);
+  box-shadow: var(--shadow-campaign-card);
+  color: var(--color-campaign-ink);
+  font-family: var(--font-family-campaign);
+}
+
+/* the media cell: a rounded gold-tinted box, the icon or image inside */
+.cards.connectivity .cards-card-image {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: var(--size-campaign-icon-box);
+  height: var(--size-campaign-icon-box);
+  margin: 0 0 var(--spacing-7);
+  border-radius: var(--radius-campaign-icon);
+  background-color: var(--color-campaign-gold-tint);
+}
+
+.cards.connectivity .cards-card-image picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.cards.connectivity>ul>li .cards-card-image img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+}
+
+.cards.connectivity>ul>li .cards-card-icon img {
+  object-fit: contain;
+}
+
+/* the body fills the card, so the footnote sits at the bottom */
+.cards.connectivity .cards-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  margin: 0;
+}
+
+.cards.connectivity .cards-card-body :is(h1, h2, h3, h4, h5, h6) {
+  margin: 0 0 var(--spacing-4);
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-campaign-card-title);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: var(--line-height-heading);
+}
+
+.cards.connectivity .cards-card-body p {
+  margin: 0 0 var(--spacing-stack);
+  color: var(--color-campaign-grey);
+  font-size: var(--font-size-campaign-text);
+  line-height: var(--line-height-loose);
+}
+
+.cards.connectivity .cards-card-body p.cards-card-footnote {
+  margin: auto 0 0;
+  padding-top: var(--spacing-bootstrap-3);
+  border-top: var(--base-border-width) solid var(--color-campaign-divider);
+  color: var(--color-campaign-note);
+  font-size: var(--font-size-campaign-note);
+  line-height: var(--line-height-body);
+}
+
+/* authored in italic to mark it, shown upright as the source */
+.cards.connectivity .cards-card-footnote :is(em, i) {
+  font-style: normal;
+}
+
+@media (width >=768px) {
+  .cards.connectivity>ul {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-9);
+  }
+
+  .cards.connectivity>ul>li {
+    padding: var(--spacing-campaign-card);
+  }
+}
+
 /* option privilege: icon cards, as the source offer pages' privileges grid (Rogers Bank "Exquisite
    Comfort", `.privileges-grid`): cream cards with a round icon badge (an icon or image in cell 1),
    a maroon title and grey text, that lift on hover. 1 per row on mobile, 2 from 550px, 4 from
    992px; the same at every heading level */
 .cards.privilege {
-  --cards-privilege-badge: 44px;
+  --cards-privilege-badge: var(--size-campaign-icon-box);
   --cards-privilege-icon: 22px;
   --cards-privilege-title-size: 13pt;
   --cards-privilege-lift: -4px;
@@ -97,12 +203,6 @@
   font-size: var(--cards-privilege-title-size);
   font-weight: var(--font-weight-campaign-bold);
   line-height: var(--line-height-heading);
-}
-
-.cards-card-icon {
-  p {
-    margin: 0;
-  }
 }
 
 .cards.privilege .cards-card-body p {

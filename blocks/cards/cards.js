@@ -9,6 +9,16 @@ function isIconCell(cell) {
   return !!cell.querySelector('.icon') && !cell.querySelector('picture') && !cell.textContent.trim();
 }
 
+/**
+ * Whether a paragraph is written entirely in italic (a card footnote, e.g. option connectivity).
+ * @param {Element} p
+ * @returns {boolean}
+ */
+function isItalicParagraph(p) {
+  const em = p.querySelector(':scope > em, :scope > i');
+  return !!em && p.children.length === 1 && p.textContent.trim() === em.textContent.trim();
+}
+
 export default function decorate(block) {
   /* change to ul, li */
   const ul = document.createElement('ul');
@@ -22,6 +32,10 @@ export default function decorate(block) {
       // an empty media cell (a card without an image or icon)
       else if (!div.textContent.trim() && !div.querySelector('picture, .icon')) div.remove();
       else div.className = 'cards-card-body';
+    });
+    // an italic paragraph in the body is the card's footnote
+    li.querySelectorAll('.cards-card-body > p').forEach((p) => {
+      if (isItalicParagraph(p)) p.classList.add('cards-card-footnote');
     });
     ul.append(li);
   });

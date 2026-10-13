@@ -14,7 +14,7 @@
   --planner-badge-bg: rgb(0 0 0 / 25%);
   --planner-size-heading: 21pt;
   --planner-size-number: 44pt;
-  --planner-size-tick: 9.5pt;
+  --planner-size-tick: var(--font-size-campaign-note);
   --planner-badge-padding-inline: 14px;
   --planner-badge-padding-block: 4px;
   --planner-track-height: 6px;

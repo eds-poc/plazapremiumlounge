@@ -18,14 +18,14 @@
   --campaign-weight-bold: var(--font-weight-campaign-bold);
   --campaign-size-heading: var(--font-size-campaign-heading);
   --campaign-size-item-title: 12.5pt;
-  --campaign-size-text: 11.5pt;
+  --campaign-size-text: var(--font-size-campaign-text);
   --campaign-size-small: var(--font-size-campaign-small);
   --campaign-size-label: var(--font-size-campaign-label);
   --campaign-letter-spacing-wide: var(--letter-spacing-eyebrow);
   --campaign-letter-spacing: var(--letter-spacing-campaign);
   --campaign-radius-lg: var(--radius-campaign);
-  --campaign-radius-box: 8px;
-  --campaign-icon-box: 44px;
+  --campaign-radius-box: var(--radius-campaign-icon);
+  --campaign-icon-box: var(--size-campaign-icon-box);
   --campaign-icon: 20px;
   --campaign-gap-lg: var(--spacing-campaign-columns);
   --campaign-gap: var(--spacing-campaign-gap);
@@ -78,7 +78,7 @@
   margin: 0 0 var(--campaign-gap);
   color: var(--campaign-grey);
   font-size: var(--font-size-xl);
-  line-height: 1.6;
+  line-height: var(--line-height-loose);
 }
 
 .campaign .campaign-text {

@@ -117,6 +117,12 @@
         "usage": "Faint maroon wash: the Campaign eyebrow pill and item icon boxes, the Cards (privilege) icon badge",
         "evidence": "source #ppl-campaign-container .eyebrow-tag, .parameter-icon-box, .privilege-icon-circle rgba(83, 14, 42, 0.05)",
         "confidence": "High"
+      },
+      "--color-campaign-gold-tint": {
+        "value": "rgb(174 143 94 / 12%)",
+        "usage": "Gold-tinted icon box (Cards connectivity), source .connectivity-icon-box",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
+        "confidence": "High"
       }
     },
     "text colors": {
@@ -185,6 +191,12 @@
         "usage": "Campaign secondary text: intro, item and planner text, slider ticks",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
         "confidence": "High"
+      },
+      "--color-campaign-note": {
+        "value": "#888",
+        "usage": "Campaign footnotes (Cards connectivity), source .connectivity-disclaimer",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
+        "confidence": "High"
       }
     },
     "border colors": {
@@ -222,6 +234,12 @@
         "value": "#efefef",
         "usage": "Campaign panel and planner card borders, the Campaign band line",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
+        "confidence": "High"
+      },
+      "--color-campaign-divider": {
+        "value": "#f0f0f0",
+        "usage": "Line above a campaign footnote (Cards connectivity), source .connectivity-disclaimer border-top",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
         "confidence": "High"
       }
     },
@@ -492,6 +510,30 @@
         "usage": "Campaign light maroon headings (Campaign, Title editorial)",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign block and the Title editorial option",
         "confidence": "High"
+      },
+      "--line-height-loose": {
+        "value": "1.6",
+        "usage": "Campaign intro and card text (Campaign intro, Cards connectivity)",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
+        "confidence": "High"
+      },
+      "--font-size-campaign-card-title": {
+        "value": "16pt",
+        "usage": "Campaign wide card titles (Cards connectivity)",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
+        "confidence": "High"
+      },
+      "--font-size-campaign-text": {
+        "value": "11.5pt",
+        "usage": "Campaign body text (Campaign text, Cards connectivity)",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
+        "confidence": "High"
+      },
+      "--font-size-campaign-note": {
+        "value": "9.5pt",
+        "usage": "Campaign small notes (Planner slider ticks, Cards connectivity footnotes)",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
+        "confidence": "High"
       }
     },
     "spacing": {
@@ -655,6 +697,12 @@
         "usage": "Campaign paragraph and heading gap (Campaign, Title editorial)",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign block and the Title editorial option",
         "confidence": "High"
+      },
+      "--spacing-campaign-card": {
+        "value": "36px",
+        "usage": "Wide campaign card padding from 768px (Cards connectivity)",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
+        "confidence": "High"
       }
     },
     "layout": {
@@ -741,6 +789,12 @@
         "usage": "Modal and View Profile panel top margin from 576px (Bootstrap modal)",
         "evidence": "refactor 2026-10-07: shared by several components",
         "confidence": "High"
+      },
+      "--size-campaign-icon-box": {
+        "value": "44px",
+        "usage": "Campaign icon boxes and badges (Campaign items, Cards privilege and connectivity)",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
+        "confidence": "High"
       }
     },
     "radius": {
@@ -797,6 +851,12 @@
         "usage": "Campaign panel and planner card corners",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
         "confidence": "High"
+      },
+      "--radius-campaign-icon": {
+        "value": "8px",
+        "usage": "Square-ish campaign icon boxes (Campaign items, Cards connectivity)",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
+        "confidence": "High"
       }
     },
     "shadows": {
@@ -822,6 +882,12 @@
         "value": "0 0 0 4px var(--color-focus-ring)",
         "usage": "Focus ring for inputs (Bootstrap default)",
         "evidence": "computed input:focus",
+        "confidence": "High"
+      },
+      "--shadow-campaign-card": {
+        "value": "0 4px 16px rgb(0 0 0 / 2%)",
+        "usage": "Wide campaign cards (Cards connectivity)",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
         "confidence": "High"
       }
     },
