@@ -1,0 +1,209 @@
+import { loadScript } from '../../scripts/aem.js';
+
+const TYPES = ['script', 'style', 'iframe'];
+const SNIPPET = /<(script|style|iframe|link)[\s>]/i;
+const URL_TEXT = /^(https?:\/\/|\/)[^\s;()]+$/i;
+const SCRIPT_FILE = /\.m?js(\?|#|$)/i;
+const STYLE_FILE = /\.css(\?|#|$)/i;
+// attributes kept from a pasted <iframe> snippet
+const IFRAME_ATTRS = ['title', 'width', 'height', 'allow', 'allowfullscreen', 'loading', 'name', 'referrerpolicy', 'sandbox'];
+
+/**
+ * The text of a cell, keeping the author's line breaks (paragraphs and <br>), so that
+ * multi-line code keeps working.
+ * @param {Element} cell
+ * @returns {string}
+ */
+function cellText(cell) {
+  if (!cell) return '';
+  const pre = cell.querySelector('pre');
+  if (pre) return pre.textContent.trim();
+  const lines = cell.children.length ? [...cell.children] : [cell];
+  return lines.map((line) => {
+    const copy = line.cloneNode(true);
+    copy.querySelectorAll('br').forEach((br) => br.replaceWith('\n'));
+    return copy.textContent;
+  }).join('\n').trim();
+}
+
+/**
+ * The URL a cell holds: a link whose text is its address, or a plain URL.
+ * @param {Element} cell
+ * @param {string} text The cell text
+ * @returns {URL|null}
+ */
+function cellUrl(cell, text) {
+  const link = cell?.querySelector('a[href]');
+  const href = link && link.textContent.trim() === text ? link.href : text;
+  if (!URL_TEXT.test(href)) return null;
+  try {
+    const url = new URL(href, window.location.href);
+    return ['http:', 'https:'].includes(url.protocol) ? url : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The scripts, styles and iframes in pasted embed code (`<script …>`, `<style>`,
+ * `<link rel="stylesheet" …>`, `<iframe …>`). Parsing doesn't run or apply anything; that
+ * only happens once they are added to the head.
+ * @param {string} code
+ * @returns {object[]} Items: `{ type: 'script' | 'style', attrs, code }`, a style file as
+ *   `{ type: 'style', attrs: { href, … } }`, or `{ type: 'iframe', attrs }`
+ */
+function parseSnippet(code) {
+  const doc = new DOMParser().parseFromString(code, 'text/html');
+  return [...doc.querySelectorAll('script, style, link[rel~="stylesheet" i][href], iframe')]
+    .filter((node) => !node.closest('noscript'))
+    .map((node) => {
+      const attrs = Object.fromEntries([...node.attributes]
+        .filter(({ name }) => !name.startsWith('on') && !['nonce', 'rel'].includes(name))
+        .map(({ name, value }) => [name, value]));
+      if (node.localName === 'iframe') return { type: 'iframe', attrs };
+      if (node.localName === 'link') return { type: 'style', attrs };
+      return { type: node.localName, attrs, code: node.textContent };
+    });
+}
+
+/**
+ * Reads one row: `Script | file URL or code`, `Style | file URL or CSS`,
+ * `Iframe | URL | title | height`, or embed code pasted in a single cell. Without a label, a
+ * `.js` URL is a script file, a `.css` URL a style file, any other URL an iframe, and anything
+ * else script code.
+ * @param {Element} row
+ * @returns {object[]} The row's items
+ */
+function readRow(row) {
+  const cells = [...row.children];
+  const label = cells.length > 1 ? cells[0].textContent.trim().toLowerCase() : '';
+  const labelled = TYPES.includes(label);
+  const [valueCell, titleCell, heightCell] = labelled ? cells.slice(1) : cells;
+  const text = cellText(valueCell);
+  if (!text) return [];
+  if (SNIPPET.test(text)) return parseSnippet(text);
+
+  const url = cellUrl(valueCell, text);
+  let type = label;
+  if (!labelled) {
+    if (!url || SCRIPT_FILE.test(url.pathname)) type = 'script';
+    else type = STYLE_FILE.test(url.pathname) ? 'style' : 'iframe';
+  }
+  if (type === 'style') {
+    return url ? [{ type, attrs: { href: url.href } }] : [{ type, attrs: {}, code: text }];
+  }
+  if (type === 'iframe') {
+    if (!url) return [];
+    const attrs = { src: url.href };
+    const title = cellText(titleCell);
+    const height = cellText(heightCell);
+    if (title) attrs.title = title;
+    if (height) attrs.height = height;
+    return [{ type, attrs }];
+  }
+  return url ? [{ type, attrs: { src: url.href } }] : [{ type, attrs: {}, code: text }];
+}
+
+/**
+ * Adds the scripts to the head in authored order. A script file is waited for before the
+ * next script runs (code that uses it can follow it), unless it is marked `async`.
+ * @param {object[]} scripts
+ */
+async function injectScripts(scripts) {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const { attrs, code } of scripts) {
+    const { src, ...rest } = attrs;
+    if (src) {
+      const loading = loadScript(new URL(src, window.location.href).href, rest).catch(() => {
+        // eslint-disable-next-line no-console
+        console.error(`embed-code: failed to load ${src}`);
+      });
+      // eslint-disable-next-line no-await-in-loop
+      if (!('async' in rest)) await loading;
+    } else if (code.trim()) {
+      const script = document.createElement('script');
+      Object.entries(rest).forEach(([name, value]) => script.setAttribute(name, value));
+      script.textContent = code;
+      document.head.append(script);
+    }
+  }
+}
+
+/**
+ * Adds the styles to the head in authored order: style files as stylesheet links (each file
+ * once, also across blocks), CSS code as <style> elements.
+ * @param {object[]} styles
+ */
+function injectStyles(styles) {
+  styles.forEach(({ attrs, code }) => {
+    const { href, ...rest } = attrs;
+    let style;
+    if (href) {
+      const url = new URL(href, window.location.href).href;
+      if (document.querySelector(`head > link[href="${url}"]`)) return;
+      style = document.createElement('link');
+      style.rel = 'stylesheet';
+      style.href = url;
+    } else if (code.trim()) {
+      style = document.createElement('style');
+      style.textContent = code;
+    } else {
+      return;
+    }
+    Object.entries(rest).forEach(([name, value]) => style.setAttribute(name, value));
+    document.head.append(style);
+  });
+}
+
+/**
+ * Builds an iframe; a size from the embed code (e.g. width="560" height="315") becomes its
+ * aspect ratio, so it still fills the column width.
+ * @param {object} attrs
+ * @returns {HTMLIFrameElement|null}
+ */
+function buildIframe(attrs) {
+  let url;
+  try {
+    url = new URL(attrs.src, window.location.href);
+  } catch {
+    return null;
+  }
+  if (!['http:', 'https:'].includes(url.protocol)) return null;
+
+  const iframe = document.createElement('iframe');
+  IFRAME_ATTRS.forEach((name) => {
+    if (name in attrs) iframe.setAttribute(name, attrs[name]);
+  });
+  iframe.src = url.href;
+  if (!iframe.title) iframe.title = 'Embedded content';
+  if (!iframe.hasAttribute('loading')) iframe.loading = 'lazy';
+
+  const width = parseFloat(attrs.width);
+  const height = parseFloat(attrs.height);
+  if (width > 0 && height > 0 && /^\d+(\.\d+)?(px)?$/.test(String(attrs.width).trim())) {
+    iframe.style.aspectRatio = `${width} / ${height}`;
+  } else if (attrs.height) {
+    iframe.style.height = /^\d+(\.\d+)?$/.test(String(attrs.height).trim()) ? `${height}px` : attrs.height;
+  }
+  iframe.removeAttribute('width');
+  iframe.removeAttribute('height');
+  return iframe;
+}
+
+/**
+ * Decorates the embed code block: scripts and styles go to the document head, iframes stay
+ * where the block is. A block without iframes takes no space on the page.
+ * @param {Element} block The embed code block element
+ */
+export default function decorate(block) {
+  const items = [...block.children].flatMap(readRow);
+  const iframes = items.filter((item) => item.type === 'iframe').map(({ attrs }) => buildIframe(attrs)).filter(Boolean);
+
+  // styles first, so they apply before the block's iframes show
+  injectStyles(items.filter((item) => item.type === 'style'));
+  block.replaceChildren(...iframes);
+  if (!iframes.length) (block.closest('.embed-code-wrapper') || block).hidden = true;
+
+  // not awaited: slow third-party scripts don't hold up the page
+  injectScripts(items.filter((item) => item.type === 'script'));
+}

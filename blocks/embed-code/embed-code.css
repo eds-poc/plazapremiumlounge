@@ -1,0 +1,17 @@
+.embed-code {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-7);
+}
+
+.embed-code iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+}
+
+/* an authored height replaces the default 16:9 */
+.embed-code iframe[style*="height"] {
+  aspect-ratio: auto;
+}
