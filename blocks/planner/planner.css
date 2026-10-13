@@ -7,7 +7,7 @@
   --planner-maroon: var(--color-brand-primary);
   --planner-maroon-light: var(--color-brand-primary-action);
   --planner-gold-wash: rgb(174 143 94 / 15%);
-  --planner-pink: #e0b2d3;
+  --planner-pink: var(--color-campaign-pink);
   --planner-blush: #f2d6d3;
   --planner-mist: #ccc;
   --planner-track: #e8e8e8;

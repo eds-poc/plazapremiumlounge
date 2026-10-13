@@ -64,7 +64,7 @@
   width: var(--size-campaign-icon-box);
   height: var(--size-campaign-icon-box);
   margin: 0 0 var(--spacing-7);
-  border-radius: var(--radius-campaign-icon);
+  border-radius: var(--radius-campaign-sm);
   background-color: var(--color-campaign-gold-tint);
 }
 
@@ -139,7 +139,7 @@
 .cards.privilege {
   --cards-privilege-badge: var(--size-campaign-icon-box);
   --cards-privilege-icon: 22px;
-  --cards-privilege-title-size: 13pt;
+  --cards-privilege-title-size: var(--font-size-campaign-md);
   --cards-privilege-lift: -4px;
   --cards-privilege-shadow-hover: 0 12px 28px rgb(83 14 42 / 8%);
 }
