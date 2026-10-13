@@ -24,7 +24,7 @@
   --campaign-letter-spacing-wide: var(--letter-spacing-eyebrow);
   --campaign-letter-spacing: var(--letter-spacing-campaign);
   --campaign-radius-lg: var(--radius-campaign);
-  --campaign-radius-box: var(--radius-campaign-icon);
+  --campaign-radius-box: var(--radius-campaign-sm);
   --campaign-icon-box: var(--size-campaign-icon-box);
   --campaign-icon: 20px;
   --campaign-gap-lg: var(--spacing-campaign-columns);

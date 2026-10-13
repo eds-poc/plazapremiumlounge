@@ -1,0 +1,94 @@
+/* promo: a call-to-action box, as the source offer pages' `premium-cta-box` (Rogers Bank "Apply
+   Now"): a maroon-to-plum gradient box with a centred light heading (italic words in gold serif),
+   pink text and a gold button with an arrow. Mobile-first; 80px 40px of padding from 768px. On an
+   offer page it sits in a flush band section, so it touches the bands around it */
+.promo {
+  padding: var(--spacing-campaign-promo-block) var(--spacing-campaign-promo-inline);
+  background: var(--gradient-campaign-promo);
+  color: var(--color-text-inverse);
+  font-family: var(--font-family-campaign);
+  text-align: center;
+}
+
+.promo .promo-heading {
+  max-width: var(--size-campaign-promo-heading-max);
+  margin: 0 auto var(--spacing-bootstrap-3);
+  color: inherit;
+  font-size: var(--font-size-campaign-lg);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-body);
+}
+
+/* italic words: the gold serif accent */
+.promo .promo-heading em {
+  color: var(--color-campaign-gold);
+  font-family: var(--font-family-campaign-accent);
+}
+
+.promo .promo-text {
+  max-width: var(--size-campaign-promo-text-max);
+  margin: 0 auto var(--spacing-campaign-card);
+  color: var(--color-campaign-pink);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+.promo .promo-action {
+  margin: 0;
+}
+
+/* the gold button; the extra side padding is the source label's no-break space on each side */
+.promo .promo-button {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-bootstrap-3) calc(var(--spacing-campaign-card) + var(--spacing-campaign-button-label));
+  border-radius: var(--radius-campaign-sm);
+  background-color: var(--color-campaign-gold);
+  box-shadow: var(--shadow-campaign-button);
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-campaign-small);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-campaign);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: background-color var(--duration-normal) ease, box-shadow var(--duration-normal) ease;
+}
+
+.promo .promo-button::after {
+  content: '';
+  flex-shrink: 0;
+  width: var(--size-campaign-button-icon);
+  height: var(--size-campaign-button-icon);
+  margin-left: var(--spacing-3);
+  background-color: currentcolor;
+  mask: url('../../icons/arrow-right.svg') center / contain no-repeat;
+}
+
+.promo .promo-button:hover,
+.promo .promo-button:focus-visible {
+  background-color: var(--color-campaign-gold-hover);
+  box-shadow: var(--shadow-campaign-button-hover);
+  color: var(--color-brand-primary);
+}
+
+/* a light focus ring on the dark box */
+.promo .promo-button:focus-visible {
+  outline-color: var(--color-text-inverse);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .promo .promo-button {
+    transition: none;
+  }
+}
+
+@media (width >=768px) {
+  .promo .promo-heading {
+    font-size: var(--font-size-3xl);
+  }
+
+  .promo .promo-text {
+    font-size: var(--font-size-campaign-md);
+  }
+}

@@ -64,6 +64,10 @@
   --color-campaign-gold-tint: rgb(174 143 94 / 12%);
   --color-campaign-note: #888;
   --color-campaign-divider: #f0f0f0;
+  --color-campaign-plum-deep: #2d0515;
+  --color-campaign-pink: #e0b2d3;
+  --color-campaign-gold-hover: #c2a16d;
+  --gradient-campaign-promo: linear-gradient(135deg, var(--color-brand-primary) 0%, var(--color-campaign-plum-deep) 100%);
   --color-text-subtle: #999;
   --color-text-inverse: #fff;
   --color-link: var(--color-brand-primary);
@@ -120,6 +124,8 @@
   --font-size-campaign-card-title: 16pt;
   --font-size-campaign-text: 11.5pt;
   --font-size-campaign-note: 9.5pt;
+  --font-size-campaign-md: 13pt;
+  --font-size-campaign-lg: 20pt;
   --body-font-size: 14px;
   --heading-page-size: 30px;
   --heading-section-size: 18px;
@@ -151,6 +157,12 @@
   --spacing-campaign-xs: 6px;
   --spacing-campaign-gap: 18px;
   --spacing-campaign-card: 36px;
+  --spacing-campaign-promo-block: 60px;
+  --spacing-campaign-promo-inline: var(--spacing-stack);
+  --spacing-campaign-button-label: calc(0.278em + var(--letter-spacing-campaign));
+  --size-campaign-promo-heading-max: 800px;
+  --size-campaign-promo-text-max: 600px;
+  --size-campaign-button-icon: 16px;
   --size-campaign-icon-box: 44px;
   --section-padding-block: 25px;
   --section-title-gap: 25px;
@@ -180,7 +192,7 @@
   --radius-xl: 30px;
   --radius-pill: 999px;
   --radius-campaign: 16px;
-  --radius-campaign-icon: 8px;
+  --radius-campaign-sm: 8px;
   --radius-circle: 50%;
 
   /* shadows */
@@ -188,6 +200,8 @@
   --shadow-card: 0 4px 24px rgb(0 0 0 / 10%);
   --shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 5%);
   --shadow-campaign-card: 0 4px 16px rgb(0 0 0 / 2%);
+  --shadow-campaign-button: 0 4px 14px rgb(0 0 0 / 18%);
+  --shadow-campaign-button-hover: 0 8px 24px rgb(0 0 0 / 28%);
   --shadow-focus: 0 0 0 4px var(--color-focus-ring);
 
   /* motion */
@@ -220,6 +234,8 @@
     --container-padding: 12px;
     --container-wide-padding: 50px;
     --section-inset-padding: 15px;
+    --spacing-campaign-promo-block: var(--spacing-12);
+    --spacing-campaign-promo-inline: var(--spacing-campaign-band-block);
   }
 }
 
@@ -731,6 +747,16 @@ main>.section.band>div:last-child {
 /* 8% of the content width at the sides */
 main>.section.band>div>* {
   margin-inline: var(--spacing-campaign-band-inline);
+}
+
+/* option flush: a band section whose block draws its own box (e.g. Promo): no band padding or side
+   margins, so it still touches the bands around it */
+main>.section.band.flush>div {
+  padding-block: 0;
+}
+
+main>.section.band.flush>div>* {
+  margin-inline: 0;
 }
 
 /* (inside the band's edge, so it spans the content width only) */

@@ -61,6 +61,24 @@
         "usage": "Campaign accent: eyebrows, serif accent words, planner thumb and number",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
         "confidence": "High"
+      },
+      "--color-campaign-plum-deep": {
+        "value": "#2d0515",
+        "usage": "End of the Promo gradient",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container .premium-cta-box)",
+        "confidence": "High"
+      },
+      "--color-campaign-gold-hover": {
+        "value": "#c2a16d",
+        "usage": "Gold button hover (Promo)",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container .premium-cta-box)",
+        "confidence": "High"
+      },
+      "--gradient-campaign-promo": {
+        "value": "linear-gradient(135deg, var(--color-brand-primary) 0%, var(--color-campaign-plum-deep) 100%)",
+        "usage": "Promo box background (maroon to plum)",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container .premium-cta-box)",
+        "confidence": "High"
       }
     },
     "surface colors": {
@@ -196,6 +214,12 @@
         "value": "#888",
         "usage": "Campaign footnotes (Cards connectivity), source .connectivity-disclaimer",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
+        "confidence": "High"
+      },
+      "--color-campaign-pink": {
+        "value": "#e0b2d3",
+        "usage": "Pink text on maroon: Promo text, Planner summary eyebrow",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container .premium-cta-box)",
         "confidence": "High"
       }
     },
@@ -534,6 +558,18 @@
         "usage": "Campaign small notes (Planner slider ticks, Cards connectivity footnotes)",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
         "confidence": "High"
+      },
+      "--font-size-campaign-md": {
+        "value": "13pt",
+        "usage": "Campaign medium text: Promo text from 768px, Cards privilege titles",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container .premium-cta-box)",
+        "confidence": "High"
+      },
+      "--font-size-campaign-lg": {
+        "value": "20pt",
+        "usage": "Promo heading on mobile",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container .premium-cta-box)",
+        "confidence": "High"
       }
     },
     "spacing": {
@@ -703,6 +739,30 @@
         "usage": "Wide campaign card padding from 768px (Cards connectivity)",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
         "confidence": "High"
+      },
+      "--spacing-campaign-promo-block": {
+        "value": "60px",
+        "responsive": {
+          "(width >= 768px)": "var(--spacing-12) (80px)"
+        },
+        "usage": "Promo box top/bottom padding",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container .premium-cta-box)",
+        "confidence": "High"
+      },
+      "--spacing-campaign-promo-inline": {
+        "value": "var(--spacing-stack) (24px)",
+        "responsive": {
+          "(width >= 768px)": "var(--spacing-campaign-band-block) (40px)"
+        },
+        "usage": "Promo box side padding",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container .premium-cta-box)",
+        "confidence": "High"
+      },
+      "--spacing-campaign-button-label": {
+        "value": "calc(0.278em + var(--letter-spacing-campaign))",
+        "usage": "Extra side padding of a campaign button: the source label has a no-break space on each side",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container .premium-cta-box)",
+        "confidence": "High"
       }
     },
     "layout": {
@@ -795,6 +855,24 @@
         "usage": "Campaign icon boxes and badges (Campaign items, Cards privilege and connectivity)",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
         "confidence": "High"
+      },
+      "--size-campaign-promo-heading-max": {
+        "value": "800px",
+        "usage": "Promo heading max width",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container .premium-cta-box)",
+        "confidence": "High"
+      },
+      "--size-campaign-promo-text-max": {
+        "value": "600px",
+        "usage": "Promo text max width",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container .premium-cta-box)",
+        "confidence": "High"
+      },
+      "--size-campaign-button-icon": {
+        "value": "16px",
+        "usage": "Arrow icon in a campaign button (Promo)",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container .premium-cta-box)",
+        "confidence": "High"
       }
     },
     "radius": {
@@ -852,9 +930,9 @@
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
         "confidence": "High"
       },
-      "--radius-campaign-icon": {
+      "--radius-campaign-sm": {
         "value": "8px",
-        "usage": "Square-ish campaign icon boxes (Campaign items, Cards connectivity)",
+        "usage": "Small campaign corners: icon boxes (Campaign items, Cards connectivity) and the Promo button",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
         "confidence": "High"
       }
@@ -888,6 +966,18 @@
         "value": "0 4px 16px rgb(0 0 0 / 2%)",
         "usage": "Wide campaign cards (Cards connectivity)",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
+        "confidence": "High"
+      },
+      "--shadow-campaign-button": {
+        "value": "0 4px 14px rgb(0 0 0 / 18%)",
+        "usage": "Gold campaign button (Promo)",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container .premium-cta-box)",
+        "confidence": "High"
+      },
+      "--shadow-campaign-button-hover": {
+        "value": "0 8px 24px rgb(0 0 0 / 28%)",
+        "usage": "Gold campaign button on hover/focus (Promo)",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container .premium-cta-box)",
         "confidence": "High"
       }
     },
