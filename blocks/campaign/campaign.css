@@ -8,7 +8,7 @@
   --campaign-font-text: var(--font-family-campaign);
   --campaign-font-accent: var(--font-family-campaign-accent);
   --campaign-maroon: var(--color-brand-primary);
-  --campaign-maroon-wash: rgb(83 14 42 / 5%);
+  --campaign-maroon-wash: var(--color-campaign-maroon-wash);
   --campaign-maroon-line: rgb(83 14 42 / 10%);
   --campaign-gold: var(--color-campaign-gold);
   --campaign-cream: var(--color-campaign-cream);

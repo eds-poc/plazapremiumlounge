@@ -25,3 +25,112 @@
   aspect-ratio: 4 / 3;
   object-fit: cover;
 }
+
+/* option privilege: icon cards, as the source offer pages' privileges grid (Rogers Bank "Exquisite
+   Comfort", `.privileges-grid`): cream cards with a round icon badge (an icon or image in cell 1),
+   a maroon title and grey text, that lift on hover. 1 per row on mobile, 2 from 550px, 4 from
+   992px; the same at every heading level */
+.cards.privilege {
+  --cards-privilege-badge: 44px;
+  --cards-privilege-icon: 22px;
+  --cards-privilege-title-size: 13pt;
+  --cards-privilege-lift: -4px;
+  --cards-privilege-shadow-hover: 0 12px 28px rgb(83 14 42 / 8%);
+}
+
+.cards.privilege > ul {
+  grid-template-columns: 1fr;
+  gap: var(--spacing-7);
+}
+
+.cards.privilege > ul > li {
+  padding: var(--spacing-stack);
+  border: var(--base-border-width) solid var(--color-campaign-line);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-campaign-cream);
+  color: var(--color-campaign-ink);
+  font-family: var(--font-family-campaign);
+  transition: transform var(--duration-medium) ease, box-shadow var(--duration-medium) ease;
+}
+
+/* the media cell: a round badge with a faint maroon wash, the icon or image inside */
+.cards.privilege .cards-card-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: var(--cards-privilege-badge);
+  height: var(--cards-privilege-badge);
+  margin: 0 0 var(--spacing-bootstrap-3);
+  border-radius: var(--radius-circle);
+  background-color: var(--color-campaign-maroon-wash);
+}
+
+.cards.privilege .cards-card-image picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.cards.privilege > ul > li .cards-card-image img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+}
+
+.cards.privilege .cards-card-icon .icon {
+  width: var(--cards-privilege-icon);
+  height: var(--cards-privilege-icon);
+}
+
+.cards.privilege > ul > li .cards-card-icon img {
+  object-fit: contain;
+}
+
+.cards.privilege .cards-card-body {
+  margin: 0;
+}
+
+.cards.privilege .cards-card-body :is(h1, h2, h3, h4, h5, h6) {
+  margin: 0 0 var(--spacing-3);
+  color: var(--color-brand-primary);
+  font-size: var(--cards-privilege-title-size);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: var(--line-height-heading);
+}
+
+.cards.privilege .cards-card-body p {
+  margin: 0;
+  color: var(--color-campaign-grey);
+  font-size: var(--font-size-campaign-small);
+  line-height: var(--line-height-relaxed);
+}
+
+.cards.privilege > ul > li:hover {
+  box-shadow: var(--cards-privilege-shadow-hover);
+  transform: translateY(var(--cards-privilege-lift));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cards.privilege > ul > li {
+    transition: none;
+  }
+
+  .cards.privilege > ul > li:hover {
+    transform: none;
+  }
+}
+
+/* breakpoint-exception: the source privileges grid has 2 columns from 550px */
+@media (width >=550px) {
+  .cards.privilege > ul {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-stack);
+  }
+}
+
+@media (width >=992px) {
+  .cards.privilege > ul {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
