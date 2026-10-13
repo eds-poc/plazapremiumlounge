@@ -53,7 +53,7 @@
   --color-text-muted: #6b6b6b;
   --color-text-control: #212529;
 
-  /* partner campaign palette (offer pages, e.g. Rogers Bank): Campaign and Planner blocks */
+  /* partner campaign palette (offer pages, e.g. Rogers Bank): Campaign, Planner, Title editorial */
   --color-campaign-gold: #ae8f5e;
   --color-campaign-cream: #faf6f4;
   --color-campaign-ink: #1d1d1d;
@@ -84,6 +84,7 @@
 
   /* the campaign text font: the source renders its campaigns in Arial (its Plus Jakarta Sans never loads) */
   --font-family-campaign: arial, sans-serif;
+  --font-family-campaign-accent: georgia, serif;
   --font-weight-light: 300;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
@@ -109,6 +110,7 @@
   --font-weight-campaign-bold: 700;
   --font-size-campaign-small: 11pt;
   --font-size-campaign-label: 10pt;
+  --font-size-campaign-heading: 28pt;
   --body-font-size: 14px;
   --heading-page-size: 30px;
   --heading-section-size: 18px;
@@ -133,9 +135,12 @@
   --spacing-bootstrap-3: 16px;
   --spacing-bootstrap-5: 48px;
   --button-large-padding-block: 9px;
-  --spacing-campaign-band: 40px 8%;
+  --spacing-campaign-band-block: 40px;
+  --spacing-campaign-band-inline: 8%;
+  --spacing-campaign-band: var(--spacing-campaign-band-block) var(--spacing-campaign-band-inline);
   --spacing-campaign-columns: 40px;
   --spacing-campaign-xs: 6px;
+  --spacing-campaign-gap: 18px;
   --section-padding-block: 25px;
   --section-title-gap: 25px;
   --section-inset-padding: 0;

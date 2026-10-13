@@ -468,6 +468,18 @@
         "usage": "Campaign label spacing: panel title, summary eyebrow",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
         "confidence": "High"
+      },
+      "--font-family-campaign-accent": {
+        "value": "georgia, serif",
+        "usage": "Gold serif italic accent words in campaign headings (Campaign, Title editorial)",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign block and the Title editorial option",
+        "confidence": "High"
+      },
+      "--font-size-campaign-heading": {
+        "value": "28pt",
+        "usage": "Campaign light maroon headings (Campaign, Title editorial)",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign block and the Title editorial option",
+        "confidence": "High"
       }
     },
     "spacing": {
@@ -596,15 +608,27 @@
         "evidence": "refactor 2026-10-07: shared by several components",
         "confidence": "High"
       },
-      "--spacing-campaign-band": {
-        "value": "40px 8%",
-        "usage": "Campaign band padding (Campaign and Planner blocks)",
-        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
-        "confidence": "High"
-      },
       "--spacing-campaign-columns": {
         "value": "40px",
         "usage": "Gap between the 7:5 columns from 768px",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
+        "confidence": "High"
+      },
+      "--spacing-campaign-band-block": {
+        "value": "40px",
+        "usage": "Campaign band top/bottom padding; also the space below a Title editorial header",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign block and the Title editorial option",
+        "confidence": "High"
+      },
+      "--spacing-campaign-band-inline": {
+        "value": "8%",
+        "usage": "Campaign band side padding (of the content width)",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign block and the Title editorial option",
+        "confidence": "High"
+      },
+      "--spacing-campaign-band": {
+        "value": "var(--spacing-campaign-band-block) var(--spacing-campaign-band-inline)",
+        "usage": "Campaign band padding shorthand (Campaign, Planner)",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
         "confidence": "High"
       },
@@ -612,6 +636,12 @@
         "value": "6px",
         "usage": "Campaign small gaps: eyebrow pill padding, eyebrow/heading margins",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
+        "confidence": "High"
+      },
+      "--spacing-campaign-gap": {
+        "value": "18px",
+        "usage": "Campaign paragraph and heading gap (Campaign, Title editorial)",
+        "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign block and the Title editorial option",
         "confidence": "High"
       }
     },
