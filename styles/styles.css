@@ -783,6 +783,31 @@ main>.section.inset:not(.band):has(+ .section.band) {
   padding-bottom: var(--spacing-9);
 }
 
+/* an inset section right after a band starts with no space above, as the source's offer text after
+   the campaign (e.g. the Terms and Conditions under the Apply Now box) */
+main>.section.band+.section.inset:not(.band) {
+  padding-top: 0;
+}
+
+/* section style fine-print: small print such as terms and conditions (source offer pages' Terms):
+   14px text at every width, lists indented 20px with a little padding and 20px between items */
+main>.section.fine-print {
+  font-size: var(--font-size-sm);
+}
+
+main>.section.fine-print :is(ol, ul) {
+  margin-bottom: var(--spacing-bootstrap-3);
+  padding-left: var(--spacing-7);
+}
+
+main>.section.fine-print li {
+  padding: var(--spacing-1) var(--spacing-2) calc(var(--spacing-7) + var(--spacing-1));
+}
+
+main>.section.fine-print li>p {
+  margin: 0;
+}
+
 /* title-position: center centres the section heading from 768px (left on mobile, as on the source) */
 @media (width >=768px) {
   main .section[data-title-position='center'] .default-content-wrapper> :is(h1, h2, h3, h4, h5, h6) {
