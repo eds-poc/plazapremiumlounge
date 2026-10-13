@@ -25,6 +25,13 @@ icon items. The text is in Arial and the headings in the site font, as the sourc
 
 ## Placement
 
-On an offer page, put the page title, using `Title (text-lg)`, and the campaign in one section with
-Section Metadata `Style` = `inset`. That gives the source's narrower offer body. The campaign
-starts 30px below the title.
+On an offer page, put the page title, using `Title (text-lg)`, in a section with Section Metadata
+`Style` = `inset`, which gives the source's narrower offer body. Then put the campaign in the next
+section, with `Style` = `inset, band, line` and `Background` = `white`. It starts 30px below the
+title, automatically.
+
+Campaign bands come from the section, not the block: give each band its own section with Section
+Metadata `Style` = `inset, band` and `Background` = `white`, `cream` or `blush`. Add `line` to the
+style for a thin line under the band. A band section has no section spacing, so consecutive bands
+touch, and its blocks get 40px above and below and 8% at the sides. Used in any other section, the
+block shows with no band spacing or background.

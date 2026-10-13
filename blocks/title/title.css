@@ -60,11 +60,10 @@
 
 /* option editorial: a campaign feature header (source offer pages, e.g. Rogers Bank "Exquisite
    Comfort"): a small gold label eyebrow, a light maroon heading with *italic* words as a gold
-   serif accent, and a small grey subtitle. The same at every width and heading level; it sits in a
-   campaign band (40px above, 8% at the sides, 40px to what follows) */
+   serif accent, and a small grey subtitle. The same at every width and heading level, with 40px to
+   what follows; the band around it comes from its section (style band) */
 .title.editorial {
   margin-bottom: var(--spacing-campaign-band-block);
-  padding: var(--spacing-campaign-band-block) var(--spacing-campaign-band-inline) 0;
 }
 
 .title.editorial .title-eyebrow {
