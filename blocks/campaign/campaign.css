@@ -1,6 +1,7 @@
 /* campaign: the intro of a partner campaign, as the source offer pages' `#ppl-campaign-container`
    first band (e.g. Rogers Bank): an eyebrow pill, a light maroon heading with a gold serif accent,
-   intro and text, beside a cream panel with icon items. Stacked on mobile, 7:5 from 768px. The
+   intro and text, beside a cream panel with icon items. Stacked on mobile, 7:5 from 768px. The band
+   around it (padding, background, the line under it) comes from its section (style band). The
    campaign's own palette and type scale (in pt, as the source) are block variables. Text uses
    Arial, as the source renders it (its Plus Jakarta Sans never loads); headings keep the site font */
 .campaign {
@@ -26,7 +27,6 @@
   --campaign-radius-box: 8px;
   --campaign-icon-box: 44px;
   --campaign-icon: 20px;
-  --campaign-band-padding: var(--spacing-campaign-band);
   --campaign-gap-lg: var(--spacing-campaign-columns);
   --campaign-gap: var(--spacing-campaign-gap);
   --campaign-gap-xs: 4px;
@@ -36,20 +36,12 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-9);
-  padding: var(--campaign-band-padding);
-  border-bottom: var(--base-border-width) solid var(--campaign-line);
-  background-color: var(--color-background);
   color: var(--campaign-ink);
   font-family: var(--campaign-font-text);
 }
 
 .campaign * {
   box-sizing: border-box;
-}
-
-/* the source's 30px spacer between the page title and the campaign */
-.title-wrapper + .campaign-wrapper {
-  padding-top: var(--spacing-9);
 }
 
 /* eyebrow pill (source `.eyebrow-tag`) */

@@ -1,6 +1,7 @@
 /* planner: the source offer pages' pass planner (`.planner-card` on a cream band, e.g. Rogers
    Bank): a centred header, a guest slider with stop labels, and a maroon summary that updates.
-   Stacked on mobile, slider and summary side by side (7:5) from 768px. Campaign palette and type
+   Stacked on mobile, slider and summary side by side (7:5) from 768px. The cream band around it
+   comes from its section (style band, background cream). Campaign palette and type
    from the shared campaign tokens; planner-only values are block variables (in pt, as the source) */
 .planner {
   --planner-maroon: var(--color-brand-primary);
@@ -24,8 +25,6 @@
   --planner-shadow-summary: 0 8px 24px rgb(83 14 42 / 20%);
   --planner-shadow-thumb: 0 2px 8px rgb(83 14 42 / 30%);
 
-  padding: var(--spacing-campaign-band);
-  background-color: var(--color-campaign-cream);
   color: var(--color-campaign-ink);
   font-family: var(--font-family-campaign);
 }

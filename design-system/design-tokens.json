@@ -105,6 +105,12 @@
         "usage": "Campaign surfaces: the Campaign panel, the Planner band",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign and Planner blocks",
         "confidence": "High"
+      },
+      "--color-campaign-blush-wash": {
+        "value": "rgb(242 214 211 / 25%)",
+        "usage": "Campaign band background 'blush' (over the campaign cream), section style band",
+        "evidence": "source .bg-champagne-band rgba(242, 214, 211, 0.25) on #ppl-campaign-container #faf6f4",
+        "confidence": "High"
       }
     },
     "text colors": {
@@ -616,13 +622,13 @@
       },
       "--spacing-campaign-band-block": {
         "value": "40px",
-        "usage": "Campaign band top/bottom padding; also the space below a Title editorial header",
+        "usage": "Section style band: band top/bottom padding; also the space below a Title editorial header",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign block and the Title editorial option",
         "confidence": "High"
       },
       "--spacing-campaign-band-inline": {
         "value": "8%",
-        "usage": "Campaign band side padding (of the content width)",
+        "usage": "Section style band: band side padding (of the content width)",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign block and the Title editorial option",
         "confidence": "High"
       },

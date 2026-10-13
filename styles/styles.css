@@ -59,6 +59,7 @@
   --color-campaign-ink: #1d1d1d;
   --color-campaign-grey: #585956;
   --color-campaign-line: #efefef;
+  --color-campaign-blush-wash: rgb(242 214 211 / 25%);
   --color-text-subtle: #999;
   --color-text-inverse: #fff;
   --color-link: var(--color-brand-primary);
@@ -686,6 +687,62 @@ main .section.fixed-width>div {
   main .section.fixed-width>div {
     max-width: 1320px;
   }
+}
+
+/* section style band: a campaign band (the source `#ppl-campaign-container .section-padded`), used
+   with inset. No section padding, so consecutive bands touch; inside the content width each band has
+   40px above and below and 8% of that width at the sides, and its Section Metadata background
+   (white, cream or blush). Option line: a 1px line under the band. The blocks inside carry no band
+   spacing, so they can be used in any section */
+main>.section.band {
+  padding-block: 0;
+}
+
+/* each block wrapper is the container: its side padding becomes a transparent border, so the band
+   background covers the content width only; it contains the blocks' margins (no gaps) */
+main>.section.band>div {
+  display: flow-root;
+  padding-inline: 0;
+  border-inline: var(--container-padding) solid transparent;
+  background: var(--band-background, none);
+  background-clip: padding-box;
+}
+
+main>.section.band>div:first-child {
+  padding-top: var(--spacing-campaign-band-block);
+}
+
+main>.section.band>div:last-child {
+  padding-bottom: var(--spacing-campaign-band-block);
+}
+
+/* 8% of the content width at the sides */
+main>.section.band>div>* {
+  margin-inline: var(--spacing-campaign-band-inline);
+}
+
+/* (inside the band's edge, so it spans the content width only) */
+main>.section.band.line>div:last-child {
+  padding-bottom: calc(var(--spacing-campaign-band-block) + var(--base-border-width));
+  box-shadow: inset 0 calc(-1 * var(--base-border-width)) 0 var(--color-campaign-line);
+}
+
+main>.section.band[data-background='white'] {
+  --band-background: var(--color-background);
+}
+
+main>.section.band[data-background='cream'] {
+  --band-background: var(--color-campaign-cream);
+}
+
+/* the source's blush wash over the campaign cream */
+main>.section.band[data-background='blush'] {
+  --band-background: linear-gradient(var(--color-campaign-blush-wash), var(--color-campaign-blush-wash)), var(--color-campaign-cream);
+}
+
+/* an inset section followed by a band ends with the source's 30px spacer */
+main>.section.inset:not(.band):has(+ .section.band) {
+  padding-bottom: var(--spacing-9);
 }
 
 /* title-position: center centres the section heading from 768px (left on mobile, as on the source) */

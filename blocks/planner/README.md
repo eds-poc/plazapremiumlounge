@@ -40,6 +40,12 @@ touch or the arrow keys), and the summary updates as they do.
 
 ## Layout
 
-The planner draws its own cream band. On mobile the slider and summary are stacked. From 768px
-they sit side by side (7:5), and the card has more padding. On an offer page, place it right
-after the Campaign block in the same `inset` section, as on the source.
+On mobile the slider and summary are stacked. From 768px they sit side by side (7:5), and the card
+has more padding. On an offer page, put it in its own section right after the Campaign band, with
+Section Metadata `Style` = `inset, band` and `Background` = `cream`, as on the source.
+
+Campaign bands come from the section, not the block: give each band its own section with Section
+Metadata `Style` = `inset, band` and `Background` = `white`, `cream` or `blush`. Add `line` to the
+style for a thin line under the band. A band section has no section spacing, so consecutive bands
+touch, and its blocks get 40px above and below and 8% at the sides. Used in any other section, the
+block shows with no band spacing or background.
