@@ -99,6 +99,12 @@
   line-height: var(--line-height-heading);
 }
 
+.cards-card-icon {
+  p {
+    margin: 0;
+  }
+}
+
 .cards.privilege .cards-card-body p {
   margin: 0;
   color: var(--color-campaign-grey);
@@ -109,12 +115,6 @@
 .cards.privilege>ul>li:hover {
   box-shadow: var(--cards-privilege-shadow-hover);
   transform: translateY(var(--cards-privilege-lift));
-}
-
-.cards-card-icon {
-  p {
-    margin: 0;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
