@@ -168,6 +168,7 @@
   --spacing-campaign-panel-block-sm: 22px;
   --spacing-campaign-panel-inline: 5%;
   --spacing-campaign-panel-inline-sm: 4%;
+  --size-campaign-callout-max: 720px;
   --spacing-campaign-card: 36px;
   --spacing-campaign-promo-block: 60px;
   --spacing-campaign-promo-inline: var(--spacing-stack);
@@ -735,6 +736,9 @@ main .section.fixed-width>div {
    (white, cream, blush or mist). Option line: a 1px line under the band. The blocks inside carry no band
    spacing, so they can be used in any section */
 main>.section.band {
+  /* the side inset of the band's content, also read by section style boxed-copy */
+  --band-inline: var(--spacing-campaign-band-inline);
+
   padding-block: 0;
 }
 
@@ -758,7 +762,7 @@ main>.section.band>div:last-child {
 
 /* 8% of the content width at the sides */
 main>.section.band>div>* {
-  margin-inline: var(--spacing-campaign-band-inline);
+  margin-inline: var(--band-inline);
 }
 
 /* option flush: a band section whose block draws its own box (e.g. Promo): no band padding or side
@@ -767,8 +771,8 @@ main>.section.band.flush>div {
   padding-block: 0;
 }
 
-main>.section.band.flush>div>* {
-  margin-inline: 0;
+main>.section.band.flush {
+  --band-inline: 0px;
 }
 
 /* (inside the band's edge, so it spans the content width only) */
@@ -810,8 +814,8 @@ main>.section.band.panel.line>div:last-child {
   padding-bottom: calc(var(--spacing-campaign-panel-block-sm) + var(--base-border-width));
 }
 
-main>.section.band.panel>div>* {
-  margin-inline: calc(var(--spacing-campaign-panel-inline-sm) + var(--spacing-stack));
+main>.section.band.panel {
+  --band-inline: calc(var(--spacing-campaign-panel-inline-sm) + var(--spacing-stack));
 }
 
 /* breakpoint-exception: the source panels change above 600px and 768px */
@@ -830,8 +834,8 @@ main>.section.band.panel>div>* {
 }
 
 @media (width > 768px) {
-  main>.section.band.panel>div>* {
-    margin-inline: calc(var(--spacing-campaign-panel-inline) + var(--spacing-stack));
+  main>.section.band.panel {
+    --band-inline: calc(var(--spacing-campaign-panel-inline) + var(--spacing-stack));
   }
 }
 
@@ -888,6 +892,44 @@ main>.section.centered-copy .default-content-wrapper>p+p {
 
 main>.section.centered-copy .default-content-wrapper>p:last-child {
   margin-bottom: var(--spacing-campaign-gap);
+}
+
+/* section style boxed-copy: the section's text as a white box with a thin border and 8px corners
+   (source West Kowloon Smart Traveller `__rewards-info`): at most 720px wide and centred inside the
+   band's side inset, padding 18px 24px, 8px between paragraphs, bold in maroon, 36px below. Drawn on
+   the text (paragraphs, lists, headings), as a band's text wrapper also paints the band. Use with
+   centered-copy for the source's grey centred Arial */
+main>.section.boxed-copy .default-content-wrapper>:is(p, ul, ol, h1, h2, h3, h4, h5, h6) {
+  box-sizing: border-box;
+  margin-inline: max(var(--band-inline, 0px), calc((100% - var(--size-campaign-callout-max)) / 2));
+  padding: 0 var(--spacing-stack);
+  border-inline: var(--base-border-width) solid var(--color-campaign-outline);
+  background-color: var(--color-background);
+}
+
+main>.section.boxed-copy .default-content-wrapper>:is(p, ul, ol, h1, h2, h3, h4, h5, h6)+:is(p, ul, ol, h1, h2, h3, h4, h5, h6) {
+  margin-top: 0;
+  padding-top: var(--spacing-3);
+}
+
+main>.section.boxed-copy .default-content-wrapper>:is(p, ul, ol, h1, h2, h3, h4, h5, h6):first-child {
+  padding-top: var(--spacing-campaign-gap);
+  border-top: var(--base-border-width) solid var(--color-campaign-outline);
+  border-start-start-radius: var(--radius-campaign-sm);
+  border-start-end-radius: var(--radius-campaign-sm);
+}
+
+main>.section.boxed-copy .default-content-wrapper>:is(p, ul, ol, h1, h2, h3, h4, h5, h6):last-child {
+  margin-bottom: calc(var(--spacing-stack) + var(--spacing-5));
+  padding-bottom: var(--spacing-campaign-gap);
+  border-bottom: var(--base-border-width) solid var(--color-campaign-outline);
+  border-end-start-radius: var(--radius-campaign-sm);
+  border-end-end-radius: var(--radius-campaign-sm);
+}
+
+main>.section.boxed-copy .default-content-wrapper strong {
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-campaign-bold);
 }
 
 /* title-position: center centres the section heading from 768px (left on mobile, as on the source) */
