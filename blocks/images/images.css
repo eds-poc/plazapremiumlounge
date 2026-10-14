@@ -24,8 +24,8 @@
 .images.carousel {
   --images-fade-duration: 600ms;
   --images-toggle-size: 36px;
-  --images-toggle-icon-size: 12px;
-  --images-toggle-bar-width: 4px;
+  --images-toggle-icon-size: 16px;
+  --images-toggle-play-size: 12px;
 
   position: relative;
   display: block;
@@ -86,22 +86,24 @@
   box-shadow: 0 0 0 calc(var(--spacing-1) * 2) var(--color-brand-primary);
 }
 
-/* pause: two bars */
+/* pause: the pause icon (icons/pause.svg) as a mask, in the button's text colour */
 .images-toggle::before {
   content: '';
   width: var(--images-toggle-icon-size);
   height: var(--images-toggle-icon-size);
-  border-inline: var(--images-toggle-bar-width) solid currentcolor;
+  background-color: currentcolor;
+  mask: url('../../icons/pause.svg') center / contain no-repeat;
 }
 
-/* play: a triangle pointing right */
+/* play: a triangle pointing right, nudged right so it looks centred */
 .images.paused .images-toggle::before {
   width: 0;
   height: 0;
-  margin-inline-start: calc(var(--images-toggle-bar-width) / 2);
-  border-block: calc(var(--images-toggle-icon-size) / 2) solid transparent;
-  border-inline-start: var(--images-toggle-icon-size) solid currentcolor;
-  border-inline-end: 0;
+  margin-inline-start: calc(var(--images-toggle-play-size) / 6);
+  border-block: calc(var(--images-toggle-play-size) / 2) solid transparent;
+  border-inline-start: var(--images-toggle-play-size) solid currentcolor;
+  background-color: transparent;
+  mask: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
