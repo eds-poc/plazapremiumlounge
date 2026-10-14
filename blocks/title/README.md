@@ -33,6 +33,8 @@ Add them in brackets after the block name, e.g. `Title (center, compact)`.
 | `editorial` | A campaign feature header: the eyebrow as a small gold label, a light maroon 28pt heading where *italic* words become a gold serif accent, and the intro as small grey text. The same at every width and heading level, with 40px to what follows. In a campaign band section (Section Metadata `Style` = `inset, band`), the band adds 40px above and 8% at the sides | Offer pages, Rogers Bank "Exquisite Comfort" |
 | `gap-small` | 30px to what follows instead of the usual space (e.g. `editorial`'s 40px) | Rogers Bank "Extended Journey Privileges", above its cards |
 | `center-all` | Centred at every width (`center` is left-aligned on mobile) | Rogers Bank "Exquisite Comfort" |
+| `tagline` | A lead-in: a maroon serif heading (22px on mobile up to 30px, growing with the screen), at most 640px wide, 10px above light grey 15px text at most 620px wide. The same at every heading level. Use with `center-all`, in a `panel` band section | West Kowloon offer lead-in |
+| `callout` | A call-to-action header, at most 720px wide and centred: a maroon serif heading (20px on mobile up to 26px), 16px above the intro, which sits in a white box with a thin border and 8px corners (16px light grey text; **bold** in maroon). The same at every heading level. Use with `center-all`, in a `panel` band section | West Kowloon offer Smart Traveller redemption |
 
 ### Example: editorial
 
@@ -43,6 +45,19 @@ Add them in brackets after the block name, e.g. `Title (center, compact)`.
 Leave out `center-all` for a left-aligned header, e.g. "Extended Journey Privileges". On an offer
 page, put it in its own band section after the Planner (`Style` = `inset, band`, `Background` =
 `white`), with the cards that follow it, as on the source.
+
+### Example: tagline and callout
+
+| Title (tagline, center-all) |
+| --- |
+| ### Enjoy a premium lounge haven experience before your high speed rail journey.<br>Setting a new benchmark in rail hospitality… |
+
+| Title (callout, center-all) |
+| --- |
+| ### Redeem a … lounge experience with 1,400 ST Points in the Smart Traveller App<br>Enjoy **100 ST Points** with every visit…<br>Haven’t downloaded the Smart Traveller App yet? Download it now… |
+
+On an offer page, put each in its own band section with `Style` = `inset, band, panel` (`Background`
+= `white` for the lead-in, `mist` for the callout).
 
 ## Spacing
 

@@ -118,6 +118,7 @@
   --line-height-body: 1.4;
   --line-height-relaxed: 1.5;
   --line-height-loose: 1.6;
+  --line-height-campaign-copy: 1.9;
   --letter-spacing-label: 1px;
   --letter-spacing-eyebrow: 2px;
   --letter-spacing-campaign: 1.5px;
@@ -160,6 +161,13 @@
   --spacing-campaign-columns: 40px;
   --spacing-campaign-xs: 6px;
   --spacing-campaign-gap: 18px;
+
+  /* campaign panels (source West Kowloon `__section`): 28px above and below (22px at 600px and
+     below), content inset 5% + 24px at the sides (4% + 24px at 768px and below) */
+  --spacing-campaign-panel-block: 28px;
+  --spacing-campaign-panel-block-sm: 22px;
+  --spacing-campaign-panel-inline: 5%;
+  --spacing-campaign-panel-inline-sm: 4%;
   --spacing-campaign-card: 36px;
   --spacing-campaign-promo-block: 60px;
   --spacing-campaign-promo-inline: var(--spacing-stack);
@@ -787,6 +795,46 @@ main>.section.band[data-background='mist'] {
   --band-background: var(--color-campaign-mist);
 }
 
+/* option panel: the source West Kowloon campaign panels (`__section`): 22px above and below, 28px
+   above 600px, instead of the band's 40px; the content inset 4% + 24px at the sides, 5% + 24px
+   above 768px, instead of 8% */
+main>.section.band.panel>div:first-child {
+  padding-top: var(--spacing-campaign-panel-block-sm);
+}
+
+main>.section.band.panel>div:last-child {
+  padding-bottom: var(--spacing-campaign-panel-block-sm);
+}
+
+main>.section.band.panel.line>div:last-child {
+  padding-bottom: calc(var(--spacing-campaign-panel-block-sm) + var(--base-border-width));
+}
+
+main>.section.band.panel>div>* {
+  margin-inline: calc(var(--spacing-campaign-panel-inline-sm) + var(--spacing-stack));
+}
+
+/* breakpoint-exception: the source panels change above 600px and 768px */
+@media (width > 600px) {
+  main>.section.band.panel>div:first-child {
+    padding-top: var(--spacing-campaign-panel-block);
+  }
+
+  main>.section.band.panel>div:last-child {
+    padding-bottom: var(--spacing-campaign-panel-block);
+  }
+
+  main>.section.band.panel.line>div:last-child {
+    padding-bottom: calc(var(--spacing-campaign-panel-block) + var(--base-border-width));
+  }
+}
+
+@media (width > 768px) {
+  main>.section.band.panel>div>* {
+    margin-inline: calc(var(--spacing-campaign-panel-inline) + var(--spacing-stack));
+  }
+}
+
 /* an inset section followed by a band ends with the source's 30px spacer */
 main>.section.inset:not(.band):has(+ .section.band) {
   padding-bottom: var(--spacing-9);
@@ -815,6 +863,29 @@ main>.section.fine-print li {
 
 main>.section.fine-print li>p {
   margin: 0;
+}
+
+/* section style centered-copy: default text as the source campaign copy (West Kowloon description,
+   `__body`): centred, light grey, 16px at every width with a 1.9 line height; paragraphs one line
+   apart and 18px before the block that follows (e.g. an Images carousel) */
+main>.section.centered-copy .default-content-wrapper {
+  color: var(--color-campaign-grey);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-campaign-copy);
+  text-align: center;
+}
+
+main>.section.centered-copy .default-content-wrapper>p {
+  margin-block: 0;
+}
+
+main>.section.centered-copy .default-content-wrapper>p+p {
+  margin-top: calc(var(--line-height-campaign-copy) * 1em);
+}
+
+main>.section.centered-copy .default-content-wrapper>p:last-child {
+  margin-bottom: var(--spacing-campaign-gap);
 }
 
 /* title-position: center centres the section heading from 768px (left on mobile, as on the source) */
