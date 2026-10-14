@@ -872,7 +872,7 @@ main>.section.fine-print li>p {
 /* section style centered-copy: default text as the source campaign copy (West Kowloon description,
    `__body`): centred grey Arial (the source's undefined PolySans Slim shows as Arial), 16px at every
    width with a 1.9 line height; paragraphs one line
-   apart and 18px before the block that follows (e.g. an Images carousel) */
+   apart and 18px before the block that follows (e.g. an Image carousel) */
 main>.section.centered-copy .default-content-wrapper {
   color: var(--color-campaign-grey);
   font-family: var(--font-family-campaign);

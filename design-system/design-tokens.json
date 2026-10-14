@@ -268,7 +268,7 @@
       },
       "--color-campaign-mist": {
         "value": "#f7f4f5",
-        "usage": "Light pinkish grey campaign panels: band Section Metadata Background mist, the Images carousel backdrop",
+        "usage": "Light pinkish grey campaign panels: band Section Metadata Background mist, the Image carousel backdrop",
         "evidence": "source West Kowloon campaign CSS (.ppg-ppl-westkowloon-lounge --c-light, __section--alt)",
         "confidence": "High"
       },
