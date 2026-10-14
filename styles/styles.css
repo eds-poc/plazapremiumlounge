@@ -67,6 +67,10 @@
   --color-campaign-plum-deep: #2d0515;
   --color-campaign-pink: #e0b2d3;
   --color-campaign-gold-hover: #c2a16d;
+
+  /* (source West Kowloon campaign, `--c-light` and the facility card border) */
+  --color-campaign-mist: #f7f4f5;
+  --color-campaign-outline: #e6e0e3;
   --gradient-campaign-promo: linear-gradient(135deg, var(--color-brand-primary) 0%, var(--color-campaign-plum-deep) 100%);
   --color-text-subtle: #999;
   --color-text-inverse: #fff;
@@ -720,7 +724,7 @@ main .section.fixed-width>div {
 /* section style band: a campaign band (the source `#ppl-campaign-container .section-padded`), used
    with inset. No section padding, so consecutive bands touch; inside the content width each band has
    40px above and below and 8% of that width at the sides, and its Section Metadata background
-   (white, cream or blush). Option line: a 1px line under the band. The blocks inside carry no band
+   (white, cream, blush or mist). Option line: a 1px line under the band. The blocks inside carry no band
    spacing, so they can be used in any section */
 main>.section.band {
   padding-block: 0;
@@ -776,6 +780,11 @@ main>.section.band[data-background='cream'] {
 /* the source's blush wash over the campaign cream */
 main>.section.band[data-background='blush'] {
   --band-background: linear-gradient(var(--color-campaign-blush-wash), var(--color-campaign-blush-wash)), var(--color-campaign-cream);
+}
+
+/* the source's light pinkish grey panels (e.g. West Kowloon `__section--alt`) */
+main>.section.band[data-background='mist'] {
+  --band-background: var(--color-campaign-mist);
 }
 
 /* an inset section followed by a band ends with the source's 30px spacer */

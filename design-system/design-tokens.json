@@ -265,6 +265,18 @@
         "usage": "Line above a campaign footnote (Cards connectivity), source .connectivity-disclaimer border-top",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
         "confidence": "High"
+      },
+      "--color-campaign-mist": {
+        "value": "#f7f4f5",
+        "usage": "Light pinkish grey campaign panels: band Section Metadata Background mist, the Images carousel backdrop",
+        "evidence": "source West Kowloon campaign CSS (.ppg-ppl-westkowloon-lounge --c-light, __section--alt)",
+        "confidence": "High"
+      },
+      "--color-campaign-outline": {
+        "value": "#e6e0e3",
+        "usage": "Thin borders of campaign boxes on light panels (Cards badge)",
+        "evidence": "source West Kowloon campaign CSS (__facility, __rewards-info and __qr-image borders)",
+        "confidence": "High"
       }
     },
     "state colors": {

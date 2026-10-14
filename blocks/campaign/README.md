@@ -31,7 +31,7 @@ section, with `Style` = `inset, band, line` and `Background` = `white`. It start
 title, automatically.
 
 Campaign bands come from the section, not the block: give each band its own section with Section
-Metadata `Style` = `inset, band` and `Background` = `white`, `cream` or `blush`. Add `line` to the
+Metadata `Style` = `inset, band` and `Background` = `white`, `cream`, `blush` or `mist`. Add `line` to the
 style for a thin line under the band. A band section has no section spacing, so consecutive bands
 touch, and its blocks get 40px above and below and 8% at the sides. Used in any other section, the
 block shows with no band spacing or background.

@@ -1,0 +1,111 @@
+/* images: every authored image at the full content width, stacked with a gap */
+.images {
+  display: grid;
+  gap: var(--spacing-7);
+}
+
+.images .images-item {
+  line-height: 0;
+}
+
+.images .images-link {
+  display: block;
+}
+
+.images img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* option carousel: one image at a time in a 16:7 frame with 8px corners, fading to the next every
+   4 seconds (source West Kowloon lounge photo gallery, `__carousel`); a round pause/play button at
+   the bottom right */
+.images.carousel {
+  --images-fade-duration: 600ms;
+  --images-toggle-size: 36px;
+  --images-toggle-icon-size: 12px;
+  --images-toggle-bar-width: 4px;
+
+  position: relative;
+  display: block;
+}
+
+.images.carousel .images-viewport {
+  display: grid;
+  overflow: hidden;
+  aspect-ratio: 16 / 7;
+  border-radius: var(--radius-campaign-sm);
+  background-color: var(--color-campaign-mist);
+}
+
+.images.carousel .images-item {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transition: opacity var(--images-fade-duration) ease;
+}
+
+.images.carousel .images-item.active {
+  opacity: 1;
+}
+
+.images.carousel :is(.images-link, picture) {
+  display: block;
+  height: 100%;
+}
+
+.images.carousel img {
+  height: 100%;
+  object-fit: cover;
+}
+
+.images-toggle {
+  position: absolute;
+  inset-block-end: var(--spacing-5);
+  inset-inline-end: var(--spacing-5);
+  display: grid;
+  place-items: center;
+  width: var(--images-toggle-size);
+  height: var(--images-toggle-size);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-circle);
+  background-color: var(--color-overlay-backdrop);
+  color: var(--color-text-inverse);
+  cursor: pointer;
+}
+
+.images-toggle:hover {
+  background-color: var(--color-brand-primary);
+}
+
+/* a white ring with a maroon edge, visible on light and dark photos */
+.images-toggle:focus-visible {
+  outline: var(--spacing-1) solid var(--color-text-inverse);
+  outline-offset: var(--spacing-1);
+  box-shadow: 0 0 0 calc(var(--spacing-1) * 2) var(--color-brand-primary);
+}
+
+/* pause: two bars */
+.images-toggle::before {
+  content: '';
+  width: var(--images-toggle-icon-size);
+  height: var(--images-toggle-icon-size);
+  border-inline: var(--images-toggle-bar-width) solid currentcolor;
+}
+
+/* play: a triangle pointing right */
+.images.paused .images-toggle::before {
+  width: 0;
+  height: 0;
+  margin-inline-start: calc(var(--images-toggle-bar-width) / 2);
+  border-block: calc(var(--images-toggle-icon-size) / 2) solid transparent;
+  border-inline-start: var(--images-toggle-icon-size) solid currentcolor;
+  border-inline-end: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .images.carousel .images-item {
+    transition: none;
+  }
+}
