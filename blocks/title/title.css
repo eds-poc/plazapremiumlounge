@@ -113,6 +113,113 @@
   margin-inline: auto;
 }
 
+/* option tagline: a lead-in (source West Kowloon `__lead`): a maroon Georgia heading from 22px to
+   30px with the screen width, at most 640px wide, over grey 15px Arial text at most 620px wide (the
+   source asks for undefined Reckless Neue Book and PolySans Slim faces, so it shows these); the same
+   at every heading level. With the lead-in's own space, 2px more than its panel above and below
+   (4px above only, above 600px). Use with center-all */
+.title.tagline {
+  --title-tagline-heading-size: clamp(22px, 3.2vw, 30px);
+  --title-tagline-heading-max: 640px;
+  --title-tagline-intro-size: 15px;
+  --title-tagline-intro-max: 620px;
+  --title-tagline-intro-line-height: 1.7;
+  --title-tagline-letter-spacing: 0.01em;
+
+  margin-bottom: 0;
+  padding-block: var(--spacing-1);
+}
+
+.title.tagline .title-heading {
+  max-width: var(--title-tagline-heading-max);
+  margin: 0 auto var(--spacing-4);
+  color: var(--color-brand-primary);
+  font-family: var(--font-family-campaign-accent);
+  font-size: var(--title-tagline-heading-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-relaxed);
+}
+
+.title.tagline .title-intro {
+  max-width: var(--title-tagline-intro-max);
+  margin: 0 auto;
+  color: var(--color-campaign-grey);
+  font-family: var(--font-family-campaign);
+  font-size: var(--title-tagline-intro-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--title-tagline-intro-line-height);
+  letter-spacing: var(--title-tagline-letter-spacing);
+}
+
+.title.tagline .title-intro p {
+  margin: 0;
+}
+
+/* option callout: a call-to-action header (source West Kowloon redemption `__cta-block`): at most
+   720px wide and centred, 12px above and below; a maroon Georgia heading from 20px to 26px with the
+   screen width, 16px above the intro; the intro in a white box with a thin border and 8px corners,
+   16px grey Arial text with a 1.9 line height, bold in maroon (as the source shows them). The same
+   at every heading level. Use with center-all */
+.title.callout {
+  --title-callout-heading-size: clamp(20px, 2.8vw, 26px);
+  --title-callout-text-max: 760px;
+
+  margin-bottom: 0;
+  padding-block: var(--spacing-5);
+}
+
+/* a callout with only a heading (e.g. above a Responsive Content block): no space below it */
+.title.callout:not(:has(.title-intro)) {
+  padding-bottom: 0;
+}
+
+/* (the 720px limit is on the parts: a band section sets the block's own side margins) */
+.title.callout .title-heading {
+  max-width: var(--size-campaign-callout-max);
+  margin: 0 auto var(--spacing-bootstrap-3);
+  color: var(--color-brand-primary);
+  font-family: var(--font-family-campaign-accent);
+  font-size: var(--title-callout-heading-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+}
+
+.title.callout .title-intro {
+  box-sizing: border-box;
+  max-width: var(--size-campaign-callout-max);
+  margin: 0 auto var(--spacing-stack);
+  padding: var(--spacing-campaign-gap) var(--spacing-stack);
+  border: var(--base-border-width) solid var(--color-campaign-outline);
+  border-radius: var(--radius-campaign-sm);
+  background-color: var(--color-background);
+  color: var(--color-campaign-grey);
+  font-family: var(--font-family-campaign);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-campaign-copy);
+}
+
+.title.callout .title-intro p {
+  max-width: var(--title-callout-text-max);
+  margin: 0 auto var(--spacing-3);
+}
+
+.title.callout .title-intro p:last-child {
+  margin-bottom: 0;
+}
+
+.title.callout .title-intro strong {
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-campaign-bold);
+}
+
+/* breakpoint-exception: the source lead-in's space changes above 600px */
+@media (width > 600px) {
+  .title.tagline {
+    padding-block: calc(var(--spacing-1) * 2) 0;
+  }
+}
+
 @media (width >=768px) {
   .title.center {
     text-align: center;

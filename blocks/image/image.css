@@ -35,3 +35,106 @@
 .image.border-rounded .image-media img {
   border-radius: var(--radius-lg);
 }
+
+/* option carousel: every image, one at a time in a 16:7 frame with 8px corners, fading to the next
+   every 4 seconds (source West Kowloon lounge photo gallery, `__carousel`); a round pause/play
+   button at the bottom right. With border-rounded the frame has 20px corners, with offer-banner
+   the 5:2 shape */
+.image.carousel {
+  --image-fade-duration: 600ms;
+  --image-toggle-size: 36px;
+  --image-toggle-icon-size: 16px;
+  --image-toggle-play-size: 12px;
+
+  position: relative;
+  display: block;
+}
+
+.image.carousel .image-viewport {
+  display: grid;
+  overflow: hidden;
+  aspect-ratio: 16 / 7;
+  border-radius: var(--radius-campaign-sm);
+  background-color: var(--color-campaign-mist);
+}
+
+.image.carousel .image-slide {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transition: opacity var(--image-fade-duration) ease;
+}
+
+.image.carousel .image-slide.active {
+  opacity: 1;
+}
+
+.image.carousel .image-slide :is(.image-link, picture) {
+  display: block;
+  height: 100%;
+}
+
+.image.carousel .image-slide img {
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-toggle {
+  position: absolute;
+  inset-block-end: var(--spacing-5);
+  inset-inline-end: var(--spacing-5);
+  display: grid;
+  place-items: center;
+  width: var(--image-toggle-size);
+  height: var(--image-toggle-size);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-circle);
+  background-color: var(--color-overlay-backdrop);
+  color: var(--color-text-inverse);
+  cursor: pointer;
+}
+
+.image-toggle:hover {
+  background-color: var(--color-brand-primary);
+}
+
+/* a white ring with a maroon edge, visible on light and dark photos */
+.image-toggle:focus-visible {
+  outline: var(--spacing-1) solid var(--color-text-inverse);
+  outline-offset: var(--spacing-1);
+  box-shadow: 0 0 0 calc(var(--spacing-1) * 2) var(--color-brand-primary);
+}
+
+/* pause: the pause icon (icons/pause.svg) as a mask, in the button's text colour */
+.image-toggle::before {
+  content: '';
+  width: var(--image-toggle-icon-size);
+  height: var(--image-toggle-icon-size);
+  background-color: currentcolor;
+  mask: url('../../icons/pause.svg') center / contain no-repeat;
+}
+
+/* play: a triangle pointing right, nudged right so it looks centred */
+.image.paused .image-toggle::before {
+  width: 0;
+  height: 0;
+  margin-inline-start: calc(var(--image-toggle-play-size) / 6);
+  border-block: calc(var(--image-toggle-play-size) / 2) solid transparent;
+  border-inline-start: var(--image-toggle-play-size) solid currentcolor;
+  background-color: transparent;
+  mask: none;
+}
+
+.image.carousel.border-rounded .image-viewport {
+  border-radius: var(--radius-lg);
+}
+
+.image.carousel.offer-banner .image-viewport {
+  aspect-ratio: 5 / 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .image.carousel .image-slide {
+    transition: none;
+  }
+}

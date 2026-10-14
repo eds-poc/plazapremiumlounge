@@ -1,0 +1,107 @@
+/* responsive content: content shown only on some screens, centred. desktop-content shows above
+   1024px, mobile-content at 1024px and below (the source West Kowloon redemption switch); content
+   for every screen always shows */
+.responsive-content {
+  text-align: center;
+}
+
+.responsive-content :is(.responsive-content-desktop, .responsive-content-mobile, .responsive-content-all)> :last-child {
+  margin-bottom: 0;
+}
+
+/* a linked image: the link is just the image's size, centred (no line gap under it) */
+.responsive-content .responsive-content-image-link {
+  display: block;
+  width: fit-content;
+  margin-inline: auto;
+}
+
+/* breakpoint-exception: the source switches between its QR code and its button at 1024px */
+@media (width <=1024px) {
+  .responsive-content .responsive-content-desktop {
+    display: none;
+  }
+}
+
+@media (width > 1024px) {
+  .responsive-content .responsive-content-mobile {
+    display: none;
+  }
+}
+
+/* option scan-or-tap: a code to scan on desktop, a button to tap on mobile (source West Kowloon
+   Smart Traveller redemption, `__qr-wrapper` / `__btn-wrapper`): the desktop image as a framed
+   170px QR code with a 14px grey caption 12px below; the mobile link (written in bold) as a maroon
+   button 20px below what's above it (4px more than the 16px the QR gets), full width at 600px and
+   below. Text in Arial, as the source shows it */
+.responsive-content.scan-or-tap {
+  --responsive-content-qr-size: 170px;
+  --responsive-content-line-height: 1.8;
+  --responsive-content-button-padding-block: 14px;
+
+  /* 36px, plus the source's &nbsp; and 8px gap on each side of the label */
+  --responsive-content-button-padding-inline: calc(44px + 0.278em);
+
+  font-family: var(--font-family-campaign);
+}
+
+.responsive-content.scan-or-tap :is(.responsive-content-desktop, .responsive-content-mobile) p {
+  margin: 0;
+}
+
+.responsive-content.scan-or-tap .responsive-content-desktop img {
+  box-sizing: border-box;
+  display: block;
+  width: var(--responsive-content-qr-size);
+  height: var(--responsive-content-qr-size);
+  margin: 0 auto;
+  padding: var(--spacing-3);
+  border: var(--base-border-width) solid var(--color-campaign-outline);
+  border-radius: var(--radius-campaign-sm);
+  background-color: var(--color-background);
+}
+
+.responsive-content.scan-or-tap .responsive-content-desktop p+p {
+  margin-top: var(--spacing-5);
+  color: var(--color-campaign-grey);
+  font-size: var(--font-size-sm);
+  line-height: var(--responsive-content-line-height);
+}
+
+.responsive-content.scan-or-tap .responsive-content-mobile {
+  padding-top: calc(var(--spacing-7) - var(--spacing-bootstrap-3));
+}
+
+.responsive-content.scan-or-tap a.button:any-link {
+  min-width: 0;
+  padding: var(--responsive-content-button-padding-block) var(--responsive-content-button-padding-inline);
+  border: 0;
+  border-radius: var(--radius-campaign-sm);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+  font-family: var(--font-family-campaign);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: var(--responsive-content-line-height);
+  text-decoration: none;
+  transition: background-color var(--duration-short) ease;
+}
+
+.responsive-content.scan-or-tap a.button:any-link:is(:hover, :focus-visible) {
+  background-color: var(--color-brand-primary-action);
+  color: var(--color-text-inverse);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .responsive-content.scan-or-tap a.button:any-link {
+    transition: none;
+  }
+}
+
+/* breakpoint-exception: the source button fills the width at 600px and below */
+@media (width <=600px) {
+  .responsive-content.scan-or-tap a.button:any-link {
+    display: flex;
+    width: 100%;
+  }
+}

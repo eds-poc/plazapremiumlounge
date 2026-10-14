@@ -265,6 +265,18 @@
         "usage": "Line above a campaign footnote (Cards connectivity), source .connectivity-disclaimer border-top",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
         "confidence": "High"
+      },
+      "--color-campaign-mist": {
+        "value": "#f7f4f5",
+        "usage": "Light pinkish grey campaign panels: band Section Metadata Background mist, the Image carousel backdrop",
+        "evidence": "source West Kowloon campaign CSS (.ppg-ppl-westkowloon-lounge --c-light, __section--alt)",
+        "confidence": "High"
+      },
+      "--color-campaign-outline": {
+        "value": "#e6e0e3",
+        "usage": "Thin borders of campaign boxes on light panels (Cards badge)",
+        "evidence": "source West Kowloon campaign CSS (__facility, __rewards-info and __qr-image borders)",
+        "confidence": "High"
       }
     },
     "state colors": {
@@ -541,6 +553,12 @@
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
         "confidence": "High"
       },
+      "--line-height-campaign-copy": {
+        "value": "1.9",
+        "usage": "Campaign body copy (section style centered-copy, Title callout intro)",
+        "evidence": "source West Kowloon campaign CSS (.ppg-ppl-westkowloon-lounge__body line-height 1.9)",
+        "confidence": "High"
+      },
       "--font-size-campaign-card-title": {
         "value": "16pt",
         "usage": "Campaign wide card titles (Cards connectivity)",
@@ -732,6 +750,36 @@
         "value": "18px",
         "usage": "Campaign paragraph and heading gap (Campaign, Title editorial)",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container), shared by the Campaign block and the Title editorial option",
+        "confidence": "High"
+      },
+      "--spacing-campaign-panel-block": {
+        "value": "28px",
+        "usage": "Campaign panel space above and below, above 600px (section style panel)",
+        "evidence": "source West Kowloon campaign CSS (.ppg-ppl-westkowloon-lounge__section padding, __container max-width 90%/92% with 24px padding)",
+        "confidence": "High"
+      },
+      "--spacing-campaign-panel-block-sm": {
+        "value": "22px",
+        "usage": "Campaign panel space above and below, at 600px and below (section style panel)",
+        "evidence": "source West Kowloon campaign CSS (.ppg-ppl-westkowloon-lounge__section padding, __container max-width 90%/92% with 24px padding)",
+        "confidence": "High"
+      },
+      "--spacing-campaign-panel-inline": {
+        "value": "5%",
+        "usage": "Campaign panel side inset, plus --spacing-stack, above 768px (section style panel)",
+        "evidence": "source West Kowloon campaign CSS (.ppg-ppl-westkowloon-lounge__section padding, __container max-width 90%/92% with 24px padding)",
+        "confidence": "High"
+      },
+      "--spacing-campaign-panel-inline-sm": {
+        "value": "4%",
+        "usage": "Campaign panel side inset, plus --spacing-stack, at 768px and below (section style panel)",
+        "evidence": "source West Kowloon campaign CSS (.ppg-ppl-westkowloon-lounge__section padding, __container max-width 90%/92% with 24px padding)",
+        "confidence": "High"
+      },
+      "--size-campaign-callout-max": {
+        "value": "720px",
+        "usage": "Width limit of a campaign call-to-action: Title callout heading and box, section style boxed-copy",
+        "evidence": "source West Kowloon campaign CSS (.ppg-ppl-westkowloon-lounge__cta-block max-width 720px)",
         "confidence": "High"
       },
       "--spacing-campaign-card": {

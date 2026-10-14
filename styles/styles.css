@@ -67,6 +67,10 @@
   --color-campaign-plum-deep: #2d0515;
   --color-campaign-pink: #e0b2d3;
   --color-campaign-gold-hover: #c2a16d;
+
+  /* (source West Kowloon campaign, `--c-light` and the facility card border) */
+  --color-campaign-mist: #f7f4f5;
+  --color-campaign-outline: #e6e0e3;
   --gradient-campaign-promo: linear-gradient(135deg, var(--color-brand-primary) 0%, var(--color-campaign-plum-deep) 100%);
   --color-text-subtle: #999;
   --color-text-inverse: #fff;
@@ -114,6 +118,7 @@
   --line-height-body: 1.4;
   --line-height-relaxed: 1.5;
   --line-height-loose: 1.6;
+  --line-height-campaign-copy: 1.9;
   --letter-spacing-label: 1px;
   --letter-spacing-eyebrow: 2px;
   --letter-spacing-campaign: 1.5px;
@@ -156,6 +161,14 @@
   --spacing-campaign-columns: 40px;
   --spacing-campaign-xs: 6px;
   --spacing-campaign-gap: 18px;
+
+  /* campaign panels (source West Kowloon `__section`): 28px above and below (22px at 600px and
+     below), content inset 5% + 24px at the sides (4% + 24px at 768px and below) */
+  --spacing-campaign-panel-block: 28px;
+  --spacing-campaign-panel-block-sm: 22px;
+  --spacing-campaign-panel-inline: 5%;
+  --spacing-campaign-panel-inline-sm: 4%;
+  --size-campaign-callout-max: 720px;
   --spacing-campaign-card: 36px;
   --spacing-campaign-promo-block: 60px;
   --spacing-campaign-promo-inline: var(--spacing-stack);
@@ -720,9 +733,12 @@ main .section.fixed-width>div {
 /* section style band: a campaign band (the source `#ppl-campaign-container .section-padded`), used
    with inset. No section padding, so consecutive bands touch; inside the content width each band has
    40px above and below and 8% of that width at the sides, and its Section Metadata background
-   (white, cream or blush). Option line: a 1px line under the band. The blocks inside carry no band
+   (white, cream, blush or mist). Option line: a 1px line under the band. The blocks inside carry no band
    spacing, so they can be used in any section */
 main>.section.band {
+  /* the side inset of the band's content, also read by section style boxed-copy */
+  --band-inline: var(--spacing-campaign-band-inline);
+
   padding-block: 0;
 }
 
@@ -746,7 +762,7 @@ main>.section.band>div:last-child {
 
 /* 8% of the content width at the sides */
 main>.section.band>div>* {
-  margin-inline: var(--spacing-campaign-band-inline);
+  margin-inline: var(--band-inline);
 }
 
 /* option flush: a band section whose block draws its own box (e.g. Promo): no band padding or side
@@ -755,8 +771,8 @@ main>.section.band.flush>div {
   padding-block: 0;
 }
 
-main>.section.band.flush>div>* {
-  margin-inline: 0;
+main>.section.band.flush {
+  --band-inline: 0px;
 }
 
 /* (inside the band's edge, so it spans the content width only) */
@@ -776,6 +792,51 @@ main>.section.band[data-background='cream'] {
 /* the source's blush wash over the campaign cream */
 main>.section.band[data-background='blush'] {
   --band-background: linear-gradient(var(--color-campaign-blush-wash), var(--color-campaign-blush-wash)), var(--color-campaign-cream);
+}
+
+/* the source's light pinkish grey panels (e.g. West Kowloon `__section--alt`) */
+main>.section.band[data-background='mist'] {
+  --band-background: var(--color-campaign-mist);
+}
+
+/* option panel: the source West Kowloon campaign panels (`__section`): 22px above and below, 28px
+   above 600px, instead of the band's 40px; the content inset 4% + 24px at the sides, 5% + 24px
+   above 768px, instead of 8% */
+main>.section.band.panel>div:first-child {
+  padding-top: var(--spacing-campaign-panel-block-sm);
+}
+
+main>.section.band.panel>div:last-child {
+  padding-bottom: var(--spacing-campaign-panel-block-sm);
+}
+
+main>.section.band.panel.line>div:last-child {
+  padding-bottom: calc(var(--spacing-campaign-panel-block-sm) + var(--base-border-width));
+}
+
+main>.section.band.panel {
+  --band-inline: calc(var(--spacing-campaign-panel-inline-sm) + var(--spacing-stack));
+}
+
+/* breakpoint-exception: the source panels change above 600px and 768px */
+@media (width > 600px) {
+  main>.section.band.panel>div:first-child {
+    padding-top: var(--spacing-campaign-panel-block);
+  }
+
+  main>.section.band.panel>div:last-child {
+    padding-bottom: var(--spacing-campaign-panel-block);
+  }
+
+  main>.section.band.panel.line>div:last-child {
+    padding-bottom: calc(var(--spacing-campaign-panel-block) + var(--base-border-width));
+  }
+}
+
+@media (width > 768px) {
+  main>.section.band.panel {
+    --band-inline: calc(var(--spacing-campaign-panel-inline) + var(--spacing-stack));
+  }
 }
 
 /* an inset section followed by a band ends with the source's 30px spacer */
@@ -806,6 +867,69 @@ main>.section.fine-print li {
 
 main>.section.fine-print li>p {
   margin: 0;
+}
+
+/* section style centered-copy: default text as the source campaign copy (West Kowloon description,
+   `__body`): centred grey Arial (the source's undefined PolySans Slim shows as Arial), 16px at every
+   width with a 1.9 line height; paragraphs one line
+   apart and 18px before the block that follows (e.g. an Image carousel) */
+main>.section.centered-copy .default-content-wrapper {
+  color: var(--color-campaign-grey);
+  font-family: var(--font-family-campaign);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-campaign-copy);
+  text-align: center;
+}
+
+main>.section.centered-copy .default-content-wrapper>p {
+  margin-block: 0;
+}
+
+main>.section.centered-copy .default-content-wrapper>p+p {
+  margin-top: calc(var(--line-height-campaign-copy) * 1em);
+}
+
+main>.section.centered-copy .default-content-wrapper>p:last-child {
+  margin-bottom: var(--spacing-campaign-gap);
+}
+
+/* section style boxed-copy: the section's text as a white box with a thin border and 8px corners
+   (source West Kowloon Smart Traveller `__rewards-info`): at most 720px wide and centred inside the
+   band's side inset, padding 18px 24px, 8px between paragraphs, bold in maroon, 36px below. Drawn on
+   the text (paragraphs, lists, headings), as a band's text wrapper also paints the band. Use with
+   centered-copy for the source's grey centred Arial */
+main>.section.boxed-copy .default-content-wrapper>:is(p, ul, ol, h1, h2, h3, h4, h5, h6) {
+  box-sizing: border-box;
+  margin-inline: max(var(--band-inline, 0px), calc((100% - var(--size-campaign-callout-max)) / 2));
+  padding: 0 var(--spacing-stack);
+  border-inline: var(--base-border-width) solid var(--color-campaign-outline);
+  background-color: var(--color-background);
+}
+
+main>.section.boxed-copy .default-content-wrapper>:is(p, ul, ol, h1, h2, h3, h4, h5, h6)+:is(p, ul, ol, h1, h2, h3, h4, h5, h6) {
+  margin-top: 0;
+  padding-top: var(--spacing-3);
+}
+
+main>.section.boxed-copy .default-content-wrapper>:is(p, ul, ol, h1, h2, h3, h4, h5, h6):first-child {
+  padding-top: var(--spacing-campaign-gap);
+  border-top: var(--base-border-width) solid var(--color-campaign-outline);
+  border-start-start-radius: var(--radius-campaign-sm);
+  border-start-end-radius: var(--radius-campaign-sm);
+}
+
+main>.section.boxed-copy .default-content-wrapper>:is(p, ul, ol, h1, h2, h3, h4, h5, h6):last-child {
+  margin-bottom: calc(var(--spacing-stack) + var(--spacing-5));
+  padding-bottom: var(--spacing-campaign-gap);
+  border-bottom: var(--base-border-width) solid var(--color-campaign-outline);
+  border-end-start-radius: var(--radius-campaign-sm);
+  border-end-end-radius: var(--radius-campaign-sm);
+}
+
+main>.section.boxed-copy .default-content-wrapper strong {
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-campaign-bold);
 }
 
 /* title-position: center centres the section heading from 768px (left on mobile, as on the source) */
