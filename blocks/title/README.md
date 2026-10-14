@@ -34,7 +34,7 @@ Add them in brackets after the block name, e.g. `Title (center, compact)`.
 | `gap-small` | 30px to what follows instead of the usual space (e.g. `editorial`'s 40px) | Rogers Bank "Extended Journey Privileges", above its cards |
 | `center-all` | Centred at every width (`center` is left-aligned on mobile) | Rogers Bank "Exquisite Comfort" |
 | `tagline` | A lead-in: a maroon Georgia heading (22px on mobile up to 30px, growing with the screen), at most 640px wide, 10px above grey 15px Arial text at most 620px wide, as the source shows them. The same at every heading level. Use with `center-all`, in a `panel` band section | West Kowloon offer lead-in |
-| `callout` | A call-to-action header, at most 720px wide and centred: a maroon Georgia heading (20px on mobile up to 26px), 16px above the intro, which sits in a white box with a thin border and 8px corners (16px grey Arial text; **bold** in maroon). The same at every heading level. Use with `center-all`, in a `panel` band section | West Kowloon offer Smart Traveller redemption |
+| `callout` | A call-to-action header, at most 720px wide and centred: a maroon Georgia heading (20px on mobile up to 26px), 16px above the intro, which sits in a white box with a thin border and 8px corners (16px grey Arial text; **bold** in maroon). The same at every heading level. With the heading only, it has no space below, so a block can follow straight under it (e.g. Responsive Content). Use with `center-all`, in a `panel` band section | West Kowloon offer Smart Traveller redemption |
 
 ### Example: editorial
 

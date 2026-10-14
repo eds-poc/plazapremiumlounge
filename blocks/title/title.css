@@ -159,10 +159,8 @@
    720px wide and centred, 12px above and below; a maroon Georgia heading from 20px to 26px with the
    screen width, 16px above the intro; the intro in a white box with a thin border and 8px corners,
    16px grey Arial text with a 1.9 line height, bold in maroon (as the source shows them). The same
-   at every heading level. Use
-   with center-all */
+   at every heading level. Use with center-all */
 .title.callout {
-  --title-callout-max: 720px;
   --title-callout-heading-size: clamp(20px, 2.8vw, 26px);
   --title-callout-text-max: 760px;
 
@@ -170,9 +168,14 @@
   padding-block: var(--spacing-5);
 }
 
+/* a callout with only a heading (e.g. above a Responsive Content block): no space below it */
+.title.callout:not(:has(.title-intro)) {
+  padding-bottom: 0;
+}
+
 /* (the 720px limit is on the parts: a band section sets the block's own side margins) */
 .title.callout .title-heading {
-  max-width: var(--title-callout-max);
+  max-width: var(--size-campaign-callout-max);
   margin: 0 auto var(--spacing-bootstrap-3);
   color: var(--color-brand-primary);
   font-family: var(--font-family-campaign-accent);
@@ -183,7 +186,7 @@
 
 .title.callout .title-intro {
   box-sizing: border-box;
-  max-width: var(--title-callout-max);
+  max-width: var(--size-campaign-callout-max);
   margin: 0 auto var(--spacing-stack);
   padding: var(--spacing-campaign-gap) var(--spacing-stack);
   border: var(--base-border-width) solid var(--color-campaign-outline);
