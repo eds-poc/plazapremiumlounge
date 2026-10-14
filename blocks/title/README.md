@@ -33,8 +33,8 @@ Add them in brackets after the block name, e.g. `Title (center, compact)`.
 | `editorial` | A campaign feature header: the eyebrow as a small gold label, a light maroon 28pt heading where *italic* words become a gold serif accent, and the intro as small grey text. The same at every width and heading level, with 40px to what follows. In a campaign band section (Section Metadata `Style` = `inset, band`), the band adds 40px above and 8% at the sides | Offer pages, Rogers Bank "Exquisite Comfort" |
 | `gap-small` | 30px to what follows instead of the usual space (e.g. `editorial`'s 40px) | Rogers Bank "Extended Journey Privileges", above its cards |
 | `center-all` | Centred at every width (`center` is left-aligned on mobile) | Rogers Bank "Exquisite Comfort" |
-| `tagline` | A lead-in: a maroon serif heading (22px on mobile up to 30px, growing with the screen), at most 640px wide, 10px above light grey 15px text at most 620px wide. The same at every heading level. Use with `center-all`, in a `panel` band section | West Kowloon offer lead-in |
-| `callout` | A call-to-action header, at most 720px wide and centred: a maroon serif heading (20px on mobile up to 26px), 16px above the intro, which sits in a white box with a thin border and 8px corners (16px light grey text; **bold** in maroon). The same at every heading level. Use with `center-all`, in a `panel` band section | West Kowloon offer Smart Traveller redemption |
+| `tagline` | A lead-in: a maroon Georgia heading (22px on mobile up to 30px, growing with the screen), at most 640px wide, 10px above grey 15px Arial text at most 620px wide, as the source shows them. The same at every heading level. Use with `center-all`, in a `panel` band section | West Kowloon offer lead-in |
+| `callout` | A call-to-action header, at most 720px wide and centred: a maroon Georgia heading (20px on mobile up to 26px), 16px above the intro, which sits in a white box with a thin border and 8px corners (16px grey Arial text; **bold** in maroon). The same at every heading level. Use with `center-all`, in a `panel` band section | West Kowloon offer Smart Traveller redemption |
 
 ### Example: editorial
 

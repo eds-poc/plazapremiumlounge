@@ -133,7 +133,7 @@
 }
 
 /* option badge: small facility cards, as the source West Kowloon offer facilities (`__facilities`):
-   white cards with a thin border, cell 1's badge image (or icon) beside a short bold label, centred.
+   white cards with a thin border, cell 1's badge image (or icon) beside a short bold Arial label, centred.
    At most 900px wide and centred, 12px below what's above it; 1 per row on mobile, 2 from 601px,
    3 from 769px */
 .cards.badge {
@@ -191,10 +191,11 @@
 
 .cards.badge .cards-card-body {
   margin: 0;
+  font-family: var(--font-family-campaign);
   font-size: var(--font-size-sm);
 
-  /* the source's PolySans Median, made bold by the browser: the same width as our medium */
-  font-weight: var(--font-weight-medium);
+  /* the source asks for an undefined "PolySans Median" at 600, so it shows Arial bold */
+  font-weight: var(--font-weight-campaign-bold);
   line-height: var(--line-height-body);
   text-align: center;
 }

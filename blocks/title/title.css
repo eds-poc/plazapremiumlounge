@@ -113,8 +113,9 @@
   margin-inline: auto;
 }
 
-/* option tagline: a lead-in (source West Kowloon `__lead`): a maroon serif heading from 22px to 30px
-   with the screen width, at most 640px wide, over light grey 15px text at most 620px wide; the same
+/* option tagline: a lead-in (source West Kowloon `__lead`): a maroon Georgia heading from 22px to
+   30px with the screen width, at most 640px wide, over grey 15px Arial text at most 620px wide (the
+   source asks for undefined Reckless Neue Book and PolySans Slim faces, so it shows these); the same
    at every heading level. With the lead-in's own space, 2px more than its panel above and below
    (4px above only, above 600px). Use with center-all */
 .title.tagline {
@@ -133,7 +134,7 @@
   max-width: var(--title-tagline-heading-max);
   margin: 0 auto var(--spacing-4);
   color: var(--color-brand-primary);
-  font-family: var(--font-family-display);
+  font-family: var(--font-family-campaign-accent);
   font-size: var(--title-tagline-heading-size);
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-relaxed);
@@ -143,8 +144,9 @@
   max-width: var(--title-tagline-intro-max);
   margin: 0 auto;
   color: var(--color-campaign-grey);
+  font-family: var(--font-family-campaign);
   font-size: var(--title-tagline-intro-size);
-  font-weight: var(--font-weight-light);
+  font-weight: var(--font-weight-regular);
   line-height: var(--title-tagline-intro-line-height);
   letter-spacing: var(--title-tagline-letter-spacing);
 }
@@ -154,9 +156,10 @@
 }
 
 /* option callout: a call-to-action header (source West Kowloon redemption `__cta-block`): at most
-   720px wide and centred, 12px above and below; a maroon serif heading from 20px to 26px with the
+   720px wide and centred, 12px above and below; a maroon Georgia heading from 20px to 26px with the
    screen width, 16px above the intro; the intro in a white box with a thin border and 8px corners,
-   16px light grey text with a 1.9 line height, bold in maroon. The same at every heading level. Use
+   16px grey Arial text with a 1.9 line height, bold in maroon (as the source shows them). The same
+   at every heading level. Use
    with center-all */
 .title.callout {
   --title-callout-max: 720px;
@@ -172,7 +175,7 @@
   max-width: var(--title-callout-max);
   margin: 0 auto var(--spacing-bootstrap-3);
   color: var(--color-brand-primary);
-  font-family: var(--font-family-display);
+  font-family: var(--font-family-campaign-accent);
   font-size: var(--title-callout-heading-size);
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-body);
@@ -187,8 +190,9 @@
   border-radius: var(--radius-campaign-sm);
   background-color: var(--color-background);
   color: var(--color-campaign-grey);
+  font-family: var(--font-family-campaign);
   font-size: var(--font-size-md);
-  font-weight: var(--font-weight-light);
+  font-weight: var(--font-weight-regular);
   line-height: var(--line-height-campaign-copy);
 }
 
@@ -203,10 +207,7 @@
 
 .title.callout .title-intro strong {
   color: var(--color-brand-primary);
-  font-weight: var(--font-weight-medium);
-
-  /* (its font's taller ascent would otherwise add 1px to the line) */
-  line-height: 1;
+  font-weight: var(--font-weight-campaign-bold);
 }
 
 /* breakpoint-exception: the source lead-in's space changes above 600px */

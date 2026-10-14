@@ -866,12 +866,14 @@ main>.section.fine-print li>p {
 }
 
 /* section style centered-copy: default text as the source campaign copy (West Kowloon description,
-   `__body`): centred, light grey, 16px at every width with a 1.9 line height; paragraphs one line
+   `__body`): centred grey Arial (the source's undefined PolySans Slim shows as Arial), 16px at every
+   width with a 1.9 line height; paragraphs one line
    apart and 18px before the block that follows (e.g. an Images carousel) */
 main>.section.centered-copy .default-content-wrapper {
   color: var(--color-campaign-grey);
+  font-family: var(--font-family-campaign);
   font-size: var(--font-size-md);
-  font-weight: var(--font-weight-light);
+  font-weight: var(--font-weight-regular);
   line-height: var(--line-height-campaign-copy);
   text-align: center;
 }
