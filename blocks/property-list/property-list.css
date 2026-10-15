@@ -6,6 +6,7 @@
   --property-list-tag-bg: color-mix(in srgb, var(--color-brand-primary-action) 10%, transparent);
   --property-list-card-shadow: 0 4px 6px -1px rgb(0 0 0 / 5%);
   --property-list-card-shadow-hover: 0 10px 15px -3px rgb(0 0 0 / 10%);
+  --property-list-card-bg-hover: #d9d9d9;
   --property-list-card-lift: -4px;
   --property-list-card-border: #e5e7eb;
   --property-list-card-border-bottom: #ccc;
@@ -257,11 +258,13 @@
   box-shadow: var(--property-list-card-shadow);
   transition:
     transform var(--duration-short),
-    box-shadow var(--duration-short);
+    box-shadow var(--duration-short),
+    background-color var(--duration-normal) ease-in;
 }
 
-/* lifts on hover, as the source */
+/* lifts and greys on hover, as the source */
 .property-card:hover {
+  background-color: var(--property-list-card-bg-hover);
   box-shadow: var(--property-list-card-shadow-hover);
   transform: translateY(var(--property-list-card-lift));
 }
@@ -413,6 +416,11 @@
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
   line-height: var(--line-height-body);
+}
+
+/* the grey hover background is too light for the muted note */
+.property-card:hover .property-card-note {
+  color: var(--color-text);
 }
 
 /* feature tags: maroon-washed pills, the first five, then "+N more" */
