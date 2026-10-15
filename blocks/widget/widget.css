@@ -1,3 +1,8 @@
 .widget {
   display: block;
 }
+
+/* a widget that fails to load (or has nothing to show) stays hidden */
+.widget[hidden] {
+  display: none;
+}

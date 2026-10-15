@@ -32,6 +32,61 @@
   }
 }
 
+/* option boxed: each column is a white box with a thin border, as the source FAQ help cards
+   (`.card-wrapper .helpCard`): 20px padding, 6px corners, 16px text (20px from 768px) and a link
+   on its own line in bold black. Stacked 15px apart on mobile, side by side (24px apart, the same
+   height) from 768px. 50px from the content above, at every width */
+.columns.boxed {
+  /* one-off: the source's bold link (strong) */
+  --columns-boxed-link-weight: 700;
+}
+
+/* the section adds what the previous section's bottom spacing leaves to 50px */
+main > .section.columns-container:has(.columns.boxed) {
+  padding-top: calc(var(--spacing-11) - var(--section-padding-block));
+}
+
+.columns.boxed > div {
+  gap: var(--spacing-6);
+}
+
+.columns.boxed > div > * {
+  box-sizing: border-box;
+  padding: var(--spacing-7);
+  border: var(--base-border-width) solid var(--color-border-translucent);
+  border-radius: var(--radius-xs);
+  background-color: var(--color-background);
+  color: var(--color-text-control);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+.columns.boxed p {
+  margin: 0;
+}
+
+.columns.boxed a:any-link {
+  color: var(--color-text-strong);
+  font-weight: var(--columns-boxed-link-weight);
+}
+
+@media (width >= 768px) {
+  .columns.boxed > div {
+    flex-direction: row;
+    align-items: stretch;
+    gap: var(--grid-gutter);
+  }
+
+  .columns.boxed > div > * {
+    flex: 1;
+    order: unset;
+    font-size: var(--font-size-xl);
+    justify-content: space-between;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 /* text-image variation: two columns, as the source About and landing pages. The image-only column
    takes 5 of 12 columns and the other 7 (either order; without one, the last is the narrow one).
    Stacked in the authored order on mobile, side by side from 768px. Images keep their own size;
@@ -360,3 +415,4 @@
     flex-basis: calc((100% - var(--columns-media-image-gap) * (var(--columns-media-image-per-row) - 1)) / var(--columns-media-image-per-row));
   }
 }
+

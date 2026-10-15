@@ -64,6 +64,8 @@ export default async function decorate(widget) {
     applyWidgetShell(widget, source, widgetName, searchParams);
 
     const resp = await fetch(widgetUrl(widgetPath, widgetName, 'html'));
+    // a missing widget shows nothing, rather than the 404 page
+    if (!resp.ok) throw new Error(`${resp.status} ${resp.url}`);
     widget.innerHTML = await resp.text();
 
     const cssLoaded = loadCSS(widgetUrl(widgetPath, widgetName, 'css'));
@@ -73,6 +75,8 @@ export default async function decorate(widget) {
     })();
     await Promise.all([cssLoaded, decorationComplete]);
   } catch (error) {
+    // a widget that fails shows nothing (not its link or a half-built widget)
+    widget.hidden = true;
     // eslint-disable-next-line no-console
     console.error(`failed to load widget ${widgetPath}/${widgetName}`, error);
   }
