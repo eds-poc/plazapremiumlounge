@@ -19,8 +19,8 @@
   --property-list-promo-height: 32px;
   --property-list-tip-width: 220px;
   --property-list-view-width: 120px;
-  --property-list-loading-height: 320px;
-  --property-list-loading-image: 160px;
+  --property-list-loading-image: 510px;
+  --property-list-loading-bg: #f4f2ee; /* the loading animation's own background */
   --property-list-tag-size: 9px;
   --property-list-tag-padding: 6px 12px;
   --property-list-tag-row-gap: 9px;
@@ -50,7 +50,9 @@
     grid-template-columns: calc((100% + var(--grid-gutter)) / 4 - var(--grid-gutter)) 1fr;
   }
 
-  .property-list-layout.no-filters {
+  /* no filters (none in the data, or still loading): the results take the full width */
+  .property-list-layout.no-filters,
+  .property-list-layout:has(> .property-list-sidebar:empty) {
     grid-template-columns: 1fr;
   }
 }
@@ -233,15 +235,19 @@
   font-size: var(--font-size-sm);
 }
 
+/* the site's page loader animation, at its size (85% of up to 600px), centred on a panel of the
+   animation's own background colour, so its canvas blends in (as on the page loader's overlay) */
 .property-list-loading {
   display: grid;
   place-items: center;
-  min-height: var(--property-list-loading-height);
+  border-radius: var(--radius-lg);
+  background-color: var(--property-list-loading-bg);
 }
 
 .property-list-loading img {
-  width: var(--property-list-loading-image);
+  width: min(85%, var(--property-list-loading-image));
   height: auto;
+  aspect-ratio: 1;
 }
 
 /* ---------- card ---------- */
