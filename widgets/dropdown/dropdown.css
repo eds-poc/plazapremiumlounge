@@ -16,12 +16,9 @@
   /* the source arrow: 18px tall */
   --dropdown-arrow-height: 18px;
 
-  margin: 0 0 calc(var(--spacing-11) - var(--section-padding-block));
-}
-
-/* the widget's own section: no space below, so the widget sets the 50px to what follows */
-main > .section.dropdown-container {
-  padding-bottom: 0;
+  /* 50px to what follows: its own section's bottom spacing plus the next section's top spacing,
+     less what's over 50px (a negative margin from 768px) */
+  margin: 0 0 calc(var(--spacing-11) - 2 * var(--section-padding-block));
 }
 
 .widget.dropdown .dropdown-field {

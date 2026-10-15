@@ -18,7 +18,7 @@ Add a link (on its own line) to the widget, with its settings after the `?`:
 
 | Setting | Meaning |
 | --- | --- |
-| `namespace` | The address parameter the options set, exactly as in the address, e.g. `faqId` gives `?faqId=159`. Needed when the sheet uses ids; when every option has a full link, it can be left out and the first parameter in the links is used. |
+| `namespace` | The address parameter the options set, exactly as in the address, e.g. `faqId` gives `?faqId=159`. Needed when the sheet uses ids. When the options are links that carry the parameter (e.g. `…?faqId=159`), it can be left out: the first parameter in the links is used. |
 | `label` (optional) | The text before the dropdown, e.g. `Show me`. |
 | `options` | Where the options come from: a DA sheet (its path with `.json`), or later an API address. |
 
@@ -56,11 +56,14 @@ Give each section that belongs to an option a Section Metadata row `Section Id`,
 | --- | --- |
 | Section Id | 159 |
 
-- Only the section(s) with the selected option's id show; every other section with a `Section Id`
-  is hidden. Sections without a `Section Id` (e.g. the page title, the help cards) always show.
+- Only the section(s) with the selected option's id show; the other sections with one of this
+  dropdown's ids (or `default`) are hidden. Sections without a `Section Id` (e.g. the page title,
+  the help cards) always show. A `Section Id` that's none of the options' ids also always shows,
+  and the browser console warns about it, so a typo is easy to spot.
 - **The default option** (no id in the sheet) shows the section with `Section Id` = `default`.
-- On load the section follows the address (`?faqId=159`); choosing another option switches it
-  without reloading, and Back/Forward switch it back.
+- On load the section follows the address (`?faqId=159`) straight away, before the options have
+  loaded; choosing another option switches it without reloading, and Back/Forward switch it back.
+- If the options can't load, the dropdown is hidden and only the `default` section shows.
 - Use `Section Id`, not `Id`: an `Id` row becomes the section's HTML id, which loses numbers like
   `159`.
 - The dropdown already shows the option name, so the sections don't need their own heading.
@@ -82,7 +85,15 @@ Give each section that belongs to an option a Section Metadata row `Section Id`,
   with CORS). It reads a sheet (`{ data: [...] }`), a multi-sheet workbook (its first sheet) or a
   plain array of rows, with columns `name`/`label`/`title`, `id`/`value` and `link`/`url`/`href`.
   For another shape, add an adapter to `ADAPTERS` in `dropdown.js`.
-- Without options (or when the list can't load) the widget stays hidden, and the console says why.
+- Without options (or when the list can't load) the widget is hidden, only the `Section Id` =
+  `default` section shows, and the console says why.
+- Links from the options are checked: only `http(s)`, `mailto:` and `tel:` links (and paths on this
+  site) are used; a malformed or other link (e.g. `javascript:`) is skipped with a console warning.
+  Rows without a name are skipped too.
+- The widget doesn't hold up the page while the options load: the label and the sections show
+  straight away, and the dropdown becomes usable when the options arrive.
+- Several dropdowns can share a page: each switches only the sections with its own ids (and
+  `default`).
 
 ## Layout and spacing
 

@@ -39,11 +39,10 @@
 .columns.boxed {
   /* one-off: the source's bold link (strong) */
   --columns-boxed-link-weight: 700;
-}
 
-/* the section adds what the previous section's bottom spacing leaves to 50px */
-main > .section.columns-container:has(.columns.boxed) {
-  padding-top: calc(var(--spacing-11) - var(--section-padding-block));
+  /* 50px from the content above: the previous section's bottom spacing plus this section's top
+     spacing, less what's over 50px (a negative margin from 768px) */
+  margin-top: calc(var(--spacing-11) - 2 * var(--section-padding-block));
 }
 
 .columns.boxed > div {
