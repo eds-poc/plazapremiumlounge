@@ -5,6 +5,8 @@
 .property-list {
   --property-list-tag-bg: color-mix(in srgb, var(--color-brand-primary-action) 10%, transparent);
   --property-list-card-shadow: 0 4px 6px -1px rgb(0 0 0 / 5%);
+  --property-list-card-shadow-hover: 0 10px 15px -3px rgb(0 0 0 / 10%);
+  --property-list-card-lift: -4px;
   --property-list-card-border: #e5e7eb;
   --property-list-card-border-bottom: #ccc;
   --property-list-clear-bg: rgb(0 0 0 / 10%);
@@ -253,6 +255,15 @@
   border-radius: var(--radius-lg);
   background-color: var(--color-background);
   box-shadow: var(--property-list-card-shadow);
+  transition:
+    transform var(--duration-short),
+    box-shadow var(--duration-short);
+}
+
+/* lifts on hover, as the source */
+.property-card:hover {
+  box-shadow: var(--property-list-card-shadow-hover);
+  transform: translateY(var(--property-list-card-lift));
 }
 
 .property-card-first {
@@ -704,6 +715,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .property-card,
   .property-slider-track,
   .property-slider-prev,
   .property-slider-next {
