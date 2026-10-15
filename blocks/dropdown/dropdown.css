@@ -1,0 +1,156 @@
+/* dropdown: a "Show me [option ↓]" selector (the Dropdown block and the Dropdown widget, which
+   imports this file), as the source FAQ filter (`.filter .dropdown`):
+   the label in the text colour, the selected option in maroon over a 1px maroon line with a thin
+   down arrow, and a white menu card of the other options below it. Mobile-first: 24px, 30px
+   from 768px. 50px to the content below at every width; 25px above it (65px from 992px) */
+.dropdown {
+  /* one-off: the source's 30px filter text (24px on mobile) */
+  --dropdown-size: 30px;
+
+  /* one-off: the source menu card (10px corners, #ccc lines between options, #1b1b1b text) */
+  --dropdown-menu-radius: 10px;
+  --dropdown-menu-min-width: 200px;
+  --dropdown-option-line: #ccc;
+  --dropdown-option-color: #1b1b1b;
+  --dropdown-link-padding-block: 4px;
+
+  /* the source arrow: 18px tall */
+  --dropdown-arrow-height: 18px;
+
+  /* 50px to what follows: its own section's bottom spacing plus the next section's top spacing,
+     less what's over 50px (a negative margin from 768px) */
+  margin: 0 0 calc(var(--spacing-11) - 2 * var(--section-padding-block));
+}
+
+.dropdown .dropdown-field {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-medium);
+
+  /* 1.4, as the source (42px at 30px) */
+  line-height: var(--line-height-body);
+}
+
+/* the selected option and its arrow, over the maroon line; the menu is positioned against it */
+.dropdown .dropdown-control {
+  position: relative;
+  display: inline-block;
+  border-bottom: var(--base-border-width) solid var(--color-brand-primary);
+}
+
+.dropdown .dropdown-toggle {
+  display: inline-flex;
+
+  /* the arrow sits on the text baseline, about 10px after it, as the source */
+  align-items: baseline;
+  gap: var(--spacing-4);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-brand-primary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.dropdown .dropdown-toggle::after {
+  content: '';
+  flex: none;
+  width: calc(var(--dropdown-arrow-height) * 0.75);
+  height: var(--dropdown-arrow-height);
+  background-color: currentcolor;
+  mask: url('../../icons/nav-arrow-up.svg') center / contain no-repeat;
+  transform: rotate(180deg);
+}
+
+.dropdown .dropdown-toggle:focus-visible {
+  outline-offset: var(--spacing-1);
+}
+
+/* the menu: a white card 1px under the line, at least 200px wide and as wide as the toggle
+   (top: 100% is the line's top edge, so the line plus the 1px gap) */
+.dropdown .dropdown-menu {
+  position: absolute;
+  z-index: calc(var(--z-header) - 1);
+  top: calc(100% + 2 * var(--base-border-width));
+  left: 0;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: var(--dropdown-menu-min-width);
+  max-width: calc(100vw - 2 * var(--container-padding));
+  margin: 0;
+  padding: 0;
+  border: var(--base-border-width) solid var(--color-text-secondary);
+  border-radius: var(--dropdown-menu-radius);
+  background-color: var(--color-background);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+  list-style: none;
+}
+
+.dropdown .dropdown-menu[hidden] {
+  display: none;
+}
+
+.dropdown .dropdown-option {
+  margin: var(--spacing-2);
+  padding: var(--spacing-1) var(--spacing-2);
+}
+
+/* a line between the options (the selected one is left out of the menu) */
+.dropdown .dropdown-option + .dropdown-option {
+  border-top: var(--base-border-width) solid var(--dropdown-option-line);
+}
+
+.dropdown .dropdown-link {
+  display: block;
+  padding: var(--dropdown-link-padding-block) var(--spacing-bootstrap-3);
+  color: var(--dropdown-option-color);
+  font-weight: inherit;
+  text-decoration: none;
+  transition: opacity var(--duration-normal) var(--ease-standard);
+}
+
+/* an option without a link is a button, looking the same as a link option */
+.dropdown button.dropdown-link {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdown .dropdown-link:hover {
+  color: var(--color-text-control);
+  text-decoration: none;
+  opacity: 0.8;
+}
+
+.dropdown .dropdown-link:focus-visible {
+  outline-offset: calc(-1 * var(--spacing-1));
+}
+
+@media (width >= 768px) {
+  .dropdown .dropdown-field {
+    font-size: var(--dropdown-size);
+  }
+}
+
+/* the source's 65px between the page title and the filter from 992px (25px below that) */
+@media (width >= 992px) {
+  .dropdown {
+    /* padding: a margin would collapse into the title's */
+    padding-top: var(--spacing-9);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dropdown .dropdown-link {
+    transition: none;
+  }
+}

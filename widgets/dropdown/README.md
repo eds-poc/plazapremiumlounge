@@ -1,7 +1,8 @@
 # Dropdown widget: authoring guide
 
 A "Show me [option ↓]" selector, as the source FAQ page filter, with its options kept in a separate
-list (a DA sheet now, an API later) instead of on the page. It looks like the Dropdown block.
+list (a DA sheet now, an API later) instead of on the page. To write the options on the page, use
+the [Dropdown block](../../blocks/dropdown/README.md) instead: it looks and works the same.
 Choosing an option sets it in the page address, e.g. `?faqId=159`, without reloading the page; an
 option with its own link (e.g. another page) opens that link instead.
 
@@ -70,6 +71,9 @@ Give each section that belongs to an option a Section Metadata row `Section Id`,
 
 ## For developers
 
+- The widget is the Dropdown block's sibling: both use `/scripts/dropdown.js` (`initDropdown`) for
+  the rendering, the address and the Section Id switching, and the block's `dropdown.css` (this
+  widget's CSS imports it). This file only loads the rows.
 - The selection is in the address (`?faqId=159`): read it on load. The widget also keeps
   `data-namespace` and `data-value` (the selected id, empty for the default) on its element.
 - When the selection changes without a reload (choosing an option without a link, or Back/Forward),
@@ -84,7 +88,7 @@ Give each section that belongs to an option a Section Metadata row `Section Id`,
 - **Options from an API:** `options` can be any JSON address the browser can fetch (same origin, or
   with CORS). It reads a sheet (`{ data: [...] }`), a multi-sheet workbook (its first sheet) or a
   plain array of rows, with columns `name`/`label`/`title`, `id`/`value` and `link`/`url`/`href`.
-  For another shape, add an adapter to `ADAPTERS` in `dropdown.js`.
+  For another shape, add an adapter to `ADAPTERS` in this widget's `dropdown.js`.
 - Without options (or when the list can't load) the widget is hidden, only the `Section Id` =
   `default` section shows, and the console says why.
 - Links from the options are checked: only `http(s)`, `mailto:` and `tel:` links (and paths on this
@@ -97,7 +101,7 @@ Give each section that belongs to an option a Section Metadata row `Section Id`,
 
 ## Layout and spacing
 
-The same as the Dropdown block: 24px on mobile, 30px from 768px; the menu at least 200px wide; 50px
+The same as the Dropdown block (the same stylesheet): 24px on mobile, 30px from 768px; the menu at least 200px wide; 50px
 to the content below, 25px below the page title (65px from 992px). Put the link right after the page
 Title, in the same section.
 
