@@ -1,5 +1,4 @@
-/* dropdown: a "Show me [option ↓]" selector (the Dropdown block and the Dropdown widget, which
-   imports this file), as the source FAQ filter (`.filter .dropdown`):
+/* dropdown: a "Show me [option ↓]" selector, as the source FAQ filter (`.filter .dropdown`):
    the label in the text colour, the selected option in maroon over a 1px maroon line with a thin
    down arrow, and a white menu card of the other options below it. Mobile-first: 24px, 30px
    from 768px. 50px to the content below at every width; 25px above it (65px from 992px) */

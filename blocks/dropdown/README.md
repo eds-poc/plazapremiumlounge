@@ -60,10 +60,10 @@ also closes it.
 
 ## For developers
 
-- The rendering, the address and the Section Id switching live in `/scripts/dropdown.js`
-  (`initDropdown`), shared with the Dropdown widget (`/widgets/dropdown/`), which takes its options
-  from a JSON sheet or an API instead. Both hand over the same rows, `{ name, id, link }`; the
-  styles are in this block's `dropdown.css`, which the widget imports.
+- Everything is in this block (`dropdown.js`, `dropdown.css`): reading the table, the rendering,
+  the address and the Section Id switching. The options become rows `{ name, id, link }`
+  (`normalizeOptions`) before rendering, so options from another source (e.g. a JSON sheet or an
+  API, read in `decorate`) could be added there later without changing the rest.
 - The selection is in the address: read `?faqId=` on load. The block also keeps `data-namespace` and
   `data-value` (the selected id, empty for the default).
 - When the selection changes without a reload (an option without a link, or Back/Forward), the block
