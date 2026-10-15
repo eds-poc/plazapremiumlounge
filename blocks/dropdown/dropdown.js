@@ -147,9 +147,10 @@ export default function decorate(block) {
     }
   });
 
-  // close when focus or a click goes elsewhere
+  // close when focus moves to something else (Safari doesn't focus a clicked link, so focus
+  // leaving to nothing is a click, handled by the click listener below)
   control.addEventListener('focusout', (e) => {
-    if (!control.contains(e.relatedTarget)) close(false);
+    if (e.relatedTarget && !control.contains(e.relatedTarget)) close(false);
   });
   document.addEventListener('click', (e) => {
     if (!control.contains(e.target)) close(false);
