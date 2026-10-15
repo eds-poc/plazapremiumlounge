@@ -97,9 +97,6 @@ const TEXTS = {
   propertyResults: {
     en: '{n} results', zh: '{n} 个结果', 'zh-HK': '{n} 個結果', ja: '{n} 件', pt: '{n} resultados',
   },
-  propertyLoading: {
-    en: 'Loading lounges…', zh: '正在加载贵宾室…', 'zh-HK': '正在載入貴賓室…', ja: 'ラウンジを読み込み中…', pt: 'Carregando lounges…',
-  },
   propertyEmpty: {
     en: 'No lounges found.', zh: '未找到贵宾室。', 'zh-HK': '找不到貴賓室。', ja: 'ラウンジが見つかりません。', pt: 'Nenhum lounge encontrado.',
   },

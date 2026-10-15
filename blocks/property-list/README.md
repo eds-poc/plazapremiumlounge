@@ -50,7 +50,7 @@ A city's lounges, loaded live from the Plaza Premium properties service, as the 
 
 | Situation | Visitors see | On the preview site, authors also see |
 | --- | --- | --- |
-| Loading | The Plaza Premium loading animation | |
+| Loading | The site's page loader (the same as on every page load), until the lounges are shown | |
 | No city code in the block | "No lounges found." | A hint to add the city code |
 | Unknown city, or nothing to show | "No lounges found." | The city code that returned nothing |
 | No property matches the filters | "No lounges match these filters." and Clear | |

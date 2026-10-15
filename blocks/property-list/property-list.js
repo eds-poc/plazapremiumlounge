@@ -1,6 +1,7 @@
 import { getMetadata } from '../../scripts/aem.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
 import { getLanguage, translate } from '../../scripts/i18n.js';
+import { hideLoader, showLoader } from '../../scripts/scripts.js';
 
 const CONFIG_URL = '/config.json';
 const CONFIG_KEY = 'property-list-url';
@@ -17,6 +18,7 @@ const GROUPS = ['airport', 'service', 'feature'];
 
 let configPromise;
 let blockCount = 0;
+let loading = 0;
 
 /**
  * Creates an element with an optional class name and text.
@@ -39,6 +41,17 @@ function el(tag, className, text) {
 function isPreview() {
   const { hostname } = window.location;
   return hostname.endsWith('.aem.page') || hostname === 'localhost';
+}
+
+/**
+ * Shows the site's full-page loader (the same as on page load) while any property list on the page
+ * is loading, and hides it once the last one is done.
+ * @param {boolean} busy
+ */
+function setLoading(busy) {
+  loading = Math.max(0, loading + (busy ? 1 : -1));
+  if (loading) showLoader();
+  else hideLoader();
 }
 
 /**
@@ -638,12 +651,6 @@ export default async function decorate(block) {
   const status = el('p', 'property-list-status visually-hidden');
   status.setAttribute('aria-live', 'polite');
   const results = el('div', 'property-list-results');
-  const loading = el('div', 'property-list-loading');
-  loading.setAttribute('role', 'status');
-  const spinner = el('img');
-  spinner.src = `${window.hlx?.codeBasePath || ''}/icons/PPL-loading-v2.webp`;
-  spinner.alt = '';
-  loading.append(spinner, el('span', 'visually-hidden', translate('propertyLoading')));
   main.append(toggle, status, results);
   layout.append(sidebar, main);
   block.replaceChildren(layout);
@@ -658,8 +665,8 @@ export default async function decorate(block) {
   dialog.append(close);
   block.append(dialog);
 
-  const load = async (fresh) => {
-    results.replaceChildren(loading);
+  let load;
+  const render = async (fresh) => {
     if (!city) {
       showMessage(results, translate('propertyEmpty'), null, 'Add the city code (e.g. HKHKG) in the block.');
       return;
@@ -715,5 +722,15 @@ export default async function decorate(block) {
     layout.classList.toggle('no-filters', !form);
     renderResults(results, properties, selected, status, clearAll, prefix);
   };
-  load(false);
+  // the page's loader stays up until the lounges are shown (the first load is awaited, so the
+  // page doesn't hide its loader before)
+  load = async (fresh) => {
+    setLoading(true);
+    try {
+      await render(fresh);
+    } finally {
+      setLoading(false);
+    }
+  };
+  await load(false);
 }
