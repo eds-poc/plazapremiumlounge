@@ -7,15 +7,21 @@ A city's lounges, loaded live from the Plaza Premium properties service, as the 
 - **Cards:** grouped by airport or station. Each card has a photo slider, the lounge's name,
   location, opening hours, features, price and a **View** button.
 
-## Table: one cell, the city code
+## Table: two columns, a setting per row
 
-| Property List |
-| --- |
-| HKHKG |
+| Property List | |
+| --- | --- |
+| city-code | HKHKG |
+| signup-button | [Join here](https://www.plazapremiumlounge.com/en-uk/sign-up?pid=plp) |
 
-- **City code:** the code the properties service uses for the city, e.g. `HKHKG` (Hong Kong) or
-  `SGSIN` (Singapore). Capitals don't matter.
-- That's all. Everything else comes from the service or the site settings:
+- **city-code** (required): the code the properties service uses for the city, e.g. `HKHKG`
+  (Hong Kong) or `SGSIN` (Singapore). Capitals don't matter.
+- **signup-button** (optional): a link. Its text and address are shown at the end of each card's
+  Smart Traveller line (e.g. "… 20% off … per eligible visit. **Join here**"). Leave the row out for
+  no link. Links to other websites open in a new tab.
+- Setting names ignore capitals and spaces (`City code` works too). A table with just one value
+  (the city code) also works.
+- Everything else comes from the service or the site settings:
   - photos, names, locations, hours, features, prices, links
   - the location groups and the filter options
 - **Page heading:** put the page's heading and any intro above the block, as normal page content.
@@ -29,7 +35,7 @@ A city's lounges, loaded live from the Plaza Premium properties service, as the 
 | Interface text ("Filters", "View", "+5 more", messages) | The site's translations, by page language |
 | Which properties show | Active lounges, grouped by location, then passes (gift cards) at the end. Other kinds (e.g. airport dining, external partners) aren't shown |
 | **View** link | The service's page link for the property. Without one, the card has no View button |
-| Green look | Plaza Premium First properties |
+| Green look | Plaza Premium First lounges (by the brand in the lounge's name); every other card is maroon |
 
 ## Filters (for visitors)
 

@@ -198,7 +198,9 @@ function readProperty(item) {
       .map((s) => ({ key: toKey(s.servicetype), label: (s.serviceDisplayName || s.name || '').trim() }))
       .filter((s) => s.key && s.label),
     price: prices.sort((a, b) => a.amount - b.amount)[0],
-    first: item.colorCode === 'PPF',
+    // the green Plaza Premium First look follows the brand in the name, as the source pages
+    // (the API's colorCode also marks some Plaza Premium Lounges PPF)
+    first: /^plaza premium first\b/i.test(name),
     // passes aren't places, so they get no journey badge
     departure: type !== PASS && journeys.includes('departure'),
     arrival: type !== PASS && journeys.includes('arrival'),
@@ -374,16 +376,30 @@ function buildFeatures(features, id) {
     const others = el('ul');
     rest.forEach((f) => others.append(el('li', '', f.label)));
     panel.append(el('p', 'property-card-more-title', translate('propertyOtherFeatures')), others);
+    // shown while the pointer is over it (as the source's tooltip); a click (or Enter) pins it open
+    // or closes it again; Escape closes it
+    let pinned = false;
+    let hovering = false;
     const set = (open) => {
       toggle.setAttribute('aria-expanded', String(open));
       panel.hidden = !open;
     };
-    toggle.addEventListener('click', () => set(panel.hidden));
-    item.addEventListener('mouseenter', () => set(true));
-    item.addEventListener('mouseleave', () => set(false));
-    item.addEventListener('focusout', (e) => { if (!item.contains(e.relatedTarget)) set(false); });
+    toggle.addEventListener('click', () => {
+      pinned = !pinned;
+      set(pinned || hovering);
+    });
+    item.addEventListener('mouseenter', () => { hovering = true; set(true); });
+    item.addEventListener('mouseleave', () => { hovering = false; set(pinned); });
+    item.addEventListener('focusout', (e) => {
+      if (!item.contains(e.relatedTarget)) { pinned = false; set(hovering); }
+    });
     item.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !panel.hidden) { set(false); toggle.focus(); }
+      if (e.key === 'Escape' && !panel.hidden) {
+        pinned = false;
+        hovering = false;
+        set(false);
+        toggle.focus();
+      }
     });
     item.append(toggle, panel);
     list.append(item);
@@ -392,14 +408,37 @@ function buildFeatures(features, id) {
 }
 
 /**
+ * The loyalty line: the API's text with percentages in bold (e.g. "20%"), then the authored
+ * sign-up link (e.g. "Join here"), as the source's "ST members save 20% … — Join free".
+ * @param {string} text
+ * @param {{href: string, label: string}|null} signup
+ * @returns {HTMLElement}
+ */
+function buildLoyalty(text, signup) {
+  const line = el('p', 'property-card-loyalty');
+  text.split(/(\d+(?:[.,]\d+)?\s?%)/).forEach((part, i) => {
+    if (!part) return;
+    line.append(i % 2 ? el('b', '', part) : part);
+  });
+  if (signup) {
+    line.append(/[.!?]$/.test(text) ? ' ' : ' — ');
+    const link = el('a', '', signup.label);
+    link.href = signup.href;
+    line.append(applyButtonAction(link));
+  }
+  return line;
+}
+
+/**
  * One property card: photos, then the details (badge, name, location, hours, icons, note,
  * features, price, View and the loyalty line). Parts without data are left out.
  * @param {Object} property
  * @param {string} id A unique prefix for ids in the card
  * @param {boolean} eager
+ * @param {Object} settings The authored settings (e.g. the sign-up link)
  * @returns {HTMLElement}
  */
-function buildCard(property, id, eager) {
+function buildCard(property, id, eager, settings) {
   const card = el('li', 'property-card');
   if (property.first) card.classList.add('property-card-first');
   if (property.pass) card.classList.add('property-card-pass');
@@ -465,7 +504,7 @@ function buildCard(property, id, eager) {
     }
     bottom.append(action);
   }
-  if (property.loyalty) bottom.append(el('p', 'property-card-loyalty', property.loyalty));
+  if (property.loyalty) bottom.append(buildLoyalty(property.loyalty, settings.signup));
   body.append(top, bottom);
   card.append(buildSlider(property, eager), body);
   return card;
@@ -569,7 +608,7 @@ function buildFilters(options, selected, onChange) {
  * @param {HTMLElement} status
  * @param {Function} onClear
  */
-function renderResults(results, properties, selected, status, onClear, prefix) {
+function renderResults(results, properties, selected, status, onClear, prefix, settings) {
   const shown = properties.filter((p) => matches(p, selected));
   const groups = new Map();
   shown.filter((p) => !p.pass).forEach((p) => {
@@ -585,7 +624,7 @@ function renderResults(results, properties, selected, status, onClear, prefix) {
     if (group.heading) section.append(el('h2', 'property-list-heading', group.heading));
     const list = el('ul', 'property-list-cards');
     group.items.sort((a, b) => a.seq - b.seq).forEach((p) => {
-      list.append(buildCard(p, `${prefix}-${n}`, n === 0));
+      list.append(buildCard(p, `${prefix}-${n}`, n === 0, settings));
       n += 1;
     });
     section.append(list);
@@ -629,7 +668,36 @@ function showMessage(results, text, retry, hint) {
 }
 
 /**
- * Decorates the property list block: the authored city code (e.g. HKHKG) is all it needs. The API
+ * The authored settings: rows of name | value, `city-code` (e.g. HKHKG) and `signup-button` (a
+ * link, e.g. [Join here](…)); names ignore capitals and spaces. A table with a single value is read
+ * as the city code.
+ * @param {HTMLElement} block
+ * @returns {{city: string, signup: {href: string, label: string}|null}}
+ */
+function readSettings(block) {
+  const rows = [...block.children].map((row) => [...row.children]);
+  const settings = { city: '', signup: null };
+  const pairs = rows.filter((cells) => cells.length >= 2);
+  if (!pairs.length) {
+    settings.city = block.textContent.trim().replace(/\s+/g, '').toUpperCase();
+    return settings;
+  }
+  pairs.forEach(([name, value]) => {
+    const key = toKey(name.textContent);
+    if (key === 'city-code') settings.city = value.textContent.trim().replace(/\s+/g, '').toUpperCase();
+    if (key === 'signup-button') {
+      const link = value.querySelector('a[href]');
+      const href = toUrl(link?.getAttribute('href'));
+      const label = link?.textContent.trim();
+      if (href && label) settings.signup = { href, label };
+    }
+  });
+  return settings;
+}
+
+/**
+ * Decorates the property list block: the authored city code (e.g. HKHKG) is all it needs (plus an
+ * optional sign-up link for the loyalty line). The API
  * address comes from the site configuration sheet (`property-list-url`), the language from the
  * page metadata (`language-code`); the block fetches the city's properties and renders them in
  * location groups, with filters (airport, service type, features). The first property list on a
@@ -637,7 +705,8 @@ function showMessage(results, text, retry, hint) {
  * @param {HTMLElement} block The property list block element
  */
 export default async function decorate(block) {
-  const city = block.textContent.trim().replace(/\s+/g, '').toUpperCase();
+  const settings = readSettings(block);
+  const { city } = settings;
   blockCount += 1;
   const prefix = `property-list-${blockCount}`;
   const useUrl = blockCount === 1;
@@ -668,7 +737,7 @@ export default async function decorate(block) {
   let load;
   const render = async (fresh) => {
     if (!city) {
-      showMessage(results, translate('propertyEmpty'), null, 'Add the city code (e.g. HKHKG) in the block.');
+      showMessage(results, translate('propertyEmpty'), null, 'Add a "city-code" row (e.g. city-code | HKHKG) in the block.');
       return;
     }
     const base = await getConfigValue(CONFIG_KEY);
@@ -700,7 +769,7 @@ export default async function decorate(block) {
     const clearAll = () => form?.querySelector('.property-list-clear')?.click();
     const update = () => {
       if (useUrl) writeSelection(selected);
-      renderResults(results, properties, selected, status, clearAll, prefix);
+      renderResults(results, properties, selected, status, clearAll, prefix, settings);
     };
     form = buildFilters(options, selected, update);
     sidebar.replaceChildren();
@@ -720,7 +789,7 @@ export default async function decorate(block) {
       toggle.onclick = () => dialog.showModal();
     }
     layout.classList.toggle('no-filters', !form);
-    renderResults(results, properties, selected, status, clearAll, prefix);
+    renderResults(results, properties, selected, status, clearAll, prefix, settings);
   };
   // the page's loader stays up until the lounges are shown (the first load is awaited, so the
   // page doesn't hide its loader before)

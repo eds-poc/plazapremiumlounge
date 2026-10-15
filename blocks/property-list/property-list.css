@@ -5,6 +5,8 @@
 .property-list {
   --property-list-tag-bg: color-mix(in srgb, var(--color-brand-primary-action) 10%, transparent);
   --property-list-card-shadow: 0 4px 6px -1px rgb(0 0 0 / 5%);
+  --property-list-card-border: #e5e7eb;
+  --property-list-card-border-bottom: #ccc;
   --property-list-clear-bg: rgb(0 0 0 / 10%);
 
   /* the Clear pill and the Filters button: darker than the source's 30% / 40% black, for contrast */
@@ -15,7 +17,7 @@
   --property-list-chevron: 32px;
   --property-list-dot: 8px;
   --property-list-dot-hit: 28px;
-  --property-list-feature-icon: 40px;
+  --property-list-feature-icon: 50px;
   --property-list-promo-height: 32px;
   --property-list-tip-width: 220px;
   --property-list-view-width: 120px;
@@ -29,6 +31,8 @@
   --property-list-heading-lg: 28px;
   --property-list-dot-gap: 3px;
   --property-list-tip-shadow: 0 4px 16px rgb(0 0 0 / 20%);
+  --property-list-more-width: 300px;
+  --property-list-more-shadow: 0 6px 15px -6px rgb(0 0 0 / 20%);
   --property-list-dots-shade: inset 0 -25px 25px rgb(0 0 0 / 65%);
   --property-list-accent: var(--color-brand-primary);
   --property-list-action: var(--color-brand-primary-action);
@@ -110,7 +114,8 @@
 
 .property-list-clear:hover,
 .property-list-clear:focus-visible {
-  color: var(--color-text);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
 }
 
 /* each option a checkbox, shown as the source's text links; a ticked one in maroon with a check */
@@ -118,7 +123,7 @@
   position: relative;
   display: block;
   padding: var(--property-list-option-padding) 0;
-  color: var(--color-text);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-light);
   line-height: var(--line-height-body);
@@ -240,7 +245,8 @@
   gap: var(--spacing-6);
   margin: 0 0 var(--spacing-9);
   padding: var(--spacing-5);
-  border: var(--base-border-width) solid var(--color-campaign-line);
+  border: var(--base-border-width) solid var(--property-list-card-border);
+  border-bottom-color: var(--property-list-card-border-bottom);
   border-radius: var(--radius-lg);
   background-color: var(--color-background);
   box-shadow: var(--property-list-card-shadow);
@@ -284,6 +290,13 @@
   text-transform: uppercase;
   white-space: nowrap;
   cursor: default;
+}
+
+/* (5px below the label and 2px lower, as the source: a 27px tall badge) */
+.property-card-badge-label {
+  position: relative;
+  inset-block-start: var(--spacing-1);
+  margin-bottom: var(--spacing-2);
 }
 
 .property-card-badge-icon {
@@ -420,20 +433,22 @@
   cursor: pointer;
 }
 
+/* the other features: a light panel above the button, as the source's features tooltip */
 .property-card-more-panel {
   position: absolute;
   inset-block-end: calc(100% + var(--spacing-3));
   inset-inline-start: 0;
   z-index: 2;
-  width: max-content;
-  max-width: var(--property-list-tip-width);
-  padding: var(--spacing-4) var(--spacing-5);
+  box-sizing: border-box;
+  width: var(--property-list-more-width);
+  max-width: calc(100vw - var(--spacing-12));
+  padding: var(--spacing-7);
   border-radius: var(--radius-xs);
-  background-color: var(--color-campaign-ink);
-  box-shadow: var(--property-list-tip-shadow);
-  color: var(--color-text-inverse);
-  font-size: var(--font-size-xs);
+  background-color: var(--color-surface-warm);
+  box-shadow: var(--property-list-more-shadow);
+  font-size: var(--font-size-sm);
   line-height: var(--line-height-body);
+  text-align: start;
 }
 
 .property-card-more-panel[hidden] {
@@ -441,13 +456,23 @@
 }
 
 .property-card-more-title {
-  margin: 0 0 var(--spacing-2);
-  font-weight: var(--font-weight-medium);
+  margin: 0 0 var(--spacing-3);
+  color: var(--color-text-strong);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: var(--line-height-heading);
 }
 
 .property-card-more-panel ul {
   margin: 0;
-  padding-inline-start: var(--spacing-6);
+  padding: 0;
+  list-style: none;
+}
+
+.property-card-more-panel li {
+  padding: var(--spacing-1) var(--spacing-2);
+  color: var(--property-list-accent);
+  font-weight: var(--font-weight-medium);
 }
 
 .property-card-action {
@@ -462,7 +487,7 @@
 .property-card-price {
   margin: 0;
   color: var(--color-text);
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-sm);
   line-height: var(--line-height-body);
 }
 
@@ -497,11 +522,23 @@
 .property-card-loyalty {
   margin: var(--spacing-3) 0 0;
   padding-top: var(--spacing-3);
+  border-top: var(--base-border-width) solid var(--color-campaign-line);
   color: var(--color-campaign-grey);
   font-family: var(--font-family-campaign);
   font-size: var(--font-size-campaign-note);
   line-height: var(--line-height-body);
   text-align: end;
+}
+
+.property-card-loyalty b {
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.property-card-loyalty a:any-link {
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-campaign-bold);
+  text-decoration: underline;
 }
 
 /* ---------- photo slider ---------- */
@@ -630,12 +667,20 @@
   .property-card-hours {
     order: -1;
   }
+
+  .property-card-features {
+    padding-bottom: var(--spacing-4);
+  }
 }
 
 @media (width >=768px) {
   .property-card {
     grid-template-columns: calc((100% + var(--grid-gutter)) / 3 - var(--grid-gutter)) 1fr;
     gap: var(--grid-gutter);
+  }
+
+  .property-card-price {
+    font-size: var(--font-size-md);
   }
 
   .property-card-price strong {
