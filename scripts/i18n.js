@@ -63,6 +63,80 @@ const TEXTS = {
   airportDining: {
     en: 'Airport dining', zh: '机场餐饮', 'zh-HK': '機場餐飲', ja: '空港ダイニング', pt: 'Restaurantes do aeroporto',
   },
+  // property list (city lounge listing)
+  propertyFilters: {
+    en: 'Filters', zh: '筛选', 'zh-HK': '篩選', ja: '絞り込み', pt: 'Filtros',
+  },
+  propertyAll: {
+    en: 'All', zh: '全部', 'zh-HK': '全部', ja: 'すべて', pt: 'Todos',
+  },
+  propertyClear: {
+    en: 'Clear', zh: '清除', 'zh-HK': '清除', ja: 'クリア', pt: 'Limpar',
+  },
+  propertyAirport: {
+    en: 'Airport / Rail Station', zh: '机场 / 火车站', 'zh-HK': '機場 / 鐵路站', ja: '空港 / 駅', pt: 'Aeroporto / Estação ferroviária',
+  },
+  propertyService: {
+    en: 'Service Type', zh: '服务类型', 'zh-HK': '服務類型', ja: 'サービスの種類', pt: 'Tipo de serviço',
+  },
+  propertyFeatures: {
+    en: 'Features', zh: '设施', 'zh-HK': '設施', ja: '設備', pt: 'Comodidades',
+  },
+  propertyFrom: {
+    en: 'from', zh: '起', 'zh-HK': '起', ja: '〜', pt: 'a partir de',
+  },
+  propertyView: {
+    en: 'View', zh: '查看', 'zh-HK': '查看', ja: '詳細', pt: 'Ver',
+  },
+  propertyMore: {
+    en: '+{n} more', zh: '+{n} 项', 'zh-HK': '+{n} 項', ja: '他 {n} 件', pt: '+{n} mais',
+  },
+  propertyOtherFeatures: {
+    en: 'Other Features', zh: '其他设施', 'zh-HK': '其他設施', ja: 'その他の設備', pt: 'Outras comodidades',
+  },
+  propertyResults: {
+    en: '{n} results', zh: '{n} 个结果', 'zh-HK': '{n} 個結果', ja: '{n} 件', pt: '{n} resultados',
+  },
+  propertyLoading: {
+    en: 'Loading lounges…', zh: '正在加载贵宾室…', 'zh-HK': '正在載入貴賓室…', ja: 'ラウンジを読み込み中…', pt: 'Carregando lounges…',
+  },
+  propertyEmpty: {
+    en: 'No lounges found.', zh: '未找到贵宾室。', 'zh-HK': '找不到貴賓室。', ja: 'ラウンジが見つかりません。', pt: 'Nenhum lounge encontrado.',
+  },
+  propertyNoMatch: {
+    en: 'No lounges match these filters.', zh: '没有符合筛选条件的贵宾室。', 'zh-HK': '沒有符合篩選條件的貴賓室。', ja: '条件に合うラウンジはありません。', pt: 'Nenhum lounge corresponde a estes filtros.',
+  },
+  propertyError: {
+    en: 'We couldn’t load the lounges.', zh: '无法加载贵宾室。', 'zh-HK': '無法載入貴賓室。', ja: 'ラウンジを読み込めませんでした。', pt: 'Não foi possível carregar os lounges.',
+  },
+  propertyRetry: {
+    en: 'Try again', zh: '重试', 'zh-HK': '重試', ja: '再試行', pt: 'Tentar novamente',
+  },
+  propertyPrevious: {
+    en: 'Previous photo', zh: '上一张照片', 'zh-HK': '上一張相片', ja: '前の写真', pt: 'Foto anterior',
+  },
+  propertyNext: {
+    en: 'Next photo', zh: '下一张照片', 'zh-HK': '下一張相片', ja: '次の写真', pt: 'Próxima foto',
+  },
+  propertyPhoto: {
+    en: 'Photo {n} of {total}', zh: '第 {n} 张，共 {total} 张', 'zh-HK': '第 {n} 張，共 {total} 張', ja: '写真 {n} / {total}', pt: 'Foto {n} de {total}',
+  },
+  propertyDeparture: {
+    en: 'Departures Lounge', zh: '出发贵宾室', 'zh-HK': '離境貴賓室', ja: '出発ラウンジ', pt: 'Lounge de embarque',
+  },
+  propertyDepartureTip: {
+    en: 'Located after security & immigration — you’ll need your boarding pass to enter.',
+    zh: '位于安检和出境检查之后，需凭登机牌进入。',
+    'zh-HK': '位於保安及出境檢查之後，須憑登機證進入。',
+    ja: '保安検査・出国審査の後にあります。ご入場には搭乗券が必要です。',
+    pt: 'Fica após a segurança e a imigração — você precisará do cartão de embarque para entrar.',
+  },
+  propertyArrival: {
+    en: 'Arrivals Lounge', zh: '到达贵宾室', 'zh-HK': '抵港貴賓室', ja: '到着ラウンジ', pt: 'Lounge de desembarque',
+  },
+  propertyArrivalTip: {
+    en: 'Located in the arrivals area.', zh: '位于到达区。', 'zh-HK': '位於抵港區。', ja: '到着エリアにあります。', pt: 'Fica na área de desembarque.',
+  },
 };
 
 /**
