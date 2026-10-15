@@ -33,6 +33,9 @@
   --property-list-tip-shadow: 0 4px 16px rgb(0 0 0 / 20%);
   --property-list-more-width: 300px;
   --property-list-more-shadow: 0 6px 15px -6px rgb(0 0 0 / 20%);
+  --property-list-arrow: 6px;
+  --property-list-check-width: 10.5px;
+  --property-list-check-height: 12px;
   --property-list-dots-shade: inset 0 -25px 25px rgb(0 0 0 / 65%);
   --property-list-accent: var(--color-brand-primary);
   --property-list-action: var(--color-brand-primary-action);
@@ -433,15 +436,21 @@
   cursor: pointer;
 }
 
-/* the other features: a light panel above the button, as the source's features tooltip */
+/* while its panel is shown, the button fills with the View button's colour, as the source */
+.property-card-more .property-card-tag:is(:hover, :focus-visible, [aria-expanded='true']) {
+  background-color: var(--property-list-action);
+  color: var(--color-text-inverse);
+}
+
+/* the other features: a light panel as the source's features tooltip, sized to its content (at
+   most 300px), centred above the button with an arrow; at the right of the button (or the left)
+   when it doesn't fit above (placed by the script) */
 .property-card-more-panel {
   position: absolute;
-  inset-block-end: calc(100% + var(--spacing-3));
-  inset-inline-start: 0;
   z-index: 2;
   box-sizing: border-box;
-  width: var(--property-list-more-width);
-  max-width: calc(100vw - var(--spacing-12));
+  width: max-content;
+  max-width: var(--property-list-more-width);
   padding: var(--spacing-7);
   border-radius: var(--radius-xs);
   background-color: var(--color-surface-warm);
@@ -453,6 +462,34 @@
 
 .property-card-more-panel[hidden] {
   display: none;
+}
+
+/* the arrow: a 12px × 6px triangle in the panel's colour, pointing at the button */
+.property-card-more-panel::after {
+  content: '';
+  position: absolute;
+  border: var(--property-list-arrow) solid transparent;
+}
+
+.property-card-more-panel[data-placement='top']::after {
+  inset-block-start: 100%;
+  inset-inline-start: calc(var(--arrow) - var(--property-list-arrow));
+  border-block-end-width: 0;
+  border-block-start-color: var(--color-surface-warm);
+}
+
+.property-card-more-panel[data-placement='right']::after {
+  inset-block-start: calc(var(--arrow) - var(--property-list-arrow));
+  inset-inline-end: 100%;
+  border-inline-start-width: 0;
+  border-inline-end-color: var(--color-surface-warm);
+}
+
+.property-card-more-panel[data-placement='left']::after {
+  inset-block-start: calc(var(--arrow) - var(--property-list-arrow));
+  inset-inline-start: 100%;
+  border-inline-end-width: 0;
+  border-inline-start-color: var(--color-surface-warm);
 }
 
 .property-card-more-title {
@@ -469,10 +506,22 @@
   list-style: none;
 }
 
+/* each item: a check, 8px, then the name, in the View button's colour */
 .property-card-more-panel li {
+  display: flex;
+  align-items: center;
   padding: var(--spacing-1) var(--spacing-2);
-  color: var(--property-list-accent);
+  color: var(--property-list-action);
   font-weight: var(--font-weight-medium);
+}
+
+.property-card-more-check {
+  flex: none;
+  width: var(--property-list-check-width);
+  height: var(--property-list-check-height);
+  margin-inline-end: var(--spacing-3);
+  background-color: currentcolor;
+  mask: url('../../icons/check.svg') center / contain no-repeat;
 }
 
 .property-card-action {

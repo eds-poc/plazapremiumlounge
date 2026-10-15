@@ -355,6 +355,47 @@ function buildBadge(kind, id) {
 }
 
 /**
+ * Places the open "+N more" panel as the source's tooltip: centred above the button; when that
+ * doesn't fit the screen's width, at the right of the button (vertically centred), else at its
+ * left. The arrow points at the button.
+ * @param {HTMLElement} item The list item holding the button and the panel
+ * @param {HTMLElement} toggle
+ * @param {HTMLElement} panel
+ */
+function placePanel(item, toggle, panel) {
+  const GAP = 6;
+  const EDGE = 4;
+  panel.style.left = '0px';
+  panel.style.top = '0px';
+  const viewport = document.documentElement.clientWidth;
+  const t = toggle.getBoundingClientRect();
+  const p = panel.getBoundingClientRect();
+  const base = item.getBoundingClientRect();
+  const centreX = t.left + t.width / 2;
+  const centreY = t.top + t.height / 2;
+  let placement = 'top';
+  let left = centreX - p.width / 2;
+  let top = t.top - p.height - (GAP / 4);
+  if (left < EDGE || left + p.width > viewport - EDGE) {
+    if (t.right + GAP + p.width <= viewport - EDGE) {
+      placement = 'right';
+      left = t.right + GAP;
+    } else if (t.left - GAP - p.width >= EDGE) {
+      placement = 'left';
+      left = t.left - GAP - p.width;
+    } else {
+      left = Math.min(Math.max(left, EDGE), viewport - EDGE - p.width);
+    }
+    if (placement !== 'top') top = centreY - p.height / 2;
+  }
+  panel.dataset.placement = placement;
+  panel.style.left = `${left - base.left}px`;
+  panel.style.top = `${top - base.top}px`;
+  // the arrow's position along the panel edge, at the button's centre
+  panel.style.setProperty('--arrow', `${placement === 'top' ? centreX - left : centreY - top}px`);
+}
+
+/**
  * The feature tags: the first five, then a "+N more" button that shows the others.
  * @param {Object[]} features
  * @param {string} id A unique id for the other features
@@ -374,7 +415,11 @@ function buildFeatures(features, id) {
     panel.id = id;
     panel.hidden = true;
     const others = el('ul');
-    rest.forEach((f) => others.append(el('li', '', f.label)));
+    rest.forEach((f) => {
+      const li = el('li');
+      li.append(el('span', 'property-card-more-check'), f.label);
+      others.append(li);
+    });
     panel.append(el('p', 'property-card-more-title', translate('propertyOtherFeatures')), others);
     // shown while the pointer is over it (as the source's tooltip); a click (or Enter) pins it open
     // or closes it again; Escape closes it
@@ -383,6 +428,7 @@ function buildFeatures(features, id) {
     const set = (open) => {
       toggle.setAttribute('aria-expanded', String(open));
       panel.hidden = !open;
+      if (open) placePanel(item, toggle, panel);
     };
     toggle.addEventListener('click', () => {
       pinned = !pinned;
