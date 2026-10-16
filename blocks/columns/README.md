@@ -12,6 +12,21 @@ such as logos.
 
 A cell that holds only an image is shown first on mobile.
 
+## Option: boxed
+
+Each column becomes a white box with a thin grey border and rounded corners, as the source FAQ
+help cards ("Still need help?" / "Book with us today"). Use it for short help or contact cards.
+
+| Columns (boxed)                                                      |                                                       |
+|----------------------------------------------------------------------|-------------------------------------------------------|
+| Visit our Contact Centre to get in touch with a member of our team.<br>[Still need help?](/en-uk/contact-us) | Ready to book you next destination before departure?<br>[Book with us today](#book-now) |
+
+- **One cell per box**, in a single row. Write the text, then the link on its own line; the link
+  shows in bold black (not as a button, so don't make it bold).
+- Stacked on mobile (15px apart), side by side from 768px (24px apart, all boxes the same height).
+  Text is 16px on mobile, 20px from 768px.
+- The section starts 50px below the content above it, at every width.
+
 ## Text-image variation
 
 A text column and a narrower image column, as the source About page ("The Company") and landing pages

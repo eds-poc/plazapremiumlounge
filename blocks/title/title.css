@@ -155,6 +155,40 @@
   margin: 0;
 }
 
+/* option headline: a partner campaign section header (source CTBC Reward `.section-title` and
+   `.section-subtitle`): a bold navy heading (22px, 24px above 480px, 28px above 768px) 15px above
+   grey 16px Arial text at most 800px wide; 30px to what follows. The same at every heading level.
+   Use with center-all */
+.title.headline {
+  --title-headline-size: 22px;
+  --title-headline-size-lg: 28px;
+  --title-headline-intro-max: 800px;
+
+  margin-bottom: var(--spacing-9);
+}
+
+.title.headline .title-heading {
+  margin: 0 0 var(--spacing-6);
+  color: var(--color-campaign-navy);
+  font-size: var(--title-headline-size);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading);
+}
+
+.title.headline .title-intro {
+  max-width: var(--title-headline-intro-max);
+  margin: 0 auto;
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-campaign);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-loose);
+}
+
+.title.headline .title-intro p {
+  margin: 0;
+}
+
 /* option callout: a call-to-action header (source West Kowloon redemption `__cta-block`): at most
    720px wide and centred, 12px above and below; a maroon Georgia heading from 20px to 26px with the
    screen width, 16px above the intro; the intro in a white box with a thin border and 8px corners,
@@ -211,6 +245,19 @@
 .title.callout .title-intro strong {
   color: var(--color-brand-primary);
   font-weight: var(--font-weight-campaign-bold);
+}
+
+/* breakpoint-exception: the source campaign headings change above 480px and 768px */
+@media (width > 480px) {
+  .title.headline {
+    --title-headline-size: var(--font-size-2xl);
+  }
+}
+
+@media (width > 768px) {
+  .title.headline {
+    --title-headline-size: var(--title-headline-size-lg);
+  }
 }
 
 /* breakpoint-exception: the source lead-in's space changes above 600px */
