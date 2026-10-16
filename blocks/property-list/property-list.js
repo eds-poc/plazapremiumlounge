@@ -6,8 +6,6 @@ import { hideLoader, showLoader } from '../../scripts/scripts.js';
 const CONFIG_URL = '/config.json';
 const CONFIG_KEY = 'property-list-url';
 const TIMEOUT_MS = 8000;
-const CACHE_MS = 5 * 60 * 1000;
-const CACHE_PREFIX = 'property-list:';
 // property types shown, as the source city pages: lounges, then passes (gift cards) at the end
 const LOUNGE = 'LOUNGE';
 const PASS = 'GFTCRD';
@@ -69,19 +67,11 @@ async function getConfigValue(key) {
 }
 
 /**
- * Fetches the properties, from this browser session's copy when it's recent. Gives up after 8s.
+ * Fetches the properties. Gives up after 8s.
  * @param {string} url
- * @param {boolean} fresh Skip the session copy (e.g. after Try again)
  * @returns {Promise<Object[]>} the API's items
  */
-async function fetchProperties(url, fresh) {
-  const cacheKey = `${CACHE_PREFIX}${url}`;
-  if (!fresh) {
-    try {
-      const cached = JSON.parse(sessionStorage.getItem(cacheKey));
-      if (cached && Date.now() - cached.time < CACHE_MS) return cached.items;
-    } catch { /* no usable copy */ }
-  }
+async function fetchProperties(url) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
@@ -89,9 +79,6 @@ async function fetchProperties(url, fresh) {
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const json = await resp.json();
     if (!Array.isArray(json.items)) throw new Error('Unexpected response');
-    try {
-      sessionStorage.setItem(cacheKey, JSON.stringify({ time: Date.now(), items: json.items }));
-    } catch { /* storage full or blocked */ }
     return json.items;
   } finally {
     clearTimeout(timer);
@@ -781,7 +768,7 @@ export default async function decorate(block) {
   block.append(dialog);
 
   let load;
-  const render = async (fresh) => {
+  const render = async () => {
     if (!city) {
       showMessage(results, translate('propertyEmpty'), null, 'Add a "city-code" row (e.g. city-code | HKHKG) in the block.');
       return;
@@ -797,11 +784,11 @@ export default async function decorate(block) {
     if (language) url.searchParams.set('languageCode', language);
     let items;
     try {
-      items = await fetchProperties(url.href, fresh);
+      items = await fetchProperties(url.href);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('property-list: could not load', url.href, error);
-      showMessage(results, translate('propertyError'), () => load(true));
+      showMessage(results, translate('propertyError'), () => load());
       return;
     }
     const properties = items.map(readProperty).filter(Boolean);
@@ -839,13 +826,13 @@ export default async function decorate(block) {
   };
   // the page's loader stays up until the lounges are shown (the first load is awaited, so the
   // page doesn't hide its loader before)
-  load = async (fresh) => {
+  load = async () => {
     setLoading(true);
     try {
-      await render(fresh);
+      await render();
     } finally {
       setLoading(false);
     }
   };
-  await load(false);
+  await load();
 }
