@@ -283,6 +283,36 @@
         "usage": "Thin borders of campaign boxes on light panels (Cards badge)",
         "evidence": "source West Kowloon campaign CSS (__facility, __rewards-info and __qr-image borders)",
         "confidence": "High"
+      },
+      "--color-campaign-navy": {
+        "value": "#002d72",
+        "usage": "Partner campaign headings and accents (Title headline, Cards steps titles)",
+        "evidence": "source CTBC Reward campaign CSS (#ctbc-campaign-container, inline stylesheet): .section-title, .step-title",
+        "confidence": "High"
+      },
+      "--color-campaign-orange": {
+        "value": "#ff8c42",
+        "usage": "Partner campaign highlights: Cards steps number badge",
+        "evidence": "source CTBC Reward campaign CSS (#ctbc-campaign-container, inline stylesheet): .step-number",
+        "confidence": "High"
+      },
+      "--color-campaign-border": {
+        "value": "#eee",
+        "usage": "Thin border of partner campaign cards (Cards steps)",
+        "evidence": "source CTBC Reward campaign CSS (#ctbc-campaign-container, inline stylesheet): .process-step border",
+        "confidence": "High"
+      },
+      "--color-campaign-cloud": {
+        "value": "#f8f9fa",
+        "usage": "Cool grey partner campaign panels: section style soft-panel",
+        "evidence": "source CTBC Reward campaign CSS (#ctbc-campaign-container, inline stylesheet): .section-alt, .cta-container background",
+        "confidence": "High"
+      },
+      "--color-campaign-copy": {
+        "value": "#444",
+        "usage": "Body text of partner campaign copy boxes: section style card-copy",
+        "evidence": "source CTBC Reward campaign CSS (#ctbc-campaign-container, inline stylesheet): .detail-section p",
+        "confidence": "High"
       }
     },
     "state colors": {
@@ -927,6 +957,12 @@
         "usage": "Arrow icon in a campaign button (Promo)",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container .premium-cta-box)",
         "confidence": "High"
+      },
+      "--container-medium-max-width": {
+        "value": "1100px",
+        "usage": "Section style medium-width: the partner campaign container (content up to 1060px)",
+        "evidence": "source CTBC Reward campaign CSS (#ctbc-campaign-container, inline stylesheet): .container max-width",
+        "confidence": "High"
       }
     },
     "radius": {
@@ -989,6 +1025,12 @@
         "usage": "Small campaign corners: icon boxes (Campaign items, Cards connectivity) and the Promo button",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container)",
         "confidence": "High"
+      },
+      "--radius-campaign-panel": {
+        "value": "10px",
+        "usage": "Partner campaign panel corners: section style soft-panel",
+        "evidence": "source CTBC Reward campaign CSS (#ctbc-campaign-container, inline stylesheet): .section-alt, .cta-container border-radius",
+        "confidence": "High"
       }
     },
     "shadows": {
@@ -1032,6 +1074,12 @@
         "value": "0 8px 24px rgb(0 0 0 / 28%)",
         "usage": "Gold campaign button on hover/focus (Promo)",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container .premium-cta-box)",
+        "confidence": "High"
+      },
+      "--shadow-campaign-soft": {
+        "value": "0 3px 15px rgb(0 0 0 / 4%)",
+        "usage": "Soft shadow of partner campaign cards: Cards steps and top-accent",
+        "evidence": "source CTBC Reward campaign CSS (#ctbc-campaign-container, inline stylesheet): .process-step, .benefit-card box-shadow",
         "confidence": "High"
       }
     },
