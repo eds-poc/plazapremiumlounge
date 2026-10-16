@@ -77,9 +77,104 @@
   outline-color: var(--color-text-inverse);
 }
 
+/* option light: a partner campaign call to action (source CTBC Reward `.cta-container`): a cool grey
+   box with 10px corners, 40px below what's above it, a bold navy heading (24px, 28px above 768px),
+   grey 16px text at most 700px wide and an orange pill button (bold 16px, 18px above 768px) that
+   lifts on hover; no arrow */
+.promo.light {
+  --promo-light-heading-size: var(--font-size-2xl);
+  --promo-light-heading-size-lg: 28px;
+  --promo-light-text-max: 700px;
+  --promo-light-button-size: var(--font-size-md);
+  --promo-light-button-block: 13px;
+  --promo-light-button-inline: var(--spacing-8);
+
+  /* the source label's no-break spaces: two before the text, one after */
+  --promo-light-space: 0.278em;
+  --promo-light-shadow: 0 5px 15px color-mix(in srgb, var(--color-campaign-orange) 30%, transparent);
+  --promo-light-shadow-hover: 0 8px 20px color-mix(in srgb, var(--color-campaign-orange) 40%, transparent);
+  --promo-light-lift: -3px;
+
+  margin-top: var(--spacing-campaign-band-block);
+  padding: var(--spacing-campaign-band-block) var(--spacing-8);
+  border-radius: var(--radius-campaign-panel);
+  background: var(--color-campaign-cloud);
+  color: var(--color-text);
+}
+
+.promo.light .promo-heading {
+  max-width: none;
+  margin: 0 0 var(--spacing-6);
+  color: var(--color-campaign-navy);
+  font-family: var(--font-family-primary);
+  font-size: var(--promo-light-heading-size);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading);
+}
+
+.promo.light .promo-text {
+  max-width: var(--promo-light-text-max);
+  margin: 0 auto var(--spacing-7);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-loose);
+}
+
+/* 20px under the text and 20px above the button, as the source (which don't collapse) */
+.promo.light .promo-action {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--spacing-7);
+}
+
+.promo.light .promo-button {
+  padding: var(--promo-light-button-block) calc(var(--promo-light-button-inline) + var(--promo-light-space)) var(--promo-light-button-block) calc(var(--promo-light-button-inline) + 2 * var(--promo-light-space));
+  border-radius: var(--radius-xl);
+  background-color: var(--color-campaign-orange);
+  box-shadow: var(--promo-light-shadow);
+  color: var(--color-text-inverse);
+  font-size: var(--promo-light-button-size);
+  line-height: var(--line-height-loose);
+  letter-spacing: normal;
+  text-transform: none;
+  transition: transform var(--duration-short), box-shadow var(--duration-short);
+}
+
+.promo.light .promo-button::after {
+  content: none;
+}
+
+.promo.light .promo-button:hover,
+.promo.light .promo-button:focus-visible {
+  background-color: var(--color-campaign-orange);
+  box-shadow: var(--promo-light-shadow-hover);
+  color: var(--color-text-inverse);
+  transform: translateY(var(--promo-light-lift));
+}
+
+/* a dark focus ring on the light box */
+.promo.light .promo-button:focus-visible {
+  outline-color: var(--color-campaign-navy);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .promo .promo-button {
     transition: none;
+  }
+
+  .promo.light .promo-button:hover,
+  .promo.light .promo-button:focus-visible {
+    transform: none;
+  }
+}
+
+/* breakpoint-exception: the source campaign's call to action changes above 768px */
+@media (width > 768px) {
+  .promo.light {
+    --promo-light-heading-size: var(--promo-light-heading-size-lg);
+    --promo-light-button-size: var(--font-size-lg);
+    --promo-light-button-block: var(--spacing-6);
+    --promo-light-button-inline: var(--spacing-10);
   }
 }
 

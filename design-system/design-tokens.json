@@ -301,6 +301,12 @@
         "usage": "Cool grey partner campaign panels: section style soft-panel",
         "evidence": "source CTBC Reward campaign CSS (#ctbc-campaign-container, inline stylesheet): .section-alt, .cta-container background",
         "confidence": "High"
+      },
+      "--color-campaign-copy": {
+        "value": "#444",
+        "usage": "Body text of partner campaign copy boxes: section style card-copy",
+        "evidence": "source CTBC Reward campaign CSS (#ctbc-campaign-container, inline stylesheet): .detail-section p",
+        "confidence": "High"
       }
     },
     "state colors": {

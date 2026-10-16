@@ -78,6 +78,7 @@
   --color-campaign-orange: #ff8c42;
   --color-campaign-border: #eee;
   --color-campaign-cloud: #f8f9fa;
+  --color-campaign-copy: #444;
   --gradient-campaign-promo: linear-gradient(135deg, var(--color-brand-primary) 0%, var(--color-campaign-plum-deep) 100%);
   --color-text-subtle: #999;
   --color-text-inverse: #fff;
@@ -750,6 +751,7 @@ main>.section.medium-width {
   /* the campaign container's own space above its first and below its last part */
   --medium-width-edge: 28px;
   --medium-width-block: var(--spacing-9);
+  --medium-width-after: var(--spacing-8);
 
   padding-block: var(--medium-width-block);
 }
@@ -762,6 +764,12 @@ main>.section:not(.medium-width)+.section.medium-width {
 
 main>.section.inset:not(.medium-width):has(+ .section.medium-width) {
   padding-bottom: var(--spacing-9);
+}
+
+/* the last campaign section: the campaign container's space below it, then the offer section's
+   own space (25px, 50px from 992px, as inset) */
+main>.section.inset.medium-width:not(:has(+ .section.medium-width)) {
+  padding-bottom: calc(var(--medium-width-block) + var(--medium-width-edge) + var(--medium-width-after));
 }
 
 main>.section.medium-width>* {
@@ -779,6 +787,12 @@ main>.section.medium-width>* {
 @media (width > 768px) {
   main>.section.medium-width {
     --medium-width-block: var(--spacing-campaign-band-block);
+  }
+}
+
+@media (width >=992px) {
+  main>.section.medium-width {
+    --medium-width-after: var(--section-padding-block);
   }
 }
 
@@ -902,55 +916,80 @@ main>.section.band+.section.inset:not(.band) {
   padding-top: 0;
 }
 
-/* section style soft-panel: a cool grey panel with 10px corners over the medium-width content
-   (source CTBC Reward `.section-alt`), 30px outside it above and below; inside 40px above and below
-   and 20px at the sides, 30px and no sides at 768px and below (as the source). It spans every block
-   in the section: each block wrapper draws its part, the first one the top, the last the bottom.
-   Use with inset, medium-width */
-main>.section.medium-width.soft-panel {
-  --soft-panel-inline: 0px;
-
-  margin-block: var(--spacing-9);
-  padding-block: 0;
-}
-
-main>.section.medium-width.soft-panel>* {
+/* section styles soft-panel and card-copy (use with inset, medium-width): a layer behind the blocks
+   of the section, over the medium-width content (each block wrapper draws its part, the first one
+   the top, the last the bottom), with the section's own space inside it */
+main>.section.medium-width:is(.soft-panel, .card-copy)>* {
   position: relative;
   isolation: isolate;
   display: flow-root;
-  padding-inline: calc(var(--container-padding) + var(--medium-width-inline) + var(--soft-panel-inline));
+  padding-inline: calc(var(--container-padding) + var(--medium-width-inline) + var(--panel-inline));
 }
 
-main>.section.medium-width.soft-panel>*::before {
+main>.section.medium-width:is(.soft-panel, .card-copy)>*::before {
   content: '';
   position: absolute;
   inset-block: 0;
   inset-inline: calc(var(--container-padding) + var(--medium-width-inline));
   z-index: -1;
-  background-color: var(--color-campaign-cloud);
+  background-color: var(--panel-background);
+  box-shadow: var(--panel-shadow, none);
 }
 
-main>.section.medium-width.soft-panel>*:first-child {
-  padding-top: var(--medium-width-block);
+main>.section.medium-width:is(.soft-panel, .card-copy)>*:first-child {
+  padding-top: var(--panel-block-start);
 }
 
-main>.section.medium-width.soft-panel>*:first-child::before {
-  border-start-start-radius: var(--radius-campaign-panel);
-  border-start-end-radius: var(--radius-campaign-panel);
+main>.section.medium-width:is(.soft-panel, .card-copy)>*:first-child::before {
+  border-start-start-radius: var(--panel-radius);
+  border-start-end-radius: var(--panel-radius);
 }
 
-main>.section.medium-width.soft-panel>*:last-child {
-  padding-bottom: var(--medium-width-block);
+main>.section.medium-width:is(.soft-panel, .card-copy)>*:last-child {
+  padding-bottom: var(--panel-block-end);
 }
 
-main>.section.medium-width.soft-panel>*:last-child::before {
-  border-end-start-radius: var(--radius-campaign-panel);
-  border-end-end-radius: var(--radius-campaign-panel);
+main>.section.medium-width:is(.soft-panel, .card-copy)>*:last-child::before {
+  border-end-start-radius: var(--panel-radius);
+  border-end-end-radius: var(--panel-radius);
+}
+
+/* soft-panel: a cool grey panel with 10px corners (source CTBC Reward `.section-alt`), 30px outside
+   it above and below; inside 40px above and below and 20px at the sides, 30px and no sides at
+   768px and below (as the source) */
+main>.section.medium-width.soft-panel {
+  --panel-background: var(--color-campaign-cloud);
+  --panel-radius: var(--radius-campaign-panel);
+  --panel-inline: 0px;
+  --panel-block-start: var(--medium-width-block);
+  --panel-block-end: var(--medium-width-block);
+
+  margin-block: var(--spacing-9);
+  padding-block: 0;
+}
+
+/* card-copy: the section's text in a white box with 8px corners and a soft shadow (source CTBC
+   Reward `.campaign-details`), 30px below the section's top space; inside 30px above and below and
+   25px at the sides. Headings in bold
+   navy 18px Arial (the source's title isn't a heading, so it shows Arial), paragraphs 15px dark
+   grey, 15px apart; line height 1.6 */
+main>.section.medium-width.card-copy {
+  --panel-background: var(--color-background);
+  --panel-radius: var(--radius-campaign-sm);
+  --panel-shadow: 0 3px 10px rgb(0 0 0 / 5%);
+  --panel-inline: var(--spacing-8);
+  --panel-block-start: var(--spacing-9);
+  --panel-block-end: var(--spacing-9);
+  --card-copy-text-size: 15px;
+}
+
+main>.section.medium-width.card-copy>*:first-child {
+  margin-top: var(--spacing-9);
 }
 
 @media (width > 768px) {
   main>.section.medium-width.soft-panel {
-    --soft-panel-inline: var(--spacing-7);
+    --panel-inline: var(--spacing-7);
   }
 }
 
@@ -971,6 +1010,27 @@ main>.section.fine-print li {
 
 main>.section.fine-print li>p {
   margin: 0;
+}
+
+/* section style card-copy: its text (the box is drawn with soft-panel's layer, above) */
+main>.section.card-copy .default-content-wrapper {
+  font-family: var(--font-family-campaign);
+  line-height: var(--line-height-loose);
+}
+
+main>.section.card-copy .default-content-wrapper>:is(h1, h2, h3, h4, h5, h6) {
+  margin: 0 0 var(--spacing-5);
+  color: var(--color-campaign-navy);
+  font-family: var(--font-family-campaign);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: var(--line-height-loose);
+}
+
+main>.section.card-copy .default-content-wrapper>p {
+  margin: 0 0 var(--spacing-6);
+  color: var(--color-campaign-copy);
+  font-size: var(--card-copy-text-size);
 }
 
 /* section style centered-copy: default text as the source campaign copy (West Kowloon description,
