@@ -33,6 +33,59 @@
   }
 }
 
+/* option large: big image cards on the page background, as the source "Plaza Premium Group
+   Entertainment" news listing (`.newsListing`): a 5:3 image with 15px corners and a soft shadow,
+   20px above the title (18px, 24px from 1200px) and the text (14px, 16px from 768px); no card
+   box. 1 per row on mobile, 2 from 768px (24px apart), 48px between rows; cards keep their own
+   height. An italic paragraph (e.g. "The service is available at…") stays italic */
+.cards.large>ul {
+  grid-template-columns: 1fr;
+  align-items: start;
+  gap: var(--spacing-bootstrap-5) var(--grid-gutter);
+}
+
+.cards.large>ul>li {
+  border: 0;
+  background: none;
+}
+
+.cards.large .cards-card-image {
+  overflow: hidden;
+  margin-bottom: var(--spacing-7);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-image);
+}
+
+.cards.large>ul>li img {
+  display: block;
+  aspect-ratio: 5 / 3;
+}
+
+.cards.large .cards-card-body {
+  margin: 0;
+}
+
+/* the title looks the same at every heading level */
+.cards.large .cards-card-body :is(h1, h2, h3, h4, h5, h6) {
+  margin: 0 0 var(--spacing-3);
+  font-size: var(--heading-card-size);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.cards.large .cards-card-body p {
+  margin: 0 0 var(--spacing-6);
+  color: var(--color-text);
+  font-size: var(--body-font-size);
+  line-height: var(--line-height-body);
+}
+
+@media (width >=768px) {
+  .cards.large>ul {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 /* option connectivity: wide white cards, as the source offer pages' connectivity grid (Rogers Bank
    "Extended Journey Privileges", `.connectivity-grid`): a gold-tinted icon box (an icon or image in
    cell 1), a maroon title, grey text and an optional footnote (an italic paragraph) under a thin
