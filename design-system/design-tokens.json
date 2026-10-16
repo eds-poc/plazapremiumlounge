@@ -277,6 +277,24 @@
         "usage": "Thin borders of campaign boxes on light panels (Cards badge)",
         "evidence": "source West Kowloon campaign CSS (__facility, __rewards-info and __qr-image borders)",
         "confidence": "High"
+      },
+      "--color-campaign-navy": {
+        "value": "#002d72",
+        "usage": "Partner campaign headings and accents (Title headline, Cards steps titles)",
+        "evidence": "source CTBC Reward campaign CSS (#ctbc-campaign-container, inline stylesheet): .section-title, .step-title",
+        "confidence": "High"
+      },
+      "--color-campaign-orange": {
+        "value": "#ff8c42",
+        "usage": "Partner campaign highlights: Cards steps number badge",
+        "evidence": "source CTBC Reward campaign CSS (#ctbc-campaign-container, inline stylesheet): .step-number",
+        "confidence": "High"
+      },
+      "--color-campaign-border": {
+        "value": "#eee",
+        "usage": "Thin border of partner campaign cards (Cards steps)",
+        "evidence": "source CTBC Reward campaign CSS (#ctbc-campaign-container, inline stylesheet): .process-step border",
+        "confidence": "High"
       }
     },
     "state colors": {
@@ -920,6 +938,12 @@
         "value": "16px",
         "usage": "Arrow icon in a campaign button (Promo)",
         "evidence": "source Rogers Bank campaign CSS (#ppl-campaign-container .premium-cta-box)",
+        "confidence": "High"
+      },
+      "--container-medium-max-width": {
+        "value": "1100px",
+        "usage": "Section style medium-width: the partner campaign container (content up to 1060px)",
+        "evidence": "source CTBC Reward campaign CSS (#ctbc-campaign-container, inline stylesheet): .container max-width",
         "confidence": "High"
       }
     },

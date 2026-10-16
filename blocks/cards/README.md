@@ -25,6 +25,7 @@ image (or icon) in the first cell and its text in the second. Options only chang
 | `connectivity` | White cards with 16px corners and a soft shadow. Cell 1 shows in a 44px gold-tinted box with 8px corners (an icon at 24px, or an image filling it). Maroon title, grey text, and the footnote (an italic paragraph) under a thin line at the bottom, shown upright. Cards in a row are the same height | 1 on mobile, 2 from 768px | Rogers Bank offer, "Extended Journey Privileges" |
 | `privilege` | Cream cards with rounded corners. Cell 1 shows in a 44px round badge with a faint maroon wash: an icon at 22px, or an image filling the badge. Maroon title (the same at every heading level), small grey text. Cards lift slightly on hover (not with reduced motion) | 1 on mobile, 2 from 550px, 4 from 992px | Rogers Bank offer, "Exquisite Comfort" privileges |
 | `badge` | Small white cards with a thin border and 10px corners: cell 1 (a badge image, e.g. a facility badge, or an icon) at 40px beside a short bold 14px Arial label, centred, 12px below what comes before. Write the label as a paragraph or a heading; it looks the same | 1 on mobile, 2 above 600px, 3 above 768px, at most 900px wide and centred | West Kowloon offer, facilities |
+| `steps` | Numbered step cards: white cards with a thin border, 8px corners and a soft shadow, an orange number badge on the top left corner (1, 2, 3… in the order you write the cards; don't type the numbers), cell 1's icon at 32px, a bold navy title and grey 14px Arial text, centred. An image in cell 1 shows at icon size; an empty cell 1 leaves the icon out. Cards in a row are the same height | 1 on mobile, 2 from 768px, 4 from 992px | CTBC Reward offer, "How It Works" |
 
 ### Example: privilege
 
@@ -42,6 +43,17 @@ image (or icon) in the first cell and its text in the second. Options only chang
 
 On an offer page, put it in its own white band section (Section Metadata `Style` = `inset, band`,
 `Background` = `white`).
+
+### Example: steps
+
+| Cards (steps) | |
+| --- | --- |
+| :person-add: | ### Register<br>Become a Smart Traveller member |
+| :card: | ### Link Card<br>Connect CTBC card via “Link My Card” in App |
+| :exchange: | ### Convert Points<br>Exchange points at 1,000:80 rate |
+
+On an offer page, put it after a `Title (headline, center-all)` in a section with Section Metadata
+`Style` = `inset, medium-width`.
 
 ### Example: connectivity
 

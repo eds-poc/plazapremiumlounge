@@ -71,6 +71,12 @@
   /* (source West Kowloon campaign, `--c-light` and the facility card border) */
   --color-campaign-mist: #f7f4f5;
   --color-campaign-outline: #e6e0e3;
+
+  /* (source CTBC Reward campaign, `#ctbc-campaign-container`: the partner's navy and orange, the
+     thin card border) */
+  --color-campaign-navy: #002d72;
+  --color-campaign-orange: #ff8c42;
+  --color-campaign-border: #eee;
   --gradient-campaign-promo: linear-gradient(135deg, var(--color-brand-primary) 0%, var(--color-campaign-plum-deep) 100%);
   --color-text-subtle: #999;
   --color-text-inverse: #fff;
@@ -185,6 +191,7 @@
   --container-max-width: 1390px;
   --container-wide-max-width: 1490px;
   --container-narrow-max-width: 860px;
+  --container-medium-max-width: 1100px;
   --container-padding: 15px;
   --container-wide-padding: 0;
   --grid-gutter: 24px;
@@ -727,6 +734,48 @@ main .section.fixed-width>div {
 @media (width >=1400px) {
   main .section.fixed-width>div {
     max-width: 1320px;
+  }
+}
+
+/* section style medium-width: the source partner campaign container (CTBC Reward,
+   `#ctbc-campaign-container .container`): at most 1100px wide including 20px at the sides (15px at
+   480px and below), centred, so the content is at most 1060px; 40px above and below, 30px at 768px
+   and below. Use with inset */
+main>.section.medium-width {
+  --medium-width-inline: var(--spacing-6);
+
+  /* the campaign container's own space above its first and below its last part */
+  --medium-width-edge: 28px;
+  --medium-width-block: var(--spacing-9);
+
+  padding-block: var(--medium-width-block);
+}
+
+/* the first campaign section: the campaign container's space above it, after the source's 30px
+   spacer under the title (an inset section before it ends with that spacer) */
+main>.section:not(.medium-width)+.section.medium-width {
+  padding-top: calc(var(--medium-width-block) + var(--medium-width-edge));
+}
+
+main>.section.inset:not(.medium-width):has(+ .section.medium-width) {
+  padding-bottom: var(--spacing-9);
+}
+
+main>.section.medium-width>div {
+  max-width: calc(var(--container-medium-max-width) + 2 * var(--container-padding));
+  padding-inline: calc(var(--container-padding) + var(--medium-width-inline));
+}
+
+/* breakpoint-exception: the source campaign container changes above 480px and 768px */
+@media (width > 480px) {
+  main>.section.medium-width {
+    --medium-width-inline: var(--spacing-7);
+  }
+}
+
+@media (width > 768px) {
+  main>.section.medium-width {
+    --medium-width-block: var(--spacing-campaign-band-block);
   }
 }
 

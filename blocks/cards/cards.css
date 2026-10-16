@@ -222,6 +222,115 @@
   }
 }
 
+/* option steps: numbered step cards (source CTBC Reward "How It Works", `.process-timeline`):
+   white cards with a thin border, 8px corners and a soft shadow, an orange number badge on the top
+   left corner (the card's position, counted automatically), cell 1's icon at 32px, a bold navy
+   title and grey text, centred. 1 per row on mobile, 2 from 768px, 4 from 992px; cards in a row
+   are the same height; the same at every heading level */
+.cards.steps {
+  --cards-steps-badge: 30px;
+  --cards-steps-badge-offset: -12px;
+  --cards-steps-badge-shadow: 0 2px 6px color-mix(in srgb, var(--color-campaign-orange) 30%, transparent);
+  --cards-steps-icon: 32px;
+  --cards-steps-icon-row: 40px;
+  --cards-steps-shadow: 0 3px 15px rgb(0 0 0 / 4%);
+
+  counter-reset: cards-step;
+}
+
+.cards.steps>ul {
+  grid-template-columns: 1fr;
+  gap: var(--grid-gutter);
+}
+
+.cards.steps>ul>li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-9) var(--spacing-7);
+  border: var(--base-border-width) solid var(--color-campaign-border);
+  border-radius: var(--radius-campaign-sm);
+  background-color: var(--color-background);
+  box-shadow: var(--cards-steps-shadow);
+  color: var(--color-text);
+  font-family: var(--font-family-campaign);
+  text-align: center;
+  counter-increment: cards-step;
+}
+
+/* the step number */
+.cards.steps>ul>li::before {
+  content: counter(cards-step);
+  position: absolute;
+  inset-block-start: var(--cards-steps-badge-offset);
+  inset-inline-start: var(--cards-steps-badge-offset);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--cards-steps-badge);
+  height: var(--cards-steps-badge);
+  border-radius: var(--radius-circle);
+  background-color: var(--color-campaign-orange);
+  box-shadow: var(--cards-steps-badge-shadow);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: var(--line-height-loose);
+}
+
+/* the media cell: the icon (or an image) centred in a 40px row */
+.cards.steps .cards-card-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--cards-steps-icon-row);
+  margin: 0 0 var(--spacing-campaign-gap);
+}
+
+.cards.steps .cards-card-icon .icon,
+.cards.steps>ul>li .cards-card-image img {
+  width: var(--cards-steps-icon);
+  height: var(--cards-steps-icon);
+}
+
+.cards.steps>ul>li .cards-card-image img {
+  aspect-ratio: auto;
+  object-fit: contain;
+}
+
+.cards.steps .cards-card-body {
+  width: 100%;
+  margin: 0;
+}
+
+.cards.steps .cards-card-body :is(h1, h2, h3, h4, h5, h6) {
+  margin: 0 0 var(--spacing-4);
+  color: var(--color-campaign-navy);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading);
+}
+
+.cards.steps .cards-card-body p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+@media (width >=768px) {
+  .cards.steps>ul {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (width >=992px) {
+  .cards.steps>ul {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
 /* option privilege: icon cards, as the source offer pages' privileges grid (Rogers Bank "Exquisite
    Comfort", `.privileges-grid`): cream cards with a round icon badge (an icon or image in cell 1),
    a maroon title and grey text, that lift on hover. 1 per row on mobile, 2 from 550px, 4 from
