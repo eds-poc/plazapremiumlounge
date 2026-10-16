@@ -82,6 +82,9 @@
   --color-border-subtle: #dee2e6;
   --color-border-strong: var(--color-brand-primary);
   --color-divider-inverse: rgb(0 0 0 / 13%);
+
+  /* (source `hr`: black at 25% opacity) */
+  --color-divider: rgb(0 0 0 / 25%);
   --color-border-translucent: rgb(0 0 0 / 17.6%);
 
   /* state colors */
@@ -848,6 +851,25 @@ main>.section.inset:not(.band):has(+ .section.band) {
    the campaign (e.g. the Terms and Conditions under the Apply Now box) */
 main>.section.band+.section.inset:not(.band) {
   padding-top: 0;
+}
+
+/* section style divider: a thin line across the content width above the section, as the source's
+   `spacer30, hr, spacer30` (PPG Entertainment, between the intro and the listing): 46px (30px + the
+   line's 16px) above and below the line at every width. It replaces the space between the
+   sections: the section before ends with no bottom padding */
+main>.section:has(+ .section.divider) {
+  padding-bottom: 0;
+}
+
+main>.section.divider {
+  padding-top: calc(var(--spacing-9) + var(--spacing-bootstrap-3));
+}
+
+main>.section.divider>div:first-child::before {
+  content: '';
+  display: block;
+  margin-bottom: calc(var(--spacing-9) + var(--spacing-bootstrap-3));
+  border-top: var(--base-border-width) solid var(--color-divider);
 }
 
 /* section style fine-print: small print such as terms and conditions (source offer pages' Terms):
