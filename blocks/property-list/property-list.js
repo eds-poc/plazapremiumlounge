@@ -1,6 +1,6 @@
 import { getMetadata } from '../../scripts/aem.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
-import { apiUrl } from '../../scripts/endpoints.js';
+import apiUrl from '../../scripts/endpoints.js';
 import { getLanguage, translate } from '../../scripts/i18n.js';
 import { hideLoader, showLoader } from '../../scripts/scripts.js';
 
@@ -715,7 +715,7 @@ function readSettings(block) {
 /**
  * Decorates the property list block: the authored city code (e.g. HKHKG) is all it needs (plus an
  * optional sign-up link for the loyalty line). The API address comes from scripts/endpoints.js
- * (the environment's API domain + the `properties` path), the language from the page metadata
+ * (the API domain + the `properties` path), the language from the page metadata
  * (`language-code`); the block fetches the city's properties and renders them in location groups,
  * with filters (airport, service type, features). The first property list on a page keeps its
  * filters in the page address; others keep them to themselves.

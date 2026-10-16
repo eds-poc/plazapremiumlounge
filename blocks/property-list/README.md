@@ -30,7 +30,7 @@ A city's lounges, loaded live from the Plaza Premium properties service, as the 
 
 | What | From |
 | --- | --- |
-| The service address | Code, not content: `scripts/endpoints.js` keeps the API domain per environment and the `properties` endpoint path |
+| The service address | Code, not content: `scripts/endpoints.js` keeps the API domain (the same for preview and live) and the `properties` endpoint path |
 | The language of the data | Page metadata `language-code` (e.g. `en`; set in the bulk metadata sheet). Empty: English |
 | Interface text ("Filters", "View", "+5 more", messages) | The site's translations, by page language |
 | Which properties show | Active lounges, grouped by location, then passes (gift cards) at the end. Other kinds (e.g. airport dining, external partners) aren't shown |
