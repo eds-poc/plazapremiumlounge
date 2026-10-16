@@ -31,11 +31,11 @@ A city's lounges, loaded live from the Plaza Premium properties service, as the 
 | What | From |
 | --- | --- |
 | The service address | Code, not content: `scripts/endpoints.js` keeps the API domain (the same for preview and live) and the `properties` endpoint path |
-| The language of the data | Page metadata `language-code` (e.g. `en`; set in the bulk metadata sheet). Empty: English |
+| The language of the data | The page's language folder: `/en-uk/` → `en`; `/zh-cn/`, `/zh-hk/`, `/pt-br/`, `/ja-jp/` → the same code. Pages outside a language folder: `en`. Page metadata `language-code` overrides it |
 | Interface text ("Filters", "View", "+5 more", messages) | The site's translations, by page language |
 | Which properties show | Active lounges, grouped by location, then passes (gift cards) at the end. Other kinds (e.g. airport dining, external partners) aren't shown |
 | **View** link | The service's page link for the property. Without one, the card has no View button |
-| Green look | Plaza Premium First lounges (by the brand in the lounge's name); every other card is maroon |
+| Green look | Plaza Premium First lounges (by the brand in the lounge's name, in each language: Plaza Premium First, 环亚优逸庭, 環亞優逸庭, プラザプレミアムファースト); every other card is maroon |
 
 ## Filters (for visitors)
 

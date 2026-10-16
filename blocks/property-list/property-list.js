@@ -1,7 +1,9 @@
 import { getMetadata } from '../../scripts/aem.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
 import apiUrl from '../../scripts/endpoints.js';
-import { getLanguage, translate } from '../../scripts/i18n.js';
+import {
+  DEFAULT_SITE, getLanguage, getSiteFolder, translate,
+} from '../../scripts/i18n.js';
 import { hideLoader, showLoader } from '../../scripts/scripts.js';
 
 const TIMEOUT_MS = 8000;
@@ -12,6 +14,10 @@ const VISIBLE_TAGS = 5;
 const SWIPE_PX = 40;
 const MOBILE = '(width < 768px)';
 const GROUPS = ['airport', 'service', 'feature'];
+// the API's language code by site folder; other folders are sent as they are (zh-cn, pt-br …)
+const API_LANGUAGES = { 'en-uk': 'en' };
+// "Plaza Premium First" as the API names it in each language (compared without spaces)
+const FIRST_BRANDS = ['plazapremiumfirst', '环亚优逸庭', '環亞優逸庭', 'プラザプレミアムファースト'];
 
 let blockCount = 0;
 let loading = 0;
@@ -122,6 +128,28 @@ function safeNote(html) {
 }
 
 /**
+ * Whether a property name starts with the Plaza Premium First brand, in any site language.
+ * @param {string} name
+ * @returns {boolean}
+ */
+function isFirstBrand(name) {
+  const compact = name.replace(/\s+/g, '').toLowerCase();
+  return FIRST_BRANDS.some((brand) => compact.startsWith(brand));
+}
+
+/**
+ * The API's language code for the page: the page metadata `language-code` when set, else from
+ * the page's site folder (/en-uk/ → en, /zh-hk/ → zh-hk …; pages outside one use the default site).
+ * @returns {string}
+ */
+function getApiLanguage() {
+  const authored = getMetadata('language-code').trim();
+  if (authored) return authored;
+  const folder = getSiteFolder() || DEFAULT_SITE;
+  return API_LANGUAGES[folder] || folder;
+}
+
+/**
  * Reads one API record into what the card and the filters need, or null for a record that
  * isn't shown (not active, another type, or without a name).
  * @param {Object} item
@@ -171,7 +199,7 @@ function readProperty(item) {
     price: prices.sort((a, b) => a.amount - b.amount)[0],
     // the green Plaza Premium First look follows the brand in the name, as the source pages
     // (the API's colorCode also marks some Plaza Premium Lounges PPF)
-    first: /^plaza premium first\b/i.test(name),
+    first: isFirstBrand(name),
     // passes aren't places, so they get no journey badge
     departure: type !== PASS && journeys.includes('departure'),
     arrival: type !== PASS && journeys.includes('arrival'),
@@ -715,10 +743,10 @@ function readSettings(block) {
 /**
  * Decorates the property list block: the authored city code (e.g. HKHKG) is all it needs (plus an
  * optional sign-up link for the loyalty line). The API address comes from scripts/endpoints.js
- * (the API domain + the `properties` path), the language from the page metadata
- * (`language-code`); the block fetches the city's properties and renders them in location groups,
- * with filters (airport, service type, features). The first property list on a page keeps its
- * filters in the page address; others keep them to themselves.
+ * (the API domain + the `properties` path), the language from the page's site folder (or the
+ * page metadata `language-code`); the block fetches the city's properties and renders them in
+ * location groups, with filters (airport, service type, features). The first property list on a
+ * page keeps its filters in the page address; others keep them to themselves.
  * @param {HTMLElement} block The property list block element
  */
 export default async function decorate(block) {
@@ -759,8 +787,7 @@ export default async function decorate(block) {
     }
     const url = apiUrl('properties');
     url.searchParams.set('cityCode', city);
-    const language = getMetadata('language-code').trim();
-    if (language) url.searchParams.set('languageCode', language);
+    url.searchParams.set('languageCode', getApiLanguage());
     let items;
     try {
       items = await fetchProperties(url.href);
