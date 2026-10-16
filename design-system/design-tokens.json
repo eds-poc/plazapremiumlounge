@@ -26,6 +26,12 @@
         "evidence": "style.css .btn-primary; computed rgb(104 18 53)",
         "confidence": "High"
       },
+      "--color-brand-first": {
+        "value": "#2a5236",
+        "usage": "Plaza Premium First sub-brand green: title, hours, tags and View button of First lounges (Property List)",
+        "evidence": "live city listing /en-uk/find/china-regions/hong-kong/hong-kong, Plaza Premium First cards (h3 and .btn colour)",
+        "confidence": "High"
+      },
       "--color-brand-primary-dark": {
         "value": "#5c0f2d",
         "usage": "Mobile navigation drawer background",
