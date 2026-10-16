@@ -1,10 +1,9 @@
 import { getMetadata } from '../../scripts/aem.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
+import { apiUrl } from '../../scripts/endpoints.js';
 import { getLanguage, translate } from '../../scripts/i18n.js';
 import { hideLoader, showLoader } from '../../scripts/scripts.js';
 
-const CONFIG_URL = '/config.json';
-const CONFIG_KEY = 'property-list-url';
 const TIMEOUT_MS = 8000;
 // property types shown, as the source city pages: lounges, then passes (gift cards) at the end
 const LOUNGE = 'LOUNGE';
@@ -14,7 +13,6 @@ const SWIPE_PX = 40;
 const MOBILE = '(width < 768px)';
 const GROUPS = ['airport', 'service', 'feature'];
 
-let configPromise;
 let blockCount = 0;
 let loading = 0;
 
@@ -50,20 +48,6 @@ function setLoading(busy) {
   loading = Math.max(0, loading + (busy ? 1 : -1));
   if (loading) showLoader();
   else hideLoader();
-}
-
-/**
- * A value from the root site configuration sheet (/config.json, Key | Value), read once per page.
- * @param {string} key
- * @returns {Promise<string>}
- */
-async function getConfigValue(key) {
-  configPromise = configPromise || fetch(CONFIG_URL)
-    .then((resp) => (resp.ok ? resp.json() : { data: [] }))
-    .catch(() => ({ data: [] }));
-  const { data = [] } = await configPromise;
-  const row = data.find((r) => (r.Key || r.key || '').trim().toLowerCase() === key);
-  return (row?.Value || row?.value || '').trim();
 }
 
 /**
@@ -730,11 +714,11 @@ function readSettings(block) {
 
 /**
  * Decorates the property list block: the authored city code (e.g. HKHKG) is all it needs (plus an
- * optional sign-up link for the loyalty line). The API
- * address comes from the site configuration sheet (`property-list-url`), the language from the
- * page metadata (`language-code`); the block fetches the city's properties and renders them in
- * location groups, with filters (airport, service type, features). The first property list on a
- * page keeps its filters in the page address; others keep them to themselves.
+ * optional sign-up link for the loyalty line). The API address comes from scripts/endpoints.js
+ * (the environment's API domain + the `properties` path), the language from the page metadata
+ * (`language-code`); the block fetches the city's properties and renders them in location groups,
+ * with filters (airport, service type, features). The first property list on a page keeps its
+ * filters in the page address; others keep them to themselves.
  * @param {HTMLElement} block The property list block element
  */
 export default async function decorate(block) {
@@ -773,12 +757,7 @@ export default async function decorate(block) {
       showMessage(results, translate('propertyEmpty'), null, 'Add a "city-code" row (e.g. city-code | HKHKG) in the block.');
       return;
     }
-    const base = await getConfigValue(CONFIG_KEY);
-    if (!toUrl(base)) {
-      showMessage(results, translate('propertyError'), null, `Add "${CONFIG_KEY}" to the site configuration sheet (/config).`);
-      return;
-    }
-    const url = new URL(toUrl(base));
+    const url = apiUrl('properties');
     url.searchParams.set('cityCode', city);
     const language = getMetadata('language-code').trim();
     if (language) url.searchParams.set('languageCode', language);
