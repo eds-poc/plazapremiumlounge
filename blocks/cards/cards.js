@@ -10,13 +10,14 @@ function isIconCell(cell) {
 }
 
 /**
- * Whether a paragraph is written entirely in italic (a card footnote, e.g. option connectivity).
- * @param {Element} p
+ * Whether an element (a paragraph or a heading) is written entirely in italic: a paragraph is a
+ * card footnote (e.g. option connectivity), a heading marks a highlighted card (option top-accent).
+ * @param {Element} node
  * @returns {boolean}
  */
-function isItalicParagraph(p) {
-  const em = p.querySelector(':scope > em, :scope > i');
-  return !!em && p.children.length === 1 && p.textContent.trim() === em.textContent.trim();
+function isAllItalic(node) {
+  const em = node.querySelector(':scope > em, :scope > i');
+  return !!em && node.children.length === 1 && node.textContent.trim() === em.textContent.trim();
 }
 
 export default function decorate(block) {
@@ -35,8 +36,11 @@ export default function decorate(block) {
     });
     // an italic paragraph in the body is the card's footnote
     li.querySelectorAll('.cards-card-body > p').forEach((p) => {
-      if (isItalicParagraph(p)) p.classList.add('cards-card-footnote');
+      if (isAllItalic(p)) p.classList.add('cards-card-footnote');
     });
+    // an italic heading marks a highlighted card
+    const heading = li.querySelector('.cards-card-body > :is(h1, h2, h3, h4, h5, h6)');
+    if (heading && isAllItalic(heading)) li.classList.add('cards-card-highlight');
     ul.append(li);
   });
   ul.querySelectorAll('picture > img').forEach((img) => img.closest('picture').replaceWith(createOptimizedPicture(img.src, img.alt, false, [{ width: '750' }])));

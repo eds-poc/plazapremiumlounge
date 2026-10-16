@@ -77,6 +77,7 @@
   --color-campaign-navy: #002d72;
   --color-campaign-orange: #ff8c42;
   --color-campaign-border: #eee;
+  --color-campaign-cloud: #f8f9fa;
   --gradient-campaign-promo: linear-gradient(135deg, var(--color-brand-primary) 0%, var(--color-campaign-plum-deep) 100%);
   --color-text-subtle: #999;
   --color-text-inverse: #fff;
@@ -213,6 +214,7 @@
   --radius-pill: 999px;
   --radius-campaign: 16px;
   --radius-campaign-sm: 8px;
+  --radius-campaign-panel: 10px;
   --radius-circle: 50%;
 
   /* shadows */
@@ -220,6 +222,7 @@
   --shadow-card: 0 4px 24px rgb(0 0 0 / 10%);
   --shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 5%);
   --shadow-campaign-card: 0 4px 16px rgb(0 0 0 / 2%);
+  --shadow-campaign-soft: 0 3px 15px rgb(0 0 0 / 4%);
   --shadow-campaign-button: 0 4px 14px rgb(0 0 0 / 18%);
   --shadow-campaign-button-hover: 0 8px 24px rgb(0 0 0 / 28%);
   --shadow-focus: 0 0 0 4px var(--color-focus-ring);
@@ -761,7 +764,7 @@ main>.section.inset:not(.medium-width):has(+ .section.medium-width) {
   padding-bottom: var(--spacing-9);
 }
 
-main>.section.medium-width>div {
+main>.section.medium-width>* {
   max-width: calc(var(--container-medium-max-width) + 2 * var(--container-padding));
   padding-inline: calc(var(--container-padding) + var(--medium-width-inline));
 }
@@ -897,6 +900,58 @@ main>.section.inset:not(.band):has(+ .section.band) {
    the campaign (e.g. the Terms and Conditions under the Apply Now box) */
 main>.section.band+.section.inset:not(.band) {
   padding-top: 0;
+}
+
+/* section style soft-panel: a cool grey panel with 10px corners over the medium-width content
+   (source CTBC Reward `.section-alt`), 30px outside it above and below; inside 40px above and below
+   and 20px at the sides, 30px and no sides at 768px and below (as the source). It spans every block
+   in the section: each block wrapper draws its part, the first one the top, the last the bottom.
+   Use with inset, medium-width */
+main>.section.medium-width.soft-panel {
+  --soft-panel-inline: 0px;
+
+  margin-block: var(--spacing-9);
+  padding-block: 0;
+}
+
+main>.section.medium-width.soft-panel>* {
+  position: relative;
+  isolation: isolate;
+  display: flow-root;
+  padding-inline: calc(var(--container-padding) + var(--medium-width-inline) + var(--soft-panel-inline));
+}
+
+main>.section.medium-width.soft-panel>*::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline: calc(var(--container-padding) + var(--medium-width-inline));
+  z-index: -1;
+  background-color: var(--color-campaign-cloud);
+}
+
+main>.section.medium-width.soft-panel>*:first-child {
+  padding-top: var(--medium-width-block);
+}
+
+main>.section.medium-width.soft-panel>*:first-child::before {
+  border-start-start-radius: var(--radius-campaign-panel);
+  border-start-end-radius: var(--radius-campaign-panel);
+}
+
+main>.section.medium-width.soft-panel>*:last-child {
+  padding-bottom: var(--medium-width-block);
+}
+
+main>.section.medium-width.soft-panel>*:last-child::before {
+  border-end-start-radius: var(--radius-campaign-panel);
+  border-end-end-radius: var(--radius-campaign-panel);
+}
+
+@media (width > 768px) {
+  main>.section.medium-width.soft-panel {
+    --soft-panel-inline: var(--spacing-7);
+  }
 }
 
 /* section style fine-print: small print such as terms and conditions (source offer pages' Terms):
