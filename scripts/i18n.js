@@ -68,7 +68,7 @@ const TEXTS = {
     en: 'Filters', zh: '筛选', 'zh-HK': '篩選', ja: '絞り込み', pt: 'Filtros',
   },
   propertyAll: {
-    en: 'All', zh: '全部', 'zh-HK': '全部', ja: 'すべて', pt: 'Todos',
+    en: 'All', zh: '全部', 'zh-HK': '全部', ja: 'すべて', pt: 'Todo',
   },
   propertyClear: {
     en: 'Clear', zh: '清除', 'zh-HK': '清除', ja: 'クリア', pt: 'Limpar',
