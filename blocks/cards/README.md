@@ -25,6 +25,7 @@ image (or icon) in the first cell and its text in the second. Options only chang
 | `connectivity` | White cards with 16px corners and a soft shadow. Cell 1 shows in a 44px gold-tinted box with 8px corners (an icon at 24px, or an image filling it). Maroon title, grey text, and the footnote (an italic paragraph) under a thin line at the bottom, shown upright. Cards in a row are the same height | 1 on mobile, 2 from 768px | Rogers Bank offer, "Extended Journey Privileges" |
 | `privilege` | Cream cards with rounded corners. Cell 1 shows in a 44px round badge with a faint maroon wash: an icon at 22px, or an image filling the badge. Maroon title (the same at every heading level), small grey text. Cards lift slightly on hover (not with reduced motion) | 1 on mobile, 2 from 550px, 4 from 992px | Rogers Bank offer, "Exquisite Comfort" privileges |
 | `badge` | Small white cards with a thin border and 10px corners: cell 1 (a badge image, e.g. a facility badge, or an icon) at 40px beside a short bold 14px Arial label, centred, 12px below what comes before. Write the label as a paragraph or a heading; it looks the same | 1 on mobile, 2 above 600px, 3 above 768px, at most 900px wide and centred | West Kowloon offer, facilities |
+| `large` | Big photo cards with no card box, on the page background: the image (5:3) has 15px corners and a soft shadow, 20px above a medium-weight title (18px, 24px from 1200px; the same at every heading level) and the text (14px, 16px from 768px). An italic footnote stays italic. Cards keep their own height | 1 on mobile, 2 from 768px, 24px apart, 48px between rows | Plaza Premium Group Entertainment, news listing |
 
 ### Example: privilege
 
@@ -52,6 +53,16 @@ On an offer page, put it in its own white band section (Section Metadata `Style`
 
 On an offer page, put it after a `Title (editorial, gap-small)` header in a blush band section
 (Section Metadata `Style` = `inset, band`, `Background` = `blush`).
+
+### Example: large
+
+| Cards (large) | |
+| --- | --- |
+| *photo* | #### PPG On-Air on Spotify<br>Curated music list on Spotify featuring different genres and cultures, …<br>*The service is available at all lounges globally* |
+| *photo* | #### Kidcast<br>Kidcast is an audio storytelling platform for children 0-8 years …<br>*The service is available at selection lounges globally* |
+
+Use landscape photos; they are cropped to 5:3. The cards have no outer spacing, so they work in
+any section.
 
 ### Placement of the privilege cards
 
