@@ -1,0 +1,84 @@
+/* directory: mobile-first; values measured from the source Eligible Lounges page (one column,
+   two from 830px of block width: the source's two 400px columns and 30px gap) */
+.directory {
+  --directory-group-color: #711b45;
+  --directory-item-color: #555;
+  --directory-note-color: #800000;
+  --directory-column-gap: var(--spacing-9);
+
+  container-type: inline-size;
+}
+
+/* the block's own width picks the columns, so it fits any section; CSS balances them, and
+   an entry (a title and its list) never splits across columns. Each column is at least 400px,
+   as the source: 2 from 830px, and with the `three` option 3 from 1260px. `one` stays 1. */
+@container (width >= 830px) {
+  .directory .directory-columns {
+    columns: 2;
+    column-gap: var(--directory-column-gap);
+  }
+}
+
+@container (width >= 1260px) {
+  .directory.three .directory-columns {
+    columns: 3;
+  }
+}
+
+.directory.one .directory-columns {
+  columns: auto;
+}
+
+.directory .directory-entry {
+  margin-bottom: var(--spacing-7);
+  break-inside: avoid;
+}
+
+.directory .directory-group-title {
+  margin: var(--spacing-stack) 0 var(--spacing-4);
+  color: var(--directory-group-color);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: var(--line-height-body);
+}
+
+/* no gap above the first name, so both columns start level */
+.directory .directory-group:first-child .directory-group-title {
+  margin-top: 0;
+}
+
+.directory .directory-entry-title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-relaxed);
+}
+
+.directory .directory-items {
+  margin: 4px 0 0;
+  padding-left: var(--spacing-7);
+  list-style: disc;
+}
+
+.directory .directory-item {
+  margin: 0 0 3px;
+  padding: var(--spacing-1) var(--spacing-2);
+  color: var(--directory-item-color);
+  font-size: var(--font-size-sm);
+  line-height: 1.55;
+}
+
+.directory .directory-note {
+  color: var(--directory-note-color);
+  font-weight: var(--font-weight-medium);
+}
+
+.directory a {
+  color: var(--color-link);
+  font-weight: var(--font-weight-medium);
+}
+
+.directory a:hover {
+  color: var(--color-link-hover);
+}
