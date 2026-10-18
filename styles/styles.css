@@ -712,7 +712,7 @@ main .section.wide>div {
 /* section style fixed-width: the source landing pages' fixed container (Bootstrap .container, nested
    in a second one, so double padding): full width on mobile, then 540/720/960/1140/1320px */
 main .section.fixed-width>div {
-  padding-inline: calc(var(--container-padding) * 2);
+  padding-inline: var(--fixed-width-padding, calc(var(--container-padding) * 2));
 }
 
 /* breakpoint-exception: Bootstrap container widths at 576px */
@@ -916,6 +916,9 @@ main>.section.centered-copy .default-content-wrapper>p:last-child {
    container); a light grey line between sections with 28px either side (source hr); headings 26px
    regular maroon; a bold label line 14px, 24px above its buttons and 34px below the buttons before */
 main>.section.divided {
+  /* the source list page's single container: 15px at the sides (fixed-width alone doubles it) */
+  --fixed-width-padding: var(--spacing-6);
+
   padding-block: 0;
 }
 
@@ -949,6 +952,7 @@ main .section.divided .default-content-wrapper h2 {
 main .section.divided .default-content-wrapper>p:has(> strong:only-child) {
   margin-bottom: var(--spacing-stack);
   font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
 }
 
 main .section.divided .buttons-wrapper+.default-content-wrapper {
