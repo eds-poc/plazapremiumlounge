@@ -100,8 +100,7 @@
 
 /* option plum: a list page title (source Eligible Lounges): a 12px bold uppercase maroon
    eyebrow, a 36px regular maroon heading, and the intro across the full width. The same at every
-   width and heading level */
-/* the intro's 24px is the only space below it */
+   width and heading level; the intro's 24px is the only space below it */
 .title.plum {
   margin-bottom: 0;
 }
