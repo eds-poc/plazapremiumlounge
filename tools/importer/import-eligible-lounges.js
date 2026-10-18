@@ -44,7 +44,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > p:first-child",
         ".contentWrapper > div"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "title",
         "buttons"
@@ -60,7 +60,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#ppl)",
         ".contentWrapper > div > h3:has(a[id=\"ppl\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -75,7 +75,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#americas)",
         ".contentWrapper > div > h3:has(a[id=\"americas\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -90,7 +90,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#canada)",
         ".contentWrapper > div > h3:has(a[id=\"canada\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -105,7 +105,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#australia)",
         ".contentWrapper > div > h3:has(a[id=\"australia\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -120,7 +120,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#europe)",
         ".contentWrapper > div > h3:has(a[id=\"europe\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -135,7 +135,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#auuk)",
         ".contentWrapper > div > h3:has(a[id=\"auuk\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -150,7 +150,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#meuk)",
         ".contentWrapper > div > h3:has(a[id=\"meuk\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -165,7 +165,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#myid)",
         ".contentWrapper > div > h3:has(a[id=\"myid\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -180,7 +180,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#hktp)",
         ".contentWrapper > div > h3:has(a[id=\"hktp\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -195,7 +195,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#hkshg)",
         ".contentWrapper > div > h3:has(a[id=\"hkshg\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -210,7 +210,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#klsg)",
         ".contentWrapper > div > h3:has(a[id=\"klsg\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -225,7 +225,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#jasg)",
         ".contentWrapper > div > h3:has(a[id=\"jasg\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -240,7 +240,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#ddjr)",
         ".contentWrapper > div > h3:has(a[id=\"ddjr\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -255,7 +255,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#msi)",
         ".contentWrapper > div > h3:has(a[id=\"msi\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -270,7 +270,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#ausi)",
         ".contentWrapper > div > h3:has(a[id=\"ausi\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -285,7 +285,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#meaf)",
         ".contentWrapper > div > h3:has(a[id=\"meaf\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -300,7 +300,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#aunz)",
         ".contentWrapper > div > h3:has(a[id=\"aunz\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -315,7 +315,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#mc)",
         ".contentWrapper > div > h3:has(a[id=\"mc\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -330,7 +330,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#asia)",
         ".contentWrapper > div > h3:has(a[id=\"asia\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -345,7 +345,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#caijed)",
         ".contentWrapper > div > h3:has(a[id=\"caijed\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -360,7 +360,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#bkk)",
         ".contentWrapper > div > h3:has(a[id=\"bkk\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -375,7 +375,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#bni)",
         ".contentWrapper > div > h3:has(a[id=\"bni\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -390,7 +390,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#bnl)",
         ".contentWrapper > div > h3:has(a[id=\"bnl\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -405,7 +405,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#ppf)",
         ".contentWrapper > div > h3:has(a[id=\"ppf\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -420,7 +420,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > h3:has(> a#vino-volo)",
         ".contentWrapper > div > h3:has(a[id=\"vino-volo\"])"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "directory"
       ],
@@ -435,7 +435,7 @@ const PAGE_TEMPLATE = {
         ".contentWrapper > div > hr:last-of-type",
         ".contentWrapper > div > h3:has(> a#vino-volo) ~ strong"
       ],
-      "style": null,
+      "style": "fixed-width, divided",
       "blocks": [
         "buttons"
       ],

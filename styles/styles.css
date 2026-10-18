@@ -34,6 +34,9 @@
   --color-brand-primary-action: #681235;
   --color-brand-primary-dark: #5c0f2d;
   --color-brand-primary-deep: #4a0d26;
+
+  /* the source's lighter maroon: jump-link pills (.btn-default), list-page titles and headings */
+  --color-brand-plum: #711b45;
   --color-brand-tint: rgb(104 18 53 / 10%);
   --color-brand-blush: #f3d7d3;
   --color-brand-coral: #ea7368;
@@ -541,6 +544,20 @@ button.button.primary.large:focus-visible {
   background-color: #eee;
 }
 
+/* pill: a compact pill sized to its label (source jump links .btn.btn-default): 16px text, no
+   minimum width, and the filled style in the source's lighter maroon */
+a.button.pill,
+button.button.pill {
+  min-width: 0;
+  font-size: var(--font-size-md);
+}
+
+a.button.primary.pill:not(:hover, :focus-visible),
+button.button.primary.pill:not(:hover, :focus-visible) {
+  border-color: var(--color-brand-plum);
+  background-color: var(--color-brand-plum);
+}
+
 /* full width (source .fullWidth) */
 a.button.full-width,
 button.button.full-width {
@@ -892,6 +909,50 @@ main>.section.centered-copy .default-content-wrapper>p+p {
 
 main>.section.centered-copy .default-content-wrapper>p:last-child {
   margin-bottom: var(--spacing-campaign-gap);
+}
+
+/* section style divided: the sections of a list page (source Eligible Lounges), use with
+   fixed-width. No section padding (24px above the first, 48px below the last, as the source
+   container); a light grey line between sections with 28px either side (source hr); headings 26px
+   regular maroon; a bold label line 14px, 24px above its buttons and 34px below the buttons before */
+main>.section.divided {
+  padding-block: 0;
+}
+
+main>.section.divided:first-child {
+  padding-top: var(--spacing-stack);
+}
+
+main>.section.divided:last-child {
+  padding-bottom: var(--spacing-bootstrap-5);
+}
+
+main>.section.divided+.section.divided>div:first-child::before {
+  content: '';
+  display: block;
+
+  /* one-off: the source hr's 28px margins */
+  margin-block: 28px;
+  border-top: var(--base-border-width) solid var(--base-border);
+}
+
+main .section.divided .default-content-wrapper h2 {
+  margin: 0 0 var(--spacing-stack);
+  color: var(--color-brand-plum);
+
+  /* one-off: the source list headings' 26px */
+  font-size: 26px;
+  font-weight: var(--font-weight-regular);
+  line-height: 1.3;
+}
+
+main .section.divided .default-content-wrapper>p:has(> strong:only-child) {
+  margin-bottom: var(--spacing-stack);
+  font-size: var(--font-size-sm);
+}
+
+main .section.divided .buttons-wrapper+.default-content-wrapper {
+  margin-top: var(--spacing-stack);
 }
 
 /* section style boxed-copy: the section's text as a white box with a thin border and 8px corners

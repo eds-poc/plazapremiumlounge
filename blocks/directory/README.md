@@ -53,13 +53,17 @@ A column is never narrower than 400px, so a column count only shows when there's
 
 ## Building a page like Eligible Lounges
 
-1. The page title: a **Title** block (eyebrow `Plaza Premium Lounge Passes`, heading 1, intro).
-2. The jump links: a **Buttons** block, one `#name` link per list, e.g. `[Canada](#lounge-pass-canada-eligible-locations)`.
-   A `#name` link scrolls to the heading with that name: the heading's text in lower case, with
-   spaces and punctuation as `-`. For headings with accents or symbols (e.g. `Türkiye`), check
-   the link in the preview.
+1. The page title: a **Title (plum)** block (eyebrow `Plaza Premium Lounge Passes`, heading 1,
+   intro).
+2. The jump links: a bold label line, then a **Buttons (pill)** block with one `#name` link per
+   list, e.g. `[Canada](#lounge-pass-canada-eligible-locations)`. A `#name` link scrolls to the
+   heading with that name: the heading's text in lower case, with spaces and punctuation as `-`
+   (an `&` gives `--`, accents stay, e.g. `türkiye`). Check the links in the preview.
 3. One section per list: its heading 2 (e.g. `Lounge Pass Canada Eligible Locations`), then a
    Directory block.
+4. Every section, including the first: Section Metadata `Style` = `fixed-width, divided`. This
+   gives the source's page width, a light grey line between sections, the 26px maroon list
+   headings and the 14px bold labels.
 
 Group names and titles become headings one level below the heading above the block (heading 3 and
 4 under a heading 2), so screen reader users can jump between countries and airports.

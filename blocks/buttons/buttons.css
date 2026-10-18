@@ -10,6 +10,11 @@
   max-width: 100%;
 }
 
+/* pills wrap in rows 10px apart (source .btn-default margins) */
+.buttons > .button-wrapper:has(.pill) {
+  margin-bottom: var(--spacing-4);
+}
+
 .buttons > .button-wrapper:has(.full-width) {
   flex-basis: 100%;
 }

@@ -1,7 +1,7 @@
 /* directory: mobile-first; values measured from the source Eligible Lounges page (one column,
    two from 830px of block width: the source's two 400px columns and 30px gap) */
 .directory {
-  --directory-group-color: #711b45;
+  --directory-group-color: var(--color-brand-plum);
   --directory-item-color: #555;
   --directory-note-color: #800000;
   --directory-column-gap: var(--spacing-9);

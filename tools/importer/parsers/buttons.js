@@ -110,6 +110,6 @@ export default function parse(element, { document }) {
   });
   separators.forEach((br) => br.remove());
 
-  const block = WebImporter.Blocks.createBlock(document, { name: 'buttons', cells });
+  const block = WebImporter.Blocks.createBlock(document, { name: 'buttons (pill)', cells });
   element.replaceWith(block);
 }

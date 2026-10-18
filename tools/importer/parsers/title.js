@@ -137,6 +137,6 @@ export default function parse(element, { document }) {
   }
 
   const cells = [[content]];
-  const block = WebImporter.Blocks.createBlock(document, { name: 'title', cells });
+  const block = WebImporter.Blocks.createBlock(document, { name: 'title (plum)', cells });
   element.replaceWith(block);
 }

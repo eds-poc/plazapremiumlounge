@@ -98,6 +98,34 @@
   font-size: var(--font-size-campaign-small);
 }
 
+/* option plum: a list page title (source Eligible Lounges): a 12px bold uppercase maroon
+   eyebrow, a 36px regular maroon heading, and the intro across the full width. The same at every
+   width and heading level */
+.title.plum .title-eyebrow {
+  margin: 0 0 var(--spacing-3);
+  color: var(--color-brand-plum);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: var(--line-height-body);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.title.plum .title-heading {
+  margin: 0 0 var(--spacing-7);
+  color: var(--color-brand-plum);
+
+  /* one-off: the source list page title's 36px */
+  font-size: 36px;
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-heading);
+}
+
+.title.plum .title-intro {
+  max-width: none;
+  margin: 0 0 var(--spacing-stack);
+}
+
 /* option gap-small: 30px to what follows instead of the usual space (e.g. Title editorial's 40px),
    as the source "Extended Journey Privileges" header above its cards */
 .title.gap-small {
