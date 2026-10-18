@@ -10,7 +10,11 @@
   max-width: 100%;
 }
 
-/* pills wrap in rows 10px apart (source .btn-default margins) */
+/* pills: 12px apart (source 8px margin plus the space between links), rows 10px apart */
+.buttons:has(.pill) {
+  column-gap: var(--spacing-5);
+}
+
 .buttons > .button-wrapper:has(.pill) {
   margin-bottom: var(--spacing-4);
 }
