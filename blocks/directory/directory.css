@@ -9,6 +9,12 @@
   container-type: inline-size;
 }
 
+/* the source's 24px above the first name of every column: a padding, as a column break drops
+   the margins at the top of a column */
+.directory .directory-columns {
+  padding-top: var(--spacing-stack);
+}
+
 /* the block's own width picks the columns, so it fits any section; CSS balances them, and
    an entry (a title and its list) never splits across columns. Each column is at least 400px,
    as the source: 2 from 830px, and with the `three` option 3 from 1260px. `one` stays 1. */
@@ -29,8 +35,9 @@
   columns: auto;
 }
 
+/* 25px after each list: the source's blank line (<br>) between airports */
 .directory .directory-entry {
-  margin-bottom: var(--spacing-7);
+  margin-bottom: var(--spacing-8);
   break-inside: avoid;
 }
 
@@ -42,7 +49,7 @@
   line-height: var(--line-height-body);
 }
 
-/* no gap above the first name, so both columns start level */
+/* the first name's space comes from the column padding above, so both columns start level */
 .directory .directory-group:first-child .directory-group-title {
   margin-top: 0;
 }
@@ -52,7 +59,9 @@
   color: var(--color-text);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  line-height: var(--line-height-relaxed);
+
+  /* the source title's 22.4px line (bold text in a 16px line) */
+  line-height: var(--line-height-loose);
 }
 
 .directory .directory-items {
