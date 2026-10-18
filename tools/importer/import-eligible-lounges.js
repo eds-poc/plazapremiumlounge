@@ -1,0 +1,512 @@
+/* eslint-disable */
+/* global WebImporter */
+
+import titleParser from './parsers/title.js';
+import buttonsParser from './parsers/buttons.js';
+import directoryParser from './parsers/directory.js';
+import cleanupTransformer from './transformers/plazapremiumlounge-cleanup.js';
+import sectionsTransformer from './transformers/plazapremiumlounge-sections.js';
+
+const PAGE_TEMPLATE = {
+  "name": "eligible-lounges",
+  "urls": [
+    "https://www.plazapremiumlounge.com/en-uk/eligible-lounges"
+  ],
+  "representativeUrl": "https://www.plazapremiumlounge.com/en-uk/eligible-lounges",
+  "description": "Eligible Lounges: page title, pass jump links, one Directory per pass list",
+  "blocks": [
+    {
+      "name": "title",
+      "instances": [
+        ".contentWrapper > div > h1"
+      ]
+    },
+    {
+      "name": "buttons",
+      "instances": [
+        ".contentWrapper > div > a.btn.btn-default",
+        ".contentWrapper > div > div > a.btn.btn-default"
+      ]
+    },
+    {
+      "name": "directory",
+      "instances": [
+        ".contentWrapper > div > h3 + div"
+      ]
+    }
+  ],
+  "urlPattern": "/en-uk/*",
+  "sections": [
+    {
+      "id": "rc1",
+      "name": "Page title and jump links",
+      "selector": [
+        ".contentWrapper > div > p:first-child",
+        ".contentWrapper > div"
+      ],
+      "style": null,
+      "blocks": [
+        "title",
+        "buttons"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > strong"
+      ]
+    },
+    {
+      "id": "rc2",
+      "name": "Lounge Pass Global Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#ppl)",
+        ".contentWrapper > div > h3:has(a[id=\"ppl\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#ppl)"
+      ]
+    },
+    {
+      "id": "rc3",
+      "name": "Lounge Pass Americas Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#americas)",
+        ".contentWrapper > div > h3:has(a[id=\"americas\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#americas)"
+      ]
+    },
+    {
+      "id": "rc4",
+      "name": "Lounge Pass Canada Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#canada)",
+        ".contentWrapper > div > h3:has(a[id=\"canada\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#canada)"
+      ]
+    },
+    {
+      "id": "rc5",
+      "name": "Lounge Pass Australia Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#australia)",
+        ".contentWrapper > div > h3:has(a[id=\"australia\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#australia)"
+      ]
+    },
+    {
+      "id": "rc6",
+      "name": "Lounge Pass Europe Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#europe)",
+        ".contentWrapper > div > h3:has(a[id=\"europe\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#europe)"
+      ]
+    },
+    {
+      "id": "rc7",
+      "name": "Lounge Pass Australia, South East Asia, United Kingdom Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#auuk)",
+        ".contentWrapper > div > h3:has(a[id=\"auuk\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#auuk)"
+      ]
+    },
+    {
+      "id": "rc8",
+      "name": "Lounge Pass Middle East, Türkiye, United Kingdom Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#meuk)",
+        ".contentWrapper > div > h3:has(a[id=\"meuk\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#meuk)"
+      ]
+    },
+    {
+      "id": "rc9",
+      "name": "Lounge Pass Malaysia, Indonesia, Saudi Arabia Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#myid)",
+        ".contentWrapper > div > h3:has(a[id=\"myid\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#myid)"
+      ]
+    },
+    {
+      "id": "rc10",
+      "name": "Lounge Pass Hong Kong, Taipei Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#hktp)",
+        ".contentWrapper > div > h3:has(a[id=\"hktp\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#hktp)"
+      ]
+    },
+    {
+      "id": "rc11",
+      "name": "Lounge Pass Hong Kong, Shanghai Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#hkshg)",
+        ".contentWrapper > div > h3:has(a[id=\"hkshg\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#hkshg)"
+      ]
+    },
+    {
+      "id": "rc12",
+      "name": "Lounge Pass Kuala Lumpur, Singapore Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#klsg)",
+        ".contentWrapper > div > h3:has(a[id=\"klsg\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#klsg)"
+      ]
+    },
+    {
+      "id": "rc13",
+      "name": "Lounge Pass Jakarta, Singapore Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#jasg)",
+        ".contentWrapper > div > h3:has(a[id=\"jasg\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#jasg)"
+      ]
+    },
+    {
+      "id": "rc14",
+      "name": "Lounge Pass Dubai, Dammam, Jeddah, Riyadh Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#ddjr)",
+        ".contentWrapper > div > h3:has(a[id=\"ddjr\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#ddjr)"
+      ]
+    },
+    {
+      "id": "rc15",
+      "name": "Lounge Pass Kuala Lumpur, Singapore, Jakarta, Medan Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#msi)",
+        ".contentWrapper > div > h3:has(a[id=\"msi\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#msi)"
+      ]
+    },
+    {
+      "id": "rc16",
+      "name": "Lounge Pass Australia, Singapore Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#ausi)",
+        ".contentWrapper > div > h3:has(a[id=\"ausi\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#ausi)"
+      ]
+    },
+    {
+      "id": "rc17",
+      "name": "Lounge Pass Middle East, Africa Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#meaf)",
+        ".contentWrapper > div > h3:has(a[id=\"meaf\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#meaf)"
+      ]
+    },
+    {
+      "id": "rc18",
+      "name": "Lounge Pass Australia, New Zealand Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#aunz)",
+        ".contentWrapper > div > h3:has(a[id=\"aunz\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#aunz)"
+      ]
+    },
+    {
+      "id": "rc19",
+      "name": "Lounge Pass Mainland China Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#mc)",
+        ".contentWrapper > div > h3:has(a[id=\"mc\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#mc)"
+      ]
+    },
+    {
+      "id": "rc20",
+      "name": "Lounge Pass Asia Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#asia)",
+        ".contentWrapper > div > h3:has(a[id=\"asia\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#asia)"
+      ]
+    },
+    {
+      "id": "rc21",
+      "name": "Lounge Pass Cairo, Jeddah Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#caijed)",
+        ".contentWrapper > div > h3:has(a[id=\"caijed\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#caijed)"
+      ]
+    },
+    {
+      "id": "rc22",
+      "name": "Lounge Pass Bangkok Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#bkk)",
+        ".contentWrapper > div > h3:has(a[id=\"bkk\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#bkk)"
+      ]
+    },
+    {
+      "id": "rc23",
+      "name": "Buggy & Intervals Pass Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#bni)",
+        ".contentWrapper > div > h3:has(a[id=\"bni\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#bni)"
+      ]
+    },
+    {
+      "id": "rc24",
+      "name": "Buggy & Lounge Pass Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#bnl)",
+        ".contentWrapper > div > h3:has(a[id=\"bnl\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#bnl)"
+      ]
+    },
+    {
+      "id": "rc25",
+      "name": "Plaza Premium First 2-Visit Pass Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#ppf)",
+        ".contentWrapper > div > h3:has(a[id=\"ppf\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#ppf)"
+      ]
+    },
+    {
+      "id": "rc26",
+      "name": "Vino Volo Dining Pass Eligible Locations",
+      "selector": [
+        ".contentWrapper > div > h3:has(> a#vino-volo)",
+        ".contentWrapper > div > h3:has(a[id=\"vino-volo\"])"
+      ],
+      "style": null,
+      "blocks": [
+        "directory"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > h3:has(> a#vino-volo)"
+      ]
+    },
+    {
+      "id": "rc27",
+      "name": "Repeated jump links (bottom)",
+      "selector": [
+        ".contentWrapper > div > hr:last-of-type",
+        ".contentWrapper > div > h3:has(> a#vino-volo) ~ strong"
+      ],
+      "style": null,
+      "blocks": [
+        "buttons"
+      ],
+      "defaultContent": [
+        ".contentWrapper > div > hr:last-of-type ~ strong",
+        ".contentWrapper > div > hr:last-of-type ~ div > strong"
+      ]
+    }
+  ]
+};
+
+const parsers = {
+  title: titleParser,
+  buttons: buttonsParser,
+  directory: directoryParser,
+};
+
+const transformers = [cleanupTransformer, sectionsTransformer];
+
+function executeTransformers(hookName, element, payload) {
+  const enhancedPayload = { ...payload, template: PAGE_TEMPLATE };
+  transformers.forEach((fn) => {
+    try { fn(hookName, element, enhancedPayload); }
+    catch (e) { console.error(`Transformer failed at ${hookName}:`, e); }
+  });
+}
+
+function findBlocksOnPage(document, template) {
+  const pageBlocks = [];
+  template.blocks.forEach((blockDef) => {
+    blockDef.instances.forEach((selector) => {
+      document.querySelectorAll(selector).forEach((element) => {
+        pageBlocks.push({ name: blockDef.name, selector, element });
+      });
+    });
+  });
+  return pageBlocks;
+}
+
+export default {
+  transform: (payload) => {
+    const { document, url, params } = payload;
+    const main = document.body;
+
+    executeTransformers('beforeTransform', main, payload);
+
+    const pageBlocks = findBlocksOnPage(document, PAGE_TEMPLATE);
+    pageBlocks.forEach((block) => {
+      if (!block.element.parentNode) return;
+      const parser = parsers[block.name];
+      if (!parser) return;
+      try { parser(block.element, { document, url, params }); }
+      catch (e) { console.error(`Failed to parse ${block.name} (${block.selector}):`, e); }
+    });
+
+    executeTransformers('afterTransform', main, payload);
+
+    main.appendChild(document.createElement('hr'));
+    WebImporter.rules.createMetadata(main, document);
+    WebImporter.rules.transformBackgroundImages(main, document);
+    WebImporter.rules.adjustImageUrls(main, url, params.originalURL);
+
+    const rawPath = new URL(params.originalURL).pathname
+      .replace(/\/$/, '')
+      .replace(/\.html?$/, '');
+    const path = WebImporter.FileUtils.sanitizePath(rawPath === '' ? '/index' : rawPath);
+
+    return [{
+      element: main,
+      path,
+      report: { title: document.title, template: PAGE_TEMPLATE.name, blocks: pageBlocks.map((b) => b.name) },
+    }];
+  },
+};

@@ -1,10 +1,12 @@
 {
+  "type": "da",
   "sites": {
     "plazapremiumlounge": {
       "previewOrg": "eds-poc",
       "previewSite": "plazapremiumlounge",
       "contentHostUrl": "https://content.da.live/eds-poc/plazapremiumlounge/",
-      "botProtected": true
+      "botProtected": true,
+      "libraryUrl": "https://main--sta-boilerplate--aemdemos.aem.page/tools/sidekick/library.json"
     }
   }
 }
