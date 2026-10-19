@@ -32,4 +32,13 @@ Add an option after the block name. Items fill the rows in the order you write t
 The first row has a darker line above it. An open item makes its whole row as tall as its answer,
 as on the source.
 
+## Detail
+
+`Accordion (detail)` is the lounge page's panels (The Lounge, Lounge Features, Available Services,
+Details), as the source lounge detail pages. The [Property Detail](../property-detail/README.md)
+block builds it itself; authors don't normally add it. It has:
+- no line above the first item or below the last
+- medium-weight questions (dark grey when closed, the text colour when open)
+- on phones: 14px uppercase questions, no lines, and 30px between items
+
 Put the section title above the block, e.g. a [Title](../title/README.md) block.

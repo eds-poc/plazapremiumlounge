@@ -169,6 +169,20 @@ export function getApiLanguage() {
 }
 
 /**
+ * The lounge's detail page on this site: the template page in the current site folder, with the
+ * lounge and its price currency, as the source's links (`?propertycode=…&currency=…`). The detail
+ * page picks the date and time itself, at the lounge's own time zone.
+ * @param {string} code The property code
+ * @param {string} [currency] The currency of the lounge's prices
+ * @returns {string} A site-relative URL
+ */
+export function propertyDetailUrl(code, currency) {
+  const params = new URLSearchParams({ propertycode: code });
+  if (currency) params.set('currency', currency);
+  return `/${getSiteFolder() || DEFAULT_SITE}/find/lounge?${params}`;
+}
+
+/**
  * Reads one API record (a listing item or a property detail) into what the cards, the filters and
  * the detail page need, or null for a record that isn't shown (not active, another type, or
  * without a name).
@@ -224,7 +238,8 @@ export function readProperty(item) {
     departure: type !== PASS && journeys.includes('departure'),
     arrival: type !== PASS && journeys.includes('arrival'),
     note: (item.note || '').trim(),
-    link: toUrl(item.targetUrl),
+    // the lounge's page on this site (the service's targetUrl points at the source site)
+    link: item.propertyCode ? propertyDetailUrl(item.propertyCode, prices[0]?.currency) : '',
   };
 }
 

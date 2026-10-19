@@ -134,6 +134,91 @@ const TEXTS = {
   propertyArrivalTip: {
     en: 'Located in the arrivals area.', zh: '位于到达区。', 'zh-HK': '位於抵港區。', ja: '到着エリアにあります。', pt: 'Fica na área de desembarque.',
   },
+  // property detail (one lounge); the wording is the source detail pages' in each language
+  propertyLounges: {
+    en: 'Lounges', zh: '贵宾室', 'zh-HK': '貴賓室', ja: 'すべてのラウンジ', pt: 'Lounges',
+  },
+  propertyLoungeIn: {
+    en: 'Lounge in {city}', zh: '{city}机场贵宾室', 'zh-HK': '{city}機場貴賓室', ja: '{city}のラウンジ', pt: 'Sala VIP em {city}',
+  },
+  propertyBookVisit: {
+    en: 'Book your visit', zh: '预订您的行程', 'zh-HK': '預訂您的行程', ja: '予約する', pt: 'Reserve sua visita',
+  },
+  propertyBookVisitButton: {
+    en: 'Book Your Visit', zh: '预订您的行程', 'zh-HK': '預訂您的行程', ja: '予約する', pt: 'Reserve sua visita',
+  },
+  propertyDate: {
+    en: 'Date', zh: '日期', 'zh-HK': '日期', ja: '日付', pt: 'Data',
+  },
+  propertyTime: {
+    en: 'Time', zh: '时间', 'zh-HK': '時間', ja: '時間', pt: 'Hora',
+  },
+  propertyHours: {
+    en: 'hrs', zh: 'hrs', 'zh-HK': 'hrs', ja: 'hrs', pt: 'hrs',
+  },
+  propertyAdults: {
+    en: 'Adult(s)', zh: '成人', 'zh-HK': '成人', ja: '大人', pt: 'Adulto(s)',
+  },
+  propertyChildren: {
+    en: 'Child(ren)', zh: '儿童', 'zh-HK': '兒童', ja: '子供', pt: 'Criança(s)',
+  },
+  propertyChildNote: {
+    en: 'Complimentary for under 2 years old', zh: '2 岁以下免费', 'zh-HK': '2 歲以下免費', ja: '2歳未満は無料', pt: 'Gratuito para menores de 2 anos',
+  },
+  propertyFewer: {
+    en: 'Fewer {group}', zh: '减少{group}', 'zh-HK': '減少{group}', ja: '{group}を減らす', pt: 'Menos {group}',
+  },
+  propertyMoreOf: {
+    en: 'More {group}', zh: '增加{group}', 'zh-HK': '增加{group}', ja: '{group}を増やす', pt: 'Mais {group}',
+  },
+  propertyServices: {
+    en: 'Services', zh: '服务', 'zh-HK': '服務', ja: 'サービス', pt: 'Serviços',
+  },
+  propertyServiceDetails: {
+    en: 'Service Details', zh: '服务详情', 'zh-HK': '服務詳情', ja: 'サービス詳細', pt: 'Detalhes do Serviço',
+  },
+  propertyPromo: {
+    en: 'Promo Code', zh: '促销代码', 'zh-HK': '促銷代碼', ja: 'プロモーションコード', pt: 'Código Promocional',
+  },
+  propertyPromoPlaceholder: {
+    en: 'Enter Code', zh: '输入代码', 'zh-HK': '輸入代碼', ja: 'コードを入力', pt: 'Digite o Código',
+  },
+  propertyGetPrice: {
+    en: 'Get Price', zh: '获取价格', 'zh-HK': '獲取價格', ja: '料金を確認', pt: 'Obter Preço',
+  },
+  propertyNoServices: {
+    en: 'Online booking isn’t available for this lounge.', zh: '此贵宾室暂不提供网上预订。', 'zh-HK': '此貴賓室暫不提供網上預訂。', ja: 'このラウンジはオンライン予約をご利用いただけません。', pt: 'A reserva online não está disponível para este lounge.',
+  },
+  propertyPanelLounge: {
+    en: 'The Lounge', zh: '贵宾室', 'zh-HK': '貴賓室', ja: 'ラウンジ', pt: 'O Lounge',
+  },
+  propertyPanelFeatures: {
+    en: 'Lounge Features', zh: '贵宾室特色', 'zh-HK': '貴賓室特色', ja: 'ラウンジの特徴', pt: 'Comodidades de lounge',
+  },
+  propertyPanelServices: {
+    en: 'Available Services', zh: '服务', 'zh-HK': '服務', ja: '利用可能なサービス', pt: 'Serviços Disponíveis',
+  },
+  propertyPanelDetails: {
+    en: 'Details', zh: '详情', 'zh-HK': '詳情', ja: '詳細', pt: 'Detalhes',
+  },
+  propertyLocation: {
+    en: 'Location', zh: '位置', 'zh-HK': '位置', ja: '場所', pt: 'Localização',
+  },
+  propertyContact: {
+    en: 'Contact', zh: '联络', 'zh-HK': '聯絡', ja: '連絡先', pt: 'Contato',
+  },
+  propertyPhone: {
+    en: 'Phone', zh: '电话', 'zh-HK': '電話', ja: '電話番号', pt: 'Telefone',
+  },
+  propertyPriceFrom: {
+    en: 'from', zh: '自', 'zh-HK': '自', ja: 'から', pt: 'de',
+  },
+  propertyNotFound: {
+    en: 'This lounge isn’t available.', zh: '此贵宾室暂不可用。', 'zh-HK': '此貴賓室暫不可用。', ja: 'このラウンジはご利用いただけません。', pt: 'Este lounge não está disponível.',
+  },
+  propertyDetailError: {
+    en: 'We couldn’t load this lounge.', zh: '无法加载此贵宾室。', 'zh-HK': '無法載入此貴賓室。', ja: 'このラウンジを読み込めませんでした。', pt: 'Não foi possível carregar este lounge.',
+  },
 };
 
 /**

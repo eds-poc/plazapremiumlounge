@@ -9,6 +9,7 @@ const API_DOMAIN = 'https://236246-402whitedonkey-dev.adobeio-static.net';
 // endpoint paths, joined to the API domain
 const ENDPOINTS = {
   properties: '/api/v1/web/app_demo/GetAllProperties',
+  propertyDetail: '/api/v1/web/app_demo/GetPropertyDetail',
 };
 
 /**

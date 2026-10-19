@@ -22,7 +22,7 @@ A city's lounges, loaded live from the Plaza Premium properties service, as the 
 - Setting names ignore capitals and spaces (`City code` works too). A table with just one value
   (the city code) also works.
 - Everything else comes from the service or the site settings:
-  - photos, names, locations, hours, features, prices, links
+  - photos, names, locations, hours, features, prices
   - the location groups and the filter options
 - **Page heading:** put the page's heading and any intro above the block, as normal page content.
 
@@ -34,7 +34,7 @@ A city's lounges, loaded live from the Plaza Premium properties service, as the 
 | The language of the data | The page's language folder: `/en-uk/` → `en`; `/zh-cn/`, `/zh-hk/`, `/pt-br/`, `/ja-jp/` → the same code. Pages outside a language folder: `en`. Page metadata `language-code` overrides it |
 | Interface text ("Filters", "View", "+5 more", messages) | The site's translations, by page language |
 | Which properties show | Active lounges, grouped by location, then passes (gift cards) at the end. Other kinds (e.g. airport dining, external partners) aren't shown |
-| **View** link | The service's page link for the property. Without one, the card has no View button |
+| **View** link | The lounge's page on this site: the lounge template page in the same language folder (`/en-uk/find/lounge?propertycode=PRPRTY814&currency=HKD`), see [Property Detail](../property-detail/README.md). The name links there too |
 | Green look | Plaza Premium First lounges (by the brand in the lounge's name, in each language: Plaza Premium First, 环亚优逸庭, 環亞優逸庭, プラザプレミアムファースト); every other card is maroon |
 
 ## Filters (for visitors)

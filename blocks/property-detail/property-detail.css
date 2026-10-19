@@ -1,0 +1,1019 @@
+/* property detail: one lounge, as the source detail pages (/en-uk/find/…/<lounge>?propertycode=…).
+   Desktop: a grey title band (name, location, hours), the breadcrumb, then the first four photos
+   beside the booking panel and the lounge's panels (an Accordion, option detail). Phones: a grey
+   intro (photo slider, journey badge, name, location, hours, description) over the panels, and a
+   bottom bar with the lowest price and Book Your Visit (the booking form in a dialog) */
+
+/* the booking form moves into the phone's dialog, outside the block: it needs the same values */
+.property-detail,
+.property-detail-modal {
+  --property-detail-field-bg: #ebe9e4;
+  --property-detail-field-height: 37px;
+  --property-detail-photo-ratio: 2 / 1;
+  --property-detail-photo-gap: var(--spacing-6);
+  --property-detail-columns-gap: var(--grid-gutter);
+  --property-detail-label-note: #aaa;
+  --property-detail-rule: var(--color-text-strong);
+  --property-detail-badge-icon: 18px;
+  --property-detail-tip-width: 200px;
+  --property-detail-tip-shadow: 0 8px 24px rgb(0 0 0 / 20%);
+  --property-detail-bar-height: 82px;
+  --property-detail-slider-shade: rgb(217 217 217);
+  --property-detail-intro-radius: 25px;
+  --property-detail-dot: 10px;
+  --property-detail-dot-idle: #d6d6d6;
+  --property-detail-bar-shadow: 0 0 10px rgb(100 100 100 / 50%);
+  --property-detail-hours-gap: 4ch;
+  --property-detail-pill-padding: 4px 11px;
+  --property-detail-pill-border: #e5dad5;
+  --property-detail-pill-radius: 4px;
+  --property-detail-pill-weight: 600;
+  --property-detail-counter-width: 61px;
+  --property-detail-button-focus: 0 0 0 4px rgb(49 132 253 / 50%);
+
+  /* the source's Bootstrap container, inside the section's own (the whole width on phones) */
+  --property-detail-container: calc(100% + 2 * var(--container-padding));
+}
+
+/* ---------- title band (desktop) ---------- */
+.property-detail-band {
+  display: none;
+}
+
+/* phones: the source's 18px name, 12.25px location and 12px hours, all #212529 */
+.property-detail-hero {
+  color: var(--color-text-control);
+}
+
+.property-detail-title {
+  margin: 0;
+  color: inherit;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.property-detail-place {
+  display: block;
+  margin-top: calc(var(--spacing-2) + var(--spacing-1));
+  font-size: calc(var(--font-size-sm) * 0.875);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+}
+
+.property-detail-hours {
+  margin: 0;
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-label);
+}
+
+/* ---------- journey badge (phones), the source's page-hero size ---------- */
+.property-detail-badge {
+  position: relative;
+  display: inline-flex;
+  gap: var(--spacing-1);
+  align-items: center;
+  margin: 0 0 var(--spacing-5);
+  padding: var(--spacing-campaign-xs) var(--spacing-5);
+  border-radius: var(--radius-xs);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+  font-family: var(--font-family-campaign);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.property-detail-badge-icon {
+  width: var(--property-detail-badge-icon);
+  height: var(--property-detail-badge-icon);
+  background-color: currentcolor;
+  mask: url('../../icons/plane.svg') center / contain no-repeat;
+}
+
+.property-detail-badge-departure .property-detail-badge-icon {
+  rotate: -45deg;
+}
+
+.property-detail-badge-arrival .property-detail-badge-icon {
+  rotate: 90deg;
+}
+
+.property-detail-badge-tip {
+  position: absolute;
+  inset-block-start: calc(100% + var(--spacing-3));
+  inset-inline-start: 0;
+  z-index: 2;
+  box-sizing: border-box;
+  width: var(--property-detail-tip-width);
+  padding: var(--spacing-4) var(--spacing-5);
+  border-radius: var(--radius-xs);
+  background-color: var(--color-campaign-ink);
+  box-shadow: var(--property-detail-tip-shadow);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: normal;
+}
+
+.property-detail-badge:not(:hover, :focus-visible) .property-detail-badge-tip {
+  display: none;
+}
+
+/* ---------- phones: the grey intro ---------- */
+.property-detail-intro {
+  margin: 0 calc(-1 * var(--container-padding)) var(--spacing-9);
+  padding: var(--spacing-9) var(--container-padding) var(--spacing-7);
+  border-radius: 0 0 var(--property-detail-intro-radius) var(--property-detail-intro-radius);
+  background-color: var(--color-surface-warm);
+}
+
+.property-detail-intro:empty {
+  display: none;
+}
+
+/* the intro's content in the same column as the panels below */
+.property-detail-intro > * {
+  max-width: calc(var(--property-detail-container) - 2 * var(--container-padding));
+  margin-inline: auto;
+}
+
+.property-detail-intro .property-detail-description {
+  margin-top: var(--spacing-7);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-body);
+}
+
+/* photo slider (phones) */
+.property-detail-slider {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: var(--spacing-10);
+  border-radius: var(--radius-lg);
+  aspect-ratio: var(--property-detail-photo-ratio);
+}
+
+/* the source's light fade over the photo, under the dots */
+.property-detail-slider::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: linear-gradient(transparent, var(--property-detail-slider-shade));
+  pointer-events: none;
+}
+
+.property-detail-slider-track {
+  display: flex;
+  height: 100%;
+  transition: transform 0.6s ease-in-out;
+}
+
+.property-detail-slider-slide {
+  flex: 0 0 100%;
+  height: 100%;
+}
+
+.property-detail-slider-slide img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.property-detail-slider-prev,
+.property-detail-slider-next {
+  position: absolute;
+  inset-block: 0;
+  z-index: 2;
+  width: 25%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.property-detail-slider-prev {
+  inset-inline-start: 0;
+  text-align: start;
+}
+
+.property-detail-slider-next {
+  inset-inline-end: 0;
+  text-align: end;
+}
+
+.property-detail-slider-prev::before {
+  content: '‹';
+}
+
+.property-detail-slider-next::before {
+  content: '›';
+}
+
+.property-detail-slider-dots {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: var(--spacing-7);
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+}
+
+.property-detail-slider-dot {
+  padding: var(--spacing-2) calc(var(--spacing-3) - var(--spacing-1) / 2);
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.property-detail-slider-dot::before {
+  content: '';
+  display: block;
+  width: var(--property-detail-dot);
+  height: var(--property-detail-dot);
+  border-radius: var(--radius-xl);
+  background-color: var(--property-detail-dot-idle);
+  transition: background-color 0.2s;
+}
+
+.property-detail-slider-dot[aria-current='true']::before {
+  background-color: var(--color-brand-primary);
+}
+
+/* ---------- body: breadcrumb, photos, booking, panels ---------- */
+.property-detail-body {
+  max-width: calc(var(--property-detail-container) - 2 * var(--container-padding));
+  margin: 0 auto;
+}
+
+.property-detail-crumbs {
+  display: none;
+}
+
+.property-detail-crumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: var(--spacing-4) 0 0;
+  list-style: none;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+}
+
+.property-detail-crumbs li {
+  padding: var(--spacing-1) var(--spacing-2) var(--spacing-1) 0;
+  color: var(--color-text-secondary);
+}
+
+.property-detail-crumbs li[aria-current='page'] {
+  color: var(--color-brand-primary);
+}
+
+/* the source's "<" between the items */
+.property-detail-crumbs li + li::before {
+  content: '<';
+  padding-inline-end: var(--spacing-3);
+  color: rgb(33 37 41 / 75%);
+}
+
+.property-detail-gallery {
+  display: none;
+}
+
+.property-detail-photos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.property-detail-photos li {
+  overflow: hidden;
+  margin-bottom: var(--property-detail-photo-gap);
+  border-radius: var(--radius-lg);
+}
+
+.property-detail-photos a {
+  display: block;
+}
+
+.property-detail-photos img {
+  display: block;
+  width: 100%;
+  aspect-ratio: var(--property-detail-photo-ratio);
+  object-fit: cover;
+}
+
+/* ---------- booking panel (desktop) and form (phones, in the dialog) ---------- */
+.property-detail-booking {
+  display: none;
+  background-color: var(--color-surface-warm);
+}
+
+/* the heading with the Smart Traveller pill on its line, as the source */
+.property-detail-booking-header {
+  margin: 0 var(--spacing-7) var(--spacing-6);
+  padding: var(--spacing-6) 0 calc(var(--spacing-6) + var(--spacing-3));
+  border-bottom: var(--base-border-width) solid var(--property-detail-rule);
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-heading);
+}
+
+.property-detail-booking-title {
+  display: inline;
+  margin: 0;
+  font-size: inherit;
+  font-weight: var(--font-weight-medium);
+  line-height: inherit;
+}
+
+.property-detail-loyalty {
+  margin: 0;
+  font-family: var(--font-family-campaign);
+  font-size: var(--font-size-xs);
+}
+
+.property-detail-booking-header .property-detail-loyalty {
+  display: inline-block;
+  margin-inline-start: var(--spacing-5);
+  padding: var(--property-detail-pill-padding);
+  border: var(--base-border-width) solid var(--property-detail-pill-border);
+  border-radius: var(--property-detail-pill-radius);
+  background-color: var(--color-campaign-cream);
+  color: var(--color-brand-primary);
+  max-width: 100%;
+  box-sizing: border-box;
+  font-weight: var(--property-detail-pill-weight);
+  line-height: var(--line-height-heading);
+}
+
+.property-detail-loyalty a:any-link {
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-campaign-bold);
+  text-decoration: underline;
+}
+
+.property-detail-fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-9) var(--grid-gutter);
+  padding: 0 var(--spacing-7) var(--spacing-9);
+  border-bottom: var(--base-border-width) solid var(--property-detail-rule);
+}
+
+.property-detail-field {
+  min-width: 0;
+}
+
+.property-detail-label {
+  display: block;
+  margin-bottom: var(--spacing-3);
+  color: var(--color-text);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+.property-detail-label-note {
+  padding-left: calc(var(--spacing-1) + 1px);
+  color: var(--property-detail-label-note);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-light);
+  letter-spacing: normal;
+  text-transform: capitalize;
+}
+
+.property-detail-form input:not([type='date']),
+.property-detail-form select,
+.property-detail-date-text {
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--property-detail-field-height);
+  margin: 0;
+  padding: var(--spacing-3) var(--spacing-8) var(--spacing-3) var(--spacing-6);
+  border: 0;
+  border-radius: var(--radius-input);
+  background-color: var(--property-detail-field-bg);
+  color: var(--color-text-control);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+.property-detail-form select {
+  padding-inline-start: var(--spacing-8);
+  font-weight: var(--font-weight-medium);
+  appearance: none;
+  background-image: url('../../icons/arrow-down.svg');
+  background-position: right var(--spacing-5) center;
+  background-repeat: no-repeat;
+  background-size: var(--font-size-md) var(--spacing-5);
+  cursor: pointer;
+}
+
+.property-detail-form :is(input, select):focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+}
+
+/* the date as the source writes it, over a native date picker */
+.property-detail-date {
+  position: relative;
+}
+
+.property-detail-date-text {
+  display: flex;
+  align-items: center;
+}
+
+.property-detail-date input[type='date'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: var(--radius-input);
+  opacity: 0;
+  cursor: pointer;
+}
+
+.property-detail-time {
+  position: relative;
+}
+
+/* "hrs" right after the time */
+.property-detail-time-unit {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(var(--spacing-8) + var(--property-detail-hours-gap));
+  display: flex;
+  align-items: center;
+  padding: 0 calc(2 * var(--spacing-1));
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-relaxed);
+  pointer-events: none;
+}
+
+.property-detail-counter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--property-detail-field-height);
+  border-radius: var(--radius-input);
+  background-color: var(--property-detail-field-bg);
+}
+
+.property-detail-form .property-detail-counter input {
+  width: 60px;
+  height: auto;
+  padding: 0;
+  background: none;
+  font-size: 15px;
+  text-align: center;
+  appearance: textfield;
+}
+
+.property-detail-counter input::-webkit-inner-spin-button,
+.property-detail-counter input::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.property-detail-step {
+  position: absolute;
+  inset-block: 0;
+  padding: 0 var(--spacing-6);
+  border: 0;
+  border-radius: var(--radius-input);
+  background: none;
+  color: var(--color-text-strong);
+  font-family: inherit;
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.property-detail-step-minus {
+  inset-inline-start: 0;
+}
+
+.property-detail-step-plus {
+  inset-inline-end: 0;
+}
+
+.property-detail-step:focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+}
+
+.property-detail-no-services {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.property-detail-action {
+  padding: var(--spacing-4) var(--spacing-8) var(--spacing-7);
+}
+
+.property-detail-action:empty {
+  display: none;
+}
+
+.property-detail-get-price {
+  display: block;
+  width: 100%;
+  margin: 0 0 var(--spacing-6);
+  padding: var(--spacing-2) var(--spacing-7);
+  border: var(--base-border-width) solid transparent;
+  border-radius: var(--radius-xl);
+  background-color: var(--color-brand-primary-action);
+  color: var(--color-text-inverse);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  text-transform: capitalize;
+  cursor: pointer;
+  transition: color var(--duration-normal) var(--ease-standard), background-color var(--duration-normal) var(--ease-standard);
+}
+
+.property-detail-get-price:is(:hover, :focus-visible) {
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
+}
+
+/* the booking form in the phone's dialog, as the source's: a sheet over the whole screen, the
+   close button alone in the maroon header, smaller centred fields in the order date, time,
+   service, service details, guests (label left, number right), promo code */
+.property-detail-modal {
+  --property-detail-field-height: 31px;
+  --property-detail-field-bg: var(--color-surface-warm);
+  --property-detail-modal-gap: calc(var(--spacing-7) + 2 * var(--spacing-1));
+}
+
+dialog.modal.property-detail-modal {
+  height: calc(100% - 2 * var(--spacing-3));
+}
+
+.property-detail-modal .modal-content {
+  box-sizing: border-box;
+  min-height: 100%;
+}
+
+.property-detail-modal .modal-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.property-detail-modal .modal-body {
+  padding: var(--spacing-bootstrap-3);
+}
+
+.property-detail-modal .property-detail-fields {
+  gap: var(--property-detail-modal-gap);
+  padding: 0;
+  border-bottom: 0;
+}
+
+.property-detail-modal .property-detail-label {
+  margin-bottom: calc(2 * var(--spacing-1));
+  color: var(--color-text-strong);
+  letter-spacing: normal;
+  text-transform: capitalize;
+}
+
+.property-detail-modal .property-detail-form :is(input:not([type='date']), select),
+.property-detail-modal .property-detail-date-text {
+  padding: var(--spacing-2) var(--spacing-8);
+  color: var(--color-text-control);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+}
+
+.property-detail-modal .property-detail-date-text {
+  justify-content: center;
+}
+
+.property-detail-modal .property-detail-form select {
+  background-position: right var(--spacing-6) center;
+}
+
+.property-detail-modal .property-detail-form input[name='promo'] {
+  text-align: start;
+}
+
+.property-detail-modal .property-detail-time-unit {
+  display: none;
+}
+
+.property-detail-modal .property-detail-field:has([name='promo']) {
+  order: 2;
+}
+
+.property-detail-modal .property-detail-field:has(.property-detail-counter) {
+  display: flex;
+  gap: var(--spacing-4);
+  align-items: center;
+  justify-content: space-between;
+  order: 1;
+}
+
+/* the two guest rows sit close together */
+.property-detail-modal .property-detail-field:has(.property-detail-counter) + .property-detail-field:has(.property-detail-counter) {
+  margin-top: calc(2 * var(--spacing-1) - var(--property-detail-modal-gap));
+}
+
+.property-detail-modal .property-detail-field:has(.property-detail-counter) .property-detail-label {
+  margin: 0;
+  text-transform: none;
+}
+
+.property-detail-modal .property-detail-label-note {
+  text-transform: none;
+}
+
+.property-detail-modal .property-detail-counter {
+  flex: none;
+  width: var(--property-detail-counter-width);
+  background-color: var(--color-background);
+}
+
+.property-detail-modal .property-detail-form .property-detail-counter input {
+  width: 100%;
+  padding: 0;
+  background: none;
+}
+
+.property-detail-modal .property-detail-step {
+  padding: 0 var(--spacing-1);
+  font-size: var(--font-size-md);
+}
+
+.property-detail-modal .property-detail-no-services {
+  order: 3;
+}
+
+.property-detail-modal .property-detail-action {
+  padding: var(--property-detail-modal-gap) 0 0;
+}
+
+/* after the dialog's date rules: the picker's focus shows on the date text */
+.property-detail-date:has(input:focus-visible) .property-detail-date-text {
+  box-shadow: var(--shadow-focus);
+}
+
+/* ---------- panels ---------- */
+.property-detail-content .accordion-wrapper {
+  margin-top: var(--spacing-9);
+}
+
+.property-detail-description > :first-child {
+  margin-top: 0;
+}
+
+.property-detail-description p {
+  margin: 0 0 var(--spacing-7);
+}
+
+.property-detail-description > :last-child {
+  margin-bottom: 0;
+}
+
+.property-detail-note {
+  color: var(--color-text);
+}
+
+.property-detail-note a:any-link {
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.property-detail-crumbs a:any-link {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+/* the pills, over the Accordion's own list styles */
+.property-detail .accordion .accordion-answer .property-detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 0 var(--spacing-bootstrap-3);
+  padding: 0;
+  list-style: none;
+}
+
+.property-detail .accordion .accordion-answer .property-detail-tag {
+  margin: 0 var(--spacing-3) var(--spacing-4) 0;
+  padding: var(--spacing-3) var(--spacing-6);
+  border-radius: var(--radius-lg);
+  background-color: color-mix(in srgb, var(--color-brand-primary-action) 10%, transparent);
+  color: var(--color-brand-primary);
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+/* Details: a small black title over each part's grey text */
+.property-detail-contact {
+  display: grid;
+  gap: 0 var(--grid-gutter);
+}
+
+.property-detail .accordion-answer .property-detail-contact p {
+  margin: 0 0 var(--spacing-7);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-light);
+}
+
+.property-detail .accordion-answer .property-detail-contact .property-detail-contact-title {
+  margin-bottom: var(--spacing-5);
+  color: var(--color-text-strong);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+}
+
+/* ---------- phones: the bottom bar ---------- */
+.property-detail-bar {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: 11;
+  min-height: var(--property-detail-bar-height);
+  box-sizing: border-box;
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--color-background);
+  box-shadow: var(--property-detail-bar-shadow);
+}
+
+.property-detail-bar-row {
+  display: flex;
+  gap: var(--spacing-4);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.property-detail-bar-price {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-body);
+}
+
+.property-detail-bar-price b {
+  font-weight: var(--font-weight-medium);
+}
+
+.property-detail-bar-book {
+  margin: var(--spacing-1) var(--spacing-2) 0 0;
+  padding: calc(var(--spacing-3) - var(--spacing-1)) var(--spacing-6);
+  border: var(--base-border-width) solid transparent;
+  border-radius: var(--radius-xl);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+  font-family: inherit;
+  font-size: 11px;
+  line-height: var(--line-height-relaxed);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--duration-normal) var(--ease-standard), background-color var(--duration-normal) var(--ease-standard);
+}
+
+.property-detail-bar-book:is(:hover, :focus-visible) {
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
+}
+
+/* the source's Bootstrap button focus ring */
+.property-detail-get-price:focus-visible,
+.property-detail-bar-book:focus-visible {
+  outline: 0;
+  box-shadow: var(--property-detail-button-focus);
+}
+
+/* the Smart Traveller line under a light rule */
+.property-detail-bar .property-detail-loyalty {
+  margin-top: var(--spacing-3);
+  padding-top: var(--spacing-3);
+  border-top: var(--base-border-width) solid var(--color-campaign-line);
+  color: var(--color-campaign-grey);
+  line-height: var(--line-height-body);
+  text-align: center;
+}
+
+.property-detail-bar .property-detail-loyalty b {
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* leave room for the bar at the end of the page */
+.property-detail.is-mobile {
+  padding-bottom: var(--property-detail-bar-height);
+}
+
+/* the lounge's description sits in the intro on phones, so The Lounge panel isn't shown */
+.property-detail.is-mobile .accordion.detail > .property-detail-panel-lounge {
+  display: none;
+}
+
+/* phones: Available Services is a grey card */
+.property-detail.is-mobile .accordion.detail > .property-detail-panel-services {
+  padding: var(--spacing-4) var(--spacing-8);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-warm);
+}
+
+.property-detail.is-mobile .accordion .accordion-answer .property-detail-tags {
+  padding-bottom: var(--spacing-4);
+}
+
+.property-detail.is-mobile .accordion-answer .property-detail-contact p:not(.property-detail-contact-title) {
+  font-weight: var(--font-weight-regular);
+}
+
+/* ---------- messages ---------- */
+.property-detail-message {
+  padding: var(--spacing-11) 0;
+  text-align: center;
+}
+
+.property-detail-hint {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* ---------- Plaza Premium First ---------- */
+.property-detail-first .property-detail-badge,
+.property-detail-first .property-detail-bar-book {
+  background-color: var(--color-brand-first);
+}
+
+/* breakpoint-exception: the source badge grows above 480px */
+@media (width > 480px) {
+  .property-detail {
+    --property-detail-badge-icon: 20px;
+    --property-detail-tip-width: 280px;
+  }
+
+  .property-detail-badge {
+    gap: var(--spacing-2);
+    padding: var(--spacing-3) var(--spacing-bootstrap-3);
+    font-size: var(--font-size-sm);
+  }
+}
+
+/* breakpoint-exception: the source's Bootstrap container widths */
+@media (width >= 576px) {
+  .property-detail {
+    --property-detail-container: 540px;
+  }
+
+  .property-detail-bar .property-detail-bar-book {
+    padding-inline: var(--spacing-8);
+    font-size: var(--font-size-sm);
+  }
+}
+
+@media (width >= 768px) {
+  .property-detail {
+    --property-detail-container: 720px;
+  }
+
+  .property-detail-intro,
+  .property-detail-bar {
+    display: none;
+  }
+
+  /* the grey band across the whole window */
+  .property-detail-band {
+    display: block;
+    margin-bottom: var(--spacing-9);
+    padding: var(--spacing-11) 0;
+    background-color: var(--color-surface-warm);
+    box-shadow: 0 0 0 100vmax var(--color-surface-warm);
+    clip-path: inset(0 -100vmax);
+  }
+
+  .property-detail-band .property-detail-hero {
+    display: flex;
+    color: var(--color-text);
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .property-detail-band .property-detail-badge {
+    display: none;
+  }
+
+  .property-detail-band .property-detail-title {
+    flex: 0 1 83.333%;
+    margin-bottom: var(--spacing-4);
+    font-size: var(--font-size-3xl);
+    line-height: var(--line-height-heading);
+  }
+
+  .property-detail-band .property-detail-place {
+    margin: 0;
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-light);
+    line-height: var(--line-height-heading);
+    letter-spacing: var(--letter-spacing-label);
+    text-transform: capitalize;
+  }
+
+  /* the hours wrap rather than squeeze the name (at most a sixth of the row) */
+  .property-detail-band .property-detail-hours {
+    flex: 0 1 auto;
+    max-width: calc(100% / 6);
+    font-size: var(--font-size-md);
+    text-align: end;
+  }
+
+  .property-detail-crumbs {
+    display: block;
+    margin-bottom: var(--spacing-7);
+  }
+
+  .property-detail-main {
+    display: grid;
+    grid-template-columns: calc((100% + var(--property-detail-columns-gap)) * 5 / 12 - var(--property-detail-columns-gap)) 1fr;
+    gap: var(--property-detail-columns-gap);
+    align-items: start;
+  }
+
+  .property-detail-gallery {
+    display: block;
+  }
+
+  .property-detail-content {
+    padding-top: var(--spacing-9);
+  }
+
+  .property-detail-booking {
+    display: block;
+  }
+
+  .property-detail-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .property-detail-contact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .property-detail-contact-part {
+    padding-inline-end: var(--spacing-7);
+  }
+}
+
+@media (width >= 992px) {
+  .property-detail {
+    --property-detail-container: 960px;
+  }
+}
+
+@media (width >= 1200px) {
+  .property-detail {
+    --property-detail-container: 1140px;
+  }
+}
+
+/* breakpoint-exception: the source container's widest step */
+@media (width >= 1400px) {
+  .property-detail {
+    --property-detail-container: 1320px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .property-detail-slider-track,
+  .property-detail-get-price,
+  .property-detail-bar-book {
+    transition: none;
+  }
+}
