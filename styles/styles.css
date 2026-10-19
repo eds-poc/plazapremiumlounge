@@ -742,6 +742,34 @@ main .section.fixed-width>div {
   }
 }
 
+/* section style lead-copy: a centred lead paragraph (source /your-destination-before-departure,
+   `.container.sm-container p.fs-5.text-center` under the destination banner): at most 860px wide,
+   16px on mobile and 20px from 768px with a 1.4 line height, 20px below each paragraph, and no
+   section padding (the space above is the previous section's) */
+main>.section.lead-copy {
+  padding-block: 0;
+}
+
+main>.section.lead-copy>div {
+  max-width: var(--container-narrow-max-width);
+}
+
+main>.section.lead-copy .default-content-wrapper {
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+  text-align: center;
+}
+
+main>.section.lead-copy p {
+  margin: 0 0 var(--spacing-7);
+}
+
+@media (width >=768px) {
+  main>.section.lead-copy .default-content-wrapper {
+    font-size: var(--font-size-xl);
+  }
+}
+
 /* section style band: a campaign band (the source `#ppl-campaign-container .section-padded`), used
    with inset. No section padding, so consecutive bands touch; inside the content width each band has
    40px above and below and 8% of that width at the sides, and its Section Metadata background
