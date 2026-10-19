@@ -29,6 +29,7 @@
   --property-detail-pill-radius: 4px;
   --property-detail-pill-weight: 600;
   --property-detail-counter-width: 61px;
+  --property-detail-tag-size: 11px;
   --property-detail-button-focus: 0 0 0 4px rgb(49 132 253 / 50%);
 
   /* the source's Bootstrap container, inside the section's own (the whole width on phones) */
@@ -737,26 +738,31 @@ dialog.modal.property-detail-modal {
   text-decoration: none;
 }
 
-/* the pills, over the Accordion's own list styles */
+/* the pills, over the Accordion's own list styles: inline blocks with a space between them
+   (8px + a space apart, 10px between rows), as the source */
 .property-detail .accordion .accordion-answer .property-detail-tags {
-  display: flex;
-  flex-wrap: wrap;
   margin: 0 0 var(--spacing-bootstrap-3);
   padding: 0;
   list-style: none;
 }
 
 .property-detail .accordion .accordion-answer .property-detail-tag {
+  display: inline-block;
   margin: 0 var(--spacing-3) var(--spacing-4) 0;
   padding: var(--spacing-3) var(--spacing-6);
   border-radius: var(--radius-lg);
-  background-color: color-mix(in srgb, var(--color-brand-primary-action) 10%, transparent);
+  background-color: var(--color-brand-tint);
   color: var(--color-brand-primary);
-  font-size: 11px;
+  font-size: var(--property-detail-tag-size);
   font-weight: var(--font-weight-medium);
   line-height: 1;
   letter-spacing: var(--letter-spacing-label);
   text-transform: uppercase;
+}
+
+/* the services' pills are 12px, as the source */
+.property-detail .accordion .accordion-answer .property-detail-tags-services .property-detail-tag {
+  font-size: var(--font-size-xs);
 }
 
 /* Details: a small black title over each part's grey text */
@@ -886,11 +892,22 @@ dialog.modal.property-detail-modal {
   color: var(--color-text-control);
 }
 
-/* phones: Available Services is a grey card */
+/* phones: Available Services is a grey card, its services rows under a black line (not pills),
+   as the source */
 .property-detail.is-mobile .accordion.detail>.property-detail-panel-services {
   padding: var(--spacing-4) var(--spacing-8);
   border-radius: var(--radius-md);
   background-color: var(--color-surface-warm);
+}
+
+.property-detail.is-mobile .accordion .accordion-answer .property-detail-tags-services .property-detail-tag {
+  display: block;
+  margin: 0;
+  padding: var(--spacing-5) var(--spacing-6) var(--spacing-5) 0;
+  border-bottom: var(--base-border-width) solid var(--color-text-strong);
+  border-radius: 0;
+  background: none;
+  color: var(--color-text-strong);
 }
 
 .property-detail.is-mobile .accordion .accordion-answer .property-detail-tags {

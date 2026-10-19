@@ -514,13 +514,15 @@ function buildBooking(lounge, slot, params, settings) {
 }
 
 /**
- * Tags (features, services) as the source's pills.
+ * Tags (features, services) as the source's pills (services are rows on phones; see the CSS).
  * @param {{label: string}[]} items
+ * @param {'features'|'services'} kind
  * @returns {HTMLElement}
  */
-function buildTags(items) {
-  const list = el('ul', 'property-detail-tags');
-  items.forEach((item) => list.append(el('li', 'property-detail-tag', item.label)));
+function buildTags(items, kind) {
+  const list = el('ul', `property-detail-tags property-detail-tags-${kind}`);
+  // a space between the pills, as the source's markup (part of the gap between them)
+  items.forEach((item, i) => list.append(...(i ? [' '] : []), el('li', 'property-detail-tag', item.label)));
   return list;
 }
 
@@ -607,8 +609,8 @@ function showMessage(block, text, retry, hint) {
  */
 async function buildPanels(lounge, description) {
   const rows = [['lounge', translate('propertyPanelLounge'), description]];
-  if (lounge.features.length) rows.push(['features', translate('propertyPanelFeatures'), buildTags(lounge.features)]);
-  if (lounge.services.length) rows.push(['services', translate('propertyPanelServices'), buildTags(lounge.services)]);
+  if (lounge.features.length) rows.push(['features', translate('propertyPanelFeatures'), buildTags(lounge.features, 'features')]);
+  if (lounge.services.length) rows.push(['services', translate('propertyPanelServices'), buildTags(lounge.services, 'services')]);
   const details = buildDetails(lounge);
   if (details.children.length) rows.push(['details', translate('propertyPanelDetails'), details]);
   const accordion = buildBlock('accordion', rows.map(([, title, content]) => [el('p', '', title), content]));
