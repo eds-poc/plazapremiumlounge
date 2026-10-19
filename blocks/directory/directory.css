@@ -46,8 +46,8 @@
 .directory .directory-group-title {
   margin: calc(var(--spacing-stack) + var(--spacing-8)) 0 var(--spacing-4);
   color: var(--directory-group-color);
-  font-size: 15px;
-  font-weight: 700;
+  font-size: var(--font-size-sm + 1);
+  font-weight: var(--font-weight-bold);
   line-height: var(--line-height-body);
 }
 
@@ -97,17 +97,8 @@
 /* anchor navigation on pages with a directory (the jump links): smooth scrolling, stopping 70px
    below the top (140px up to 768px), clear of the header. Loaded with the block, so only these
    pages get it */
-:root {
-  --scroll-padding-top: 70px;
-}
-
-@media (width <= 768px) {
-  :root {
-    --scroll-padding-top: 140px;
-  }
-}
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: var(--scroll-padding-top);
+  scroll-padding-top: var(--nav-height);
 }
