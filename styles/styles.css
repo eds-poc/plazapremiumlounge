@@ -936,9 +936,15 @@ main>.section.divided+.section.divided>div:first-child::before {
   content: '';
   display: block;
 
-  /* one-off: the source hr's 28px margins */
+  /* one-offs: the live page's hr, 28px margins and a 1px #f6f6f6 line (measured) */
   margin-block: 28px;
-  border-top: var(--base-border-width) solid var(--base-border);
+  border-top: var(--base-border-width) solid #f6f6f6;
+}
+
+/* a links-only section after the lists (the repeated jump links): 120px above its line, as the
+   blank lines at the end of the live page's last list */
+main>.section.divided:has(.directory)+.section.divided:not(:has(.directory))>div:first-child::before {
+  margin-top: 120px;
 }
 
 main .section.divided .default-content-wrapper h2 {
@@ -947,7 +953,7 @@ main .section.divided .default-content-wrapper h2 {
 
   /* one-off: the source list headings' 26px */
   font-size: 26px;
-  font-weight: var(--font-weight-regular);
+  font-weight: var(--font-weight-medium);
   line-height: 1.3;
 }
 

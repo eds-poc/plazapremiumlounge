@@ -41,8 +41,10 @@
   break-inside: avoid;
 }
 
+/* 49px above a name after a list: the live page's blank line (&nbsp;) after each country's list,
+   then the heading's 24px */
 .directory .directory-group-title {
-  margin: var(--spacing-stack) 0 var(--spacing-4);
+  margin: calc(var(--spacing-stack) + var(--spacing-8)) 0 var(--spacing-4);
   color: var(--directory-group-color);
   font-size: 15px;
   font-weight: 700;
