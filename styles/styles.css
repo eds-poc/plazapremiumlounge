@@ -941,10 +941,11 @@ main>.section.divided+.section.divided>div:first-child::before {
   border-top: var(--base-border-width) solid #f6f6f6;
 }
 
-/* a links-only section after the lists (the repeated jump links): 120px above its line, as the
-   blank lines at the end of the live page's last list */
+/* a links-only section after the lists (the repeated jump links): 120px from the last list to
+   its line (the live page's blank lines; the list's own space below its last item is 15px) and
+   31px from the line to the label, as the live page */
 main>.section.divided:has(.directory)+.section.divided:not(:has(.directory))>div:first-child::before {
-  margin-top: 120px;
+  margin-block: 105px 30px;
 }
 
 main .section.divided .default-content-wrapper h2 {
