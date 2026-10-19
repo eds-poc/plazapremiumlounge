@@ -1183,6 +1183,12 @@ main>.section.boxed-copy .default-content-wrapper strong {
   margin-bottom: var(--spacing-11);
 }
 
+/* section style bottom-spacing: 20px of extra space below the whole section, outside its
+   background, at every width, e.g. under a Featured Carousel (image-inset) */
+main>.section.bottom-spacing {
+  margin-bottom: var(--spacing-7);
+}
+
 #spinner-overlay {
   position: fixed;
   top: 0;
