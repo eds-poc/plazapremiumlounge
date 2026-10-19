@@ -199,7 +199,7 @@ function buildGroup({ name, cells }, level) {
       list = null;
     }
     if (line.title) {
-      const title = el(`h${level + 1}`, 'directory-entry-title');
+      const title = el(`p`, 'directory-entry-title');
       title.append(...line.nodes);
       entry.append(title);
       return;

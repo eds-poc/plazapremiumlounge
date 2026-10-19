@@ -46,7 +46,7 @@
 .directory .directory-group-title {
   margin: calc(var(--spacing-stack) + var(--spacing-8)) 0 var(--spacing-4);
   color: var(--directory-group-color);
-  font-size: var(--font-size-sm + 1);
+  font-size: calc (var(--font-size-sm) + 1px);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-body);
 }
