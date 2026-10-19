@@ -93,3 +93,21 @@
 .directory a:hover {
   color: var(--color-link-hover);
 }
+
+/* anchor navigation on pages with a directory (the jump links): smooth scrolling, stopping 70px
+   below the top (140px up to 768px), clear of the header. Loaded with the block, so only these
+   pages get it */
+:root {
+  --scroll-padding-top: 70px;
+}
+
+@media (width <= 768px) {
+  :root {
+    --scroll-padding-top: 140px;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--scroll-padding-top);
+}
