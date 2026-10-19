@@ -3,12 +3,14 @@
  * Each action has `matches(url, link)` and `apply(link, url)`; the first match wins.
  * Register more with registerButtonAction() to support new behaviours without touching blocks.
  * Modal links (`#name`, `/modals/…`) are opened by the site-wide handler in modal.js, so a modal
- * that registers later (for example from the nav) still opens.
+ * that registers later (for example from the nav) still opens. Video links play in the video popup
+ * (video.js), which also handles video links in plain text.
  */
 import {
   markModalTrigger, modalPageUrl, openPageModal, preloadPageModal,
 } from './modal.js';
 import { translate } from './i18n.js';
+import { buildVideoButton, getVideo } from './video.js';
 
 const actions = [];
 
@@ -92,6 +94,13 @@ registerButtonAction({
   name: 'anchor',
   matches: (url) => !!url.hash && isSamePage(url),
   apply: (link) => markModalTrigger(link),
+});
+
+// a YouTube or Vimeo video, or a video file: a button that plays it in the video popup
+registerButtonAction({
+  name: 'video',
+  matches: (url) => !!getVideo(url.href),
+  apply: (link) => buildVideoButton(link),
 });
 
 // another website: open in a new tab and say so

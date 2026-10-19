@@ -1,0 +1,258 @@
+/* branding card: the source's "Your Destination Before Departure" grid (`section.branding
+   .gridBox`), measured at 1440, 768 and 375px. Each card is a photo filling a rounded box (18px,
+   1px white border), the title top left in white capitals with a soft shadow and two pill buttons
+   at the bottom. On hover, or when a button has keyboard focus, a maroon tint and the text fade in.
+   Cards are centred in rows: 1 per row on mobile, 2 from 520px, 3 from 992px. The card keeps the
+   source's proportions at its own width (the source sizes it from the grid width) */
+.branding-card {
+  /* source one-offs: the card tint and button maroon, and the title font (the source's
+     nimbus_sans_lregular never loads, so browsers show Arial) */
+  --branding-card-maroon: #711b45;
+  --branding-card-tint: rgb(113 27 69 / 66%);
+  --branding-card-title-font: arial, helvetica, sans-serif;
+  --branding-card-title-size: var(--font-size-xl);
+  --branding-card-inset-block: var(--spacing-8);
+  --branding-card-inset-inline: var(--spacing-6);
+}
+
+.branding-card .branding-card-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.branding-card .branding-card-item {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 100%;
+  aspect-ratio: 342 / 241;
+  margin: 2% 0.5%;
+  overflow: hidden;
+  border: var(--base-border-width) solid var(--color-text-inverse);
+  border-radius: 18px;
+  background-color: var(--branding-card-maroon);
+  color: var(--color-text-inverse);
+}
+
+/* the photo fills the card */
+.branding-card .branding-card-media {
+  position: absolute;
+  inset: 0;
+  display: block;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.branding-card div.branding-card-media {
+  cursor: auto;
+}
+
+.branding-card .branding-card-media :is(picture, img) {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.branding-card .branding-card-media img {
+  object-fit: cover;
+}
+
+/* a linked photo playing a video: a white play icon in a ring in the middle */
+.branding-card .branding-card-media[data-action='video']::before,
+.branding-card .branding-card-media[data-action='video']::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.branding-card .branding-card-media[data-action='video']::before {
+  z-index: 1;
+  width: 20px;
+  height: 20px;
+  margin-left: 2px;
+  background-color: var(--color-text-inverse);
+  mask: url('../../icons/play.svg') center / contain no-repeat;
+}
+
+.branding-card .branding-card-media[data-action='video']::after {
+  width: 56px;
+  height: 56px;
+  border: var(--base-border-width) solid var(--color-text-inverse);
+  border-radius: var(--radius-circle);
+  background-color: rgb(0 0 0 / 25%);
+}
+
+/* the tint, shown on hover and focus */
+.branding-card .branding-card-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-color: var(--branding-card-tint);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-slow) var(--ease-standard);
+}
+
+.branding-card .branding-card-body {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: var(--branding-card-inset-block) var(--branding-card-inset-inline) var(--spacing-6);
+  text-align: start;
+  pointer-events: none;
+}
+
+.branding-card .branding-card-title {
+  flex: none;
+  max-width: 220px;
+  margin: 0;
+  color: inherit;
+  font-family: var(--branding-card-title-font);
+  font-size: var(--branding-card-title-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-heading);
+  text-transform: uppercase;
+  text-shadow: 0 0 5px #000;
+}
+
+/* the text: hidden until hover or focus (still read by screen readers); a long text scrolls
+   inside the card instead of running under the buttons */
+.branding-card .branding-card-text {
+  flex: 0 1 auto;
+  min-height: 0;
+  margin-top: var(--spacing-3);
+  overflow-y: auto;
+  font-size: var(--body-font-size);
+  line-height: var(--line-height-body);
+  opacity: 0;
+  transition: opacity var(--duration-slow) var(--ease-standard);
+}
+
+.branding-card .branding-card-text > :first-child {
+  margin-top: 0;
+}
+
+.branding-card .branding-card-text > :last-child {
+  margin-bottom: 0;
+}
+
+.branding-card .branding-card-text a:any-link {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* the buttons at the bottom, side by side when they fit, else stacked 15px apart */
+.branding-card .branding-card-actions {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-6) var(--spacing-2);
+  padding: 0 0 45px;
+}
+
+.branding-card .branding-card-actions .button-wrapper {
+  margin: 0;
+}
+
+.branding-card .branding-card-actions :is(a.button, button.button) {
+  border-color: transparent;
+  background-color: var(--branding-card-maroon);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-relaxed);
+  transition:
+    color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+}
+
+.branding-card .branding-card-actions button.button[data-action='video'] {
+  border-radius: var(--radius-lg);
+}
+
+.branding-card .branding-card-actions :is(a.button, button.button):hover,
+.branding-card .branding-card-actions :is(a.button, button.button):focus-visible {
+  border-color: transparent;
+  background-color: var(--color-background);
+  color: var(--color-brand-primary-action);
+}
+
+/* a light focus ring over the photo */
+.branding-card .branding-card-item :focus-visible {
+  outline: 2px solid var(--color-text-inverse);
+  outline-offset: 2px;
+}
+
+/* revealed: hover, keyboard focus on a button, or a card with nothing to hover or focus */
+.branding-card .branding-card-item:is(:hover, :focus-within, .no-actions)::before,
+.branding-card .branding-card-item:is(:hover, :focus-within, .no-actions) .branding-card-text {
+  opacity: 1;
+}
+
+.branding-card .branding-card-item:is(:hover, :focus-within, .no-actions) .branding-card-title {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-medium);
+  text-shadow: none;
+}
+
+/* the scrolling text takes pointer events once shown, so a long text can be scrolled */
+.branding-card .branding-card-item:is(:hover, :focus-within, .no-actions) .branding-card-text {
+  pointer-events: auto;
+}
+
+/* without a photo the card is maroon, so the tint isn't needed */
+.branding-card .branding-card-item.no-media::before {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .branding-card .branding-card-item::before,
+  .branding-card .branding-card-text {
+    transition: none;
+  }
+}
+
+/* breakpoint-exception: the source grid goes to 2 cards per row at 520px */
+@media (width >=520px) {
+  .branding-card .branding-card-item {
+    flex-basis: 45%;
+    aspect-ratio: 45 / 55;
+    margin: 1% 0.5%;
+  }
+}
+
+@media (width >=768px) {
+  .branding-card .branding-card-item {
+    flex-basis: 40%;
+    aspect-ratio: 278 / 261;
+  }
+}
+
+@media (width >=992px) {
+  .branding-card {
+    --branding-card-title-size: 28px;
+    --branding-card-inset-block: var(--spacing-10);
+    --branding-card-inset-inline: var(--spacing-7);
+  }
+
+  .branding-card .branding-card-item {
+    flex-basis: 32%;
+    aspect-ratio: 415 / 471;
+  }
+}

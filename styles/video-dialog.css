@@ -1,0 +1,108 @@
+/* video popup (scripts/video-dialog.js), as the source's Fancybox video: a 16:9 player centred over
+   a near-black backdrop, with a white close button in the top right corner */
+body.video-dialog-open {
+  overflow: hidden;
+}
+
+/* the dialog fills the screen, so a click beside the player lands on it (the backdrop area) */
+dialog.video-dialog {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  padding: var(--spacing-11) var(--spacing-6);
+  background: none;
+}
+
+dialog.video-dialog:not([open]) {
+  display: none;
+}
+
+dialog.video-dialog::backdrop {
+  background-color: rgb(24 24 27 / 92%);
+}
+
+dialog.video-dialog[open],
+dialog.video-dialog[open]::backdrop {
+  animation: video-dialog-fade-in var(--duration-medium) var(--ease-standard);
+}
+
+/* the largest 16:9 box that fits the screen */
+.video-dialog-frame {
+  width: min(100%, calc((100vh - 2 * var(--spacing-11)) * 16 / 9));
+  aspect-ratio: 16 / 9;
+  background-color: #000;
+}
+
+.video-dialog-frame :is(iframe, video) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.video-dialog-close {
+  position: absolute;
+  top: var(--spacing-3);
+  right: var(--spacing-3);
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-circle);
+  padding: 0;
+  background: none;
+  color: var(--color-text-inverse);
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.video-dialog-close:hover,
+.video-dialog-close:focus-visible {
+  opacity: 1;
+}
+
+.video-dialog-close:focus-visible {
+  outline-color: var(--color-text-inverse);
+}
+
+.video-dialog-close::before,
+.video-dialog-close::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 25%;
+  width: 50%;
+  height: 2px;
+  background-color: currentcolor;
+  transform: rotate(45deg);
+}
+
+.video-dialog-close::after {
+  transform: rotate(-45deg);
+}
+
+@keyframes video-dialog-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog.video-dialog[open],
+  dialog.video-dialog[open]::backdrop {
+    animation: none;
+  }
+}
+
+@media (width >=1024px) {
+  .video-dialog-close {
+    right: var(--spacing-10);
+  }
+}

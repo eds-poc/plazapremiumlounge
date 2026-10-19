@@ -53,6 +53,16 @@ const TEXTS = {
   accountTitle: {
     en: 'Account', zh: '账户', 'zh-HK': '帳戶', ja: 'アカウント', pt: 'Conta',
   },
+  // video links and the video popup
+  watchVideo: {
+    en: 'Watch Video', zh: '观看视频', 'zh-HK': '觀看影片', ja: '動画を見る', pt: 'Assistir ao vídeo',
+  },
+  playVideo: {
+    en: 'Play video: {name}', zh: '播放视频：{name}', 'zh-HK': '播放影片：{name}', ja: '動画を再生：{name}', pt: 'Reproduzir vídeo: {name}',
+  },
+  video: {
+    en: 'Video', zh: '视频', 'zh-HK': '影片', ja: '動画', pt: 'Vídeo',
+  },
   backToTop: {
     en: 'Back to top', zh: '返回顶部', 'zh-HK': '返回頂部', ja: 'ページの先頭へ戻る', pt: 'Voltar ao topo',
   },

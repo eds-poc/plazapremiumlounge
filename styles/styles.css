@@ -559,6 +559,18 @@ button.button.arrow::after {
   mask: url('../icons/arrow-right.svg') center / contain no-repeat;
 }
 
+/* video: a play icon before the label of any button that plays a video (scripts/video.js), 8px
+   away, as the source's "▶ Watch Video" */
+button.button[data-action='video']::before {
+  content: '';
+  flex: none;
+  width: 0.875em;
+  height: 0.875em;
+  margin-right: var(--spacing-3);
+  background-color: currentcolor;
+  mask: url('../icons/play.svg') center / contain no-repeat;
+}
+
 a.button.secondary:hover,
 a.button.secondary:focus-visible,
 button.button.secondary:hover,
