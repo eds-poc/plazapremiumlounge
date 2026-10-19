@@ -17,7 +17,6 @@
   --property-detail-badge-icon: 18px;
   --property-detail-tip-width: 200px;
   --property-detail-tip-shadow: 0 8px 24px rgb(0 0 0 / 20%);
-  --property-detail-bar-height: 82px;
   --property-detail-photo-shade: rgb(217 217 217);
   --property-detail-photo-fade: 300px;
   --property-detail-intro-radius: 25px;
@@ -786,7 +785,6 @@ dialog.modal.property-detail-modal {
   inset-inline: 0;
   inset-block-end: 0;
   z-index: 11;
-  min-height: var(--property-detail-bar-height);
   box-sizing: border-box;
   padding: var(--spacing-3) var(--spacing-4);
   background-color: var(--color-background);
@@ -867,14 +865,25 @@ dialog.modal.property-detail-modal {
   font-weight: var(--font-weight-medium);
 }
 
-/* leave room for the bar at the end of the page */
+/* leave room for the bar at the end of the page: its height, measured (see the block script) */
 .property-detail.is-mobile {
-  padding-bottom: var(--property-detail-bar-height);
+  padding-bottom: var(--property-detail-bar-space, 0);
 }
 
 /* the lounge's description sits in the intro on phones, so The Lounge panel isn't shown */
 .property-detail.is-mobile .accordion.detail>.property-detail-panel-lounge {
   display: none;
+}
+
+/* phones: the panels are static headings over their content, as the source (setPanelsMode in
+   the block script keeps them open): no arrow; the headings keep their desktop shade (#333 for
+   the panels open on desktop, #212529 for the others) */
+.property-detail .accordion.detail.is-static .accordion-question::after {
+  display: none;
+}
+
+.property-detail .accordion.detail.is-static > [data-desktop-open='false'] > .accordion-question {
+  color: var(--color-text-control);
 }
 
 /* phones: Available Services is a grey card */
@@ -1066,7 +1075,6 @@ dialog.modal.property-detail-modal {
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   .property-detail-slider-track,
   .property-detail-photos::after,
   .property-detail-get-price,

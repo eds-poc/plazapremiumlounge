@@ -17,8 +17,8 @@ folder serves every lounge: `/en-uk/find/lounge`, `/zh-cn/find/lounge`, `/zh-hk/
 - **Phones:**
   - a grey intro: a photo slider, the Departures/Arrivals badge, the name, location, hours and
     description
-  - the panels
-  - a bar fixed at the bottom: the lowest price, **Book your visit** (the booking form in a
+  - the panels, all shown open as on the source (no arrows; the headings don't open or close them)
+  - a bar fixed at the bottom (as tall as its content: shorter without a Smart Traveller line): the lowest price, **Book your visit** (the booking form in a
     pop-up) and the Smart Traveller line
 - **Plaza Premium First** lounges are green instead of maroon.
 

@@ -617,12 +617,35 @@ async function buildPanels(lounge, description) {
   wrapper.append(accordion);
   decorateBlock(accordion);
   await loadBlock(accordion);
-  // each panel named by its content (property-detail-panel-services is a card on phones)
+  // each panel named by its content (property-detail-panel-services is a card on phones); the
+  // first two open on desktop, as the source
   [...accordion.querySelectorAll(':scope > details')].forEach((item, i) => {
     if (rows[i]) item.classList.add(`property-detail-panel-${rows[i][0]}`);
-    if (i < 2) item.open = true;
+    item.dataset.desktopOpen = i < 2;
+    item.open = i < 2;
+  });
+  // phones show every panel open, and their headings don't close them (see setPanelsMode)
+  accordion.addEventListener('click', (e) => {
+    if (accordion.classList.contains('is-static') && e.target.closest('summary')) e.preventDefault();
   });
   return wrapper;
+}
+
+/**
+ * The panels on phones, as the source: every panel open, no arrows, and the headings don't open
+ * or close anything (out of the tab order); on desktop, accordions again, the first two open.
+ * @param {HTMLElement} panels The accordion's wrapper
+ * @param {boolean} mobile
+ */
+function setPanelsMode(panels, mobile) {
+  const accordion = panels.querySelector('.accordion');
+  accordion.classList.toggle('is-static', mobile);
+  accordion.querySelectorAll(':scope > details').forEach((item) => {
+    item.open = mobile || item.dataset.desktopOpen === 'true';
+    const summary = item.querySelector(':scope > summary');
+    if (mobile) summary.tabIndex = -1;
+    else summary.removeAttribute('tabindex');
+  });
 }
 
 /**
@@ -729,6 +752,10 @@ export default async function decorate(block) {
     const bar = buildBar(lounge, booking, settings);
     block.classList.toggle('property-detail-first', lounge.first);
     block.replaceChildren(band, intro, body, bar);
+    // the page ends with room for the bar, as tall as it is (no Smart Traveller line: shorter)
+    new ResizeObserver(() => {
+      block.style.setProperty('--property-detail-bar-space', `${bar.offsetHeight}px`);
+    }).observe(bar);
 
     // phones: the slider, the name and the description share the grey intro; desktop: the name in
     // the band, the photos beside the booking panel, the description in The Lounge panel
@@ -745,6 +772,7 @@ export default async function decorate(block) {
         }
       }
       block.classList.toggle('is-mobile', mobile.matches);
+      setPanelsMode(panels, mobile.matches);
     };
     mobile.addEventListener('change', place);
     place();
