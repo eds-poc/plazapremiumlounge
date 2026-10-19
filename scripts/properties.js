@@ -169,17 +169,45 @@ export function getApiLanguage() {
 }
 
 /**
- * The lounge's detail page on this site: the template page in the current site folder, with the
- * lounge and its price currency, as the source's links (`?propertycode=…&currency=…`). The detail
- * page picks the date and time itself, at the lounge's own time zone.
- * @param {string} code The property code
- * @param {string} [currency] The currency of the lounge's prices
- * @returns {string} A site-relative URL
+ * Whether a value is a real calendar date as YYYY-MM-DD (not e.g. 2026-02-30).
+ * @param {string} value
+ * @returns {boolean}
  */
-export function propertyDetailUrl(code, currency) {
-  const params = new URLSearchParams({ propertycode: code });
-  if (currency) params.set('currency', currency);
-  return `/${getSiteFolder() || DEFAULT_SITE}/find/lounge?${params}`;
+export function isIsoDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return false;
+  const d = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
+}
+
+/**
+ * The lounge template page for the current site folder (e.g. /en-uk/find/lounge).
+ * @returns {string}
+ */
+export function propertyDetailPath() {
+  return `/${getSiteFolder() || DEFAULT_SITE}/find/lounge`;
+}
+
+/**
+ * A lounge's detail page on this site, as the source's links: the lounge page (`base`, else the
+ * template page in the current site folder) with `propertycode`, and `currency`, `date` and `time`
+ * when given and valid (the detail page picks the date and time itself otherwise, at the lounge's
+ * own time zone). A query already on `base` is kept.
+ * @param {string} code The property code
+ * @param {{base?: string, currency?: string, date?: string, time?: string}} [options]
+ * @returns {string} A site-relative URL, or '' without a valid property code
+ */
+export function propertyDetailUrl(code, {
+  base, currency, date, time,
+} = {}) {
+  const value = (code || '').trim().toUpperCase();
+  if (!/^[A-Z0-9]+$/.test(value)) return '';
+  const url = new URL(base || propertyDetailPath(), window.location.origin);
+  url.searchParams.set('propertycode', value);
+  const money = (currency || '').trim().toUpperCase();
+  if (/^[A-Z]{3}$/.test(money)) url.searchParams.set('currency', money);
+  if (isIsoDate(date)) url.searchParams.set('date', date);
+  if (/^([01]\d|2[0-3])[0-5]\d$/.test(time || '')) url.searchParams.set('time', time);
+  return `${url.pathname}${url.search}`;
 }
 
 /**
@@ -238,8 +266,6 @@ export function readProperty(item) {
     departure: type !== PASS && journeys.includes('departure'),
     arrival: type !== PASS && journeys.includes('arrival'),
     note: (item.note || '').trim(),
-    // the lounge's page on this site (the service's targetUrl points at the source site)
-    link: item.propertyCode ? propertyDetailUrl(item.propertyCode, prices[0]?.currency) : '',
   };
 }
 

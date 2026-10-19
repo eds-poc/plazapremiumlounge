@@ -85,9 +85,6 @@ const TEXTS = {
   propertyFrom: {
     en: 'from', zh: '起', 'zh-HK': '起', ja: '〜', pt: 'a partir de',
   },
-  propertyView: {
-    en: 'View', zh: '查看', 'zh-HK': '查看', ja: '詳細', pt: 'Ver',
-  },
   propertyMore: {
     en: '+{n} more', zh: '+{n} 项', 'zh-HK': '+{n} 項', ja: '他 {n} 件', pt: '+{n} mais',
   },

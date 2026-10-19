@@ -2,14 +2,16 @@ import { applyButtonAction } from '../../scripts/button-actions.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { getLanguage, translate } from '../../scripts/i18n.js';
 import {
-  buildBadge, buildSlider, el, fetchJson, getApiLanguage, isPreview, readProperty, safeNote,
-  setLoading, toKey, toUrl,
+  buildBadge, buildSlider, el, fetchJson, getApiLanguage, isPreview, propertyDetailPath,
+  propertyDetailUrl, readProperty, safeNote, setLoading, toKey, toUrl,
 } from '../../scripts/properties.js';
 
 const TIMEOUT_MS = 8000;
 const VISIBLE_TAGS = 5;
 const MOBILE = '(width < 768px)';
 const GROUPS = ['airport', 'service', 'feature'];
+// this site's preview and live hosts: a View now link to them is a page on this site
+const SITE_HOSTS = /^[\w-]+--plazapremiumlounge--eds-poc\.aem\.(page|live)$/;
 
 let blockCount = 0;
 
@@ -200,9 +202,16 @@ function buildCard(property, id, eager, settings) {
   if (property.departure) top.append(buildBadge('departure', `${id}-dep`));
   if (property.arrival) top.append(buildBadge('arrival', `${id}-arr`));
   const title = el('h3', 'property-card-title');
-  if (property.link) {
+  // the authored View now button and the name link to the lounge's page (none without the button)
+  const { view } = settings;
+  const detail = view ? propertyDetailUrl(property.code, {
+    ...view.params,
+    base: view.base,
+    currency: property.price?.currency || view.params.currency,
+  }) : '';
+  if (detail) {
     const link = el('a', '', property.name);
-    link.href = property.link;
+    link.href = detail;
     title.append(applyButtonAction(link));
   } else {
     title.textContent = property.name;
@@ -236,7 +245,7 @@ function buildCard(property, id, eager, settings) {
   }
   const bottom = el('div', 'property-card-bottom');
   if (property.features.length) bottom.append(buildFeatures(property.features, `${id}-more`));
-  if (property.price || property.link) {
+  if (property.price || detail) {
     const action = el('div', 'property-card-action');
     if (property.price) {
       const price = el('p', 'property-card-price', `${translate('propertyFrom')} `);
@@ -247,12 +256,12 @@ function buildCard(property, id, eager, settings) {
       price.append(el('strong', '', `${property.price.currency} ${amount}`));
       action.append(price);
     }
-    if (property.link) {
-      const view = el('a', 'button', translate('propertyView'));
-      view.href = property.link;
-      view.setAttribute('aria-label', `${translate('propertyView')} ${property.name}`);
+    if (detail) {
+      const button = el('a', 'button', view.label);
+      button.href = detail;
+      button.setAttribute('aria-label', `${view.label} ${property.name}`);
       const wrap = el('p', 'property-card-view');
-      wrap.append(applyButtonAction(view));
+      wrap.append(applyButtonAction(button));
       action.append(wrap);
     }
     bottom.append(action);
@@ -421,15 +430,44 @@ function showMessage(results, text, retry, hint) {
 }
 
 /**
- * The authored settings: rows of name | value, `city-code` (e.g. HKHKG) and `signup-button` (a
- * link, e.g. [Join here](…)); names ignore capitals and spaces. A table with a single value is read
- * as the city code.
+ * The View now button's settings from its row: a link (its text is the label, its address the
+ * lounge page, a page on this site) or plain text (the label; the lounge page in the page's site
+ * folder). The listing page's own `currency`, `date` and `time` are passed on to the lounge pages.
+ * @param {HTMLElement} value The row's value cell
+ * @returns {{label: string, base: string, params: Object<string, string>}|null}
+ */
+function readViewButton(value) {
+  const link = value.querySelector('a[href]');
+  const label = (link || value).textContent.trim();
+  if (!label) return null;
+  let base = propertyDetailPath();
+  if (link) {
+    const href = toUrl(link.getAttribute('href'));
+    const url = href ? new URL(href) : null;
+    if (url && (url.origin === window.location.origin || SITE_HOSTS.test(url.hostname)) && url.pathname !== '/') {
+      base = `${url.pathname}${url.search}`;
+    } else if (isPreview()) {
+      // eslint-disable-next-line no-console
+      console.warn(`property-list: view-button links to "${href}", not a page on this site; using ${base}`);
+    }
+  }
+  const page = new URLSearchParams(window.location.search);
+  const params = Object.fromEntries(['currency', 'date', 'time']
+    .map((name) => [name, (page.get(name) || '').trim()]).filter(([, v]) => v));
+  return { label, base, params };
+}
+
+/**
+ * The authored settings: rows of name | value, `city-code` (e.g. HKHKG), `view-button` (a link,
+ * e.g. [View now](/en-uk/find/lounge), or plain text) and `signup-button` (a link, e.g.
+ * [Join here](…)); names ignore capitals and spaces. A table with a single value is read as the
+ * city code.
  * @param {HTMLElement} block
- * @returns {{city: string, signup: {href: string, label: string}|null}}
+ * @returns {{city: string, view: Object|null, signup: {href: string, label: string}|null}}
  */
 function readSettings(block) {
   const rows = [...block.children].map((row) => [...row.children]);
-  const settings = { city: '', signup: null };
+  const settings = { city: '', view: null, signup: null };
   const pairs = rows.filter((cells) => cells.length >= 2);
   if (!pairs.length) {
     settings.city = block.textContent.trim().replace(/\s+/g, '').toUpperCase();
@@ -438,6 +476,7 @@ function readSettings(block) {
   pairs.forEach(([name, value]) => {
     const key = toKey(name.textContent);
     if (key === 'city-code') settings.city = value.textContent.trim().replace(/\s+/g, '').toUpperCase();
+    if (key === 'view-button') settings.view = readViewButton(value);
     if (key === 'signup-button') {
       const link = value.querySelector('a[href]');
       const href = toUrl(link?.getAttribute('href'));

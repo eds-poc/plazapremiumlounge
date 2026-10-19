@@ -7,8 +7,8 @@ import { getLanguage, translate } from '../../scripts/i18n.js';
 import { enableLightbox } from '../../scripts/lightbox.js';
 import { openModal } from '../../scripts/modal-dialog.js';
 import {
-  buildBadge, buildSlider, el, fetchJson, getApiLanguage, isPreview, readProperty, safeHtml,
-  setLoading, toKey, toUrl,
+  buildBadge, buildSlider, el, fetchJson, getApiLanguage, isIsoDate, isPreview, readProperty,
+  safeHtml, setLoading, toKey, toUrl,
 } from '../../scripts/properties.js';
 
 // the detail service is slow (typically 4-7s, at times over 20s)
@@ -111,8 +111,7 @@ function toTime(minutes) {
 function chooseSlot(params, timeZone) {
   const now = nowAt(timeZone);
   const nextSlot = Math.ceil((now.minutes + 1) / SLOT_MINUTES) * SLOT_MINUTES;
-  let date = /^\d{4}-\d{2}-\d{2}$/.test(params.date) && !Number.isNaN(Date.parse(params.date))
-    && params.date >= now.date ? params.date : now.date;
+  let date = isIsoDate(params.date) && params.date >= now.date ? params.date : now.date;
   const asked = /^\d{4}$/.test(params.time) ? Number(params.time.slice(0, 2)) * 60 + Number(params.time.slice(2)) : NaN;
   let minutes = asked >= 0 && asked < DAY_MINUTES
     ? Math.ceil(asked / SLOT_MINUTES) * SLOT_MINUTES : nextSlot % DAY_MINUTES;
