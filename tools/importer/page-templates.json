@@ -1,0 +1,35 @@
+{
+  "templates": [
+    {
+      "name": "branding-card-test",
+      "urls": [
+        "https://www.plazapremiumlounge.com/en-uk/your-destination-before-departure"
+      ],
+      "description": "Branding Card test page (/en-uk/drafts/blocks/branding-card): the source's \"Your Destination Before Departure\" destination grid, plus cases for missing fields",
+      "blocks": [
+        {
+          "name": "branding-card",
+          "instances": [
+            "section.branding .grid-wrapper"
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "id": "section-1",
+          "name": "Your Destination Before Departure",
+          "selector": [
+            "section.branding"
+          ],
+          "style": "fixed-width",
+          "blocks": [
+            "branding-card"
+          ],
+          "defaultContent": [
+            "section.branding > .container > h2"
+          ]
+        }
+      ]
+    }
+  ]
+}
