@@ -36,6 +36,10 @@
   --property-detail-container: calc(100% + 2 * var(--container-padding));
 }
 
+.section.property-detail-container {
+  padding: 0;
+}
+
 /* ---------- title band (desktop) ---------- */
 .property-detail-band {
   display: none;
@@ -75,7 +79,7 @@
 .property-detail-badge {
   position: relative;
   display: inline-flex;
-  gap: var(--spacing-1);
+  gap: var(--spacing-2);
   align-items: center;
   margin: 0 0 var(--spacing-5);
   padding: var(--spacing-campaign-xs) var(--spacing-5);
@@ -144,7 +148,7 @@
 }
 
 /* the intro's content in the same column as the panels below */
-.property-detail-intro > * {
+.property-detail-intro>* {
   max-width: calc(var(--property-detail-container) - 2 * var(--container-padding));
   margin-inline: auto;
 }
@@ -276,7 +280,7 @@
 }
 
 /* the source's "<" between the items */
-.property-detail-crumbs li + li::before {
+.property-detail-crumbs li+li::before {
   content: '<';
   padding-inline-end: var(--spacing-3);
   color: rgb(33 37 41 / 75%);
@@ -304,6 +308,8 @@
   background: linear-gradient(transparent, var(--property-detail-photo-shade)) bottom / 100% var(--property-detail-photo-fade) no-repeat;
   pointer-events: none;
   transition: opacity var(--duration-normal) var(--ease-standard);
+  border-bottom-right-radius: var(--radius-md);
+  border-bottom-left-radius: var(--radius-md);
 }
 
 .property-detail-photos:is(:hover, :focus-within)::after {
@@ -658,7 +664,7 @@ dialog.modal.property-detail-modal {
 }
 
 /* the two guest rows sit close together */
-.property-detail-modal .property-detail-field:has(.property-detail-counter) + .property-detail-field:has(.property-detail-counter) {
+.property-detail-modal .property-detail-field:has(.property-detail-counter)+.property-detail-field:has(.property-detail-counter) {
   margin-top: calc(2 * var(--spacing-1) - var(--property-detail-modal-gap));
 }
 
@@ -706,7 +712,7 @@ dialog.modal.property-detail-modal {
   margin-top: var(--spacing-9);
 }
 
-.property-detail-description > :first-child {
+.property-detail-description> :first-child {
   margin-top: 0;
 }
 
@@ -714,7 +720,7 @@ dialog.modal.property-detail-modal {
   margin: 0 0 var(--spacing-7);
 }
 
-.property-detail-description > :last-child {
+.property-detail-description> :last-child {
   margin-bottom: 0;
 }
 
@@ -822,7 +828,7 @@ dialog.modal.property-detail-modal {
 
 /* breakpoint-exception: the source's button steps on small phones (10px side padding up to
    340px, 20px above 380px) */
-@media (width <= 340px) {
+@media (width <=340px) {
   .property-detail-bar-book {
     padding-inline: var(--spacing-4);
   }
@@ -867,12 +873,12 @@ dialog.modal.property-detail-modal {
 }
 
 /* the lounge's description sits in the intro on phones, so The Lounge panel isn't shown */
-.property-detail.is-mobile .accordion.detail > .property-detail-panel-lounge {
+.property-detail.is-mobile .accordion.detail>.property-detail-panel-lounge {
   display: none;
 }
 
 /* phones: Available Services is a grey card */
-.property-detail.is-mobile .accordion.detail > .property-detail-panel-services {
+.property-detail.is-mobile .accordion.detail>.property-detail-panel-services {
   padding: var(--spacing-4) var(--spacing-8);
   border-radius: var(--radius-md);
   background-color: var(--color-surface-warm);
@@ -914,14 +920,14 @@ dialog.modal.property-detail-modal {
 }
 
 /* breakpoint-exception: the source's bar button grows to 12px from 480px */
-@media (width >= 480px) {
+@media (width >=480px) {
   .property-detail-bar-book {
     font-size: var(--font-size-xs);
   }
 }
 
 /* breakpoint-exception: the source's Bootstrap container widths */
-@media (width >= 576px) {
+@media (width >=576px) {
   .property-detail {
     --property-detail-container: 540px;
   }
@@ -931,7 +937,7 @@ dialog.modal.property-detail-modal {
     font-size: var(--font-size-sm);
   }
 
-  .property-detail.is-mobile .accordion.detail > .property-detail-panel-services {
+  .property-detail.is-mobile .accordion.detail>.property-detail-panel-services {
     padding: var(--spacing-4) var(--spacing-9) var(--spacing-8);
   }
 
@@ -941,7 +947,7 @@ dialog.modal.property-detail-modal {
   }
 }
 
-@media (width >= 768px) {
+@media (width >=768px) {
   .property-detail {
     --property-detail-container: 720px;
   }
@@ -1025,23 +1031,23 @@ dialog.modal.property-detail-modal {
   }
 
   /* the guests take a row each until 1200px, as the source */
-  .property-detail-fields > .property-detail-field:has(.property-detail-counter) {
+  .property-detail-fields>.property-detail-field:has(.property-detail-counter) {
     grid-column: 1 / -1;
   }
 }
 
-@media (width >= 992px) {
+@media (width >=992px) {
   .property-detail {
     --property-detail-container: 960px;
   }
 }
 
-@media (width >= 1200px) {
+@media (width >=1200px) {
   .property-detail {
     --property-detail-container: 1140px;
   }
 
-  .property-detail-fields > .property-detail-field:has(.property-detail-counter) {
+  .property-detail-fields>.property-detail-field:has(.property-detail-counter) {
     grid-column: auto;
   }
 
@@ -1053,13 +1059,14 @@ dialog.modal.property-detail-modal {
 }
 
 /* breakpoint-exception: the source container's widest step */
-@media (width >= 1400px) {
+@media (width >=1400px) {
   .property-detail {
     --property-detail-container: 1320px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .property-detail-slider-track,
   .property-detail-photos::after,
   .property-detail-get-price,
