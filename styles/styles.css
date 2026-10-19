@@ -699,6 +699,13 @@ main>.section.inset {
   }
 }
 
+/* section style flush-top: no space above the section at any width, e.g. a hero section, so the
+   banner starts right under the header as on the source (`section.pt-0`). Works with any other
+   section style */
+main>.section.flush-top {
+  padding-top: 0;
+}
+
 main .section.wide>div {
   max-width: var(--container-wide-max-width);
   padding-inline: var(--container-wide-padding);
