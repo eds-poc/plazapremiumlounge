@@ -52,7 +52,7 @@ On an offer page, put it in its own white band section (Section Metadata `Style`
 | Cards (steps) | |
 | --- | --- |
 | :person-add: | ### Register<br>Become a Smart Traveller member |
-| :card: | ### Link Card<br>Connect CTBC card via “Link My Card” in App |
+| :card: | ### Link Card<br>Connect CTBC card via "Link My Card" in App |
 | :exchange: | ### Convert Points<br>Exchange points at 1,000:80 rate |
 
 On an offer page, put it after a `Title (headline, center-all)` in a section with Section Metadata

@@ -108,7 +108,7 @@
   color: var(--color-campaign-navy);
   font-family: var(--font-family-primary);
   font-size: var(--promo-light-heading-size);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-campaign-bold);
   line-height: var(--line-height-heading);
 }
 
@@ -144,17 +144,20 @@
   content: none;
 }
 
-.promo.light .promo-button:hover,
+/* keyboard focus: the resting look (the source doesn't lift it), with a dark ring on the light box */
 .promo.light .promo-button:focus-visible {
+  background-color: var(--color-campaign-orange);
+  box-shadow: var(--promo-light-shadow);
+  color: var(--color-text-inverse);
+  outline-color: var(--color-campaign-navy);
+}
+
+/* hover lifts it, as the source (also when focused) */
+.promo.light .promo-button:hover {
   background-color: var(--color-campaign-orange);
   box-shadow: var(--promo-light-shadow-hover);
   color: var(--color-text-inverse);
   transform: translateY(var(--promo-light-lift));
-}
-
-/* a dark focus ring on the light box */
-.promo.light .promo-button:focus-visible {
-  outline-color: var(--color-campaign-navy);
 }
 
 @media (prefers-reduced-motion: reduce) {
