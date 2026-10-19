@@ -1,8 +1,10 @@
 /*
  * Video links: a link to a YouTube or Vimeo video, or to a video file, plays in a popup instead of
  * leaving the page, wherever it is authored (a block button, a linked image or plain text). The
- * popup (video-dialog.js) loads on first use. Links that aren't videos are left alone.
+ * popup (video-dialog.js) loads on first use. Links that aren't videos are left alone, except in a
+ * video dialog button (Buttons (video dialog)), which always opens the popup.
  */
+import { translate } from './i18n.js';
 
 const YOUTUBE_HOSTS = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtube-nocookie.com', 'www.youtube-nocookie.com'];
 const VIMEO_HOSTS = ['vimeo.com', 'www.vimeo.com', 'player.vimeo.com'];
@@ -41,9 +43,11 @@ function vimeoVideo(url) {
 }
 
 /**
- * How a link plays as a video: an embedded player (`iframe`) or a video file (`file`).
+ * How a link plays as a video: an embedded player (`iframe`) or a video file (`file`), with the
+ * provider and the original link (for the popup's fallback link).
  * @param {string} href
- * @returns {{type: 'iframe'|'file', src: string}|null} null when the link isn't a video
+ * @returns {{type: 'iframe'|'file', provider: 'youtube'|'vimeo'|'file', src: string,
+ *   href: string}|null} null when the link isn't a video
  */
 export function getVideo(href) {
   let url;
@@ -62,7 +66,9 @@ export function getVideo(href) {
     // a start time in seconds (?t=90 or ?t=90s)
     const start = (url.searchParams.get('t') || url.searchParams.get('start') || '').match(/^(\d+)s?$/);
     if (start) src.searchParams.set('start', start[1]);
-    return { type: 'iframe', src: src.href };
+    return {
+      type: 'iframe', provider: 'youtube', src: src.href, href: url.href,
+    };
   }
 
   const vimeo = vimeoVideo(url);
@@ -71,22 +77,29 @@ export function getVideo(href) {
     if (vimeo.hash) src.searchParams.set('h', vimeo.hash);
     src.searchParams.set('autoplay', '1');
     src.searchParams.set('dnt', '1');
-    return { type: 'iframe', src: src.href };
+    return {
+      type: 'iframe', provider: 'vimeo', src: src.href, href: url.href,
+    };
   }
 
-  if (VIDEO_FILE.test(url.pathname)) return { type: 'file', src: url.href };
+  if (VIDEO_FILE.test(url.pathname)) {
+    return {
+      type: 'file', provider: 'file', src: url.href, href: url.href,
+    };
+  }
   return null;
 }
 
 /**
- * Opens a video link in the video popup.
+ * Opens a video link in the video popup. A link that isn't a video we can play (only possible from
+ * a Buttons (video dialog) button) opens the popup's fallback: a message and a link to open it.
  * @param {string} href The video link
  * @param {HTMLElement} [trigger] The element that opened it; focus returns here
  * @param {string} [title] What the video is (e.g. the card heading), for screen readers
  */
 export async function openVideo(href, trigger, title) {
-  const video = getVideo(href);
-  if (!video) return;
+  const video = getVideo(href)
+    || { type: 'unavailable', href: new URL(href, window.location.href).href };
   const { openVideoDialog } = await import('./video-dialog.js');
   openVideoDialog(video, { trigger, title });
 }
@@ -122,6 +135,50 @@ export function buildVideoButton(link) {
   btn.setAttribute('aria-haspopup', 'dialog');
   btn.addEventListener('click', () => openVideo(btn.dataset.href, btn, videoTitle(btn)));
   return btn;
+}
+
+/**
+ * For a video dialog button (Buttons (video dialog), or a nested Buttons (video dialog) table): a
+ * link written as its own address (a bare video URL) gets the label "Watch Video", without the
+ * address as its title.
+ * @param {HTMLAnchorElement} [link] The authored link
+ */
+export function labelBareVideoLink(link) {
+  if (!link) return;
+  const text = link.textContent.trim();
+  if (text && text !== link.href && text !== link.getAttribute('href')) return;
+  link.textContent = translate('watchVideo');
+  if (link.title === text) link.removeAttribute('title');
+}
+
+/**
+ * Makes a built button (from scripts/buttons.js) a video dialog button: it opens its link in the
+ * video popup. A video link already is one; any other link becomes one too, and the popup shows
+ * its fallback (a message and a link to open it). Disabled buttons stay as they are. The video's
+ * name for screen readers is the link's title, else the label.
+ * @param {HTMLElement} wrapper A p.button-wrapper from buildButton()
+ */
+export function toVideoDialogButton(wrapper) {
+  let control = wrapper?.querySelector('a, button');
+  if (!control || control.getAttribute('aria-disabled') === 'true') return;
+  // the label, without the "opens in a new tab" note of an external link
+  const label = [...control.childNodes]
+    .filter((node) => !node.classList?.contains('visually-hidden'))
+    .map((node) => node.textContent).join('').trim();
+  if (control.dataset.action !== 'video') {
+    const link = document.createElement('a');
+    link.href = control.getAttribute('href') || control.dataset.href;
+    link.className = control.className;
+    link.textContent = label;
+    if (control.title) link.title = control.title;
+    const button = buildVideoButton(link);
+    button.dataset.action = 'video';
+    control.replaceWith(button);
+    control = button;
+  }
+  if (!control.dataset.videoTitle) {
+    control.dataset.videoTitle = control.title && control.title !== label ? control.title : label;
+  }
 }
 
 let installed = false;

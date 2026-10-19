@@ -1,11 +1,19 @@
-/* video popup (scripts/video-dialog.js), as the source's Fancybox video: a 16:9 player centred over
-   a near-black backdrop, with a white close button in the top right corner */
+/* video popup (scripts/video-dialog.js), as the source's Fancybox video: a 16:9 frame of at most
+   960x540px, centred over a near-black backdrop, smaller when the screen is, with a white close
+   button just above the frame's top right corner. A portrait video sits in the middle of the
+   frame, with the frame's dark grey at its sides */
 body.video-dialog-open {
   overflow: hidden;
 }
 
-/* the dialog fills the screen, so a click beside the player lands on it (the backdrop area) */
+/* the dialog fills the screen, so a click beside the frame lands on it (the backdrop area). Its
+   padding is the space kept around the frame: 48px above (room for the close button) and 8px at
+   the sides and below on small screens, 64px above and below and 100px at the sides from 1024px */
 dialog.video-dialog {
+  --video-dialog-padding-top: 48px;
+  --video-dialog-padding-bottom: var(--spacing-3);
+  --video-dialog-padding-inline: var(--spacing-3);
+
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -16,7 +24,8 @@ dialog.video-dialog {
   max-height: none;
   margin: 0;
   border: 0;
-  padding: var(--spacing-11) var(--spacing-6);
+  padding: var(--video-dialog-padding-top) var(--video-dialog-padding-inline)
+    var(--video-dialog-padding-bottom);
   background: none;
 }
 
@@ -33,11 +42,17 @@ dialog.video-dialog[open]::backdrop {
   animation: video-dialog-fade-in var(--duration-medium) var(--ease-standard);
 }
 
-/* the largest 16:9 box that fits the screen */
+/* 960x540px, or the largest 16:9 box that fits the space inside the padding */
 .video-dialog-frame {
-  width: min(100%, calc((100vh - 2 * var(--spacing-11)) * 16 / 9));
+  position: relative;
+  width: min(
+    960px,
+    100%,
+    (100dvh - var(--video-dialog-padding-top) - var(--video-dialog-padding-bottom)) * 16 / 9
+  );
   aspect-ratio: 16 / 9;
-  background-color: #000;
+  background-color: rgb(24 24 27 / 90%);
+  color: var(--color-text-inverse);
 }
 
 .video-dialog-frame :is(iframe, video) {
@@ -45,41 +60,69 @@ dialog.video-dialog[open]::backdrop {
   width: 100%;
   height: 100%;
   border: 0;
+  background: transparent;
 }
 
+/* a video file keeps its own shape (e.g. portrait), centred in the frame */
+.video-dialog-frame video {
+  object-fit: contain;
+}
+
+/* the fallback, when the video can't play here: a message and a link, centred in the frame */
+.video-dialog-fallback {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-7);
+  height: 100%;
+  padding: var(--spacing-7);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+  text-align: center;
+}
+
+.video-dialog-fallback p {
+  margin: 0;
+}
+
+.video-dialog-fallback a.button:focus-visible {
+  outline-color: var(--color-text-inverse);
+}
+
+/* the close button: 36px, a 22px white cross with a soft shadow, 40px above the frame and in line
+   with its right edge; a round ring on keyboard focus */
 .video-dialog-close {
   position: absolute;
-  top: var(--spacing-3);
-  right: var(--spacing-3);
-  width: 44px;
-  height: 44px;
+  top: -40px;
+  right: 0;
+  width: 36px;
+  height: 36px;
   border: 0;
   border-radius: var(--radius-circle);
   padding: 0;
   background: none;
   color: var(--color-text-inverse);
   cursor: pointer;
-  opacity: 0.85;
-  transition: opacity var(--duration-fast) var(--ease-standard);
-}
-
-.video-dialog-close:hover,
-.video-dialog-close:focus-visible {
-  opacity: 1;
+  filter: drop-shadow(1px 1px 1px rgb(0 0 0 / 40%));
 }
 
 .video-dialog-close:focus-visible {
-  outline-color: var(--color-text-inverse);
+  outline: 0;
+  box-shadow: 0 0 0 1px var(--color-text-inverse), 0 0 0 3px rgb(255 255 255 / 60%);
 }
 
 .video-dialog-close::before,
 .video-dialog-close::after {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 25%;
-  width: 50%;
-  height: 2px;
+  top: calc(50% - 1.25px);
+  left: calc(50% - 11px);
+  width: 22px;
+  height: 2.5px;
+  border-radius: 2px;
   background-color: currentcolor;
   transform: rotate(45deg);
 }
@@ -101,8 +144,11 @@ dialog.video-dialog[open]::backdrop {
   }
 }
 
+/* breakpoint-exception: the source's Fancybox popup changes its padding at 1024px */
 @media (width >=1024px) {
-  .video-dialog-close {
-    right: var(--spacing-10);
+  dialog.video-dialog {
+    --video-dialog-padding-top: 64px;
+    --video-dialog-padding-bottom: 64px;
+    --video-dialog-padding-inline: 100px;
   }
 }
