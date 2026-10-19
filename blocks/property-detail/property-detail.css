@@ -18,7 +18,8 @@
   --property-detail-tip-width: 200px;
   --property-detail-tip-shadow: 0 8px 24px rgb(0 0 0 / 20%);
   --property-detail-bar-height: 82px;
-  --property-detail-slider-shade: rgb(217 217 217);
+  --property-detail-photo-shade: rgb(217 217 217);
+  --property-detail-photo-fade: 300px;
   --property-detail-intro-radius: 25px;
   --property-detail-dot: 10px;
   --property-detail-dot-idle: #d6d6d6;
@@ -164,16 +165,6 @@
   aspect-ratio: var(--property-detail-photo-ratio);
 }
 
-/* the source's light fade over the photo, under the dots */
-.property-detail-slider::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background-image: linear-gradient(transparent, var(--property-detail-slider-shade));
-  pointer-events: none;
-}
-
 .property-detail-slider-track {
   display: flex;
   height: 100%;
@@ -271,16 +262,17 @@
   padding: var(--spacing-4) 0 0;
   list-style: none;
   font-size: var(--font-size-md);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-regular);
 }
 
 .property-detail-crumbs li {
   padding: var(--spacing-1) var(--spacing-2) var(--spacing-1) 0;
-  color: var(--color-text-secondary);
+  color: var(--color-text);
 }
 
 .property-detail-crumbs li[aria-current='page'] {
   color: var(--color-brand-primary);
+  font-weight: var(--font-weight-medium);
 }
 
 /* the source's "<" between the items */
@@ -295,9 +287,27 @@
 }
 
 .property-detail-photos {
+  position: relative;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* the source's fade over the foot of the photo column (the last photo): a 300px light-grey
+   gradient on the column, gone while the pointer is over the photos (or, here, a photo has
+   keyboard focus). Unlike the source it lets clicks through to the photo, and it stays inside a
+   column shorter than 300px */
+.property-detail-photos::after {
+  content: '';
+  position: absolute;
+  inset: max(0px, calc(100% - var(--property-detail-photo-fade))) 0 0;
+  background: linear-gradient(transparent, var(--property-detail-photo-shade)) bottom / 100% var(--property-detail-photo-fade) no-repeat;
+  pointer-events: none;
+  transition: opacity var(--duration-normal) var(--ease-standard);
+}
+
+.property-detail-photos:is(:hover, :focus-within)::after {
+  opacity: 0;
 }
 
 .property-detail-photos li {
@@ -423,7 +433,7 @@
   background-position: right var(--spacing-5) center;
   background-repeat: no-repeat;
   background-size: var(--font-size-md) var(--spacing-5);
-  cursor: pointer;
+  cursor: default;
 }
 
 .property-detail-form :is(input, select):focus-visible {
@@ -450,7 +460,7 @@
   border: 0;
   border-radius: var(--radius-input);
   opacity: 0;
-  cursor: pointer;
+  cursor: text;
 }
 
 .property-detail-time {
@@ -490,6 +500,7 @@
   font-size: 15px;
   text-align: center;
   appearance: textfield;
+  cursor: default;
 }
 
 .property-detail-counter input::-webkit-inner-spin-button,
@@ -537,6 +548,11 @@
 
 .property-detail-action:empty {
   display: none;
+}
+
+/* the panel's 15px under the fields' line, above Get Price */
+.property-detail-booking .property-detail-action {
+  margin-top: var(--spacing-6);
 }
 
 .property-detail-get-price {
@@ -747,7 +763,7 @@ dialog.modal.property-detail-modal {
 .property-detail .accordion-answer .property-detail-contact p {
   margin: 0 0 var(--spacing-7);
   color: var(--color-text-secondary);
-  font-weight: var(--font-weight-light);
+  font-weight: var(--font-weight-regular);
 }
 
 .property-detail .accordion-answer .property-detail-contact .property-detail-contact-title {
@@ -804,6 +820,20 @@ dialog.modal.property-detail-modal {
   transition: color var(--duration-normal) var(--ease-standard), background-color var(--duration-normal) var(--ease-standard);
 }
 
+/* breakpoint-exception: the source's button steps on small phones (10px side padding up to
+   340px, 20px above 380px) */
+@media (width <= 340px) {
+  .property-detail-bar-book {
+    padding-inline: var(--spacing-4);
+  }
+}
+
+@media (width > 380px) {
+  .property-detail-bar-book {
+    padding-inline: var(--spacing-7);
+  }
+}
+
 .property-detail-bar-book:is(:hover, :focus-visible) {
   background-color: var(--color-background);
   color: var(--color-brand-primary);
@@ -852,10 +882,6 @@ dialog.modal.property-detail-modal {
   padding-bottom: var(--spacing-4);
 }
 
-.property-detail.is-mobile .accordion-answer .property-detail-contact p:not(.property-detail-contact-title) {
-  font-weight: var(--font-weight-regular);
-}
-
 /* ---------- messages ---------- */
 .property-detail-message {
   padding: var(--spacing-11) 0;
@@ -887,6 +913,13 @@ dialog.modal.property-detail-modal {
   }
 }
 
+/* breakpoint-exception: the source's bar button grows to 12px from 480px */
+@media (width >= 480px) {
+  .property-detail-bar-book {
+    font-size: var(--font-size-xs);
+  }
+}
+
 /* breakpoint-exception: the source's Bootstrap container widths */
 @media (width >= 576px) {
   .property-detail {
@@ -896,6 +929,15 @@ dialog.modal.property-detail-modal {
   .property-detail-bar .property-detail-bar-book {
     padding-inline: var(--spacing-8);
     font-size: var(--font-size-sm);
+  }
+
+  .property-detail.is-mobile .accordion.detail > .property-detail-panel-services {
+    padding: var(--spacing-4) var(--spacing-9) var(--spacing-8);
+  }
+
+  /* Details: location and contact side by side from 576px, as the source */
+  .property-detail-contact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -982,12 +1024,9 @@ dialog.modal.property-detail-modal {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .property-detail-contact {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .property-detail-contact-part {
-    padding-inline-end: var(--spacing-7);
+  /* the guests take a row each until 1200px, as the source */
+  .property-detail-fields > .property-detail-field:has(.property-detail-counter) {
+    grid-column: 1 / -1;
   }
 }
 
@@ -1001,6 +1040,16 @@ dialog.modal.property-detail-modal {
   .property-detail {
     --property-detail-container: 1140px;
   }
+
+  .property-detail-fields > .property-detail-field:has(.property-detail-counter) {
+    grid-column: auto;
+  }
+
+  /* from 1200px the source's Details text is light, 20px short of its title's width */
+  .property-detail .accordion-answer .property-detail-contact p:not(.property-detail-contact-title) {
+    padding-inline-end: var(--spacing-7);
+    font-weight: var(--font-weight-light);
+  }
 }
 
 /* breakpoint-exception: the source container's widest step */
@@ -1012,6 +1061,7 @@ dialog.modal.property-detail-modal {
 
 @media (prefers-reduced-motion: reduce) {
   .property-detail-slider-track,
+  .property-detail-photos::after,
   .property-detail-get-price,
   .property-detail-bar-book {
     transition: none;

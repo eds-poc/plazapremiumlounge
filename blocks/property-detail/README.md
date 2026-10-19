@@ -10,7 +10,8 @@ folder serves every lounge: `/en-uk/find/lounge`, `/zh-cn/find/lounge`, `/zh-hk/
 - **Desktop:**
   - a grey title band: the name, location and opening hours
   - a breadcrumb: Lounges (back to the listing the visitor came from) < the lounge
-  - the first four photos (each opens full size) beside the **Book your visit** panel
+  - the first four photos (each opens full size) beside the **Book your visit** panel; as on the
+    source, the foot of the photo column fades to light grey until the pointer is over the photos
   - the panels: The Lounge, Lounge Features, Available Services, Details (an
     [Accordion](../accordion/README.md) with the `detail` option, the first two open)
 - **Phones:**
