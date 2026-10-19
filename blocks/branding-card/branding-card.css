@@ -81,7 +81,7 @@
   height: 20px;
   margin-left: 2px;
   background-color: var(--color-text-inverse);
-  mask: url('../../icons/play.svg') center / contain no-repeat;
+  mask: url('/icons/play.svg') center / contain no-repeat;
 }
 
 .branding-card .branding-card-media[data-action='video']::after {
@@ -111,7 +111,7 @@
   flex: 1;
   flex-direction: column;
   min-height: 0;
-  padding: var(--branding-card-inset-block) var(--branding-card-inset-inline) var(--spacing-6);
+  padding: var(--branding-card-inset-block) var(--branding-card-inset-inline) var(--spacing-2);
   text-align: start;
   pointer-events: none;
 }

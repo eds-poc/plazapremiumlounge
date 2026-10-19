@@ -583,7 +583,7 @@ button.button[data-action='video']::before {
   height: 0.875em;
   margin-right: var(--spacing-3);
   background-color: currentcolor;
-  mask: url('../icons/play.svg') center / contain no-repeat;
+  mask: url('/icons/play.svg') center / contain no-repeat;
 }
 
 a.button.secondary:hover,
@@ -1186,7 +1186,7 @@ main>.section.boxed-copy .default-content-wrapper strong {
 /* section style bottom-spacing: 20px of extra space below the whole section, outside its
    background, at every width, e.g. under a Featured Carousel (image-inset) */
 main>.section.bottom-spacing {
-  margin-bottom: var(--spacing-7);
+  margin-bottom: var(--spacing-10);
 }
 
 #spinner-overlay {

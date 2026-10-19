@@ -109,6 +109,7 @@
   z-index: 1;
   display: flex;
   flex-wrap: wrap;
+  margin-bottom: 15px;
   justify-content: center;
   gap: var(--spacing-3);
   width: max-content;
