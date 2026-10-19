@@ -936,9 +936,12 @@ main>.section.divided+.section.divided>div:first-child::before {
   content: '';
   display: block;
 
-  /* one-offs: the live page's hr, 28px margins and a 1px #f6f6f6 line (measured) */
+  /* the live page's hr, built the same way: a 1px #ddd bar with 28px margins (its inline style)
+     at 25% opacity (Bootstrap's hr) */
+  height: var(--base-border-width);
   margin-block: 28px;
-  border-top: var(--base-border-width) solid #f6f6f6;
+  background-color: var(--base-border);
+  opacity: 0.25;
 }
 
 /* a links-only section after the lists (the repeated jump links): 120px from the last list to
