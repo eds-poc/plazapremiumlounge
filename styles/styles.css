@@ -55,6 +55,8 @@
   --color-text-secondary: #666;
   --color-text-muted: #6b6b6b;
   --color-text-control: #212529;
+  --directory-item-color:#555;
+  --directory-color:#800000;
 
   /* partner campaign palette (offer pages, e.g. Rogers Bank): Campaign, Planner, Title editorial */
   --color-campaign-gold: #ae8f5e;
@@ -718,32 +720,32 @@ main .section.fixed-width>div {
 /* breakpoint-exception: Bootstrap container widths at 576px */
 @media (width >=576px) {
   main .section.fixed-width>div {
-    max-width: var(--fixed-width-max, 540px);
+    max-width: 540px;
   }
 }
 
 @media (width >=768px) {
   main .section.fixed-width>div {
-    max-width: var(--fixed-width-max, 720px);
+    max-width: 720px;
   }
 }
 
 @media (width >=992px) {
   main .section.fixed-width>div {
-    max-width: var(--fixed-width-max, 960px);
+    max-width: 960px;
   }
 }
 
 @media (width >=1200px) {
   main .section.fixed-width>div {
-    max-width: var(--fixed-width-max, 1140px);
+    max-width: 1140px;
   }
 }
 
 /* breakpoint-exception: Bootstrap container width at 1400px */
 @media (width >=1400px) {
   main .section.fixed-width>div {
-    max-width: var(--fixed-width-max, 1320px);
+    max-width: 1320px;
   }
 }
 
@@ -916,9 +918,7 @@ main>.section.centered-copy .default-content-wrapper>p:last-child {
    container); a light grey line between sections with 28px either side (source hr); headings 26px
    regular maroon; a bold label line 14px, 24px above its buttons and 34px below the buttons before */
 main>.section.divided {
-  /* the source list page's single 1140px column at every width (fluid below it), 15px at the
-     sides: fixed-width alone follows the Bootstrap widths and doubles the padding */
-  --fixed-width-max: 1140px;
+  /* the source list page's single container: 15px at the sides (fixed-width alone doubles it) */
   --fixed-width-padding: var(--spacing-6);
 
   padding-block: 0;
@@ -936,19 +936,9 @@ main>.section.divided+.section.divided>div:first-child::before {
   content: '';
   display: block;
 
-  /* the live page's hr, built the same way: a 1px #ddd bar with 28px margins (its inline style)
-     at 25% opacity (Bootstrap's hr) */
-  height: var(--base-border-width);
+  /* one-off: the source hr's 28px margins */
   margin-block: 28px;
-  background-color: var(--base-border);
-  opacity: 0.25;
-}
-
-/* a links-only section after the lists (the repeated jump links): 120px from the last list to
-   its line (the live page's blank lines; the list's own space below its last item is 15px) and
-   31px from the line to the label, as the live page */
-main>.section.divided:has(.directory)+.section.divided:not(:has(.directory))>div:first-child::before {
-  margin-block: 105px 30px;
+  border-top: var(--base-border-width) solid var(--base-border);
 }
 
 main .section.divided .default-content-wrapper h2 {
@@ -957,7 +947,7 @@ main .section.divided .default-content-wrapper h2 {
 
   /* one-off: the source list headings' 26px */
   font-size: 26px;
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-regular);
   line-height: 1.3;
 }
 

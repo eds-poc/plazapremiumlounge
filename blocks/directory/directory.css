@@ -1,9 +1,8 @@
-/* directory: mobile-first; values measured from the source Eligible Lounges page (one column,
-   two from 830px of block width: the source's two 400px columns and 30px gap) */
+/* Directory layout: mobile-first.
+   Uses a single column on mobile and two columns on larger screens. */
 .directory {
   --directory-group-color: var(--color-brand-plum);
-  --directory-item-color: #555;
-  --directory-note-color: #800000;
+  --directory-note-color: var( --directory-color);
   --directory-column-gap: var(--spacing-9);
 
   container-type: inline-size;
@@ -15,17 +14,21 @@
   padding-top: var(--spacing-stack);
 }
 
-/* the block's own width picks the columns, so it fits any section; CSS balances them, and
-   an entry (a title and its list) never splits across columns. Each column is at least 400px,
-   as the source: 2 from 830px, and with the `three` option 3 from 1260px. `one` stays 1. */
-@container (width >= 830px) {
+
+/* Mobile first */
+  .directory .directory-columns{
+    columns: 1;
+  }
+
+   /* Tablet and above */
+   @media (width >= 768px) {
   .directory .directory-columns {
     columns: 2;
     column-gap: var(--directory-column-gap);
   }
 }
-
-@container (width >= 1260px) {
+/* Large desktop for three-column variant */
+@media (width >= 1200px) {
   .directory.three .directory-columns {
     columns: 3;
   }
@@ -94,9 +97,11 @@
   color: var(--color-link-hover);
 }
 
-/* anchor navigation on pages with a directory (the jump links): smooth scrolling, stopping 70px
-   below the top (140px up to 768px), clear of the header. Loaded with the block, so only these
-   pages get it */
+.title.plum .title-heading{font-weight: var(--font-weight-regular);font-family:Polysans,sans-serif;}
+main .section.divided .default-content-wrapper h2{font-weight: var(--font-weight-medium);font-family: Polysans,sans-serif;}
+
+/* Smooth anchor navigation with mobile and desktop header offsets.
+   Applied only on pages using the directory block. */
 
 html {
   scroll-behavior: smooth;
