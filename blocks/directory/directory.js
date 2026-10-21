@@ -62,9 +62,9 @@ function splitBoldBreaks(nodes) {
 }
 
 /**
- * Undoes the site's link-to-button decoration inside the block. A bold link alone in a
- * paragraph comes back wrapped in <strong> (so it still reads as a bold line), any other
- * button link becomes a plain link again.
+ * Reverts button decoration inside the block. A paragraph containing only a bold link
+ * is restored as a <strong> element, while other button links are converted back to
+ * regular links.
  * @param {Element} block
  */
 function unbutton(block) {
