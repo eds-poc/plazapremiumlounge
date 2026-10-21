@@ -171,7 +171,7 @@
   margin: 0 0 var(--spacing-6);
   color: var(--color-campaign-navy);
   font-size: var(--title-headline-size);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-campaign-bold);
   line-height: var(--line-height-heading);
 }
 

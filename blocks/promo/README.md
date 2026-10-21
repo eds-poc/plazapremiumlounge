@@ -37,7 +37,7 @@ arrow.
 
 | Promo (light) |
 | --- |
-| ## Ready to Upgrade Your Travel?<br>Don’t miss this limited-time opportunity to get 50% more value from your CTBC Reward Points<br>**[Start Converting Now](https://web.mysmarttraveller.com/signup?language=en&)** |
+| ## Ready to Upgrade Your Travel?<br>Don't miss this limited-time opportunity to get 50% more value from your CTBC Reward Points<br>**[Start Converting Now](https://web.mysmarttraveller.com/signup?language=en&)** |
 
 On an offer page, put it in the last campaign section, with Section Metadata `Style` =
 `inset, medium-width`.
