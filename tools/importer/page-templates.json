@@ -61,6 +61,31 @@
           ]
         }
       ]
+    },
+    {
+      "name": "sign-up-successful",
+      "urls": [
+        "https://www.plazapremiumlounge.com/en-uk/sign-up-successful-page"
+      ],
+      "description": "Sign up confirmation page (/en-uk/sign-up-successful-page): the thank-you heading, text and a Back to Home button, as default content",
+      "blocks": [],
+      "sections": [
+        {
+          "id": "section-1",
+          "name": "Thank You",
+          "selector": [
+            "section.thank-you-section"
+          ],
+          "style": null,
+          "blocks": [],
+          "defaultContent": [
+            "section.thank-you-section h1.thank-you-title",
+            "section.thank-you-section p.thank-you-message",
+            "section.thank-you-section .verification-info-box p",
+            "section.thank-you-section .action-buttons-group a"
+          ]
+        }
+      ]
     }
   ]
 }
