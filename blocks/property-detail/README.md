@@ -60,9 +60,13 @@ shared. Lounge cards in the [Property List](../property-list/README.md) link her
   "Loading…" and the fields are disabled. Changing the date or time asks again (the drop-downs say
   "Loading…" meanwhile), keeping the visitor's choice when it's still offered. Durations are listed shortest first. Service names follow the page language;
   the durations' names are English only (the service has no translations).
-- **Get Price** has no action yet. It sends a `property-detail:get-price` event with the choices
-  (lounge code, currency, start date and time, guests, the service code `SRVC…`, the product code
-  `PRD…`, promo code), as a hook for the booking hand-off to come.
+- **Get Price** asks the price service for the chosen service, duration, guests, start and promo
+  code, and shows the price as the source: "Subtotal", the price before a discount struck through
+  (when there's one), and the price, with **Reserve Now** in place of Get Price. Any change to the
+  choices clears it again. Reserve Now has no action yet: it announces the choice and its price (a
+  `property-detail:reserve` event) for the booking hand-off to come (`property-detail:get-price`
+  and `property-detail:price` are announced too). The service ignores a promo code it doesn't
+  know (the price stays the same, with no message).
 - **No services:** a lounge without bookable services at that time (e.g. a rail lounge in the
   test data) shows a note instead of the service fields and Get Price. If the services can't be
   loaded, the note says so, with Try again.
@@ -71,7 +75,7 @@ shared. Lounge cards in the [Property List](../property-list/README.md) link her
 
 | What | From |
 | --- | --- |
-| The service addresses | Code, not content: `scripts/endpoints.js` (the `propertyDetail` endpoint, a GET, and `propertyServices`, a POST with the start time, the lounge and its airport code, and the currency) |
+| The service addresses | Code, not content: `scripts/endpoints.js` (the `propertyDetail` endpoint, a GET, and `propertyServices`, a POST with the start time, the lounge and its airport code, and the currency, and `propertyPrice`, a POST with the choices) |
 | The language of the data | The page's language folder (as the Property List); page metadata `language-code` overrides it |
 | Labels ("Date", "Get Price", panel names, "Lounge in {city}") | The site's translations, by page language, in the source pages' wording |
 | Details panel | The lounge's address and phone number only; the service's email addresses aren't shown |
@@ -86,3 +90,5 @@ shared. Lounge cards in the [Property List](../property-list/README.md) link her
 | The service is unavailable or slow (15 seconds) | "We couldn't load this lounge." and Try again | |
 | The services can't be loaded (an error, or 30 seconds) | "We couldn't load the services." and Try again, in the booking panel | |
 | No bookable services at that time | "Online booking isn't available for this lounge." in the booking panel | |
+| No price for the choices (not available then, or outside opening hours) | "This option isn't available at the selected time." above Get Price | |
+| The price can't be had (an error, or 30 seconds) | "We couldn't get the price. Please try again." above Get Price | |

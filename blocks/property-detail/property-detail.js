@@ -14,6 +14,8 @@ import {
 // the detail service answers in about 0.2-2s; the services one in 3-7s (at times far longer)
 const DETAIL_TIMEOUT_MS = 15000;
 const SERVICES_TIMEOUT_MS = 30000;
+// the price service answers in about 1-4s
+const PRICE_TIMEOUT_MS = 30000;
 // a pause after a date or time change before asking for that slot's services
 const SERVICES_DELAY_MS = 400;
 const MOBILE = '(width < 768px)';
@@ -201,6 +203,28 @@ function readServices(json, names = {}) {
       // (a product before its bundle of the same length, e.g. "5 Hours" before "5 Hours + Sakura…")
       .sort((a, b) => a.minutes - b.minutes || a.name.length - b.name.length),
   })).filter((s) => s.code && s.name && s.products.length);
+}
+
+/**
+ * The price in a price response (the first product's first price): the total, the price before
+ * discounts and the currency. Null when there's none (not available for that start or guests).
+ * @param {Object} json
+ * @param {string} currency The currency asked for
+ * @returns {{total: number, base: number, currency: string, catalogueCode: string}|null}
+ */
+function readPrice(json, currency) {
+  const item = Array.isArray(json?.items) ? json.items[0] : null;
+  const price = Array.isArray(item?.prices) ? item.prices[0] : null;
+  const total = Number(price?.totalPrice);
+  if (!price || item.availability === false || price.isInventoryAvailable === false
+    || !Number.isFinite(total)) return null;
+  const base = Number(price.basePrice);
+  return {
+    total,
+    base: Number.isFinite(base) ? base : total,
+    currency: price.baseRate?.[0]?.currency || currency,
+    catalogueCode: price.catalogueCode || '',
+  };
 }
 
 /**
@@ -411,16 +435,20 @@ function counter(name, group, value, min) {
  * The booking panel (desktop) / form (in the phone's Book Your Visit dialog), as the source:
  * date, time, adults, children, service, service details, promo code and Get Price. Changing the
  * date or time updates the page address and calls `onSlotChange` (the services depend on the
- * start time). Get Price has no action yet: it announces the choices (a
- * `property-detail:get-price` event) for the booking hand-off to come.
+ * start time). Get Price asks for the price of the chosen service, duration, guests and start
+ * (`requestPrice`) and shows it as the source: Subtotal, the price before a discount struck
+ * through, the price, and Reserve Now instead of Get Price. Any change clears it again. Reserve
+ * Now has no action yet: it announces the choice and its price (`property-detail:reserve`) for
+ * the booking hand-off to come; `property-detail:get-price` and `property-detail:price` are
+ * announced too.
  * @param {Object} lounge
  * @param {Object} slot The chosen date and time (see chooseSlot)
  * @param {Object} settings
- * @param {{currency: string, onSlotChange: Function}} options
+ * @param {{currency: string, onSlotChange: Function, requestPrice: Function}} options
  * @returns {{panel: HTMLElement, heading: HTMLElement, form: HTMLFormElement,
  *   setServices: Function, startDateTime: Function}}
  */
-function buildBooking(lounge, slot, settings, { currency, onSlotChange }) {
+function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestPrice }) {
   const panel = el('section', 'property-detail-booking');
   const header = el('div', 'property-detail-booking-header');
   const heading = el('h2', 'property-detail-booking-title', translate('propertyBookVisit'));
@@ -494,10 +522,63 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange }) {
   form.append(fields);
 
   const action = el('div', 'property-detail-action');
+  // the price, announced when it arrives: Subtotal | the price before a discount | the price
+  const result = el('div', 'property-detail-price');
+  result.setAttribute('role', 'status');
+  const total = el('div', 'property-detail-total');
+  const message = el('p', 'property-detail-price-message');
+  result.append(total, message);
   const button = el('button', 'property-detail-get-price', translate('propertyGetPrice'));
   button.type = 'submit';
-  action.append(button);
+  const reserve = el('button', 'property-detail-get-price property-detail-reserve', translate('propertyReserveNow'));
+  reserve.type = 'button';
+  action.append(result, button, reserve);
   form.append(action);
+
+  let priced = null;
+  let pricing = null;
+  /** Back to Get Price: no price, no message, and any price request still out is dropped. */
+  const clearPrice = () => {
+    pricing?.abort();
+    pricing = null;
+    priced = null;
+    total.replaceChildren();
+    total.hidden = true;
+    message.replaceChildren();
+    message.hidden = true;
+    button.hidden = false;
+    reserve.hidden = true;
+    form.removeAttribute('aria-busy');
+  };
+  clearPrice();
+  /**
+   * The price as the source shows it, with Reserve Now in place of Get Price.
+   * @param {Object} request
+   * @param {{total: number, base: number, currency: string}} price
+   */
+  const showPrice = (request, price) => {
+    priced = { request, price };
+    const was = el('s', 'property-detail-total-was');
+    // (compared to the cent: the service's prices can carry more decimals, e.g. converted ones)
+    if (Math.round(price.base * 100) > Math.round(price.total * 100)) {
+      was.textContent = formatPrice({ amount: price.base, currency: price.currency });
+    }
+    total.replaceChildren(
+      el('span', 'property-detail-total-label', translate('propertySubtotal')),
+      was,
+      el('b', 'property-detail-total-now', formatPrice({ amount: price.total, currency: price.currency })),
+    );
+    total.hidden = false;
+    button.hidden = true;
+    reserve.hidden = false;
+    form.dispatchEvent(new CustomEvent('property-detail:price', { bubbles: true, detail: priced }));
+  };
+  // any change to the choices clears the price, as the source
+  form.addEventListener('change', clearPrice);
+  form.addEventListener('input', (e) => { if (e.target.name === 'promo') clearPrice(); });
+  reserve.addEventListener('click', () => {
+    if (priced) form.dispatchEvent(new CustomEvent('property-detail:reserve', { bubbles: true, detail: priced }));
+  });
 
   let services = [];
   const fillProducts = (keep) => {
@@ -527,6 +608,7 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange }) {
    */
   const setServices = (list, retry) => {
     const waiting = list === null;
+    clearPrice();
     form.classList.toggle('is-waiting', waiting);
     [service, product, promo, button].forEach((control) => { control.disabled = waiting; });
     if (waiting && services.length) chosen = { service: service.value, product: product.value };
@@ -574,18 +656,40 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange }) {
     writeParams({ time: time.value });
     onSlotChange();
   });
-  form.addEventListener('submit', () => {
+  form.addEventListener('submit', async () => {
+    if (form.classList.contains('is-waiting') || !service.value || !product.value) return;
     const data = new FormData(form);
-    form.dispatchEvent(new CustomEvent('property-detail:get-price', {
-      bubbles: true,
-      detail: {
-        code: lounge.code,
-        currency,
-        startDateTime: startDateTime(),
-        // service: the serviceCode (SRVC…), product: the productCode (PRD…)
-        ...Object.fromEntries(data.entries()),
+    const request = {
+      serviceCode: service.value,
+      productCode: product.value,
+      guests: {
+        adult: Math.max(1, Number.parseInt(data.get('adults'), 10) || 1),
+        child: Math.max(0, Number.parseInt(data.get('children'), 10) || 0),
       },
-    }));
+      iataCode: lounge.iata,
+      currencyCode: currency,
+      propertyCode: lounge.code,
+      startDateTime: startDateTime(),
+      promocode: promo.value.trim(),
+    };
+    form.dispatchEvent(new CustomEvent('property-detail:get-price', { bubbles: true, detail: request }));
+    clearPrice();
+    const controller = new AbortController();
+    pricing = controller;
+    // the source shows no wait on the button; assistive technology hears the form is busy
+    form.setAttribute('aria-busy', 'true');
+    try {
+      const price = await requestPrice(request, controller.signal);
+      if (!controller.signal.aborted) showPrice(request, price);
+    } catch (error) {
+      if (controller.signal.aborted) return;
+      // eslint-disable-next-line no-console
+      console.error('property-detail: could not get the price', request, error);
+      message.textContent = translate(error.unavailable ? 'propertyPriceUnavailable' : 'propertyPriceError');
+      message.hidden = false;
+    } finally {
+      if (pricing === controller) form.removeAttribute('aria-busy');
+    }
   });
   panel.append(header, form);
   return {
@@ -849,6 +953,20 @@ export default async function decorate(block) {
     const booking = buildBooking(lounge, slot, settings, {
       currency,
       onSlotChange: () => requestServices(true),
+      // the price of the choices: a POST; no price for them (or the service's "not available"
+      // kind of error) is marked `unavailable`
+      requestPrice: async (body, signal) => {
+        let json;
+        try {
+          json = await fetchJson(apiUrl('propertyPrice').href, PRICE_TIMEOUT_MS, { body, signal });
+        } catch (error) {
+          if (error.service && error.service.errorCode !== '500') error.unavailable = true;
+          throw error;
+        }
+        const price = readPrice(json, body.currencyCode);
+        if (!price) throw Object.assign(new Error('No price for these choices'), { unavailable: true });
+        return price;
+      },
     });
     const panels = await buildPanels(lounge, description);
     const content = el('div', 'property-detail-content');

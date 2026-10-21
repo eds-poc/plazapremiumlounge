@@ -12,6 +12,8 @@ const ENDPOINTS = {
   propertyDetail: '/api/v1/web/app_demo/GetPropertyDetail',
   // a lounge's bookable services and their products for a start time (POST, JSON body)
   propertyServices: '/api/v1/web/app_demo/GetServices',
+  // the price of a service's product for a start time and guests (POST, JSON body)
+  propertyPrice: '/api/v1/web/app_demo/GetPrice',
 };
 
 /**

@@ -189,6 +189,18 @@ const TEXTS = {
   propertyLoading: {
     en: 'Loading…', zh: '加载中…', 'zh-HK': '載入中…', ja: '読み込み中…', pt: 'Carregando…',
   },
+  propertySubtotal: {
+    en: 'Subtotal', zh: '小计', 'zh-HK': '小計', ja: '小計', pt: 'Subtotal',
+  },
+  propertyReserveNow: {
+    en: 'Reserve Now', zh: '立即预约', 'zh-HK': '立即預約', ja: '今すぐ予約', pt: 'Reserve Agora',
+  },
+  propertyPriceUnavailable: {
+    en: 'This option isn’t available at the selected time.', zh: '所选时间无法提供此选项。', 'zh-HK': '所選時間無法提供此選項。', ja: '選択した時間にはこのオプションをご利用いただけません。', pt: 'Esta opção não está disponível no horário selecionado.',
+  },
+  propertyPriceError: {
+    en: 'We couldn’t get the price. Please try again.', zh: '无法获取价格，请重试。', 'zh-HK': '無法獲取價格，請重試。', ja: '料金を取得できませんでした。もう一度お試しください。', pt: 'Não foi possível obter o preço. Tente novamente.',
+  },
   propertyServicesError: {
     en: 'We couldn’t load the services.', zh: '无法加载服务。', 'zh-HK': '無法載入服務。', ja: 'サービスを読み込めませんでした。', pt: 'Não foi possível carregar os serviços.',
   },

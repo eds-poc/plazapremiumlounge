@@ -30,6 +30,10 @@
   --property-detail-pill-weight: 600;
   --property-detail-counter-width: 61px;
   --property-detail-tag-size: 11px;
+  --property-detail-total-size: 21px;
+
+  /* the source's red (Bootstrap text-danger, --color-error) darkened to 4.5:1 on the grey panel */
+  --property-detail-error: #b02a37;
   --property-detail-button-focus: 0 0 0 4px rgb(49 132 253 / 50%);
 
   /* the source's Bootstrap container, inside the section's own (the whole width on phones) */
@@ -590,6 +594,46 @@
 .property-detail-get-price:is(:hover, :focus-visible) {
   background-color: var(--color-background);
   color: var(--color-brand-primary);
+}
+
+/* Get Price and Reserve Now (the same look) take turns */
+.property-detail-get-price[hidden] {
+  display: none;
+}
+
+/* the price after Get Price, as the source's .lounge-total: Subtotal at the left, the price
+   before a discount (struck through) in the middle, the price at the right; 20px above Reserve
+   Now */
+.property-detail-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-7);
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+.property-detail-total[hidden] {
+  display: none;
+}
+
+.property-detail-total-was {
+  font-weight: var(--font-weight-medium);
+}
+
+.property-detail-total-now {
+  font-size: var(--property-detail-total-size);
+  font-weight: var(--font-weight-medium);
+}
+
+/* the price couldn't be had: a red message, as the source's */
+.property-detail-price-message {
+  margin: 0 0 var(--spacing-4);
+  color: var(--property-detail-error);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-body);
+  text-align: center;
 }
 
 /* the booking form in the phone's dialog, as the source's: a sheet over the whole screen, the
