@@ -32,6 +32,23 @@
   --property-detail-tag-size: 11px;
   --property-detail-total-size: 21px;
 
+  /* the date's calendar (the source's jQuery UI datepicker; sizes in em follow its font size) */
+  --property-detail-calendar-width: 350px;
+  --property-detail-calendar-shadow: 0 4px 8px rgb(10 10 10 / 10%);
+  --property-detail-calendar-fade: 0.4s;
+  --property-detail-calendar-top-height: 13px;
+  --property-detail-calendar-close-width: 19px;
+  --property-detail-calendar-close-height: 30px;
+  --property-detail-calendar-header-top: 1.65em;
+  --property-detail-calendar-nav: 1.8em;
+  --property-detail-calendar-nav-inset: var(--spacing-6);
+  --property-detail-calendar-title-inset: 0;
+  --property-detail-calendar-arrow-width: 14px;
+  --property-detail-calendar-arrow-height: 16px;
+  --property-detail-calendar-bold: 700;
+  --property-detail-calendar-day-size: 32px;
+  --property-detail-calendar-day: #454545;
+
   /* the promo code rejection notice (from the design reference) */
   --property-detail-notice-bg: #fffbeb;
   --property-detail-notice-color: #92400e;
@@ -424,7 +441,7 @@
   text-transform: capitalize;
 }
 
-.property-detail-form input:not([type='date']),
+.property-detail-form input,
 .property-detail-form select,
 .property-detail-date-text {
   box-sizing: border-box;
@@ -457,7 +474,8 @@
   box-shadow: var(--shadow-focus);
 }
 
-/* the date as the source writes it, over a native date picker */
+/* the date as the source writes it; desktop: the source's calendar pops up under it (the "Date"
+   title and close, the month between previous and next, the days) */
 .property-detail-date {
   position: relative;
 }
@@ -465,18 +483,191 @@
 .property-detail-date-text {
   display: flex;
   align-items: center;
+  text-align: start;
+  cursor: text;
 }
 
-.property-detail-date input[type='date'] {
+.property-detail-date-text:focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+}
+
+/* the dialog's date text (see the dialog's rules) */
+.property-detail-date-value {
+  display: none;
+}
+
+.property-detail-calendar {
   position: absolute;
-  inset: 0;
+  top: calc(100% + var(--spacing-4));
+  left: 0;
+  z-index: 2;
+  display: none;
+  box-sizing: border-box;
+  width: var(--property-detail-calendar-width);
+  padding: var(--spacing-7);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-warm);
+  box-shadow: var(--property-detail-calendar-shadow);
+  color: var(--color-text);
+  font-family: var(--font-family-campaign);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+.property-detail-date.is-open .property-detail-calendar {
+  display: block;
+  animation: property-detail-calendar-in var(--property-detail-calendar-fade) ease;
+}
+
+@keyframes property-detail-calendar-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* "Date", its text above its short line box as the source's, and close at the top right */
+.property-detail-calendar-top {
+  position: relative;
+  height: var(--property-detail-calendar-top-height);
+}
+
+.property-detail-calendar-heading {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+}
+
+.property-detail-calendar-close,
+.property-detail-calendar-nav {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.property-detail-calendar-close {
+  position: absolute;
+  top: 0;
+  right: var(--spacing-5);
+  width: var(--property-detail-calendar-close-width);
+  height: var(--property-detail-calendar-close-height);
+}
+
+.property-detail-calendar-close::before,
+.property-detail-calendar-nav::before {
+  content: '';
+  display: block;
   width: 100%;
   height: 100%;
+  background-color: currentcolor;
+  mask: url('../../icons/close-light.svg') center / contain no-repeat;
+}
+
+/* the month and year between previous and next */
+.property-detail-calendar-header {
+  display: grid;
+  grid-template-columns: var(--property-detail-calendar-nav) 1fr var(--property-detail-calendar-nav);
+  gap: var(--property-detail-calendar-title-inset);
+  align-items: end;
+  padding: var(--property-detail-calendar-header-top) var(--property-detail-calendar-nav-inset) 0.75em;
+}
+
+.property-detail-calendar-title {
   margin: 0;
-  border: 0;
-  border-radius: var(--radius-input);
-  opacity: 0;
-  cursor: text;
+  font-size: var(--font-size-lg);
+  font-weight: var(--property-detail-calendar-bold);
+  line-height: 1.8;
+  text-align: center;
+}
+
+.property-detail-calendar-nav {
+  width: var(--property-detail-calendar-nav);
+  height: var(--property-detail-calendar-nav);
+  border-radius: var(--radius-xs);
+  transition: color var(--duration-normal) ease-in-out;
+}
+
+.property-detail-calendar-nav::before {
+  width: var(--property-detail-calendar-arrow-width);
+  height: var(--property-detail-calendar-arrow-height);
+  margin: auto;
+  mask-image: url('../../icons/arrow-left-light.svg');
+}
+
+.property-detail-calendar-next::before {
+  mask-image: url('../../icons/arrow-right-light.svg');
+}
+
+.property-detail-calendar-nav:hover {
+  color: var(--color-text-subtle);
+}
+
+.property-detail-calendar-nav:disabled {
+  color: inherit;
+  opacity: 0.35;
+  cursor: default;
+}
+
+.property-detail-calendar-close:focus-visible,
+.property-detail-calendar-nav:focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+}
+
+/* the days: one month, the days before the first bookable one faded, the chosen one in maroon */
+.property-detail-calendar-grid {
+  width: 100%;
+  margin: 0 0 0.4em;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+
+.property-detail-calendar-grid th {
+  padding: 0.7em 0.3em;
+  font-weight: var(--property-detail-calendar-bold);
+  text-align: center;
+}
+
+.property-detail-calendar-grid td {
+  padding: calc(var(--spacing-1) / 2);
+  text-align: center;
+  cursor: pointer;
+}
+
+.property-detail-calendar-grid td:not([data-date]),
+.property-detail-calendar-grid td[aria-disabled='true'] {
+  cursor: default;
+}
+
+.property-detail-calendar-grid td[aria-disabled='true'] {
+  opacity: 0.35;
+}
+
+.property-detail-calendar-day {
+  display: inline-block;
+  width: var(--property-detail-calendar-day-size);
+  height: var(--property-detail-calendar-day-size);
+  border-radius: var(--radius-circle);
+  color: var(--property-detail-calendar-day);
+  font-size: var(--font-size-sm);
+  line-height: 2.2;
+  vertical-align: middle;
+}
+
+.property-detail-calendar-grid td[aria-selected='true'] .property-detail-calendar-day {
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+.property-detail-calendar-grid td:focus-visible {
+  outline: 0;
+}
+
+.property-detail-calendar-grid td:focus-visible .property-detail-calendar-day {
+  box-shadow: var(--shadow-focus);
 }
 
 .property-detail-time {
@@ -721,16 +912,52 @@ dialog.modal.property-detail-modal {
   text-transform: capitalize;
 }
 
-.property-detail-modal .property-detail-form :is(input:not([type='date']), select),
-.property-detail-modal .property-detail-date-text {
+.property-detail-modal .property-detail-form :is(input, select) {
   padding: var(--spacing-2) var(--spacing-8);
   color: var(--color-text-control);
   font-weight: var(--font-weight-medium);
   text-align: center;
 }
 
-.property-detail-modal .property-detail-date-text {
-  justify-content: center;
+/* the dialog's date, as the source's: the date as plain text over the calendar, always open, white
+   and the dialog's width */
+.property-detail-modal .property-detail-date-text,
+.property-detail-modal .property-detail-calendar-top {
+  display: none;
+}
+
+/* (as the source's, a little wider than the other fields, and the calendar's own space under it
+   as the gap to the next) */
+.property-detail-modal .property-detail-date {
+  margin-inline: calc(-1 * var(--spacing-5));
+  margin-bottom: calc(-1 * var(--property-detail-modal-gap));
+}
+
+.property-detail-modal .property-detail-date-value {
+  display: block;
+  margin: 0;
+  padding: 0 var(--spacing-bootstrap-3);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+}
+
+.property-detail-modal .property-detail-date .property-detail-calendar {
+  position: static;
+  display: block;
+  width: auto;
+  padding: var(--spacing-7) 0;
+  background-color: var(--color-background);
+  box-shadow: none;
+  font-size: var(--font-size-sm);
+  animation: none;
+}
+
+.property-detail-modal .property-detail-calendar-header {
+  align-items: center;
+  padding-top: 0;
+  padding-inline: var(--spacing-5);
 }
 
 .property-detail-modal .property-detail-form select {
@@ -794,11 +1021,6 @@ dialog.modal.property-detail-modal {
 
 .property-detail-modal .property-detail-action {
   padding: var(--property-detail-modal-gap) 0 0;
-}
-
-/* after the dialog's date rules: the picker's focus shows on the date text */
-.property-detail-date:has(input:focus-visible) .property-detail-date-text {
-  box-shadow: var(--shadow-focus);
 }
 
 /* ---------- panels ---------- */
@@ -1189,7 +1411,12 @@ dialog.modal.property-detail-modal {
   .property-detail-slider-track,
   .property-detail-photos::after,
   .property-detail-get-price,
-  .property-detail-bar-book {
+  .property-detail-bar-book,
+  .property-detail-calendar-nav {
     transition: none;
+  }
+
+  .property-detail-date.is-open .property-detail-calendar {
+    animation: none;
   }
 }

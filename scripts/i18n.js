@@ -147,6 +147,13 @@ const TEXTS = {
   propertyDate: {
     en: 'Date', zh: '日期', 'zh-HK': '日期', ja: '日付', pt: 'Data',
   },
+  // the date's calendar: the previous and next month (as the source's)
+  propertyCalendarPrev: {
+    en: 'Prev', zh: '上月', 'zh-HK': '上月', ja: '前', pt: 'Anterior',
+  },
+  propertyCalendarNext: {
+    en: 'Next', zh: '下月', 'zh-HK': '下月', ja: '次', pt: 'Seguinte',
+  },
   propertyTime: {
     en: 'Time', zh: '时间', 'zh-HK': '時間', ja: '時間', pt: 'Hora',
   },

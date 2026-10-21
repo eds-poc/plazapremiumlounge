@@ -54,6 +54,15 @@ shared. Lounge cards in the [Property List](../property-list/README.md) link her
 
 - **Fields:** date, time ("hrs"), adults, children, service and service details, and a promo
   code.
+- **Date:** the source's calendar (`date-picker.js`): one month, previous and next, days before
+  the first bookable one faded and unavailable, no last day. On desktop it pops up under the date
+  (with a "Date" title and close) and closes on a pick, Escape, close or a click outside; in the
+  phone's Book Your Visit dialog it's always open under the date. Month names, weekdays and the
+  first day of the week follow the page language, as the source (Sunday first in English, Monday
+  in the others). Keyboard: the arrow keys move a day or a week, Home/End to the week's start or
+  end, Page Up/Down a month (with Shift, a year), Enter or Space choose. A new date updates the
+  address's `date` (and `time` when the earliest times move it), keeping its other parameters, and
+  asks for that day's services.
 - **Services and service details** (e.g. Lounge → Lounge Use - 2 Hours) come from the services
   service for the chosen start time. The page doesn't wait for them: the request goes out as soon
   as the lounge's details arrive, and until the answer (a few seconds) both drop-downs say

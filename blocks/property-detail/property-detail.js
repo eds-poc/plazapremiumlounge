@@ -6,6 +6,7 @@ import apiUrl from '../../scripts/endpoints.js';
 import { getLanguage, translate } from '../../scripts/i18n.js';
 import { enableLightbox } from '../../scripts/lightbox.js';
 import { openModal } from '../../scripts/modal-dialog.js';
+import buildDatePicker from './date-picker.js';
 import {
   buildBadge, buildSlider, el, fetchJson, getApiLanguage, isIsoDate, isPreview, readProperty,
   safeHtml, setLoading, toKey, toUrl,
@@ -398,7 +399,8 @@ function buildGallery(lounge, mobile) {
 function field(label, control, note) {
   const wrap = el('div', 'property-detail-field');
   const text = el('label', 'property-detail-label', label);
-  const input = control.matches('input, select') ? control : control.querySelector('input, select');
+  const input = control.matches('input, select')
+    ? control : control.querySelector('.property-detail-date-text, input:not([type="hidden"]), select');
   if (input) {
     input.id = input.id || `property-detail-${toKey(label)}`;
     text.htmlFor = input.id;
@@ -459,7 +461,7 @@ function counter(name, group, value, min) {
  * @param {Object} settings
  * @param {{currency: string, onSlotChange: Function, requestPrice: Function}} options
  * @returns {{panel: HTMLElement, heading: HTMLElement, form: HTMLFormElement,
- *   setServices: Function, startDateTime: Function}}
+ *   setServices: Function, startDateTime: Function, closeCalendar: Function}}
  */
 function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestPrice }) {
   const panel = el('section', 'property-detail-booking');
@@ -476,20 +478,19 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
   form.addEventListener('submit', (e) => e.preventDefault());
   const fields = el('div', 'property-detail-fields');
 
-  // date: the date as the source writes it, over a native date picker
-  const dateWrap = el('div', 'property-detail-date');
-  const dateText = el('span', 'property-detail-date-text', formatDate(slot.date));
-  dateText.setAttribute('aria-hidden', 'true');
-  const date = el('input');
-  date.type = 'date';
-  date.name = 'date';
-  date.value = slot.date;
-  date.min = slot.firstDay;
-  dateWrap.append(dateText, date);
+  // date: the date as the source writes it, with the source's calendar (see buildDatePicker); a
+  // day before the first bookable one can't be chosen
+  const time = el('select');
+  const picker = buildDatePicker({
+    name: 'date',
+    value: slot.date,
+    min: slot.firstDay,
+    format: formatDate,
+  });
+  const date = picker.input;
 
   // time: every half hour; times before the first bookable slot are unavailable
   const timeWrap = el('div', 'property-detail-time');
-  const time = el('select');
   time.name = 'time';
   const fillTimes = () => {
     const keep = time.value || slot.time;
@@ -508,8 +509,13 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
   time.value = slot.time;
   timeWrap.append(time, el('span', 'property-detail-time-unit', translate('propertyHours')));
 
+  const dateField = field(translate('propertyDate'), picker.element);
+  // the date's name: the label, then the date
+  const dateLabel = dateField.querySelector('.property-detail-label');
+  dateLabel.id = `${picker.trigger.id}-label`;
+  picker.trigger.setAttribute('aria-labelledby', `${dateLabel.id} ${picker.trigger.id}`);
   fields.append(
-    field(translate('propertyDate'), dateWrap),
+    dateField,
     field(translate('propertyTime'), timeWrap),
     field(translate('propertyAdults'), counter('adults', translate('propertyAdults'), 1, 1)),
     field(translate('propertyChildren'), counter('children', translate('propertyChildren'), 0, 0), translate('propertyChildNote')),
@@ -674,8 +680,6 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
   /** The chosen start as the services call takes it (see toStartDateTime). */
   const startDateTime = () => toStartDateTime(date.value, time.value);
   date.addEventListener('change', () => {
-    if (!date.value || date.value < slot.firstDay) date.value = slot.firstDay;
-    dateText.textContent = formatDate(date.value);
     fillTimes();
     writeParams({ date: date.value, time: time.value });
     onSlotChange();
@@ -727,7 +731,7 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
   });
   panel.append(header, form);
   return {
-    panel, heading, form, setServices, startDateTime,
+    panel, heading, form, setServices, startDateTime, closeCalendar: picker.close,
   };
 }
 
@@ -1025,6 +1029,8 @@ export default async function decorate(block) {
     // the band, the photos beside the booking panel, the description in The Lounge panel
     const loungeAnswer = panels.querySelector('details .accordion-answer');
     const place = () => {
+      // (the date's pop-up is desktop's; the dialog's calendar is always open)
+      booking.closeCalendar();
       if (mobile.matches) {
         intro.append(slider, hero, description);
       } else {
