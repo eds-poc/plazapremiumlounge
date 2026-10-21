@@ -102,6 +102,9 @@
   --color-disabled-text: #666;
   --color-focus-ring: rgb(13 110 253 / 25%);
 
+  /* other colors */
+  --color-yellow-400: #f5ca45;
+
   /* typography */
   --font-family-primary: polysans, polysans-fallback, sans-serif;
   --font-family-display: recklessneue, sans-serif;

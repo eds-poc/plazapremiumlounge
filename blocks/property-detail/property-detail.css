@@ -33,9 +33,8 @@
   --property-detail-total-size: 21px;
 
   /* the promo code rejection notice (from the design reference) */
-  --property-detail-notice-bg: #fefbec;
-  --property-detail-notice-border: #ebca61;
-  --property-detail-notice-color: #8a3c0c;
+  --property-detail-notice-bg: #fffbeb;
+  --property-detail-notice-color: #92400e;
   --property-detail-notice-radius: 4px;
   --property-detail-notice-icon: 13px;
 
@@ -638,16 +637,15 @@
    cream box with a yellow line, a filled brown "!" and brown text, 5px below the field */
 .property-detail-promo-notice {
   display: flex;
-  gap: calc(var(--spacing-2) + var(--spacing-1));
+  gap: calc(var(--spacing-3) - var(--spacing-1));
   align-items: center;
   margin: var(--spacing-2) 0 0;
   padding: var(--spacing-1) var(--spacing-4);
-  border: var(--base-border-width) solid var(--property-detail-notice-border);
+  border: var(--base-border-width) solid var(--color-yellow-400);
   border-radius: var(--property-detail-notice-radius);
   background-color: var(--property-detail-notice-bg);
   color: var(--property-detail-notice-color);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-xs);
   line-height: var(--line-height-body);
 }
 
@@ -984,7 +982,7 @@ dialog.modal.property-detail-modal {
   display: none;
 }
 
-.property-detail .accordion.detail.is-static > [data-desktop-open='false'] > .accordion-question {
+.property-detail .accordion.detail.is-static>[data-desktop-open='false']>.accordion-question {
   color: var(--color-text-control);
 }
 
@@ -1188,6 +1186,7 @@ dialog.modal.property-detail-modal {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .property-detail-slider-track,
   .property-detail-photos::after,
   .property-detail-get-price,
