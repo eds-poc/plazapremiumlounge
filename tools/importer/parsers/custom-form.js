@@ -26,7 +26,7 @@ const FIELDS = {
   },
   ContactNumber: {
     type: 'phone',
-    settings: ['key: phone', 'prefix key: countryPhoneCode', 'value type: number'],
+    settings: ['key: phone', 'prefix key: countryPhoneCode', 'prefix default: +1 (US)', 'value type: number'],
   },
   EmailAddress: { type: 'email', settings: ['key: email'] },
   ConfirmEmailAddress: { type: 'email', settings: ['key: confirmEmail', 'match: email'] },

@@ -23,6 +23,8 @@ const AUTOCOMPLETE = {
   confirmPassword: 'new-password',
 };
 const TYPE_AUTOCOMPLETE = { email: 'email', tel: 'tel', url: 'url' };
+// the phone code selected once the countries are in (the option text, else its value)
+const DEFAULT_PHONE_CODE = '+1 (US)';
 
 // rule presets: `rule: name` etc.; the source's own patterns where it has them
 const RULES = {
@@ -129,21 +131,26 @@ function readOptions(text) {
 }
 
 /**
- * Fills a select (or a radio/checkbox group) with options, after its empty first option.
+ * Fills a select (or a radio/checkbox group) with options, after its empty first option, and
+ * selects the preset one: the option whose text is the preset (e.g. `+1 (US)`), else the first
+ * whose value is (e.g. `+1`).
  * @param {HTMLElement} control
  * @param {{text: string, value: string}[]} options
  * @param {object} state The field state
+ * @param {string} [preset] The default (the field's `default` setting unless given)
  */
-function fillOptions(control, options, state) {
+function fillOptions(control, options, state, preset = state.def.settings.get('default')) {
   const { def } = state;
+  const chosen = preset && (options.find((o) => o.text === preset)
+    || options.find((o) => o.value === preset));
   if (control.matches('select')) {
     const keep = control.querySelector('option[value=""]');
     control.replaceChildren(...(keep ? [keep] : []));
-    options.forEach(({ text, value }) => {
+    options.forEach((item) => {
       const option = el('option');
-      option.value = value;
-      option.textContent = text;
-      if (def.settings.get('default') === value) option.selected = true;
+      option.value = item.value;
+      option.textContent = item.text;
+      if (item === chosen) option.selected = true;
       control.append(option);
     });
     return;
@@ -156,7 +163,7 @@ function fillOptions(control, options, state) {
     input.name = def.key;
     input.id = `${def.id}-${i}`;
     input.value = value;
-    if (def.settings.get('default') === value) input.checked = true;
+    if (chosen?.value === value) input.checked = true;
     const label = el('label', 'form-check-label');
     label.htmlFor = input.id;
     label.textContent = text;
@@ -172,7 +179,8 @@ function fillOptions(control, options, state) {
  * a message with a retry button if the list can't be loaded.
  * @param {object} state
  * @param {HTMLSelectElement} select
- * @param {{value: string, text: string}} map Which fields of the data give the value and text
+ * @param {{value: string, text: string, preset?: string}} map Which fields of the data give the
+ *   value and text, and the option to select once loaded
  */
 function loadSource(state, select, map) {
   const source = SOURCES[state.def.settings.get('source') || 'countries'];
@@ -188,7 +196,7 @@ function loadSource(state, select, map) {
     loading.replaceWith(placeholder);
     fillOptions(select, list.map((item) => ({
       text: String(item[map.text] ?? ''), value: String(item[map.value] ?? ''),
-    })).filter((o) => o.text && o.value), state);
+    })).filter((o) => o.text && o.value), state, map.preset);
     select.disabled = false;
     state.loaded = true;
   }).catch(() => {
@@ -348,6 +356,10 @@ export function buildField({
     loadSource(state, code, {
       value: settings.get('prefix value') || 'phoneCode',
       text: settings.get('prefix text') || 'phoneCodeCountryCode',
+      // the code chosen once the list is in: +1 (US) unless authored (`prefix default: +65 (SG)`,
+      // `+44`), none with `prefix default: none`
+      preset: settings.has('prefix default')
+        ? settings.get('prefix default').replace(/^none$/i, '') : DEFAULT_PHONE_CODE,
     });
   } else {
     let control;
@@ -372,6 +384,7 @@ export function buildField({
       loadSource(state, control, {
         value: settings.get('value') || 'countryId',
         text: settings.get('text') || 'countryName',
+        preset: settings.get('default'),
       });
     }
   }
@@ -566,9 +579,9 @@ export function validateField(wrap) {
 }
 
 /**
- * Checks a form's fields as the visitor goes: a field is checked when they leave it once they've
- * used it, and its error clears (or updates) while they type; a field another one must match is
- * rechecked too.
+ * Checks a form's fields as the visitor goes: a field is checked when they leave it (a required
+ * field left empty shows its error), and its error clears (or updates) while they type; a field
+ * another one must match is rechecked too.
  * @param {HTMLFormElement} form
  */
 export function attachValidation(form) {
@@ -582,15 +595,12 @@ export function attachValidation(form) {
       if (other !== wrap && state?.def.settings.get('match') === wrap.dataset.key) validateField(other);
     });
   };
+  // leaving a field checks it, empty or not, so a required field left empty shows its error
   form.addEventListener('focusout', (e) => {
     const wrap = wrapOf(e.target);
-    const state = wrap && fields.get(wrap);
-    if (!state || wrap.contains(e.relatedTarget)) return;
-    const used = valueOf(state);
-    if (wrap.classList.contains('is-touched') || (Array.isArray(used) ? used.length : used)) {
-      wrap.classList.add('is-touched');
-      recheck(wrap);
-    }
+    if (!wrap || !fields.has(wrap) || wrap.contains(e.relatedTarget)) return;
+    wrap.classList.add('is-touched');
+    recheck(wrap);
   });
   const onChange = (e) => {
     const wrap = wrapOf(e.target);
