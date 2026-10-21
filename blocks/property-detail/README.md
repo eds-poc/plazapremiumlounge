@@ -55,9 +55,10 @@ shared. Lounge cards in the [Property List](../property-list/README.md) link her
 - **Fields:** date, time ("hrs"), adults, children, service and service details, and a promo
   code.
 - **Services and service details** (e.g. Lounge → Lounge Use - 2 Hours) come from the services
-  service for the chosen start time, after the lounge is shown (it takes a few seconds; the fields
-  wait, disabled). Changing the date or time asks again, keeping the visitor's choice when it's
-  still offered. Durations are listed shortest first. Service names follow the page language;
+  service for the chosen start time. The page doesn't wait for them: the request goes out as soon
+  as the lounge's details arrive, and until the answer (a few seconds) both drop-downs say
+  "Loading…" and the fields are disabled. Changing the date or time asks again (the drop-downs say
+  "Loading…" meanwhile), keeping the visitor's choice when it's still offered. Durations are listed shortest first. Service names follow the page language;
   the durations' names are English only (the service has no translations).
 - **Get Price** has no action yet. It sends a `property-detail:get-price` event with the choices
   (lounge code, currency, start date and time, guests, the service code `SRVC…`, the product code

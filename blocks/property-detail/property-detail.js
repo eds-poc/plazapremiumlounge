@@ -101,6 +101,16 @@ function toTime(minutes) {
 }
 
 /**
+ * A start as the services call takes it: "2026-10-21 14:00:00" (the lounge's local time).
+ * @param {string} date YYYY-MM-DD
+ * @param {string} time HHmm
+ * @returns {string}
+ */
+function toStartDateTime(date, time) {
+  return `${date} ${time.slice(0, 2)}:${time.slice(2)}:00`;
+}
+
+/**
  * The booking date and time to show, as the source: the address's date and time when valid,
  * else the first bookable slot; an earlier date or time moves forward to it (the time onto the
  * half-hour grid). The first bookable slot is the half hour after now plus the lounge's lead time
@@ -500,11 +510,18 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange }) {
     if (keep && chosen?.products.some((p) => p.code === keep)) product.value = keep;
   };
   service.addEventListener('change', () => fillProducts());
+  // the visitor's service and service details, kept while a new list loads
+  let chosen = null;
+  const loading = () => {
+    const option = el('option', '', translate('propertyLoading'));
+    option.value = '';
+    return option;
+  };
   /**
-   * Shows the bookable services: null while they're loading (fields disabled), [] when there are
-   * none (a note instead of the fields and Get Price), or, with `retry`, a note that they couldn't
-   * be loaded and Try again. The visitor's service and service details stay chosen when the new
-   * list still has them.
+   * Shows the bookable services: null while they're loading (both drop-downs say Loading…, the
+   * fields are disabled), [] when there are none (a note instead of the fields and Get Price), or,
+   * with `retry`, a note that they couldn't be loaded and Try again. The visitor's service and
+   * service details stay chosen when the new list still has them.
    * @param {Object[]|null} list
    * @param {Function} [retry]
    */
@@ -512,17 +529,20 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange }) {
     const waiting = list === null;
     form.classList.toggle('is-waiting', waiting);
     [service, product, promo, button].forEach((control) => { control.disabled = waiting; });
-    // while a new list loads, the current one stays (disabled), so the choice can be kept
-    if (waiting && services.length) return;
-    const keep = { service: service.value, product: product.value };
+    if (waiting && services.length) chosen = { service: service.value, product: product.value };
     services = list || [];
-    service.replaceChildren(...services.map((x) => {
-      const option = el('option', '', x.name);
-      option.value = x.code;
-      return option;
-    }));
-    if (services.some((x) => x.code === keep.service)) service.value = keep.service;
-    fillProducts(keep.product);
+    if (waiting) {
+      service.replaceChildren(loading());
+      product.replaceChildren(loading());
+    } else {
+      service.replaceChildren(...services.map((x) => {
+        const option = el('option', '', x.name);
+        option.value = x.code;
+        return option;
+      }));
+      if (services.some((x) => x.code === chosen?.service)) service.value = chosen.service;
+      fillProducts(chosen?.product);
+    }
     const none = !waiting && !services.length;
     serviceFields.forEach((f) => { f.hidden = none; });
     action.hidden = none;
@@ -541,8 +561,8 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange }) {
   };
   setServices(null);
 
-  /** The chosen start as the services call takes it: "2026-10-21 14:00:00" (lounge time). */
-  const startDateTime = () => `${date.value} ${time.value.slice(0, 2)}:${time.value.slice(2)}:00`;
+  /** The chosen start as the services call takes it (see toStartDateTime). */
+  const startDateTime = () => toStartDateTime(date.value, time.value);
   date.addEventListener('change', () => {
     if (!date.value || date.value < slot.firstDay) date.value = slot.firstDay;
     dateText.textContent = formatDate(date.value);
@@ -793,6 +813,27 @@ export default async function decorate(block) {
     const currency = params.currency || lounge.defaultCurrency || DEFAULT_CURRENCY;
     let requestServices = () => {};
 
+    // the bookable services for a start time (a POST, with the lounge's own airport code; it takes
+    // a few seconds): a newer request replaces an older one. The first one goes out now, before the
+    // page is built
+    let pending;
+    const fetchServices = (start) => {
+      pending?.abort();
+      const controller = new AbortController();
+      pending = controller;
+      const request = fetchJson(apiUrl('propertyServices').href, SERVICES_TIMEOUT_MS, {
+        signal: controller.signal,
+        body: {
+          startDateTime: start,
+          propertyCode: lounge.code,
+          iataCode: lounge.iata,
+          currencyCode: currency,
+        },
+      });
+      return { controller, request };
+    };
+    const early = lounge.iata ? fetchServices(toStartDateTime(slot.date, slot.time)) : null;
+
     const description = el('div', 'property-detail-description');
     if (lounge.note) description.append(el('p', 'property-detail-note'));
     if (lounge.note) description.querySelector('.property-detail-note').append(safeHtml(lounge.note));
@@ -845,10 +886,17 @@ export default async function decorate(block) {
     place();
     setHead(lounge, safeHtml(lounge.description, { blocks: true }));
 
-    // the bookable services for the chosen start time (a POST, with the lounge's own airport
-    // code): asked for once the lounge is shown, and again, after a short pause, when the date or
-    // time changes; a newer request replaces an older one
-    let pending;
+    // the services' answer into the booking form (an answer replaced by a newer request is dropped)
+    const showServices = ({ controller, request }) => request.then((json) => {
+      if (controller.signal.aborted) return;
+      booking.setServices(readServices(json, lounge.serviceNames));
+    }).catch((error) => {
+      if (controller.signal.aborted) return;
+      // eslint-disable-next-line no-console
+      console.error('property-detail: could not load the services', error);
+      booking.setServices([], () => requestServices(false));
+    });
+    // asked for again, after a short pause, when the date or time changes (and on Try again)
     let timer;
     requestServices = (delayed) => {
       clearTimeout(timer);
@@ -858,29 +906,11 @@ export default async function decorate(block) {
         return;
       }
       booking.setServices(null);
-      timer = setTimeout(() => {
-        const controller = new AbortController();
-        pending = controller;
-        fetchJson(apiUrl('propertyServices').href, SERVICES_TIMEOUT_MS, {
-          signal: controller.signal,
-          body: {
-            startDateTime: booking.startDateTime(),
-            propertyCode: lounge.code,
-            iataCode: lounge.iata,
-            currencyCode: currency,
-          },
-        }).then((json) => {
-          if (controller.signal.aborted) return;
-          booking.setServices(readServices(json, lounge.serviceNames));
-        }).catch((error) => {
-          if (controller.signal.aborted) return;
-          // eslint-disable-next-line no-console
-          console.error('property-detail: could not load the services', error);
-          booking.setServices([], () => requestServices(false));
-        });
-      }, delayed ? SERVICES_DELAY_MS : 0);
+      const ask = () => showServices(fetchServices(booking.startDateTime()));
+      timer = setTimeout(ask, delayed ? SERVICES_DELAY_MS : 0);
     };
-    requestServices(false);
+    if (early) showServices(early);
+    else booking.setServices([]);
   };
   load = async () => {
     setLoading(true);
