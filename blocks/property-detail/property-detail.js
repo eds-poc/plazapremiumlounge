@@ -538,13 +538,12 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
   promoNotice.hidden = true;
   serviceFields[2].append(promoNotice);
   /**
-   * Shows the promo code rejection and empties the promo code field, as the source.
+   * Shows the promo code rejection (the code stays in the field, for the visitor to correct).
    * @param {string} text
    */
   const rejectPromo = (text) => {
     promoNotice.textContent = text;
     promoNotice.hidden = false;
-    promo.value = '';
   };
   form.append(fields);
 
@@ -711,8 +710,9 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
     try {
       const price = await requestPrice(request, controller.signal);
       if (controller.signal.aborted) return;
-      showPrice(request, price);
+      // a rejected promo code: only its message; no price, and Get Price stays
       if (price.promoRejected) rejectPromo(price.promoRejected);
+      else showPrice(request, price);
     } catch (error) {
       if (controller.signal.aborted) return;
       // eslint-disable-next-line no-console

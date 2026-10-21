@@ -1186,7 +1186,6 @@ dialog.modal.property-detail-modal {
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   .property-detail-slider-track,
   .property-detail-photos::after,
   .property-detail-get-price,
