@@ -915,8 +915,8 @@ main>.section.centered-copy .default-content-wrapper>p:last-child {
 
 /* section style divided: the sections of a list page (source Eligible Lounges), use with
    fixed-width. No section padding (24px above the first, 48px below the last, as the source
-   container); a light grey line between sections with 28px either side (source hr); headings 26px
-   regular maroon; a bold label line 14px, 24px above its buttons and 34px below the buttons before */
+   container); headings 26px regular maroon; a bold label line 14px, 24px above its buttons and
+   34px below the buttons before. The line between sections is a Divider block, added by authors */
 main>.section.divided {
   /* the source list page's single container: 15px at the sides (fixed-width alone doubles it) */
   --fixed-width-padding: var(--spacing-6);
@@ -930,15 +930,6 @@ main>.section.divided:first-child {
 
 main>.section.divided:last-child {
   padding-bottom: var(--spacing-bootstrap-5);
-}
-
-main>.section.divided+.section.divided>div:first-child::before {
-  content: '';
-  display: block;
-
-  /* one-off: the source hr's 28px margins */
-  margin-block: 28px;
-  border-top: var(--base-border-width) solid var(--base-border);
 }
 
 main .section.divided .default-content-wrapper h2 {

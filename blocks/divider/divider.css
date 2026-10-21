@@ -1,0 +1,11 @@
+/* divider: a horizontal line between sections, built as the live site's hr (Eligible Lounges):
+   a 1px #ddd bar (its inline style) at 25% opacity (Bootstrap's hr), 28px above and below */
+.divider .divider-line {
+  height: var(--base-border-width);
+
+  /* one-off: the live hr's 28px margins */
+  margin: 28px 0;
+  border: 0;
+  background-color: var(--base-border);
+  opacity: 0.25;
+}

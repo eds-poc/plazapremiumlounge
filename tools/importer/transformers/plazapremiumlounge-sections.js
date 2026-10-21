@@ -83,6 +83,10 @@ export default function transform(hookName, element, payload) {
         el.before(hr);
       }
       if (section.style) hr.setAttribute(MARKER, section.id);
+
+      // The source draws a visible line (its hr) between sections: start the new section with
+      // a Divider block, so authors can keep or remove the line in DA.
+      hr.after(WebImporter.Blocks.createBlock(document, { name: 'Divider', cells: [['']] }));
     }
 
     // The first section must not start with a break.
