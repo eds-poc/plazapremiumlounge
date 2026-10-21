@@ -34,6 +34,7 @@
   --color-brand-primary-action: #681235;
   --color-brand-primary-dark: #5c0f2d;
   --color-brand-primary-deep: #4a0d26;
+  --color-brand-maroon-dark: #800000;
 
   /* the source's lighter maroon: jump-link pills (.btn-default), list-page titles and headings */
   --color-brand-plum: #711b45;
@@ -55,8 +56,7 @@
   --color-text-secondary: #666;
   --color-text-muted: #6b6b6b;
   --color-text-control: #212529;
-  --directory-item-color:#555;
-  --directory-color:#800000;
+  --color-text-soft-dark:#555;
 
   /* partner campaign palette (offer pages, e.g. Rogers Bank): Campaign, Planner, Title editorial */
   --color-campaign-gold: #ae8f5e;

@@ -2,7 +2,7 @@
    Uses a single column on mobile and two columns on larger screens. */
 .directory {
   --directory-group-color: var(--color-brand-plum);
-  --directory-note-color: var( --directory-color);
+  --directory-note-color: var( --color-brand-maroon-dark);
   --directory-column-gap: var(--spacing-9);
 
   container-type: inline-size;
@@ -16,6 +16,9 @@
 
 
 /* Mobile first */
+ main .section.fixed-width>div {
+        max-width: 1140px;
+    }
   .directory .directory-columns{
     columns: 1;
   }
@@ -78,7 +81,7 @@
 .directory .directory-item {
   margin: 0 0 3px;
   padding: var(--spacing-1) var(--spacing-2);
-  color: var(--directory-item-color);
+  color: var(--color-text-soft-dark);
   font-size: var(--font-size-sm);
   line-height: 1.55;
 }
