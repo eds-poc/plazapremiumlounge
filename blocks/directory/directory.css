@@ -110,3 +110,4 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: var(--nav-height);
 }
+.margin-bottom-100{margin-bottom: var(--margin-bottom-100)!important;}
