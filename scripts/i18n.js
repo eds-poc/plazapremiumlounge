@@ -53,6 +53,33 @@ const TEXTS = {
   accountTitle: {
     en: 'Account', zh: '账户', 'zh-HK': '帳戶', ja: 'アカウント', pt: 'Conta',
   },
+  // video links and the video popup
+  watchVideo: {
+    en: 'Watch Video', zh: '观看视频', 'zh-HK': '觀看影片', ja: '動画を見る', pt: 'Assistir ao vídeo',
+  },
+  playVideo: {
+    en: 'Play video: {name}', zh: '播放视频：{name}', 'zh-HK': '播放影片：{name}', ja: '動画を再生：{name}', pt: 'Reproduzir vídeo: {name}',
+  },
+  video: {
+    en: 'Video', zh: '视频', 'zh-HK': '影片', ja: '動画', pt: 'Vídeo',
+  },
+  videoUnavailable: {
+    en: 'This video can’t be played here.',
+    zh: '此视频无法在此播放。',
+    'zh-HK': '此影片無法在此播放。',
+    ja: 'この動画はここでは再生できません。',
+    pt: 'Este vídeo não pode ser reproduzido aqui.',
+  },
+  watchOn: {
+    en: 'Watch on {provider}',
+    zh: '在 {provider} 上观看',
+    'zh-HK': '在 {provider} 上觀看',
+    ja: '{provider} で見る',
+    pt: 'Assistir no {provider}',
+  },
+  openVideo: {
+    en: 'Open the video', zh: '打开视频', 'zh-HK': '開啟影片', ja: '動画を開く', pt: 'Abrir o vídeo',
+  },
   backToTop: {
     en: 'Back to top', zh: '返回顶部', 'zh-HK': '返回頂部', ja: 'ページの先頭へ戻る', pt: 'Voltar ao topo',
   },

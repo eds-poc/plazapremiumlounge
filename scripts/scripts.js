@@ -15,6 +15,7 @@ import { installModalLinks, registerModalSections } from './modal.js';
 // icons: the DA icon library first, then the code /icons folder
 import { decorateIcons } from './icons.js';
 import { getLanguage } from './i18n.js';
+import { installVideoLinks } from './video.js';
 
 if (window.trustedTypes && window.trustedTypes.createPolicy) {
   const innerTT = window.trustedTypes.createPolicy('tt-inner', {
@@ -222,6 +223,8 @@ async function loadEager(doc) {
   document.documentElement.lang = getLanguage();
   decorateTemplateAndTheme();
   installModalLinks();
+  // YouTube, Vimeo and video file links play in the video popup, wherever they are authored
+  installVideoLinks();
   const main = doc.querySelector('main');
   if (main) {
     decorateMain(main);

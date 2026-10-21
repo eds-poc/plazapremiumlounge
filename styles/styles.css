@@ -574,6 +574,18 @@ button.button.arrow::after {
   mask: url('../icons/arrow-right.svg') center / contain no-repeat;
 }
 
+/* video: a play icon before the label of any button that plays a video (scripts/video.js), 8px
+   away, as the source's "▶ Watch Video" */
+button.button[data-action='video']::before {
+  content: '';
+  flex: none;
+  width: 0.875em;
+  height: 0.875em;
+  margin-right: var(--spacing-3);
+  background-color: currentcolor;
+  mask: url('/icons/play.svg') center / contain no-repeat;
+}
+
 a.button.secondary:hover,
 a.button.secondary:focus-visible,
 button.button.secondary:hover,
@@ -702,6 +714,13 @@ main>.section.inset {
   }
 }
 
+/* section style flush-top: no space above the section at any width, e.g. a hero section, so the
+   banner starts right under the header as on the source (`section.pt-0`). Works with any other
+   section style */
+main>.section.flush-top {
+  padding-top: 0;
+}
+
 main .section.wide>div {
   max-width: var(--container-wide-max-width);
   padding-inline: var(--container-wide-padding);
@@ -742,6 +761,34 @@ main .section.fixed-width>div {
 @media (width >=1400px) {
   main .section.fixed-width>div {
     max-width: 1320px;
+  }
+}
+
+/* section style lead-copy: a centred lead paragraph (source /your-destination-before-departure,
+   `.container.sm-container p.fs-5.text-center` under the destination banner): at most 860px wide,
+   16px on mobile and 20px from 768px with a 1.4 line height, 20px below each paragraph, and no
+   section padding (the space above is the previous section's) */
+main>.section.lead-copy {
+  padding-block: 0;
+}
+
+main>.section.lead-copy>div {
+  max-width: var(--container-narrow-max-width);
+}
+
+main>.section.lead-copy .default-content-wrapper {
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+  text-align: center;
+}
+
+main>.section.lead-copy p {
+  margin: 0 0 var(--spacing-7);
+}
+
+@media (width >=768px) {
+  main>.section.lead-copy .default-content-wrapper {
+    font-size: var(--font-size-xl);
   }
 }
 
@@ -1134,6 +1181,12 @@ main>.section.boxed-copy .default-content-wrapper strong {
 
 .space-bottom-50 {
   margin-bottom: var(--spacing-11);
+}
+
+/* section style bottom-spacing: 20px of extra space below the whole section, outside its
+   background, at every width, e.g. under a Featured Carousel (image-inset) */
+main>.section.bottom-spacing {
+  margin-bottom: var(--spacing-10);
 }
 
 #spinner-overlay {
