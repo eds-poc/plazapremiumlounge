@@ -198,6 +198,9 @@ const TEXTS = {
   propertyPriceUnavailable: {
     en: 'This option isn’t available at the selected time.', zh: '所选时间无法提供此选项。', 'zh-HK': '所選時間無法提供此選項。', ja: '選択した時間にはこのオプションをご利用いただけません。', pt: 'Esta opção não está disponível no horário selecionado.',
   },
+  propertyPromoRejected: {
+    en: 'This promo code isn’t valid.', zh: '此促销代码无效。', 'zh-HK': '此促銷代碼無效。', ja: 'このプロモーションコードは無効です。', pt: 'Este código promocional não é válido.',
+  },
   propertyPriceError: {
     en: 'We couldn’t get the price. Please try again.', zh: '无法获取价格，请重试。', 'zh-HK': '無法獲取價格，請重試。', ja: '料金を取得できませんでした。もう一度お試しください。', pt: 'Não foi possível obter o preço. Tente novamente.',
   },

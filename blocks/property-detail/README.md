@@ -65,8 +65,10 @@ shared. Lounge cards in the [Property List](../property-list/README.md) link her
   (when there's one), and the price, with **Reserve Now** in place of Get Price. Any change to the
   choices clears it again. Reserve Now has no action yet: it announces the choice and its price (a
   `property-detail:reserve` event) for the booking hand-off to come (`property-detail:get-price`
-  and `property-detail:price` are announced too). The service ignores a promo code it doesn't
-  know (the price stays the same, with no message).
+  and `property-detail:price` are announced too). When the service rejects the promo code
+  (`isPromoRejected` on any item of its answer), its message shows under the promo code field
+  (e.g. "No campaign found with given promocode") and the field is emptied; the price shown is
+  then the one without the code. Typing a new code hides the message.
 - **No services:** a lounge without bookable services at that time (e.g. a rail lounge in the
   test data) shows a note instead of the service fields and Get Price. If the services can't be
   loaded, the note says so, with Try again.
@@ -90,5 +92,6 @@ shared. Lounge cards in the [Property List](../property-list/README.md) link her
 | The service is unavailable or slow (15 seconds) | "We couldn't load this lounge." and Try again | |
 | The services can't be loaded (an error, or 30 seconds) | "We couldn't load the services." and Try again, in the booking panel | |
 | No bookable services at that time | "Online booking isn't available for this lounge." in the booking panel | |
+| The promo code was rejected | The service's message in a yellow box under the promo code field, which is emptied ("This promo code isn't valid." when the service gives no text) | |
 | No price for the choices (not available then, or outside opening hours) | "This option isn't available at the selected time." above Get Price | |
 | The price can't be had (an error, or 30 seconds) | "We couldn't get the price. Please try again." above Get Price | |

@@ -32,6 +32,13 @@
   --property-detail-tag-size: 11px;
   --property-detail-total-size: 21px;
 
+  /* the promo code rejection notice (from the design reference) */
+  --property-detail-notice-bg: #fefbec;
+  --property-detail-notice-border: #ebca61;
+  --property-detail-notice-color: #8a3c0c;
+  --property-detail-notice-radius: 4px;
+  --property-detail-notice-icon: 13px;
+
   /* the source's red (Bootstrap text-danger, --color-error) darkened to 4.5:1 on the grey panel */
   --property-detail-error: #b02a37;
   --property-detail-button-focus: 0 0 0 4px rgb(49 132 253 / 50%);
@@ -625,6 +632,42 @@
 .property-detail-total-now {
   font-size: var(--property-detail-total-size);
   font-weight: var(--font-weight-medium);
+}
+
+/* the service's promo code rejection, under the promo code field (as the design reference): a
+   cream box with a yellow line, a filled brown "!" and brown text, 5px below the field */
+.property-detail-promo-notice {
+  display: flex;
+  gap: calc(var(--spacing-2) + var(--spacing-1));
+  align-items: center;
+  margin: var(--spacing-2) 0 0;
+  padding: var(--spacing-1) var(--spacing-4);
+  border: var(--base-border-width) solid var(--property-detail-notice-border);
+  border-radius: var(--property-detail-notice-radius);
+  background-color: var(--property-detail-notice-bg);
+  color: var(--property-detail-notice-color);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+}
+
+.property-detail-promo-notice[hidden] {
+  display: none;
+}
+
+.property-detail-promo-notice::before {
+  content: '!';
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--property-detail-notice-icon);
+  height: var(--property-detail-notice-icon);
+  border-radius: var(--radius-circle);
+  background-color: var(--property-detail-notice-color);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
 }
 
 /* the price couldn't be had: a red message, as the source's */

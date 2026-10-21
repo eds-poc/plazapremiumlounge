@@ -206,6 +206,19 @@ function readServices(json, names = {}) {
 }
 
 /**
+ * The service's promo code rejection in a price response: the `isPromoRejected` of any item (its
+ * message, e.g. "No campaign found with given promocode"; `true` gets the site's own wording).
+ * @param {Object} json
+ * @returns {string} '' when the promo code wasn't rejected
+ */
+function readPromoRejection(json) {
+  const items = Array.isArray(json?.items) ? json.items : [];
+  const rejected = items.find((i) => i?.isPromoRejected)?.isPromoRejected;
+  if (!rejected) return '';
+  return typeof rejected === 'string' && rejected.trim() ? rejected.trim() : translate('propertyPromoRejected');
+}
+
+/**
  * The price in a price response (the first product's first price): the total, the price before
  * discounts and the currency. Null when there's none (not available for that start or guests).
  * @param {Object} json
@@ -519,6 +532,20 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
     field(translate('propertyPromo'), promo),
   ];
   fields.append(...serviceFields);
+  // the service's promo code rejection, under the promo code field
+  const promoNotice = el('p', 'property-detail-promo-notice');
+  promoNotice.setAttribute('role', 'alert');
+  promoNotice.hidden = true;
+  serviceFields[2].append(promoNotice);
+  /**
+   * Shows the promo code rejection and empties the promo code field, as the source.
+   * @param {string} text
+   */
+  const rejectPromo = (text) => {
+    promoNotice.textContent = text;
+    promoNotice.hidden = false;
+    promo.value = '';
+  };
   form.append(fields);
 
   const action = el('div', 'property-detail-action');
@@ -546,6 +573,8 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
     total.hidden = true;
     message.replaceChildren();
     message.hidden = true;
+    promoNotice.replaceChildren();
+    promoNotice.hidden = true;
     button.hidden = false;
     reserve.hidden = true;
     form.removeAttribute('aria-busy');
@@ -681,13 +710,16 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
     form.setAttribute('aria-busy', 'true');
     try {
       const price = await requestPrice(request, controller.signal);
-      if (!controller.signal.aborted) showPrice(request, price);
+      if (controller.signal.aborted) return;
+      showPrice(request, price);
+      if (price.promoRejected) rejectPromo(price.promoRejected);
     } catch (error) {
       if (controller.signal.aborted) return;
       // eslint-disable-next-line no-console
       console.error('property-detail: could not get the price', request, error);
       message.textContent = translate(error.unavailable ? 'propertyPriceUnavailable' : 'propertyPriceError');
       message.hidden = false;
+      if (error.promoRejected) rejectPromo(error.promoRejected);
     } finally {
       setLoading(false);
       if (pricing === controller) form.removeAttribute('aria-busy');
@@ -965,9 +997,13 @@ export default async function decorate(block) {
           if (error.service && error.service.errorCode !== '500') error.unavailable = true;
           throw error;
         }
+        // a rejected promo code comes with the price without it (or with no price at all)
+        const promoRejected = body.promocode ? readPromoRejection(json) : '';
         const price = readPrice(json, body.currencyCode);
-        if (!price) throw Object.assign(new Error('No price for these choices'), { unavailable: true });
-        return price;
+        if (!price) {
+          throw Object.assign(new Error('No price for these choices'), { unavailable: true, promoRejected });
+        }
+        return { ...price, promoRejected };
       },
     });
     const panels = await buildPanels(lounge, description);
