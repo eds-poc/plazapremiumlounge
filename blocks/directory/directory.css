@@ -111,3 +111,16 @@ html {
   scroll-padding-top: var(--nav-height);
 }
 .margin-bottom-100{margin-bottom: var(--margin-bottom-100)!important;}
+/* pill: a compact pill sized to its label (source jump links .btn.btn-default): 16px text, no
+   minimum width, and the filled style in the source's lighter maroon */
+a.button.pill,
+button.button.pill {
+  min-width: 0;
+  font-size: var(--font-size-md);
+}
+
+a.button.primary.pill:not(:hover, :focus-visible),
+button.button.primary.pill:not(:hover, :focus-visible) {
+  border-color: var(--color-brand-plum);
+  background-color: var(--color-brand-plum);
+}
