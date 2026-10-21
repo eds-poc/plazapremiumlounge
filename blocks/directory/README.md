@@ -62,8 +62,9 @@ A column is never narrower than 400px, so a column count only shows when there's
 3. One section per list: its heading 2 (e.g. `Lounge Pass Canada Eligible Locations`), then a
    Directory block.
 4. Every section, including the first: Section Metadata `Style` = `fixed-width, divided`. This
-   gives the source's page width, a light grey line between sections, the 26px maroon list
-   headings and the 14px bold labels.
+   gives the source's page width, the 26px maroon list headings and the 14px bold labels.
+5. The line between lists: a **Divider** block at the start of each section after the first,
+   before its heading. Delete the Divider table to remove a line; add one to add a line.
 
 Group names and titles become headings one level below the heading above the block (heading 3 and
 4 under a heading 2), so screen reader users can jump between countries and airports.
