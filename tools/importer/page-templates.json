@@ -30,6 +30,37 @@
           ]
         }
       ]
+    },
+    {
+      "name": "sign-up",
+      "urls": [
+        "https://www.plazapremiumlounge.com/en-uk/sign-up"
+      ],
+      "description": "Sign up page (/en-uk/sign-up): the page title and the sign up form as a Custom Form (two-columns)",
+      "blocks": [
+        {
+          "name": "custom-form",
+          "instances": [
+            "#formBookingRegistration"
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "id": "section-1",
+          "name": "Sign Up",
+          "selector": [
+            "section.news"
+          ],
+          "style": null,
+          "blocks": [
+            "custom-form"
+          ],
+          "defaultContent": [
+            "section.news .title-wrapper h2"
+          ]
+        }
+      ]
     }
   ]
 }
