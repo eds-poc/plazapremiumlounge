@@ -40,27 +40,37 @@ folder serves every lounge: `/en-uk/find/lounge`, `/zh-cn/find/lounge`, `/zh-hk/
 | Parameter | Meaning | When missing or wrong |
 | --- | --- | --- |
 | `propertycode` | The lounge, e.g. `PRPRTY814` | "This lounge isn't available." |
-| `currency` | Sent to the service, e.g. `HKD` (prices come in the lounge's own currency) | `USD` |
-| `date` | The booking date, `YYYY-MM-DD` | Today at the lounge; a past date moves to today |
-| `time` | The booking time, `HHmm` on the half hour | The next half hour at the lounge; a past time moves on |
+| `currency` | Sent to the services, e.g. `HKD` (the "from" prices come in the lounge's own currency) | The lounge's own currency |
+| `date` | The booking date, `YYYY-MM-DD` | The first bookable day at the lounge; an earlier date moves to it |
+| `time` | The booking time, `HHmm` on the half hour | The first bookable time; an earlier one moves on |
+
+The first bookable time is the half hour after now plus the lounge's booking lead time (from the
+service, e.g. 1 hour: at 12:32 the first time is 14:00), as the source. Earlier times are disabled.
 
 The page writes the date and time it shows back into the address (no reload), so a link can be
 shared. Lounge cards in the [Property List](../property-list/README.md) link here.
 
 ## Booking panel
 
-- **Fields:** date, time ("hrs"), adults, children, service and service details (from the
-  service), and a promo code.
-- **Get Price** has no action yet. It sends a `property-detail:get-price` event with the choices,
-  as a hook for the booking hand-off to come.
-- **No services:** a lounge without bookable services (e.g. a rail lounge in the test data) shows
-  a note instead of the service fields and Get Price.
+- **Fields:** date, time ("hrs"), adults, children, service and service details, and a promo
+  code.
+- **Services and service details** (e.g. Lounge → Lounge Use - 2 Hours) come from the services
+  service for the chosen start time, after the lounge is shown (it takes a few seconds; the fields
+  wait, disabled). Changing the date or time asks again, keeping the visitor's choice when it's
+  still offered. Durations are listed shortest first. Service names follow the page language;
+  the durations' names are English only (the service has no translations).
+- **Get Price** has no action yet. It sends a `property-detail:get-price` event with the choices
+  (lounge code, currency, start date and time, guests, the service code `SRVC…`, the product code
+  `PRD…`, promo code), as a hook for the booking hand-off to come.
+- **No services:** a lounge without bookable services at that time (e.g. a rail lounge in the
+  test data) shows a note instead of the service fields and Get Price. If the services can't be
+  loaded, the note says so, with Try again.
 
 ## Where the rest comes from
 
 | What | From |
 | --- | --- |
-| The service address | Code, not content: `scripts/endpoints.js` (the `propertyDetail` endpoint path) |
+| The service addresses | Code, not content: `scripts/endpoints.js` (the `propertyDetail` endpoint, a GET, and `propertyServices`, a POST with the start time, the lounge and its airport code, and the currency) |
 | The language of the data | The page's language folder (as the Property List); page metadata `language-code` overrides it |
 | Labels ("Date", "Get Price", panel names, "Lounge in {city}") | The site's translations, by page language, in the source pages' wording |
 | Details panel | The lounge's address and phone number only; the service's email addresses aren't shown |
@@ -72,7 +82,6 @@ shared. Lounge cards in the [Property List](../property-list/README.md) link her
 | Loading | The site's page loader until the lounge is shown (the service can take several seconds) | |
 | No `propertycode` in the address | "This lounge isn't available." | A hint with an example address |
 | Unknown or inactive lounge | "This lounge isn't available." | The code that wasn't found |
-| The service is unavailable or slow (30 seconds) | "We couldn't load this lounge." and Try again | |
-
-The bookable services arrive with a second call in the background. Their fields wait, disabled,
-until then.
+| The service is unavailable or slow (15 seconds) | "We couldn't load this lounge." and Try again | |
+| The services can't be loaded (an error, or 30 seconds) | "We couldn't load the services." and Try again, in the booking panel | |
+| No bookable services at that time | "Online booking isn't available for this lounge." in the booking panel | |

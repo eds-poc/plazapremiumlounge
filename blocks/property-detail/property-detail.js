@@ -11,8 +11,11 @@ import {
   safeHtml, setLoading, toKey, toUrl,
 } from '../../scripts/properties.js';
 
-// the detail service is slow (typically 4-7s, at times over 20s)
-const TIMEOUT_MS = 30000;
+// the detail service answers in about 0.2-2s; the services one in 3-7s (at times far longer)
+const DETAIL_TIMEOUT_MS = 15000;
+const SERVICES_TIMEOUT_MS = 30000;
+// a pause after a date or time change before asking for that slot's services
+const SERVICES_DELAY_MS = 400;
 const MOBILE = '(width < 768px)';
 // desktop shows the first four photos, as the source
 const DESKTOP_PHOTOS = 4;
@@ -20,9 +23,6 @@ const SLOT_MINUTES = 30;
 const DAY_MINUTES = 24 * 60;
 const MAX_GUESTS = 10;
 const DEFAULT_CURRENCY = 'USD';
-// the service requires an airport code; the lounge's details come with any code, its bookable
-// services only with the lounge's own (which the first response gives)
-const IATA_PLACEHOLDER = 'ALL';
 
 /**
  * The page address's lounge and booking choices, as the source detail pages use them
@@ -102,27 +102,45 @@ function toTime(minutes) {
 
 /**
  * The booking date and time to show, as the source: the address's date and time when valid,
- * else today and the next half hour at the lounge; a past date or time moves forward to the next
- * free slot (the time onto the half-hour grid).
+ * else the first bookable slot; an earlier date or time moves forward to it (the time onto the
+ * half-hour grid). The first bookable slot is the half hour after now plus the lounge's lead time
+ * at the lounge (e.g. 12:32 with 1 hour's lead → 14:00), which can be the next day.
  * @param {{date: string, time: string}} params
  * @param {string} [timeZone]
- * @returns {{date: string, time: string, today: string, earliest: number}}
+ * @param {number} [leadMinutes] How far ahead bookings must start
+ * @returns {{date: string, time: string, firstDay: string, earliest: number}} `earliest` is the
+ *   first bookable minute of `firstDay`
  */
-function chooseSlot(params, timeZone) {
+function chooseSlot(params, timeZone, leadMinutes = 0) {
   const now = nowAt(timeZone);
-  const nextSlot = Math.ceil((now.minutes + 1) / SLOT_MINUTES) * SLOT_MINUTES;
-  let date = isIsoDate(params.date) && params.date >= now.date ? params.date : now.date;
+  let first = Math.ceil((now.minutes + leadMinutes + 1) / SLOT_MINUTES) * SLOT_MINUTES;
+  let firstDay = now.date;
+  while (first >= DAY_MINUTES) {
+    firstDay = nextDay(firstDay);
+    first -= DAY_MINUTES;
+  }
+  let date = isIsoDate(params.date) && params.date >= firstDay ? params.date : firstDay;
   const asked = /^\d{4}$/.test(params.time) ? Number(params.time.slice(0, 2)) * 60 + Number(params.time.slice(2)) : NaN;
   let minutes = asked >= 0 && asked < DAY_MINUTES
-    ? Math.ceil(asked / SLOT_MINUTES) * SLOT_MINUTES : nextSlot % DAY_MINUTES;
-  if (date === now.date && minutes < nextSlot) minutes = nextSlot;
+    ? Math.ceil(asked / SLOT_MINUTES) * SLOT_MINUTES : first;
+  if (date === firstDay && minutes < first) minutes = first;
   if (minutes >= DAY_MINUTES) {
     date = nextDay(date);
     minutes -= DAY_MINUTES;
   }
   return {
-    date, time: toTime(minutes), today: now.date, earliest: nextSlot,
+    date, time: toTime(minutes), firstDay, earliest: first,
   };
+}
+
+/**
+ * The lounge's booking lead time in minutes, from the service's hours ("1.0", "01.00", "0.0").
+ * @param {string|number} value
+ * @returns {number}
+ */
+function readLeadTime(value) {
+  const hours = Number.parseFloat(value);
+  return Number.isFinite(hours) && hours > 0 ? Math.round(hours * 60) : 0;
 }
 
 /**
@@ -151,17 +169,27 @@ function formatPrice(price) {
 }
 
 /**
- * The bookable services in a detail response, each with its products (durations).
+ * The bookable services in a services response, each with its products (durations); services
+ * without products (e.g. the "Pass Service" every lounge lists) aren't bookable here. The service
+ * answers in English only, so a service's name comes from the lounge's own (translated) list when
+ * it has it (SRVC1619 there is serviceId 1619).
  * @param {Object} json
- * @returns {{code: string, name: string, products: {code: string, name: string}[]}[]}
+ * @param {Object<string, string>} [names] Translated service names by serviceId
+ * @returns {{code: string, name: string,
+ *   products: {code: string, name: string, minutes: number}[]}[]}
  */
-function readServices(json) {
-  return (json?.serviceList?.items || []).map((s) => ({
+function readServices(json, names = {}) {
+  const items = Array.isArray(json?.items) ? json.items : [];
+  const order = (x) => Number(x.sequence) || 0;
+  return [...items].sort((a, b) => order(a) - order(b)).map((s) => ({
     code: s.serviceCode,
-    name: (s.serviceDisplayName || s.serviceName || '').trim(),
+    name: (names[String(s.serviceCode || '').replace(/^SRVC/, '')] || s.serviceDisplayName || s.serviceName || '').trim(),
+    // the service lists the products in no fixed order: shortest first, as the source
     products: (s.availableProducts || [])
-      .map((p) => ({ code: p.productCode, name: (p.displayName || '').trim() }))
-      .filter((p) => p.code && p.name),
+      .map((p) => ({ code: p.productCode, name: (p.displayName || '').trim(), minutes: Number(p.durationInMinutes) || 0 }))
+      .filter((p) => p.code && p.name)
+      // (a product before its bundle of the same length, e.g. "5 Hours" before "5 Hours + Sakura…")
+      .sort((a, b) => a.minutes - b.minutes || a.name.length - b.name.length),
   })).filter((s) => s.code && s.name && s.products.length);
 }
 
@@ -191,7 +219,12 @@ function readDetail(json) {
     description: detail.description || '',
     timeZone: readTimeZone(detail.timeZone),
     iata,
-    bookable: readServices(json),
+    leadMinutes: readLeadTime(detail.leadTime),
+    defaultCurrency: (detail.defaultCurrency || '').trim().toUpperCase(),
+    // the translated service names, for the services call's English ones
+    serviceNames: Object.fromEntries((detail.availableServices || [])
+      .filter((s) => s.serviceId && s.serviceDisplayName)
+      .map((s) => [String(s.serviceId), s.serviceDisplayName.trim()])),
   };
 }
 
@@ -367,16 +400,17 @@ function counter(name, group, value, min) {
 /**
  * The booking panel (desktop) / form (in the phone's Book Your Visit dialog), as the source:
  * date, time, adults, children, service, service details, promo code and Get Price. Changing the
- * date or time updates the page address. Get Price has no action yet: it announces the choices
- * (a `property-detail:get-price` event) for the booking hand-off to come.
+ * date or time updates the page address and calls `onSlotChange` (the services depend on the
+ * start time). Get Price has no action yet: it announces the choices (a
+ * `property-detail:get-price` event) for the booking hand-off to come.
  * @param {Object} lounge
  * @param {Object} slot The chosen date and time (see chooseSlot)
- * @param {Object} params The address's choices
  * @param {Object} settings
+ * @param {{currency: string, onSlotChange: Function}} options
  * @returns {{panel: HTMLElement, heading: HTMLElement, form: HTMLFormElement,
- *   setServices: Function}}
+ *   setServices: Function, startDateTime: Function}}
  */
-function buildBooking(lounge, slot, params, settings) {
+function buildBooking(lounge, slot, settings, { currency, onSlotChange }) {
   const panel = el('section', 'property-detail-booking');
   const header = el('div', 'property-detail-booking-header');
   const heading = el('h2', 'property-detail-booking-title', translate('propertyBookVisit'));
@@ -399,10 +433,10 @@ function buildBooking(lounge, slot, params, settings) {
   date.type = 'date';
   date.name = 'date';
   date.value = slot.date;
-  date.min = slot.today;
+  date.min = slot.firstDay;
   dateWrap.append(dateText, date);
 
-  // time: every half hour; times already past today are unavailable
+  // time: every half hour; times before the first bookable slot are unavailable
   const timeWrap = el('div', 'property-detail-time');
   const time = el('select');
   time.name = 'time';
@@ -412,7 +446,7 @@ function buildBooking(lounge, slot, params, settings) {
     for (let m = 0; m < DAY_MINUTES; m += SLOT_MINUTES) {
       const option = el('option', '', toTime(m));
       option.value = toTime(m);
-      option.disabled = date.value === slot.today && m < slot.earliest;
+      option.disabled = date.value === slot.firstDay && m < slot.earliest;
       time.append(option);
     }
     const first = [...time.options].find((o) => !o.disabled);
@@ -430,8 +464,8 @@ function buildBooking(lounge, slot, params, settings) {
     field(translate('propertyChildren'), counter('children', translate('propertyChildren'), 0, 0), translate('propertyChildNote')),
   );
 
-  // service and its products (e.g. Lounge → Lounge Use - 2 Hours); they arrive with a second
-  // call (see setServices), so the fields wait, disabled, until then
+  // service and its products (e.g. Lounge → Lounge Use - 2 Hours); they come from the services
+  // call for the chosen start time (see setServices), so the fields wait, disabled, until then
   const service = el('select');
   service.name = 'service';
   const product = el('select');
@@ -456,60 +490,86 @@ function buildBooking(lounge, slot, params, settings) {
   form.append(action);
 
   let services = [];
-  const fillProducts = () => {
+  const fillProducts = (keep) => {
     const chosen = services.find((x) => x.code === service.value) || services[0];
     product.replaceChildren(...(chosen?.products || []).map((p) => {
       const option = el('option', '', p.name);
       option.value = p.code;
       return option;
     }));
+    if (keep && chosen?.products.some((p) => p.code === keep)) product.value = keep;
   };
-  service.addEventListener('change', fillProducts);
+  service.addEventListener('change', () => fillProducts());
   /**
    * Shows the bookable services: null while they're loading (fields disabled), [] when there are
-   * none (a note instead of the fields and Get Price).
+   * none (a note instead of the fields and Get Price), or, with `retry`, a note that they couldn't
+   * be loaded and Try again. The visitor's service and service details stay chosen when the new
+   * list still has them.
    * @param {Object[]|null} list
+   * @param {Function} [retry]
    */
-  const setServices = (list) => {
+  const setServices = (list, retry) => {
     const waiting = list === null;
-    services = list || [];
     form.classList.toggle('is-waiting', waiting);
     [service, product, promo, button].forEach((control) => { control.disabled = waiting; });
+    // while a new list loads, the current one stays (disabled), so the choice can be kept
+    if (waiting && services.length) return;
+    const keep = { service: service.value, product: product.value };
+    services = list || [];
     service.replaceChildren(...services.map((x) => {
       const option = el('option', '', x.name);
       option.value = x.code;
       return option;
     }));
-    fillProducts();
+    if (services.some((x) => x.code === keep.service)) service.value = keep.service;
+    fillProducts(keep.product);
     const none = !waiting && !services.length;
     serviceFields.forEach((f) => { f.hidden = none; });
     action.hidden = none;
     fields.querySelector('.property-detail-no-services')?.remove();
-    if (none) fields.append(el('p', 'property-detail-no-services', translate('propertyNoServices')));
+    if (!none) return;
+    const note = el('div', 'property-detail-no-services');
+    note.setAttribute('role', 'status');
+    note.append(el('p', '', translate(retry ? 'propertyServicesError' : 'propertyNoServices')));
+    if (retry) {
+      const again = el('button', 'button secondary', translate('propertyRetry'));
+      again.type = 'button';
+      again.addEventListener('click', retry);
+      note.append(again);
+    }
+    fields.append(note);
   };
-  setServices(lounge.bookable.length ? lounge.bookable : null);
+  setServices(null);
 
+  /** The chosen start as the services call takes it: "2026-10-21 14:00:00" (lounge time). */
+  const startDateTime = () => `${date.value} ${time.value.slice(0, 2)}:${time.value.slice(2)}:00`;
   date.addEventListener('change', () => {
-    if (!date.value || date.value < slot.today) date.value = slot.today;
+    if (!date.value || date.value < slot.firstDay) date.value = slot.firstDay;
     dateText.textContent = formatDate(date.value);
     fillTimes();
     writeParams({ date: date.value, time: time.value });
+    onSlotChange();
   });
-  time.addEventListener('change', () => writeParams({ time: time.value }));
+  time.addEventListener('change', () => {
+    writeParams({ time: time.value });
+    onSlotChange();
+  });
   form.addEventListener('submit', () => {
     const data = new FormData(form);
     form.dispatchEvent(new CustomEvent('property-detail:get-price', {
       bubbles: true,
       detail: {
         code: lounge.code,
-        currency: params.currency || DEFAULT_CURRENCY,
+        currency,
+        startDateTime: startDateTime(),
+        // service: the serviceCode (SRVC…), product: the productCode (PRD…)
         ...Object.fromEntries(data.entries()),
       },
     }));
   });
   panel.append(header, form);
   return {
-    panel, heading, form, setServices,
+    panel, heading, form, setServices, startDateTime,
   };
 }
 
@@ -702,17 +762,17 @@ export default async function decorate(block) {
     showMessage(block, translate('propertyNotFound'), null, 'Open this page with a lounge in the address, e.g. ?propertycode=PRPRTY814&currency=HKD.');
     return;
   }
+  // the detail service needs the code and the language (the currency doesn't change its answer)
   const url = apiUrl('propertyDetail');
   url.searchParams.set('propertyCode', params.code);
   url.searchParams.set('currencyCode', params.currency || DEFAULT_CURRENCY);
-  url.searchParams.set('iataCode', IATA_PLACEHOLDER);
   url.searchParams.set('languageCode', getApiLanguage());
 
   let load;
   const render = async () => {
     let lounge;
     try {
-      lounge = readDetail(await fetchJson(url.href, TIMEOUT_MS));
+      lounge = readDetail(await fetchJson(url.href, DETAIL_TIMEOUT_MS));
     } catch (error) {
       if (error.status === 404) {
         showMessage(block, translate('propertyNotFound'), null, `Property code "${params.code}" isn't in the service.`);
@@ -728,8 +788,10 @@ export default async function decorate(block) {
       return;
     }
     const mobile = window.matchMedia(MOBILE);
-    const slot = chooseSlot(params, lounge.timeZone);
+    const slot = chooseSlot(params, lounge.timeZone, lounge.leadMinutes);
     writeParams({ date: slot.date, time: slot.time });
+    const currency = params.currency || lounge.defaultCurrency || DEFAULT_CURRENCY;
+    let requestServices = () => {};
 
     const description = el('div', 'property-detail-description');
     if (lounge.note) description.append(el('p', 'property-detail-note'));
@@ -743,7 +805,10 @@ export default async function decorate(block) {
     const intro = el('div', 'property-detail-intro');
     const gallery = el('div', 'property-detail-gallery');
     gallery.append(photos);
-    const booking = buildBooking(lounge, slot, params, settings);
+    const booking = buildBooking(lounge, slot, settings, {
+      currency,
+      onSlotChange: () => requestServices(true),
+    });
     const panels = await buildPanels(lounge, description);
     const content = el('div', 'property-detail-content');
     content.append(booking.panel, panels);
@@ -780,14 +845,42 @@ export default async function decorate(block) {
     place();
     setHead(lounge, safeHtml(lounge.description, { blocks: true }));
 
-    // the bookable services need the lounge's own airport code: a second call in the background
-    if (lounge.iata && lounge.iata !== url.searchParams.get('iataCode')) {
-      const servicesUrl = new URL(url);
-      servicesUrl.searchParams.set('iataCode', lounge.iata);
-      fetchJson(servicesUrl.href, TIMEOUT_MS)
-        .then((json) => booking.setServices(readServices(json)))
-        .catch(() => booking.setServices([]));
-    } else if (!lounge.bookable.length) booking.setServices([]);
+    // the bookable services for the chosen start time (a POST, with the lounge's own airport
+    // code): asked for once the lounge is shown, and again, after a short pause, when the date or
+    // time changes; a newer request replaces an older one
+    let pending;
+    let timer;
+    requestServices = (delayed) => {
+      clearTimeout(timer);
+      pending?.abort();
+      if (!lounge.iata) {
+        booking.setServices([]);
+        return;
+      }
+      booking.setServices(null);
+      timer = setTimeout(() => {
+        const controller = new AbortController();
+        pending = controller;
+        fetchJson(apiUrl('propertyServices').href, SERVICES_TIMEOUT_MS, {
+          signal: controller.signal,
+          body: {
+            startDateTime: booking.startDateTime(),
+            propertyCode: lounge.code,
+            iataCode: lounge.iata,
+            currencyCode: currency,
+          },
+        }).then((json) => {
+          if (controller.signal.aborted) return;
+          booking.setServices(readServices(json, lounge.serviceNames));
+        }).catch((error) => {
+          if (controller.signal.aborted) return;
+          // eslint-disable-next-line no-console
+          console.error('property-detail: could not load the services', error);
+          booking.setServices([], () => requestServices(false));
+        });
+      }, delayed ? SERVICES_DELAY_MS : 0);
+    };
+    requestServices(false);
   };
   load = async () => {
     setLoading(true);

@@ -54,19 +54,28 @@ export function setLoading(busy) {
 }
 
 /**
- * Fetches JSON, giving up after `timeout` ms. Rejects with an Error carrying `status` (HTTP status,
- * 0 for a network failure or the timeout).
+ * Fetches JSON, giving up after `timeout` ms. With `body`, it's a POST of that object as JSON. A
+ * `signal` cancels it early (e.g. a newer request replaces it). Rejects with an Error carrying
+ * `status` (HTTP status, 0 for a network failure, the timeout or a cancel); an answer that isn't
+ * JSON, or a 200 with the service's error object (`{ errorCode, message }`), is a failure too.
  * @param {string} url
  * @param {number} timeout
+ * @param {{body?: Object, signal?: AbortSignal}} [options]
  * @returns {Promise<Object>}
  */
-export async function fetchJson(url, timeout) {
+export async function fetchJson(url, timeout, { body, signal } = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
+  signal?.addEventListener('abort', () => controller.abort(), { once: true });
   try {
-    const resp = await fetch(url, { signal: controller.signal });
+    const resp = await fetch(url, {
+      signal: controller.signal,
+      ...(body && { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }),
+    });
     if (!resp.ok) throw Object.assign(new Error(`HTTP ${resp.status}`), { status: resp.status });
-    return await resp.json();
+    const json = await resp.json();
+    if (json?.errorCode) throw Object.assign(new Error(`${json.errorCode}: ${json.message || ''}`), { status: resp.status });
+    return json;
   } catch (error) {
     if (error.status === undefined) error.status = 0;
     throw error;

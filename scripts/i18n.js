@@ -186,6 +186,9 @@ const TEXTS = {
   propertyNoServices: {
     en: 'Online booking isn’t available for this lounge.', zh: '此贵宾室暂不提供网上预订。', 'zh-HK': '此貴賓室暫不提供網上預訂。', ja: 'このラウンジはオンライン予約をご利用いただけません。', pt: 'A reserva online não está disponível para este lounge.',
   },
+  propertyServicesError: {
+    en: 'We couldn’t load the services.', zh: '无法加载服务。', 'zh-HK': '無法載入服務。', ja: 'サービスを読み込めませんでした。', pt: 'Não foi possível carregar os serviços.',
+  },
   propertyPanelLounge: {
     en: 'The Lounge', zh: '贵宾室', 'zh-HK': '貴賓室', ja: 'ラウンジ', pt: 'O Lounge',
   },

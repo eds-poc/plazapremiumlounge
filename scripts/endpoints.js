@@ -10,6 +10,8 @@ const API_DOMAIN = 'https://236246-402whitedonkey-dev.adobeio-static.net';
 const ENDPOINTS = {
   properties: '/api/v1/web/app_demo/GetAllProperties',
   propertyDetail: '/api/v1/web/app_demo/GetPropertyDetail',
+  // a lounge's bookable services and their products for a start time (POST, JSON body)
+  propertyServices: '/api/v1/web/app_demo/GetServices',
 };
 
 /**

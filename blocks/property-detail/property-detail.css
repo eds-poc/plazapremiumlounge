@@ -542,10 +542,19 @@
   box-shadow: var(--shadow-focus);
 }
 
+/* the note in place of the service fields (no bookable services, or Try again), across the row */
 .property-detail-no-services {
-  margin: 0;
+  grid-column: 1 / -1;
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
+}
+
+.property-detail-no-services p {
+  margin: 0;
+}
+
+.property-detail-no-services .button {
+  margin: var(--spacing-4) 0 0;
 }
 
 .property-detail-action {
