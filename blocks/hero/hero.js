@@ -72,7 +72,7 @@ function decorateVideoPlayback(block) {
   });
 
   // a line above the title (e.g. "Your destination before departure") is smaller
-  const title = content.querySelector('h1') || content.querySelector(HEADINGS);
+  const title = content.querySelector(HEADINGS);
   if (title) {
     title.classList.add('hero-title');
     let prev = title.previousElementSibling;
