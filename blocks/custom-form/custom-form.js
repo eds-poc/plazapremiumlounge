@@ -3,8 +3,8 @@ import apiUrl from '../../scripts/endpoints.js';
 import { getSiteFolder, translate } from '../../scripts/i18n.js';
 import { styleWords } from '../../scripts/buttons.js';
 import {
-  attachValidation, buildField, collectValues, fieldElement, readSettings, setFieldError,
-  validateForm,
+  attachValidation, buildField, collectValues, fieldElement, linkFields, readSettings, resetForm,
+  setFieldError, validateForm,
 } from '../../scripts/forms.js';
 
 /**
@@ -128,10 +128,15 @@ export default async function decorate(block) {
   });
 
   // the form's message (e.g. the API's "An account with the given email already exists."),
-  // announced, at the top of the form
+  // announced, at the top of the form, with a button to close it
   const status = el('div', 'form-status');
-  status.setAttribute('role', 'alert');
   status.hidden = true;
+  const statusText = el('p', 'form-status-text');
+  statusText.setAttribute('role', 'alert');
+  const statusClose = el('button', 'form-status-close');
+  statusClose.type = 'button';
+  statusClose.setAttribute('aria-label', translate('close'));
+  status.append(statusText, statusClose);
   // the error count after a submit with errors, for screen readers
   const summary = el('p', 'visually-hidden');
   summary.setAttribute('aria-live', 'polite');
@@ -140,13 +145,18 @@ export default async function decorate(block) {
   if (submit) form.append(submit);
 
   const showStatus = (text) => {
-    status.textContent = text;
+    statusText.textContent = text;
     status.hidden = !text;
     if (text) {
       const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       status.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'center' });
     }
   };
+  statusClose.addEventListener('click', () => {
+    showStatus('');
+    // focus moves on to the form, not back to the top of the page
+    form.querySelector('input:not([type="hidden"]), select, textarea')?.focus();
+  });
 
   const button = submit?.querySelector('button');
   const label = button?.textContent;
@@ -161,6 +171,7 @@ export default async function decorate(block) {
   };
 
   attachValidation(form);
+  linkFields(form);
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     // a second click (or Enter) while the first is still on its way does nothing
@@ -185,7 +196,6 @@ export default async function decorate(block) {
     }
 
     setBusy(true, true);
-    let leaving = false;
     try {
       const res = await fetch(url, {
         method: (settings.get('method') || 'POST').toUpperCase(),
@@ -209,8 +219,10 @@ export default async function decorate(block) {
         return;
       }
       form.dispatchEvent(new CustomEvent('custom-form:success', { bubbles: true, detail: { data, values, form } }));
+      // sent: the form is emptied and its button back to normal (also when the visitor comes
+      // back to the page)
+      resetForm(form);
       if (settings.get('redirect')) {
-        leaving = true;
         window.location.assign(localRedirect(settings.get('redirect')));
         return;
       }
@@ -224,8 +236,7 @@ export default async function decorate(block) {
       showStatus(translate('formNetworkError'));
       form.dispatchEvent(new CustomEvent('custom-form:error', { bubbles: true, detail: { status: 0, form } }));
     } finally {
-      // on the way to the confirmation page the button stays disabled
-      if (!leaving) setBusy(false);
+      setBusy(false);
     }
   });
 

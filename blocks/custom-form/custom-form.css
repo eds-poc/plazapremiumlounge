@@ -26,10 +26,13 @@
   margin-top: calc(var(--spacing-3) - var(--form-row-gap));
 }
 
-/* the API's message (e.g. its serviceResponseMsg), at the top of the form */
+/* the API's message (e.g. its serviceResponseMsg), at the top of the form, with a close button */
 .custom-form .form-status {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-4);
   border-radius: var(--radius-sm);
-  padding: var(--spacing-5) var(--spacing-7);
+  padding: var(--spacing-5) var(--spacing-5) var(--spacing-5) var(--spacing-7);
   background-color: rgb(220 53 69 / 8%);
   color: var(--color-error);
   font-size: var(--font-size-sm);
@@ -38,6 +41,33 @@
 
 .custom-form .form-status[hidden] {
   display: none;
+}
+
+.custom-form .form-status-text {
+  flex: 1;
+  margin: 0;
+}
+
+.custom-form .form-status-close {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin: -2px 0;
+  border: 0;
+  padding: 0;
+  background: currentcolor;
+  cursor: pointer;
+  mask: url('../../icons/close-thin.svg') center / 10px no-repeat;
+}
+
+.custom-form .form-status-close:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 2px;
+}
+
+/* the source's space below the last field: 50px, then its 20px spacer before the button */
+.custom-form .form-submit {
+  margin-top: calc(var(--spacing-11) + var(--spacing-7) - var(--form-row-gap));
 }
 
 .custom-form .form-submit .button {

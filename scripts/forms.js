@@ -3,7 +3,8 @@
  * A field is defined by a label, a type and settings (one `name: value` per line, e.g.
  * `key: firstName`, `required`, `rule: name`, `width: half`). Fields are built with
  * buildField(); attachValidation() checks them as the visitor goes, validateForm() checks them all
- * (on submit) and collectValues() gives the payload, keyed by each field's `key`.
+ * (on submit) and collectValues() gives the payload, keyed by each field's `key`. linkFields()
+ * makes a phone code follow the country field; resetForm() empties the form.
  * Styles: styles/forms.css (the form element gets the class `form-fields`).
  */
 import { translate } from './i18n.js';
@@ -146,11 +147,15 @@ function fillOptions(control, options, state, preset = state.def.settings.get('d
   if (control.matches('select')) {
     const keep = control.querySelector('option[value=""]');
     control.replaceChildren(...(keep ? [keep] : []));
+    // each option's source data (e.g. a country's phone code), for linked fields
+    state.data = new Map();
     options.forEach((item) => {
       const option = el('option');
       option.value = item.value;
       option.textContent = item.text;
-      if (item === chosen) option.selected = true;
+      // the preset is also what a form reset goes back to
+      if (item === chosen) option.defaultSelected = true;
+      if (item.data && !state.data.has(item.value)) state.data.set(item.value, item.data);
       control.append(option);
     });
     return;
@@ -163,7 +168,7 @@ function fillOptions(control, options, state, preset = state.def.settings.get('d
     input.name = def.key;
     input.id = `${def.id}-${i}`;
     input.value = value;
-    if (chosen?.value === value) input.checked = true;
+    if (chosen?.value === value) input.defaultChecked = true;
     const label = el('label', 'form-check-label');
     label.htmlFor = input.id;
     label.textContent = text;
@@ -195,7 +200,7 @@ function loadSource(state, select, map) {
   source.load().then((list) => {
     loading.replaceWith(placeholder);
     fillOptions(select, list.map((item) => ({
-      text: String(item[map.text] ?? ''), value: String(item[map.value] ?? ''),
+      text: String(item[map.text] ?? ''), value: String(item[map.value] ?? ''), data: item,
     })).filter((o) => o.text && o.value), state, map.preset);
     select.disabled = false;
     state.loaded = true;
@@ -240,7 +245,8 @@ function setControlAttributes(control, def) {
   control.id = def.id;
   control.name = def.key;
   if (settings.has('placeholder')) control.placeholder = settings.get('placeholder');
-  if (settings.has('default') && 'value' in control) control.value = settings.get('default');
+  // as the default value, so a form reset goes back to it
+  if (settings.has('default') && 'defaultValue' in control) control.defaultValue = settings.get('default');
   if (settings.has('readonly')) control.readOnly = true;
   const autocomplete = settings.get('autocomplete') || AUTOCOMPLETE[def.key] || TYPE_AUTOCOMPLETE[def.type];
   if (autocomplete) control.autocomplete = autocomplete;
@@ -323,7 +329,7 @@ export function buildField({
     const input = el('input', 'form-check-input');
     input.type = 'checkbox';
     setControlAttributes(input, def);
-    if (settings.has('default')) input.checked = /^(true|yes|checked|on)$/i.test(settings.get('default'));
+    if (settings.has('default')) input.defaultChecked = /^(true|yes|checked|on)$/i.test(settings.get('default'));
     const text = buildLabel(def);
     text.className = 'form-check-label';
     wrap.append(input, text);
@@ -610,6 +616,54 @@ export function attachValidation(form) {
   };
   form.addEventListener('input', onChange);
   form.addEventListener('change', onChange);
+}
+
+/**
+ * Links each phone field's country code to a country field: choosing a country of residence
+ * selects that country's code, which the visitor can still change on its own. The phone field
+ * follows the form's first country field, or the one its `prefix follows: key` names (`none` to
+ * turn it off).
+ * @param {HTMLFormElement} form
+ */
+export function linkFields(form) {
+  const states = [...form.querySelectorAll('.form-field')].map((wrap) => fields.get(wrap)).filter(Boolean);
+  states.filter((s) => s.def.type === 'phone' && s.code).forEach((phone) => {
+    const follows = phone.def.settings.get('prefix follows');
+    if (/^(none|no)$/i.test(follows || '')) return;
+    const country = follows
+      ? fieldByKey(form, follows)
+      : states.find((s) => s.def.type === 'country');
+    const select = country?.controls[0];
+    if (!select?.matches('select')) return;
+    const { settings } = phone.def;
+    const textKey = settings.get('prefix text') || 'phoneCodeCountryCode';
+    const valueKey = settings.get('prefix value') || 'phoneCode';
+    select.addEventListener('change', () => {
+      const item = country.data?.get(select.value);
+      if (!item) return;
+      // by its text first: +1 (US) and +1 (CA) share a value
+      const options = [...phone.code.options];
+      const option = options.find((o) => o.textContent === String(item[textKey] ?? ''))
+        || options.find((o) => o.value === String(item[valueKey] ?? ''));
+      if (!option || option.selected) return;
+      option.selected = true;
+      phone.code.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  });
+}
+
+/**
+ * Empties a form back to its defaults (e.g. after a successful send): the authored defaults and
+ * presets (such as the +1 (US) phone code), no errors, passwords hidden again.
+ * @param {HTMLFormElement} form
+ */
+export function resetForm(form) {
+  form.reset();
+  form.querySelectorAll('.form-field').forEach((wrap) => {
+    wrap.classList.remove('is-touched');
+    setFieldError(wrap, '');
+  });
+  form.querySelectorAll('.form-password-toggle[aria-pressed="true"]').forEach((button) => button.click());
 }
 
 /**
