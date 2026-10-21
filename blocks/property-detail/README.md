@@ -84,7 +84,7 @@ shared. Lounge cards in the [Property List](../property-list/README.md) link her
 
 | Situation | Visitors see | On the preview site, authors also see |
 | --- | --- | --- |
-| Loading | The site's page loader until the lounge is shown (the service can take several seconds) | |
+| Loading | The site's page loader until the lounge is shown (the service can take several seconds), and again while Get Price asks for the price (over the booking dialog on phones) | |
 | No `propertycode` in the address | "This lounge isn't available." | A hint with an example address |
 | Unknown or inactive lounge | "This lounge isn't available." | The code that wasn't found |
 | The service is unavailable or slow (15 seconds) | "We couldn't load this lounge." and Try again | |

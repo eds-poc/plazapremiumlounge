@@ -45,7 +45,9 @@ const LOADER_ID = 'spinner-overlay';
 let loader;
 
 /**
- * Shows the full-page loader (styled in styles.css), creating it on first use.
+ * Shows the full-page loader (styled in styles.css), creating it on first use. With a modal
+ * dialog open, the loader goes inside it: a modal dialog sits in the browser's top layer, above
+ * anything in the page.
  */
 export function showLoader() {
   if (!loader) {
@@ -56,7 +58,8 @@ export function showLoader() {
       loader.innerHTML = '<div id="global-spinner"><img src="/icons/PPL-loading-v2.webp" width="320" height="auto" alt="Loading..."></div>';
     }
   }
-  if (!loader.isConnected) document.body.prepend(loader);
+  const host = [...document.querySelectorAll('dialog[open]')].pop() || document.body;
+  if (loader.parentElement !== host) host.prepend(loader);
 }
 
 /**

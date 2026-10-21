@@ -436,11 +436,11 @@ function counter(name, group, value, min) {
  * date, time, adults, children, service, service details, promo code and Get Price. Changing the
  * date or time updates the page address and calls `onSlotChange` (the services depend on the
  * start time). Get Price asks for the price of the chosen service, duration, guests and start
- * (`requestPrice`) and shows it as the source: Subtotal, the price before a discount struck
- * through, the price, and Reserve Now instead of Get Price. Any change clears it again. Reserve
- * Now has no action yet: it announces the choice and its price (`property-detail:reserve`) for
- * the booking hand-off to come; `property-detail:get-price` and `property-detail:price` are
- * announced too.
+ * (`requestPrice`, with the page's loader up meanwhile) and shows it as the source: Subtotal,
+ * the price before a discount struck through, the price, and Reserve Now instead of Get Price.
+ * Any change clears it again. Reserve Now has no action yet: it announces the choice and its
+ * price (`property-detail:reserve`) for the booking hand-off to come; `property-detail:get-price`
+ * and `property-detail:price` are announced too.
  * @param {Object} lounge
  * @param {Object} slot The chosen date and time (see chooseSlot)
  * @param {Object} settings
@@ -676,7 +676,8 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
     clearPrice();
     const controller = new AbortController();
     pricing = controller;
-    // the source shows no wait on the button; assistive technology hears the form is busy
+    // the page's loader while the price comes (over the booking dialog on phones)
+    setLoading(true);
     form.setAttribute('aria-busy', 'true');
     try {
       const price = await requestPrice(request, controller.signal);
@@ -688,6 +689,7 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
       message.textContent = translate(error.unavailable ? 'propertyPriceUnavailable' : 'propertyPriceError');
       message.hidden = false;
     } finally {
+      setLoading(false);
       if (pricing === controller) form.removeAttribute('aria-busy');
     }
   });
