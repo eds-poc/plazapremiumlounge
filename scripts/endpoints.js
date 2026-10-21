@@ -9,6 +9,10 @@ const API_DOMAIN = 'https://236246-402whitedonkey-dev.adobeio-static.net';
 // endpoint paths, joined to the API domain
 const ENDPOINTS = {
   properties: '/api/v1/web/app_demo/GetAllProperties',
+  // countries with their phone codes, for the Custom Form country and phone fields
+  countries: '/api/v1/web/app_demo/GetCountries',
+  // the Custom Form sign up submit (account registration)
+  signUp: '/api/v1/web/app_demo/Register',
 };
 
 /**

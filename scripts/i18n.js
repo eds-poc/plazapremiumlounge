@@ -161,6 +161,106 @@ const TEXTS = {
   propertyArrivalTip: {
     en: 'Located in the arrivals area.', zh: '位于到达区。', 'zh-HK': '位於抵港區。', ja: '到着エリアにあります。', pt: 'Fica na área de desembarque.',
   },
+  // custom form (scripts/forms.js): default field messages, each can be replaced in the authoring
+  formRequired: {
+    en: 'Please fill in {label}.', zh: '请填写{label}。', 'zh-HK': '請填寫{label}。', ja: '{label}を入力してください。', pt: 'Preencha {label}.',
+  },
+  formRequiredChoice: {
+    en: 'Please select {label}.', zh: '请选择{label}。', 'zh-HK': '請選擇{label}。', ja: '{label}を選択してください。', pt: 'Selecione {label}.',
+  },
+  formRequiredCheck: {
+    en: 'Please tick this box to continue.', zh: '请勾选此项以继续。', 'zh-HK': '請剔選此項以繼續。', ja: '続行するにはチェックを入れてください。', pt: 'Marque esta caixa para continuar.',
+  },
+  formEmail: {
+    en: 'Please enter a valid email address.', zh: '请输入有效的电子邮箱地址。', 'zh-HK': '請輸入有效的電郵地址。', ja: '有効なメールアドレスを入力してください。', pt: 'Insira um endereço de e-mail válido.',
+  },
+  formMatch: {
+    en: '{label} does not match.', zh: '{label}不一致。', 'zh-HK': '{label}不一致。', ja: '{label}が一致しません。', pt: '{label} não corresponde.',
+  },
+  formName: {
+    en: 'Only alphabetic characters, apostrophes, and hyphens are allowed.',
+    zh: '只能输入字母、撇号和连字符。',
+    'zh-HK': '只可輸入字母、撇號及連字號。',
+    ja: '使用できるのは英字、アポストロフィ、ハイフンのみです。',
+    pt: 'Só são permitidas letras, apóstrofos e hífens.',
+  },
+  formPassword: {
+    en: 'Password must contain at least 1 lower case, 1 upper case, 1 numeric and 8 to 15 length character.',
+    zh: '密码须为 8 至 15 个字符，并至少包含 1 个小写字母、1 个大写字母和 1 个数字。',
+    'zh-HK': '密碼須為 8 至 15 個字元，並至少包含 1 個小楷字母、1 個大楷字母及 1 個數字。',
+    ja: 'パスワードは 8〜15 文字で、小文字・大文字・数字をそれぞれ 1 文字以上含めてください。',
+    pt: 'A senha deve ter de 8 a 15 caracteres, com pelo menos 1 letra minúscula, 1 maiúscula e 1 número.',
+  },
+  formPhone: {
+    en: 'Please fill in valid contact number', zh: '请填写有效的联系电话', 'zh-HK': '請填寫有效的聯絡電話', ja: '有効な電話番号を入力してください', pt: 'Preencha um número de contato válido',
+  },
+  formUrl: {
+    en: 'Please enter a valid web address.', zh: '请输入有效的网址。', 'zh-HK': '請輸入有效的網址。', ja: '有効な URL を入力してください。', pt: 'Insira um endereço web válido.',
+  },
+  formPostcode: {
+    en: 'Please enter a valid postcode.', zh: '请输入有效的邮政编码。', 'zh-HK': '請輸入有效的郵政編碼。', ja: '有効な郵便番号を入力してください。', pt: 'Insira um código postal válido.',
+  },
+  formPattern: {
+    en: 'Please check the format of {label}.', zh: '请检查{label}的格式。', 'zh-HK': '請檢查{label}的格式。', ja: '{label}の形式を確認してください。', pt: 'Verifique o formato de {label}.',
+  },
+  formMinLength: {
+    en: 'Please enter at least {n} characters.', zh: '请至少输入 {n} 个字符。', 'zh-HK': '請至少輸入 {n} 個字元。', ja: '{n} 文字以上で入力してください。', pt: 'Insira pelo menos {n} caracteres.',
+  },
+  formMaxLength: {
+    en: 'Please enter no more than {n} characters.', zh: '最多输入 {n} 个字符。', 'zh-HK': '最多輸入 {n} 個字元。', ja: '{n} 文字以内で入力してください。', pt: 'Insira no máximo {n} caracteres.',
+  },
+  formMin: {
+    en: 'Please enter {n} or more.', zh: '请输入不小于 {n} 的值。', 'zh-HK': '請輸入不小於 {n} 的值。', ja: '{n} 以上を入力してください。', pt: 'Insira {n} ou mais.',
+  },
+  formMax: {
+    en: 'Please enter {n} or less.', zh: '请输入不大于 {n} 的值。', 'zh-HK': '請輸入不大於 {n} 的值。', ja: '{n} 以下を入力してください。', pt: 'Insira {n} ou menos.',
+  },
+  formMinDate: {
+    en: 'Please choose {n} or later.', zh: '请选择 {n} 或之后的日期。', 'zh-HK': '請選擇 {n} 或之後的日期。', ja: '{n} 以降の日付を選択してください。', pt: 'Escolha {n} ou depois.',
+  },
+  formMaxDate: {
+    en: 'Please choose {n} or earlier.', zh: '请选择 {n} 或之前的日期。', 'zh-HK': '請選擇 {n} 或之前的日期。', ja: '{n} 以前の日付を選択してください。', pt: 'Escolha {n} ou antes.',
+  },
+  formMinAge: {
+    en: 'You must be at least {n} years old.', zh: '您必须年满 {n} 岁。', 'zh-HK': '您必須年滿 {n} 歲。', ja: '{n} 歳以上である必要があります。', pt: 'Você deve ter pelo menos {n} anos.',
+  },
+  formMinSelected: {
+    en: 'Please choose at least {n}.', zh: '请至少选择 {n} 项。', 'zh-HK': '請至少選擇 {n} 項。', ja: '{n} 件以上選択してください。', pt: 'Escolha pelo menos {n}.',
+  },
+  formSummary: {
+    en: 'Please check the {n} highlighted fields.', zh: '请检查标出的 {n} 个字段。', 'zh-HK': '請檢查標示的 {n} 個欄位。', ja: '強調表示された {n} 件の項目を確認してください。', pt: 'Verifique os {n} campos destacados.',
+  },
+  formLoading: {
+    en: 'Loading…', zh: '加载中…', 'zh-HK': '載入中…', ja: '読み込み中…', pt: 'Carregando…',
+  },
+  formLoadError: {
+    en: 'We couldn’t load this list.', zh: '无法加载此列表。', 'zh-HK': '無法載入此清單。', ja: 'リストを読み込めませんでした。', pt: 'Não foi possível carregar esta lista.',
+  },
+  formRetry: {
+    en: 'Try again', zh: '重试', 'zh-HK': '重試', ja: '再試行', pt: 'Tentar novamente',
+  },
+  formPhoneCode: {
+    en: 'Country code', zh: '国家/地区代码', 'zh-HK': '國家/地區代碼', ja: '国番号', pt: 'Código do país',
+  },
+  formShowPassword: {
+    en: 'Show password', zh: '显示密码', 'zh-HK': '顯示密碼', ja: 'パスワードを表示', pt: 'Mostrar senha',
+  },
+  formHidePassword: {
+    en: 'Hide password', zh: '隐藏密码', 'zh-HK': '隱藏密碼', ja: 'パスワードを隠す', pt: 'Ocultar senha',
+  },
+  formSending: {
+    en: 'Sending…', zh: '提交中…', 'zh-HK': '提交中…', ja: '送信中…', pt: 'Enviando…',
+  },
+  formError: {
+    en: 'Something went wrong. Please try again.', zh: '出现问题，请重试。', 'zh-HK': '出現問題，請重試。', ja: '問題が発生しました。もう一度お試しください。', pt: 'Algo deu errado. Tente novamente.',
+  },
+  formNetworkError: {
+    en: 'We couldn’t reach the server. Please check your connection and try again.',
+    zh: '无法连接服务器，请检查网络后重试。',
+    'zh-HK': '無法連接伺服器，請檢查網絡後重試。',
+    ja: 'サーバーに接続できませんでした。接続を確認して、もう一度お試しください。',
+    pt: 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.',
+  },
 };
 
 /**

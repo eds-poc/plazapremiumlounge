@@ -1,0 +1,64 @@
+/* custom form: the layout around the shared fields (styles/forms.css). The source sign up form
+   (/en-uk/sign-up) is option two-columns: full width, fields half width from 992px (Title alone in
+   the left half), one column below. Option narrow: at most 650px wide (the source's col-md-6
+   content forms); centered: a narrow form in the middle; compact: rows 16px apart */
+.custom-form.narrow,
+.custom-form.centered {
+  max-width: 650px;
+}
+
+.custom-form.centered {
+  margin-inline: auto;
+}
+
+.custom-form.compact .form-fields {
+  --form-row-gap: var(--spacing-bootstrap-3);
+}
+
+/* text between fields, e.g. the source's lines over the two checkboxes (14px/500) */
+.custom-form .form-content {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+}
+
+.custom-form .form-content + .form-field-checkbox {
+  margin-top: calc(var(--spacing-3) - var(--form-row-gap));
+}
+
+/* the API's message (e.g. its serviceResponseMsg), at the top of the form */
+.custom-form .form-status {
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-5) var(--spacing-7);
+  background-color: rgb(220 53 69 / 8%);
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-body);
+}
+
+.custom-form .form-status[hidden] {
+  display: none;
+}
+
+.custom-form .form-submit .button {
+  margin: 0;
+}
+
+.custom-form .form-submit .button:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.custom-form .form-success {
+  margin: 0;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+/* breakpoint-exception: design-system breakpoint (768px), the button fills the width below it */
+@media (width < 768px) {
+  .custom-form .form-submit.full-width-mobile .button {
+    width: 100%;
+    max-width: none;
+  }
+}
