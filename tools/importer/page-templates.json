@@ -86,6 +86,35 @@
           ]
         }
       ]
+    },
+    {
+      "name": "custom-form-test",
+      "urls": [
+        "https://www.plazapremiumlounge.com/en-uk/sign-up"
+      ],
+      "description": "Custom Form test page (/en-uk/drafts/blocks/custom-form): the authoring guidelines, the source sign up form, and sample forms for each option, field type and rule",
+      "blocks": [
+        {
+          "name": "custom-form",
+          "instances": [
+            "#formBookingRegistration"
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "id": "section-1",
+          "name": "Custom Form",
+          "selector": [
+            "section.news"
+          ],
+          "style": null,
+          "blocks": [
+            "custom-form"
+          ],
+          "defaultContent": []
+        }
+      ]
     }
   ]
 }
