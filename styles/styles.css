@@ -166,7 +166,6 @@
   --spacing-campaign-columns: 40px;
   --spacing-campaign-xs: 6px;
   --spacing-campaign-gap: 18px;
-
   --margin-bottom-100:100px;
 
   /* campaign panels (source West Kowloon `__section`): 28px above and below (22px at 600px and
@@ -427,6 +426,7 @@ a:hover {
   outline: 2px solid var(--color-brand-primary);
   outline-offset: 2px;
 }
+
 /* buttons */
 p.button-wrapper {
   margin: 0 0 var(--spacing-6);

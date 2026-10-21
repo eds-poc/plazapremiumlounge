@@ -2,7 +2,7 @@
    Uses a single column on mobile and two columns on larger screens. */
 .directory {
   --directory-group-color: var(--color-brand-plum);
-  --directory-note-color: var( --color-brand-maroon-dark);
+  --directory-note-color: var(--color-brand-maroon-dark);
   --directory-column-gap: var(--spacing-9);
 
   container-type: inline-size;
@@ -12,24 +12,22 @@
    the margins at the top of a column */
 .directory .directory-columns {
   padding-top: var(--spacing-stack);
+  columns: 1;
 }
-
 
 /* Mobile first */
  main .section.fixed-width>div {
         max-width: 1140px;
     }
-  .directory .directory-columns{
-    columns: 1;
-  }
-
-   /* Tablet and above */
+    
+ /* Tablet and above */
    @media (width >= 768px) {
   .directory .directory-columns {
     columns: 2;
     column-gap: var(--directory-column-gap);
   }
 }
+
 /* Large desktop for three-column variant */
 @media (width >= 1200px) {
   .directory.three .directory-columns {
@@ -52,7 +50,7 @@
 .directory .directory-group-title {
   margin: calc(var(--spacing-stack) + var(--spacing-8)) 0 var(--spacing-4);
   color: var(--directory-group-color);
-  font-size: calc (var(--font-size-sm) + 1px);
+  font-size: calc(var(--font-size-sm) + 1px);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-body);
 }
@@ -100,8 +98,11 @@
   color: var(--color-link-hover);
 }
 
-.title.plum .title-heading{font-weight: var(--font-weight-regular);font-family:Polysans,sans-serif;}
-main .section.divided .default-content-wrapper h2{font-weight: var(--font-weight-medium);font-family: Polysans,sans-serif;}
+.title.plum .title-heading{
+  font-weight:var(--font-weight-regular);
+}
+
+main .section.divided .default-content-wrapper h2{font-weight: var(--font-weight-medium);}
 
 /* Smooth anchor navigation with mobile and desktop header offsets.
    Applied only on pages using the directory block. */
@@ -110,7 +111,9 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: var(--nav-height);
 }
+
 .margin-bottom-100{margin-bottom: var(--margin-bottom-100)!important;}
+
 /* pill: a compact pill sized to its label (source jump links .btn.btn-default): 16px text, no
    minimum width, and the filled style in the source's lighter maroon */
 a.button.pill,
