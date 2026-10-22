@@ -13,7 +13,7 @@ const STYLES = {
   tertiary: 'tertiary',
   white: 'white',
 };
-const MODIFIERS = ['large', 'arrow', 'full-width', 'disabled'];
+const MODIFIERS = ['large', 'pill', 'arrow', 'full-width', 'disabled'];
 
 /**
  * Splits authored style text ("Outline, large") into known style words.

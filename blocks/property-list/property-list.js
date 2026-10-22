@@ -1,60 +1,19 @@
-import { getMetadata } from '../../scripts/aem.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
 import apiUrl from '../../scripts/endpoints.js';
+import { getLanguage, translate } from '../../scripts/i18n.js';
 import {
-  DEFAULT_SITE, getLanguage, getSiteFolder, translate,
-} from '../../scripts/i18n.js';
-import { hideLoader, showLoader } from '../../scripts/scripts.js';
+  buildBadge, buildSlider, el, fetchJson, getApiLanguage, isPreview, propertyDetailPath,
+  propertyDetailUrl, readProperty, safeNote, setLoading, toKey, toUrl,
+} from '../../scripts/properties.js';
 
 const TIMEOUT_MS = 8000;
-// property types shown, as the source city pages: lounges, then passes (gift cards) at the end
-const LOUNGE = 'LOUNGE';
-const PASS = 'GFTCRD';
 const VISIBLE_TAGS = 5;
-const SWIPE_PX = 40;
 const MOBILE = '(width < 768px)';
 const GROUPS = ['airport', 'service', 'feature'];
-// the API's language code by site folder; other folders are sent as they are (zh-cn, pt-br …)
-const API_LANGUAGES = { 'en-uk': 'en' };
-// "Plaza Premium First" as the API names it in each language (compared without spaces)
-const FIRST_BRANDS = ['plazapremiumfirst', '环亚优逸庭', '環亞優逸庭', 'プラザプレミアムファースト'];
+// this site's preview and live hosts: a View now link to them is a page on this site
+const SITE_HOSTS = /^[\w-]+--plazapremiumlounge--eds-poc\.aem\.(page|live)$/;
 
 let blockCount = 0;
-let loading = 0;
-
-/**
- * Creates an element with an optional class name and text.
- * @param {string} tag
- * @param {string} [className]
- * @param {string} [text]
- * @returns {HTMLElement}
- */
-function el(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text) node.textContent = text;
-  return node;
-}
-
-/**
- * Whether the page is shown on the preview site (or locally), where authors get setup hints.
- * @returns {boolean}
- */
-function isPreview() {
-  const { hostname } = window.location;
-  return hostname.endsWith('.aem.page') || hostname === 'localhost';
-}
-
-/**
- * Shows the site's full-page loader (the same as on page load) while any property list on the page
- * is loading, and hides it once the last one is done.
- * @param {boolean} busy
- */
-function setLoading(busy) {
-  loading = Math.max(0, loading + (busy ? 1 : -1));
-  if (loading) showLoader();
-  else hideLoader();
-}
 
 /**
  * Fetches the properties. Gives up after 8s.
@@ -62,150 +21,9 @@ function setLoading(busy) {
  * @returns {Promise<Object[]>} the API's items
  */
 async function fetchProperties(url) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-  try {
-    const resp = await fetch(url, { signal: controller.signal });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const json = await resp.json();
-    if (!Array.isArray(json.items)) throw new Error('Unexpected response');
-    return json.items;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-/**
- * A stable filter key for a value: lower case, words joined by dashes.
- * @param {string} value
- * @returns {string}
- */
-function toKey(value) {
-  return String(value || '')
-    .trim()
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, '-')
-    .replace(/^-|-$/g, '');
-}
-
-/**
- * An absolute URL for an API image or link (spaces encoded; the source's `~/` site prefix fixed),
- * or '' if it isn't valid.
- * @param {string} value
- * @returns {string}
- */
-function toUrl(value) {
-  if (!value || typeof value !== 'string') return '';
-  try {
-    return new URL(value.trim().replace(/^~\//, '/'), window.location.href).href;
-  } catch {
-    return '';
-  }
-}
-
-/**
- * The API's note (HTML) as safe content: its text, line breaks and links only.
- * @param {string} html
- * @returns {DocumentFragment}
- */
-function safeNote(html) {
-  const out = document.createDocumentFragment();
-  const source = new DOMParser().parseFromString(html, 'text/html').body;
-  const copy = (node, into) => {
-    node.childNodes.forEach((child) => {
-      if (child.nodeType === Node.TEXT_NODE) into.append(child.textContent);
-      else if (child.nodeName === 'BR') into.append(el('br'));
-      else if (child.nodeName === 'A' && toUrl(child.getAttribute('href'))) {
-        const link = el('a');
-        link.href = toUrl(child.getAttribute('href'));
-        copy(child, link);
-        into.append(applyButtonAction(link));
-      } else if (child.nodeType === Node.ELEMENT_NODE) copy(child, into);
-    });
-  };
-  copy(source, out);
-  return out;
-}
-
-/**
- * Whether a property name starts with the Plaza Premium First brand, in any site language.
- * @param {string} name
- * @returns {boolean}
- */
-function isFirstBrand(name) {
-  const compact = name.replace(/\s+/g, '').toLowerCase();
-  return FIRST_BRANDS.some((brand) => compact.startsWith(brand));
-}
-
-/**
- * The API's language code for the page: the page metadata `language-code` when set, else from
- * the page's site folder (/en-uk/ → en, /zh-hk/ → zh-hk …; pages outside one use the default site).
- * @returns {string}
- */
-function getApiLanguage() {
-  const authored = getMetadata('language-code').trim();
-  if (authored) return authored;
-  const folder = getSiteFolder() || DEFAULT_SITE;
-  return API_LANGUAGES[folder] || folder;
-}
-
-/**
- * Reads one API record into what the card and the filters need, or null for a record that
- * isn't shown (not active, another type, or without a name).
- * @param {Object} item
- * @returns {Object|null}
- */
-function readProperty(item) {
-  const type = item.propertyTypeCode;
-  const name = (item.propertyDisplayName || item.propertyName || '').trim();
-  if (item.status !== 'Active' || ![LOUNGE, PASS].includes(type) || !name) return null;
-  const descriptions = Array.isArray(item.loungeDescription) ? item.loungeDescription : [];
-  const describe = (kind) => descriptions.find((d) => d.type === kind);
-  const iata = (item.iataCode || '').trim();
-  const locationName = (item.locationName || '').trim();
-  const shortLocation = (item.shortLocation || '').trim();
-  const prices = (item.availableServices || [])
-    .map((s) => ({ amount: Number(s.lowestPrice), currency: s.currency }))
-    .filter((p) => p.amount > 0 && p.currency);
-  const slots = item.operationalHours?.[0]?.timeSlots || [];
-  const journeys = (item.journeyDetails || []).map((j) => (j.journeyTypeName || '').toLowerCase());
-  return {
-    code: item.propertyCode,
-    name,
-    pass: type === PASS,
-    seq: Number(item.propertySeq) || 0,
-    location: {
-      key: toKey(type === PASS ? '' : iata || item.locationCode),
-      name: locationName,
-      // airports show their 3-letter code, e.g. "Hong Kong International Airport (HKG)"
-      heading: /^[A-Z]{3}$/.test(iata) && locationName ? `${locationName} (${iata})` : locationName,
-      seq: Number(item.locationSeq) || 0,
-    },
-    line: [shortLocation, locationName].filter((part, i, all) => part && (i === 0 || !all[0].includes(part))).join(', '),
-    hours: describe('OperatingHours')?.desc?.trim() || slots.map((s) => [s.from, s.to].filter(Boolean).join(' - ')).filter(Boolean).join(', '),
-    promo: describe('OnlinePromo'),
-    loyalty: describe('LoyaltyPoints')?.desc?.trim() || '',
-    icons: (item.icons || []).map((i) => ({ src: toUrl(i.path), alt: i.iconDesc || i.name || '' })).filter((i) => i.src),
-    images: (item.images || [])
-      .map((image, i) => ({ src: toUrl(image.path), order: Number(image.sequence) || i + 1 }))
-      .filter((image) => image.src)
-      .sort((a, b) => a.order - b.order),
-    features: (item.featureList || [])
-      .map((f) => ({ key: toKey(f.nameEn || f.name), label: (f.name || f.nameEn || '').trim() }))
-      .filter((f) => f.key && f.label),
-    services: (item.availableServices || [])
-      .map((s) => ({ key: toKey(s.servicetype), label: (s.serviceDisplayName || s.name || '').trim() }))
-      .filter((s) => s.key && s.label),
-    price: prices.sort((a, b) => a.amount - b.amount)[0],
-    // the green Plaza Premium First look follows the brand in the name, as the source pages
-    // (the API's colorCode also marks some Plaza Premium Lounges PPF)
-    first: isFirstBrand(name),
-    // passes aren't places, so they get no journey badge
-    departure: type !== PASS && journeys.includes('departure'),
-    arrival: type !== PASS && journeys.includes('arrival'),
-    note: (item.note || '').trim(),
-    link: toUrl(item.targetUrl),
-  };
+  const json = await fetchJson(url, TIMEOUT_MS);
+  if (!Array.isArray(json.items)) throw new Error('Unexpected response');
+  return json.items;
 }
 
 /**
@@ -243,114 +61,6 @@ function matches(property, selected) {
   };
   return GROUPS.every((group) => !selected[group].size
     || values[group].some((key) => selected[group].has(key)));
-}
-
-/**
- * The photo slider of a card: one photo at a time, previous/next, one dot per photo, swipe; loops.
- * @param {Object} property
- * @param {boolean} eager Load the first photo straight away (the first card)
- * @returns {HTMLElement}
- */
-function buildSlider(property, eager) {
-  const { images, name, line } = property;
-  const slider = el('div', 'property-slider');
-  if (!images.length) {
-    slider.classList.add('is-empty');
-    return slider;
-  }
-  const track = el('div', 'property-slider-track');
-  const slides = images.map((image, i) => {
-    const slide = el('div', 'property-slider-slide');
-    const img = el('img');
-    // photos after the first load when they're about to be shown
-    if (i === 0) img.src = image.src;
-    else img.dataset.src = image.src;
-    img.alt = i === 0 ? [name, line].filter(Boolean).join(', ') : `${name}, ${translate('propertyPhoto', { n: i + 1, total: images.length })}`;
-    img.loading = eager && i === 0 ? 'eager' : 'lazy';
-    img.decoding = 'async';
-    slide.append(img);
-    track.append(slide);
-    return slide;
-  });
-  slider.append(track);
-  if (slides.length < 2) return slider;
-
-  slider.setAttribute('role', 'group');
-  slider.setAttribute('aria-roledescription', 'carousel');
-  slider.setAttribute('aria-label', name);
-  slides.forEach((slide, i) => {
-    slide.setAttribute('role', 'group');
-    slide.setAttribute('aria-roledescription', 'slide');
-    slide.setAttribute('aria-label', translate('propertyPhoto', { n: i + 1, total: slides.length }));
-  });
-  const button = (className, label) => {
-    const btn = el('button', className);
-    btn.type = 'button';
-    btn.setAttribute('aria-label', label);
-    return btn;
-  };
-  const prev = button('property-slider-prev', translate('propertyPrevious'));
-  const next = button('property-slider-next', translate('propertyNext'));
-  const dots = el('div', 'property-slider-dots');
-  const dotButtons = slides.map((slide, i) => {
-    const dot = button('property-slider-dot', translate('propertyPhoto', { n: i + 1, total: slides.length }));
-    dots.append(dot);
-    return dot;
-  });
-  slider.append(prev, next, dots);
-
-  let index = 0;
-  const load = (i) => {
-    const img = slides[(i + slides.length) % slides.length].querySelector('img[data-src]');
-    if (img) {
-      img.src = img.dataset.src;
-      delete img.dataset.src;
-    }
-  };
-  const show = (i) => {
-    index = (i + slides.length) % slides.length;
-    [index, index + 1, index - 1].forEach(load);
-    track.style.transform = `translateX(-${index * 100}%)`;
-    slides.forEach((slide, n) => { slide.inert = n !== index; });
-    dotButtons.forEach((dot, n) => dot.setAttribute('aria-current', n === index ? 'true' : 'false'));
-  };
-  prev.addEventListener('click', () => show(index - 1));
-  next.addEventListener('click', () => show(index + 1));
-  dotButtons.forEach((dot, n) => dot.addEventListener('click', () => show(n)));
-  let startX = null;
-  track.addEventListener('pointerdown', (e) => { startX = e.clientX; });
-  track.addEventListener('pointercancel', () => { startX = null; });
-  track.addEventListener('pointerup', (e) => {
-    if (startX === null) return;
-    const dx = e.clientX - startX;
-    startX = null;
-    if (Math.abs(dx) > SWIPE_PX) show(index + (dx < 0 ? 1 : -1));
-  });
-  slides.forEach((slide, n) => { slide.inert = n !== 0; });
-  dotButtons.forEach((dot, n) => dot.setAttribute('aria-current', n === 0 ? 'true' : 'false'));
-  // the neighbours load once the visitor reaches the slider
-  slider.addEventListener('pointerenter', () => [1, -1].forEach(load), { once: true });
-  slider.addEventListener('focusin', () => [1, -1].forEach(load), { once: true });
-  return slider;
-}
-
-/**
- * The journey badge (e.g. "Departures Lounge") with its explanation shown on hover or focus.
- * @param {'departure'|'arrival'} kind
- * @param {string} id A unique id for the explanation
- * @returns {HTMLElement}
- */
-function buildBadge(kind, id) {
-  const label = translate(kind === 'departure' ? 'propertyDeparture' : 'propertyArrival');
-  const tip = translate(kind === 'departure' ? 'propertyDepartureTip' : 'propertyArrivalTip');
-  const badge = el('span', `property-card-badge property-card-badge-${kind}`);
-  badge.tabIndex = 0;
-  badge.setAttribute('aria-describedby', id);
-  const tipEl = el('span', 'property-card-badge-tip', tip);
-  tipEl.id = id;
-  tipEl.setAttribute('role', 'tooltip');
-  badge.append(el('span', 'property-card-badge-icon'), el('span', 'property-card-badge-label', label), tipEl);
-  return badge;
 }
 
 /**
@@ -492,9 +202,16 @@ function buildCard(property, id, eager, settings) {
   if (property.departure) top.append(buildBadge('departure', `${id}-dep`));
   if (property.arrival) top.append(buildBadge('arrival', `${id}-arr`));
   const title = el('h3', 'property-card-title');
-  if (property.link) {
+  // the authored View now button and the name link to the lounge's page (none without the button)
+  const { view } = settings;
+  const detail = view ? propertyDetailUrl(property.code, {
+    ...view.params,
+    base: view.base,
+    currency: property.price?.currency || view.params.currency,
+  }) : '';
+  if (detail) {
     const link = el('a', '', property.name);
-    link.href = property.link;
+    link.href = detail;
     title.append(applyButtonAction(link));
   } else {
     title.textContent = property.name;
@@ -528,7 +245,7 @@ function buildCard(property, id, eager, settings) {
   }
   const bottom = el('div', 'property-card-bottom');
   if (property.features.length) bottom.append(buildFeatures(property.features, `${id}-more`));
-  if (property.price || property.link) {
+  if (property.price || detail) {
     const action = el('div', 'property-card-action');
     if (property.price) {
       const price = el('p', 'property-card-price', `${translate('propertyFrom')} `);
@@ -539,12 +256,12 @@ function buildCard(property, id, eager, settings) {
       price.append(el('strong', '', `${property.price.currency} ${amount}`));
       action.append(price);
     }
-    if (property.link) {
-      const view = el('a', 'button', translate('propertyView'));
-      view.href = property.link;
-      view.setAttribute('aria-label', `${translate('propertyView')} ${property.name}`);
+    if (detail) {
+      const button = el('a', 'button', view.label);
+      button.href = detail;
+      button.setAttribute('aria-label', `${view.label} ${property.name}`);
       const wrap = el('p', 'property-card-view');
-      wrap.append(applyButtonAction(view));
+      wrap.append(applyButtonAction(button));
       action.append(wrap);
     }
     bottom.append(action);
@@ -713,15 +430,44 @@ function showMessage(results, text, retry, hint) {
 }
 
 /**
- * The authored settings: rows of name | value, `city-code` (e.g. HKHKG) and `signup-button` (a
- * link, e.g. [Join here](…)); names ignore capitals and spaces. A table with a single value is read
- * as the city code.
+ * The View now button's settings from its row: a link (its text is the label, its address the
+ * lounge page, a page on this site) or plain text (the label; the lounge page in the page's site
+ * folder). The listing page's own `currency`, `date` and `time` are passed on to the lounge pages.
+ * @param {HTMLElement} value The row's value cell
+ * @returns {{label: string, base: string, params: Object<string, string>}|null}
+ */
+function readViewButton(value) {
+  const link = value.querySelector('a[href]');
+  const label = (link || value).textContent.trim();
+  if (!label) return null;
+  let base = propertyDetailPath();
+  if (link) {
+    const href = toUrl(link.getAttribute('href'));
+    const url = href ? new URL(href) : null;
+    if (url && (url.origin === window.location.origin || SITE_HOSTS.test(url.hostname)) && url.pathname !== '/') {
+      base = `${url.pathname}${url.search}`;
+    } else if (isPreview()) {
+      // eslint-disable-next-line no-console
+      console.warn(`property-list: view-button links to "${href}", not a page on this site; using ${base}`);
+    }
+  }
+  const page = new URLSearchParams(window.location.search);
+  const params = Object.fromEntries(['currency', 'date', 'time']
+    .map((name) => [name, (page.get(name) || '').trim()]).filter(([, v]) => v));
+  return { label, base, params };
+}
+
+/**
+ * The authored settings: rows of name | value, `city-code` (e.g. HKHKG), `view-button` (a link,
+ * e.g. [View now](/en-uk/find/lounge), or plain text) and `signup-button` (a link, e.g.
+ * [Join here](…)); names ignore capitals and spaces. A table with a single value is read as the
+ * city code.
  * @param {HTMLElement} block
- * @returns {{city: string, signup: {href: string, label: string}|null}}
+ * @returns {{city: string, view: Object|null, signup: {href: string, label: string}|null}}
  */
 function readSettings(block) {
   const rows = [...block.children].map((row) => [...row.children]);
-  const settings = { city: '', signup: null };
+  const settings = { city: '', view: null, signup: null };
   const pairs = rows.filter((cells) => cells.length >= 2);
   if (!pairs.length) {
     settings.city = block.textContent.trim().replace(/\s+/g, '').toUpperCase();
@@ -730,6 +476,7 @@ function readSettings(block) {
   pairs.forEach(([name, value]) => {
     const key = toKey(name.textContent);
     if (key === 'city-code') settings.city = value.textContent.trim().replace(/\s+/g, '').toUpperCase();
+    if (key === 'view-button') settings.view = readViewButton(value);
     if (key === 'signup-button') {
       const link = value.querySelector('a[href]');
       const href = toUrl(link?.getAttribute('href'));

@@ -341,6 +341,14 @@
         "confidence": "High"
       }
     },
+    "other colors": {
+      "--color-yellow-400": {
+        "value": "#f5ca45",
+        "usage": "Notice border (the promo code rejection under the booking form's promo field)",
+        "evidence": "design reference for the lounge page's promo notice",
+        "confidence": "Medium"
+      }
+    },
     "typography": {
       "--font-family-primary": {
         "value": "polysans, polysans-fallback, sans-serif",

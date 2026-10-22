@@ -50,6 +50,7 @@ One or more buttons, in the site's button styles. What a button does depends onl
 | `tertiary` | White with a maroon outline, 240px wide |
 | `white` | White outline, for maroon or photo backgrounds |
 | `large` | Bigger button (44px tall, at least 260px wide) |
+| `pill` | A compact pill as wide as its label (16px text, rows 10px apart), filled in the lighter maroon with `primary`, e.g. the Eligible Lounges jump links: `Buttons (pill)` |
 | `arrow` | Adds an arrow after the label |
 | `full-width` | Fills the available width |
 | `disabled` | Grey and not clickable |
