@@ -5,6 +5,7 @@
  */
 import { getMetadata } from './aem.js';
 import { applyButtonAction } from './button-actions.js';
+import apiUrl from './endpoints.js';
 import { DEFAULT_SITE, getSiteFolder, translate } from './i18n.js';
 import { hideLoader, showLoader } from './scripts.js';
 
@@ -171,6 +172,55 @@ export function safeNote(html) {
 export function isFirstBrand(name) {
   const compact = name.replace(/\s+/g, '').toLowerCase();
   return FIRST_BRANDS.some((brand) => compact.startsWith(brand));
+}
+
+/**
+ * The property and airport (IATA) codes the passes API asks for, from the page metadata
+ * `api-property-code` and `api-iata-code`: set once for the site (or per language folder) in the
+ * bulk metadata sheet, or on a page. Every block reads them here, so none authors its own. A value
+ * that's missing or malformed (letters and digits only) isn't guessed: it's listed in `problems`,
+ * for the block to report on the preview site.
+ * @returns {{propertyCode: string, iataCode: string, problems: string[]}}
+ */
+export function getApiContext() {
+  const read = (name) => getMetadata(name).trim().toUpperCase();
+  const propertyCode = read('api-property-code');
+  const iataCode = read('api-iata-code');
+  const problems = [['api-property-code', propertyCode], ['api-iata-code', iataCode]]
+    .filter(([, value]) => !/^[A-Z0-9]+$/.test(value))
+    .map(([name, value]) => (value ? `${name} "${value}" isn't a valid code` : `${name} is missing`));
+  return { propertyCode, iataCode, problems };
+}
+
+// the passes service takes one product code per call; the same pass is asked for once per page
+const passes = new Map();
+
+/**
+ * One pass (product) from the passes service, in a currency: its first item, or null when the
+ * service doesn't know the code. The answer is shared by every block on the page that asks for
+ * the same pass. Rejects as fetchJson does (a failure isn't kept, so it can be asked again).
+ * @param {string} productCode e.g. PRD3705
+ * @param {{propertyCode: string, iataCode: string}} context See getApiContext
+ * @param {string} currency e.g. USD
+ * @param {number} timeout ms
+ * @returns {Promise<Object|null>}
+ */
+export function fetchPass(productCode, { propertyCode, iataCode }, currency, timeout) {
+  const url = apiUrl('productPasses');
+  url.searchParams.set('propertyCode', propertyCode);
+  url.searchParams.set('iataCode', iataCode);
+  url.searchParams.set('currencyCode', currency);
+  url.searchParams.set('productCode', productCode);
+  if (!passes.has(url.href)) {
+    const request = fetchJson(url.href, timeout)
+      .then((json) => (json?.items || []).find((item) => item?.productCode === productCode) || null)
+      .catch((error) => {
+        passes.delete(url.href);
+        throw error;
+      });
+    passes.set(url.href, request);
+  }
+  return passes.get(url.href);
 }
 
 /**

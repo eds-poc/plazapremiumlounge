@@ -1,0 +1,435 @@
+/* quick buy: passes from the passes service on a white panel, as the source lounge passes page
+   (`#ppl-gtm-live-root .ppl-quickbuy-grid`): a centred heading and intro, then a card per pass
+   with its tag, image, name, price, points, Best for lines, Learn more and Add to Cart. 1 per row
+   on phones, 2 from 480px, 3 from 700px. The source's own colours are block variables */
+.quick-buy {
+  --quick-buy-accent: #7c0040;
+  --quick-buy-ink: #2a1017;
+  --quick-buy-muted: #7d6870;
+  --quick-buy-soft: #a8536f;
+  --quick-buy-intro: #5c4149;
+  --quick-buy-image-bg: #f7f1ef;
+  --quick-buy-shadow: 0 2px 14px rgb(83 14 42 / 6%);
+  --quick-buy-panel-padding: 28px 24px;
+  --quick-buy-panel-inset: var(--spacing-7);
+  --quick-buy-space-above: 24px;
+  --quick-buy-name-line-height: 1.25;
+  --quick-buy-gap: var(--spacing-bootstrap-3);
+  --quick-buy-card-radius: 14px;
+  --quick-buy-card-border: 2px;
+  --quick-buy-tag-size: 11.5px;
+  --quick-buy-tag-radius: 6px;
+  --quick-buy-name-size: var(--font-size-lg);
+  --quick-buy-line-size: 13px;
+  --quick-buy-learn-size: 12.5px;
+  --quick-buy-button-height: 38px;
+  --quick-buy-button-size: 13.5px;
+  --quick-buy-button-radius: 8px;
+  --quick-buy-icon: 17px;
+  --quick-buy-check: 14px;
+  --quick-buy-image-ratio: 902 / 569;
+
+  margin: var(--quick-buy-space-above) var(--quick-buy-panel-inset) var(--spacing-campaign-band-block);
+  padding: var(--quick-buy-panel-padding);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-background);
+  box-shadow: var(--quick-buy-shadow);
+  color: var(--quick-buy-ink);
+}
+
+/* the heading and intro (an optional first row) */
+.quick-buy-header {
+  margin-bottom: calc(var(--spacing-5) + 3 * var(--spacing-1));
+  text-align: center;
+}
+
+.quick-buy-header .quick-buy-title {
+  margin: 0;
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semi-bold);
+  line-height: var(--line-height-body);
+}
+
+.quick-buy-header p {
+  margin: calc(2 * var(--spacing-1)) 0 0;
+  color: var(--quick-buy-intro);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+.quick-buy-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--quick-buy-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quick-buy-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border: var(--quick-buy-card-border) solid var(--quick-buy-accent);
+  border-radius: var(--quick-buy-card-radius);
+  background-color: var(--color-background);
+}
+
+.quick-buy-tag {
+  position: absolute;
+  top: var(--spacing-4);
+  left: calc(var(--spacing-5) + var(--spacing-1));
+  z-index: 2;
+  margin: 0;
+  padding: var(--spacing-2) var(--spacing-5);
+  border-radius: var(--quick-buy-tag-radius);
+  background-color: var(--quick-buy-accent);
+  color: var(--color-text-inverse);
+  font-size: var(--quick-buy-tag-size);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-body);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* (the image's shape is kept while it loads) */
+.quick-buy-media {
+  aspect-ratio: var(--quick-buy-image-ratio);
+  background-color: var(--quick-buy-image-bg);
+  line-height: 0;
+}
+
+.quick-buy-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.quick-buy-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding: calc(var(--spacing-5) + var(--spacing-1)) var(--spacing-bootstrap-3) var(--spacing-bootstrap-3);
+}
+
+.quick-buy-head {
+  display: flex;
+  flex-direction: column;
+  gap: calc(2 * var(--spacing-1));
+}
+
+.quick-buy-name {
+  margin: 0;
+  color: var(--quick-buy-ink);
+  font-size: var(--quick-buy-name-size);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--quick-buy-name-line-height);
+}
+
+.quick-buy-price {
+  margin: 0;
+  color: var(--quick-buy-accent);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+  white-space: nowrap;
+}
+
+.quick-buy-price b {
+  font-weight: var(--font-weight-bold);
+}
+
+.quick-buy-per-visit {
+  color: var(--quick-buy-muted);
+  font-size: var(--quick-buy-tag-size);
+  font-weight: var(--font-weight-semi-bold);
+}
+
+.quick-buy-points {
+  margin: 0;
+  color: var(--quick-buy-muted);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-body);
+  white-space: nowrap;
+}
+
+.quick-buy-points-icon,
+.quick-buy-modal-points-icon {
+  display: inline-block;
+  width: var(--quick-buy-icon);
+  height: var(--quick-buy-icon);
+  margin: 0 var(--spacing-1);
+  vertical-align: calc(-2 * var(--spacing-1));
+}
+
+.quick-buy-best-for {
+  margin: var(--spacing-1) 0 0;
+  color: var(--quick-buy-soft);
+  font-size: var(--quick-buy-tag-size);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-body);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.quick-buy-lines {
+  display: flex;
+  flex-direction: column;
+  gap: calc(3 * var(--spacing-1));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quick-buy-lines li {
+  display: flex;
+  gap: calc(var(--spacing-2) + var(--spacing-1));
+  align-items: flex-start;
+  color: var(--color-brand-primary);
+  font-size: var(--quick-buy-line-size);
+  line-height: var(--line-height-body);
+}
+
+.quick-buy-check {
+  flex: none;
+  width: var(--quick-buy-check);
+  height: var(--quick-buy-check);
+  margin-top: var(--spacing-1);
+}
+
+/* Learn more and Add to Cart, at the foot of the card */
+.quick-buy-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  margin-top: auto;
+}
+
+.quick-buy-learn {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-brand-primary-action);
+  font-family: inherit;
+  font-size: var(--quick-buy-learn-size);
+  line-height: var(--line-height-body);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.quick-buy-add {
+  width: 100%;
+  height: var(--quick-buy-button-height);
+  border: 0;
+  border-radius: var(--quick-buy-button-radius);
+  background-color: var(--quick-buy-accent);
+  color: var(--color-text-inverse);
+  font-family: inherit;
+  font-size: var(--quick-buy-button-size);
+  font-weight: var(--font-weight-semi-bold);
+  cursor: pointer;
+}
+
+.quick-buy-learn:focus-visible,
+.quick-buy-add:focus-visible {
+  outline: 2px solid var(--quick-buy-accent);
+  outline-offset: 2px;
+}
+
+/* while the pass loads: its name and price as quiet bars, the buttons not there yet */
+.quick-buy-card[aria-busy='true'] .quick-buy-name::before,
+.quick-buy-card[aria-busy='true'] .quick-buy-price::before {
+  content: '';
+  display: block;
+  width: 60%;
+  height: 1.1em;
+  border-radius: var(--radius-xs);
+  background-color: var(--quick-buy-image-bg);
+}
+
+.quick-buy-card[aria-busy='true'] .quick-buy-price::before {
+  width: 40%;
+}
+
+/* (the price and points lines, and Learn more and Add to Cart, keep their room: nothing moves when
+   the pass arrives) */
+.quick-buy-card[aria-busy='true'] .quick-buy-pricing {
+  min-height: calc(var(--line-height-body) * (var(--font-size-md) + var(--font-size-xs)) + 2 * var(--spacing-1));
+}
+
+.quick-buy-card[aria-busy='true'] .quick-buy-actions {
+  min-height: calc(var(--quick-buy-button-height) + var(--spacing-3) + var(--line-height-body) * var(--quick-buy-learn-size));
+}
+
+.quick-buy-message {
+  text-align: center;
+}
+
+.quick-buy-message p {
+  margin: 0 0 var(--spacing-5);
+}
+
+.quick-buy-hint {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* the Learn more pop-up, as the source's pass pop-up: the image across the top (close over it),
+   the name and where it's valid beside the price and points, a dashed line, the location tag,
+   the description and Add to Cart */
+dialog.modal.quick-buy-modal {
+  --quick-buy-accent: #7c0040;
+  --quick-buy-modal-width: 450px;
+  --quick-buy-modal-radius: 18px;
+  --quick-buy-modal-gap: 24px;
+  --quick-buy-modal-text: 13px;
+  --quick-buy-icon: 18px;
+
+  max-width: var(--quick-buy-modal-width);
+}
+
+dialog.modal.quick-buy-modal .modal-content {
+  position: relative;
+  border-radius: var(--quick-buy-modal-radius);
+}
+
+dialog.modal.quick-buy-modal .modal-header {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+  justify-content: flex-end;
+  padding: calc(var(--spacing-7) + var(--spacing-1)) var(--spacing-7);
+  border: 0;
+  background: none;
+}
+
+dialog.modal.quick-buy-modal .modal-header .modal-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+dialog.modal.quick-buy-modal .modal-body {
+  padding: 0;
+}
+
+/* (as the source's banner: 10px above the panel's top, 5px under the details) */
+.quick-buy-modal-media {
+  margin: calc(-1 * var(--spacing-4)) 0 calc(-1 * var(--spacing-2));
+}
+
+.quick-buy-modal-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.quick-buy-modal-info {
+  padding: var(--spacing-7);
+  color: var(--color-text);
+}
+
+/* (the source's 7 and 5 of 12 columns) */
+.quick-buy-modal-head {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: var(--quick-buy-modal-gap);
+}
+
+.quick-buy-modal-name,
+.quick-buy-modal-price {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-body);
+}
+
+.quick-buy-modal-name {
+  font-weight: var(--font-weight-medium);
+}
+
+.quick-buy-modal-location {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  line-height: 1;
+}
+
+.quick-buy-modal-pricing {
+  text-align: end;
+}
+
+.quick-buy-modal-points {
+  margin: 0;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+.quick-buy-modal-rule {
+  margin: var(--spacing-bootstrap-3) 0;
+  border: 0;
+  border-top: var(--base-border-width) dashed var(--color-text-strong);
+}
+
+.quick-buy-modal-tag {
+  display: inline-block;
+  margin: 0 0 var(--spacing-6);
+  padding: var(--spacing-2) var(--spacing-6);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-brand-tint);
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.quick-buy-modal-description {
+  font-size: var(--quick-buy-modal-text);
+  line-height: var(--line-height-body);
+}
+
+.quick-buy-modal-description p {
+  margin: 0 0 var(--spacing-7);
+}
+
+.quick-buy-modal-description ul {
+  margin: 0 0 var(--spacing-6);
+  padding-left: var(--spacing-7);
+}
+
+.quick-buy-modal-description li {
+  margin-bottom: calc(var(--spacing-5) + var(--spacing-1));
+  padding: var(--spacing-1) var(--spacing-2);
+}
+
+dialog.modal.quick-buy-modal .quick-buy-modal-add {
+  width: 100%;
+}
+
+/* breakpoint-exception: the source quick buy's 2 columns start at 480px */
+@media (width >=480px) {
+  .quick-buy-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* breakpoint-exception: the source quick buy's 3 columns start at 700px */
+@media (width >=700px) {
+  .quick-buy-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (width >=576px) {
+  dialog.modal.quick-buy-modal {
+    width: var(--quick-buy-modal-width);
+  }
+}

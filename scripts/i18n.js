@@ -266,6 +266,25 @@ const TEXTS = {
   propertyServicesError: {
     en: 'We couldn’t load the services.', zh: '无法加载服务。', 'zh-HK': '無法載入服務。', ja: 'サービスを読み込めませんでした。', pt: 'Não foi possível carregar os serviços.',
   },
+  // the quick buy passes (the source's wording in English)
+  quickBuyBestFor: {
+    en: 'Best for', zh: '适合', 'zh-HK': '適合', ja: 'おすすめ', pt: 'Ideal para',
+  },
+  quickBuyPerVisit: {
+    en: '/Visit', zh: '/次', 'zh-HK': '/次', ja: '/回', pt: '/Visita',
+  },
+  quickBuyLearnMore: {
+    en: 'Learn more', zh: '了解更多', 'zh-HK': '了解更多', ja: '詳細を見る', pt: 'Saiba mais',
+  },
+  quickBuyAddToCart: {
+    en: 'Add to Cart', zh: '加入购物车', 'zh-HK': '加入購物車', ja: 'カートに追加', pt: 'Adicionar ao carrinho',
+  },
+  quickBuyLocation: {
+    en: '{location} Plaza Premium Lounge', zh: '{location} 环亚机场贵宾室', 'zh-HK': '{location} 環亞機場貴賓室', ja: '{location} プラザプレミアムラウンジ', pt: '{location} Plaza Premium Lounge',
+  },
+  quickBuyError: {
+    en: 'We couldn’t load the passes.', zh: '无法加载贵宾室通行证。', 'zh-HK': '無法載入貴賓室通行證。', ja: 'パスを読み込めませんでした。', pt: 'Não foi possível carregar os passes.',
+  },
   propertyPanelLounge: {
     en: 'The Lounge', zh: '贵宾室', 'zh-HK': '貴賓室', ja: 'ラウンジ', pt: 'O Lounge',
   },
