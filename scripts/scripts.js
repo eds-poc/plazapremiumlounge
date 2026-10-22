@@ -9,6 +9,8 @@ import {
   loadSections,
   loadCSS,
   buildBlock,
+  getMetadata,
+  toClassName,
 } from './aem.js';
 // eslint-disable-next-line import/no-cycle
 import { installModalLinks, registerModalSections } from './modal.js';
@@ -221,6 +223,16 @@ async function loadEager(doc) {
   // the page language: page metadata `language`, else the site folder (e.g. /zh-cn/ → zh-CN)
   document.documentElement.lang = getLanguage();
   decorateTemplateAndTheme();
+  // a page template's own styles, only on its pages: page metadata `template` = hsbc-offer loads
+  // /templates/hsbc-offer/hsbc-offer.css (a template without a stylesheet is simply skipped)
+  const template = toClassName(getMetadata('template'));
+  if (template) {
+    try {
+      await loadCSS(`${window.hlx.codeBasePath}/templates/${template}/${template}.css`);
+    } catch (e) {
+      // no stylesheet for this template
+    }
+  }
   installModalLinks();
   const main = doc.querySelector('main');
   if (main) {
