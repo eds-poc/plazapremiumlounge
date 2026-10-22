@@ -120,6 +120,63 @@
   margin: 0 var(--spacing-4);
 }
 
+/* option detail: the source lounge detail panels (`#lounge-detail`): no darker line above or
+   below, a medium-weight question (#212529 closed, #333 open), the first question flush with the top;
+   on phones 14px uppercase questions, no lines, 30px between items */
+.accordion.detail .accordion-item:first-child {
+  border-top: 0;
+}
+
+.accordion.detail .accordion-item > .accordion-question {
+  color: var(--color-text-control);
+  font-weight: var(--font-weight-medium);
+}
+
+.accordion.detail .accordion-item:last-child {
+  border-bottom: 0;
+}
+
+.accordion.detail .accordion-item:first-child > .accordion-question {
+  padding-top: 0;
+}
+
+.accordion.detail .accordion-item[open] > .accordion-question {
+  color: var(--color-text);
+}
+
+.accordion.detail .accordion-item > .accordion-question::after {
+  margin-right: 0;
+}
+
+.accordion.detail .accordion-answer {
+  font-size: var(--font-size-md);
+}
+
+@media (width < 768px) {
+  .accordion.detail .accordion-item {
+    margin-bottom: var(--spacing-9);
+    padding-top: var(--spacing-4);
+    border-bottom: 0;
+  }
+
+  .accordion.detail .accordion-item > .accordion-question {
+    padding: 0 0 var(--spacing-6);
+    font-size: var(--font-size-sm);
+    letter-spacing: var(--letter-spacing-label);
+    text-transform: uppercase;
+  }
+
+  .accordion.detail .accordion-item > .accordion-question::after {
+    width: var(--font-size-sm);
+    height: var(--font-size-sm);
+  }
+
+  .accordion.detail .accordion-answer {
+    padding: 0;
+    font-size: var(--font-size-sm);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .accordion .accordion-question,
   .accordion .accordion-question::after,
