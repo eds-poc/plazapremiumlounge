@@ -590,7 +590,7 @@
   --cards-icon-list-column-gap: 28px;
   --cards-icon-list-row-gap: 32px;
   --cards-icon-list-title-size: 16.5px;
-  --cards-icon-list-title-weight: 600;
+  --cards-icon-list-title-weight: var(--font-weight-bold);
   --cards-icon-list-text-size: 15.5px;
   --cards-icon-list-text-color: #2a1017;
   --cards-icon-list-link-size: 13px;
