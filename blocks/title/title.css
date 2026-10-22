@@ -355,7 +355,7 @@
   --title-fluid-size: clamp(26px, 6vw, 38px);
   --title-fluid-max: 840px;
   --title-fluid-gap: 14px;
-  --title-fluid-weight: var(--font-weight-medium);
+  --title-fluid-weight: var(--font-weight-semi-bold);
   --title-fluid-line-height: 1.25;
 }
 
@@ -415,7 +415,7 @@
   line-height: var(--line-height-loose);
 }
 
-.title.highlight .title-intro > * {
+.title.highlight .title-intro>* {
   margin: 0;
 }
 
