@@ -89,7 +89,7 @@
   background-color: var(--quick-buy-accent);
   color: var(--color-text-inverse);
   font-size: var(--quick-buy-tag-size);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-campaign-bold);
   line-height: var(--line-height-body);
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -127,26 +127,29 @@
   margin: 0;
   color: var(--quick-buy-ink);
   font-size: var(--quick-buy-name-size);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-campaign-bold);
   line-height: var(--quick-buy-name-line-height);
 }
 
+/* (bold as a whole, as the source's price: one face, so the line is its 22.4px) */
 .quick-buy-price {
   margin: 0;
   color: var(--quick-buy-accent);
   font-size: var(--font-size-md);
+  font-weight: var(--font-weight-campaign-bold);
   line-height: var(--line-height-body);
   white-space: nowrap;
 }
 
 .quick-buy-price b {
-  font-weight: var(--font-weight-bold);
+  font-weight: inherit;
 }
 
 .quick-buy-per-visit {
   color: var(--quick-buy-muted);
   font-size: var(--quick-buy-tag-size);
   font-weight: var(--font-weight-semi-bold);
+  line-height: 1;
 }
 
 .quick-buy-points {
@@ -170,7 +173,7 @@
   margin: var(--spacing-1) 0 0;
   color: var(--quick-buy-soft);
   font-size: var(--quick-buy-tag-size);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-campaign-bold);
   line-height: var(--line-height-body);
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -217,6 +220,7 @@
   color: var(--color-brand-primary-action);
   font-family: inherit;
   font-size: var(--quick-buy-learn-size);
+  font-weight: var(--font-weight-medium);
   line-height: var(--line-height-body);
   text-decoration: underline;
   cursor: pointer;

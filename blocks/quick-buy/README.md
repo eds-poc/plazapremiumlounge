@@ -32,6 +32,11 @@ so it's always current.
   the Best for lines, **Learn more** and **Add to Cart**.
 - **While the passes load** (the service takes a few seconds), the cards show the tags and Best
   for lines, with quiet bars for the rest; nothing moves when the passes arrive.
+- **Loading:** one call to the passes service brings all the passes (it takes one product code
+  per call, and its whole list answers as fast as one code); a code the list doesn't have is
+  asked for on its own. The list is kept for the visitor's session (about 15KB, for 30 minutes),
+  so a page seen again shows its passes at once while a fresh list is fetched; a changed price
+  then replaces the kept one. If that refresh fails, the kept passes stay.
 - **Learn more** opens the pass's details in a pop-up, as the source: the image, name, where it's
   valid, the price and points, the description from the service, and Add to Cart.
 - **Add to Cart** has no cart to add to yet: it announces the choice (a `quick-buy:add-to-cart`

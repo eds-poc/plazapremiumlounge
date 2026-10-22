@@ -1,7 +1,7 @@
 import { translate } from '../../scripts/i18n.js';
 import { openModal } from '../../scripts/modal-dialog.js';
 import {
-  el, fetchPass, getApiContext, isPreview, safeHtml,
+  el, fetchPass, fetchPassList, getApiContext, isPreview, readPassList, safeHtml,
 } from '../../scripts/properties.js';
 
 // the passes service answers in about 5-7s
@@ -171,7 +171,7 @@ function addToCart(from, pass) {
  */
 function openDetails(pass, trigger) {
   openModal({
-    key: `quick-buy-${pass.code}-${pass.currency}`,
+    key: `quick-buy-${pass.code}-${pass.currency}-${pass.total}-${pass.catalogueCode}`,
     trigger,
     content: () => {
       const location = pass.locations.length
@@ -248,11 +248,20 @@ function buildCard(product) {
   card.append(media, body);
   body.append(...bestFor, actions);
 
+  let shown = '';
   /**
-   * Shows the pass's data.
+   * Shows the pass's data (again when it changes, e.g. a fresh price after the session's kept one;
+   * the same data leaves the card as it is).
    * @param {Object} pass See readPass
    */
   const fill = (pass) => {
+    const data = JSON.stringify(pass);
+    if (data === shown) return;
+    shown = data;
+    media.replaceChildren();
+    price.replaceChildren();
+    pricing.querySelector('.quick-buy-points')?.remove();
+    actions.replaceChildren();
     if (pass.image) {
       const img = el('img');
       img.src = pass.image;
@@ -279,7 +288,7 @@ function buildCard(product) {
     actions.append(learn, add);
     card.removeAttribute('aria-busy');
   };
-  return { card, fill };
+  return { card, fill, isFilled: () => !!shown };
 }
 
 /**
@@ -340,37 +349,67 @@ export default function decorate(block) {
     const cards = products.map((product) => ({ product, ...buildCard(product) }));
     grid.append(...cards.map(({ card }) => card));
     results.replaceChildren(grid);
-    const ask = ({ product }) => fetchPass(product.code, context, currency, TIMEOUT_MS);
-    const requests = cards.map(ask);
-    Promise.allSettled(requests)
-      .then((answers) => {
-        const missing = [];
-        let failed = false;
-        answers.forEach((answer, i) => {
-          const { product, card, fill } = cards[i];
-          const pass = answer.status === 'fulfilled' && answer.value ? readPass(answer.value) : null;
-          if (pass) {
-            fill(pass);
-            return;
-          }
+    /**
+     * Fills the cards whose passes are in a list.
+     * @param {Map<string, Object>} list By product code
+     */
+    const show = (list) => cards.forEach(({ product, fill }) => {
+      const item = list.get(product.code);
+      const pass = item ? readPass(item) : null;
+      if (pass) fill(pass);
+    });
+    // a page seen again in this session: the passes straight away, refreshed below
+    const kept = readPassList(context, currency);
+    if (kept) show(kept);
+    // the passes the service says it doesn't have
+    const gone = new Set();
+    /**
+     * Leaves out the passes the service doesn't have (or has no price for), with a hint. A pass
+     * shown from the session whose own call failed stays.
+     */
+    const finish = (list) => {
+      const missing = [];
+      cards.forEach(({ product, card, isFilled }) => {
+        const item = list.get(product.code);
+        if (item && readPass(item)) return;
+        if (item || gone.has(product.code) || !isFilled()) {
           card.remove();
-          if (answer.status === 'rejected') {
-            failed = true;
-            // eslint-disable-next-line no-console
-            console.error('quick-buy: could not load', product.code, answer.reason);
-          } else missing.push(product.code);
-        });
-        const notes = [...hints, ...missing.map((code) => `${code} isn't in the passes service, or has no price.`)];
-        if (failed) {
-          showMessage(results, translate('quickBuyError'), load, notes);
-        } else if (!grid.children.length) {
-          if (isPreview()) showMessage(results, '', null, notes);
-          else block.hidden = true;
-        } else if (notes.length && isPreview()) {
-          const note = el('div');
-          showMessage(note, '', null, notes);
-          results.append(note.firstChild);
+          missing.push(product.code);
         }
+      });
+      const notes = [...hints, ...missing.map((code) => `${code} isn't in the passes service, or has no price.`)];
+      if (!grid.children.length) {
+        if (isPreview()) showMessage(results, '', null, notes);
+        else block.hidden = true;
+      } else if (notes.length && isPreview()) {
+        const note = el('div');
+        showMessage(note, '', null, notes);
+        results.append(note.firstChild);
+      }
+    };
+    // one call for all the passes (the service takes one code per call; its whole list answers as
+    // fast as one code); a pass the list doesn't have is asked for on its own
+    fetchPassList(context, currency, TIMEOUT_MS)
+      .then((list) => {
+        show(list);
+        const others = cards.filter(({ product }) => !list.has(product.code));
+        const askOne = ({ product, fill }) => fetchPass(product.code, context, currency, TIMEOUT_MS)
+          .then((item) => {
+            const pass = item ? readPass(item) : null;
+            if (!pass) {
+              gone.add(product.code);
+              return;
+            }
+            list.set(product.code, item);
+            fill(pass);
+          });
+        return Promise.allSettled(others.map(askOne)).then(() => finish(list));
+      })
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error('quick-buy: could not load the passes', error);
+        // the session's passes stay when they're all there; otherwise, Try again
+        if (!cards.every(({ isFilled }) => isFilled())) showMessage(results, translate('quickBuyError'), load, hints);
       });
   };
   load();
