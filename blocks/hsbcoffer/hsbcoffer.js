@@ -64,7 +64,7 @@ function isLinkLine(node) {
  */
 function buttonsOf(node) {
   return [...node.querySelectorAll('a[href]')].map((a) => {
-    const button = el('a', 'showcase-button');
+    const button = el('a', 'hsbcoffer-button');
     button.href = a.getAttribute('href');
     button.textContent = textOf(a);
     if (a.title && a.title !== button.textContent) button.title = a.title;
@@ -162,22 +162,22 @@ function readRow(row, first) {
  * @returns {HTMLElement}
  */
 function buildHeader(nodes) {
-  const header = el('div', 'showcase-header');
+  const header = el('div', 'hsbcoffer-header');
   // a header without a heading is an eyebrow (e.g. "Important Information") and optional text
   const parts = readText(nodes, { minLines: 1 });
-  const eyebrow = eyebrowOf(parts.eyebrow, 'showcase-eyebrow');
+  const eyebrow = eyebrowOf(parts.eyebrow, 'hsbcoffer-eyebrow');
   if (eyebrow) header.append(eyebrow);
   if (parts.heading) {
-    parts.heading.classList.add('showcase-title');
+    parts.heading.classList.add('hsbcoffer-title');
     header.append(parts.heading);
   }
   if (parts.text.length) {
-    const intro = el('div', 'showcase-intro');
+    const intro = el('div', 'hsbcoffer-intro');
     intro.append(...parts.text);
     header.append(intro);
   }
   if (parts.buttons.length) {
-    const actions = el('div', 'showcase-buttons');
+    const actions = el('div', 'hsbcoffer-buttons');
     actions.append(...parts.buttons);
     header.append(actions);
   }
@@ -190,25 +190,25 @@ function buildHeader(nodes) {
  * @returns {HTMLElement}
  */
 function buildCard({ featured, media, nodes }) {
-  const card = el('div', featured ? 'showcase-card featured' : 'showcase-card');
-  const figure = el('div', 'showcase-card-media');
+  const card = el('div', featured ? 'hsbcoffer-card featured' : 'hsbcoffer-card');
+  const figure = el('div', 'hsbcoffer-card-media');
   figure.append(media.closest('picture') || media);
   card.append(figure);
 
-  const body = el('div', 'showcase-card-body');
+  const body = el('div', 'hsbcoffer-card-body');
   // without a title, a card's first line is its eyebrow when more text follows
   const parts = readText(nodes, { minLines: 2 });
-  const eyebrow = eyebrowOf(parts.eyebrow, 'showcase-card-eyebrow');
+  const eyebrow = eyebrowOf(parts.eyebrow, 'hsbcoffer-card-eyebrow');
   if (eyebrow) body.append(eyebrow);
   if (parts.heading) {
-    const title = el('h3', 'showcase-card-title');
+    const title = el('h3', 'hsbcoffer-card-title');
     title.append(...parts.heading.childNodes);
     body.append(title);
   }
   body.append(...parts.text);
   card.append(body);
   if (parts.buttons.length) {
-    const actions = el('div', 'showcase-card-buttons');
+    const actions = el('div', 'hsbcoffer-card-buttons');
     actions.append(...parts.buttons);
     card.append(actions);
   }
@@ -222,7 +222,7 @@ function buildCard({ featured, media, nodes }) {
  * @returns {HTMLElement}
  */
 function buildLogos(nodes) {
-  const strip = el('div', 'showcase-logos');
+  const strip = el('div', 'hsbcoffer-logos');
   // several images in one paragraph: one pill each
   const pills = nodes.flatMap((node) => {
     const pics = [...node.querySelectorAll('picture, img:not(picture img)')];
@@ -230,17 +230,17 @@ function buildLogos(nodes) {
   });
   pills.forEach((node, i) => {
     if (i) {
-      const x = el('span', 'showcase-logos-x');
+      const x = el('span', 'hsbcoffer-logos-x');
       x.textContent = '×';
       x.setAttribute('aria-hidden', 'true');
       strip.append(x);
     }
-    const pill = el('div', 'showcase-logo');
+    const pill = el('div', 'hsbcoffer-logo');
     const pic = /^(PICTURE|IMG)$/.test(node.tagName) ? node : node.querySelector('picture, img');
     if (pic) pill.append(pic);
     const label = /^(PICTURE|IMG)$/.test(node.tagName) ? '' : textOf(node);
     if (label) {
-      const span = el('span', 'showcase-logo-label');
+      const span = el('span', 'hsbcoffer-logo-label');
       span.textContent = label;
       pill.append(span);
     }
@@ -250,8 +250,8 @@ function buildLogos(nodes) {
 }
 
 /**
- * loads and decorates the showcase
- * @param {Element} block The showcase block element
+ * loads and decorates the hsbcoffer
+ * @param {Element} block The hsbcoffer block element
  */
 export default function decorate(block) {
   // undo the site's link-to-button decoration: the block draws its own buttons
@@ -260,7 +260,7 @@ export default function decorate(block) {
     a.closest('.button-wrapper')?.removeAttribute('class');
   });
 
-  const body = el('div', 'showcase-body');
+  const body = el('div', 'hsbcoffer-body');
   let grid = null;
   [...block.children].forEach((row, i) => {
     const data = readRow(row, i === 0);
@@ -269,29 +269,29 @@ export default function decorate(block) {
     if (data.type === 'header') body.append(buildHeader(data.nodes));
     else if (data.type === 'card') {
       if (!grid) {
-        grid = el('div', 'showcase-cards');
+        grid = el('div', 'hsbcoffer-cards');
         body.append(grid);
       }
       grid.append(buildCard(data));
     } else if (data.type === 'image') {
-      const figure = el('div', 'showcase-image');
+      const figure = el('div', 'hsbcoffer-image');
       figure.append(data.media.closest('picture') || data.media);
       body.append(figure);
     } else if (data.type === 'logos') {
       body.append(buildLogos(data.nodes));
     } else if (data.type === 'buttons') {
-      const actions = el('div', 'showcase-buttons');
+      const actions = el('div', 'hsbcoffer-buttons');
       data.nodes.forEach((n) => actions.append(...buttonsOf(n)));
       body.append(actions);
     } else {
-      const text = el('div', 'showcase-text');
+      const text = el('div', 'hsbcoffer-text');
       text.append(...data.nodes);
       body.append(text);
     }
   });
 
   // a lone card is centred and not stretched (e.g. a single marketplace card)
-  body.querySelectorAll('.showcase-cards').forEach((g) => {
+  body.querySelectorAll('.hsbcoffer-cards').forEach((g) => {
     if (g.children.length === 1) g.classList.add('single');
   });
 

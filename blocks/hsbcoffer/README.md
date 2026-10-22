@@ -1,12 +1,12 @@
-# Showcase: authoring guide
+# hsbcoffer: authoring guide
 
 A full-width campaign panel, as the source Smart Traveller x HSBC offer pages (e.g. Autumn Travel):
 a centred header, then cards, wide images, logos, buttons, closing text or notes. Stack several
-Showcase blocks in one section to build a campaign: each is its own coloured band.
+hsbcoffer blocks in one section to build a campaign: each is its own coloured band.
 
 ## Table: one row per part, in the order they show
 
-| Showcase (navy, accent) | |
+| hsbcoffer (navy, accent) | |
 | --- | --- |
 | Elevate Your Autumn Travel<br>## Your rewards deserve a journey.<br>Autumn is made for getting away… | |
 | *Smart Traveller logo*<br>*HSBC Reward+ logo* HSBC Reward+ | |
@@ -30,7 +30,7 @@ Each row's role comes from what's in it:
 
 ## Options
 
-Add them in brackets after the block name, e.g. `Showcase (red, icons, centered)`.
+Add them in brackets after the block name, e.g. `hsbcoffer (red, icons, centered)`.
 
 | Option | Effect |
 | --- | --- |
@@ -51,14 +51,14 @@ Fonts, colours, sizes and spacing are fixed, as the source campaign.
 ## Example: Autumn Travel (`/en-uk/offers/autumn-travel`)
 
 After the banner (Image `offer-banner, border-rounded`) and the title (Title `text-lg`), one section
-holds seven Showcase blocks:
+holds seven hsbcoffer blocks:
 
 | Panel | Block name | Rows |
 | --- | --- | --- |
-| Intro | `Showcase (navy, accent, compact)` | Header; logos |
-| Value cards | `Showcase (cream)` | 3 cards (the middle one `featured`); closing text |
-| Eligible cards | `Showcase (white, products)` | Header; 8 cards (card image, `### name`, card type) |
-| How to bind | `Showcase (cream, split)` | Header; the gift card; the steps image; a button |
-| Marketplace | `Showcase (navy, icons)` | Header; 1 icon card; the steps image; a button |
-| Link your card | `Showcase (red, icons, centered)` | Header; 3 icon cards; a button |
-| Important information | `Showcase (cream, notes)` | `Important Information`; the terms lines |
+| Intro | `hsbcoffer (navy, accent, compact)` | Header; logos |
+| Value cards | `hsbcoffer (cream)` | 3 cards (the middle one `featured`); closing text |
+| Eligible cards | `hsbcoffer (white, products)` | Header; 8 cards (card image, `### name`, card type) |
+| How to bind | `hsbcoffer (cream, split)` | Header; the gift card; the steps image; a button |
+| Marketplace | `hsbcoffer (navy, icons)` | Header; 1 icon card; the steps image; a button |
+| Link your card | `hsbcoffer (red, icons, centered)` | Header; 3 icon cards; a button |
+| Important information | `hsbcoffer (cream, notes)` | `Important Information`; the terms lines |

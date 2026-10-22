@@ -68,6 +68,29 @@
   --color-campaign-pink: #e0b2d3;
   --color-campaign-gold-hover: #c2a16d;
 
+  /* HSBC offer palette */
+--color-hsbc-red: #e31837;
+--color-hsbc-red-hover: #b0122a;
+--color-hsbc-navy: #1a2b4a;
+--color-hsbc-navy-secondary: #243860;
+--color-hsbc-gold: #c9922a;
+--color-hsbc-gold-light: #e0b454;
+--color-hsbc-cream: #fdf8f2;
+--color-hsbc-surface: #f4f6fa;
+--color-hsbc-ink: #1a1a2e;
+--color-hsbc-grey: #4a5568;
+--color-campaign-walnut: #5a5048;
+--color-hsbc-line: rgb(26 43 74 / 12%);
+--font-hsbc: var(--font-family-primary);
+--color-white-alpha-88:rgb(255 255 255 / 88%);
+--color-white-alpha-72: rgb(255 255 255 / 72%);
+--color-white-alpha-60:rgb(255 255 255 / 60%);
+--color-white-alpha-30:rgb(255 255 255 / 30%);
+--color-white-alpha-16: rgb(255 255 255 / 16%);
+--color-white-alpha-18:rgb(255 255 255 / 18%);
+--color-white-alpha-10:rgb(255 255 255 / 10%);
+--color-white-alpha-6:rgb(255 255 255 / 6%);
+
   /* (source West Kowloon campaign, `--c-light` and the facility card border) */
   --color-campaign-mist: #f7f4f5;
   --color-campaign-outline: #e6e0e3;
