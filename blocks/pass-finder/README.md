@@ -10,7 +10,7 @@ notes for particular passes.
 | Pass Finder | |
 | --- | --- |
 | ## Explore Regional Passes<br>Discover your pre-flight retreat. Choose a regional pass for personalized care and exclusive privileges on your frequent routes. | |
-| hide | PRD3700, PRD3701 |
+| hide | PRD3902, PRD3832, PRD3789 |
 | PRD3684 | Try our elevated lounge concept with personalized hospitality, a-la-carte gourmet dining |
 | PRD3678 | 2 visits to our Dubai lounge, including a one-time Caviar Experience. |
 
