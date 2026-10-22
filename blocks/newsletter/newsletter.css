@@ -43,9 +43,20 @@
 
 /* as the source: faint light placeholders, a maroon tick in the white box when checked, and
    autofilled fields keep the maroon fill and white text */
-.newsletter .custom-form .form-input::placeholder {
-  color: rgb(255 255 255 / 25%);
+.newsletter .custom-form.maroon .form-input::placeholder {
+  color: var(--color-text-inverse);
   font-weight: var(--font-weight-light);
+  opacity: 0.25;
+}
+
+/* the source's consent row: at least 24px tall, 2px below, the box 1px from the top of its text */
+.newsletter .custom-form .form-field-checkbox {
+  min-height: 1.5rem;
+  margin-bottom: var(--spacing-1);
+}
+
+.newsletter .custom-form .form-check-input {
+  margin-top: 1px;
 }
 
 /* more specific than the Custom Form maroon checked box (a maroon dot), which loads after this */
