@@ -13,6 +13,8 @@ const ENDPOINTS = {
   countries: '/api/v1/web/app_demo/GetCountries',
   // the Custom Form sign up submit (account registration)
   signUp: '/api/v1/web/app_demo/Register',
+  // the Newsletter submit: a placeholder path until the newsletter API exists
+  newsletter: '/api/v1/web/app_demo/Newsletter',
   propertyDetail: '/api/v1/web/app_demo/GetPropertyDetail',
   // a lounge's bookable services and their products for a start time (POST, JSON body)
   propertyServices: '/api/v1/web/app_demo/GetServices',

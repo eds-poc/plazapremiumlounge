@@ -1,0 +1,132 @@
+/* newsletter: the source band above the footer (measured at 1440, 768 and 375px). In the wide
+   container (1490px, 50px from the edges from 768px), 20px above and below; a maroon panel (the
+   Custom Form maroon option) 30px 50px inside, 30px corners; edge to edge with 15px sides on
+   phones. The heading 24px/500, the copy 18px/300; fields 16px apart, labels 5px above, 12px
+   checkbox text, no required marks (as the source); the button an arrow inside the email field */
+.newsletter {
+  box-sizing: border-box;
+  max-width: var(--container-wide-max-width);
+  margin-inline: auto;
+  padding-inline: var(--container-wide-padding);
+}
+
+.newsletter .custom-form.maroon {
+  border-radius: 0;
+  padding: var(--spacing-9) var(--spacing-6);
+}
+
+.newsletter .custom-form .form-fields {
+  --form-row-gap: var(--spacing-bootstrap-3);
+  --form-column-gap: var(--spacing-bootstrap-3);
+}
+
+.newsletter .custom-form .form-intro :is(h2, h3, h4) {
+  margin-bottom: var(--spacing-8);
+}
+
+.newsletter .custom-form .form-intro p {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-light);
+}
+
+.newsletter .custom-form .form-label {
+  margin-bottom: var(--spacing-2);
+}
+
+.newsletter .custom-form .form-required {
+  display: none;
+}
+
+.newsletter .custom-form .form-check-label {
+  font-size: var(--font-size-xs);
+}
+
+/* as the source: faint light placeholders, a maroon tick in the white box when checked, and
+   autofilled fields keep the maroon fill and white text */
+.newsletter .custom-form .form-input::placeholder {
+  color: rgb(255 255 255 / 25%);
+  font-weight: var(--font-weight-light);
+}
+
+/* more specific than the Custom Form maroon checked box (a maroon dot), which loads after this */
+.newsletter .custom-form.maroon .form-check-input:checked {
+  background: var(--color-text-inverse) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath fill='%23530e2a' d='M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z'/%3E%3C/svg%3E") center / 10px no-repeat;
+  box-shadow: none;
+}
+
+.newsletter .custom-form .form-input:autofill {
+  box-shadow: 0 0 0 100px var(--color-brand-primary) inset;
+  -webkit-text-fill-color: var(--color-text-inverse);
+  caret-color: var(--color-text-inverse);
+}
+
+.newsletter .custom-form .form-input:autofill:focus {
+  box-shadow: 0 0 0 100px var(--color-brand-primary) inset, 0 0 0 3px rgb(255 255 255 / 40%);
+}
+
+/* the submit button: a white arrow at the right of the field it sits in */
+.newsletter .newsletter-submit {
+  position: absolute;
+  top: 50%;
+  right: var(--spacing-4);
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-circle);
+  padding: 0;
+  background: none;
+  color: var(--color-text-inverse);
+  font-size: 0;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.newsletter .newsletter-submit::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: currentcolor;
+  mask: url('/icons/arrow-right.svg') center / 18px no-repeat;
+}
+
+.newsletter .newsletter-submit:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 2px;
+}
+
+.newsletter .newsletter-submit:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+.newsletter .custom-form .form-control-wrap:has(.newsletter-submit) .form-input {
+  padding-right: calc(var(--spacing-4) + 40px);
+}
+
+/* breakpoint-exception: the source's col-sm-6, first and last name side by side from 576px */
+@media (width >= 576px) {
+  .newsletter .custom-form .form-fields .width-half {
+    grid-column: span 3;
+  }
+}
+
+@media (width >= 768px) {
+  .newsletter {
+    padding-block: var(--spacing-7);
+  }
+
+  .newsletter .custom-form.maroon {
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-9);
+  }
+}
+
+@media (width >= 992px) {
+  .newsletter .custom-form.maroon {
+    padding-inline: var(--spacing-11);
+  }
+
+  .newsletter .custom-form .form-intro :is(h2, h3, h4) {
+    margin-bottom: var(--spacing-10);
+  }
+}
