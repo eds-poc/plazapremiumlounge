@@ -160,12 +160,12 @@
   background: currentcolor;
   color: var(--color-text-secondary);
   cursor: pointer;
-  mask: url('../icons/eye.svg') center / 18px no-repeat;
+  mask: url('/icons/eye.svg') center / 18px no-repeat;
   transform: translateY(-50%);
 }
 
 .form-fields .form-password-toggle[aria-pressed='true'] {
-  mask-image: url('../icons/eye-off.svg');
+  mask-image: url('/icons/eye-off.svg');
 }
 
 .form-fields .form-control-wrap:has(.form-password-toggle) .form-input {

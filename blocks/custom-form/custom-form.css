@@ -57,7 +57,7 @@
   padding: 0;
   background: currentcolor;
   cursor: pointer;
-  mask: url('../../icons/close-thin.svg') center / 10px no-repeat;
+  mask: url('/icons/close-thin.svg') center / 10px no-repeat;
 }
 
 .custom-form .form-status-close:focus-visible {
@@ -85,10 +85,192 @@
   line-height: var(--line-height-body);
 }
 
-/* breakpoint-exception: design-system breakpoint (768px), the button fills the width below it */
+/* options text-left / text-right: the text rows above the first field beside the form (the
+   source newsletter band: a 24px/500 heading and a line of copy); stacked, text first, on phones */
+.custom-form .form-intro {
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+.custom-form .form-intro :is(h2, h3, h4) {
+  margin: 0 0 var(--spacing-9);
+  color: inherit;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.custom-form .form-intro > :first-child {
+  margin-top: 0;
+}
+
+.custom-form .form-intro > :last-child {
+  margin-bottom: 0;
+}
+
+/* option maroon: the form on the source newsletter's maroon panel (30px corners, 30px 50px
+   padding), in white: outlined 35px inputs with 20px corners, white labels, text and links, a white
+   circle checkbox; light pink errors and required marks, as red is too faint on maroon */
+.custom-form.maroon {
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-9) var(--spacing-11);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+.custom-form.maroon .form-fields {
+  --form-input-height: 35px;
+  --form-on-maroon-error: var(--color-brand-blush);
+}
+
+.custom-form.maroon :is(.form-label, .form-check-label, .form-content, .form-success) {
+  color: var(--color-text-inverse);
+}
+
+.custom-form.maroon .form-required {
+  color: var(--color-brand-blush);
+}
+
+.custom-form.maroon .form-input {
+  border: 1px solid var(--color-text-inverse);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-2) var(--spacing-8);
+  background-color: transparent;
+  color: var(--color-text-inverse);
+}
+
+.custom-form.maroon .form-input::placeholder {
+  color: rgb(255 255 255 / 55%);
+}
+
+.custom-form.maroon .form-input:focus {
+  background-color: transparent;
+  box-shadow: 0 0 0 3px rgb(255 255 255 / 40%);
+}
+
+.custom-form.maroon .form-input:disabled {
+  color: rgb(255 255 255 / 60%);
+}
+
+/* dropdowns: a white arrow; the open list stays dark on white */
+.custom-form.maroon .form-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23fff' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1'/%3E%3C/svg%3E");
+}
+
+.custom-form.maroon .form-select option {
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+/* phone: one outlined pill around the code and the number, a faint line between them */
+.custom-form.maroon .form-phone {
+  border: 1px solid var(--color-text-inverse);
+  border-radius: var(--radius-lg);
+  background-color: transparent;
+}
+
+.custom-form.maroon .form-phone:focus-within {
+  background-color: transparent;
+  box-shadow: 0 0 0 3px rgb(255 255 255 / 40%);
+}
+
+.custom-form.maroon .form-phone .form-input {
+  height: calc(var(--form-input-height) - 2px);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.custom-form.maroon .form-phone .form-phone-code {
+  border-right: 1px solid rgb(255 255 255 / 50%);
+}
+
+.custom-form.maroon .form-password-toggle {
+  color: var(--color-text-inverse);
+}
+
+.custom-form.maroon .form-help {
+  color: rgb(255 255 255 / 80%);
+}
+
+.custom-form.maroon .form-error {
+  color: var(--form-on-maroon-error);
+}
+
+.custom-form.maroon .form-check-input {
+  border-color: var(--color-text-inverse);
+  background-color: var(--color-text-inverse);
+}
+
+.custom-form.maroon .form-check-input:checked {
+  background-color: var(--color-brand-primary);
+  box-shadow: inset 0 0 0 3px var(--color-text-inverse);
+}
+
+.custom-form.maroon .form-check-input:focus-visible {
+  outline-color: var(--color-text-inverse);
+}
+
+.custom-form.maroon :is(.form-check-label, .form-content, .form-intro) a:any-link {
+  color: var(--color-text-inverse);
+  text-decoration: underline;
+}
+
+.custom-form.maroon .form-load-error {
+  color: var(--color-text-inverse);
+}
+
+.custom-form.maroon .form-field.has-error .form-input,
+.custom-form.maroon .form-field.has-error .form-phone {
+  border-color: var(--form-on-maroon-error);
+  box-shadow: inset 0 0 0 1px var(--form-on-maroon-error);
+}
+
+.custom-form.maroon .form-field.has-error .form-phone .form-input {
+  box-shadow: none;
+}
+
+.custom-form.maroon .form-field.has-error .form-check-input {
+  border-color: var(--form-on-maroon-error);
+  box-shadow: 0 0 0 1px var(--form-on-maroon-error);
+}
+
+/* the message at the top: white, the text and its close button maroon */
+.custom-form.maroon .form-status {
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
+}
+
+/* breakpoint-exception: design-system breakpoint (768px), the button fills the width below it;
+   the maroon panel has 20px side padding */
 @media (width < 768px) {
   .custom-form .form-submit.full-width-mobile .button {
     width: 100%;
     max-width: none;
+  }
+
+  .custom-form.maroon {
+    padding-inline: var(--spacing-7);
+  }
+}
+
+/* breakpoint-exception: the source's col-md-6 (768px), text and form side by side, half each */
+@media (width >= 768px) {
+  .custom-form:is(.text-left, .text-right):has(> .form-intro) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--grid-gutter);
+    align-items: start;
+  }
+
+  .custom-form.text-right > .form-intro {
+    order: 1;
+  }
+}
+
+/* stacked: the text above the form */
+@media (width < 768px) {
+  .custom-form:is(.text-left, .text-right) > .form-intro {
+    margin-bottom: var(--spacing-9);
   }
 }

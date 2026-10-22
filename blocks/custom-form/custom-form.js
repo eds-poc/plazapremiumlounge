@@ -73,7 +73,9 @@ function showApiErrors(form, data) {
  * Decorates the custom form block: an authorable form. One row per field (label | type |
  * settings, see scripts/forms.js), a `settings` row for the form (`action`, `redirect`,
  * `error`, `success`), one-cell rows shown as text, and a `submit` row. Options: two-columns (as
- * the source sign up form: fields half width from 992px), narrow, centered, compact. On submit
+ * the source sign up form: fields half width from 992px), narrow, centered, compact, maroon (the
+ * form on a maroon panel, in white), text-left / text-right (the text rows above the first field
+ * beside the form, as the source newsletter band). On submit
  * every field is checked; a valid form is posted as JSON (keys from each field's `key`) and the
  * visitor goes to the `redirect` page, or sees the error.
  * @param {Element} block The custom form block element
@@ -82,7 +84,10 @@ export default async function decorate(block) {
   // the shared field styles, before the fields show
   const css = loadCSS(`${window.hlx.codeBasePath}/styles/forms.css`);
   const twoColumns = block.classList.contains('two-columns');
+  // options text-left / text-right: the text rows above the first field sit beside the form
+  const split = block.classList.contains('text-left') || block.classList.contains('text-right');
   const form = el('form', 'form-fields');
+  const intro = el('div', 'form-intro');
   let settings = new Map();
   let submit = null;
 
@@ -90,6 +95,10 @@ export default async function decorate(block) {
     const cells = [...row.children];
     if (!row.textContent.trim() && !row.querySelector('img, picture')) return;
     if (cells.length === 1) {
+      if (split && !form.querySelector('.form-field')) {
+        intro.append(...cells[0].childNodes);
+        return;
+      }
       const content = el('div', 'form-content');
       content.append(...cells[0].childNodes);
       form.append(content);
@@ -241,5 +250,5 @@ export default async function decorate(block) {
   });
 
   await css;
-  block.replaceChildren(form);
+  block.replaceChildren(...(split && intro.childNodes.length ? [intro] : []), form);
 }
