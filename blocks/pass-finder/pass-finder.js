@@ -16,6 +16,8 @@ const ALL = 'All';
 const MULTI = 'Multi Cities';
 const SORTS = ['recommended', 'price-asc', 'price-desc'];
 const SEARCH_DELAY_MS = 150;
+// how far an image's shape may differ from the frame's and still be shown whole (stretched)
+const WHOLE_IMAGE_TOLERANCE = 0.05;
 let count = 0;
 
 /**
@@ -150,7 +152,7 @@ function readRegions(passes) {
  * location tags (+N more), the note, Learn more and Add to Cart; Best Value on the best price per
  * visit.
  * @param {Object} pass See readPass
- * @param {{text: string, kind: string}|null} note
+ * @param {string} note
  * @param {boolean} bestValue
  * @returns {HTMLElement}
  */
@@ -160,6 +162,14 @@ function buildCard(pass, note, bestValue) {
   const media = el('div', 'pass-finder-media');
   if (pass.image) {
     const img = el('img');
+    // most pass images are card artwork with their own rounded corners: one near the frame's
+    // shape is shown whole, so nothing is cut off; any other (a photo) fills it from the centre
+    img.addEventListener('load', () => {
+      const frame = media.clientWidth / media.clientHeight;
+      const shape = img.naturalWidth / img.naturalHeight;
+      img.classList.toggle('pass-finder-image-whole', Math.abs(shape / frame - 1) <= WHOLE_IMAGE_TOLERANCE);
+      media.classList.add('is-loaded');
+    }, { once: true });
     img.src = pass.image;
     img.alt = pass.name;
     img.loading = 'lazy';

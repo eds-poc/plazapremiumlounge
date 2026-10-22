@@ -49,7 +49,8 @@
   --pass-finder-icon: 17px;
   --pass-finder-note-icon: 13px;
   --pass-finder-page: 40px;
-  --pass-finder-image-ratio: 902 / 569;
+  --pass-finder-image-ratio: 39 / 25;
+  --pass-finder-image-radius: calc(var(--pass-finder-card-radius) - var(--base-border-width));
 
   margin: var(--pass-finder-space-above) var(--pass-finder-panel-inset) var(--spacing-campaign-band-block);
   padding: var(--pass-finder-panel-padding);
@@ -292,15 +293,19 @@
   white-space: nowrap;
 }
 
-/* one image shape for every card (the service's images differ: 600x390, 902x569, 1600x800…),
-   each filling it from the centre */
+/* one image shape for every card (the service's images differ: 600x390, 800x523, 902x569,
+   1600x800…; 39/25 sits between the artwork's shapes), each image rounded on every corner. The
+   frame is tinted only until its image arrives, so artwork's own transparent corners stay clear */
 .pass-finder-media {
   aspect-ratio: var(--pass-finder-image-ratio);
   overflow: hidden;
-  border-radius: calc(var(--pass-finder-card-radius) - var(--base-border-width))
-    calc(var(--pass-finder-card-radius) - var(--base-border-width)) 0 0;
+  border-radius: var(--pass-finder-image-radius);
   background-color: var(--pass-finder-image-bg);
   line-height: 0;
+}
+
+.pass-finder-media.is-loaded {
+  background-color: transparent;
 }
 
 .pass-finder-media img {
@@ -308,6 +313,11 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* card artwork near the frame's shape: shown whole */
+.pass-finder-media img.pass-finder-image-whole {
+  object-fit: fill;
 }
 
 .pass-finder-body {
