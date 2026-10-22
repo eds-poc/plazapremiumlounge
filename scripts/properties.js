@@ -266,7 +266,12 @@ export function readProperty(item) {
     loyalty: describe('LoyaltyPoints')?.desc?.trim() || '',
     icons: (item.icons || []).map((i) => ({ src: toUrl(i.path), alt: i.iconDesc || i.name || '' })).filter((i) => i.src),
     images: (item.images || [])
-      .map((image, i) => ({ src: toUrl(image.path), order: Number(image.sequence) || i + 1 }))
+      .map((image, i) => ({
+        src: toUrl(image.path),
+        order: Number(image.sequence) || i + 1,
+        // the photo's name, the source gallery's caption
+        caption: (image.name || '').trim(),
+      }))
       .filter((image) => image.src)
       .sort((a, b) => a.order - b.order),
     features: (item.featureList || [])
@@ -291,9 +296,11 @@ export function readProperty(item) {
  * @param {Object} property The read property (images, name, line)
  * @param {boolean} eager Load the first photo straight away
  * @param {string} [prefix] The class name prefix (`property-slider`); the block styles the slider
+ * @param {{onOpen?: Function}} [options] `onOpen(index, link)`: a tap or click on a photo opens
+ *   it (e.g. in a gallery); the photos are then links to their files
  * @returns {HTMLElement}
  */
-export function buildSlider(property, eager, prefix = 'property-slider') {
+export function buildSlider(property, eager, prefix = 'property-slider', { onOpen } = {}) {
   const { images, name, line } = property;
   const slider = el('div', prefix);
   if (!images.length) {
@@ -310,10 +317,25 @@ export function buildSlider(property, eager, prefix = 'property-slider') {
     img.alt = i === 0 ? [name, line].filter(Boolean).join(', ') : `${name}, ${translate('propertyPhoto', { n: i + 1, total: images.length })}`;
     img.loading = eager && i === 0 ? 'eager' : 'lazy';
     img.decoding = 'async';
-    slide.append(img);
+    if (onOpen) {
+      const link = el('a', `${prefix}-open`);
+      link.href = image.src;
+      link.setAttribute('aria-haspopup', 'dialog');
+      link.draggable = false;
+      link.append(img);
+      link.addEventListener('click', (e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+        e.preventDefault();
+        // eslint-disable-next-line no-use-before-define
+        if (!swiped) onOpen(i, link);
+      });
+      slide.append(link);
+    } else slide.append(img);
     track.append(slide);
     return slide;
   });
+  // (the end of a swipe isn't a tap on the photo)
+  let swiped = false;
   slider.append(track);
   if (slides.length < 2) return slider;
 
@@ -360,13 +382,16 @@ export function buildSlider(property, eager, prefix = 'property-slider') {
   next.addEventListener('click', () => show(index + 1));
   dotButtons.forEach((dot, n) => dot.addEventListener('click', () => show(n)));
   let startX = null;
-  track.addEventListener('pointerdown', (e) => { startX = e.clientX; });
+  track.addEventListener('pointerdown', (e) => { startX = e.clientX; swiped = false; });
   track.addEventListener('pointercancel', () => { startX = null; });
   track.addEventListener('pointerup', (e) => {
     if (startX === null) return;
     const dx = e.clientX - startX;
     startX = null;
-    if (Math.abs(dx) > SWIPE_PX) show(index + (dx < 0 ? 1 : -1));
+    if (Math.abs(dx) > SWIPE_PX) {
+      swiped = true;
+      show(index + (dx < 0 ? 1 : -1));
+    }
   });
   slides.forEach((slide, n) => { slide.inert = n !== 0; });
   dotButtons.forEach((dot, n) => dot.setAttribute('aria-current', n === 0 ? 'true' : 'false'));

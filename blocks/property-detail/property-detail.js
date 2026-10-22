@@ -4,7 +4,7 @@ import {
 import { applyButtonAction } from '../../scripts/button-actions.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { getLanguage, translate } from '../../scripts/i18n.js';
-import { enableLightbox } from '../../scripts/lightbox.js';
+import openGallery from '../../scripts/gallery.js';
 import { openModal } from '../../scripts/modal-dialog.js';
 import buildDatePicker from './date-picker.js';
 import {
@@ -24,7 +24,9 @@ const MOBILE = '(width < 768px)';
 const DESKTOP_PHOTOS = 4;
 const SLOT_MINUTES = 30;
 const DAY_MINUTES = 24 * 60;
-const MAX_GUESTS = 10;
+// the source's guest limits: 9 guests at most, and up to two children per adult
+const MAX_GUESTS = 9;
+const CHILDREN_PER_ADULT = 2;
 const DEFAULT_CURRENCY = 'USD';
 
 /**
@@ -264,6 +266,11 @@ function readDetail(json) {
     address: (detail.address || '').trim(),
     // the phone only: the service's contact emails aren't for visitors
     phone: (detail.contactInfo?.primaryNumber || '').trim(),
+    // the lounge's factsheet (a PDF): the first of the service's files
+    factsheet: (Array.isArray(detail.factsheetLink) ? detail.factsheetLink : [])
+      .map((file, i) => ({ href: toUrl(file?.path), order: Number(file?.sequence) || i + 1 }))
+      .filter((file) => /^https?:/.test(file.href || ''))
+      .sort((a, b) => a.order - b.order)[0]?.href || '',
     description: detail.description || '',
     timeZone: readTimeZone(detail.timeZone),
     iata,
@@ -364,28 +371,37 @@ function buildCrumbs(lounge) {
 }
 
 /**
- * The photos: the first four stacked on desktop (each opens full size), a slider on phones.
+ * The photos: the first four stacked on desktop, a slider on phones. A photo opens the gallery
+ * of all the lounge's photos at that one, as the source (captioned with the photos' names).
  * @param {Object} lounge
  * @param {boolean} mobile Which one loads its first photo straight away
  * @returns {{photos: HTMLElement, slider: HTMLElement}}
  */
 function buildGallery(lounge, mobile) {
+  const altFor = (i) => (i === 0 ? [lounge.name, lounge.place].filter(Boolean).join(', ') : `${lounge.name}, ${translate('propertyPhoto', { n: i + 1, total: lounge.images.length })}`);
+  const images = lounge.images.map((image, i) => ({ ...image, alt: altFor(i) }));
+  const open = (i, link) => openGallery(images, i, { label: lounge.name, trigger: link });
   const photos = el('ul', 'property-detail-photos');
   lounge.images.slice(0, DESKTOP_PHOTOS).forEach((image, i) => {
     const item = el('li');
     const link = el('a');
     link.href = image.src;
+    link.setAttribute('aria-haspopup', 'dialog');
     const img = el('img');
     img.src = image.src;
-    img.alt = i === 0 ? [lounge.name, lounge.place].filter(Boolean).join(', ') : `${lounge.name}, ${translate('propertyPhoto', { n: i + 1, total: lounge.images.length })}`;
+    img.alt = altFor(i);
     img.loading = !mobile && i === 0 ? 'eager' : 'lazy';
     img.decoding = 'async';
     link.append(img);
-    enableLightbox(link, img.alt);
+    link.addEventListener('click', (e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+      e.preventDefault();
+      open(i, link);
+    });
     item.append(link);
     photos.append(item);
   });
-  const slider = buildSlider({ ...lounge, line: lounge.place }, mobile, 'property-detail-slider');
+  const slider = buildSlider({ ...lounge, line: lounge.place }, mobile, 'property-detail-slider', { onOpen: open });
   return { photos, slider };
 }
 
@@ -411,7 +427,9 @@ function field(label, control, note) {
 }
 
 /**
- * A number field with minus and plus buttons (adults, children).
+ * A number field with minus and plus buttons (adults, children); the buttons stay within the
+ * field's `min` and `max` (the booking form moves `max` with the other count, see fixGuests), and
+ * a step that changes nothing announces nothing.
  * @param {string} name
  * @param {string} group The label, for the buttons' names
  * @param {number} value
@@ -432,7 +450,9 @@ function counter(name, group, value, min) {
     btn.type = 'button';
     btn.setAttribute('aria-label', label);
     btn.addEventListener('click', () => {
-      const next = Math.min(MAX_GUESTS, Math.max(min, (Number(input.value) || 0) + delta));
+      const now = Number.parseInt(input.value, 10) || min;
+      const next = Math.min(Number(input.max), Math.max(min, now + delta));
+      if (next === Number(input.value)) return;
       input.value = next;
       input.dispatchEvent(new Event('change', { bubbles: true }));
     });
@@ -520,6 +540,44 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
     field(translate('propertyAdults'), counter('adults', translate('propertyAdults'), 1, 1)),
     field(translate('propertyChildren'), counter('children', translate('propertyChildren'), 0, 0), translate('propertyChildNote')),
   );
+
+  // the guests, as the source: at least one adult, up to two children per adult, nine in all.
+  // A change that breaks a limit is pulled back to it: the changed count stops at what's left, and
+  // fewer adults take children down with them (3 + 6, then 2 adults: 2 + 4)
+  const adults = fields.querySelector('[name="adults"]');
+  const children = fields.querySelector('[name="children"]');
+  const count = (input, fallback) => {
+    const n = Number.parseInt(input.value, 10);
+    return Number.isFinite(n) ? n : fallback;
+  };
+  /**
+   * Keeps the guest counts within the limits, and each field's `max` and its buttons' state too.
+   * @param {string} [changed] `adults` or `children`, the count the visitor changed
+   */
+  const fixGuests = (changed) => {
+    let a = Math.min(MAX_GUESTS, Math.max(1, count(adults, 1)));
+    let c = Math.max(0, count(children, 0));
+    if (changed === 'adults') a = Math.max(1, Math.min(a, MAX_GUESTS - c));
+    c = Math.min(c, CHILDREN_PER_ADULT * a, MAX_GUESTS - a);
+    a = Math.min(a, MAX_GUESTS - c);
+    if (adults.value !== String(a)) adults.value = a;
+    if (children.value !== String(c)) children.value = c;
+    adults.max = MAX_GUESTS - c;
+    children.max = Math.min(CHILDREN_PER_ADULT * a, MAX_GUESTS - a);
+    // (the buttons look the same at a limit, as the source's; they're marked for screen readers)
+    [[adults, a], [children, c]].forEach(([input, value]) => {
+      const wrap = input.closest('.property-detail-counter');
+      const off = (button, state) => button.setAttribute('aria-disabled', String(state));
+      off(wrap.querySelector('.property-detail-step-minus'), value <= Number(input.min));
+      off(wrap.querySelector('.property-detail-step-plus'), value >= Number(input.max));
+    });
+  };
+  [adults, children].forEach((input) => {
+    // typing: fixed as it goes (a field left empty becomes the least it can be)
+    input.addEventListener('input', () => { if (input.value !== '') fixGuests(input.name); });
+    input.addEventListener('change', () => fixGuests(input.name));
+  });
+  fixGuests();
 
   // service and its products (e.g. Lounge → Lounge Use - 2 Hours); they come from the services
   // call for the chosen start time (see setServices), so the fields wait, disabled, until then
@@ -690,6 +748,7 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
   });
   form.addEventListener('submit', async () => {
     if (form.classList.contains('is-waiting') || !service.value || !product.value) return;
+    fixGuests();
     const data = new FormData(form);
     const request = {
       serviceCode: service.value,
@@ -749,7 +808,7 @@ function buildTags(items, kind) {
 }
 
 /**
- * The Details panel: the location and the phone number.
+ * The Details panel: the location, the phone number and the factsheet.
  * @param {Object} lounge
  * @returns {HTMLElement}
  */
@@ -762,6 +821,15 @@ function buildDetails(lounge) {
   };
   if (lounge.address) part(translate('propertyLocation'), el('p', '', lounge.address));
   if (lounge.phone) part(translate('propertyContact'), el('p', '', `${translate('propertyPhone')}: ${lounge.phone}`));
+  // the factsheet, under both, in a new tab as the source
+  if (lounge.factsheet) {
+    const link = el('a', 'property-detail-factsheet', translate('propertyFactsheet'));
+    link.href = lounge.factsheet;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.append(el('span', 'visually-hidden', translate('opensInNewTab')));
+    wrap.append(link);
+  }
   return wrap;
 }
 

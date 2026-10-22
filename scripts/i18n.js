@@ -112,6 +112,28 @@ const TEXTS = {
   propertyNext: {
     en: 'Next photo', zh: '下一张照片', 'zh-HK': '下一張相片', ja: '次の写真', pt: 'Próxima foto',
   },
+  // the photo gallery's controls
+  galleryPhotos: {
+    en: 'Photos', zh: '照片', 'zh-HK': '相片', ja: '写真', pt: 'Fotos',
+  },
+  galleryZoom: {
+    en: 'Zoom', zh: '缩放', 'zh-HK': '縮放', ja: 'ズーム', pt: 'Zoom',
+  },
+  gallerySlideshowPlay: {
+    en: 'Play slideshow', zh: '播放幻灯片', 'zh-HK': '播放幻燈片', ja: 'スライドショーを再生', pt: 'Reproduzir apresentação',
+  },
+  gallerySlideshowPause: {
+    en: 'Pause slideshow', zh: '暂停幻灯片', 'zh-HK': '暫停幻燈片', ja: 'スライドショーを一時停止', pt: 'Pausar apresentação',
+  },
+  galleryFullscreen: {
+    en: 'Full screen', zh: '全屏', 'zh-HK': '全螢幕', ja: '全画面表示', pt: 'Tela cheia',
+  },
+  galleryFullscreenExit: {
+    en: 'Exit full screen', zh: '退出全屏', 'zh-HK': '退出全螢幕', ja: '全画面表示を終了', pt: 'Sair da tela cheia',
+  },
+  galleryThumbs: {
+    en: 'Thumbnails', zh: '缩略图', 'zh-HK': '縮圖', ja: 'サムネイル', pt: 'Miniaturas',
+  },
   propertyPhoto: {
     en: 'Photo {n} of {total}', zh: '第 {n} 张，共 {total} 张', 'zh-HK': '第 {n} 張，共 {total} 張', ja: '写真 {n} / {total}', pt: 'Foto {n} de {total}',
   },
@@ -231,6 +253,10 @@ const TEXTS = {
   },
   propertyContact: {
     en: 'Contact', zh: '联络', 'zh-HK': '聯絡', ja: '連絡先', pt: 'Contato',
+  },
+  // the Details panel's factsheet link (the source's wording)
+  propertyFactsheet: {
+    en: 'FACTSHEET', zh: '贵宾室简介', 'zh-HK': '貴賓室簡介', ja: 'ファクトシート', pt: 'FOLHETO INFORMATIVO',
   },
   propertyPhone: {
     en: 'Phone', zh: '电话', 'zh-HK': '電話', ja: '電話番号', pt: 'Telefone',

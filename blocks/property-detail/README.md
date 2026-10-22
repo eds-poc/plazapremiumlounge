@@ -10,8 +10,8 @@ folder serves every lounge: `/en-uk/find/lounge`, `/zh-cn/find/lounge`, `/zh-hk/
 - **Desktop:**
   - a grey title band: the name, location and opening hours
   - a breadcrumb: Lounges (back to the listing the visitor came from) < the lounge
-  - the first four photos (each opens full size) beside the **Book your visit** panel; as on the
-    source, the foot of the photo column fades to light grey until the pointer is over the photos
+  - the first four photos beside the **Book your visit** panel; as on the source, the foot of the
+    photo column fades to light grey until the pointer is over the photos
   - the panels: The Lounge, Lounge Features, Available Services, Details (an
     [Accordion](../accordion/README.md) with the `detail` option, the first two open)
 - **Phones:**
@@ -21,6 +21,15 @@ folder serves every lounge: `/en-uk/find/lounge`, `/zh-cn/find/lounge`, `/zh-hk/
   - a bar fixed at the bottom (as tall as its content: shorter without a Smart Traveller line): the lowest price, **Book your visit** (the booking form in a
     pop-up) and the Smart Traveller line
 - **Plaza Premium First** lounges are green instead of maroon.
+- **Photo gallery** (`scripts/gallery.js`, as the source's Fancybox): a photo (desktop) or a tap
+  on the slider (phones) opens all the lounge's photos at that one, over a dark backdrop.
+  - The toolbar: the counter ("2 / 7"), then zoom (to the photo's full size; a click on the photo
+    zooms too, and a zoomed photo can be dragged), slideshow (a photo every 3 seconds with a
+    progress bar, looping; the button pauses it), full screen (where the browser allows it),
+    thumbnails (shows or hides the strip at the foot) and close.
+  - Previous and next at the sides, looping; the photo's name as its caption, as the source.
+  - Keys as the source: the arrow keys and Page Up/Down move, Escape (or Delete) closes. Drag or
+    swipe sideways to move, down to close. The focus returns to the photo that opened it.
 
 ## Table: two columns, a setting per row (all optional)
 
@@ -54,6 +63,10 @@ shared. Lounge cards in the [Property List](../property-list/README.md) link her
 
 - **Fields:** date, time ("hrs"), adults, children, service and service details, and a promo
   code.
+- **Guests,** as the source: at least 1 adult, up to two children per adult, 9 guests in all.
+  The + and − buttons stop at the limits (they look the same, as the source's). Fewer adults
+  take the children down with them (3 adults + 6 children, then 2 adults: 2 + 4). A typed count
+  is held to the limits as it's typed, and an emptied field goes back to the least it can be.
 - **Date:** the source's calendar (`date-picker.js`): one month, previous and next, days before
   the first bookable one faded and unavailable, no last day. On desktop it pops up under the date
   (with a "Date" title and close) and closes on a pick, Escape, close or a click outside; in the
@@ -89,7 +102,7 @@ shared. Lounge cards in the [Property List](../property-list/README.md) link her
 | The service addresses | Code, not content: `scripts/endpoints.js` (the `propertyDetail` endpoint, a GET, and `propertyServices`, a POST with the start time, the lounge and its airport code, and the currency, and `propertyPrice`, a POST with the choices) |
 | The language of the data | The page's language folder (as the Property List); page metadata `language-code` overrides it |
 | Labels ("Date", "Get Price", panel names, "Lounge in {city}") | The site's translations, by page language, in the source pages' wording |
-| Details panel | The lounge's address and phone number only; the service's email addresses aren't shown |
+| Details panel | The lounge's address and phone number, and its factsheet (the service's `factsheetLink`, a PDF opening in a new tab; none, no link); the service's email addresses aren't shown |
 
 ## Messages
 
