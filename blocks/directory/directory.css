@@ -122,11 +122,8 @@ html {
     font-weight: var(--font-weight-regular);
   }
 
-
-/* pill: a compact pill sized to its label (source jump links .btn.btn-default): 16px text, no
-   minimum width, and the filled style in the source's lighter maroon */
+  /* pill: a compact pill sized to its label */
   .buttons {
-
     a.button.pill,
     button.button.pill {
       min-width: 0;
@@ -138,8 +135,5 @@ html {
       border-color: var(--color-brand-plum);
       background-color: var(--color-brand-plum);
     }
-
   }
-
 }
-
