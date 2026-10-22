@@ -187,7 +187,7 @@
   display: flex;
   flex-direction: column;
   border: 1px solid #efe7db;
-  border-radius: calc(var(--radius-md) +1px);
+  border-radius: calc(var(--radius-md) + 1px);
   padding-bottom: calc(var(--spacing-7) + 4px);
   background: var(--base-background);
   box-shadow: 0 6px 18px rgb(26 43 74 / 6%);
@@ -258,16 +258,16 @@
     border-radius: var(--radius-sm);
     padding: calc(var(--spacing-stack) + 4px) var(--spacing-7) var(--spacing-stack);
     text-align: center;
-    border: 1px solid rgba(26, 43, 74, 0.12);
+    border: 1px solid rgb(26 43 74 / 12%);
     transform-style: preserve-3d;
     transition: transform 0.18s ease, box-shadow 0.25s ease;
-    box-shadow: 0 4px 14px rgba(26, 43, 74, 0.06);
+    box-shadow: 0 4px 14px rgb(26 43 74 / 6%);
     will-change: transform;
 }
 
 .hsbcoffer.products .hsbcoffer-card:where(:hover) {
   transform: translateY(-8px) rotateX(6deg) rotateY(-4deg) scale(1.04);
-    box-shadow: 0 26px 54px rgba(26, 43, 74, 0.24);
+    box-shadow: 0 26px 54px rgb(26 43 74 / 24%);
 }
 
 .hsbcoffer.products .hsbcoffer-card-media img {
