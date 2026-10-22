@@ -166,6 +166,11 @@
   padding: var(--gallery-slide-padding);
 }
 
+/* (until its photo is sized: never at the photo's own, larger size) */
+.gallery-slide:not(.is-ready) {
+  visibility: hidden;
+}
+
 .gallery-slide[data-offset='-1'] {
   translate: -100%;
 }

@@ -142,13 +142,15 @@ export default async function openGallery(images, start = 0, { label, trigger } 
   let zoomed = null;
 
   /**
-   * A slide: the photo, fitted into the slide (never enlarged), with its caption.
+   * A slide: the photo, fitted into the slide (never enlarged), with its caption. It stays hidden
+   * until its photo is sized (see prepare), so a photo never shows at its own, larger size.
    * @param {number} i
    * @returns {HTMLElement}
    */
   const buildSlide = (i) => {
     const photo = photos[i];
     const slide = el('figure', 'gallery-slide');
+    slide.dataset.photo = i;
     const content = el('div', 'gallery-content');
     const img = el('img', 'gallery-image');
     img.src = photo.src;
@@ -160,7 +162,7 @@ export default async function openGallery(images, start = 0, { label, trigger } 
     return slide;
   };
   /**
-   * Sizes a slide's photo to fit the room left beside its caption.
+   * Sizes a slide's photo to fit the room left beside its caption, and shows the slide.
    * @param {HTMLElement} slide
    */
   const fit = (slide) => {
@@ -175,6 +177,21 @@ export default async function openGallery(images, start = 0, { label, trigger } 
     const scale = Math.min(1, width / img.naturalWidth, height / img.naturalHeight);
     img.style.width = `${Math.floor(img.naturalWidth * scale)}px`;
     img.style.height = `${Math.floor(img.naturalHeight * scale)}px`;
+    slide.classList.add('is-ready');
+  };
+  /**
+   * Sizes a slide (in the track) as soon as its photo's size is known: straight away when it's
+   * loaded (before the next paint), else when it loads (a photo that fails shows its text).
+   * @param {HTMLElement} slide
+   */
+  const prepare = (slide) => {
+    const img = slide.querySelector('.gallery-image');
+    if (img.complete && img.naturalWidth) {
+      fit(slide);
+      return;
+    }
+    img.addEventListener('load', () => fit(slide), { once: true });
+    img.addEventListener('error', () => slide.classList.add('is-ready'), { once: true });
   };
   const slideAt = (offset) => track.querySelector(`[data-offset="${offset}"]`);
 
@@ -192,20 +209,49 @@ export default async function openGallery(images, start = 0, { label, trigger } 
     strip.style.transform = `translateX(${x}px)`;
   };
 
-  /** Draws the photo and its neighbours, and the counter, thumbnails and announcement. */
-  const render = () => {
+  /** The photo back to fit (no animation), e.g. before moving to another one. */
+  const unzoom = () => {
+    if (!zoomed) return;
+    const { img } = zoomed;
+    img.style.transition = 'none';
+    img.style.transform = '';
+    img.classList.remove('is-zoomed');
+    img.getBoundingClientRect();
+    img.style.transition = '';
     zoomed = null;
     setZoomButton(false);
-    const offsets = several ? [-1, 0, 1] : [0];
-    track.replaceChildren(...offsets.map((offset) => {
-      const slide = buildSlide(wrap(index + offset));
+  };
+
+  /**
+   * Puts the photo and its neighbours in place, keeping the slides already there: `shown` (the
+   * slide that's on screen, e.g. the one that just slid in) stays as it is, so nothing visible is
+   * redrawn; only a missing neighbour is built (off screen, where it loads and is sized before it
+   * slides in). Then the counter, thumbnails and announcement follow.
+   * @param {HTMLElement} [shown]
+   */
+  const arrange = (shown) => {
+    const pool = [...track.children].filter((slide) => slide !== shown);
+    const take = (photo) => {
+      const found = pool.find((slide) => Number(slide.dataset.photo) === photo);
+      if (found) pool.splice(pool.indexOf(found), 1);
+      return found;
+    };
+    const offsets = several ? [0, -1, 1] : [0];
+    const placed = offsets.map((offset) => {
+      const photo = wrap(index + offset);
+      const slide = (offset === 0 && shown) || take(photo) || buildSlide(photo);
       slide.dataset.offset = offset;
       slide.inert = offset !== 0;
-      const img = slide.querySelector('img');
-      if (img.complete) requestAnimationFrame(() => fit(slide));
-      else img.addEventListener('load', () => fit(slide), { once: true });
       return slide;
-    }));
+    });
+    pool.forEach((slide) => slide.remove());
+    placed.forEach((slide) => {
+      if (!slide.isConnected) {
+        track.append(slide);
+        prepare(slide);
+      }
+    });
+    // (the slides' new places and the track's reset land in the same frame: nothing moves)
     track.style.transition = 'none';
     track.style.transform = '';
     current.textContent = String(index + 1);
@@ -241,8 +287,8 @@ export default async function openGallery(images, start = 0, { label, trigger } 
   };
 
   /**
-   * Moves to a photo: its neighbour slides in (any other is drawn beside first); with reduced
-   * motion it just changes.
+   * Moves to a photo: its neighbour slides in (any other is put in the neighbour's place first);
+   * with reduced motion it just changes.
    * @param {number} target
    */
   const go = (target) => {
@@ -250,23 +296,23 @@ export default async function openGallery(images, start = 0, { label, trigger } 
     const to = wrap(target);
     if (to === index) return;
     const offset = target > index ? 1 : -1;
+    unzoom();
     // a jump (a thumbnail): that photo takes the neighbour's place
-    const neighbour = slideAt(offset);
-    if (wrap(index + offset) !== to) {
+    let incoming = slideAt(offset);
+    if (Number(incoming.dataset.photo) !== to) {
       const slide = buildSlide(to);
       slide.dataset.offset = offset;
       slide.inert = true;
-      neighbour.replaceWith(slide);
-      const img = slide.querySelector('img');
-      if (img.complete) fit(slide);
-      else img.addEventListener('load', () => fit(slide), { once: true });
+      incoming.replaceWith(slide);
+      prepare(slide);
+      incoming = slide;
     }
     // (the slideshow's next photo is due a full interval after this one starts to show)
     if (playing()) runTimer();
     const done = () => {
       moving = false;
       index = to;
-      render();
+      arrange(incoming);
     };
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       done();
@@ -428,8 +474,8 @@ export default async function openGallery(images, start = 0, { label, trigger } 
   stage.addEventListener('pointercancel', endDrag);
 
   const resize = new ResizeObserver(() => {
+    unzoom();
     track.querySelectorAll('.gallery-slide').forEach(fit);
-    if (zoomed) toggleZoom();
     placeThumbs();
   });
   dialog.addEventListener('close', () => {
@@ -446,7 +492,7 @@ export default async function openGallery(images, start = 0, { label, trigger } 
   // (the keys work straight away; Tab goes on to the toolbar)
   dialog.tabIndex = -1;
   dialog.focus();
-  render();
+  arrange();
   resize.observe(stage);
   return dialog;
 }
