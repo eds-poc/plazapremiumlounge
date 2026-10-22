@@ -355,7 +355,7 @@
   --title-fluid-size: clamp(26px, 6vw, 38px);
   --title-fluid-max: 840px;
   --title-fluid-gap: 14px;
-  --title-fluid-weight: 600;
+  --title-fluid-weight: var(--font-weight-medium);
   --title-fluid-line-height: 1.25;
 }
 
@@ -376,7 +376,7 @@
 .title.highlight {
   --title-highlight-size: clamp(16px, 3.2vw, 22px);
   --title-highlight-max: 820px;
-  --title-highlight-weight: 600;
+  --title-highlight-weight: var(--font-weight-medium);
   --title-highlight-bg: #fdf3e3;
   --title-highlight-color: #7c0040;
   --title-highlight-pad: calc(2 * var(--spacing-1)) var(--spacing-5);
