@@ -279,15 +279,28 @@ function buildControls(state, onChange) {
   search.setAttribute('aria-label', translate('passFinderSearch'));
   search.value = state.search;
   search.autocomplete = 'off';
+  const clear = el('button', 'pass-finder-search-clear', '×');
+  clear.type = 'button';
+  clear.setAttribute('aria-label', translate('passFinderClearSearch'));
+  clear.hidden = !state.search;
   let timer;
   search.addEventListener('input', () => {
+    clear.hidden = !search.value;
     clearTimeout(timer);
     timer = setTimeout(() => {
       state.search = search.value;
       onChange('search');
     }, SEARCH_DELAY_MS);
   });
-  searchBox.append(search);
+  clear.addEventListener('click', () => {
+    clearTimeout(timer);
+    search.value = '';
+    clear.hidden = true;
+    search.focus();
+    state.search = '';
+    onChange('search');
+  });
+  searchBox.append(search, clear);
 
   // the region: a button opening a list (with its own search), as the source
   const region = el('div', 'pass-finder-region');
@@ -330,6 +343,7 @@ function buildControls(state, onChange) {
     if (panel.hidden) return;
     panel.hidden = true;
     button.setAttribute('aria-expanded', 'false');
+    arrow.textContent = '▼';
     if (refocus) button.focus();
   };
   button.addEventListener('click', () => {
@@ -341,7 +355,7 @@ function buildControls(state, onChange) {
     drawOptions();
     panel.hidden = false;
     button.setAttribute('aria-expanded', 'true');
-    filter.focus();
+    arrow.textContent = '▲';
   });
   filter.addEventListener('input', drawOptions);
   list.addEventListener('click', (e) => {

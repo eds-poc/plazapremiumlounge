@@ -298,6 +298,9 @@ const TEXTS = {
   passFinderMultiCities: {
     en: 'Multi Cities', zh: '多城市', 'zh-HK': '多城市', ja: '複数都市', pt: 'Várias cidades',
   },
+  passFinderClearSearch: {
+    en: 'Clear search', zh: '清除搜索', 'zh-HK': '清除搜尋', ja: '検索をクリア', pt: 'Limpar pesquisa',
+  },
   passFinderSearchLocation: {
     en: 'Search location', zh: '搜索地点', 'zh-HK': '搜尋地點', ja: '場所を検索', pt: 'Pesquisar local',
   },

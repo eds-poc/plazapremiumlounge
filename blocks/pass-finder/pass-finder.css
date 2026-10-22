@@ -39,6 +39,14 @@
   --pass-finder-empty-block: 64px;
   --pass-finder-pager-space: 28px;
   --pass-finder-focus-ring: 2px;
+  --pass-finder-grid-inset: var(--spacing-1);
+  --pass-finder-grid-end: var(--spacing-4);
+  --pass-finder-input-inset: 1px var(--spacing-1);
+  --pass-finder-clear-size: var(--font-size-lg);
+  --pass-finder-button-inset: 1px calc(var(--spacing-3) - var(--spacing-1));
+  --pass-finder-option-inset: calc(var(--spacing-3) + 1px) var(--spacing-4);
+  --pass-finder-check: 14px;
+  --pass-finder-rule-opacity: 0.25;
   --pass-finder-small: 11.5px;
   --pass-finder-note-text: 13px;
   --pass-finder-learn-size: 12.5px;
@@ -114,12 +122,33 @@
   flex: 1;
   min-width: 0;
   height: 100%;
-  padding: 0;
+  padding: var(--pass-finder-input-inset);
   border: 0;
   outline: 0;
   background: transparent;
   color: inherit;
   font: inherit;
+}
+
+.pass-finder-search input::-webkit-search-cancel-button,
+.pass-finder-region-search::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.pass-finder-search-clear {
+  flex: none;
+  padding: var(--pass-finder-button-inset);
+  border: 0;
+  background: transparent;
+  color: var(--pass-finder-intro);
+  font-family: inherit;
+  font-size: var(--pass-finder-clear-size);
+  line-height: var(--line-height-body);
+  cursor: pointer;
+}
+
+.pass-finder-search-clear[hidden] {
+  display: none;
 }
 
 .pass-finder-region {
@@ -140,6 +169,7 @@
 }
 
 .pass-finder-region-panel {
+  box-sizing: border-box;
   position: absolute;
   top: calc(100% + var(--spacing-3));
   right: 0;
@@ -170,8 +200,10 @@
   font-size: var(--font-size-sm);
 }
 
+/* (live's 320px list sits below the search's own line; here the line is the list's top border) */
 .pass-finder-region-list {
-  max-height: var(--pass-finder-region-list-max);
+  box-sizing: border-box;
+  max-height: calc(var(--pass-finder-region-list-max) + var(--base-border-width));
   margin: 0;
   padding: calc(3 * var(--spacing-1));
   overflow-y: auto;
@@ -184,7 +216,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: calc(var(--spacing-3) + var(--spacing-1)) var(--spacing-4);
+  padding: var(--pass-finder-option-inset);
   border: 0;
   border-radius: var(--pass-finder-option-radius);
   background: transparent;
@@ -195,7 +227,6 @@
   cursor: pointer;
 }
 
-.pass-finder-region-option:hover,
 .pass-finder-region-option:focus-visible {
   outline: 0;
   background-color: var(--pass-finder-image-bg);
@@ -209,8 +240,8 @@
 .pass-finder-region-option[aria-pressed='true']::after {
   content: '';
   flex: none;
-  width: var(--spacing-bootstrap-3);
-  height: var(--spacing-bootstrap-3);
+  width: var(--pass-finder-check);
+  height: var(--pass-finder-check);
   background-color: var(--pass-finder-accent);
   mask: url('../../icons/check.svg') center / contain no-repeat;
 }
@@ -259,7 +290,7 @@
   grid-template-columns: 1fr;
   gap: var(--pass-finder-gap);
   margin: 0;
-  padding: 0;
+  padding: var(--pass-finder-grid-inset) var(--pass-finder-grid-inset) var(--pass-finder-grid-end);
   list-style: none;
 }
 
@@ -342,12 +373,12 @@
   line-height: var(--pass-finder-name-line-height);
 }
 
-/* (bold as a whole, as the quick buy's price: one face, so the line is its 22.4px) */
+/* one face for the whole line (the amount's), so the line is live's 22.4px */
 .pass-finder-price {
   margin: 0;
   color: var(--pass-finder-accent);
   font-size: var(--font-size-md);
-  font-weight: var(--font-weight-campaign-bold);
+  font-weight: var(--font-weight-semi-bold);
   line-height: var(--line-height-body);
   white-space: nowrap;
 }
@@ -439,10 +470,11 @@
 .pass-finder-actions::before {
   content: '';
   border-top: var(--base-border-width) dashed var(--pass-finder-line);
+  opacity: var(--pass-finder-rule-opacity);
 }
 
 .pass-finder-learn {
-  align-self: flex-start;
+  align-self: stretch;
   padding: 0;
   border: 0;
   background: none;
@@ -451,6 +483,7 @@
   font-size: var(--pass-finder-learn-size);
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-body);
+  text-align: start;
   text-decoration: underline;
   cursor: pointer;
 }
@@ -520,7 +553,7 @@
 .pass-finder-page {
   min-width: var(--pass-finder-page);
   height: var(--pass-finder-page);
-  padding: 0 var(--spacing-3);
+  padding: var(--pass-finder-button-inset);
   border: var(--pass-finder-field-border) solid var(--pass-finder-line);
   border-radius: var(--pass-finder-button-radius);
   background-color: var(--color-background);
