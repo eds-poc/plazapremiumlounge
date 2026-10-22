@@ -116,8 +116,11 @@ const TEXTS = {
   galleryPhotos: {
     en: 'Photos', zh: '照片', 'zh-HK': '相片', ja: '写真', pt: 'Fotos',
   },
-  galleryZoom: {
-    en: 'Zoom', zh: '缩放', 'zh-HK': '縮放', ja: 'ズーム', pt: 'Zoom',
+  galleryZoomIn: {
+    en: 'Zoom in', zh: '放大', 'zh-HK': '放大', ja: '拡大', pt: 'Ampliar',
+  },
+  galleryZoomOut: {
+    en: 'Zoom out', zh: '缩小', 'zh-HK': '縮小', ja: '縮小', pt: 'Reduzir',
   },
   gallerySlideshowPlay: {
     en: 'Play slideshow', zh: '播放幻灯片', 'zh-HK': '播放幻燈片', ja: 'スライドショーを再生', pt: 'Reproduzir apresentação',

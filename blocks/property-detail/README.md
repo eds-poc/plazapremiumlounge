@@ -23,7 +23,7 @@ folder serves every lounge: `/en-uk/find/lounge`, `/zh-cn/find/lounge`, `/zh-hk/
 - **Plaza Premium First** lounges are green instead of maroon.
 - **Photo gallery** (`scripts/gallery.js`, as the source's Fancybox): a photo (desktop) or a tap
   on the slider (phones) opens all the lounge's photos at that one, over a dark backdrop.
-  - The toolbar: the counter ("2 / 7"), then zoom (to the photo's full size; a click on the photo
+  - The toolbar: the counter ("2 / 7"), then zoom (+ to the photo's full size, − back; a click on the photo
     zooms too, and a zoomed photo can be dragged), slideshow (a photo every 3 seconds with a
     progress bar, looping; the button pauses it), full screen (where the browser allows it),
     thumbnails (shows or hides the strip at the foot) and close.

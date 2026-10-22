@@ -15,7 +15,8 @@ const CLOSE_DRAG_PX = 120;
 
 // the toolbar's icons, drawn as the source's (24×24, stroked)
 const ICONS = {
-  zoom: '<circle cx="10" cy="10" r="7"/><path d="M16 16l5 5"/>',
+  zoomIn: '<circle cx="10" cy="10" r="7"/><path d="M16 16l5 5M7 10h6M10 7v6"/>',
+  zoomOut: '<circle cx="10" cy="10" r="7"/><path d="M16 16l5 5M7 10h6"/>',
   play: '<path d="M6 4v16M20 12L6 20M20 12L6 4"/>',
   pause: '<path d="M7 4v15M17 4v15"/>',
   fullscreen: '<path d="M3 8V3h5M21 8V3h-5M8 21H3v-5M16 21h5v-5"/>',
@@ -81,8 +82,18 @@ export default async function openGallery(images, start = 0, { label, trigger } 
   const current = el('span');
   counter.append(current, ' / ', el('span', '', String(count)));
   const tools = el('div', 'gallery-tools');
-  const zoom = iconButton('gallery-zoom', 'zoom', translate('galleryZoom'));
-  zoom.setAttribute('aria-pressed', 'false');
+  const zoom = iconButton('gallery-zoom', 'zoomIn', translate('galleryZoomIn'));
+  /**
+   * The zoom button as what it does next: zoom in (+) while the photo fits, zoom out (−) once
+   * it's zoomed.
+   * @param {boolean} on The photo is zoomed
+   */
+  const setZoomButton = (on) => {
+    const name = translate(on ? 'galleryZoomOut' : 'galleryZoomIn');
+    zoom.setAttribute('aria-label', name);
+    zoom.title = name;
+    zoom.querySelector('svg').innerHTML = ICONS[on ? 'zoomOut' : 'zoomIn'];
+  };
   const slideshow = iconButton('gallery-slideshow', 'play', translate('gallerySlideshowPlay'));
   const fullscreen = iconButton('gallery-fullscreen', 'fullscreen', translate('galleryFullscreen'));
   const thumbsToggle = iconButton('gallery-thumbs-toggle', 'thumbs', translate('galleryThumbs'));
@@ -184,7 +195,7 @@ export default async function openGallery(images, start = 0, { label, trigger } 
   /** Draws the photo and its neighbours, and the counter, thumbnails and announcement. */
   const render = () => {
     zoomed = null;
-    zoom.setAttribute('aria-pressed', 'false');
+    setZoomButton(false);
     const offsets = several ? [-1, 0, 1] : [0];
     track.replaceChildren(...offsets.map((offset) => {
       const slide = buildSlide(wrap(index + offset));
@@ -283,7 +294,7 @@ export default async function openGallery(images, start = 0, { label, trigger } 
       zoomed = null;
       img.style.transform = '';
       img.classList.remove('is-zoomed');
-      zoom.setAttribute('aria-pressed', 'false');
+      setZoomButton(false);
       return;
     }
     const scale = img.naturalWidth / img.offsetWidth;
@@ -297,7 +308,7 @@ export default async function openGallery(images, start = 0, { label, trigger } 
     // eslint-disable-next-line no-use-before-define
     pan(0, 0);
     img.classList.add('is-zoomed');
-    zoom.setAttribute('aria-pressed', 'true');
+    setZoomButton(true);
   };
   /**
    * Moves the zoomed photo, never past its edges.
