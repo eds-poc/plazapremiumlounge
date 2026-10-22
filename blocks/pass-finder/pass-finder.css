@@ -14,9 +14,6 @@
   --pass-finder-disabled: #c9a3ac;
   --pass-finder-places-line: #f0d9c8;
   --pass-finder-places-bg: #fdf0e8;
-  --pass-finder-special-line: #e8cfa0;
-  --pass-finder-special-bg: #fdf3e3;
-  --pass-finder-special-ink: #7a5a1e;
   --pass-finder-shadow: 0 2px 14px rgb(83 14 42 / 6%);
   --pass-finder-panel-shadow: 0 12px 32px rgb(83 14 42 / 16%);
   --pass-finder-panel-padding: 28px 24px;
@@ -402,22 +399,11 @@
   padding: var(--spacing-2) var(--spacing-3);
   border: var(--base-border-width) solid;
   border-radius: calc(3 * var(--spacing-1));
-  font-size: var(--pass-finder-note-text);
-  line-height: var(--line-height-body);
-}
-
-/* a pass valid in several places: maroon on blush */
-.pass-finder-note-places {
   border-color: var(--pass-finder-places-line);
   background-color: var(--pass-finder-places-bg);
   color: var(--color-brand-primary-action);
-}
-
-/* a pass's own note: gold on cream */
-.pass-finder-note-special {
-  border-color: var(--pass-finder-special-line);
-  background-color: var(--pass-finder-special-bg);
-  color: var(--pass-finder-special-ink);
+  font-size: var(--pass-finder-note-text);
+  line-height: var(--line-height-body);
 }
 
 .pass-finder-note-icon {

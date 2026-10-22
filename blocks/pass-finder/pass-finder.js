@@ -11,7 +11,6 @@ const PAGE_SIZE = 9;
 const MAX_TAGS = 4;
 const MAX_PLACES = 4;
 const ADD_TO_CART = 'pass-finder:add-to-cart';
-const PRODUCT_CODE = /^[A-Z0-9]+$/;
 const HEADINGS = 'h1, h2, h3, h4, h5, h6';
 const ALL = 'All';
 const MULTI = 'Multi Cities';
@@ -20,33 +19,22 @@ const SEARCH_DELAY_MS = 150;
 let count = 0;
 
 /**
- * The authored rows: an optional header row (a heading and intro), `hide | PRD…, PRD…` (passes to
- * leave out) and `PRD… | note` rows (a pass's own note, shown instead of its locations note).
+ * The authored row: an optional heading and intro. The passes and everything on them come from
+ * the passes service.
  * @param {Element} block
- * @returns {{header: Node[], hidden: Set<string>, notes: Map<string, string>, skipped: string[]}}
+ * @returns {{header: Node[], skipped: string[]}}
  */
 function readRows(block) {
   const header = [];
-  const hidden = new Set();
-  const notes = new Map();
   const skipped = [];
   [...block.children].forEach((row) => {
-    const [first, second] = row.children;
-    const key = (first?.textContent || '').trim();
-    const value = (second?.textContent || '').trim();
-    if (/^hide$/i.test(key)) {
-      value.toUpperCase().split(/[\s,;]+/).filter((code) => PRODUCT_CODE.test(code)).forEach((code) => hidden.add(code));
-    } else if (PRODUCT_CODE.test(key.toUpperCase()) && value) {
-      notes.set(key.toUpperCase(), value);
-    } else if (!header.length && row.querySelector(HEADINGS)) {
+    if (!header.length && row.querySelector(HEADINGS)) {
       [...row.children].forEach((cell) => header.push(...cell.childNodes));
     } else if (row.textContent.trim()) {
       skipped.push(row.textContent.trim().slice(0, 40));
     }
   });
-  return {
-    header, hidden, notes, skipped,
-  };
+  return { header, skipped };
 }
 
 /**
@@ -98,18 +86,16 @@ function joinPlaces(places) {
 }
 
 /**
- * The note on a card, as the source: the pass's own note when the page has one, else for a pass
- * valid in several places, "One visit each at …" (a visit per place) or "Access lounges across …".
+ * The note on a card for a pass valid in several places, as the source: "One visit each at …" (a
+ * visit per place) or "Access lounges across …".
  * @param {Object} pass See readPass
- * @param {Map<string, string>} notes
- * @returns {{text: string, kind: string}|null}
+ * @returns {string}
  */
-function readNote(pass, notes) {
-  if (notes.has(pass.code)) return { text: notes.get(pass.code), kind: 'special' };
-  if (pass.locations.length < 2) return null;
+function readNote(pass) {
+  if (pass.locations.length < 2) return '';
   const places = joinPlaces(pass.locations.map(locationName));
   const key = pass.locations.length === pass.visits ? 'passFinderOneEach' : 'passFinderAcross';
-  return { text: translate(key, { places }), kind: 'places' };
+  return translate(key, { places });
 }
 
 /**
@@ -208,8 +194,8 @@ function buildCard(pass, note, bestValue) {
     body.append(tags);
   }
   if (note) {
-    const line = el('p', `pass-finder-note pass-finder-note-${note.kind}`);
-    line.append(icon(note.kind === 'special' ? 'sparkle' : 'pin-line', '', 'pass-finder-note-icon'), el('span', '', note.text));
+    const line = el('p', 'pass-finder-note');
+    line.append(icon('pin-line', '', 'pass-finder-note-icon'), el('span', '', note));
     body.append(line);
   }
   const actions = el('div', 'pass-finder-actions');
@@ -414,18 +400,17 @@ function buildControls(state, onChange) {
 /**
  * Decorates the pass finder block: every lounge pass from the passes service, with the source
  * Lounge Passes page's search, region and sort (kept in the page address), cards and pages of
- * nine. The page authors the heading and intro, passes to hide and passes' own notes; the property
- * and airport codes come from the page metadata (see getApiContext), the currency from the page
- * address (else USD). The passes list is the same as the quick buy's (one call, kept for the
- * session).
+ * nine. Every pass the service lists is shown as it gives it; the page authors only the heading and
+ * intro. The property and airport codes come from the page metadata (see getApiContext), the
+ * currency from the page address (else USD). The passes list is the same as the quick buy's (one
+ * call, kept for the session).
  * @param {Element} block
  */
 export default function decorate(block) {
-  const {
-    header, hidden, notes, skipped,
-  } = readRows(block);
+  const { header, skipped } = readRows(block);
   const context = getApiContext();
-  const hints = skipped.map((text) => `A row that isn't a heading, hide or a pass's note was left out: "${text}".`);
+  const leftOut = 'A row that isn\'t the heading was left out (the passes come from the service)';
+  const hints = skipped.map((text) => `${leftOut}: "${text}".`);
   block.replaceChildren();
   if (header.length) {
     const head = el('div', 'pass-finder-header');
@@ -466,7 +451,7 @@ export default function decorate(block) {
     controls.count.textContent = chosen.length === 1
       ? translate('passFinderFoundOne') : translate('passFinderFound', { count: chosen.length });
     const onPage = chosen.slice((state.page - 1) * PAGE_SIZE, state.page * PAGE_SIZE);
-    const card = (pass) => buildCard(pass, readNote(pass, notes), perVisit(pass) === best);
+    const card = (pass) => buildCard(pass, readNote(pass), perVisit(pass) === best);
     grid.replaceChildren(...onPage.map(card));
     grid.hidden = !chosen.length;
     empty.hidden = !!chosen.length;
@@ -522,7 +507,6 @@ export default function decorate(block) {
    */
   const show = (list) => {
     const next = [...list.values()]
-      .filter((item) => !hidden.has(item.productCode))
       .map(readPass)
       .filter(Boolean)
       .map((pass, index) => ({ ...pass, index }));
@@ -547,10 +531,9 @@ export default function decorate(block) {
     fetchPassList(context, readCurrency(), PASSES_TIMEOUT_MS)
       .then((list) => {
         show(list);
-        const unknown = [...hidden, ...notes.keys()].filter((code) => !list.has(code));
-        if (unknown.length && isPreview()) {
+        if (hints.length && isPreview()) {
           const note = el('div');
-          showMessage(note, '', null, [...hints, `Not in the passes service: ${unknown.join(', ')}.`]);
+          showMessage(note, '', null, hints);
           results.append(note.firstChild);
         }
       })
