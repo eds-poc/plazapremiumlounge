@@ -268,6 +268,7 @@ function slimPass(item) {
     productCode: item.productCode,
     productDisplayName: item.productDisplayName,
     productName: item.productName,
+    productSeq: item.productSeq,
     images: (item.images || []).slice(0, 1).map((image) => ({ path: image?.path })),
     numberOfVisits: item.numberOfVisits,
     accuralPoints: item.accuralPoints,

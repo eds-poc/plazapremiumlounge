@@ -1,40 +1,15 @@
 import { translate } from '../../scripts/i18n.js';
-import { openModal } from '../../scripts/modal-dialog.js';
 import {
-  el, fetchPass, fetchPassList, getApiContext, isPreview, readPassList, safeHtml,
+  PASSES_TIMEOUT_MS as TIMEOUT_MS, addToCart, buildPoints, formatPrice, icon, openPassDetails,
+  readCurrency, readPass,
+} from '../../scripts/passes.js';
+import {
+  el, fetchPass, fetchPassList, getApiContext, isPreview, readPassList,
 } from '../../scripts/properties.js';
 
-// the passes service answers in about 5-7s
-const TIMEOUT_MS = 30000;
-const DEFAULT_CURRENCY = 'USD';
+const ADD_TO_CART = 'quick-buy:add-to-cart';
 const PRODUCT_CODE = /^[A-Z0-9]+$/;
 const HEADINGS = 'h1, h2, h3, h4, h5, h6';
-
-/**
- * The currency for the prices, as the lounge pages: the page address's `currency` when it's a
- * 3-letter code, else USD.
- * @returns {string}
- */
-function readCurrency() {
-  const value = (new URLSearchParams(window.location.search).get('currency') || '').trim().toUpperCase();
-  return /^[A-Z]{3}$/.test(value) ? value : DEFAULT_CURRENCY;
-}
-
-/**
- * An icon from /icons as an image.
- * @param {string} name
- * @param {string} alt
- * @param {string} className
- * @returns {HTMLImageElement}
- */
-function icon(name, alt, className) {
-  const img = el('img', className);
-  img.src = `${window.hlx.codeBasePath}/icons/${name}.svg`;
-  img.alt = alt;
-  img.width = 17;
-  img.height = 17;
-  return img;
-}
 
 /**
  * The authored rows: an optional header row (a heading and intro, no product code) and one row
@@ -70,148 +45,6 @@ function readRows(block) {
     }
   });
   return { header, products, skipped };
-}
-
-/**
- * A price as the source writes it, e.g. "USD 99.00".
- * @param {number} amount
- * @param {string} currency
- * @returns {string}
- */
-function formatPrice(amount, currency) {
-  return `${currency} ${amount.toFixed(2)}`;
-}
-
-/**
- * The pass's data the cards show, from the service's item.
- * @param {Object} item
- * @returns {Object|null} null without a usable price
- */
-function readPass(item) {
-  const price = (item.prices || []).find((p) => Number.isFinite(Number(p?.totalPrice)));
-  if (!price) return null;
-  const total = Number(price.totalPrice);
-  const visits = Number(item.numberOfVisits) || 0;
-  const currency = (price.baseRate?.[0]?.currency || '').trim();
-  return {
-    code: item.productCode,
-    name: (item.productDisplayName || item.productName || '').trim(),
-    image: (item.images || []).map((i) => i?.path).find((path) => /^https?:/.test(path || '')) || '',
-    total,
-    perVisit: visits > 1 ? total / visits : null,
-    currency,
-    points: (item.accuralPoints || '').trim(),
-    description: item.productDescription || '',
-    locations: (item.eligibleLocations || []).map((l) => String(l).trim()).filter(Boolean),
-    catalogueCode: price.catalogueCode || '',
-  };
-}
-
-/**
- * The points line as the source shows it: "+150 ST Points" with ST as the Smart Traveller icon.
- * @param {string} text
- * @param {string} className
- * @returns {HTMLElement}
- */
-function buildPoints(text, className) {
-  const line = el('p', className);
-  const [before, after] = text.split(/\bST\b/);
-  if (after === undefined) {
-    line.textContent = text;
-    return line;
-  }
-  line.append(before, icon('st-points', 'ST', `${className}-icon`), after);
-  return line;
-}
-
-/**
- * The description as safe content; list items the service sent without their list get one.
- * @param {string} html
- * @returns {DocumentFragment}
- */
-function buildDescription(html) {
-  const content = safeHtml(html, { blocks: true });
-  let list = null;
-  [...content.childNodes].forEach((node) => {
-    if (node.nodeName === 'LI') {
-      if (!list) {
-        list = el('ul');
-        node.before(list);
-      }
-      list.append(node);
-    } else if (node.nodeType !== Node.TEXT_NODE || node.textContent.trim()) list = null;
-  });
-  return content;
-}
-
-/**
- * Announces Add to Cart: there's no cart on this site yet, so the choice (and what the source's
- * cart needs, the catalogue code) goes out as a `quick-buy:add-to-cart` event for the hand-off.
- * @param {HTMLElement} from
- * @param {Object} pass
- */
-function addToCart(from, pass) {
-  from.dispatchEvent(new CustomEvent('quick-buy:add-to-cart', {
-    bubbles: true,
-    detail: {
-      productCode: pass.code,
-      catalogueCode: pass.catalogueCode,
-      name: pass.name,
-      price: pass.total,
-      currency: pass.currency,
-    },
-  }));
-}
-
-/**
- * The Learn more pop-up, as the source's pass pop-up: the image, the name and where it's valid,
- * the price and points, the location tag, the description and Add to Cart.
- * @param {Object} pass
- * @param {HTMLElement} trigger
- */
-function openDetails(pass, trigger) {
-  openModal({
-    key: `quick-buy-${pass.code}-${pass.currency}-${pass.total}-${pass.catalogueCode}`,
-    trigger,
-    content: () => {
-      const location = pass.locations.length
-        ? translate('quickBuyLocation', { location: pass.locations.join(', ') }) : '';
-      const title = el('h2', '', pass.name);
-      const media = el('div', 'quick-buy-modal-media');
-      if (pass.image) {
-        const img = el('img');
-        img.src = pass.image;
-        img.alt = '';
-        media.append(img);
-      }
-      const info = el('div', 'quick-buy-modal-info');
-      const head = el('div', 'quick-buy-modal-head');
-      const naming = el('div', 'quick-buy-modal-naming');
-      // (the visible name; the dialog's title is the same text, for screen readers)
-      naming.append(el('p', 'quick-buy-modal-name', pass.name));
-      if (location) naming.append(el('p', 'quick-buy-modal-location', location));
-      const pricing = el('div', 'quick-buy-modal-pricing');
-      pricing.append(el('p', 'quick-buy-modal-price', formatPrice(pass.total, pass.currency)));
-      // (the pop-up shows the icon before the whole text, as the source's)
-      if (pass.points) {
-        const points = el('p', 'quick-buy-modal-points');
-        points.append(icon('st-points', '', 'quick-buy-modal-points-icon'), ` ${pass.points}`);
-        pricing.append(points);
-      }
-      head.append(naming, pricing);
-      info.append(head, el('hr', 'quick-buy-modal-rule'));
-      if (location) info.append(el('p', 'quick-buy-modal-tag', location));
-      const description = el('div', 'quick-buy-modal-description');
-      description.append(buildDescription(pass.description));
-      const add = el('button', 'button primary quick-buy-modal-add', translate('quickBuyAddToCart'));
-      add.type = 'button';
-      add.addEventListener('click', () => addToCart(add, pass));
-      info.append(description, add);
-      const nodes = [title, media, info];
-      nodes.styles = ['quick-buy-modal'];
-      return nodes;
-    },
-  });
 }
 
 /**
@@ -280,11 +113,11 @@ function buildCard(product) {
     learn.type = 'button';
     learn.setAttribute('aria-haspopup', 'dialog');
     learn.setAttribute('aria-label', `${translate('quickBuyLearnMore')}: ${pass.name}`);
-    learn.addEventListener('click', () => openDetails(pass, learn));
+    learn.addEventListener('click', () => openPassDetails(pass, learn, ADD_TO_CART));
     const add = el('button', 'quick-buy-add', translate('quickBuyAddToCart'));
     add.type = 'button';
     add.setAttribute('aria-label', `${translate('quickBuyAddToCart')}: ${pass.name}`);
-    add.addEventListener('click', () => addToCart(add, pass));
+    add.addEventListener('click', () => addToCart(add, pass, ADD_TO_CART));
     actions.append(learn, add);
     card.removeAttribute('aria-busy');
   };

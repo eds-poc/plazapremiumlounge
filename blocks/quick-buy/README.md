@@ -30,6 +30,8 @@ so it's always current.
 - **Each card:** the tag, the pass image, the name, the price and the price per visit (e.g.
   "USD 99.00 (USD 49.50/Visit)"), the Smart Traveller points ("+150 ST Points", ST as its icon),
   the Best for lines, **Learn more** and **Add to Cart**.
+- **Price:** the pass's regular rate (a pass can have several; member and partner rates are
+  passed over), the first one still in stock.
 - **While the passes load** (the service takes a few seconds), the cards show the tags and Best
   for lines, with quiet bars for the rest; nothing moves when the passes arrive.
 - **Loading:** one call to the passes service brings all the passes (it takes one product code
