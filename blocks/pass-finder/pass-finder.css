@@ -292,7 +292,10 @@
   white-space: nowrap;
 }
 
+/* one image shape for every card (the service's images differ: 600x390, 902x569, 1600x800…),
+   each filling it from the centre */
 .pass-finder-media {
+  aspect-ratio: var(--pass-finder-image-ratio);
   overflow: hidden;
   border-radius: calc(var(--pass-finder-card-radius) - var(--base-border-width))
     calc(var(--pass-finder-card-radius) - var(--base-border-width)) 0 0;
@@ -303,7 +306,8 @@
 .pass-finder-media img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
 }
 
 .pass-finder-body {
@@ -455,10 +459,6 @@
 }
 
 /* while the passes load: quiet placeholder cards */
-.pass-finder-placeholder .pass-finder-media {
-  aspect-ratio: var(--pass-finder-image-ratio);
-}
-
 .pass-finder-bar {
   display: block;
   width: 70%;
