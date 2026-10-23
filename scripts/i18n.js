@@ -266,6 +266,101 @@ const TEXTS = {
   propertyServicesError: {
     en: 'We couldn’t load the services.', zh: '无法加载服务。', 'zh-HK': '無法載入服務。', ja: 'サービスを読み込めませんでした。', pt: 'Não foi possível carregar os serviços.',
   },
+  // the quick buy passes (the source's wording in English)
+  quickBuyBestFor: {
+    en: 'Best for', zh: '适合', 'zh-HK': '適合', ja: 'おすすめ', pt: 'Ideal para',
+  },
+  quickBuyPerVisit: {
+    en: '/Visit', zh: '/次', 'zh-HK': '/次', ja: '/回', pt: '/Visita',
+  },
+  quickBuyLearnMore: {
+    en: 'Learn more', zh: '了解更多', 'zh-HK': '了解更多', ja: '詳細を見る', pt: 'Saiba mais',
+  },
+  quickBuyAddToCart: {
+    en: 'Add to Cart', zh: '加入购物车', 'zh-HK': '加入購物車', ja: 'カートに追加', pt: 'Adicionar ao carrinho',
+  },
+  quickBuyLocation: {
+    en: '{location} Plaza Premium Lounge', zh: '{location} 环亚机场贵宾室', 'zh-HK': '{location} 環亞機場貴賓室', ja: '{location} プラザプレミアムラウンジ', pt: '{location} Plaza Premium Lounge',
+  },
+  quickBuyError: {
+    en: 'We couldn’t load the passes.', zh: '无法加载贵宾室通行证。', 'zh-HK': '無法載入貴賓室通行證。', ja: 'パスを読み込めませんでした。', pt: 'Não foi possível carregar os passes.',
+  },
+  // the pass finder (the source's wording in English)
+  passFinderSearch: {
+    en: 'Search by pass name or location', zh: '按通行证名称或地点搜索', 'zh-HK': '按通行證名稱或地點搜尋', ja: 'パス名または場所で検索', pt: 'Pesquise por nome do passe ou local',
+  },
+  passFinderRegion: {
+    en: 'Region', zh: '地区', 'zh-HK': '地區', ja: '地域', pt: 'Região',
+  },
+  passFinderAll: {
+    en: 'All', zh: '全部', 'zh-HK': '全部', ja: 'すべて', pt: 'Todos',
+  },
+  passFinderMultiCities: {
+    en: 'Multi Cities', zh: '多城市', 'zh-HK': '多城市', ja: '複数都市', pt: 'Várias cidades',
+  },
+  passFinderClearSearch: {
+    en: 'Clear search', zh: '清除搜索', 'zh-HK': '清除搜尋', ja: '検索をクリア', pt: 'Limpar pesquisa',
+  },
+  passFinderSearchLocation: {
+    en: 'Search location', zh: '搜索地点', 'zh-HK': '搜尋地點', ja: '場所を検索', pt: 'Pesquisar local',
+  },
+  passFinderFound: {
+    en: '{count} passes found', zh: '找到 {count} 个通行证', 'zh-HK': '找到 {count} 個通行證', ja: '{count} 件のパス', pt: '{count} passes encontrados',
+  },
+  passFinderFoundOne: {
+    en: '1 pass found', zh: '找到 1 个通行证', 'zh-HK': '找到 1 個通行證', ja: '1 件のパス', pt: '1 passe encontrado',
+  },
+  passFinderSortBy: {
+    en: 'Sort by', zh: '排序方式', 'zh-HK': '排序方式', ja: '並べ替え', pt: 'Ordenar por',
+  },
+  passFinderSortRecommended: {
+    en: 'Recommended', zh: '推荐', 'zh-HK': '推薦', ja: 'おすすめ', pt: 'Recomendados',
+  },
+  passFinderSortPriceUp: {
+    en: 'Price: Low to High', zh: '价格：从低到高', 'zh-HK': '價格：由低至高', ja: '価格：安い順', pt: 'Preço: menor para maior',
+  },
+  passFinderSortPriceDown: {
+    en: 'Price: High to Low', zh: '价格：从高到低', 'zh-HK': '價格：由高至低', ja: '価格：高い順', pt: 'Preço: maior para menor',
+  },
+  passFinderBestValue: {
+    en: 'Best Value', zh: '最超值', 'zh-HK': '最超值', ja: 'ベストバリュー', pt: 'Melhor valor',
+  },
+  passFinderMore: {
+    en: '+{count} more', zh: '+{count} 个', 'zh-HK': '+{count} 個', ja: '+{count} 件', pt: '+{count} mais',
+  },
+  passFinderOneEach: {
+    en: 'One visit each at {places}', zh: '{places} 各一次', 'zh-HK': '{places} 各一次', ja: '{places} で各1回', pt: 'Uma visita em cada: {places}',
+  },
+  passFinderAcross: {
+    en: 'Access lounges across {places}', zh: '可使用 {places} 的贵宾室', 'zh-HK': '可使用 {places} 的貴賓室', ja: '{places} のラウンジを利用可能', pt: 'Acesso a lounges em {places}',
+  },
+  passFinderAnd: {
+    en: '{list} and {last}', zh: '{list} 和 {last}', 'zh-HK': '{list} 和 {last}', ja: '{list} と {last}', pt: '{list} e {last}',
+  },
+  passFinderMoreRegions: {
+    en: '{count} more regions', zh: '另外 {count} 个地区', 'zh-HK': '另外 {count} 個地區', ja: 'ほか {count} 地域', pt: 'mais {count} regiões',
+  },
+  passFinderMoreRegion: {
+    en: '1 more region', zh: '另外 1 个地区', 'zh-HK': '另外 1 個地區', ja: 'ほか 1 地域', pt: 'mais 1 região',
+  },
+  passFinderEmpty: {
+    en: 'No passes found', zh: '未找到通行证', 'zh-HK': '未找到通行證', ja: 'パスが見つかりません', pt: 'Nenhum passe encontrado',
+  },
+  passFinderEmptyHint: {
+    en: 'Try a different search term or region.', zh: '请尝试其他搜索词或地区。', 'zh-HK': '請嘗試其他搜尋字詞或地區。', ja: '別のキーワードまたは地域でお試しください。', pt: 'Tente outro termo de pesquisa ou região.',
+  },
+  passFinderPages: {
+    en: 'Pages', zh: '页码', 'zh-HK': '頁碼', ja: 'ページ', pt: 'Páginas',
+  },
+  passFinderPrevious: {
+    en: 'Previous page', zh: '上一页', 'zh-HK': '上一頁', ja: '前のページ', pt: 'Página anterior',
+  },
+  passFinderNextPage: {
+    en: 'Next page', zh: '下一页', 'zh-HK': '下一頁', ja: '次のページ', pt: 'Próxima página',
+  },
+  passFinderPage: {
+    en: 'Page {n}', zh: '第 {n} 页', 'zh-HK': '第 {n} 頁', ja: '{n} ページ', pt: 'Página {n}',
+  },
   propertyPanelLounge: {
     en: 'The Lounge', zh: '贵宾室', 'zh-HK': '貴賓室', ja: 'ラウンジ', pt: 'O Lounge',
   },

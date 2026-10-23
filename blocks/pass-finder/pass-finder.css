@@ -1,0 +1,638 @@
+/* pass finder: every lounge pass on a white panel, as the source Lounge Passes page's "Explore
+   Regional Passes" (#ppl-regional-passes-card): a centred heading and intro, the search, region
+   and sort, the cards (1 per row on phones, 2 from 560px, 3 from 1000px) and pages of nine.
+   The source's own colours are block variables */
+.pass-finder {
+  --pass-finder-accent: #7c0040;
+  --pass-finder-ink: #2a1017;
+  --pass-finder-muted: #7d6870;
+  --pass-finder-intro: #5c4149;
+  --pass-finder-line: #f2d6d3;
+  --pass-finder-line-strong: #e3d2cf;
+  --pass-finder-more: #e8c9c2;
+  --pass-finder-image-bg: #f7f1ef;
+  --pass-finder-disabled: #c9a3ac;
+  --pass-finder-places-line: #f0d9c8;
+  --pass-finder-places-bg: #fdf0e8;
+  --pass-finder-shadow: 0 2px 14px rgb(83 14 42 / 6%);
+  --pass-finder-panel-shadow: 0 12px 32px rgb(83 14 42 / 16%);
+  --pass-finder-panel-padding: 28px 24px;
+  --pass-finder-panel-inset: var(--spacing-7);
+  --pass-finder-space-above: 24px;
+  --pass-finder-controls-max: 900px;
+  --pass-finder-field-height: 48px;
+  --pass-finder-field-border: 1.5px;
+  --pass-finder-field-radius: 10px;
+  --pass-finder-field-text: 15px;
+  --pass-finder-sort-height: 38px;
+  --pass-finder-sort-text: 13.5px;
+  --pass-finder-region-width: 220px;
+  --pass-finder-region-panel: 280px;
+  --pass-finder-region-list-max: 320px;
+  --pass-finder-region-search: 36px;
+  --pass-finder-card-radius: 12px;
+  --pass-finder-gap: var(--spacing-7);
+  --pass-finder-gap-two: 18px;
+  --pass-finder-badge-rise: 13px;
+  --pass-finder-option-radius: 7px;
+  --pass-finder-tag-inline: 9px;
+  --pass-finder-empty-block: 64px;
+  --pass-finder-pager-space: 28px;
+  --pass-finder-focus-ring: 2px;
+  --pass-finder-grid-inset: var(--spacing-1);
+  --pass-finder-grid-end: var(--spacing-4);
+  --pass-finder-input-inset: 1px var(--spacing-1);
+  --pass-finder-clear-size: var(--font-size-lg);
+  --pass-finder-button-inset: 1px calc(var(--spacing-3) - var(--spacing-1));
+  --pass-finder-option-inset: calc(var(--spacing-3) + 1px) var(--spacing-4);
+  --pass-finder-check: 14px;
+  --pass-finder-rule-opacity: 0.25;
+  --pass-finder-small: 11.5px;
+  --pass-finder-note-text: 13px;
+  --pass-finder-learn-size: 12.5px;
+  --pass-finder-button-height: 40px;
+  --pass-finder-button-size: 13.5px;
+  --pass-finder-button-radius: 8px;
+  --pass-finder-name-line-height: 1.25;
+  --pass-finder-icon: 17px;
+  --pass-finder-note-icon: 13px;
+  --pass-finder-page: 40px;
+  --pass-finder-image-ratio: 39 / 25;
+  --pass-finder-image-radius: calc(var(--pass-finder-card-radius) - var(--base-border-width));
+
+  margin: var(--pass-finder-space-above) var(--pass-finder-panel-inset) var(--spacing-campaign-band-block);
+  padding: var(--pass-finder-panel-padding);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-background);
+  box-shadow: var(--pass-finder-shadow);
+  color: var(--pass-finder-ink);
+}
+
+.pass-finder-header {
+  margin-bottom: var(--spacing-7);
+  text-align: center;
+}
+
+.pass-finder-header .pass-finder-title {
+  margin: 0;
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semi-bold);
+  line-height: var(--line-height-body);
+}
+
+.pass-finder-header p {
+  margin: calc(2 * var(--spacing-1)) 0 0;
+  color: var(--pass-finder-intro);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+/* the search, region and sort */
+.pass-finder-controls {
+  max-width: var(--pass-finder-controls-max);
+  margin: 0 auto var(--spacing-7);
+}
+
+.pass-finder-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+}
+
+.pass-finder-search,
+.pass-finder-region-button {
+  box-sizing: border-box;
+  height: var(--pass-finder-field-height);
+  border: var(--pass-finder-field-border) solid var(--pass-finder-line-strong);
+  border-radius: var(--pass-finder-field-radius);
+  background-color: var(--color-background);
+  color: var(--pass-finder-ink);
+  font-size: var(--pass-finder-field-text);
+}
+
+.pass-finder-search {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  padding: 0 calc(var(--spacing-5) + var(--spacing-1));
+}
+
+.pass-finder-search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: var(--pass-finder-input-inset);
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.pass-finder-search input::-webkit-search-cancel-button,
+.pass-finder-region-search::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.pass-finder-search-clear {
+  flex: none;
+  padding: var(--pass-finder-button-inset);
+  border: 0;
+  background: transparent;
+  color: var(--pass-finder-intro);
+  font-family: inherit;
+  font-size: var(--pass-finder-clear-size);
+  line-height: var(--line-height-body);
+  cursor: pointer;
+}
+
+.pass-finder-search-clear[hidden] {
+  display: none;
+}
+
+.pass-finder-region {
+  position: relative;
+}
+
+.pass-finder-region-button {
+  display: flex;
+  gap: var(--spacing-4);
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 calc(var(--spacing-5) + var(--spacing-1));
+  font-family: inherit;
+  line-height: var(--line-height-body);
+  text-align: start;
+  cursor: pointer;
+}
+
+.pass-finder-region-panel {
+  box-sizing: border-box;
+  position: absolute;
+  top: calc(100% + var(--spacing-3));
+  right: 0;
+  z-index: 40;
+  width: var(--pass-finder-region-panel);
+  max-width: 90vw;
+  overflow: hidden;
+  border: var(--base-border-width) solid var(--pass-finder-line-strong);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-background);
+  box-shadow: var(--pass-finder-panel-shadow);
+}
+
+.pass-finder-region-panel[hidden] {
+  display: none;
+}
+
+.pass-finder-region-search {
+  box-sizing: border-box;
+  display: block;
+  width: calc(100% - 2 * var(--spacing-4));
+  height: var(--pass-finder-region-search);
+  margin: var(--spacing-4);
+  padding: 0 var(--spacing-4);
+  border: var(--base-border-width) solid var(--pass-finder-line-strong);
+  border-radius: var(--pass-finder-button-radius);
+  font: inherit;
+  font-size: var(--font-size-sm);
+}
+
+/* (live's 320px list sits below the search's own line; here the line is the list's top border) */
+.pass-finder-region-list {
+  box-sizing: border-box;
+  max-height: calc(var(--pass-finder-region-list-max) + var(--base-border-width));
+  margin: 0;
+  padding: calc(3 * var(--spacing-1));
+  overflow-y: auto;
+  border-top: var(--base-border-width) solid var(--pass-finder-line);
+  list-style: none;
+}
+
+.pass-finder-region-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--pass-finder-option-inset);
+  border: 0;
+  border-radius: var(--pass-finder-option-radius);
+  background: transparent;
+  color: var(--pass-finder-ink);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  text-align: start;
+  cursor: pointer;
+}
+
+.pass-finder-region-option:focus-visible {
+  outline: 0;
+  background-color: var(--pass-finder-image-bg);
+}
+
+/* the chosen region: tinted, with a check */
+.pass-finder-region-option[aria-pressed='true'] {
+  background-color: var(--pass-finder-line);
+}
+
+.pass-finder-region-option[aria-pressed='true']::after {
+  content: '';
+  flex: none;
+  width: var(--pass-finder-check);
+  height: var(--pass-finder-check);
+  background-color: var(--pass-finder-accent);
+  mask: url('../../icons/check.svg') center / contain no-repeat;
+}
+
+.pass-finder-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-5);
+  align-items: center;
+  justify-content: space-between;
+  margin-top: calc(var(--spacing-5) + var(--spacing-1));
+}
+
+.pass-finder-count {
+  margin: 0;
+  color: var(--pass-finder-intro);
+  font-size: var(--pass-finder-note-text);
+  line-height: var(--line-height-body);
+}
+
+.pass-finder-sort {
+  display: flex;
+  gap: var(--spacing-3);
+  align-items: center;
+}
+
+.pass-finder-sort label {
+  color: var(--pass-finder-intro);
+  font-size: var(--pass-finder-note-text);
+}
+
+.pass-finder-sort select {
+  height: var(--pass-finder-sort-height);
+  padding: 0 var(--spacing-4);
+  border: var(--pass-finder-field-border) solid var(--pass-finder-line-strong);
+  border-radius: var(--pass-finder-button-radius);
+  background-color: var(--color-background);
+  color: var(--pass-finder-ink);
+  font: inherit;
+  font-size: var(--pass-finder-sort-text);
+}
+
+/* the cards */
+.pass-finder-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--pass-finder-gap);
+  margin: 0;
+  padding: var(--pass-finder-grid-inset) var(--pass-finder-grid-inset) var(--pass-finder-grid-end);
+  list-style: none;
+}
+
+.pass-finder-grid[hidden] {
+  display: none;
+}
+
+.pass-finder-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: var(--base-border-width) solid var(--pass-finder-line);
+  border-radius: var(--pass-finder-card-radius);
+  background-color: var(--color-background);
+}
+
+.pass-finder-badge {
+  position: absolute;
+  top: calc(-1 * var(--pass-finder-badge-rise));
+  left: var(--spacing-bootstrap-3);
+  z-index: 2;
+  margin: 0;
+  padding: calc(var(--spacing-3) - var(--spacing-1)) calc(var(--spacing-5) + var(--spacing-1));
+  border-radius: var(--radius-pill);
+  background-color: var(--pass-finder-accent);
+  color: var(--color-text-inverse);
+  font-size: var(--pass-finder-small);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: var(--line-height-body);
+  white-space: nowrap;
+}
+
+/* one image shape for every card (the service's images differ: 600x390, 800x523, 902x569,
+   1600x800…; 39/25 sits between the artwork's shapes), each image rounded on every corner. The
+   frame is tinted only until its image arrives, so artwork's own transparent corners stay clear */
+.pass-finder-media {
+  aspect-ratio: var(--pass-finder-image-ratio);
+  overflow: hidden;
+  border-radius: var(--pass-finder-image-radius);
+  background-color: var(--pass-finder-image-bg);
+  line-height: 0;
+}
+
+.pass-finder-media.is-loaded {
+  background-color: transparent;
+}
+
+.pass-finder-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* card artwork near the frame's shape: shown whole */
+.pass-finder-media img.pass-finder-image-whole {
+  object-fit: fill;
+}
+
+.pass-finder-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding: var(--spacing-5);
+}
+
+.pass-finder-head {
+  display: flex;
+  flex-direction: column;
+  gap: calc(2 * var(--spacing-1));
+}
+
+.pass-finder-name {
+  margin: 0;
+  color: var(--pass-finder-ink);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--pass-finder-name-line-height);
+}
+
+/* one face for the whole line (the amount's), so the line is live's 22.4px */
+.pass-finder-price {
+  margin: 0;
+  color: var(--pass-finder-accent);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semi-bold);
+  line-height: var(--line-height-body);
+  white-space: nowrap;
+}
+
+.pass-finder-price b {
+  font-weight: var(--font-weight-semi-bold);
+}
+
+.pass-finder-per-visit {
+  color: var(--pass-finder-muted);
+  font-size: var(--pass-finder-small);
+  font-weight: var(--font-weight-semi-bold);
+  line-height: 1;
+}
+
+.pass-finder-points {
+  margin: 0;
+  color: var(--pass-finder-muted);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-body);
+  white-space: nowrap;
+}
+
+.pass-finder-points-icon {
+  display: inline-block;
+  width: var(--pass-finder-icon);
+  height: var(--pass-finder-icon);
+  margin: 0 var(--spacing-1);
+  vertical-align: calc(-2 * var(--spacing-1));
+}
+
+.pass-finder-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pass-finder-tag {
+  flex-shrink: 0;
+  padding: calc(2 * var(--spacing-1)) var(--pass-finder-tag-inline);
+  border-radius: var(--radius-pill);
+  background-color: var(--pass-finder-line);
+  color: var(--color-brand-primary);
+  font-size: var(--pass-finder-small);
+  font-weight: var(--font-weight-semi-bold);
+  line-height: var(--line-height-body);
+  white-space: nowrap;
+}
+
+.pass-finder-tag-more {
+  background-color: var(--pass-finder-more);
+  cursor: help;
+}
+
+.pass-finder-note {
+  display: flex;
+  gap: calc(3 * var(--spacing-1));
+  align-items: flex-start;
+  margin: 0;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: var(--base-border-width) solid;
+  border-radius: calc(3 * var(--spacing-1));
+  border-color: var(--pass-finder-places-line);
+  background-color: var(--pass-finder-places-bg);
+  color: var(--color-brand-primary-action);
+  font-size: var(--pass-finder-note-text);
+  line-height: var(--line-height-body);
+}
+
+.pass-finder-note-icon {
+  flex: none;
+  width: var(--pass-finder-note-icon);
+  height: var(--pass-finder-note-icon);
+  margin-top: var(--spacing-1);
+}
+
+/* Learn more and Add to Cart, under a dashed line at the foot of the card */
+.pass-finder-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  margin-top: auto;
+  padding-top: var(--spacing-3);
+}
+
+.pass-finder-actions::before {
+  content: '';
+  border-top: var(--base-border-width) dashed var(--pass-finder-line);
+  opacity: var(--pass-finder-rule-opacity);
+}
+
+.pass-finder-learn {
+  align-self: stretch;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-brand-primary-action);
+  font-family: inherit;
+  font-size: var(--pass-finder-learn-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+  text-align: start;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.pass-finder-add {
+  width: 100%;
+  height: var(--pass-finder-button-height);
+  border: 0;
+  border-radius: var(--pass-finder-button-radius);
+  background-color: var(--pass-finder-accent);
+  color: var(--color-text-inverse);
+  font-family: inherit;
+  font-size: var(--pass-finder-button-size);
+  font-weight: var(--font-weight-semi-bold);
+  cursor: pointer;
+}
+
+/* while the passes load: quiet placeholder cards */
+.pass-finder-bar {
+  display: block;
+  width: 70%;
+  height: 1.1em;
+  border-radius: var(--radius-xs);
+  background-color: var(--pass-finder-image-bg);
+}
+
+.pass-finder-bar-short {
+  width: 40%;
+}
+
+.pass-finder-empty {
+  padding: var(--pass-finder-empty-block) var(--spacing-7);
+  color: var(--color-brand-primary-action);
+  text-align: center;
+}
+
+.pass-finder-empty[hidden] {
+  display: none;
+}
+
+.pass-finder-empty p {
+  margin: 0;
+  color: var(--pass-finder-intro);
+  font-size: var(--font-size-sm);
+}
+
+.pass-finder-empty .pass-finder-empty-title {
+  margin-bottom: calc(3 * var(--spacing-1));
+  color: var(--color-brand-primary-action);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semi-bold);
+}
+
+/* the pages */
+.pass-finder-pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(3 * var(--spacing-1));
+  align-items: center;
+  justify-content: center;
+}
+
+.pass-finder-pager:not(:empty) {
+  margin-top: var(--pass-finder-pager-space);
+}
+
+.pass-finder-page {
+  min-width: var(--pass-finder-page);
+  height: var(--pass-finder-page);
+  padding: var(--pass-finder-button-inset);
+  border: var(--pass-finder-field-border) solid var(--pass-finder-line);
+  border-radius: var(--pass-finder-button-radius);
+  background-color: var(--color-background);
+  color: var(--color-brand-primary-action);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semi-bold);
+  cursor: pointer;
+}
+
+.pass-finder-page-prev,
+.pass-finder-page-next {
+  color: var(--pass-finder-accent);
+}
+
+.pass-finder-page[aria-current='page'] {
+  border-color: var(--pass-finder-accent);
+  background-color: var(--pass-finder-accent);
+  color: var(--color-text-inverse);
+}
+
+.pass-finder-page:disabled {
+  color: var(--pass-finder-disabled);
+  cursor: default;
+}
+
+.pass-finder-message {
+  text-align: center;
+}
+
+.pass-finder-message p {
+  margin: 0 0 var(--spacing-5);
+}
+
+.pass-finder-hint {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* focus: the accent ring */
+.pass-finder-search:focus-within,
+.pass-finder-region-button:focus-visible,
+.pass-finder-sort select:focus-visible {
+  outline: var(--pass-finder-focus-ring) solid var(--pass-finder-accent);
+  outline-offset: calc(var(--pass-finder-focus-ring) / 2);
+}
+
+.pass-finder-learn:focus-visible,
+.pass-finder-add:focus-visible,
+.pass-finder-page:focus-visible {
+  outline: var(--pass-finder-focus-ring) solid var(--pass-finder-accent);
+  outline-offset: var(--pass-finder-focus-ring);
+}
+
+/* breakpoint-exception: the source finder's 2 columns start at 560px */
+@media (width >=560px) {
+  .pass-finder-grid {
+    --pass-finder-gap: var(--pass-finder-gap-two);
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* breakpoint-exception: the source finder's toolbar is one row from 700px */
+@media (width >=700px) {
+  .pass-finder-toolbar {
+    flex-direction: row;
+  }
+
+  .pass-finder-region {
+    min-width: var(--pass-finder-region-width);
+  }
+}
+
+/* breakpoint-exception: the source finder's 3 columns start at 1000px */
+@media (width >=1000px) {
+  .pass-finder-grid {
+    --pass-finder-gap: var(--spacing-7);
+
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

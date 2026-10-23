@@ -14,6 +14,8 @@ const ENDPOINTS = {
   propertyServices: '/api/v1/web/app_demo/GetServices',
   // the price of a service's product for a start time and guests (POST, JSON body)
   propertyPrice: '/api/v1/web/app_demo/GetPrice',
+  // a pass (product) with its prices, for a product code and currency (GET)
+  productPasses: '/api/v1/web/app_demo/GetProductPasses',
 };
 
 /**

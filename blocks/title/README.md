@@ -36,6 +36,8 @@ Add them in brackets after the block name, e.g. `Title (center, compact)`.
 | `center-all` | Centred at every width (`center` is left-aligned on mobile) | Rogers Bank "Exquisite Comfort" |
 | `tagline` | A lead-in: a maroon Georgia heading (22px on mobile up to 30px, growing with the screen), at most 640px wide, 10px above grey 15px Arial text at most 620px wide, as the source shows them. The same at every heading level. Use with `center-all`, in a `panel` band section | West Kowloon offer lead-in |
 | `callout` | A call-to-action header, at most 720px wide and centred: a maroon Georgia heading (20px on mobile up to 26px), 16px above the intro, which sits in a white box with a thin border and 8px corners (16px grey Arial text; **bold** in maroon). The same at every heading level. With the heading only, it has no space below, so a block can follow straight under it (e.g. Responsive Content). Use with `center-all`, in a `panel` band section | West Kowloon offer Smart Traveller redemption |
+| `fluid` | A campaign page title: a maroon heading that grows with the screen, 26px on phones up to 38px (from about 633px), at most 840px wide, 14px above what follows. The same at every heading level. Use with `center-all` | Lounge Passes page title |
+| `highlight` | A lead-in with a highlighted offer: a maroon heading that grows with the screen (16px on phones up to 22px), where the words you make **bold** sit in a cream highlight with rounded corners, a little larger and bolder; then grey 15.5px text. At most 820px wide, 8px above what follows. The same at every heading level. Use with `center-all` | Lounge Passes "Save up to 50% off" |
 | `headline` | A partner campaign section header: a bold navy heading (22px on mobile, 24px from 481px, 28px from 769px) 15px above grey 16px Arial text at most 800px wide, with 30px to what follows (e.g. Cards). The same at every heading level. Use with `center-all`, in a `medium-width` section | CTBC Reward offer "How It Works", "Travel Benefits" |
 
 ### Example: editorial
@@ -60,6 +62,19 @@ page, put it in its own band section after the Planner (`Style` = `inset, band`,
 
 On an offer page, put each in its own band section with `Style` = `inset, band, panel` (`Background`
 = `white` for the lead-in, `mist` for the callout).
+
+### Example: fluid and highlight
+
+| Title (fluid, center-all) |
+| --- |
+| # One pass to unlock your access to global airport lounges |
+
+| Title (highlight, center-all) |
+| --- |
+| ## **Save up to 50% off** walk-in rates with exclusive online-only passes<br>One pass, infinite freedom. Whether you are flying solo or with a small group… |
+
+On the Lounge Passes page they open its grey section (Section Metadata `Background` = `grey`),
+followed by `Image (fixed-height)` and `Cards (icon-list)`.
 
 ### Example: headline
 
