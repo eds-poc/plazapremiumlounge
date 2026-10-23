@@ -369,8 +369,11 @@ export function buildField({
     });
   } else {
     let control;
-    if (type === 'textarea') control = el('textarea', 'form-input form-textarea');
-    else if (CHOICE_TYPES.includes(type)) {
+    if (type === 'textarea') {
+      control = el('textarea', 'form-input form-textarea');
+      // its height in lines of text (`rows: 12`)
+      if (Number(settings.get('rows')) > 0) control.rows = Number(settings.get('rows'));
+    } else if (CHOICE_TYPES.includes(type)) {
       control = el('select', 'form-input form-select');
       control.append(Object.assign(el('option'), { value: '', textContent: settings.get('placeholder') || '' }));
     } else {

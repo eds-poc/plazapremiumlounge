@@ -85,6 +85,48 @@
   line-height: var(--line-height-body);
 }
 
+/* a field with `new column`: two columns of fields, each filled top to bottom, side by side from
+   768px (the source contact form: 64px apart); the button in the right half of the second */
+.custom-form .form-column {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--form-row-gap) var(--form-column-gap);
+  align-content: start;
+}
+
+.custom-form .form-column > * {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+/* option slim: the source contact form sizes, 41px fields with their labels 16px above, and in a
+   second column the checkboxes 20px under the field above and 24px apart, the button 58px below */
+.custom-form.slim .form-fields {
+  --form-input-height: 41px;
+}
+
+.custom-form.slim .form-fields .form-label {
+  margin-bottom: var(--spacing-bootstrap-3);
+}
+
+/* the source text box padding (10px 20px); its checkboxes: see below the maroon option */
+.custom-form.slim .form-fields .form-textarea {
+  padding: var(--spacing-4) var(--spacing-7);
+}
+
+.custom-form.slim .form-column > .form-field-checkbox {
+  margin-top: calc(var(--spacing-stack) - var(--form-row-gap));
+}
+
+.custom-form.slim .form-column > :not(.form-field-checkbox) + .form-field-checkbox {
+  margin-top: calc(var(--spacing-7) - var(--form-row-gap));
+}
+
+.custom-form.slim .form-column > .form-submit {
+  /* one-off: the source's 58px between the last checkbox and the button */
+  margin-top: calc(58px - var(--form-row-gap));
+}
+
 /* options text-left / text-right: the text rows above the first field beside the form (the
    source newsletter band: a 24px/500 heading and a line of copy); stacked, text first, on phones */
 .custom-form .form-intro {
@@ -241,6 +283,11 @@
   color: var(--color-brand-primary);
 }
 
+/* option slim: checkboxes 1px from the top of their text, as the source contact form */
+.custom-form.slim .form-fields :is(.form-field-checkbox, .form-check) .form-check-input {
+  margin-top: 1px;
+}
+
 /* breakpoint-exception: design-system breakpoint (768px), the button fills the width below it;
    the maroon panel has 20px side padding */
 @media (width < 768px) {
@@ -254,8 +301,27 @@
   }
 }
 
-/* breakpoint-exception: the source's col-md-6 (768px), text and form side by side, half each */
+/* breakpoint-exception: the source's col-md-6 (768px), text and form side by side, half each; the
+   two columns of a form side by side, the button in the right half of its column */
 @media (width >= 768px) {
+  .custom-form .form-fields.has-columns {
+    /* one-off: the source contact form's 64px between its columns */
+    column-gap: 64px;
+  }
+
+  .custom-form .form-fields.has-columns > .form-column {
+    grid-column: span 3;
+  }
+
+  .custom-form .form-column > .form-submit {
+    grid-column: 4 / -1;
+  }
+
+  .custom-form .form-column > .form-submit .button {
+    width: 100%;
+    max-width: none;
+  }
+
   .custom-form:is(.text-left, .text-right):has(> .form-intro) {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

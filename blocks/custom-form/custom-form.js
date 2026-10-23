@@ -75,7 +75,9 @@ function showApiErrors(form, data) {
  * `error`, `success`), one-cell rows shown as text, and a `submit` row. Options: two-columns (as
  * the source sign up form: fields half width from 992px), narrow, centered, compact, maroon (the
  * form on a maroon panel, in white), text-left / text-right (the text rows above the first field
- * beside the form, as the source newsletter band). On submit
+ * beside the form, as the source newsletter band), slim (41px fields, labels 16px above, as the
+ * source contact form). A field with `new column` starts a second column (it and the rows after
+ * it, side by side with the first from 768px). On submit
  * every field is checked; a valid form is posted as JSON (keys from each field's `key`) and the
  * visitor goes to the `redirect` page, or sees the error.
  * @param {Element} block The custom form block element
@@ -133,6 +135,8 @@ export default async function decorate(block) {
     const field = buildField({
       label, labelNodes, type, settings: fieldSettings,
     }, { defaultWidth: twoColumns ? 'half' : 'full' });
+    // `new column`: this field and the rows after it fill a second column (the source contact form)
+    if (field && fieldSettings.has('new column')) field.classList.add('new-column');
     if (field) form.append(field);
   });
 
@@ -152,6 +156,20 @@ export default async function decorate(block) {
   form.prepend(status);
   form.append(summary);
   if (submit) form.append(submit);
+
+  // a field with `new column`: the rows before it fill the first column, it and the rows after it
+  // (and the button) the second, side by side from 768px
+  const secondStart = form.querySelector(':scope > .new-column');
+  if (secondStart) {
+    const columns = [el('div', 'form-column'), el('div', 'form-column')];
+    let column = 0;
+    [...form.children].filter((child) => child !== status && child !== summary).forEach((child) => {
+      if (child === secondStart) column = 1;
+      columns[column].append(child);
+    });
+    form.classList.add('has-columns');
+    summary.before(...columns);
+  }
 
   const showStatus = (text) => {
     statusText.textContent = text;
