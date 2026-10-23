@@ -7,7 +7,7 @@ import { buildForm } from '../../scripts/forms.js';
 const FIELDS = {
   title: { type: 'select', key: 'title' },
   firstName: {
-    type: 'text', key: 'firstName', required: true, settings: { rule: 'name', 'max length': 200, 'new row': '' },
+    type: 'text', key: 'firstName', required: true, settings: { rule: 'name', 'max length': 50, 'new row': '' },
   },
   lastName: {
     type: 'text', key: 'lastName', required: true, settings: { rule: 'name', 'max length': 200 },

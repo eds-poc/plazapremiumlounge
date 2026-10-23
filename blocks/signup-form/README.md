@@ -26,8 +26,8 @@ redirect to the confirmation page (`/en-uk/sign-up-successful-page`, in the visi
 | Field | What it is |
 | --- | --- |
 | `title` | Title dropdown |
-| `firstName` ✱ | First name: letters, apostrophes and hyphens, at most 200 |
-| `lastName` ✱ | Last name: the same rule |
+| `firstName` ✱ | First name: letters, apostrophes and hyphens, at most 50 |
+| `lastName` ✱ | Last name: letters, apostrophes and hyphens, at most 200 |
 | `countryOfResidence` ✱ | Country, from the countries service |
 | `phone` ✱ | Country code (+1 (US) to start with, then the country of residence's) and number |
 | `email` ✱ | Email address, at most 200 |
