@@ -1,0 +1,635 @@
+/* hsbcoffer: Full-width campaign section based on the Smart Traveller x HSBC
+   offer pages. Uses its own palette and styling to avoid affecting site-wide
+   styles. Campaign font for body text, site font for headings. */
+.hsbcoffer {
+  --hsbcoffer-red:var(--color-hsbc-red);
+  --hsbcoffer-red-dark:var(--color-hsbc-red-hover);
+  --hsbcoffer-navy: var(--color-hsbc-navy);
+  --hsbcoffer-navy-mid: var(--color-hsbc-navy-secondary);
+  --hsbcoffer-gold: var(--color-hsbc-gold);
+  --hsbcoffer-gold-light: var(--color-hsbc-gold-light);
+  --hsbcoffer-cream: var(--color-hsbc-cream);
+  --hsbcoffer-surface: var(--color-hsbc-surface);
+  --hsbcoffer-text: var(--color-hsbc-ink);
+  --hsbcoffer-text-mid: var(--color-hsbc-grey);
+  --hsbcoffer-line:var(--color-hsbc-line);
+  --hsbcoffer-font: var(--font-hsbc);
+
+  /* per theme (cream by default) */
+  --hsbcoffer-bg: var(--hsbcoffer-cream);
+  --hsbcoffer-heading: var(--hsbcoffer-navy);
+  --hsbcoffer-copy: var(--hsbcoffer-text-mid);
+  --hsbcoffer-eyebrow: var(--hsbcoffer-red);
+
+  background: var(--hsbcoffer-bg);
+  color: var(--hsbcoffer-text);
+  font-family: var(--hsbcoffer-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+.hsbcoffer.white {
+  --hsbcoffer-bg: #fff;
+}
+
+.hsbcoffer.navy {
+  --hsbcoffer-bg: linear-gradient(135deg, var(--hsbcoffer-navy) 0%, var(--hsbcoffer-navy-mid) 100%);
+  --hsbcoffer-heading: #fff;
+  --hsbcoffer-copy: rgb(255 255 255 / 72%);
+  --hsbcoffer-eyebrow: var(--hsbcoffer-gold-light);
+}
+
+.hsbcoffer.red {
+  --hsbcoffer-bg: linear-gradient(135deg, var(--hsbcoffer-red-dark) 0%, var(--hsbcoffer-red) 100%);
+  --hsbcoffer-heading: #fff;
+  --hsbcoffer-copy: rgb(255 255 255 / 78%);
+  --hsbcoffer-eyebrow: rgb(255 255 255 / 65%);
+}
+
+.hsbcoffer .hsbcoffer-body {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: calc(var(--spacing-campaign-columns) + 4px) var(--spacing-7);
+}
+
+/* option accent: the source's gold line under the panel */
+.hsbcoffer.accent::after {
+  content: '';
+  display: block;
+  height: 4px;
+  background: linear-gradient(90deg, var(--hsbcoffer-navy), var(--hsbcoffer-gold), var(--hsbcoffer-red), var(--hsbcoffer-gold), var(--hsbcoffer-navy));
+}
+
+/* header: eyebrow, heading, intro */
+.hsbcoffer .hsbcoffer-header {
+  margin-bottom: var(--spacing-campaign-band-block);
+  text-align: center;
+}
+
+.hsbcoffer .hsbcoffer-header:last-child {
+  margin-bottom: 0;
+}
+
+.hsbcoffer .hsbcoffer-eyebrow {
+  margin: 0 0 var(--spacing-4);
+  color: var(--hsbcoffer-eyebrow);
+  font-size: calc(var(--font-size-2xs) + 1px);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: 1.4;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.hsbcoffer .hsbcoffer-title {
+  margin: 0 0 var(--spacing-5);
+  color: var(--hsbcoffer-heading);
+  font-family: var(--font-family-primary);
+  font-size: clamp(20px, 3.5vw, 30px);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.3;
+}
+
+.hsbcoffer.red .hsbcoffer-title {
+  font-size: clamp(22px, 3.5vw, 32px);
+}
+
+.hsbcoffer .hsbcoffer-intro {
+  max-width: 580px;
+  margin: 0 auto;
+  color: var(--hsbcoffer-copy);
+  font-size: calc(var(--font-size-sm) + 1px);
+  line-height: 1.7;
+}
+
+.hsbcoffer .hsbcoffer-intro p {
+  margin: 0;
+}
+
+/* logo pills (e.g. Smart Traveller x HSBC Reward+) */
+.hsbcoffer .hsbcoffer-logos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.hsbcoffer .hsbcoffer-header + .hsbcoffer-logos {
+  margin-top: -12px;
+}
+
+.hsbcoffer .hsbcoffer-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: calc(var(--radius-xs) + 2px);
+  padding: var(--spacing-4) var(--spacing-campaign-gap);
+  background: rgb(255 255 255 / 10%);
+}
+
+.hsbcoffer .hsbcoffer-logo img {
+  display: block;
+  width: auto;
+  height: 28px;
+  object-fit: contain;
+}
+
+.hsbcoffer .hsbcoffer-logo-label {
+  color: var(--color-white-alpha-88);
+  font-size: calc(var(--font-size-xs) + 1px);
+  font-weight: var(--font-weight-campaign-bold);
+  white-space: nowrap;
+}
+
+.hsbcoffer .hsbcoffer-logos-x {
+  color:var(--color-white-alpha-30);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-light);
+}
+
+/* a wide image (e.g. the steps strip) */
+.hsbcoffer .hsbcoffer-image {
+  max-width: 860px;
+  margin: 0 auto calc(var(--spacing-10) + 1px);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 var(--spacing-5) var(--spacing-campaign-band-block) rgb(0 0 0 / 10%);
+  overflow: hidden;
+}
+
+.hsbcoffer:where(.navy, .red) .hsbcoffer-image {
+  box-shadow: 0 var(--spacing-5) var(--spacing-campaign-band-block) rgb(0 0 0 / 25%);
+}
+
+.hsbcoffer .hsbcoffer-image:last-child {
+  margin-bottom: 0;
+}
+
+.hsbcoffer .hsbcoffer-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* cards: photo cards by default (image on top, eyebrow, text, button) */
+.hsbcoffer .hsbcoffer-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: calc(var(--spacing-7) + 22px);
+  margin-bottom: var(--spacing-campaign-band-block);
+}
+
+.hsbcoffer .hsbcoffer-cards:last-child,
+.hsbcoffer .hsbcoffer-cards:has(+ .hsbcoffer-text) {
+  margin-bottom: 0;
+}
+
+.hsbcoffer .hsbcoffer-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #efe7db;
+  border-radius: calc(var(--radius-md) + 1px);
+  padding-bottom: calc(var(--spacing-7) + 4px);
+  background: var(--base-background);
+  box-shadow: 0 6px 18px rgb(26 43 74 / 6%);
+  overflow: hidden;
+}
+
+.hsbcoffer .hsbcoffer-card.featured {
+  border-color: var(--hsbcoffer-gold);
+  box-shadow: 0 10px 26px rgb(201 146 42 / 18%);
+}
+
+.hsbcoffer .hsbcoffer-card-media {
+  line-height: 0;
+}
+
+.hsbcoffer .hsbcoffer-card-media img {
+  display: block;
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.hsbcoffer .hsbcoffer-card-body {
+  flex-grow: 1;
+  margin: calc(var(--spacing-7) + 2px) calc(var(--spacing-7) + 4px) 0;
+  color: var(--hsbcoffer-text-mid);
+  font-size: calc(var(--font-size-sm) + .5px);
+  line-height: 1.7;
+}
+
+.hsbcoffer .hsbcoffer-card-body p {
+  margin: 0;
+}
+
+.hsbcoffer .hsbcoffer-card-eyebrow {
+  margin: 0 0 var(--spacing-4);
+  color: var(--hsbcoffer-red-dark);
+  font-size: calc(var(--font-size-2xs) + 1px);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: 1.4;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.hsbcoffer .hsbcoffer-card-title {
+  margin: 0 0 var(--spacing-3);
+  color: var(--hsbcoffer-navy);
+  font-family: var(--font-family-primary);
+  font-size: calc(var(--font-size-sm) + 1px);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: 1.35;
+}
+
+.hsbcoffer .hsbcoffer-card-buttons {
+  margin: var(--spacing-7) calc(var(--spacing-7) + 4px) 0;
+}
+
+/* option products: centred product cards on a light surface (e.g. eligible credit cards) */
+.hsbcoffer.products .hsbcoffer-cards {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--grid-gutter);
+  max-width: 880px;
+  margin-inline: auto;
+}
+
+.hsbcoffer.products .hsbcoffer-card {
+   background: var(--color-hsbc-surface);
+    border-radius: var(--radius-sm);
+    padding: calc(var(--spacing-stack) + 4px) var(--spacing-7) var(--spacing-stack);
+    text-align: center;
+    border: 1px solid rgb(26 43 74 / 12%);
+    transform-style: preserve-3d;
+    transition: transform 0.18s ease, box-shadow 0.25s ease;
+    box-shadow: 0 4px 14px rgb(26 43 74 / 6%);
+    will-change: transform;
+}
+
+.hsbcoffer.products .hsbcoffer-card:where(:hover) {
+  transform: translateY(-8px) rotateX(6deg) rotateY(-4deg) scale(1.04);
+    box-shadow: 0 26px 54px rgb(26 43 74 / 24%);
+}
+
+.hsbcoffer.products .hsbcoffer-card-media img {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  margin: 0 auto var(--spacing-campaign-gap);
+  object-fit: contain;
+}
+
+.hsbcoffer.products .hsbcoffer-card-body {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+}
+
+.hsbcoffer.products .hsbcoffer-card-title {
+  margin: 0 0 calc(var(--spacing-2) + 1px);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+}
+
+/* option icons: small icon cards; on navy dark cards with a square icon box */
+.hsbcoffer.icons .hsbcoffer-cards {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--spacing-7);
+  max-width: 860px;
+  margin-inline: auto;
+}
+
+.hsbcoffer.icons .hsbcoffer-cards.single {
+  grid-template-columns: minmax(0, 420px);
+  justify-content: center;
+}
+
+.hsbcoffer.icons .hsbcoffer-card {
+  border: 1px solid var(--hsbcoffer-line);
+  border-radius: var(--radius-sm);
+  padding: calc(var(--spacing-8) + 3px) var(--spacing-campaign-panel-block-sm);
+  background: var(--base-background);
+  box-shadow: none;
+}
+
+.hsbcoffer.icons:where(.navy, .red) .hsbcoffer-card {
+  border-color:var(--color-white-alpha-10);
+  background:var(--color-white-alpha-6);
+}
+
+.hsbcoffer.icons .hsbcoffer-card-media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: calc(var(--spacing-6) + 1px);
+  border-radius:calc(var(--radius-xs) + 4px);
+  background: var(--color-white-alpha-18);
+}
+
+.hsbcoffer.icons .hsbcoffer-card-media img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.hsbcoffer.icons .hsbcoffer-card-body {
+  margin: 0;
+  font-size: calc(var(--font-size-xs) + 1px);
+  line-height: 1.65;
+}
+
+.hsbcoffer.icons:where(.navy, .red) .hsbcoffer-card-body {
+  color: var(--color-white-alpha-60);
+}
+
+.hsbcoffer.icons:where(.navy, .red) .hsbcoffer-card-title {
+  color: var(--base-background);
+}
+
+/* option centered (with icons): centred cards with a round icon (e.g. on red) */
+.hsbcoffer.icons:where(.centered) .hsbcoffer-cards {
+  grid-template-columns: 1fr;
+  gap: var(--font-size-xs);
+  max-width: 880px;
+}
+
+.hsbcoffer.icons:where(.centered) .hsbcoffer-card {
+  border-radius: calc(var(--radius-sm) + 2px);
+  padding: calc(var(--font-size-2xl) + 4px) var(--font-size-xl);
+  text-align: center;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.hsbcoffer.icons:where(.centered):where(.navy, .red) .hsbcoffer-card {
+  border-color:var(--color-white-alpha-18);
+  background: var(--color-white-alpha-10);
+}
+
+.hsbcoffer.icons:where(.centered):where(.navy, .red) .hsbcoffer-card:where(:hover) {
+  background: var(--color-white-alpha-16);
+  transform: translateY(-3px);
+}
+
+.hsbcoffer.icons:where(.centered) .hsbcoffer-card-media {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto var(--font-size-md);
+  border-radius: var(--radius-circle)
+}
+
+.hsbcoffer.icons:where(.centered):where(.navy, .red) .hsbcoffer-card-media {
+  background:var(--color-white-alpha-16);
+}
+
+.hsbcoffer.icons:where(.centered) .hsbcoffer-card-body {
+  line-height: 1.55;
+}
+
+.hsbcoffer.icons:where(.centered):where(.navy, .red) .hsbcoffer-card-body {
+  color: var(--color-white-alpha-72);
+}
+
+/* option split: a highlight with its image beside the text, in a gold-tinted box (e.g. a gift) */
+.hsbcoffer.split .hsbcoffer-cards {
+  max-width: 780px;
+  margin: 0 auto calc(var(--spacing-campaign-columns) + 4px);
+}
+
+.hsbcoffer.split .hsbcoffer-card {
+  flex-direction: column;
+  gap: calc(var(--spacing-8) + 3px);
+  border: 1px solid rgb(201 146 42 / 30%);
+  border-radius: var(--spacing-5);
+  padding: calc(var(--spacing-8) + 3px);
+  background: linear-gradient(135deg, #fff9f0, #fff3e0);
+  box-shadow: none;
+}
+
+.hsbcoffer.split .hsbcoffer-card-media {
+  flex-shrink: 0;
+  width: 100%;
+  height: 200px;
+  border-radius: calc(var(--radius-xs) + 4px);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 12%);
+  overflow: hidden;
+}
+
+.hsbcoffer.split .hsbcoffer-card-media img {
+  height: 100%;
+}
+
+.hsbcoffer.split .hsbcoffer-card-body {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: 1.65;
+}
+
+.hsbcoffer.split .hsbcoffer-card-eyebrow {
+  display: inline-flex;
+  margin-bottom: var(--spacing-4);
+  border-radius: calc(var(--radius-xs) - 2px);
+  padding: calc(var(--spacing-1) + 2px) var(--spacing-4);
+  background: var(--hsbcoffer-gold);
+  color: var(--base-background);
+  font-size: var(--font-size-2xs);
+  letter-spacing: 0.12em;
+}
+
+.hsbcoffer.split .hsbcoffer-card-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+/* buttons */
+.hsbcoffer .hsbcoffer-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: calc(var(--spacing-5) + 2px);
+}
+
+.hsbcoffer .hsbcoffer-header .hsbcoffer-buttons {
+  margin-top:var(--spacing-stack);
+}
+
+.hsbcoffer .hsbcoffer-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  border-radius: 6px;
+  padding: calc(var(--spacing-5) + 2px) calc(var(--spacing-8) + 3px);
+  background: var(--hsbcoffer-red);
+  color: var(--base-background);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: 1.2;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  transition: background-color 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+
+.hsbcoffer .hsbcoffer-button:where(:hover, :focus-visible) {
+  background: var(--hsbcoffer-red-dark);
+  color: var(--base-background);
+}
+
+.hsbcoffer:where(.navy, .red) .hsbcoffer-button {
+  background:var(--base-background);
+  color: var(--hsbcoffer-red);
+}
+
+.hsbcoffer:where(.navy, .red) .hsbcoffer-button:where(:hover, :focus-visible) {
+  background: var(--hsbcoffer-cream);
+  color: var(--hsbcoffer-red);
+}
+
+.hsbcoffer .hsbcoffer-button:where(:focus-visible) {
+  outline: 2px solid var(--hsbcoffer-gold);
+  outline-offset: 2px;
+}
+
+.hsbcoffer.red .hsbcoffer-button {
+  border-radius: 8px;
+  padding: var(--spacing-6) var(--spacing-campaign-band-block);
+}
+
+.hsbcoffer.red .hsbcoffer-button:where(:hover) {
+  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+  transform: translateY(-2px);
+}
+
+/* closing text after the cards */
+.hsbcoffer .hsbcoffer-text {
+  max-width: 640px;
+  margin: var(--spacing-campaign-band-block) auto 0;
+  color: var(--hsbcoffer-copy);
+  font-size: calc(var(--font-size-sm) + 1px);
+  line-height: 1.7;
+  text-align: center;
+}
+
+.hsbcoffer .hsbcoffer-text:first-child {
+  margin-top: 0;
+}
+
+.hsbcoffer .hsbcoffer-text p {
+  margin: 0 0 calc(var(--spacing-5) + 2px);
+}
+
+.hsbcoffer .hsbcoffer-text p:last-child {
+  margin-bottom: 0;
+}
+
+.hsbcoffer .hsbcoffer-text strong {
+  color: var(--hsbcoffer-heading);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-campaign-bold);
+}
+
+/* option notes: small print (e.g. Important Information): a small title over a gold rule, then
+   lines separated by thin rules */
+.hsbcoffer.notes .hsbcoffer-body {
+  max-width: 720px;
+ padding: calc(var(--spacing-11) - 6px) calc(var(--spacing-7) + 4px);
+}
+
+.hsbcoffer.notes .hsbcoffer-header {
+  margin-bottom: 0;
+}
+
+.hsbcoffer.notes .hsbcoffer-eyebrow {
+  margin-bottom: var(--spacing-campaign-gap);
+  color: var(--hsbcoffer-red-dark);
+}
+
+.hsbcoffer.notes .hsbcoffer-eyebrow::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 3px;
+  margin: var(--spacing-campaign-gap) auto 0;
+  border-radius: 2px;
+  background: var(--hsbcoffer-gold);
+}
+
+.hsbcoffer.notes .hsbcoffer-text {
+  margin-top: var(--spacing-campaign-panel-block-sm);
+  color: var(--color-campaign-walnut);
+  font-size:calc(var(--font-size-xs) + .5px);
+  line-height: 1.8;
+}
+
+.hsbcoffer.notes .hsbcoffer-text p {
+  margin: 0;
+}
+
+.hsbcoffer.notes .hsbcoffer-text p + p,
+.hsbcoffer.notes .hsbcoffer-text + .hsbcoffer-text p:first-child {
+  margin-top: var(--spacing-5);
+  border-top: 1px solid rgb(26 43 74 / 10%);
+  padding-top: var(--spacing-5);
+}
+
+.hsbcoffer.notes .hsbcoffer-text + .hsbcoffer-text {
+  margin-top: 0;
+}
+
+/* breakpoint-exception: the source campaign's 640px and 860px breakpoints */
+@media (width > 640px) {
+  .hsbcoffer .hsbcoffer-body {
+    padding: calc(var(--spacing-11) + 10px) var(--spacing-stack);
+  }
+
+  .hsbcoffer.compact .hsbcoffer-body {
+    padding-block: var(--spacing-campaign-band-block);
+  }
+
+  .hsbcoffer.red .hsbcoffer-body {
+    padding-block:calc(var(--spacing-11) + 14px);
+  }
+
+  .hsbcoffer .hsbcoffer-logos {
+    gap:calc(var(--spacing-6) + 1px);
+  }
+
+  .hsbcoffer.icons:where(.centered) .hsbcoffer-cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .hsbcoffer.split .hsbcoffer-card {
+    flex-flow: row wrap;
+    align-items: center;
+  }
+
+  .hsbcoffer.split .hsbcoffer-card-media {
+    width: 130px;
+    height: 130px;
+  }
+
+  .hsbcoffer.split .hsbcoffer-card-body {
+    flex: 1;
+    min-width: 200px;
+  }
+}
+
+@media (width >= 860px) {
+  .hsbcoffer:not(.products, .icons, .split) .hsbcoffer-cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hsbcoffer .hsbcoffer-card,
+  .hsbcoffer .hsbcoffer-button {
+    transition: none;
+  }
+
+  .hsbcoffer.products .hsbcoffer-card:where(:hover),
+  .hsbcoffer.icons:where(.centered) .hsbcoffer-card:where(:hover),
+  .hsbcoffer.red .hsbcoffer-button:where(:hover) {
+    transform: none;
+  }
+}
