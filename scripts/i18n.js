@@ -183,7 +183,7 @@ const TEXTS = {
   propertyArrivalTip: {
     en: 'Located in the arrivals area.', zh: '位于到达区。', 'zh-HK': '位於抵港區。', ja: '到着エリアにあります。', pt: 'Fica na área de desembarque.',
   },
-  // custom form (scripts/forms.js): default field messages, each can be replaced in the authoring
+  // forms (scripts/forms.js): default field messages, each can be replaced in the authoring
   formRequired: {
     en: 'Please fill in {label}.', zh: '请填写{label}。', 'zh-HK': '請填寫{label}。', ja: '{label}を入力してください。', pt: 'Preencha {label}.',
   },

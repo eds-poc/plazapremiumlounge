@@ -1,8 +1,10 @@
 /* newsletter: the source band above the footer (measured at 1440, 768 and 375px). In the wide
-   container (1490px, 50px from the edges from 768px), 20px above and below; a maroon panel (the
-   Custom Form maroon option) 30px 50px inside, 30px corners; edge to edge with 15px sides on
-   phones. The heading 24px/500, the copy 18px/300; fields 16px apart, labels 5px above, 12px
-   checkbox text, no required marks (as the source); the button an arrow inside the email field */
+   container (1490px, 50px from the edges from 768px), 20px above and below; a maroon panel with
+   30px corners, 30px 50px inside (30px from 768px, 30px 15px and edge to edge on phones). The
+   heading 24px/500 and the copy 18px/300 on the left, the form on the right from 768px; fields 16px
+   apart, labels 5px above, outlined white 35px fields with 20px corners and faint placeholders, a
+   white round checkbox with a maroon tick, 12px checkbox text, no required marks (as the source),
+   light pink errors (red is too faint on maroon); the button an arrow inside the email field */
 .newsletter {
   box-sizing: border-box;
   max-width: var(--container-wide-max-width);
@@ -10,72 +12,150 @@
   padding-inline: var(--container-wide-padding);
 }
 
-.newsletter .custom-form.maroon {
-  border-radius: 0;
+.newsletter .newsletter-panel {
   padding: var(--spacing-9) var(--spacing-6);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
 }
 
-.newsletter .custom-form .form-fields {
-  --form-row-gap: var(--spacing-bootstrap-3);
-  --form-column-gap: var(--spacing-bootstrap-3);
+/* the heading and copy */
+.newsletter .form-intro {
+  margin-bottom: var(--spacing-9);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
 }
 
-.newsletter .custom-form .form-intro :is(h2, h3, h4) {
-  margin-bottom: var(--spacing-8);
+.newsletter .form-intro :is(h2, h3, h4) {
+  margin: 0 0 var(--spacing-8);
+  color: inherit;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
 }
 
-.newsletter .custom-form .form-intro p {
+.newsletter .form-intro p {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-light);
 }
 
-.newsletter .custom-form .form-label {
+.newsletter .form-intro > :first-child {
+  margin-top: 0;
+}
+
+.newsletter .form-intro > :last-child {
+  margin-bottom: 0;
+}
+
+.newsletter .form-intro a:any-link {
+  color: var(--color-text-inverse);
+  text-decoration: underline;
+}
+
+/* the fields, in white on maroon */
+.newsletter .form-fields {
+  --form-input-height: 35px;
+  --form-row-gap: var(--spacing-bootstrap-3);
+  --form-column-gap: var(--spacing-bootstrap-3);
+  --form-on-maroon-error: var(--color-brand-blush);
+}
+
+.newsletter .form-fields .form-label {
   margin-bottom: var(--spacing-2);
 }
 
-.newsletter .custom-form .form-required {
+.newsletter .form-fields :is(.form-label, .form-check-label, .form-content) {
+  color: var(--color-text-inverse);
+}
+
+.newsletter .form-fields .form-required {
   display: none;
 }
 
-.newsletter .custom-form .form-check-label {
-  font-size: var(--font-size-xs);
+.newsletter .form-fields .form-input {
+  border: 1px solid var(--color-text-inverse);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-2) var(--spacing-8);
+  background-color: transparent;
+  color: var(--color-text-inverse);
 }
 
-/* as the source: faint light placeholders, a maroon tick in the white box when checked, and
-   autofilled fields keep the maroon fill and white text */
-.newsletter .custom-form.maroon .form-input::placeholder {
+.newsletter .form-fields .form-input::placeholder {
   color: var(--color-text-inverse);
   font-weight: var(--font-weight-light);
   opacity: 0.25;
 }
 
-/* the source's consent row: at least 24px tall, 2px below, the box 1px from the top of its text */
-.newsletter .custom-form .form-field-checkbox {
-  min-height: 1.5rem;
-  margin-bottom: var(--spacing-1);
+.newsletter .form-fields .form-input:focus {
+  background-color: transparent;
+  box-shadow: 0 0 0 3px rgb(255 255 255 / 40%);
 }
 
-.newsletter .custom-form .form-check-input {
-  margin-top: 1px;
-}
-
-/* more specific than the Custom Form maroon checked box (a maroon dot), which loads after this */
-.newsletter .custom-form.maroon .form-check-input:checked {
-  background: var(--color-text-inverse) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath fill='%23530e2a' d='M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z'/%3E%3C/svg%3E") center / 10px no-repeat;
-  box-shadow: none;
-}
-
-.newsletter .custom-form .form-input:autofill {
+/* autofilled fields keep the maroon fill and white text */
+.newsletter .form-fields .form-input:autofill {
   box-shadow: 0 0 0 100px var(--color-brand-primary) inset;
   -webkit-text-fill-color: var(--color-text-inverse);
   caret-color: var(--color-text-inverse);
 }
 
-.newsletter .custom-form .form-input:autofill:focus {
+.newsletter .form-fields .form-input:autofill:focus {
   box-shadow: 0 0 0 100px var(--color-brand-primary) inset, 0 0 0 3px rgb(255 255 255 / 40%);
 }
 
-/* the submit button: a white arrow at the right of the field it sits in */
+.newsletter .form-fields .form-error {
+  color: var(--form-on-maroon-error);
+}
+
+/* the consent row: at least 24px tall, 2px below; the box 1px from the top of its 12px text */
+.newsletter .form-fields .form-field-checkbox {
+  min-height: 1.5rem;
+  margin-bottom: var(--spacing-1);
+}
+
+.newsletter .form-fields .form-check-label {
+  font-size: var(--font-size-xs);
+}
+
+.newsletter .form-fields .form-check-label a:any-link {
+  color: var(--color-text-inverse);
+  text-decoration: underline;
+}
+
+.newsletter .form-fields .form-check-input {
+  margin-top: 1px;
+  border-color: var(--color-text-inverse);
+  background-color: var(--color-text-inverse);
+}
+
+.newsletter .form-fields .form-check-input:checked {
+  background: var(--color-text-inverse) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath fill='%23530e2a' d='M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z'/%3E%3C/svg%3E") center / 10px no-repeat;
+  box-shadow: none;
+}
+
+.newsletter .form-fields .form-check-input:focus-visible {
+  outline-color: var(--color-text-inverse);
+}
+
+.newsletter .form-fields .form-field.has-error .form-input {
+  border-color: var(--form-on-maroon-error);
+  box-shadow: inset 0 0 0 1px var(--form-on-maroon-error);
+}
+
+.newsletter .form-fields .form-field.has-error .form-check-input {
+  border-color: var(--form-on-maroon-error);
+  box-shadow: 0 0 0 1px var(--form-on-maroon-error);
+}
+
+/* the message at the top: white, the text and its close button maroon; after sending, white text */
+.newsletter .form-fields .form-status {
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
+}
+
+.newsletter .form-success {
+  color: var(--color-text-inverse);
+}
+
+/* the button: a white arrow at the right of the email field */
 .newsletter .newsletter-submit {
   position: absolute;
   top: 50%;
@@ -110,34 +190,47 @@
   opacity: 0.6;
 }
 
-.newsletter .custom-form .form-control-wrap:has(.newsletter-submit) .form-input {
+.newsletter .form-fields .form-control-wrap:has(.newsletter-submit) .form-input {
   padding-right: calc(var(--spacing-4) + 40px);
 }
 
 /* breakpoint-exception: the source's col-sm-6, first and last name side by side from 576px */
 @media (width >= 576px) {
-  .newsletter .custom-form .form-fields .width-half {
+  .newsletter .form-fields .width-half {
     grid-column: span 3;
   }
 }
 
+/* breakpoint-exception: the source's col-md-6 (768px), the text and the form side by side */
 @media (width >= 768px) {
   .newsletter {
     padding-block: var(--spacing-7);
   }
 
-  .newsletter .custom-form.maroon {
+  .newsletter .newsletter-panel {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--grid-gutter);
+    align-items: start;
     border-radius: var(--radius-xl);
     padding: var(--spacing-9);
+  }
+
+  .newsletter .form-intro {
+    margin-bottom: 0;
+  }
+
+  .newsletter .newsletter-panel > .form-fields:only-child {
+    grid-column: 1 / -1;
   }
 }
 
 @media (width >= 992px) {
-  .newsletter .custom-form.maroon {
+  .newsletter .newsletter-panel {
     padding-inline: var(--spacing-11);
   }
 
-  .newsletter .custom-form .form-intro :is(h2, h3, h4) {
+  .newsletter .form-intro :is(h2, h3, h4) {
     margin-bottom: var(--spacing-10);
   }
 }

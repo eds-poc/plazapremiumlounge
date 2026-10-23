@@ -277,6 +277,91 @@
   margin-bottom: 0;
 }
 
+/* text between fields (one-cell rows), e.g. the source's lines over the two checkboxes (14px/500) */
+.form-fields .form-content {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+}
+
+.form-fields .form-content + .form-field-checkbox {
+  margin-top: calc(var(--spacing-3) - var(--form-row-gap));
+}
+
+/* the API's message (e.g. its serviceResponseMsg), at the top of the form, with a close button */
+.form-fields .form-status {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-4);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-5) var(--spacing-5) var(--spacing-5) var(--spacing-7);
+  background-color: rgb(220 53 69 / 8%);
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-body);
+}
+
+.form-fields .form-status[hidden] {
+  display: none;
+}
+
+.form-fields .form-status-text {
+  flex: 1;
+  margin: 0;
+}
+
+.form-fields .form-status-close {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin: -2px 0;
+  border: 0;
+  padding: 0;
+  background: currentcolor;
+  cursor: pointer;
+  mask: url('/icons/close-thin.svg') center / 10px no-repeat;
+}
+
+.form-fields .form-status-close:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 2px;
+}
+
+/* the button: the source's space below the last field (50px, then its 20px spacer) */
+.form-fields .form-submit {
+  margin-top: calc(var(--spacing-11) + var(--spacing-7) - var(--form-row-gap));
+}
+
+.form-fields .form-submit .button {
+  margin: 0;
+}
+
+.form-fields .form-submit .button:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+/* the message that replaces the form after a successful send */
+.form-success {
+  margin: 0;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+/* two columns of fields (a field with newColumn), each filled top to bottom, side by side from
+   768px; one column below */
+.form-fields .form-column {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--form-row-gap) var(--form-column-gap);
+  align-content: start;
+}
+
+.form-fields .form-column > * {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
 /* the grid: from 992px a field can be half or a third of the row; new row starts a line */
 @media (width >=992px) {
   .form-fields .width-half {
@@ -299,5 +384,20 @@
 @media (prefers-reduced-motion: reduce) {
   .form-fields .form-input {
     transition: none;
+  }
+}
+
+/* breakpoint-exception: design-system breakpoint (768px): the button fills the width below it
+   (full width mobile); the two columns side by side from it */
+@media (width < 768px) {
+  .form-fields .form-submit.full-width-mobile .button {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (width >= 768px) {
+  .form-fields.has-columns > .form-column {
+    grid-column: span 3;
   }
 }

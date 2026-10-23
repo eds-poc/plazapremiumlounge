@@ -1,13 +1,17 @@
 /*
- * Forms: authorable form fields and their validation, shared by form blocks (Custom Form).
- * A field is defined by a label, a type and settings (one `name: value` per line, e.g.
+ * Forms: form fields, their validation and sending, shared by the form blocks (Signup Form,
+ * Newsletter, Contact Form). A field is defined by a label, a type and settings (e.g.
  * `key: firstName`, `required`, `rule: name`, `width: half`). Fields are built with
  * buildField(); attachValidation() checks them as the visitor goes, validateForm() checks them all
  * (on submit) and collectValues() gives the payload, keyed by each field's `key`. linkFields()
  * makes a phone code follow the country field; resetForm() empties the form.
+ * buildForm() builds a whole form from a block's authored rows (Field | Label | Placeholder |
+ * Required | Error) and the block's own definition (the fields' types, keys and rules, the action,
+ * the redirect), and sends it.
  * Styles: styles/forms.css (the form element gets the class `form-fields`).
  */
-import { translate } from './i18n.js';
+import { loadCSS } from './aem.js';
+import { getSiteFolder, translate } from './i18n.js';
 import apiUrl from './endpoints.js';
 
 const INPUT_TYPES = ['text', 'email', 'password', 'tel', 'number', 'date', 'url', 'hidden'];
@@ -125,7 +129,9 @@ function el(tag, className) {
  * @returns {{text: string, value: string}[]}
  */
 function readOptions(text) {
-  return (text || '').split(/\s*[,;]\s*/).filter(Boolean).map((item) => {
+  // a list (one option per authored line, see buildForm) or a comma-separated setting
+  const items = Array.isArray(text) ? text : (text || '').split(/\s*[,;]\s*/);
+  return items.map((item) => item.trim()).filter(Boolean).map((item) => {
     const [label, value] = item.split(/\s*=\s*/);
     return { text: label, value: value ?? label };
   });
@@ -746,4 +752,294 @@ export function collectValues(form) {
  */
 export function fieldElement(form, key) {
   return form.querySelector(`.form-field[data-key="${CSS.escape(key)}"]`);
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * Form blocks: a form built from authored rows and a block's definition, and sent as JSON.
+ * ------------------------------------------------------------------------------------------- */
+
+const REQUIRED_WORDS = /^(yes|y|true|required|x|✓)$/i;
+
+/**
+ * The lines of an authored cell: its paragraphs or list items, or its text split at line breaks.
+ * @param {Element} [cell]
+ * @returns {string[]}
+ */
+function cellLines(cell) {
+  if (!cell) return [];
+  const copy = cell.cloneNode(true);
+  copy.querySelectorAll('br').forEach((br) => br.replaceWith('\n'));
+  const parts = copy.querySelector('p, li') ? [...copy.querySelectorAll('p, li')] : [copy];
+  return parts.flatMap((part) => part.textContent.split('\n')).map((line) => line.trim()).filter(Boolean);
+}
+
+/**
+ * The nodes of a label cell, keeping its links (e.g. the Privacy Policy in a checkbox label).
+ * @param {Element} cell
+ * @returns {Node[]}
+ */
+function labelNodesOf(cell) {
+  const paragraphs = cell.querySelectorAll('p');
+  return [...(paragraphs.length === 1 ? paragraphs[0] : cell).childNodes];
+}
+
+/**
+ * The address to post to: an endpoint name from scripts/endpoints.js (`signUp`), or a URL.
+ * @param {string} action
+ * @returns {URL|null}
+ */
+function actionUrl(action) {
+  if (!action) return null;
+  try {
+    if (/^(https?:)?\//.test(action)) return new URL(action, window.location.href);
+    return apiUrl(action);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * A page path in the visitor's language site: /en-uk/… becomes /zh-cn/… on a Chinese page.
+ * @param {string} path
+ * @returns {string}
+ */
+function localPath(path) {
+  const url = new URL(path, window.location.href);
+  const folder = getSiteFolder();
+  const parts = url.pathname.split('/');
+  if (url.origin === window.location.origin && folder && /^[a-z]{2}-[a-z]{2}$/.test(parts[1] || '')) {
+    parts[1] = folder;
+    url.pathname = parts.join('/');
+  }
+  return url.href;
+}
+
+/**
+ * Shows field errors an API returned, by key: `{errors: {key: message}}` or
+ * `{errors: [{field, message}]}`.
+ * @param {HTMLFormElement} form
+ * @param {object} data
+ */
+function showApiErrors(form, data) {
+  const list = Array.isArray(data?.errors)
+    ? data.errors.map((e) => [e.field || e.key, e.message])
+    : Object.entries(data?.errors || {});
+  list.forEach(([key, text]) => {
+    const wrap = key && fieldElement(form, key);
+    if (wrap && text) setFieldError(wrap, String(text));
+  });
+}
+
+/**
+ * The settings of one field: the block's definition (type, key, rules, limits…) with the authored
+ * placeholder or options, required and error messages on top.
+ * @param {object} field The block's definition of the field
+ * @param {Element[]} cells The authored row: Field | Label | Placeholder | Required | Error
+ * @returns {Map<string, *>}
+ */
+function fieldSettings(field, cells) {
+  const settings = new Map(Object.entries(field.settings || {}).map(([k, v]) => [k, String(v)]));
+  settings.set('key', field.key);
+  const [, , placeholderCell, requiredCell, errorCell] = cells;
+  const placeholder = cellLines(placeholderCell);
+  if (CHOICE_TYPES.includes(field.type) && field.type !== 'country') {
+    // dropdowns and choice groups: the empty choice, then one option per line
+    if (field.type === 'select' && placeholder.length) settings.set('placeholder', placeholder[0]);
+    const options = field.type === 'select' ? placeholder.slice(1) : placeholder;
+    if (options.length) settings.set('options', options);
+  } else if (placeholder.length) {
+    settings.set('placeholder', placeholder[0]);
+  }
+  const [emptyMessage, formatMessage] = cellLines(errorCell);
+  const required = field.required || REQUIRED_WORDS.test(cellLines(requiredCell)[0] || '');
+  if (required) settings.set('required', emptyMessage || '');
+  if (formatMessage) settings.set(settings.has('match') ? 'match message' : 'message', formatMessage);
+  return settings;
+}
+
+/**
+ * Builds a form block's form: one authored row per field (Field | Label | Placeholder | Required |
+ * Error), the field's name in the first cell, matched to the block's definition; one-cell rows are
+ * text (before the first field, in `intro` when the definition asks for it); the rows `submit`,
+ * `success` and `error` give the button text and the messages. On submit every field is checked;
+ * a valid form is posted as JSON to the definition's action and the visitor goes to its redirect,
+ * or sees the success message, or the error at the top of the form.
+ * @param {Element} block The block, its rows as authored
+ * @param {object} definition The block's form:
+ *   `fields` (by name: `{ type, key, required, settings, newColumn }`),
+ *   `action`, `redirect`, `method`, `defaultWidth` ('full' or 'half'), `intro` (true: text rows
+ *   before the first field go beside the form), `submit` (`{ classes, fullWidthMobile, text }`)
+ * @returns {Promise<{form: HTMLFormElement, intro: HTMLElement|null}>}
+ */
+export async function buildForm(block, definition) {
+  const css = loadCSS(`${window.hlx.codeBasePath}/styles/forms.css`);
+  const form = el('form', 'form-fields');
+  const intro = definition.intro ? el('div', 'form-intro') : null;
+  const texts = {};
+  let buttonText = definition.submit?.text || 'Submit';
+
+  [...block.children].forEach((row) => {
+    const cells = [...row.children];
+    if (!row.textContent.trim() && !row.querySelector('img, picture')) return;
+    const name = cells[0]?.textContent.trim();
+    const field = cells.length > 1 ? definition.fields[name] : null;
+    if (!field) {
+      if (cells.length > 1 && ['submit', 'success', 'error'].includes(name)) {
+        const text = cells[1]?.textContent.trim();
+        if (name === 'submit' && text) buttonText = text;
+        else if (text) texts[name] = text;
+        return;
+      }
+      // a line of text (a one-cell row, or a row with only its first cell filled)
+      if (cells.slice(1).some((cell) => cell.textContent.trim())) return;
+      const target = intro && !form.querySelector('.form-field') ? intro : el('div', 'form-content');
+      target.append(...cells[0].childNodes);
+      if (target !== intro) form.append(target);
+      return;
+    }
+    const label = cells[1]?.textContent.trim();
+    if (!label) return;
+    const built = buildField({
+      label,
+      labelNodes: field.type === 'checkbox' ? labelNodesOf(cells[1]) : undefined,
+      type: field.type,
+      settings: fieldSettings(field, cells),
+    }, { defaultWidth: definition.defaultWidth || 'full' });
+    if (!built) return;
+    if (field.newColumn) built.classList.add('new-column');
+    form.append(built);
+  });
+
+  // the button
+  const submit = el('div', 'form-submit');
+  if (definition.submit?.fullWidthMobile) submit.classList.add('full-width-mobile');
+  const button = el('button', ['button', ...(definition.submit?.classes || ['tertiary'])].join(' '));
+  button.type = 'submit';
+  button.textContent = buttonText;
+  submit.append(button);
+
+  // the form's message (e.g. the API's "An account with the given email already exists."),
+  // announced, at the top of the form, with a button to close it
+  const status = el('div', 'form-status');
+  status.hidden = true;
+  const statusText = el('p', 'form-status-text');
+  statusText.setAttribute('role', 'alert');
+  const statusClose = el('button', 'form-status-close');
+  statusClose.type = 'button';
+  statusClose.setAttribute('aria-label', translate('close'));
+  status.append(statusText, statusClose);
+  // the error count after a submit with errors, for screen readers
+  const summary = el('p', 'visually-hidden');
+  summary.setAttribute('aria-live', 'polite');
+  form.prepend(status);
+  form.append(summary, submit);
+
+  // a field with `newColumn`: the rows before it fill the first column, it and the rows after it
+  // (and the button) the second, side by side from 768px
+  const secondStart = form.querySelector(':scope > .new-column');
+  if (secondStart) {
+    const columns = [el('div', 'form-column'), el('div', 'form-column')];
+    let column = 0;
+    [...form.children].filter((child) => child !== status && child !== summary).forEach((child) => {
+      if (child === secondStart) column = 1;
+      columns[column].append(child);
+    });
+    form.classList.add('has-columns');
+    summary.before(...columns);
+  }
+
+  const showStatus = (text) => {
+    statusText.textContent = text;
+    status.hidden = !text;
+    if (text) {
+      const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      status.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'center' });
+    }
+  };
+  statusClose.addEventListener('click', () => {
+    showStatus('');
+    // focus moves on to the form, not back to the top of the page
+    form.querySelector('input:not([type="hidden"]), select, textarea')?.focus();
+  });
+
+  let submitting = false;
+  // the button stays disabled from the click until the answer (or a failed check) is in; a button
+  // shown as an icon keeps its text as its name
+  const setBusy = (busy, sending = false) => {
+    submitting = busy;
+    form.toggleAttribute('aria-busy', busy);
+    button.disabled = busy;
+    button.textContent = sending ? translate('formSending') : buttonText;
+  };
+
+  attachValidation(form);
+  linkFields(form);
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    // a second click (or Enter) while the first is still on its way does nothing
+    if (submitting) return;
+    setBusy(true);
+    showStatus('');
+    const invalid = validateForm(form);
+    summary.textContent = invalid.length ? translate('formSummary', { n: invalid.length }) : '';
+    if (invalid.length) {
+      // validateForm has moved focus to the first invalid field
+      setBusy(false);
+      return;
+    }
+
+    const values = collectValues(form);
+    const before = new CustomEvent('forms:submit', { bubbles: true, cancelable: true, detail: { values, form } });
+    const url = actionUrl(definition.action);
+    if (!form.dispatchEvent(before) || !url) {
+      setBusy(false);
+      if (!url) showStatus(texts.error || translate('formError'));
+      return;
+    }
+
+    setBusy(true, true);
+    try {
+      const res = await fetch(url, {
+        method: definition.method || 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(values),
+      });
+      let data = null;
+      try {
+        data = await res.json();
+      } catch {
+        // an empty or non-JSON answer
+      }
+      // a refusal: an HTTP error, `success: false`, or the API's own `serviceResponseCode` of 400
+      // or more (it can answer 200 with a 400 inside, e.g. an email that is already registered)
+      if (!res.ok || data?.success === false || Number(data?.serviceResponseCode) >= 400) {
+        showApiErrors(form, data);
+        showStatus(data?.serviceResponseMsg || data?.message || texts.error || translate('formError'));
+        const code = Number(data?.serviceResponseCode) || res.status;
+        form.dispatchEvent(new CustomEvent('forms:error', { bubbles: true, detail: { status: code, data, form } }));
+        return;
+      }
+      form.dispatchEvent(new CustomEvent('forms:success', { bubbles: true, detail: { data, values, form } }));
+      // sent: the form is emptied and its button back to normal (also when the visitor comes back)
+      resetForm(form);
+      if (definition.redirect) {
+        window.location.assign(localPath(definition.redirect));
+        return;
+      }
+      if (texts.success) {
+        const done = el('p', 'form-success');
+        done.setAttribute('role', 'status');
+        done.textContent = texts.success;
+        form.replaceWith(done);
+      }
+    } catch {
+      showStatus(translate('formNetworkError'));
+      form.dispatchEvent(new CustomEvent('forms:error', { bubbles: true, detail: { status: 0, form } }));
+    } finally {
+      setBusy(false);
+    }
+  });
+
+  await css;
+  return { form, intro: intro?.childNodes.length ? intro : null };
 }

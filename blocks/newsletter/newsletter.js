@@ -1,10 +1,17 @@
-import { decorateBlock, loadBlock } from '../../scripts/aem.js';
-
-// the Custom Form options of the source newsletter band: the maroon panel, the heading and copy on
-// the left of the form, first and last name side by side
-const FORM_OPTIONS = ['maroon', 'two-columns', 'text-left'];
-// the sign up placeholder until the newsletter API exists (scripts/endpoints.js)
-const DEFAULT_ACTION = 'newsletter';
+/*
+ * The newsletter form's fields: the keys sent and the source's rules. The authoring only gives each
+ * field's label, placeholder, required and error texts (see README).
+ */
+const FIELDS = {
+  firstName: { type: 'text', key: 'firstName', settings: { rule: 'name', 'max length': 200 } },
+  lastName: { type: 'text', key: 'lastName', settings: { rule: 'name', 'max length': 100 } },
+  email: {
+    type: 'email', key: 'email', required: true, settings: { 'max length': 200, width: 'full' },
+  },
+  isAgree: {
+    type: 'checkbox', key: 'isAgree', required: true, settings: { 'value type': 'boolean' },
+  },
+};
 const SITE_FOLDER = /^[a-z]{2}-[a-z]{2}$/;
 
 /**
@@ -55,26 +62,14 @@ export function isHiddenOn(paths, pathname = window.location.pathname) {
 }
 
 /**
- * The row of a given type (the second cell), e.g. the `settings` or `submit` row.
- * @param {Element[]} rows
- * @param {string} type
- * @returns {Element|undefined}
+ * Puts the button in the email field, as the source's arrow; its text stays as its name for
+ * screen readers.
+ * @param {HTMLFormElement} form
  */
-function rowOfType(rows, type) {
-  return rows.find((row) => row.children.length > 1
-    && row.children[1].textContent.trim().toLowerCase() === type);
-}
-
-/**
- * Moves the submit button into a field (the submit row's `inside: <key>`), as an arrow icon
- * button; its text stays as its name for screen readers.
- * @param {Element} form The Custom Form block
- * @param {string} key
- */
-function moveSubmitInside(form, key) {
+function arrowInEmail(form) {
   const submit = form.querySelector('.form-submit');
   const button = submit?.querySelector('button');
-  const wrap = form.querySelector(`.form-field[data-key="${CSS.escape(key)}"] .form-control-wrap`);
+  const wrap = form.querySelector('.form-field[data-key="email"] .form-control-wrap');
   if (!button || !wrap) return;
   button.className = 'newsletter-submit';
   wrap.append(button);
@@ -82,12 +77,13 @@ function moveSubmitInside(form, key) {
 }
 
 /**
- * Decorates the Newsletter block: a Custom Form on the maroon panel (the source's newsletter band,
- * shown above the footer on every page from the footer page), with the heading and copy beside it.
- * Rows as in Custom Form; the submit row also takes `inside: <key>` (the button as an arrow in that
- * field). Section metadata `hide-on` (`all`, or paths) lists the pages the band isn't shown on; on
- * those, nothing of the form loads. Block options are added to the Custom Form's (e.g. text-right
- * puts the form on the left).
+ * Decorates the Newsletter block: the source's newsletter band, authored once in the footer page
+ * and shown above the footer on every page. A maroon panel with the heading and copy (one-cell rows
+ * before the first field) on the left and the form on the right: one authored row per field
+ * (Field | Label | Placeholder | Required | Error) and the rows submit / success / error; the
+ * button is an arrow in the email field. Sent to the newsletter endpoint. Section metadata
+ * `hide-on` (`all`, or paths) lists the pages the band isn't shown on; on those, nothing of the
+ * form loads.
  * @param {Element} block The Newsletter block element
  */
 export default async function decorate(block) {
@@ -103,37 +99,17 @@ export default async function decorate(block) {
   }
 
   // the shared form code loads only when the band is shown
-  const { readSettings } = await import('../../scripts/forms.js');
-  const rows = [...block.children];
-  let settingsRow = rowOfType(rows, 'settings');
-
-  // the form's action defaults to the newsletter endpoint
-  if (!settingsRow) {
-    settingsRow = document.createElement('div');
-    settingsRow.innerHTML = '<div>Form</div><div>settings</div><div></div>';
-    block.prepend(settingsRow);
-  }
-  if (!readSettings(settingsRow.children[2]).has('action')) {
-    const action = document.createElement('p');
-    action.textContent = `action: ${DEFAULT_ACTION}`;
-    settingsRow.children[2].append(action);
-  }
-  const inside = readSettings(rowOfType(rows, 'submit')?.children[2]).get('inside');
-
-  // the authored options (e.g. text-right) on top of the band's
-  const authored = [...block.classList].filter((c) => !['newsletter', 'block'].includes(c));
-  const options = FORM_OPTIONS
-    .filter((o) => !(o === 'text-left' && authored.includes('text-right')))
-    .concat(authored);
-  const holder = document.createElement('div');
-  holder.className = 'newsletter-form';
-  const form = document.createElement('div');
-  form.className = ['custom-form', ...new Set(options)].join(' ');
-  form.append(...block.children);
-  holder.append(form);
-  block.replaceChildren(holder);
-
-  decorateBlock(form);
-  await loadBlock(form);
-  if (inside) moveSubmitInside(form, inside);
+  const { buildForm } = await import('../../scripts/forms.js');
+  const { form, intro } = await buildForm(block, {
+    fields: FIELDS,
+    action: 'newsletter',
+    defaultWidth: 'half',
+    intro: true,
+    submit: { text: 'Subscribe' },
+  });
+  arrowInEmail(form);
+  const panel = document.createElement('div');
+  panel.className = 'newsletter-panel';
+  panel.append(...(intro ? [intro] : []), form);
+  block.replaceChildren(panel);
 }

@@ -1,0 +1,5 @@
+/* signup form: the fields, the button and the messages come from styles/forms.css (fields half
+   width from 992px, Title alone in the left half, one column below) */
+.signup-form {
+  display: block;
+}
