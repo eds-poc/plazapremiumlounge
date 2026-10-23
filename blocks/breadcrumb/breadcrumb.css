@@ -20,7 +20,7 @@
 .breadcrumb-list li:not(:last-child)::after {
   content: '<';
   margin-inline: var(--spacing-2);
-  color: var(--color-neutral-600);
+  color: var(--color-hsbc-grey);
 }
 
 /* Previous pages */
