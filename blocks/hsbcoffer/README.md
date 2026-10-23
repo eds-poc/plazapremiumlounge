@@ -62,3 +62,24 @@ holds seven hsbcoffer blocks:
 | Marketplace | `hsbcoffer (navy, icons)` | Header; 1 icon card; the steps image; a button |
 | Link your card | `hsbcoffer (red, icons, centered)` | Header; 3 icon cards; a button |
 | Important information | `hsbcoffer (cream, notes)` | `Important Information`; the terms lines |
+
+## HSBC Library (DA: Library → HSBC)
+
+Each section of the page above is a ready-made library entry in `docs/library/blocks/hsbc/`, with
+the Autumn Travel content as its example. To build a new HSBC campaign, insert the banner and title,
+then the entries in this order, and replace the text, links and images.
+
+| Library entry | Inserts | Use it for |
+| --- | --- | --- |
+| HSBC Campaign Intro | `hsbcoffer (navy, accent, compact)` | The campaign opener: eyebrow, heading, intro, partner logos |
+| HSBC Promotion Cards | `hsbcoffer (cream)` | The offers: photo cards with buttons (`featured` in a third cell highlights one), closing text |
+| HSBC Eligible Cards | `hsbcoffer (white, products)` | The qualifying cards: one row per card (image \| `### name`, type) |
+| HSBC Step Journey → Step: Highlight | `hsbcoffer (cream, split)` | A how-to step with a highlighted benefit, a steps image and a button |
+| HSBC Step Journey → Step: Feature Cards | `hsbcoffer (navy, icons)` | A how-to step with icon cards, a steps image and a button |
+| HSBC Feature Highlights | `hsbcoffer (red, icons, centered)` | App or product features with one button |
+| HSBC Notes & Disclaimers | `hsbcoffer (cream, notes)` | The campaign period and terms |
+
+- Insert **HSBC Step Journey** once per step; pick the item that fits the step's highlight.
+- Change an entry's look with the options above (e.g. `red` instead of `navy`); its rows stay the same.
+- Keep a campaign's images in its page media folder (e.g. `en-uk/offers/.autumn-travel/`); use white
+  icons on `navy` and `red`.
