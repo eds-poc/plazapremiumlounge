@@ -1,6 +1,6 @@
-// a themed full-width campaign panel (source: the Smart Traveller x HSBC offer pages): a centred
-// header, then cards, wide images, logo pills, buttons, closing text or notes, in authored order.
-// Each row's role comes from its content, so authors only write text, images and links.
+// Full-width campaign section with a centered header, cards, images, logos,
+// buttons, and notes. Row types are determined by content, so authors only
+// need to provide text, images, and links.
 
 const HEADING = /^H[1-6]$/;
 
@@ -77,9 +77,10 @@ function buttonsOf(node) {
 }
 
 /**
- * The text part of a header or card: an eyebrow (the lines before the heading; without a
- * heading, the first line once there are at least `minLines` lines), the heading, the text and
- * its buttons.
+  * Content inside a header or card:
+ * eyebrow, heading, body text, and buttons.
+ * If no heading exists, the first line becomes the eyebrow
+ * when there are at least `minLines` lines.
  * @param {Element[]} nodes block-level nodes
  * @param {{minLines: number}} options
  * @returns {{eyebrow: Element[], heading: Element|null, text: Element[], buttons: Element[]}}

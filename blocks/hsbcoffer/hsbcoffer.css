@@ -1,6 +1,6 @@
-/* hsbcoffer: a themed full-width campaign panel, as the source Smart Traveller x HSBC offer pages
-   (e.g. Autumn Travel). Values from the source campaign stylesheet; its own palette, so the site
-   styles are untouched. Text in the source's system font, headings in the site font */
+/* hsbcoffer: Full-width campaign section based on the Smart Traveller x HSBC
+   offer pages. Uses its own palette and styling to avoid affecting site-wide
+   styles. Campaign font for body text, site font for headings. */
 .hsbcoffer {
   --hsbcoffer-red:var(--color-hsbc-red);
   --hsbcoffer-red-dark:var(--color-hsbc-red-hover);
