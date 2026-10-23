@@ -26,7 +26,7 @@
 /* Previous pages */
 
 .breadcrumb-list a {
-  color: var(--color-text-subtle);
+  color: var(--color-text-secondary);
   text-decoration: none;
   transition: color 0.2s ease;
 }
@@ -41,7 +41,7 @@
 
 .breadcrumb-list li[aria-current='page'] {
   color: var(--color-brand-primary);
-  font-weight: 600;
+  font-weight: var(--font-weight-medium);
 }
 
 /* Mobile */
