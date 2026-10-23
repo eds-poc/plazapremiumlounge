@@ -1,0 +1,61 @@
+
+/* Breadcrumb */
+
+.breadcrumb-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.breadcrumb-list li {
+  display: flex;
+  align-items: center;
+  line-height: 1.5;
+}
+
+.breadcrumb-list li:not(:last-child)::after {
+  content: '<';
+  margin-inline: var(--spacing-2);
+  color: var(--color-neutral-600);
+}
+
+/* Previous pages */
+
+.breadcrumb-list a {
+  color: var(--color-text-subtle);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb-list a:hover,
+.breadcrumb-list a:focus-visible {
+  color: var(--color-brand-primary);
+  text-decoration: underline;
+}
+
+/* Current page */
+
+.breadcrumb-list li[aria-current='page'] {
+  color: var(--color-brand-primary);
+  font-weight: 600;
+}
+
+/* Mobile */
+
+@media (width < 768px) {
+  .breadcrumb-list {
+    font-size: var(--body-font-size-xs);
+  }
+}
+
+/* Tablet and above */
+
+@media (width >= 768px) {
+  .breadcrumb-list {
+    font-size: var(--body-font-size-s);
+  }
+}
