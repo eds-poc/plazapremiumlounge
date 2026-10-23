@@ -61,6 +61,32 @@ page, put it in its own band section after the Planner (`Style` = `inset, band`,
 On an offer page, put each in its own band section with `Style` = `inset, band, panel` (`Background`
 = `white` for the lead-in, `mist` for the callout).
 
+### Example: legal pages
+
+The legal pages (Terms and Conditions, Data Privacy and Security Policy, Website Terms of Use)
+use no other block: a grey title band, then the text as default content.
+
+| Title |
+| --- |
+| ## Terms and Conditions |
+
+| Section Metadata | |
+| --- | --- |
+| background | grey |
+
+---
+
+Last updated: 29 Sep 2025<br>…<br>**1. TERMS AND CONDITIONS**<br>1.1 These are these Terms and Conditions…
+
+- **Title band:** the heading 2 as on the source (`section.pageTitle`), in its own section with
+  `background` = `grey`.
+- **Text:** write clause headings as **bold** lines, not headings, as the source does. Lists stay
+  lists. A blank line starts a new paragraph; a soft line break (Shift+Enter) keeps lines together
+  (the Privacy Notice's sections).
+- **Width:** add Section Metadata `Style` = `fixed-width` to the text section for the source's
+  narrower text (Terms and Conditions); leave it out for the full content width.
+- **Metadata:** Title, Description and Keywords as the source page.
+
 ### Example: headline
 
 | Title (headline, center-all) |
