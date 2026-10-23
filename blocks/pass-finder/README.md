@@ -3,16 +3,22 @@
 Every lounge pass to search and choose from, as the source Lounge Passes page's "Explore Regional
 Passes". Everything comes from the passes service: which passes, in its order, and their images,
 names, prices, locations and points. So new passes and prices appear without editing the page. The
-page adds only the heading.
+page adds only the heading and the codes the service is asked with.
 
-## Table: one optional row
+## Table: an optional header row and the service's codes, 2 columns
 
 | Pass Finder | |
 | --- | --- |
 | ## Explore Regional Passes<br>Discover your pre-flight retreat. Choose a regional pass for personalized care and exclusive privileges on your frequent routes. | |
+| propertycode | PRPRTY1235 |
+| iata-code | HKG |
 
 - **Header row (optional):** a heading and an intro line, shown centred above the finder. Leave its
   second cell empty.
+- **`propertycode` and `iata-code` rows (required):** the property code and airport (IATA)
+  code the passes service is asked with, e.g. `propertycode | PRPRTY1235` and `iata-code | HKG`.
+  Letters and digits only; the key's case, spaces and dashes don't matter (`Property Code` works
+  too). They can go anywhere in the table. The page metadata isn't used for these.
 - Nothing else is authored. Any other row is left out (the preview site says so).
 - To leave a pass out or change one, change it in the passes service.
 
@@ -46,7 +52,7 @@ page adds only the heading.
 
 | What | From |
 | --- | --- |
-| The service, property and airport codes, currency | As Quick Buy: `scripts/endpoints.js`, the metadata sheet's `api-property-code` / `api-iata-code`, and the address's `currency` (else USD) |
+| The service, currency | As Quick Buy: `scripts/endpoints.js`, and the address's `currencyCode` (e.g. `?currencyCode=HKD`; else USD) |
 | Names, locations, descriptions | The service's, in English |
 | The card parts and the pop-up | `scripts/passes.js` and `styles/passes.css`, shared with Quick Buy |
 
@@ -54,6 +60,6 @@ page adds only the heading.
 
 | Situation | Visitors see | On the preview site, authors also see |
 | --- | --- | --- |
-| The metadata codes are missing or not valid | Nothing (the block is hidden) | Which value is missing or wrong |
-| A row other than the heading | The finder | That the row was left out |
+| The `propertycode` or `iata-code` row is missing or not valid | Nothing (the block is hidden) | Which row is missing or wrong |
+| A row other than the heading or the codes | The finder | That the row was left out |
 | The service doesn't answer | "We couldn't load the passes." with Try again | |

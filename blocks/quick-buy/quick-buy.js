@@ -4,7 +4,7 @@ import {
   readCurrency, readPass,
 } from '../../scripts/passes.js';
 import {
-  el, fetchPass, fetchPassList, getApiContext, isPreview, readPassList,
+  el, fetchPass, fetchPassList, getApiContext, isPreview, readApiRow, readPassList,
 } from '../../scripts/properties.js';
 
 const ADD_TO_CART = 'quick-buy:add-to-cart';
@@ -12,20 +12,26 @@ const PRODUCT_CODE = /^[A-Z0-9]+$/;
 const HEADINGS = 'h1, h2, h3, h4, h5, h6';
 
 /**
- * The authored rows: an optional header row (a heading and intro, no product code) and one row
- * per pass: the product code | the tag (the first line) and the Best for lines (a list).
+ * The authored rows: an optional header row (a heading and intro, no product code), the passes
+ * service's codes (`propertycode | …`, `iata-code | …`) and one row per pass: the product code |
+ * the tag (the first line) and the Best for lines (a list).
  * @param {Element} block
- * @returns {{header: Node[], products: {code: string, tag: string, lines: string[]}[],
- *   skipped: string[]}}
+ * @returns {{header: Node[], codes: Object<string, string>,
+ *   products: {code: string, tag: string, lines: string[]}[], skipped: string[]}}
  */
 function readRows(block) {
   const header = [];
+  const codes = {};
   const products = [];
   const skipped = [];
   [...block.children].forEach((row) => {
     const [first, second] = row.children;
     const code = (first?.textContent || '').trim().toUpperCase();
-    if (code && PRODUCT_CODE.test(code) && second) {
+    // (read first: "PROPERTYCODE" looks like a product code)
+    const api = readApiRow(row);
+    if (api) {
+      codes[api.name] = api.value;
+    } else if (code && PRODUCT_CODE.test(code) && second) {
       const lines = [...second.querySelectorAll('li')]
         .map((li) => li.textContent.trim())
         .filter(Boolean);
@@ -44,7 +50,9 @@ function readRows(block) {
       skipped.push(row.textContent.trim().slice(0, 40));
     }
   });
-  return { header, products, skipped };
+  return {
+    header, codes, products, skipped,
+  };
 }
 
 /**
@@ -149,14 +157,16 @@ function showMessage(at, text, retry, hints = []) {
 /**
  * Decorates the quick buy block: a row of passes from the passes service, as the source lounge
  * passes page's quick buy. The page authors the product codes, each pass's tag and its Best for
- * lines (and an optional heading and intro); the name, image, price, points and details come
- * from the service, with the property and airport codes from the page metadata (see
- * getApiContext) and the currency from the page address (else USD).
+ * lines (and an optional heading and intro), and the property and airport codes the service asks
+ * for (see getApiContext); the name, image, price, points and details come from the service, in
+ * the page address's currency (`currencyCode`, else USD).
  * @param {Element} block
  */
 export default function decorate(block) {
-  const { header, products, skipped } = readRows(block);
-  const context = getApiContext();
+  const {
+    header, codes, products, skipped,
+  } = readRows(block);
+  const context = getApiContext(codes);
   const hints = skipped.map((text) => `A row without a product code was left out: "${text}".`);
   block.replaceChildren();
   if (header.length) {
@@ -170,7 +180,7 @@ export default function decorate(block) {
   if (context.problems.length || !products.length) {
     // nothing to show visitors; authors see why on the preview site
     if (!products.length) hints.push('Add a row per pass: the product code, then its tag and Best for list.');
-    context.problems.forEach((problem) => hints.push(`The page metadata ${problem} (set it in the site's metadata sheet).`));
+    hints.push(...context.problems);
     if (isPreview()) showMessage(results, '', null, hints);
     else block.hidden = true;
     return;

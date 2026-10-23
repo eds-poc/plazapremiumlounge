@@ -4,7 +4,7 @@ import {
   readCurrency, readPass,
 } from '../../scripts/passes.js';
 import {
-  el, fetchPassList, getApiContext, isPreview, readPassList,
+  el, fetchPassList, getApiContext, isPreview, readApiRow, readPassList,
 } from '../../scripts/properties.js';
 
 const PAGE_SIZE = 9;
@@ -21,22 +21,27 @@ const WHOLE_IMAGE_TOLERANCE = 0.05;
 let count = 0;
 
 /**
- * The authored row: an optional heading and intro. The passes and everything on them come from
- * the passes service.
+ * The authored rows: an optional heading and intro, and the property and airport codes the passes
+ * service asks for (`propertycode | …`, `iata-code | …`). The passes and everything on them come
+ * from the service.
  * @param {Element} block
- * @returns {{header: Node[], skipped: string[]}}
+ * @returns {{header: Node[], codes: Object<string, string>, skipped: string[]}}
  */
 function readRows(block) {
   const header = [];
+  const codes = {};
   const skipped = [];
   [...block.children].forEach((row) => {
-    if (!header.length && row.querySelector(HEADINGS)) {
+    const api = readApiRow(row);
+    if (api) {
+      codes[api.name] = api.value;
+    } else if (!header.length && row.querySelector(HEADINGS)) {
       [...row.children].forEach((cell) => header.push(...cell.childNodes));
     } else if (row.textContent.trim()) {
       skipped.push(row.textContent.trim().slice(0, 40));
     }
   });
-  return { header, skipped };
+  return { header, codes, skipped };
 }
 
 /**
@@ -425,15 +430,16 @@ function buildControls(state, onChange) {
  * Decorates the pass finder block: every lounge pass from the passes service, with the source
  * Lounge Passes page's search, region and sort (kept in the page address), cards and pages of
  * nine. Every pass the service lists is shown as it gives it; the page authors only the heading and
- * intro. The property and airport codes come from the page metadata (see getApiContext), the
- * currency from the page address (else USD). The passes list is the same as the quick buy's (one
- * call, kept for the session).
+ * intro, and the property and airport codes the service asks for (see getApiContext). The
+ * currency is the page address's `currencyCode` (else USD). The passes list is the same as the
+ * quick buy's (one call, kept for the session).
  * @param {Element} block
  */
 export default function decorate(block) {
-  const { header, skipped } = readRows(block);
-  const context = getApiContext();
-  const leftOut = 'A row that isn\'t the heading was left out (the passes come from the service)';
+  const { header, codes, skipped } = readRows(block);
+  const context = getApiContext(codes);
+  const leftOut = 'A row that isn\'t the heading or a code was left out (the passes come from the '
+    + 'service)';
   const hints = skipped.map((text) => `${leftOut}: "${text}".`);
   block.replaceChildren();
   if (header.length) {
@@ -444,7 +450,7 @@ export default function decorate(block) {
   }
   const results = el('div', 'pass-finder-results');
   if (context.problems.length) {
-    context.problems.forEach((problem) => hints.push(`The page metadata ${problem} (set it in the site's metadata sheet).`));
+    hints.push(...context.problems);
     block.append(results);
     if (isPreview()) showMessage(results, '', null, hints);
     else block.hidden = true;

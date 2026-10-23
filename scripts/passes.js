@@ -17,12 +17,12 @@ const OTHER_RATES = /\b(?:st\s*member|member'?s?\s*rate|partner)\b/i;
 const GLOBAL = 'global';
 
 /**
- * The currency for the prices, as the lounge pages: the page address's `currency` when it's a
- * 3-letter code, else USD.
+ * The currency for the prices: the page address's `currencyCode` (the passes service's own name)
+ * when it's a 3-letter code, else USD.
  * @returns {string}
  */
 export function readCurrency() {
-  const value = (new URLSearchParams(window.location.search).get('currency') || '').trim().toUpperCase();
+  const value = (new URLSearchParams(window.location.search).get('currencyCode') || '').trim().toUpperCase();
   return /^[A-Z]{3}$/.test(value) ? value : DEFAULT_CURRENCY;
 }
 

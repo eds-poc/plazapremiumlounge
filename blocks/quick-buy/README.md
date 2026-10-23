@@ -5,17 +5,23 @@ Traveller's Choice"). The page names the passes, their tags and their Best for l
 else (the image, name, price, price per visit, points and details) comes from the passes service,
 so it's always current.
 
-## Table: an optional header row, then one row per pass, 2 columns
+## Table: an optional header row, the service's codes, then one row per pass, 2 columns
 
 | Quick Buy | |
 | --- | --- |
 | ## The Smart Traveller's Choice<br>Discover unparalleled service and seamless worldwide access with our curated Global Passes | |
+| propertycode | PRPRTY1235 |
+| iata-code | HKG |
 | PRD3705 | Easy Start<br>- One for departure, one for return<br>- Ideal for a single round-trip holiday |
 | PRD3696 | Most Popular<br>- Admit up to 4 companions in one visit<br>- Or split across two separate trips<br>- Or gift individual lounge vouchers to friends |
 | PRD3695 | Best Value<br>- Up to 10 guests admitted per visit<br>- … |
 
 - **Header row (optional):** a heading and an intro line, shown centred above the passes. Leave
   its second cell empty.
+- **`propertycode` and `iata-code` rows (required):** the property code and airport (IATA)
+  code the passes service is asked with, e.g. `propertycode | PRPRTY1235` and `iata-code | HKG`.
+  Letters and digits only; the key's case, spaces and dashes don't matter (`Property Code` works
+  too). They can go anywhere in the table. The page metadata isn't used for these.
 - **Column 1:** the pass's product code (e.g. `PRD3705`). Passes appear in the order you write
   them.
 - **Column 2:** the tag on the card (the first line, e.g. `Most Popular`; leave it out for no
@@ -50,15 +56,14 @@ so it's always current.
 | What | From |
 | --- | --- |
 | The service | `scripts/endpoints.js` (`productPasses`, a GET with the property code, airport code, currency and product code) |
-| Property code and airport (IATA) code | Page metadata `api-property-code` and `api-iata-code`, set once in the site's **metadata sheet** (the `/**` row, or a language folder's row, or a page's own Metadata table). Every block that calls the service reads them the same way (`getApiContext()` in `scripts/properties.js`) |
-| Currency | The page address's `currency` (e.g. `?currency=HKD`), else USD |
+| Currency | The page address's `currencyCode` (e.g. `?currencyCode=HKD`), else USD |
 | Names, descriptions | The service's, in English (it has no translations) |
 
 ## Messages
 
 | Situation | Visitors see | On the preview site, authors also see |
 | --- | --- | --- |
-| The metadata codes are missing or not valid | Nothing (the block is hidden) | Which value is missing or wrong |
+| The `propertycode` or `iata-code` row is missing or not valid | Nothing (the block is hidden) | Which row is missing or wrong |
 | A product code isn't in the service, or has no price | The other passes | Which code was left out |
 | No pass could be shown | Nothing | Why |
 | The service doesn't answer | "We couldn't load the passes." with Try again | |

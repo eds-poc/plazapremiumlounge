@@ -174,21 +174,40 @@ export function isFirstBrand(name) {
   return FIRST_BRANDS.some((brand) => compact.startsWith(brand));
 }
 
+// the passes blocks' own rows for the codes the passes API asks for (the key's case, spaces and
+// dashes don't matter: "propertycode", "Property Code", "iata-code" …)
+const API_ROWS = { propertycode: 'propertyCode', iatacode: 'iataCode' };
+const API_ROW_NAMES = { propertyCode: 'propertycode', iataCode: 'iata-code' };
+const API_ROW_EXAMPLES = { propertyCode: 'PRPRTY1235', iataCode: 'HKG' };
+
 /**
- * The property and airport (IATA) codes the passes API asks for, from the page metadata
- * `api-property-code` and `api-iata-code`: set once for the site (or per language folder) in the
- * bulk metadata sheet, or on a page. Every block reads them here, so none authors its own. A value
- * that's missing or malformed (letters and digits only) isn't guessed: it's listed in `problems`,
- * for the block to report on the preview site.
+ * A block row holding one of the passes API's codes (`propertycode | PRPRTY1235`,
+ * `iata-code | HKG`): which code and its value, or null for any other row.
+ * @param {Element} row
+ * @returns {{name: string, value: string}|null}
+ */
+export function readApiRow(row) {
+  const [first, second] = row.children;
+  const name = API_ROWS[toKey(first?.textContent).replace(/-/g, '')];
+  return name ? { name, value: (second?.textContent || '').trim() } : null;
+}
+
+/**
+ * The property and airport (IATA) codes the passes API asks for, as the block authors them (see
+ * readApiRow). A value that's missing or malformed (letters and digits only) isn't guessed, and
+ * the page metadata isn't read: it's listed in `problems`, for the block to report on the preview
+ * site.
+ * @param {{propertyCode?: string, iataCode?: string}} codes
  * @returns {{propertyCode: string, iataCode: string, problems: string[]}}
  */
-export function getApiContext() {
-  const read = (name) => getMetadata(name).trim().toUpperCase();
-  const propertyCode = read('api-property-code');
-  const iataCode = read('api-iata-code');
-  const problems = [['api-property-code', propertyCode], ['api-iata-code', iataCode]]
+export function getApiContext(codes = {}) {
+  const propertyCode = (codes.propertyCode || '').trim().toUpperCase();
+  const iataCode = (codes.iataCode || '').trim().toUpperCase();
+  const problems = Object.entries({ propertyCode, iataCode })
     .filter(([, value]) => !/^[A-Z0-9]+$/.test(value))
-    .map(([name, value]) => (value ? `${name} "${value}" isn't a valid code` : `${name} is missing`));
+    .map(([name, value]) => (value
+      ? `The block's "${API_ROW_NAMES[name]}" value "${value}" isn't a valid code (letters and digits only).`
+      : `The block's "${API_ROW_NAMES[name]}" row is missing (e.g. "${API_ROW_NAMES[name]} | ${API_ROW_EXAMPLES[name]}").`));
   return { propertyCode, iataCode, problems };
 }
 
