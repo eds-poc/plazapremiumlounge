@@ -22,7 +22,13 @@ const GLOBAL = 'global';
  * @returns {string}
  */
 export function readCurrency() {
-  const value = (new URLSearchParams(window.location.search).get('currencyCode') || '').trim().toUpperCase();
+  const params = new URLSearchParams(window.location.search);
+
+  const value = ([...params.entries()]
+    .find(([key]) => key.toLowerCase() === 'currencycode')?.[1] || '')
+    .trim()
+    .toUpperCase();
+
   return /^[A-Z]{3}$/.test(value) ? value : DEFAULT_CURRENCY;
 }
 
