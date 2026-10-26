@@ -1,18 +1,21 @@
 /*
- * Breadcrumb: the trail from the page's section to the page, as the source's offer pages
- * ("Offers < Plaza Petit: Discover the World Before Departure"). Built automatically when the page
- * has the metadata `breadcrumb` = `on` (set for a whole folder in the metadata sheet), from the
- * address: one level per folder under the language folder (e.g. /en-uk/offers), then the page.
- * Each level's label is that page's own `breadcrumb-title` metadata, else its title; the parents'
- * are read from their pages (once per browser session). A breadcrumb authored on the page (one
- * line per level, a link on each but the last) is used as written instead.
+ * Breadcrumb: the page's parent and the page, as the source's offer pages ("Offers < Plaza Petit:
+ * Discover the World Before Departure"). Built automatically when the page has the metadata
+ * `breadcrumb` = `on` (set for a whole folder in the metadata sheet). The parent is the page one
+ * level up in the same language folder (/zh-cn/offers for /zh-cn/offers/ctbcreward: the page named
+ * after the folder, else the folder's own index page). Each item's label is that page's own
+ * `breadcrumb-title` metadata, else its title; the parent's is read from its page (kept for the
+ * browser session once found). Without a parent page or label, only the page itself shows. A
+ * breadcrumb authored on the page (one line per item, a link on each but the last) is used as
+ * written instead.
  */
 import { getMetadata } from '../../scripts/aem.js';
 import { getSiteFolder, translate } from '../../scripts/i18n.js';
 
 // the site name the source adds to page titles ("… | Plaza Premium Lounge"), not part of a label
 const TITLE_SUFFIX = /\s*\|\s*Plaza Premium Lounge\s*$/i;
-const CACHE_KEY = 'ppl-breadcrumb';
+// (only parents that were found are kept: a missing one is asked for again on the next page)
+const CACHE_KEY = 'ppl-breadcrumb-parent';
 const FETCH_TIMEOUT_MS = 8000;
 
 /**
@@ -30,15 +33,6 @@ function el(tag, className, text) {
 }
 
 /**
- * A label from a folder or page name ("lounge-passes" → "Lounge Passes"), when its page has none.
- * @param {string} slug
- * @returns {string}
- */
-function labelFromSlug(slug) {
-  return decodeURIComponent(slug).replace(/[-_]+/g, ' ').replace(/\b\p{L}/gu, (c) => c.toUpperCase());
-}
-
-/**
  * A page's label: its `breadcrumb-title`, else its title (without the site name).
  * @param {(name: string) => string} meta Reads a metadata value of that page
  * @param {string} [title] The page's <title>
@@ -49,8 +43,8 @@ function labelOf(meta, title = '') {
 }
 
 /**
- * The labels kept for this browser session, by page path.
- * @returns {Object<string, {label: string, exists: boolean}>}
+ * The parents found earlier in this browser session, by the current page's parent path.
+ * @returns {Object<string, {label: string, href: string}>}
  */
 function readCache() {
   try {
@@ -61,62 +55,78 @@ function readCache() {
 }
 
 /**
- * Keeps a parent page's label for this session.
+ * Keeps a found parent for this session.
  * @param {string} path
- * @param {{label: string, exists: boolean}} entry
+ * @param {{label: string, href: string}} parent
  */
-function keep(path, entry) {
+function keep(path, parent) {
   try {
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ...readCache(), [path]: entry }));
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ...readCache(), [path]: parent }));
   } catch { /* storage blocked: asked again next time */ }
 }
 
 /**
- * A parent page's label and whether the page exists, from its own metadata (its <head>, where
- * EDS writes both the page's Metadata table and the metadata sheet's values).
- * @param {string} path
- * @returns {Promise<{label: string, exists: boolean}>}
+ * A page's label from its own <head> (where EDS writes both the page's Metadata table and the
+ * metadata sheet's values), or null when there's no such page.
+ * @param {string} href
+ * @param {AbortSignal} signal
+ * @returns {Promise<string|null>} '' for a page without a label
+ */
+async function readPage(href, signal) {
+  const resp = await fetch(href, { signal });
+  if (resp.status === 404) return null;
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  const doc = new DOMParser().parseFromString(await resp.text(), 'text/html');
+  const meta = (name) => (doc.head.querySelector(`meta[name="${name}"], meta[property="${name}"]`)?.content || '').trim();
+  return labelOf(meta, doc.title);
+}
+
+/**
+ * The page's parent: the page named after the folder one level up (/zh-cn/offers), else that
+ * folder's index page (/zh-cn/offers/); its label and address, or null when neither page exists,
+ * it has no label, or it can't be read in time.
+ * @param {string} path The parent's path, e.g. /zh-cn/offers
+ * @returns {Promise<{label: string, href: string}|null>}
  */
 async function readParent(path) {
   const kept = readCache()[path];
-  if (kept) return kept;
+  if (kept?.label) return kept;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const resp = await fetch(path, { signal: controller.signal });
-    if (!resp.ok) {
-      const entry = { label: '', exists: false };
-      if (resp.status === 404) keep(path, entry);
-      return entry;
+    let href = path;
+    let label = await readPage(href, controller.signal);
+    if (label === null) {
+      href = `${path}/`;
+      label = await readPage(href, controller.signal);
     }
-    const doc = new DOMParser().parseFromString(await resp.text(), 'text/html');
-    const meta = (name) => (doc.head.querySelector(`meta[name="${name}"], meta[property="${name}"]`)?.content || '').trim();
-    const entry = { label: labelOf(meta, doc.title), exists: true };
-    keep(path, entry);
-    return entry;
+    if (!label) return null;
+    const parent = { label, href };
+    keep(path, parent);
+    return parent;
   } catch {
-    // (offline or slow: the folder's name for now, asked again on the next page)
-    return { label: '', exists: false };
+    // (offline, slow or failing: the page alone this time, asked again on the next page)
+    return null;
   } finally {
     clearTimeout(timer);
   }
 }
 
 /**
- * The trail's levels for this page: each folder under the language folder, then the page; []
- * outside a language folder or on its homepage.
- * @returns {{parents: {path: string, slug: string}[], current: string}|null}
+ * The page's parent path (one level up, in the same language folder) and the page's own name;
+ * null outside a language folder or on its homepage. A page right under the language folder has
+ * no parent (its homepage isn't a breadcrumb level).
+ * @returns {{parent: string, current: string}|null}
  */
 function readLevels() {
   const site = getSiteFolder();
   if (!site) return null;
   const segments = window.location.pathname.replace(/\.html$/, '').split('/').filter(Boolean).slice(1);
   if (!segments.length) return null;
-  const parents = segments.slice(0, -1).map((slug, i) => ({
-    path: `/${site}/${segments.slice(0, i + 1).join('/')}`,
-    slug,
-  }));
-  return { parents, current: segments[segments.length - 1] };
+  return {
+    parent: segments.length > 1 ? `/${site}/${segments.slice(0, -1).join('/')}` : '',
+    current: segments[segments.length - 1],
+  };
 }
 
 /**
@@ -159,7 +169,7 @@ function readAuthored(block) {
  * Decorates the breadcrumb: the authored trail, else the one built from the address.
  * @param {Element} block
  */
-export default async function decorate(block) {
+export default function decorate(block) {
   const authored = readAuthored(block);
   if (authored.length) {
     block.replaceChildren(buildTrail(authored));
@@ -173,24 +183,19 @@ export default async function decorate(block) {
   }
   const current = labelOf((name) => getMetadata(name), document.title)
     || document.querySelector('main h1')?.textContent.trim()
-    || labelFromSlug(levels.current);
-  // drawn straight away (the parents' kept labels, else their folder names), then each parent's
-  // own label once read
-  const cache = readCache();
-  const items = levels.parents.map(({ path, slug }) => ({
-    path,
-    slug,
-    label: cache[path]?.label || labelFromSlug(slug),
-    href: cache[path]?.exists === false ? '' : path,
-  }));
-  const draw = () => block.replaceChildren(buildTrail([...items, { label: current }]));
-  draw();
-  const read = await Promise.all(items.map((item) => readParent(item.path)));
-  let changed = false;
-  read.forEach(({ label, exists }, i) => {
-    const next = { label: label || labelFromSlug(items[i].slug), href: exists ? items[i].path : '' };
-    if (next.label !== items[i].label || next.href !== items[i].href) changed = true;
-    Object.assign(items[i], next);
+    || decodeURIComponent(levels.current).replace(/[-_]+/g, ' ');
+  const kept = levels.parent ? readCache()[levels.parent] : null;
+  if (!levels.parent || kept?.label) {
+    block.replaceChildren(buildTrail([...(kept?.label ? [kept] : []), { label: current }]));
+    return;
+  }
+  // the row's space is kept (the page alone, hidden) while the parent is read, so nothing moves
+  // and no placeholder label shows; then the parent and the page appear together. (Not awaited:
+  // the section, with the offer banner, shows without waiting for the parent's page)
+  block.replaceChildren(buildTrail([{ label: current }]));
+  block.classList.add('is-loading');
+  readParent(levels.parent).then((parent) => {
+    block.replaceChildren(buildTrail([...(parent ? [parent] : []), { label: current }]));
+    block.classList.remove('is-loading');
   });
-  if (changed) draw();
 }

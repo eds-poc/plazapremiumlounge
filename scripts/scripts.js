@@ -138,10 +138,12 @@ function buildWidgetAutoBlocks(main) {
  * Adds the breadcrumb on pages with the metadata `breadcrumb` = `on` (set for a folder in the
  * metadata sheet, e.g. the offers), unless the page authors one: just before the page title, at
  * the end of the section before it (after the banner, as the source), else at the top of the
- * title's section.
+ * title's section. Only in the page's own main: fragments (the nav, the footer, modal pages) are
+ * built with this too, but the page's metadata isn't theirs.
  * @param {Element} main The container element
  */
 function buildBreadcrumbAutoBlock(main) {
+  if (main !== document.querySelector('main')) return;
   if (!/^(on|true|yes)$/i.test(getMetadata('breadcrumb').trim()) || main.querySelector('.breadcrumb')) return;
   const heading = main.querySelector('h1, h2');
   const section = heading?.closest('main > div') || main.querySelector(':scope > div');

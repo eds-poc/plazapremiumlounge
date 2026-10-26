@@ -11,6 +11,11 @@
   --breadcrumb-separator: rgb(33 37 41 / 75%);
 }
 
+/* while the parent is read: the row's space kept, nothing shown yet */
+.breadcrumb.is-loading {
+  visibility: hidden;
+}
+
 .breadcrumb-list {
   display: flex;
   flex-wrap: wrap;
