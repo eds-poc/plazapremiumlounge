@@ -1,8 +1,8 @@
 /*
  * Captcha (hCaptcha) for the form blocks: buildForm adds one before the button with
  * `captcha: true` in the block's definition (see scripts/forms.js), and its token goes with the
- * data as `h-captcha-response`. The site key is public: it comes from the site's public
- * configuration (/config.json, `hcaptcha.siteKey`). The secret stays in the API that checks the
+ * data as `h-captcha-response`. The site key is public: it comes from the site's config sheet
+ * (/config.json, the row `hcaptcha-site-key`). The secret stays in the API that checks the
  * token with hCaptcha (siteverify). Without a configured key, hCaptcha's test key (no protection)
  * is used, on the local and aem.page / aem.live hosts only.
  */
@@ -23,7 +23,7 @@ const LANGUAGES = {
 let ready;
 
 /**
- * The site key: the public configuration's, else the test key on the test hosts.
+ * The site key: the config sheet's, else the test key on the test hosts.
  * @returns {Promise<string>}
  */
 function readSiteKey() {
@@ -31,7 +31,9 @@ function readSiteKey() {
     .then((res) => (res.ok ? res.json() : null))
     .catch(() => null)
     .then((config) => {
-      const key = config?.hcaptcha?.siteKey;
+      // the config sheet's row `hcaptcha-site-key` (Key | Value), or a JSON `hcaptcha.siteKey`
+      const key = config?.data?.find((row) => row.Key === 'hcaptcha-site-key')?.Value
+        || config?.hcaptcha?.siteKey;
       if (key) return key;
       if (TEST_HOSTS.test(window.location.hostname)) return TEST_SITE_KEY;
       throw new Error('captcha: no hCaptcha site key in the site configuration');
