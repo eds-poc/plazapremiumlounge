@@ -51,9 +51,9 @@ column has room for both (wide screens), else above the button. It loads only wh
 near the screen (once per page). A send waits for the tick; the token goes with the data as
 `h-captcha-response`, and a refused send resets the captcha (a token works once, for 120 seconds).
 
-**The site key** (public) comes from the site's public configuration, served at `/config.json`:
-`{ "hcaptcha": { "siteKey": "<key>" } }`, set with the configuration API
-(`admin.hlx.page/config/eds-poc/sites/plazapremiumlounge/public.json`). Without it, hCaptcha's
+**The site key** (public) comes from the site's `config` sheet in Document Authoring (served at
+`/config.json`, next to `property-list-url`): a row with Key `hcaptcha-site-key` and the key as
+its Value, previewed and published like the sheet's other rows. Without it, hCaptcha's
 test key is used on the local preview and the `*.aem.page` / `*.aem.live` sites only (it always
 passes and shows a "for testing only" note); on any other host the form says the check couldn't
 load and sends nothing. The **secret** is never in the site: only in the Contact API's
@@ -61,9 +61,9 @@ environment variables.
 
 Before go-live:
 
-1. **Key**: the live key (or a new one) in the public configuration, with our hostnames allowed in
-   the hCaptcha dashboard (the `main--plazapremiumlounge--eds-poc.aem.page` / `.aem.live` sites,
-   the branch previews being tested and the production domain).
+1. **Key**: the live key (or a new one) in the config sheet's `hcaptcha-site-key` row, with our
+   hostnames allowed in the hCaptcha dashboard (the `main--plazapremiumlounge--eds-poc.aem.page` /
+   `.aem.live` sites, the branch previews being tested and the production domain).
 2. **Contact API**: it checks `h-captcha-response` with a form-encoded POST (not JSON) to
    `https://api.hcaptcha.com/siteverify` with `secret`, `response`, `sitekey` (so a token from
    another key can't be used) and the visitor's `remoteip`; it accepts only `success: true`, and
