@@ -9,6 +9,7 @@ import {
   loadSections,
   loadCSS,
   buildBlock,
+  getMetadata,
 } from './aem.js';
 // eslint-disable-next-line import/no-cycle
 import { installModalLinks, registerModalSections } from './modal.js';
@@ -134,6 +135,26 @@ function buildWidgetAutoBlocks(main) {
 }
 
 /**
+ * Adds the breadcrumb on pages with the metadata `breadcrumb` = `on` (set for a folder in the
+ * metadata sheet, e.g. the offers), unless the page authors one: just before the page title, at
+ * the end of the section before it (after the banner, as the source), else at the top of the
+ * title's section.
+ * @param {Element} main The container element
+ */
+function buildBreadcrumbAutoBlock(main) {
+  if (!/^(on|true|yes)$/i.test(getMetadata('breadcrumb').trim()) || main.querySelector('.breadcrumb')) return;
+  const heading = main.querySelector('h1, h2');
+  const section = heading?.closest('main > div') || main.querySelector(':scope > div');
+  if (!section) return;
+  const breadcrumb = buildBlock('breadcrumb', '');
+  const top = heading ? [...section.children].find((child) => child.contains(heading)) : null;
+  const before = section.previousElementSibling;
+  if (top && top !== section.firstElementChild) top.before(breadcrumb);
+  else if (heading && before) before.append(breadcrumb);
+  else section.prepend(breadcrumb);
+}
+
+/**
  * Builds all synthetic blocks in a container element.
  * @param {Element} main The container element
  */
@@ -157,6 +178,7 @@ function buildAutoBlocks(main) {
       });
     }
     buildWidgetAutoBlocks(main);
+    buildBreadcrumbAutoBlock(main);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Auto Blocking failed', error);

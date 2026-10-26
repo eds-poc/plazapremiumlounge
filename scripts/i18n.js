@@ -21,6 +21,10 @@ export const DEFAULT_SITE = 'en-uk';
 
 // texts by language tag, or by its base language (zh-HK, then zh, then en)
 const TEXTS = {
+  // the breadcrumb trail's name for screen readers
+  breadcrumb: {
+    en: 'Breadcrumb', zh: '面包屑导航', 'zh-HK': '導覽路徑', ja: 'パンくずリスト', pt: 'Trilha de navegação',
+  },
   opensInNewTab: {
     en: ' (opens in a new tab)',
     zh: '（在新标签页中打开）',
