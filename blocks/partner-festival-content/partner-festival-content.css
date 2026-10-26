@@ -1,0 +1,115 @@
+/* partner-festival-content: a partner festival intro (source /en-uk/rockinthunder): a maroon pill
+   eyebrow, a large heading, the description and italic small print, then the campaign CTAs as
+   rounded boxes (label over value): the first light, the others maroon. Mobile first; from 768px
+   the source's 32px inset, from 1024px the source's text column width */
+.partner-festival-content {
+  --partner-festival-ink: var(--color-campaign-ink);
+  --partner-festival-muted: #6b7280;
+  --partner-festival-label: #9ca3af;
+  --partner-festival-surface: #f9fafb;
+
+  margin-bottom: 64px;
+  color: var(--color-text);
+  font-family: var(--font-family-campaign);
+}
+
+.partner-festival-content .partner-festival-content-eyebrow {
+  display: inline-block;
+  margin: 0 0 24px;
+  padding: 6px 32px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-brand-tint);
+  color: var(--color-brand-primary-action);
+  font-size: 8.5pt;
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: 1.4;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.partner-festival-content .partner-festival-content-heading {
+  margin: 0;
+  color: var(--partner-festival-ink);
+  font-family: var(--font-family-primary);
+  font-size: 27pt;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+/* the description: no space between paragraphs, as the source (the eyebrow keeps its own) */
+.partner-festival-content .partner-festival-content-content > p:not(.partner-festival-content-eyebrow) {
+  margin: 0;
+  font-size: var(--font-size-md);
+  line-height: 1.625;
+}
+
+.partner-festival-content .partner-festival-content-content > p.partner-festival-content-note {
+  color: var(--partner-festival-muted);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.partner-festival-content .partner-festival-content-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+}
+
+.partner-festival-content .partner-festival-content-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 24px;
+  border: var(--base-border-width) solid var(--color-border-subtle);
+  border-radius: var(--radius-campaign);
+  background-color: var(--partner-festival-surface);
+  color: var(--partner-festival-ink);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: 1.4;
+  text-decoration: none;
+}
+
+/* the second and later CTAs: maroon, as the source "Lounge Pass Validity" */
+.partner-festival-content .partner-festival-content-cta ~ .partner-festival-content-cta {
+  border-width: 0;
+  background-color: var(--color-brand-primary);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%), 0 2px 4px -2px rgb(0 0 0 / 10%);
+  color: var(--color-text-inverse);
+}
+
+.partner-festival-content .partner-festival-content-cta-label {
+  color: var(--partner-festival-label);
+  font-size: 7pt;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.partner-festival-content .partner-festival-content-cta ~ .partner-festival-content-cta .partner-festival-content-cta-label {
+  color: rgb(255 255 255 / 70%);
+}
+
+.partner-festival-content .partner-festival-content-cta-value {
+  font-size: 10pt;
+}
+
+.partner-festival-content a.partner-festival-content-cta:hover,
+.partner-festival-content a.partner-festival-content-cta:focus-visible {
+  box-shadow: var(--shadow-campaign-button-hover);
+}
+
+@media (width >=768px) {
+  .partner-festival-content {
+    padding-inline: 32px;
+  }
+}
+
+@media (width >=1024px) {
+  /* one-off: the source's text column (654px beside its 480px images) */
+  .partner-festival-content .partner-festival-content-content,
+  .partner-festival-content .partner-festival-content-ctas {
+    max-width: 654px;
+  }
+}

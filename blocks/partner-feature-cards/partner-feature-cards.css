@@ -1,0 +1,190 @@
+/* partner-feature-cards: partner offer cards (source /en-uk/rockinthunder pricing grid): white
+   rounded cards with an eyebrow, a title and description, the price in a grey box and the
+   benefits with round markers. A card with a badge is highlighted: maroon border, deep shadow,
+   maroon eyebrow and price. One column, two from 768px with the source's 32px inset */
+.partner-feature-cards {
+  --partner-cards-ink: var(--color-campaign-ink);
+  --partner-cards-muted: #6b7280;
+  --partner-cards-label: #9ca3af;
+  --partner-cards-copy: #374151;
+  --partner-cards-surface: #f9fafb;
+  --partner-cards-accent: var(--color-brand-primary);
+
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  margin-bottom: var(--spacing-12);
+  font-family: var(--font-family-campaign);
+}
+
+.partner-feature-cards .partner-feature-cards-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 32px var(--spacing-8);
+  border: var(--base-border-width) solid var(--color-border-subtle);
+  border-radius: 24px;
+  background-color: var(--color-background);
+  transition: box-shadow 0.3s;
+}
+
+.partner-feature-cards .partner-feature-cards-card:hover {
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%), 0 8px 10px -6px rgb(0 0 0 / 10%);
+}
+
+/* the highlighted card (with a badge), as the source "Vino Volo Set Meal" */
+.partner-feature-cards .partner-feature-cards-card.featured {
+  --partner-cards-accent: var(--color-brand-primary-action);
+
+  border: 2px solid var(--color-brand-primary-action);
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
+}
+
+/* the badge: above the eyebrow on small screens, top right of the card from 1024px */
+.partner-feature-cards .partner-feature-cards-badge {
+  align-self: flex-start;
+  margin: 0 0 var(--spacing-5);
+  padding: 4px 14px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-brand-primary-action);
+  color: var(--color-text-inverse);
+  font-size: 7pt;
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: 1.4;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.partner-feature-cards .partner-feature-cards-eyebrow {
+  margin: 0 0 var(--spacing-3);
+  color: var(--partner-cards-label);
+  font-size: 8.5pt;
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: 1.4;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.partner-feature-cards .featured .partner-feature-cards-eyebrow {
+  color: var(--partner-cards-accent);
+  letter-spacing: 0.05em;
+}
+
+.partner-feature-cards .partner-feature-cards-title {
+  margin: 0;
+  color: var(--partner-cards-ink);
+  font-family: var(--font-family-primary);
+  font-size: 18pt;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.25;
+}
+
+.partner-feature-cards .partner-feature-cards-description {
+  margin: var(--spacing-3) 0 0;
+  color: var(--partner-cards-muted);
+  font-size: 10.5pt;
+  line-height: 1.4;
+}
+
+/* the price: currency, a large amount and the label on one baseline in a grey box; the label
+   moves under the amount when the card is narrow */
+.partner-feature-cards .partner-feature-cards-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--spacing-3);
+  margin: 0 0 32px;
+  padding: 24px var(--spacing-7);
+  border: var(--base-border-width) solid var(--color-border-subtle);
+  border-radius: var(--radius-campaign);
+  background-color: var(--partner-cards-surface);
+}
+
+.partner-feature-cards .partner-feature-cards-currency {
+  color: var(--partner-cards-muted);
+  font-size: 10.5pt;
+  font-weight: var(--font-weight-campaign-bold);
+  letter-spacing: 0.1em;
+}
+
+.partner-feature-cards .partner-feature-cards-amount {
+  color: var(--partner-cards-accent);
+  font-size: 40px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.partner-feature-cards .partner-feature-cards-label {
+  margin-left: var(--spacing-3);
+  color: var(--partner-cards-label);
+  font-size: 9pt;
+  font-weight: 600;
+}
+
+.partner-feature-cards .partner-feature-cards-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* each benefit with a round tinted marker before it, as the source */
+.partner-feature-cards .partner-feature-cards-benefit {
+  position: relative;
+  padding-left: 36px;
+  color: var(--partner-cards-copy);
+  font-size: 11pt;
+  line-height: 1.5;
+}
+
+.partner-feature-cards .partner-feature-cards-benefit::before {
+  position: absolute;
+  top: 2px;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-circle);
+  background-color: var(--partner-cards-accent);
+  content: '';
+  opacity: 0.1;
+}
+
+.partner-feature-cards .partner-feature-cards-benefit-title {
+  font-weight: var(--font-weight-campaign-bold);
+}
+
+@media (width >=768px) {
+  .partner-feature-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-inline: 32px;
+  }
+
+  .partner-feature-cards .partner-feature-cards-card {
+    padding: 40px;
+  }
+
+  .partner-feature-cards .partner-feature-cards-price {
+    padding-inline: 24px;
+  }
+
+  /* two cards side by side are narrower than one on a phone: a smaller amount until 1024px */
+  .partner-feature-cards .partner-feature-cards-amount {
+    font-size: 36px;
+  }
+}
+
+@media (width >=1024px) {
+  /* the source's 48px amount, once the two cards are wide enough for it */
+  .partner-feature-cards .partner-feature-cards-amount {
+    font-size: 36pt;
+  }
+
+  .partner-feature-cards .partner-feature-cards-badge {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    margin: 0;
+  }
+}

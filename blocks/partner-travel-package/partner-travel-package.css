@@ -1,0 +1,134 @@
+/* partner-travel-package: partner offer redemption steps (source /en-uk/rockinthunder "How to
+   Redeem Your Festival Travel Package"): a white rounded panel, centred, with a maroon eyebrow,
+   the heading and the steps, each a numbered maroon circle over its title and description.
+   Mobile first: the steps one under the other; from 768px three across, joined by a dashed line
+   between the circles, with the source's 32px inset */
+.partner-travel-package {
+  --partner-travel-ink: var(--color-campaign-ink);
+  --partner-travel-title: #111827;
+  --partner-travel-copy: #4b5563;
+  --partner-travel-line: #e5e7eb;
+  --partner-travel-plum: #700040;
+  --partner-travel-circle: 56px;
+
+  margin-bottom: 24px;
+  padding: 32px var(--spacing-7);
+  border: var(--base-border-width) solid var(--color-border-subtle);
+  border-radius: 24px;
+  background-color: var(--color-background);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%), 0 8px 10px -6px rgb(0 0 0 / 10%);
+  font-family: var(--font-family-campaign);
+  text-align: center;
+}
+
+.partner-travel-package .partner-travel-package-eyebrow {
+  margin: 0 0 16px;
+  color: var(--partner-travel-plum);
+  font-size: 9pt;
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.partner-travel-package .partner-travel-package-heading {
+  margin: 0;
+  color: var(--partner-travel-ink);
+  font-family: var(--font-family-primary);
+  font-size: 20pt;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+}
+
+.partner-travel-package .partner-travel-package-intro {
+  margin: var(--spacing-5) auto 0;
+  color: var(--partner-travel-copy);
+  font-size: 11pt;
+}
+
+.partner-travel-package .partner-travel-package-steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.partner-travel-package .partner-travel-package-step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.partner-travel-package .partner-travel-package-number {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--partner-travel-circle);
+  height: var(--partner-travel-circle);
+  margin-bottom: 24px;
+  border-radius: var(--radius-circle);
+  background-color: var(--color-brand-primary);
+  box-shadow: 0 16px 48px rgb(0 0 0 / 17.6%);
+  color: var(--color-text-inverse);
+  font-size: 13.5pt;
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: 1;
+}
+
+/* the source's circle colours: maroon, plum, then the action maroon (repeating) */
+.partner-travel-package .partner-travel-package-step:nth-child(3n + 2) .partner-travel-package-number {
+  background-color: var(--partner-travel-plum);
+}
+
+.partner-travel-package .partner-travel-package-step:nth-child(3n) .partner-travel-package-number {
+  background-color: var(--color-brand-primary-action);
+}
+
+.partner-travel-package .partner-travel-package-step-title {
+  margin: 0 0 var(--spacing-3);
+  color: var(--partner-travel-title);
+  font-family: var(--font-family-primary);
+  font-size: 13.5pt;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+}
+
+.partner-travel-package .partner-travel-package-step-description {
+  /* one-off: the source's 320px description width */
+  max-width: 320px;
+  margin: 0;
+  color: var(--partner-travel-copy);
+  font-size: 11pt;
+  line-height: 1.625;
+}
+
+@media (width >=768px) {
+  .partner-travel-package {
+    margin-inline: 32px;
+    padding: 48px;
+  }
+
+  .partner-travel-package .partner-travel-package-steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /* the dashed line from the previous circle's centre to this one, behind the circles */
+  .partner-travel-package .partner-travel-package-step + .partner-travel-package-step::before {
+    position: absolute;
+    top: calc(var(--partner-travel-circle) / 2);
+    right: 50%;
+    left: -50%;
+    border-top: var(--base-border-width) dashed var(--partner-travel-line);
+    content: '';
+  }
+
+  /* a new row of three starts without a line */
+  .partner-travel-package .partner-travel-package-step:nth-child(3n + 1)::before {
+    display: none;
+  }
+}
