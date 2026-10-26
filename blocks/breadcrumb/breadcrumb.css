@@ -1,0 +1,61 @@
+/* breadcrumb: the source offer pages' trail ("Offers < page") between the banner and the title:
+   the levels in a row, "<" between them, the earlier levels as grey links (no change on hover, as
+   the source), the page itself in maroon. 14px on phones, 16px from 768px. Started from the HSBC
+   offer branch's breadcrumb, with the source's values */
+.breadcrumb {
+  --breadcrumb-text: var(--color-text);
+  --breadcrumb-link: var(--color-text-secondary);
+  --breadcrumb-current: var(--color-brand-primary);
+
+  /* one-off: the source's (Bootstrap) separator grey */
+  --breadcrumb-separator: rgb(33 37 41 / 75%);
+}
+
+/* while the parent is read: the row's space kept, nothing shown yet */
+.breadcrumb.is-loading {
+  visibility: hidden;
+}
+
+.breadcrumb-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0;
+  padding: var(--spacing-4) 0 0;
+  list-style: none;
+  color: var(--breadcrumb-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+}
+
+.breadcrumb-list li {
+  padding: var(--spacing-1) var(--spacing-2) var(--spacing-1) 0;
+}
+
+/* the source's "<" before every level but the first */
+.breadcrumb-list li + li::before {
+  content: '<';
+  padding-inline-end: var(--spacing-3);
+  color: var(--breadcrumb-separator);
+}
+
+/* earlier levels: links, as the source (the same on hover; keyboard focus shows the site's ring) */
+.breadcrumb-list a:any-link,
+.breadcrumb-list a:hover {
+  color: var(--breadcrumb-link);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+}
+
+/* the page itself */
+.breadcrumb-list li[aria-current='page'] {
+  color: var(--breadcrumb-current);
+  font-weight: var(--font-weight-medium);
+}
+
+@media (width >= 768px) {
+  .breadcrumb-list {
+    font-size: var(--font-size-md);
+  }
+}
