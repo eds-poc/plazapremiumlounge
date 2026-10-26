@@ -20,6 +20,16 @@
   --hsbcoffer-heading: var(--hsbcoffer-navy);
   --hsbcoffer-copy: var(--hsbcoffer-text-mid);
   --hsbcoffer-eyebrow: var(--hsbcoffer-red);
+--color-white-alpha-88:rgb(255 255 255 / 88%);
+--color-white-alpha-72: rgb(255 255 255 / 72%);
+--color-white-alpha-60:rgb(255 255 255 / 60%);
+--color-white-alpha-30:rgb(255 255 255 / 30%);
+--color-white-alpha-16: rgb(255 255 255 / 16%);
+--color-white-alpha-18:rgb(255 255 255 / 18%);
+--color-white-alpha-10:rgb(255 255 255 / 10%);
+--color-white-alpha-6:rgb(255 255 255 / 6%);
+
+
 
   background: var(--hsbcoffer-bg);
   color: var(--hsbcoffer-text);
@@ -576,7 +586,7 @@
 }
 
 /* breakpoint-exception: the source campaign's 640px and 860px breakpoints */
-@media (width > 640px) {
+@media (width >= 768px) {
   .hsbcoffer .hsbcoffer-body {
     padding: calc(var(--spacing-11) + 10px) var(--spacing-stack);
   }
@@ -614,7 +624,7 @@
   }
 }
 
-@media (width >= 860px) {
+@media (width >= 1200px) {
   .hsbcoffer:not(.products, .icons, .split) .hsbcoffer-cards {
     grid-template-columns: repeat(3, 1fr);
     gap: 24px;

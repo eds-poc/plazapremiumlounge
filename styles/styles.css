@@ -82,14 +82,7 @@
 --color-campaign-walnut: #5a5048;
 --color-hsbc-line: rgb(26 43 74 / 12%);
 --font-hsbc: var(--font-family-primary);
---color-white-alpha-88:rgb(255 255 255 / 88%);
---color-white-alpha-72: rgb(255 255 255 / 72%);
---color-white-alpha-60:rgb(255 255 255 / 60%);
---color-white-alpha-30:rgb(255 255 255 / 30%);
---color-white-alpha-16: rgb(255 255 255 / 16%);
---color-white-alpha-18:rgb(255 255 255 / 18%);
---color-white-alpha-10:rgb(255 255 255 / 10%);
---color-white-alpha-6:rgb(255 255 255 / 6%);
+
 
   /* (source West Kowloon campaign, `--c-light` and the facility card border) */
   --color-campaign-mist: #f7f4f5;
