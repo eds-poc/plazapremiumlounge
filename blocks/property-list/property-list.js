@@ -452,8 +452,11 @@ function readViewButton(value) {
     }
   }
   const page = new URLSearchParams(window.location.search);
+  // (the currency: `currencyCode` when there's one, as the language and currency modal's Apply
+  // writes it, else `currency`)
+  const read = (name) => (name === 'currency' ? page.get('currencyCode') || page.get(name) : page.get(name));
   const params = Object.fromEntries(['currency', 'date', 'time']
-    .map((name) => [name, (page.get(name) || '').trim()]).filter(([, v]) => v));
+    .map((name) => [name, (read(name) || '').trim()]).filter(([, v]) => v));
   return { label, base, params };
 }
 
