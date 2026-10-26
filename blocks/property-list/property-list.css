@@ -46,6 +46,12 @@
   font-family: var(--font-family-primary);
 }
 
+/* the breadcrumb (the Breadcrumb block's look, from breadcrumb.css): 30px above the filters and
+   cards, as the source city pages */
+.property-list > .breadcrumb {
+  margin-bottom: var(--spacing-9);
+}
+
 /* sidebar a quarter of the row (less the gutter), the cards the rest; no sidebar on phones */
 .property-list-layout {
   display: grid;

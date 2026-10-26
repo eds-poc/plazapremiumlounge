@@ -1,3 +1,4 @@
+import { loadCSS } from '../../scripts/aem.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { getLanguage, translate } from '../../scripts/i18n.js';
@@ -14,6 +15,28 @@ const GROUPS = ['airport', 'service', 'feature'];
 const SITE_HOSTS = /^[\w-]+--plazapremiumlounge--eds-poc\.aem\.(page|live)$/;
 
 let blockCount = 0;
+
+/**
+ * The breadcrumb, as the source city pages: "Home < Lounges in {country}", both as text (the
+ * source links neither). The country is the API's first item's `countryName`; without one, Home
+ * alone. Built with the Breadcrumb block's classes, so its stylesheet (breadcrumb.css) applies.
+ * @param {HTMLElement} crumb The breadcrumb's element (its content is replaced)
+ * @param {string} [country]
+ */
+function drawCrumb(crumb, country = '') {
+  const nav = el('nav');
+  nav.setAttribute('aria-label', translate('breadcrumb'));
+  const list = el('ol', 'breadcrumb-list');
+  const name = (country || '').trim();
+  const labels = [translate('propertyCrumbHome'), ...(name ? [translate('propertyCrumbCountry', { country: name })] : [])];
+  labels.forEach((label, i) => {
+    const li = el('li', 'breadcrumb-item', label);
+    if (i === labels.length - 1) li.setAttribute('aria-current', 'page');
+    list.append(li);
+  });
+  nav.append(list);
+  crumb.replaceChildren(nav);
+}
 
 /**
  * Fetches the properties. Gives up after 8s.
@@ -496,7 +519,8 @@ function readSettings(block) {
  * (the API domain + the `properties` path), the language from the page's site folder (or the
  * page metadata `language-code`); the block fetches the city's properties and renders them in
  * location groups, with filters (airport, service type, features). The first property list on a
- * page keeps its filters in the page address; others keep them to themselves.
+ * page keeps its filters in the page address (others keep them to themselves) and shows the
+ * breadcrumb above the filters and cards ("Home < Lounges in {country}", see drawCrumb).
  * @param {HTMLElement} block The property list block element
  */
 export default async function decorate(block) {
@@ -515,9 +539,16 @@ export default async function decorate(block) {
   const status = el('p', 'property-list-status visually-hidden');
   status.setAttribute('aria-live', 'polite');
   const results = el('div', 'property-list-results');
-  main.append(toggle, status, results);
+  main.append(status, results);
   layout.append(sidebar, main);
-  block.replaceChildren(layout);
+  // the first list's breadcrumb (Home straight away, the country once the lounges arrive), above
+  // the filters and cards; the phones' Filters button above it, as the source
+  const crumb = useUrl ? el('div', 'breadcrumb') : null;
+  if (crumb) {
+    await loadCSS(`${window.hlx.codeBasePath}/blocks/breadcrumb/breadcrumb.css`);
+    drawCrumb(crumb);
+  }
+  block.replaceChildren(...[toggle, crumb, layout].filter(Boolean));
 
   const dialog = el('dialog', 'property-list-dialog');
   dialog.setAttribute('aria-label', translate('propertyFilters'));
@@ -544,9 +575,11 @@ export default async function decorate(block) {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('property-list: could not load', url.href, error);
+      if (crumb) drawCrumb(crumb);
       showMessage(results, translate('propertyError'), () => load());
       return;
     }
+    if (crumb) drawCrumb(crumb, items[0]?.countryName);
     const properties = items.map(readProperty).filter(Boolean);
     if (!properties.length) {
       showMessage(results, translate('propertyEmpty'), null, `City code "${city}" returned no lounges.`);
