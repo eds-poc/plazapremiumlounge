@@ -545,7 +545,11 @@ export default async function decorate(block) {
   // the filters and cards; the phones' Filters button above it, as the source
   const crumb = useUrl ? el('div', 'breadcrumb') : null;
   if (crumb) {
-    await loadCSS(`${window.hlx.codeBasePath}/blocks/breadcrumb/breadcrumb.css`);
+    // (a missing stylesheet leaves the breadcrumb unstyled, never the lounges unloaded)
+    await loadCSS(`${window.hlx.codeBasePath}/blocks/breadcrumb/breadcrumb.css`).catch((error) => {
+      // eslint-disable-next-line no-console
+      console.error('property-list: the breadcrumb styles did not load', error);
+    });
     drawCrumb(crumb);
   }
   block.replaceChildren(...[toggle, crumb, layout].filter(Boolean));
