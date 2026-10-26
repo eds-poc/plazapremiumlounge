@@ -1,0 +1,95 @@
+/* pagination (scripts/pagination.js), as the source offers page's (`ul.pagination`, Bootstrap 5):
+   centred page buttons 8px apart, 16px medium maroon text in a 1px light grey box with 6px
+   corners (about 36 x 38px), the current page filled maroon; 85px below the list */
+.pagination {
+  /* one-off: the source's 85px from the list's last line to the buttons (measured) */
+  --pagination-space: 85px;
+
+  /* one-off: Bootstrap's page link padding, 6px 12px */
+  --pagination-padding-block: 6px;
+  --pagination-padding-inline: var(--spacing-5);
+  --pagination-gap: var(--spacing-3);
+  --pagination-border: var(--color-border-subtle);
+
+  margin-top: var(--pagination-space);
+}
+
+.pagination[hidden] {
+  display: none;
+}
+
+.pagination-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--pagination-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pagination-button {
+  margin: 0;
+  padding: var(--pagination-padding-block) var(--pagination-padding-inline);
+  border: var(--base-border-width) solid var(--pagination-border);
+  border-radius: var(--radius-xs);
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
+  font-family: inherit;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-relaxed);
+  cursor: pointer;
+  transition: background-color var(--duration-normal) var(--ease-standard),
+    border-color var(--duration-normal) var(--ease-standard);
+}
+
+.pagination-button:hover {
+  border-color: var(--color-brand-primary);
+  background-color: var(--color-brand-tint);
+}
+
+.pagination-button:focus-visible {
+  outline-offset: var(--spacing-1);
+}
+
+/* the current page: filled maroon, white text */
+.pagination-button[aria-current='page'] {
+  border-color: var(--color-brand-primary);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+  cursor: default;
+}
+
+/* the … between page numbers, the size of a button */
+.pagination-gap {
+  align-self: center;
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+}
+
+/* the list the buttons page through: it comes back into view below the header */
+.pagination-target {
+  scroll-margin-top: calc(var(--nav-height) + var(--spacing-7));
+}
+
+/* what's focused after a page change (e.g. the first title, not otherwise focusable): the focus
+   ring for keyboard users only */
+.pagination-focus:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* narrow phones: tighter buttons, so « 1 … 6 7 8 … 13 » stays on one line */
+@media (width < 400px) {
+  .pagination {
+    --pagination-padding-inline: var(--spacing-3);
+    --pagination-gap: var(--spacing-1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pagination-button {
+    transition: none;
+  }
+}

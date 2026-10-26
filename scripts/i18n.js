@@ -94,6 +94,22 @@ const TEXTS = {
   airportDining: {
     en: 'Airport dining', zh: '机场餐饮', 'zh-HK': '機場餐飲', ja: '空港ダイニング', pt: 'Restaurantes do aeroporto',
   },
+  // pagination of lists (scripts/pagination.js): the landmark and its buttons
+  paginationLabel: {
+    en: 'Pagination', zh: '分页', 'zh-HK': '分頁', ja: 'ページ送り', pt: 'Paginação',
+  },
+  paginationPage: {
+    en: 'Page {n}', zh: '第 {n} 页', 'zh-HK': '第 {n} 頁', ja: '{n} ページ', pt: 'Página {n}',
+  },
+  paginationPrevious: {
+    en: 'Previous page', zh: '上一页', 'zh-HK': '上一頁', ja: '前のページ', pt: 'Página anterior',
+  },
+  paginationNext: {
+    en: 'Next page', zh: '下一页', 'zh-HK': '下一頁', ja: '次のページ', pt: 'Próxima página',
+  },
+  paginationStatus: {
+    en: 'Page {n} of {total}', zh: '第 {n} 页，共 {total} 页', 'zh-HK': '第 {n} 頁，共 {total} 頁', ja: '{n} / {total} ページ', pt: 'Página {n} de {total}',
+  },
   // offer list: the "Show me [All offers] ordered by [Latest]" filter line and the offer cards
   offerShowMe: {
     en: 'Show me', zh: '显示', 'zh-HK': '顯示', ja: '表示', pt: 'Mostrar',

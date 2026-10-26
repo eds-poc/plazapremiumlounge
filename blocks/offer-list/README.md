@@ -6,12 +6,14 @@ page (`/en-uk/offers`):
   Choosing an option shows those offers at once.
 - **Cards:** the offers as large photo cards (the Cards `large` look). Each has its photo, the
   title, the description and a **Learn more →** link to the offer page.
+- **Pages:** 10 offers at a time, with « 1 2 3 » buttons below the cards when there are more.
 
-## Table: one row (optional)
+## Table: two rows, both optional
 
 | Offer List | |
 | --- | --- |
 | Source | [/en-uk-offers.json](/en-uk-offers.json) |
+| Page size | 10 |
 
 - **Source** (optional): the JSON file with the offers, as a link or plain text, e.g.
   `/en-uk-offers.json`.
@@ -24,6 +26,13 @@ page (`/en-uk/offers`):
     it's the same site as the page; another site's address (including this site's preview or
     live address seen from the other one) isn't read.
   - A table with just the link (one cell) also works.
+- **Page size** (optional): the offers per page, a whole number, e.g. `6`. Leave it out for 10,
+  as the source (anything that isn't a number counts as 10).
+  - The « 1 2 3 » buttons show only when there's more than one page: « and » only when there's
+    a page before or after; with more than 7 pages, the first, the last and the pages around
+    the current one, with … between (`1 … 4 5 6 … 12`).
+  - Choosing a page shows its offers without reloading and brings the visitor back to the top
+    of the list. Choosing a category or an order goes back to page 1.
 - **Page heading:** put the page's heading above the block, e.g. a `Title` with
   "Plaza Premium Lounge offers for your next trip", in the same section.
 - When the file can't be read (or the Source isn't a valid address), the block says "We couldn't
@@ -54,30 +63,33 @@ Each row of the JSON is one offer:
 
 ## The page address
 
-The selection is kept in the page address, so a reload or a shared link shows the same offers,
-and the browser's Back and Forward buttons work:
+The selection and the page are kept in the page address, so a reload or a shared link shows the
+same offers, and the browser's Back and Forward buttons work:
 
 | Selection | Address |
 | --- | --- |
-| All offers, Latest (the default) | `/en-uk/offers` |
+| All offers, Latest, page 1 (the default) | `/en-uk/offers` |
 | A category | `?category=limited-time` (the tag in lower case, words joined by dashes) |
 | Oldest first | `?sort=oldest` |
+| Another page | `?page=2` |
 
-- Both together: `?category=limited-time&sort=oldest`. An unknown category shows all offers;
-  other parameters in the address are kept.
+- Together: `?category=limited-time&sort=oldest&page=2`. An unknown category shows all offers; a
+  page past the last shows the last page (and the address is corrected). Other parameters in the
+  address are kept.
 
 ## Interface text
 
-"Show me", "ordered by", "All offers", "Latest", "Oldest", "Learn more" and the messages come from
-the site's translations (`scripts/i18n.js`), by page language. The category
-names are the tags, as written in the file.
+"Show me", "ordered by", "All offers", "Latest", "Oldest", "Learn more", the page buttons'
+screen reader names ("Pagination", "Page 2", "Previous page", "Next page") and the messages come
+from the site's translations (`scripts/i18n.js`), by page language. The category names are the
+tags, as written in the file.
 
 ## For developers
 
 - `offer-list.js` reads the Source (else `/{site}-offers.json`, from `getSiteFolder()`), fetches
   every row in one request (`limit=10000`), orders by `date` (else `lastModified`), and keeps the
-  selection in the address (`category`, `sort`). The listing page itself and the index's
-  `/default-meta-image.png` placeholder are left out (no card, no photo).
+  selection and the page in the address (`category`, `sort`, `page`). The listing page itself
+  and the index's `/default-meta-image.png` placeholder are left out (no card, no photo).
 - `decorate` doesn't wait for the JSON, so the page shows straight away. While the offers load,
   the block keeps a screen's height (`aria-busy`), and its content is put together hidden and
   shown at once, so nothing on the page moves (CLS).
@@ -86,8 +98,14 @@ names are the tags, as written in the file.
   `blocks/dropdown/dropdown.css`, loaded by this block. The keyboard handling matches the
   Dropdown block's.
 - The cards are a `cards large` block made with `buildBlock` and decorated by the Cards block
-  (`decorateBlock` and `loadBlock`), so they always match Cards (large). Filtering hides cards
-  (`hidden`) and sorting reorders them; nothing is fetched again.
+  (`decorateBlock` and `loadBlock`), so they always match Cards (large). Filtering and paging
+  hide cards (`hidden`) and sorting reorders them; nothing is fetched again.
+- The pages come from `scripts/pagination.js`: `createPager` pages the shown offers (the block
+  gives them with `setItems`, and calls `sync` on Back/Forward), keeps `page` in the address and
+  draws the buttons, with their look in `styles/pagination.css`; `readPageSize` reads the
+  `Page size` row and `setPage` resets the page when the selection changes. See
+  `docs/pagination.md`. The buttons are drawn with the first page before the block is shown, so
+  they don't shift the page either.
 - Generic helpers (`el`, `fetchJson`, `toKey`, `isPreview`) come from `scripts/properties.js`.
-- The block keeps `data-category` and `data-sort` (the current selection), and announces the number
-  of offers shown to screen readers after each change.
+- The block keeps `data-category`, `data-sort` and `data-page` (the current selection and page),
+  and announces the number of offers to screen readers after each filter change.
