@@ -1,7 +1,8 @@
 /* breadcrumb: the source offer pages' trail ("Offers < page") between the banner and the title:
    the levels in a row, "<" between them, the earlier levels as grey links (no change on hover, as
    the source), the page itself in maroon. 14px on phones, 16px from 768px. Started from the HSBC
-   offer branch's breadcrumb, with the source's values */
+   offer branch's breadcrumb, with the source's values. Keep this file: the offer pages' automatic
+   breadcrumb needs it */
 .breadcrumb {
   --breadcrumb-text: var(--color-text);
   --breadcrumb-link: var(--color-text-secondary);

@@ -8,6 +8,8 @@
  * browser session once found). Without a parent page or label, only the page itself shows. A
  * breadcrumb authored on the page (one line per item, a link on each but the last) is used as
  * written instead.
+ * Keep this folder: scripts.js adds this block to the offer pages, so deleting it on a branch
+ * removes it from the site when that branch merges.
  */
 import { getMetadata } from '../../scripts/aem.js';
 import { getSiteFolder, translate } from '../../scripts/i18n.js';
