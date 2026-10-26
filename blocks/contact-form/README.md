@@ -53,11 +53,10 @@ near the screen (once per page). A send waits for the tick; the token goes with 
 
 **The site key** (public) comes from the site's `config` sheet in Document Authoring (served at
 `/config.json`, next to `property-list-url`): a row with Key `hcaptcha-site-key` and the key as
-its Value, previewed and published like the sheet's other rows. Without it, hCaptcha's
-test key is used on the local preview and the `*.aem.page` / `*.aem.live` sites only (it always
-passes and shows a "for testing only" note); on any other host the form says the check couldn't
-load and sends nothing. The **secret** is never in the site: only in the Contact API's
-environment variables.
+its Value, previewed and published like the sheet's other rows (for now hCaptcha's test key,
+`10000000-ffff-ffff-ffff-000000000001`: it always passes and shows a "for testing only" note). The
+code has no key of its own: without the row the captcha can't load, the form says so and sends
+nothing. The **secret** is never in the site: only in the Contact API's environment variables.
 
 Before go-live:
 
