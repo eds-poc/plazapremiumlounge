@@ -88,6 +88,19 @@ Last updated: 29 Sep 2025<br>…<br>**1. TERMS AND CONDITIONS**<br>1.1 These are
   narrower text (Terms and Conditions); leave it out for the full content width.
 - **Metadata:** Title, Description and Keywords as the source page.
 
+**In the DA Library** (`docs/library`):
+
+| Library | Entry | Inserts |
+| --- | --- | --- |
+| Blocks | Legal Page Title | The Title (page-title) and its grey Section Metadata, together |
+| Blocks | Legal Text Width | Section Metadata `fixed-width`, at the end of the text section (leave it out for full width) |
+| Blocks | Legal Page Metadata | The page Metadata (Title, Description, Keywords) |
+| Blocks | Title → Title (page-title) | The Title table only |
+| Templates | Legal Page (fixed width) | A whole page as Terms and Conditions: title band, sample text, fixed width, metadata |
+| Templates | Legal Page (full width) | A whole page as the Privacy Notice: title band, sample text (soft line breaks), metadata |
+
+The entries live in `docs/library/blocks/legal/` and the templates in `docs/library/templates/`.
+
 ### Example: headline
 
 | Title (headline, center-all) |
