@@ -5,6 +5,7 @@
  */
 import { getMetadata } from './aem.js';
 import { applyButtonAction } from './button-actions.js';
+import apiUrl from './endpoints.js';
 import { DEFAULT_SITE, getSiteFolder, translate } from './i18n.js';
 import { hideLoader, showLoader } from './scripts.js';
 
@@ -171,6 +172,167 @@ export function safeNote(html) {
 export function isFirstBrand(name) {
   const compact = name.replace(/\s+/g, '').toLowerCase();
   return FIRST_BRANDS.some((brand) => compact.startsWith(brand));
+}
+
+// the passes blocks' own rows for the codes the passes API asks for (the key's case, spaces and
+// dashes don't matter: "propertycode", "Property Code", "iata-code" …)
+const API_ROWS = { propertycode: 'propertyCode', iatacode: 'iataCode' };
+const API_ROW_NAMES = { propertyCode: 'propertycode', iataCode: 'iata-code' };
+const API_ROW_EXAMPLES = { propertyCode: 'PRPRTY1235', iataCode: 'HKG' };
+
+/**
+ * A block row holding one of the passes API's codes (`propertycode | PRPRTY1235`,
+ * `iata-code | HKG`): which code and its value, or null for any other row.
+ * @param {Element} row
+ * @returns {{name: string, value: string}|null}
+ */
+export function readApiRow(row) {
+  const [first, second] = row.children;
+  const name = API_ROWS[toKey(first?.textContent).replace(/-/g, '')];
+  return name ? { name, value: (second?.textContent || '').trim() } : null;
+}
+
+/**
+ * The property and airport (IATA) codes the passes API asks for, as the block authors them (see
+ * readApiRow). A value that's missing or malformed (letters and digits only) isn't guessed, and
+ * the page metadata isn't read: it's listed in `problems`, for the block to report on the preview
+ * site.
+ * @param {{propertyCode?: string, iataCode?: string}} codes
+ * @returns {{propertyCode: string, iataCode: string, problems: string[]}}
+ */
+export function getApiContext(codes = {}) {
+  const propertyCode = (codes.propertyCode || '').trim().toUpperCase();
+  const iataCode = (codes.iataCode || '').trim().toUpperCase();
+  const problems = Object.entries({ propertyCode, iataCode })
+    .filter(([, value]) => !/^[A-Z0-9]+$/.test(value))
+    .map(([name, value]) => (value
+      ? `The block's "${API_ROW_NAMES[name]}" value "${value}" isn't a valid code (letters and digits only).`
+      : `The block's "${API_ROW_NAMES[name]}" row is missing (e.g. "${API_ROW_NAMES[name]} | ${API_ROW_EXAMPLES[name]}").`));
+  return { propertyCode, iataCode, problems };
+}
+
+// the passes service: one product code per call, or every pass when no code is given (the same
+// data per pass). Each answer is asked for once per page
+const passes = new Map();
+
+/**
+ * Fetches a passes service answer once per page (a failure isn't kept, so it can be asked again).
+ * @param {Object<string, string>} query
+ * @param {number} timeout ms
+ * @returns {Promise<Object[]>} the answer's items
+ */
+function fetchPassItems(query, timeout) {
+  const url = apiUrl('productPasses');
+  Object.entries(query).forEach(([name, value]) => url.searchParams.set(name, value));
+  if (!passes.has(url.href)) {
+    const request = fetchJson(url.href, timeout)
+      .then((json) => (Array.isArray(json?.items) ? json.items : []))
+      .catch((error) => {
+        passes.delete(url.href);
+        throw error;
+      });
+    passes.set(url.href, request);
+  }
+  return passes.get(url.href);
+}
+
+/**
+ * One pass (product) from the passes service, in a currency: its item, or null when the service
+ * doesn't know the code. Rejects as fetchJson does.
+ * @param {string} productCode e.g. PRD3705
+ * @param {{propertyCode: string, iataCode: string}} context See getApiContext
+ * @param {string} currency e.g. USD
+ * @param {number} timeout ms
+ * @returns {Promise<Object|null>}
+ */
+export function fetchPass(productCode, { propertyCode, iataCode }, currency, timeout) {
+  return fetchPassItems({
+    propertyCode, iataCode, currencyCode: currency, productCode,
+  }, timeout).then((items) => items.find((item) => item?.productCode === productCode) || null);
+}
+
+/**
+ * Every pass from the passes service, in a currency, by product code: one call (the service takes
+ * one code per call, so for several passes this is quicker and lighter than a call each). The list
+ * is also kept for the session (see readPassList).
+ * @param {{propertyCode: string, iataCode: string}} context See getApiContext
+ * @param {string} currency e.g. USD
+ * @param {number} timeout ms
+ * @returns {Promise<Map<string, Object>>}
+ */
+export function fetchPassList({ propertyCode, iataCode }, currency, timeout) {
+  const query = { propertyCode, iataCode, currencyCode: currency };
+  return fetchPassItems(query, timeout).then((items) => {
+    const list = new Map(items.filter((item) => item?.productCode)
+      .map((item) => [item.productCode, item]));
+    // eslint-disable-next-line no-use-before-define
+    keepPassList({ propertyCode, iataCode }, currency, list);
+    return list;
+  });
+}
+
+// the passes list kept for the session: a page seen again shows the passes straight away (the
+// service answers in 5-7s) while a fresh list is asked for; older than this, it isn't used
+const PASS_LIST_KEY = 'ppl-pass-list';
+const PASS_LIST_MAX_AGE = 30 * 60 * 1000;
+const passListKey = ({ propertyCode, iataCode }, currency) => `${PASS_LIST_KEY}:${propertyCode}:${iataCode}:${currency}`;
+
+/**
+ * A pass with only what the pass blocks show (an answer's pass is about 2.4KB, this about 0.4KB).
+ * @param {Object} item
+ * @returns {Object}
+ */
+function slimPass(item) {
+  return {
+    productCode: item.productCode,
+    productDisplayName: item.productDisplayName,
+    productName: item.productName,
+    productSeq: item.productSeq,
+    images: (item.images || []).slice(0, 1).map((image) => ({ path: image?.path })),
+    numberOfVisits: item.numberOfVisits,
+    accuralPoints: item.accuralPoints,
+    productDescription: item.productDescription,
+    eligibleLocations: item.eligibleLocations,
+    prices: (item.prices || []).slice(0, 1).map((price) => ({
+      totalPrice: price?.totalPrice,
+      baseRate: (price?.baseRate || []).slice(0, 1).map((rate) => ({ currency: rate?.currency })),
+      catalogueCode: price?.catalogueCode,
+    })),
+  };
+}
+
+/**
+ * Keeps the passes list for the session (nothing happens when storage isn't available).
+ * @param {{propertyCode: string, iataCode: string}} context
+ * @param {string} currency
+ * @param {Map<string, Object>} list
+ */
+function keepPassList(context, currency, list) {
+  try {
+    sessionStorage.setItem(passListKey(context, currency), JSON.stringify({
+      time: Date.now(),
+      items: [...list.values()].map(slimPass),
+    }));
+  } catch {
+    // storage full or blocked: the list is just asked for again next time
+  }
+}
+
+/**
+ * The passes list kept for this session (see fetchPassList), when it's recent, by product code.
+ * @param {{propertyCode: string, iataCode: string}} context
+ * @param {string} currency
+ * @returns {Map<string, Object>|null}
+ */
+export function readPassList(context, currency) {
+  try {
+    const kept = JSON.parse(sessionStorage.getItem(passListKey(context, currency)));
+    const recent = Date.now() - (Number(kept?.time) || 0) < PASS_LIST_MAX_AGE;
+    if (!recent || !Array.isArray(kept.items)) return null;
+    return new Map(kept.items.map((item) => [item.productCode, item]));
+  } catch {
+    return null;
+  }
 }
 
 /**

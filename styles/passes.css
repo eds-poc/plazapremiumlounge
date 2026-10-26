@@ -1,0 +1,147 @@
+/* the Learn more pop-up of the lounge passes (scripts/passes.js), as the source's pass pop-up: the
+   image across the top (close over it), the name and where it's valid beside the price and points,
+   a dashed line, the location tag, the description and Add to Cart */
+dialog.modal.pass-modal {
+  --pass-modal-width: 450px;
+  --pass-modal-radius: 18px;
+  --pass-modal-gap: 24px;
+  --pass-modal-text: 13px;
+  --pass-modal-icon: 18px;
+
+  max-width: var(--pass-modal-width);
+}
+
+dialog.modal.pass-modal .modal-content {
+  position: relative;
+  border-radius: var(--pass-modal-radius);
+}
+
+dialog.modal.pass-modal .modal-header {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+  justify-content: flex-end;
+  padding: calc(var(--spacing-7) + var(--spacing-1)) var(--spacing-7);
+  border: 0;
+  background: none;
+}
+
+dialog.modal.pass-modal .modal-header .modal-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+dialog.modal.pass-modal .modal-body {
+  padding: 0;
+}
+
+/* (as the source's banner: 10px above the panel's top, 5px under the details) */
+.pass-modal-media {
+  margin: calc(-1 * var(--spacing-4)) 0 calc(-1 * var(--spacing-2));
+}
+
+.pass-modal-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.pass-modal-info {
+  padding: var(--spacing-7);
+  color: var(--color-text);
+}
+
+/* (the source's 7 and 5 of 12 columns) */
+.pass-modal-head {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: var(--pass-modal-gap);
+}
+
+.pass-modal-name,
+.pass-modal-price {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-body);
+}
+
+.pass-modal-name {
+  font-weight: var(--font-weight-medium);
+}
+
+.pass-modal-location {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  line-height: 1;
+}
+
+.pass-modal-pricing {
+  text-align: end;
+}
+
+.pass-modal-points {
+  margin: 0;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+.pass-modal-rule {
+  margin: var(--spacing-bootstrap-3) 0;
+  border: 0;
+  border-top: var(--base-border-width) dashed var(--color-text-strong);
+}
+
+.pass-modal-tag {
+  display: inline-block;
+  margin: 0 0 var(--spacing-6);
+  padding: var(--spacing-2) var(--spacing-6);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-brand-tint);
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.pass-modal-description {
+  font-size: var(--pass-modal-text);
+  line-height: var(--line-height-body);
+}
+
+.pass-modal-description p {
+  margin: 0 0 var(--spacing-7);
+}
+
+.pass-modal-description ul {
+  margin: 0 0 var(--spacing-6);
+  padding-left: var(--spacing-7);
+}
+
+.pass-modal-description li {
+  margin-bottom: calc(var(--spacing-5) + var(--spacing-1));
+  padding: var(--spacing-1) var(--spacing-2);
+}
+
+dialog.modal.pass-modal .pass-modal-add {
+  width: 100%;
+}
+
+@media (width >=768px) {
+  dialog.modal.pass-modal {
+    width: var(--pass-modal-width);
+  }
+}
+
+.pass-modal-points-icon {
+  display: inline-block;
+  width: var(--pass-modal-icon);
+  height: var(--pass-modal-icon);
+  margin: 0 var(--spacing-1);
+  vertical-align: calc(-2 * var(--spacing-1));
+}

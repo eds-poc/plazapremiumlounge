@@ -577,3 +577,99 @@
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+/* option icon-list: a list of features with no card boxes (source lounge passes
+   `#ppl-gtm-usp-swap`): cell 1's icon at 34px beside the title (16.5px, maroon) and its text
+   (15.5px); links small, bold and underlined. 1 per row on mobile, 3 from 640px (28px apart, 32px
+   between rows), at most 980px wide and centred, 24px above and 40px below. The same at every
+   heading level */
+.cards.icon-list {
+  --cards-icon-list-max-width: 980px;
+  --cards-icon-list-icon: 34px;
+  --cards-icon-list-gap: var(--spacing-bootstrap-3);
+  --cards-icon-list-column-gap: 28px;
+  --cards-icon-list-row-gap: 32px;
+  --cards-icon-list-title-size: 16.5px;
+  --cards-icon-list-title-weight: var(--font-weight-bold);
+  --cards-icon-list-text-size: 15.5px;
+  --cards-icon-list-text-color: #2a1017;
+  --cards-icon-list-link-size: 13px;
+  --cards-icon-list-link-color: #7c0040;
+  --cards-icon-list-space-above: 24px;
+  --cards-icon-list-space-below: 40px;
+
+  max-width: var(--cards-icon-list-max-width);
+  margin: var(--cards-icon-list-space-above) auto var(--cards-icon-list-space-below);
+  padding-bottom: var(--spacing-3);
+}
+
+.cards.icon-list>ul {
+  grid-template-columns: 1fr;
+  gap: var(--cards-icon-list-row-gap) var(--cards-icon-list-column-gap);
+}
+
+.cards.icon-list>ul>:is(li) {
+  display: flex;
+  gap: var(--cards-icon-list-gap);
+  align-items: flex-start;
+  border: 0;
+  background: none;
+}
+
+.cards.icon-list .cards-card-image {
+  flex: none;
+  width: var(--cards-icon-list-icon);
+  height: var(--cards-icon-list-icon);
+}
+
+.cards.icon-list .cards-card-image picture,
+.cards.icon-list .cards-card-icon .icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.cards.icon-list>ul>li .cards-card-image img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  object-fit: contain;
+}
+
+.cards.icon-list .cards-card-body {
+  margin: 0;
+  color: var(--cards-icon-list-text-color);
+  font-size: var(--cards-icon-list-text-size);
+  line-height: var(--line-height-relaxed);
+}
+
+.cards.icon-list .cards-card-body> :is(h1, h2, h3, h4, h5, h6) {
+  margin: 0 0 calc(2 * var(--spacing-1));
+  color: var(--color-brand-primary);
+  font-size: var(--cards-icon-list-title-size);
+  font-weight: var(--cards-icon-list-title-weight);
+  line-height: var(--line-height-relaxed);
+}
+
+.cards.icon-list .cards-card-body p {
+  margin: 0;
+}
+
+/* (the links' line, after the text) */
+.cards.icon-list .cards-card-body p+p {
+  margin-top: calc(3 * var(--spacing-1));
+}
+
+.cards.icon-list .cards-card-body a:any-link {
+  color: var(--cards-icon-list-link-color);
+  font-size: var(--cards-icon-list-link-size);
+  font-weight: var(--cards-icon-list-title-weight);
+  text-decoration: underline;
+}
+
+/* breakpoint-exception: the source list's 3 columns start at 640px */
+@media (width >=640px) {
+  .cards.icon-list>ul {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

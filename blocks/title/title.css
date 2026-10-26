@@ -360,3 +360,79 @@
     font-size: var(--heading-page-size);
   }
 }
+
+/* option fluid: a campaign page title (source lounge passes `h1.title`, as its trial restyles
+   it): a maroon heading growing with the screen, 26px on phones up to 38px (6% of the width
+   between), at most 840px wide, 14px below. The same at every heading level. Use with center-all */
+.title.fluid {
+  --title-fluid-size: clamp(26px, 6vw, 38px);
+  --title-fluid-max: 840px;
+  --title-fluid-gap: 14px;
+  --title-fluid-weight: var(--font-weight-semi-bold);
+  --title-fluid-line-height: 1.25;
+}
+
+.title.fluid .title-heading {
+  max-width: var(--title-fluid-max);
+  margin: 0 0 var(--title-fluid-gap);
+  color: var(--color-brand-primary);
+  font-size: var(--title-fluid-size);
+  font-weight: var(--title-fluid-weight);
+  line-height: var(--title-fluid-line-height);
+}
+
+/* option highlight: a lead-in with a highlighted offer (source lounge passes
+   `#ppl-gtm-hero-block`): a maroon heading growing with the screen (16px on phones up to 22px,
+   3.2% of the width between) where **bold** words sit in a cream highlight with 8px corners, a
+   little larger and bolder, then grey 15.5px text; at most 820px wide, 8px below. The same at
+   every heading level. Use with center-all */
+.title.highlight {
+  --title-highlight-size: clamp(16px, 3.2vw, 22px);
+  --title-highlight-max: 820px;
+  --title-highlight-weight: var(--font-weight-medium);
+  --title-highlight-bg: #fdf3e3;
+  --title-highlight-color: #7c0040;
+  --title-highlight-pad: calc(2 * var(--spacing-1)) var(--spacing-5);
+  --title-highlight-radius: 8px;
+  --title-highlight-scale: 1.15em;
+  --title-highlight-intro-color: #5c4149;
+  --title-highlight-intro-size: 15.5px;
+
+  max-width: var(--title-highlight-max);
+  margin-bottom: var(--spacing-3);
+}
+
+.title.highlight .title-heading {
+  margin: 0 0 var(--spacing-5);
+  color: var(--color-brand-primary);
+  font-size: var(--title-highlight-size);
+  font-weight: var(--title-highlight-weight);
+  line-height: var(--line-height-loose);
+}
+
+.title.highlight .title-heading strong {
+  display: inline-block;
+  padding: var(--title-highlight-pad);
+  border-radius: var(--title-highlight-radius);
+  background-color: var(--title-highlight-bg);
+  color: var(--title-highlight-color);
+  font-size: var(--title-highlight-scale);
+  font-weight: var(--font-weight-bold);
+}
+
+.title.highlight .title-intro {
+  max-width: none;
+  margin: 0;
+  color: var(--title-highlight-intro-color);
+  font-size: var(--title-highlight-intro-size);
+  line-height: var(--line-height-loose);
+}
+
+.title.highlight .title-intro>* {
+  margin: 0;
+}
+
+.title.center-all:is(.fluid, .highlight),
+.title.center-all.fluid .title-heading {
+  margin-inline: auto;
+}
