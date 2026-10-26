@@ -31,7 +31,9 @@ const DEFAULT_CURRENCY = 'USD';
 
 /**
  * The page address's lounge and booking choices, as the source detail pages use them
- * (`?propertycode=PRPRTY754&currency=HKD&date=2026-10-21&time=1600`). Unknown parameters are kept.
+ * (`?propertycode=PRPRTY754&currency=HKD&date=2026-10-21&time=1600`). The currency is
+ * `currencyCode` when there's one (the language and currency modal's Apply writes it), else
+ * `currency`. Unknown parameters are kept.
  * @returns {{code: string, currency: string, date: string, time: string}}
  */
 function readParams() {
@@ -39,7 +41,7 @@ function readParams() {
   const get = (name) => (params.get(name) || '').trim();
   return {
     code: get('propertycode').toUpperCase(),
-    currency: get('currency').toUpperCase(),
+    currency: (get('currencyCode') || get('currency')).toUpperCase(),
     date: get('date'),
     time: get('time'),
   };

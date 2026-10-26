@@ -294,10 +294,16 @@ export default function decorate(block) {
     }
     // no submission yet: other scripts can listen for this event and send the values
     const values = Object.fromEntries(new FormData(form));
-    // a currency choice is remembered for the visitor (the header shows it)
-    if (values.currency) setCurrency(values.currency);
     form.dispatchEvent(new CustomEvent('form:submit', { bubbles: true, detail: { values, form } }));
     if (form.dataset.closeOnSubmit) form.closest('dialog')?.close();
+    // the language and currency modal: Apply opens the page in the chosen language with the
+    // chosen currency, as the source (see scripts/language-currency.js)
+    if (form.querySelector('.form-choice-input[name="language"], .form-choice-input[name="currency"]')) {
+      import('../../scripts/language-currency.js')
+        .then(({ applyLanguageAndCurrency }) => applyLanguageAndCurrency(values))
+        // (if it can't load, the currency is still remembered for the visitor)
+        .catch(() => { if (values.currency) setCurrency(values.currency); });
+    }
   });
 
   block.replaceChildren(form);
