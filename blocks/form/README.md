@@ -29,11 +29,22 @@ checks required fields and shows their messages; **sending the form is not built
     `电子邮件地址` with `name: email-address`), so every language sends the same names.
 - **Choice rows (e.g. Language, Currency):** column 3 lists the choices, one per line: text
   (`GBP`) or a link (`[English](/en-uk)`). They show as boxes, three to a row. The selected one is:
-  for a group named **Currency**, the visitor's currency (the one they applied, else the one for
+  for a group named **Currency**, the visitor's currency (the address's, else the one applied this session, else the one for
   their location); for links, the one for this page's site (e.g. `/en-uk/…`); else a choice ending
   in `(selected)`; else the first. A line `name: currency` (or `name: language`) names the group,
-  for labels in other languages (e.g. 货币). Applying a Currency remembers it for the visitor and updates the
-  header.
+  for labels in other languages (e.g. 货币).
+- **Apply in a form with Language and/or Currency choices** (the language and currency modal) works as
+  on the source:
+  - It opens the same page in the chosen language's site (`/en-uk/eligible-lounges` →
+    `/zh-cn/eligible-lounges`; a homepage as `/zh-cn/`). If that site doesn't have the page, the
+    default site's (`/en-uk/…`) opens instead.
+  - The address keeps its query, with `currencyCode=<the chosen currency>` set and `currency`
+    removed. A `langCode` or `language` parameter is updated only if the address has one.
+  - The page is replaced, so Back doesn't return to it with the old choices. Apply with nothing
+    changed reloads the page with `currencyCode`.
+  - The currency is remembered for the browser session: the header shows it and later pages
+    preselect it. A page opened with `?currencyCode=` (or `?currency=`) remembers that one too.
+  - A view of one group (e.g. `#currency`) applies the other group as it is.
 - **A row with one cell** is shown as written: text and links, e.g. "Sign up now" and
   "Forgot Password?" between the fields and the button. After the button, it's centred with maroon
   links (e.g. a **Back** link).
