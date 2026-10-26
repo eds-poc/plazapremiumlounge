@@ -20,6 +20,16 @@
   --hsbcoffer-heading: var(--hsbcoffer-navy);
   --hsbcoffer-copy: var(--hsbcoffer-text-mid);
   --hsbcoffer-eyebrow: var(--hsbcoffer-red);
+
+  --color-hsbc-gold: #c9922a;
+--color-hsbc-gold-light: #e0b454;
+--color-hsbc-cream: #fdf8f2;
+--color-hsbc-surface: #f4f6fa;
+--color-hsbc-ink: #1a1a2e;
+--color-hsbc-grey: #4a5568;
+--color-campaign-walnut: #5a5048;
+--color-hsbc-line: rgb(26 43 74 / 12%);
+--font-hsbc: var(--font-family-primary);
 --color-white-alpha-88:rgb(255 255 255 / 88%);
 --color-white-alpha-72: rgb(255 255 255 / 72%);
 --color-white-alpha-60:rgb(255 255 255 / 60%);
