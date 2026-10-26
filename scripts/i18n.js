@@ -261,6 +261,16 @@ const TEXTS = {
   formPhoneCode: {
     en: 'Country code', zh: '国家/地区代码', 'zh-HK': '國家/地區代碼', ja: '国番号', pt: 'Código do país',
   },
+  formCaptcha: {
+    en: 'Please confirm that you’re not a robot.', zh: '请确认您不是机器人。', 'zh-HK': '請確認您不是機械人。', ja: 'ロボットではないことを確認してください。', pt: 'Confirme que você não é um robô.',
+  },
+  formCaptchaLoadError: {
+    en: 'The security check couldn’t load. Please try again.',
+    zh: '安全验证无法加载，请重试。',
+    'zh-HK': '安全驗證無法載入，請重試。',
+    ja: 'セキュリティチェックを読み込めませんでした。もう一度お試しください。',
+    pt: 'Não foi possível carregar a verificação de segurança. Tente novamente.',
+  },
   formSubmit: {
     en: 'Submit', zh: '提交', 'zh-HK': '提交', ja: '送信', pt: 'Enviar',
   },
