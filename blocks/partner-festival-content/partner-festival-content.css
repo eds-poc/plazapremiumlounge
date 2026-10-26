@@ -1,7 +1,5 @@
-/* partner-festival-content: a partner festival intro (source /en-uk/rockinthunder): a maroon pill
-   eyebrow, a large heading, the description and italic small print, then the campaign CTAs as
-   rounded boxes (label over value): the first light, the others maroon. Mobile first; from 768px
-   the source's 32px inset, from 1024px the source's text column width */
+/* partner-festival-content: Intro section with eyebrow, title, copy,
+   small print, and CTA cards. Responsive layout matching reference design. */
 .partner-festival-content {
   --partner-festival-ink: var(--color-campaign-ink);
   --partner-festival-muted: #6b7280;
@@ -15,8 +13,8 @@
 
 .partner-festival-content .partner-festival-content-eyebrow {
   display: inline-block;
-  margin: 0 0 24px;
-  padding: 6px 32px;
+  margin: 0 0 var(--spacing-stack);
+  padding:calc(var(--spacing-2) + 1px) calc(var(--spacing-9) + 2px);
   border-radius: var(--radius-pill);
   background-color: var(--color-brand-tint);
   color: var(--color-brand-primary-action);
@@ -31,7 +29,7 @@
   margin: 0;
   color: var(--partner-festival-ink);
   font-family: var(--font-family-primary);
-  font-size: 27pt;
+  font-size: calc(var(--font-size-3xl) + 4px);
   font-weight: var(--font-weight-bold);
   line-height: 1.15;
   letter-spacing: -0.025em;
@@ -55,14 +53,14 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 24px;
+  gap: var(--spacing-stack);
 }
 
 .partner-festival-content .partner-festival-content-cta {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 16px 24px;
+  gap: calc(var(--spacing-1) + 2px);
+  padding: calc(var(--spacing-6) + 1px) var(--spacing-stack);
   border: var(--base-border-width) solid var(--color-border-subtle);
   border-radius: var(--radius-campaign);
   background-color: var(--partner-festival-surface);
@@ -82,7 +80,7 @@
 
 .partner-festival-content .partner-festival-content-cta-label {
   color: var(--partner-festival-label);
-  font-size: 7pt;
+  font-size: calc(var(--font-size-2xs) - 1px);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -92,7 +90,7 @@
 }
 
 .partner-festival-content .partner-festival-content-cta-value {
-  font-size: 10pt;
+  font-size: calc(var(--font-size-xs) + 1px);
 }
 
 .partner-festival-content a.partner-festival-content-cta:hover,
@@ -102,7 +100,7 @@
 
 @media (width >=768px) {
   .partner-festival-content {
-    padding-inline: 32px;
+    padding-inline: calc(var(--spacing-9) + 2px);
   }
 }
 

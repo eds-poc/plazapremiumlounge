@@ -1,8 +1,5 @@
-/* partner-travel-package: partner offer redemption steps (source /en-uk/rockinthunder "How to
-   Redeem Your Festival Travel Package"): a white rounded panel, centred, with a maroon eyebrow,
-   the heading and the steps, each a numbered maroon circle over its title and description.
-   Mobile first: the steps one under the other; from 768px three across, joined by a dashed line
-   between the circles, with the source's 32px inset */
+/* partner-travel-package: Travel package redemption steps with numbered cards.
+   Stacked on mobile, 3-column layout with dashed connectors on tablet+. */
 .partner-travel-package {
   --partner-travel-ink: var(--color-campaign-ink);
   --partner-travel-title: #111827;
@@ -11,10 +8,10 @@
   --partner-travel-plum: #700040;
   --partner-travel-circle: 56px;
 
-  margin-bottom: 24px;
+  margin-bottom: calc(var(--spacing-3) * 3);
   padding: 32px var(--spacing-7);
   border: var(--base-border-width) solid var(--color-border-subtle);
-  border-radius: 24px;
+  border-radius: calc(var(--radius-xs) * 4);
   background-color: var(--color-background);
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%), 0 8px 10px -6px rgb(0 0 0 / 10%);
   font-family: var(--font-family-campaign);
@@ -22,9 +19,9 @@
 }
 
 .partner-travel-package .partner-travel-package-eyebrow {
-  margin: 0 0 16px;
+  margin: 0 0 calc(var(--spacing-3) * 2);
   color: var(--partner-travel-plum);
-  font-size: 9pt;
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-campaign-bold);
   line-height: 1.4;
   letter-spacing: 0.1em;
@@ -35,7 +32,7 @@
   margin: 0;
   color: var(--partner-travel-ink);
   font-family: var(--font-family-primary);
-  font-size: 20pt;
+  font-size: calc(var(--font-size-2xl) + 3px);
   font-weight: var(--font-weight-bold);
   line-height: 1.2;
 }
@@ -43,13 +40,13 @@
 .partner-travel-package .partner-travel-package-intro {
   margin: var(--spacing-5) auto 0;
   color: var(--partner-travel-copy);
-  font-size: 11pt;
+  font-size: var(--spacing-6);
 }
 
 .partner-travel-package .partner-travel-package-steps {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 32px;
+  gap: calc(var(--spacing-9) + 2px);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -70,12 +67,12 @@
   justify-content: center;
   width: var(--partner-travel-circle);
   height: var(--partner-travel-circle);
-  margin-bottom: 24px;
+  margin-bottom: calc(var(--spacing-8) - 1px);
   border-radius: var(--radius-circle);
   background-color: var(--color-brand-primary);
   box-shadow: 0 16px 48px rgb(0 0 0 / 17.6%);
   color: var(--color-text-inverse);
-  font-size: 13.5pt;
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-campaign-bold);
   line-height: 1;
 }
@@ -93,7 +90,7 @@
   margin: 0 0 var(--spacing-3);
   color: var(--partner-travel-title);
   font-family: var(--font-family-primary);
-  font-size: 13.5pt;
+  font-size:var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   line-height: 1.2;
 }
@@ -103,14 +100,14 @@
   max-width: 320px;
   margin: 0;
   color: var(--partner-travel-copy);
-  font-size: 11pt;
+  font-size: var(--spacing-6);
   line-height: 1.625;
 }
 
 @media (width >=768px) {
   .partner-travel-package {
     margin-inline: 32px;
-    padding: 48px;
+    padding:calc(var(--spacing-5) * 4);
   }
 
   .partner-travel-package .partner-travel-package-steps {
@@ -123,7 +120,7 @@
     top: calc(var(--partner-travel-circle) / 2);
     right: 50%;
     left: -50%;
-    border-top: var(--base-border-width) dashed var(--partner-travel-line);
+    border-top: calc(var(--base-border-width) + 2px) dashed var(--partner-travel-line);
     content: '';
   }
 
