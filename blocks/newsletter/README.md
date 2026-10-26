@@ -2,7 +2,7 @@
 
 The live site's "Subscribe to our Newsletter!" band: a maroon panel with a heading and copy on the
 left and a sign up form on the right. It is authored once, in the footer page (`/en-uk/footer`),
-and shows above the footer on every page, except the pages in the section's `hide-on`. Authors
+and shows above the footer on every page, except the pages with `hide-newsletter`. Authors
 write the texts; the block's code sets the fields' keys and rules, the layout, the arrow button and
 where it's sent (the `newsletter` endpoint, a placeholder until the newsletter API exists).
 
@@ -32,26 +32,18 @@ The Newsletter table in its own section at the top of `/en-uk/footer`. Each lang
 - **submit**: the button's name (read out by screen readers); it shows as an arrow in the email
   field. **success** / **error**: the messages after sending.
 
-## hide-on: pages without the band
+## hide-newsletter: pages without the band
 
-The section's Section Metadata, under the Newsletter table:
+The `hide-newsletter` column of the site's metadata sheet (`/metadata`): `true` on a page's row
+hides the band on that page; a row's URL can be a page or a pattern (`/en-uk/drafts/**`).
 
-| Section Metadata |  |
-| --- | --- |
-| section-name | footer-newsletter |
-| hide-on | /en-uk/sign-up-successful-page |
+| URL | … | hide-newsletter |
+| --- | --- | --- |
+| /en-uk/sign-up-successful-page |  | true |
 
-`hide-on` lists the pages the band isn't shown on, separated by commas; add a page by adding its
-path. `all` hides it on every page.
-
-| Written as | Hides the band on |
-| --- | --- |
-| `all` | every page |
-| `/en-uk/sign-up-successful-page` | that page (with or without `.html` or a trailing `/`) |
-| `/en-uk/drafts/*` | every page under `/en-uk/drafts/` |
-| `/sign-up-successful-page` (no language folder) | that page in every language site |
-
-On a hidden page only the Newsletter's own small script and styles load: no form, no fields.
+A page's own Metadata table can set it too (`hide-newsletter | true`). The sheet's change shows
+once the sheet is previewed (and on the live site once it's published). On a hidden page no
+fields are built and nothing is sent.
 
 ## Look
 

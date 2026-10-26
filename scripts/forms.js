@@ -8,9 +8,9 @@
  * buildForm() builds a whole form from a block's authored rows (Field | Label | Placeholder |
  * Required | Error) and the block's own definition (the fields' types, keys and rules, the action,
  * the redirect), and sends it.
- * Styles: styles/forms.css (the form element gets the class `form-fields`).
+ * Styles: styles/forms.css (the form element gets the class `form-fields`), imported by each form
+ * block's CSS so it's loaded before the block shows.
  */
-import { loadCSS } from './aem.js';
 import { getSiteFolder, translate } from './i18n.js';
 import apiUrl from './endpoints.js';
 
@@ -869,10 +869,9 @@ function fieldSettings(field, cells) {
  *   `fields` (by name: `{ type, key, required, settings, newColumn }`),
  *   `action`, `redirect`, `method`, `defaultWidth` ('full' or 'half'), `intro` (true: text rows
  *   before the first field go beside the form), `submit` (`{ classes, fullWidthMobile, text }`)
- * @returns {Promise<{form: HTMLFormElement, intro: HTMLElement|null}>}
+ * @returns {{form: HTMLFormElement, intro: HTMLElement|null}}
  */
-export async function buildForm(block, definition) {
-  const css = loadCSS(`${window.hlx.codeBasePath}/styles/forms.css`);
+export function buildForm(block, definition) {
   const form = el('form', 'form-fields');
   const intro = definition.intro ? el('div', 'form-intro') : null;
   const texts = {};
@@ -1040,6 +1039,5 @@ export async function buildForm(block, definition) {
     }
   });
 
-  await css;
   return { form, intro: intro?.childNodes.length ? intro : null };
 }

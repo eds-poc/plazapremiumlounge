@@ -1,3 +1,6 @@
+/* the shared form styles, loaded with the block's own (before the block shows) */
+@import url('../../styles/forms.css');
+
 /* newsletter: the source band above the footer (measured at 1440, 768 and 375px). In the wide
    container (1490px, 50px from the edges from 768px), 20px above and below; a maroon panel with
    30px corners, 30px 50px inside (30px from 768px, 30px 15px and edge to edge on phones). The

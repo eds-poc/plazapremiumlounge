@@ -1,3 +1,6 @@
+/* the shared form styles, loaded with the block's own (before the block shows) */
+@import url('../../styles/forms.css');
+
 /* contact form: the source contact us form (measured at 1440, 768 and 375px). Two columns from
    768px, 64px apart; 41px fields with their labels 16px above; the 12-row message box with 10px
    20px padding; the checkboxes 20px under it and 24px apart, 1px from the top of their text; the

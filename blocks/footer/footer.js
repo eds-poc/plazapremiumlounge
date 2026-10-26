@@ -343,17 +343,8 @@ export default async function decorate(block) {
   if (!fragment) return;
 
   removeBrokenImages(fragment);
-  // modal sections (section metadata "modal") are registered as modals, not footer bands; a
-  // Newsletter section (already removed on the pages it hides on) shows above the footer, on the
-  // page's background
-  const all = [...fragment.querySelectorAll(':scope > .section:not([data-modal])')];
-  const newsletters = all.filter((section) => section.querySelector('.newsletter'));
-  if (newsletters.length) {
-    const band = el('div', 'footer-newsletter');
-    band.append(...newsletters);
-    block.before(band);
-  }
-  const sections = all.filter((section) => !newsletters.includes(section));
+  // modal sections (section metadata "modal") are registered as modals, not footer bands
+  const sections = [...fragment.querySelectorAll(':scope > .section:not([data-modal])')];
   const inner = el('div', 'footer-inner');
   sections.forEach((section, i) => {
     let band;
