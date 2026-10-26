@@ -279,6 +279,19 @@
   font-weight: var(--font-weight-campaign-bold);
 }
 
+/* option page-title: a page title band (source legal pages `section.pageTitle`): 50px above and
+   below the heading at every width, and no space under the heading. The section keeps its own
+   padding (25px, 35px from 768px, 50px from 992px), so the block adds the rest. Use in a section
+   with background grey */
+.title.page-title {
+  margin-bottom: 0;
+  padding-block: calc(var(--spacing-11) - var(--section-padding-block));
+}
+
+.title.page-title .title-heading {
+  margin-bottom: 0;
+}
+
 /* breakpoint-exception: the source campaign headings change above 480px and 768px */
 @media (width > 480px) {
   .title.headline {

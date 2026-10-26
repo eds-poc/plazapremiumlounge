@@ -39,6 +39,7 @@ Add them in brackets after the block name, e.g. `Title (center, compact)`.
 | `fluid` | A campaign page title: a maroon heading that grows with the screen, 26px on phones up to 38px (from about 633px), at most 840px wide, 14px above what follows. The same at every heading level. Use with `center-all` | Lounge Passes page title |
 | `highlight` | A lead-in with a highlighted offer: a maroon heading that grows with the screen (16px on phones up to 22px), where the words you make **bold** sit in a cream highlight with rounded corners, a little larger and bolder; then grey 15.5px text. At most 820px wide, 8px above what follows. The same at every heading level. Use with `center-all` | Lounge Passes "Save up to 50% off" |
 | `headline` | A partner campaign section header: a bold navy heading (22px on mobile, 24px from 481px, 28px from 769px) 15px above grey 16px Arial text at most 800px wide, with 30px to what follows (e.g. Cards). The same at every heading level. Use with `center-all`, in a `medium-width` section | CTBC Reward offer "How It Works", "Travel Benefits" |
+| `page-title` | A page title band: 50px above and below the heading at every width, and no space under the heading. Use alone in a section with `background` = `grey` | Legal pages (`section.pageTitle`) |
 
 ### Example: editorial
 
@@ -62,6 +63,32 @@ page, put it in its own band section after the Planner (`Style` = `inset, band`,
 
 On an offer page, put each in its own band section with `Style` = `inset, band, panel` (`Background`
 = `white` for the lead-in, `mist` for the callout).
+
+### Example: legal pages
+
+The legal pages (Terms and Conditions, Data Privacy and Security Policy, Website Terms of Use)
+use no other block: a grey title band, then the text as default content.
+
+| Title (page-title) |
+| --- |
+| ## Terms and Conditions |
+
+| Section Metadata | |
+| --- | --- |
+| background | grey |
+
+---
+
+Last updated: 29 Sep 2025<br>…<br>**1. TERMS AND CONDITIONS**<br>1.1 These are these Terms and Conditions…
+
+- **Title band:** `Title (page-title)` with the heading 2 as on the source (`section.pageTitle`),
+  in its own section with `background` = `grey`.
+- **Text:** write clause headings as **bold** lines, not headings, as the source does. Lists stay
+  lists. A blank line starts a new paragraph; a soft line break (Shift+Enter) keeps lines together
+  (the Privacy Notice's sections).
+- **Width:** add Section Metadata `Style` = `fixed-width` to the text section for the source's
+  narrower text (Terms and Conditions); leave it out for the full content width.
+- **Metadata:** Title, Description and Keywords as the source page.
 
 ### Example: fluid and highlight
 
