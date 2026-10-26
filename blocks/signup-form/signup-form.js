@@ -52,9 +52,10 @@ export default function decorate(block) {
   const { form } = buildForm(block, {
     fields: FIELDS,
     action: 'signUp',
-    redirect: '/en-uk/sign-up-successful-page',
+    // the confirmation page in the visitor's language site (/zh-cn/… on /zh-cn/sign-up)
+    redirect: 'sign-up-successful-page',
     defaultWidth: 'half',
-    submit: { classes: ['tertiary'], fullWidthMobile: true, text: 'Create Account' },
+    submit: { classes: ['tertiary'], fullWidthMobile: true },
   });
   block.replaceChildren(form);
 }

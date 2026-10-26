@@ -2,7 +2,9 @@
 
 The sign up form (the live site's `/en-uk/sign-up`). Authors write the texts; the block's code sets
 everything else: the field types, the keys sent to the Register API, the rules, the layout, and the
-redirect to the confirmation page (`/en-uk/sign-up-successful-page`, in the visitor's language).
+redirect to the confirmation page (`sign-up-successful-page` in the visitor's language site:
+`/zh-cn/sign-up-successful-page` from `/zh-cn/sign-up`). The button text is the `submit` row (else
+"Submit" in the visitor's language).
 
 ## Table: 5 columns
 

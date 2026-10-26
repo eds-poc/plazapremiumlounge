@@ -11,7 +11,7 @@
  * Styles: styles/forms.css (the form element gets the class `form-fields`), imported by each form
  * block's CSS so it's loaded before the block shows.
  */
-import { getSiteFolder, translate } from './i18n.js';
+import { DEFAULT_SITE, getSiteFolder, translate } from './i18n.js';
 import apiUrl from './endpoints.js';
 
 const INPUT_TYPES = ['text', 'email', 'password', 'tel', 'number', 'date', 'url', 'hidden'];
@@ -799,12 +799,15 @@ function actionUrl(action) {
 }
 
 /**
- * A page path in the visitor's language site: /en-uk/… becomes /zh-cn/… on a Chinese page.
+ * A page path in the visitor's language site: a page name without the language folder
+ * (`sign-up-successful-page`) goes in the visitor's site folder (/zh-cn/… on a Chinese page, else
+ * the default site's); /en-uk/… becomes /zh-cn/… on a Chinese page.
  * @param {string} path
  * @returns {string}
  */
 function localPath(path) {
-  const url = new URL(path, window.location.href);
+  const site = getSiteFolder() || DEFAULT_SITE;
+  const url = new URL(/^(https?:)?\//.test(path) ? path : `/${site}/${path}`, window.location.href);
   const folder = getSiteFolder();
   const parts = url.pathname.split('/');
   if (url.origin === window.location.origin && folder && /^[a-z]{2}-[a-z]{2}$/.test(parts[1] || '')) {
@@ -867,15 +870,17 @@ function fieldSettings(field, cells) {
  * @param {Element} block The block, its rows as authored
  * @param {object} definition The block's form:
  *   `fields` (by name: `{ type, key, required, settings, newColumn }`),
- *   `action`, `redirect`, `method`, `defaultWidth` ('full' or 'half'), `intro` (true: text rows
- *   before the first field go beside the form), `submit` (`{ classes, fullWidthMobile, text }`)
+ *   `action`, `redirect` (a page name such as `sign-up-successful-page`, opened in the visitor's
+ *   language site, or a path), `method`, `defaultWidth` ('full' or 'half'), `intro` (true: text
+ *   rows before the first field go beside the form), `submit` (`{ classes, fullWidthMobile }`; its
+ *   text is the authored `submit` row, else "Submit" in the visitor's language)
  * @returns {{form: HTMLFormElement, intro: HTMLElement|null}}
  */
 export function buildForm(block, definition) {
   const form = el('form', 'form-fields');
   const intro = definition.intro ? el('div', 'form-intro') : null;
   const texts = {};
-  let buttonText = definition.submit?.text || 'Submit';
+  let buttonText = translate('formSubmit');
 
   [...block.children].forEach((row) => {
     const cells = [...row.children];

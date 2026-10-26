@@ -270,6 +270,9 @@ const TEXTS = {
   formHidePassword: {
     en: 'Hide password', zh: '隐藏密码', 'zh-HK': '隱藏密碼', ja: 'パスワードを隠す', pt: 'Ocultar senha',
   },
+  formSubmit: {
+    en: 'Submit', zh: '提交', 'zh-HK': '提交', ja: '送信', pt: 'Enviar',
+  },
   formSending: {
     en: 'Sending…', zh: '提交中…', 'zh-HK': '提交中…', ja: '送信中…', pt: 'Enviando…',
   },

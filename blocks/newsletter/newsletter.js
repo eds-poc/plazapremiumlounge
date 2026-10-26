@@ -64,7 +64,6 @@ export default function decorate(block) {
     action: 'newsletter',
     defaultWidth: 'half',
     intro: true,
-    submit: { text: 'Subscribe' },
   });
   arrowInEmail(form);
   const panel = document.createElement('div');
