@@ -1,7 +1,8 @@
 /* quick buy: passes from the passes service on a white panel, as the source lounge passes page
    (`#ppl-gtm-live-root .ppl-quickbuy-grid`): a centred heading and intro, then a card per pass
    with its tag, image, name, price, points, Best for lines, Learn more and Add to Cart. 1 per row
-   on phones, 2 from 480px, 3 from 700px. The source's own colours are block variables */
+   on phones, 2 from 768px, 3 from 992px (the site's breakpoints). The source's own colours are
+   block variables */
 .quick-buy {
   --quick-buy-accent: #7c0040;
   --quick-buy-ink: #2a1017;
@@ -283,15 +284,13 @@
   font-size: var(--font-size-sm);
 }
 
-/* breakpoint-exception: the source quick buy's 2 columns start at 480px */
-@media (width >=480px) {
+@media (width >=768px) {
   .quick-buy-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-/* breakpoint-exception: the source quick buy's 3 columns start at 700px */
-@media (width >=700px) {
+@media (width >=992px) {
   .quick-buy-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }

@@ -31,8 +31,8 @@ so it's always current.
 
 ## What visitors see
 
-- **A white panel** with the header and one card per pass: 1 per row on phones, 2 from 480px, 3
-  from 700px, as the source.
+- **A white panel** with the header and one card per pass: 1 per row on phones, 2 from 768px, 3
+  from 992px (the site's breakpoints).
 - **Each card:** the tag, the pass image, the name, the price and the price per visit (e.g.
   "USD 99.00 (USD 49.50/Visit)"), the Smart Traveller points ("+150 ST Points", ST as its icon),
   the Best for lines, **Learn more** and **Add to Cart**.

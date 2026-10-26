@@ -1,7 +1,7 @@
 /* pass finder: every lounge pass on a white panel, as the source Lounge Passes page's "Explore
    Regional Passes" (#ppl-regional-passes-card): a centred heading and intro, the search, region
-   and sort, the cards (1 per row on phones, 2 from 560px, 3 from 1000px) and pages of nine.
-   The source's own colours are block variables */
+   and sort (one row from 768px), the cards (1 per row on phones, 2 from 768px, 3 from 992px: the
+   site's breakpoints) and pages of nine. The source's own colours are block variables */
 .pass-finder {
   --pass-finder-accent: #7c0040;
   --pass-finder-ink: #2a1017;
@@ -608,17 +608,7 @@
   outline-offset: var(--pass-finder-focus-ring);
 }
 
-/* breakpoint-exception: the source finder's 2 columns start at 560px */
-@media (width >=560px) {
-  .pass-finder-grid {
-    --pass-finder-gap: var(--pass-finder-gap-two);
-
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-/* breakpoint-exception: the source finder's toolbar is one row from 700px */
-@media (width >=700px) {
+@media (width >=768px) {
   .pass-finder-toolbar {
     flex-direction: row;
   }
@@ -626,10 +616,15 @@
   .pass-finder-region {
     min-width: var(--pass-finder-region-width);
   }
+
+  .pass-finder-grid {
+    --pass-finder-gap: var(--pass-finder-gap-two);
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-/* breakpoint-exception: the source finder's 3 columns start at 1000px */
-@media (width >=1000px) {
+@media (width >=992px) {
   .pass-finder-grid {
     --pass-finder-gap: var(--spacing-7);
 

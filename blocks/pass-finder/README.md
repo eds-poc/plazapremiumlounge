@@ -31,7 +31,8 @@ page adds only the heading and the codes the service is asked with.
   - **"N passes found"** and **Sort by:** Recommended (the service's order), Price low to high,
     Price high to low.
 - **The global passes are always shown**, last, whatever the search or region, as the source.
-- **Cards** (1 per row on phones, 2 from 560px, 3 from 1000px, as the source):
+- **Cards** (1 per row on phones, 2 from 768px, 3 from 992px: the site's breakpoints; the search,
+  region and sort sit in one row from 768px):
   - the image, the name, the price and price per visit, the Smart Traveller points
   - up to 4 location tags, then "+N more" (hover for the rest)
   - for passes valid in several places, a note: "One visit each at …" (a visit per place) or

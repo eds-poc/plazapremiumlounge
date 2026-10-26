@@ -132,7 +132,7 @@ dialog.modal.pass-modal .pass-modal-add {
   width: 100%;
 }
 
-@media (width >=576px) {
+@media (width >=768px) {
   dialog.modal.pass-modal {
     width: var(--pass-modal-width);
   }
