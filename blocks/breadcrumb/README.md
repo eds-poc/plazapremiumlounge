@@ -62,3 +62,10 @@ per item, a link on each but the last.
 As the source: the items in a row with "<" between them, the parent as a grey link (no change on
 hover), the page in maroon; 14px on phones, 16px from 768px. It's named for screen readers in the
 page's language ("Breadcrumb", 面包屑导航 …).
+
+## For developers
+
+Keep `blocks/breadcrumb/`: the offer pages' automatic breadcrumb needs it. A branch commit that
+deletes these files removes them from the site when the branch merges, even if the merge keeps them
+in git. If they go missing (404) again, re-sync the code: a commit that touches them, as this
+note's own commit did.
