@@ -1,0 +1,313 @@
+/* form fields (scripts/forms.js), measured from the source sign up form (/en-uk/sign-up): uppercase
+   12px labels 8px above warm grey pill inputs (45px, 25px radius, no border), fields in rows 30px
+   apart; a red * on required fields, the error in red under its field; round maroon checkboxes.
+   Fields sit in a 6-column grid: width full (6) or half (3); one column below 992px */
+.form-fields {
+  /* one-off: the source required star, input text and select arrow colours */
+  --form-required: #df1111;
+  --form-input-color: var(--color-text-control);
+  --form-row-gap: var(--spacing-9);
+  --form-column-gap: var(--grid-gutter);
+  --form-input-height: 45px;
+}
+
+/* the form, and each of its two columns (a field with newColumn) */
+.form-fields,
+.form-fields .form-column {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--form-row-gap) var(--form-column-gap);
+}
+
+.form-fields > *,
+.form-fields .form-column > * {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+/* labels: Polysans 12px/500 uppercase, 1px letter spacing, 8px above the field */
+.form-fields .form-label {
+  display: block;
+  margin: 0 0 var(--spacing-3);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+.form-fields .form-required {
+  color: var(--form-required);
+}
+
+/* inputs and dropdowns: 45px warm grey pills, 12px 25px padding, 14px text */
+.form-fields .form-input {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  height: var(--form-input-height);
+  margin: 0;
+  border: 0;
+  border-radius: var(--radius-input);
+  padding: var(--spacing-5) var(--spacing-8);
+  background-color: var(--color-surface-warm);
+  color: var(--form-input-color);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-relaxed);
+  transition:
+    box-shadow var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+}
+
+.form-fields .form-input::placeholder {
+  color: var(--color-text-subtle);
+}
+
+.form-fields .form-input:focus {
+  outline: none;
+  background-color: var(--color-background);
+  box-shadow: var(--shadow-focus);
+}
+
+.form-fields .form-input:disabled {
+  color: var(--color-disabled-text);
+  cursor: progress;
+}
+
+.form-fields .form-textarea {
+  height: auto;
+  min-height: 140px;
+  resize: vertical;
+}
+
+/* the error text under the field */
+.form-fields .form-error {
+  margin: var(--spacing-2) 0 0;
+  color: var(--color-error);
+  font-size: 13px;
+}
+
+/* dropdowns: the source's down arrow 25px from the right, 500 weight */
+.form-fields .form-select {
+  padding-right: calc(var(--spacing-8) + 24px);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23212529' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1'/%3E%3C/svg%3E");
+  background-position: right var(--spacing-8) center;
+  background-repeat: no-repeat;
+  background-size: 12px;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+/* phone: the country code and the number in one pill, a thin line between them */
+.form-fields .form-phone {
+  display: flex;
+  border-radius: var(--radius-input);
+  background-color: var(--color-surface-warm);
+}
+
+.form-fields .form-phone:focus-within {
+  background-color: var(--color-background);
+  box-shadow: var(--shadow-focus);
+}
+
+.form-fields .form-phone .form-input {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.form-fields .form-phone-code {
+  flex: 0 0 auto;
+  width: 9.5em;
+  border-radius: var(--radius-input) 0 0 var(--radius-input);
+  border-right: 1px solid var(--color-border);
+  padding-left: var(--spacing-7);
+}
+
+.form-fields .form-phone-number {
+  flex: 1 1 auto;
+  min-width: 0;
+  border-radius: 0 var(--radius-input) var(--radius-input) 0;
+}
+
+/* checkboxes: a 14px round maroon ring that fills when checked, the label 12px after */
+.form-fields .form-field-checkbox {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0 var(--spacing-5);
+}
+
+.form-fields .form-check-input {
+  flex: none;
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  margin: 3px 0 0;
+  border: 1px solid var(--color-brand-primary);
+  border-radius: var(--radius-circle);
+  appearance: none;
+  background-color: var(--color-background);
+  cursor: pointer;
+}
+
+.form-fields .form-check-input:checked {
+  background-color: var(--color-brand-primary);
+  box-shadow: inset 0 0 0 2px var(--color-background);
+}
+
+.form-fields .form-check-input:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+}
+
+.form-fields .form-check-label {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.form-fields .form-check-label a:any-link {
+  text-decoration: underline;
+}
+
+.form-fields .form-field-checkbox .form-error {
+  flex-basis: 100%;
+  padding-left: calc(14px + var(--spacing-5));
+}
+
+/* a field with an error: a thin red ring */
+.form-fields .form-field.has-error .form-input,
+.form-fields .form-field.has-error .form-phone {
+  box-shadow: inset 0 0 0 1px var(--color-error);
+}
+
+/* the phone pill has one ring, around both of its parts */
+.form-fields .form-field.has-error .form-phone .form-input {
+  box-shadow: none;
+}
+
+.form-fields .form-field.has-error .form-check-input {
+  border-color: var(--color-error);
+}
+
+/* a list that couldn't load: a small retry link under the field */
+.form-fields .form-load-error {
+  margin: var(--spacing-2) 0 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--color-brand-primary);
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* text between fields (one-cell rows), e.g. the source's lines over the two checkboxes (14px/500),
+   and the text beside the form (intro) */
+.form-fields .form-content {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+:is(.form-fields .form-content, .form-intro) > :first-child {
+  margin-top: 0;
+}
+
+:is(.form-fields .form-content, .form-intro) > :last-child {
+  margin-bottom: 0;
+}
+
+.form-fields .form-content + .form-field-checkbox {
+  margin-top: calc(var(--spacing-3) - var(--form-row-gap));
+}
+
+/* the API's message (e.g. its serviceResponseMsg), at the top of the form, with a close button */
+.form-fields .form-status {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-4);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-5) var(--spacing-5) var(--spacing-5) var(--spacing-7);
+  background-color: rgb(220 53 69 / 8%);
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+}
+
+.form-fields .form-status[hidden] {
+  display: none;
+}
+
+.form-fields .form-status-text {
+  flex: 1;
+  margin: 0;
+}
+
+.form-fields .form-status-close {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin: -2px 0;
+  border: 0;
+  padding: 0;
+  background: currentcolor;
+  cursor: pointer;
+  mask: url('/icons/close-thin.svg') center / 10px no-repeat;
+}
+
+.form-fields .form-status-close:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 2px;
+}
+
+/* the button: the source's space below the last field (50px, then its 20px spacer); faded while
+   sending */
+.form-fields .form-submit {
+  margin-top: calc(var(--spacing-11) + var(--spacing-7) - var(--form-row-gap));
+}
+
+.form-fields .form-submit .button:disabled {
+  opacity: 0.7;
+}
+
+/* the message that replaces the form after a successful send */
+.form-success {
+  margin: 0;
+  font-size: var(--font-size-md);
+}
+
+.form-fields .form-column {
+  align-content: start;
+}
+
+/* the grid: from 992px a field can be half the row; new row starts a line */
+@media (width >= 992px) {
+  .form-fields .width-half {
+    grid-column: span 3;
+  }
+
+  .form-fields .new-row.width-half {
+    grid-column: 1 / span 3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .form-fields .form-input {
+    transition: none;
+  }
+}
+
+/* breakpoint-exception: design-system breakpoint (768px): the button fills the width below it
+   (full width mobile); the two columns side by side from it */
+@media (width < 768px) {
+  .form-fields .form-submit.full-width-mobile .button {
+    width: 100%;
+  }
+}
+
+@media (width >= 768px) {
+  .form-fields.has-columns > .form-column {
+    grid-column: span 3;
+  }
+}

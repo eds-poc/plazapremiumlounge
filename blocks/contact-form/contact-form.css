@@ -1,0 +1,48 @@
+/* the shared form styles, loaded with the block's own (before the block shows) */
+@import url('../../styles/forms.css');
+
+/* contact form: the source contact us form (measured at 1440, 768 and 375px). Two columns from
+   768px, 64px apart; 41px fields with their labels 16px above; the 12-row message box with 10px
+   20px padding; the checkboxes 20px under it and 24px apart, 1px from the top of their text; the
+   button 58px below, full width (the global full-width class), in the right half of the second
+   column (the captcha's half on the source) */
+.contact-form .form-fields {
+  --form-input-height: 41px;
+}
+
+.contact-form .form-fields .form-label {
+  margin-bottom: var(--spacing-bootstrap-3);
+}
+
+.contact-form .form-fields .form-textarea {
+  padding: var(--spacing-4) var(--spacing-7);
+}
+
+.contact-form .form-fields .form-check-input {
+  margin-top: 1px;
+}
+
+.contact-form .form-fields .form-column > .form-field-checkbox {
+  margin-top: calc(var(--spacing-stack) - var(--form-row-gap));
+}
+
+.contact-form .form-fields .form-column > :not(.form-field-checkbox) + .form-field-checkbox {
+  margin-top: calc(var(--spacing-7) - var(--form-row-gap));
+}
+
+.contact-form .form-fields .form-column > .form-submit {
+  /* one-off: the source's 58px between the last checkbox and the button */
+  margin-top: calc(58px - var(--form-row-gap));
+}
+
+/* breakpoint-exception: the source's col-md-6 (768px), the two columns side by side */
+@media (width >= 768px) {
+  .contact-form .form-fields.has-columns {
+    /* one-off: the source's 64px between its columns */
+    column-gap: 64px;
+  }
+
+  .contact-form .form-fields .form-column > .form-submit {
+    grid-column: 4 / -1;
+  }
+}
