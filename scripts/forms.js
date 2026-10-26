@@ -8,11 +8,13 @@
  * buildForm() builds a whole form from a block's authored rows (Field | Label | Placeholder |
  * Required | Error) and the block's own definition (the fields' types, keys and rules, the action,
  * the redirect), and sends it.
+ * A form can have a captcha before its button (`captcha: true`, scripts/captcha.js).
  * Styles: styles/forms.css (the form element gets the class `form-fields`), imported by each form
  * block's CSS so it's loaded before the block shows.
  */
 import { DEFAULT_SITE, getSiteFolder, translate } from './i18n.js';
 import apiUrl from './endpoints.js';
+import { addCaptcha, CAPTCHA_KEY } from './captcha.js';
 
 const INPUT_TYPES = ['text', 'email', 'password', 'tel', 'number', 'date', 'url'];
 const FIELD_TYPES = [...INPUT_TYPES, 'textarea', 'select', 'checkbox', 'country', 'phone'];
@@ -763,16 +765,18 @@ function fieldSettings(field, cells) {
  * Builds a form block's form: one authored row per field (Field | Label | Placeholder | Required |
  * Error), the field's name in the first cell, matched to the block's definition; one-cell rows are
  * text (before the first field, in `intro` when the definition asks for it); the rows `submit`,
- * `success` and `error` give the button text and the messages. On submit every field is checked;
- * a valid form is posted as JSON to the definition's action and the visitor goes to its redirect,
- * or sees the success message, or the error at the top of the form.
+ * `success` and `error` give the button text and the messages, and the row `captcha` (its Error
+ * cell) the message when the captcha isn't ticked. On submit every field and the captcha are
+ * checked; a valid form is posted as JSON to the definition's action and the visitor goes to its
+ * redirect, or sees the success message, or the error at the top of the form.
  * @param {Element} block The block, its rows as authored
  * @param {object} definition The block's form:
  *   `fields` (by name: `{ type, key, required, settings, newColumn }`),
  *   `action`, `redirect` (a page name such as `sign-up-successful-page`, opened in the visitor's
  *   language site, or a path), `method`, `defaultWidth` ('full' or 'half'), `intro` (true: text
  *   rows before the first field go beside the form), `submit` (`{ classes, fullWidthMobile }`; its
- *   text is the authored `submit` row, else "Submit" in the visitor's language)
+ *   text is the authored `submit` row, else "Submit" in the visitor's language), `captcha` (true,
+ *   or `{ key }` for the token's key in the data; default `h-captcha-response`)
  * @returns {{form: HTMLFormElement, intro: HTMLElement|null}}
  */
 export function buildForm(block, definition) {
@@ -787,8 +791,8 @@ export function buildForm(block, definition) {
     const name = cells[0]?.textContent.trim();
     const field = cells.length > 1 ? definition.fields[name] : null;
     if (!field) {
-      if (cells.length > 1 && ['submit', 'success', 'error'].includes(name)) {
-        const text = cells[1]?.textContent.trim();
+      if (cells.length > 1 && ['submit', 'success', 'error', 'captcha'].includes(name)) {
+        const text = cells[name === 'captcha' ? 4 : 1]?.textContent.trim();
         if (name === 'submit' && text) buttonText = text;
         else if (text) texts[name] = text;
         return;
@@ -836,6 +840,9 @@ export function buildForm(block, definition) {
   summary.setAttribute('aria-live', 'polite');
   form.prepend(status);
   form.append(summary, submit);
+  // the captcha, before the button (it moves with it into the second column)
+  const captcha = definition.captcha ? addCaptcha(form, { message: texts.captcha }) : null;
+  if (captcha) submit.before(captcha.element);
 
   // a field with `newColumn`: the rows before it fill the first column, it and the rows after it
   // (and the button) the second, side by side from 768px
@@ -892,6 +899,14 @@ export function buildForm(block, definition) {
     }
 
     const values = collectValues(form);
+    if (captcha) {
+      const token = captcha.check();
+      if (!token) {
+        setBusy(false);
+        return;
+      }
+      values[definition.captcha.key || CAPTCHA_KEY] = token;
+    }
     const before = new CustomEvent('forms:submit', { bubbles: true, cancelable: true, detail: { values, form } });
     const url = actionUrl(definition.action);
     if (!form.dispatchEvent(before) || !url) {
@@ -917,6 +932,8 @@ export function buildForm(block, definition) {
       // or more (it can answer 200 with a 400 inside, e.g. an email that is already registered)
       if (!res.ok || data?.success === false || Number(data?.serviceResponseCode) >= 400) {
         showApiErrors(form, data);
+        // a captcha token works once
+        captcha?.reset();
         showStatus(data?.serviceResponseMsg || data?.message || texts.error || translate('formError'));
         const code = Number(data?.serviceResponseCode) || res.status;
         form.dispatchEvent(new CustomEvent('forms:error', { bubbles: true, detail: { status: code, data, form } }));
@@ -936,6 +953,7 @@ export function buildForm(block, definition) {
         form.replaceWith(done);
       }
     } catch {
+      captcha?.reset();
       showStatus(translate('formNetworkError'));
       form.dispatchEvent(new CustomEvent('forms:error', { bubbles: true, detail: { status: 0, form } }));
     } finally {
