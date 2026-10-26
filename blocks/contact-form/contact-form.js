@@ -40,8 +40,8 @@ const FIELDS = {
  * sent to the contact endpoint.
  * @param {Element} block The Contact Form block element
  */
-export default async function decorate(block) {
-  const { form } = await buildForm(block, {
+export default function decorate(block) {
+  const { form } = buildForm(block, {
     fields: FIELDS,
     action: 'contact',
     submit: { classes: ['secondary', 'large'], fullWidthMobile: true },

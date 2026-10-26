@@ -48,8 +48,8 @@ const FIELDS = {
  * visitor's language. Fields half width from 992px (Title alone), one column below.
  * @param {Element} block The Signup Form block element
  */
-export default async function decorate(block) {
-  const { form } = await buildForm(block, {
+export default function decorate(block) {
+  const { form } = buildForm(block, {
     fields: FIELDS,
     action: 'signUp',
     redirect: '/en-uk/sign-up-successful-page',
