@@ -4,8 +4,8 @@
 /* contact form: the source contact us form (measured at 1440, 768 and 375px). Two columns from
    768px, 64px apart; 41px fields with their labels 16px above; the 12-row message box with 10px
    20px padding; the checkboxes 20px under it and 24px apart, 1px from the top of their text; the
-   button 58px below, full width (the global full-width class), in the right half of the second
-   column (the captcha's half on the source) */
+   captcha 58px below and the button, full width (the global full-width class), in the right half
+   of the second column */
 .contact-form .form-fields {
   --form-input-height: 41px;
 }
@@ -30,9 +30,25 @@
   margin-top: calc(var(--spacing-7) - var(--form-row-gap));
 }
 
-.contact-form .form-fields .form-column > .form-submit {
-  /* one-off: the source's 58px between the last checkbox and the button */
+/* the captcha (scripts/captcha.js, 302px wide) 58px under the last checkbox (one-off, the source's
+   gap) and the button under it; side by side, the captcha in the left half (as the source), when
+   the column has room for both */
+.contact-form .form-fields .form-column {
+  container-type: inline-size;
+}
+
+.contact-form .form-fields .form-column > .form-captcha {
   margin-top: calc(58px - var(--form-row-gap));
+}
+
+@container (width >= 640px) {
+  .contact-form .form-fields .form-column > .form-captcha {
+    grid-column: 1 / span 3;
+  }
+
+  .contact-form .form-fields .form-captcha + .form-submit {
+    margin-top: calc(58px - var(--form-row-gap));
+  }
 }
 
 /* breakpoint-exception: the source's col-md-6 (768px), the two columns side by side */

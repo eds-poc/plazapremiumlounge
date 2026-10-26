@@ -36,14 +36,16 @@ const FIELDS = {
 /**
  * Decorates the Contact Form block: the contact us form (the source /en-uk/contact-us). One
  * authored row per field (Field | Label | Placeholder | Required | Error), one-cell rows as text,
- * and the rows submit / success / error. Two columns from 768px (Email Address starts the second),
- * sent to the contact endpoint.
+ * and the rows submit / success / error, and captcha (its Error cell: the message when the box
+ * isn't ticked). Two columns from 768px (Email Address starts the second), a captcha before the
+ * button (scripts/captcha.js), sent to the contact endpoint.
  * @param {Element} block The Contact Form block element
  */
 export default function decorate(block) {
   const { form } = buildForm(block, {
     fields: FIELDS,
     action: 'contact',
+    captcha: true,
     submit: { classes: ['secondary', 'large', 'full-width'] },
   });
   block.replaceChildren(form);

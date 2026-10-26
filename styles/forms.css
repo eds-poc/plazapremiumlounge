@@ -261,10 +261,15 @@
   outline-offset: 2px;
 }
 
-/* the button: the source's space below the last field (50px, then its 20px spacer); faded while
+/* the button: the source's space below the last field (50px, then its 20px spacer), taken by the
+   captcha (scripts/captcha.js) when there is one, the button then right under it; faded while
    sending */
-.form-fields .form-submit {
+.form-fields :is(.form-captcha, .form-submit) {
   margin-top: calc(var(--spacing-11) + var(--spacing-7) - var(--form-row-gap));
+}
+
+.form-fields .form-captcha + .form-submit {
+  margin-top: 0;
 }
 
 .form-fields .form-submit .button:disabled {
