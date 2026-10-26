@@ -25,7 +25,6 @@
 .newsletter .form-intro {
   margin-bottom: var(--spacing-9);
   font-size: var(--font-size-md);
-  line-height: var(--line-height-body);
 }
 
 .newsletter .form-intro :is(h2, h3, h4) {
@@ -41,15 +40,7 @@
   font-weight: var(--font-weight-light);
 }
 
-.newsletter .form-intro > :first-child {
-  margin-top: 0;
-}
-
-.newsletter .form-intro > :last-child {
-  margin-bottom: 0;
-}
-
-.newsletter .form-intro a:any-link {
+.newsletter :is(.form-intro, .form-fields .form-check-label) a:any-link {
   color: var(--color-text-inverse);
   text-decoration: underline;
 }
@@ -64,10 +55,6 @@
 
 .newsletter .form-fields .form-label {
   margin-bottom: var(--spacing-2);
-}
-
-.newsletter .form-fields :is(.form-label, .form-check-label, .form-content) {
-  color: var(--color-text-inverse);
 }
 
 .newsletter .form-fields .form-required {
@@ -118,11 +105,6 @@
   font-size: var(--font-size-xs);
 }
 
-.newsletter .form-fields .form-check-label a:any-link {
-  color: var(--color-text-inverse);
-  text-decoration: underline;
-}
-
 .newsletter .form-fields .form-check-input {
   margin-top: 1px;
   border-color: var(--color-text-inverse);
@@ -159,6 +141,10 @@
 }
 
 /* the button: a white arrow at the right of the email field */
+.newsletter .form-fields .form-control-wrap:has(.newsletter-submit) {
+  position: relative;
+}
+
 .newsletter .newsletter-submit {
   position: absolute;
   top: 50%;

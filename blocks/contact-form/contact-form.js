@@ -44,7 +44,7 @@ export default function decorate(block) {
   const { form } = buildForm(block, {
     fields: FIELDS,
     action: 'contact',
-    submit: { classes: ['secondary', 'large'], fullWidthMobile: true },
+    submit: { classes: ['secondary', 'large', 'full-width'] },
   });
   block.replaceChildren(form);
 }

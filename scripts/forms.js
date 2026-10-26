@@ -14,9 +14,9 @@
 import { DEFAULT_SITE, getSiteFolder, translate } from './i18n.js';
 import apiUrl from './endpoints.js';
 
-const INPUT_TYPES = ['text', 'email', 'password', 'tel', 'number', 'date', 'url', 'hidden'];
-const FIELD_TYPES = [...INPUT_TYPES, 'textarea', 'select', 'radio', 'checkbox', 'checkboxes', 'country', 'phone'];
-const CHOICE_TYPES = ['select', 'radio', 'country', 'checkboxes'];
+const INPUT_TYPES = ['text', 'email', 'password', 'tel', 'number', 'date', 'url'];
+const FIELD_TYPES = [...INPUT_TYPES, 'textarea', 'select', 'checkbox', 'country', 'phone'];
+const CHOICE_TYPES = ['select', 'country'];
 // autofill hints by key (sign up and contact forms), else by type
 const AUTOCOMPLETE = {
   title: 'honorific-prefix',
@@ -78,28 +78,6 @@ const SOURCES = {
 };
 
 /**
- * Reads a settings cell: one setting per line or paragraph, `name: value` or a bare name
- * (`required`). Names are case and dash insensitive (`Min-Length` = `min length`).
- * @param {Element} [cell]
- * @returns {Map<string, string>}
- */
-export function readSettings(cell) {
-  const settings = new Map();
-  if (!cell) return settings;
-  const lines = cell.querySelector('p, li')
-    ? [...cell.querySelectorAll('p, li')].map((p) => p.textContent)
-    : cell.textContent.split('\n');
-  lines.forEach((line) => {
-    const text = line.trim();
-    if (!text) return;
-    const at = text.indexOf(':');
-    const name = (at > 0 ? text.slice(0, at) : text).trim().toLowerCase().replace(/[\s_-]+/g, ' ');
-    settings.set(name, at > 0 ? text.slice(at + 1).trim() : '');
-  });
-  return settings;
-}
-
-/**
  * A payload key from a label ("First Name" → "firstName"); '' for labels without Latin letters.
  * @param {string} label
  * @returns {string}
@@ -138,51 +116,29 @@ function readOptions(text) {
 }
 
 /**
- * Fills a select (or a radio/checkbox group) with options, after its empty first option, and
- * selects the preset one: the option whose text is the preset (e.g. `+1 (US)`), else the first
- * whose value is (e.g. `+1`).
- * @param {HTMLElement} control
+ * Fills a select with options, after its empty first option, and selects the preset one: the
+ * option whose text is the preset (e.g. `+1 (US)`), else the first whose value is (e.g. `+1`).
+ * @param {HTMLSelectElement} control
  * @param {{text: string, value: string}[]} options
  * @param {object} state The field state
  * @param {string} [preset] The default (the field's `default` setting unless given)
  */
 function fillOptions(control, options, state, preset = state.def.settings.get('default')) {
-  const { def } = state;
   const chosen = preset && (options.find((o) => o.text === preset)
     || options.find((o) => o.value === preset));
-  if (control.matches('select')) {
-    const keep = control.querySelector('option[value=""]');
-    control.replaceChildren(...(keep ? [keep] : []));
-    // each option's source data (e.g. a country's phone code), for linked fields
-    state.data = new Map();
-    options.forEach((item) => {
-      const option = el('option');
-      option.value = item.value;
-      option.textContent = item.text;
-      // the preset is also what a form reset goes back to
-      if (item === chosen) option.defaultSelected = true;
-      if (item.data && !state.data.has(item.value)) state.data.set(item.value, item.data);
-      control.append(option);
-    });
-    return;
-  }
-  const type = def.type === 'radio' ? 'radio' : 'checkbox';
-  const items = options.map(({ text, value }, i) => {
-    const item = el('div', 'form-check');
-    const input = el('input', 'form-check-input');
-    input.type = type;
-    input.name = def.key;
-    input.id = `${def.id}-${i}`;
-    input.value = value;
-    if (chosen?.value === value) input.defaultChecked = true;
-    const label = el('label', 'form-check-label');
-    label.htmlFor = input.id;
-    label.textContent = text;
-    item.append(input, label);
-    return item;
+  const keep = control.querySelector('option[value=""]');
+  control.replaceChildren(...(keep ? [keep] : []));
+  // each option's source data (e.g. a country's phone code), for linked fields
+  state.data = new Map();
+  options.forEach((item) => {
+    const option = el('option');
+    option.value = item.value;
+    option.textContent = item.text;
+    // the preset is also what a form reset goes back to
+    if (item === chosen) option.defaultSelected = true;
+    if (item.data && !state.data.has(item.value)) state.data.set(item.value, item.data);
+    control.append(option);
   });
-  control.replaceChildren(...items);
-  state.controls = [...control.querySelectorAll('input')];
 }
 
 /**
@@ -224,12 +180,11 @@ function loadSource(state, select, map) {
  * Builds a field's label: the authored text (or nodes, e.g. a checkbox label with links) and a
  * red * when required.
  * @param {object} def
- * @param {string} tag
- * @returns {HTMLElement}
+ * @returns {HTMLLabelElement}
  */
-function buildLabel(def, tag = 'label') {
-  const label = el(tag, tag === 'legend' ? 'form-label form-legend' : 'form-label');
-  if (tag === 'label') label.htmlFor = def.id;
+function buildLabel(def) {
+  const label = el('label', 'form-label');
+  label.htmlFor = def.id;
   if (def.labelNodes?.length) label.append(...def.labelNodes);
   else label.textContent = def.label;
   if (def.settings.has('required')) {
@@ -263,40 +218,19 @@ function setControlAttributes(control, def) {
 }
 
 /**
- * Builds the password visibility toggle (setting `toggle`).
- * @param {HTMLInputElement} input
- * @returns {HTMLButtonElement}
- */
-function buildPasswordToggle(input) {
-  const button = el('button', 'form-password-toggle');
-  button.type = 'button';
-  button.setAttribute('aria-controls', input.id);
-  const sync = () => {
-    const shown = input.type === 'text';
-    button.setAttribute('aria-pressed', String(shown));
-    button.setAttribute('aria-label', translate(shown ? 'formHidePassword' : 'formShowPassword'));
-  };
-  button.addEventListener('click', () => {
-    input.type = input.type === 'password' ? 'text' : 'password';
-    sync();
-  });
-  sync();
-  return button;
-}
-
-/**
- * Links a field's help and error text to its controls for screen readers.
+ * Links a field's error text to its controls for screen readers.
  * @param {object} state
  * @param {boolean} invalid
  */
 function describe(state, invalid) {
-  const ids = [state.helpId, invalid ? state.error.id : ''].filter(Boolean).join(' ');
-  const targets = state.group ? [state.group] : [...state.controls, state.code].filter(Boolean);
-  targets.forEach((control) => {
-    if (ids) control.setAttribute('aria-describedby', ids);
-    else control.removeAttribute('aria-describedby');
-    if (invalid) control.setAttribute('aria-invalid', 'true');
-    else control.removeAttribute('aria-invalid');
+  [...state.controls, state.code].filter(Boolean).forEach((control) => {
+    if (invalid) {
+      control.setAttribute('aria-describedby', state.error.id);
+      control.setAttribute('aria-invalid', 'true');
+    } else {
+      control.removeAttribute('aria-describedby');
+      control.removeAttribute('aria-invalid');
+    }
   });
 }
 
@@ -318,20 +252,12 @@ export function buildField({
   };
   const wrap = el('div', `form-field form-field-${type}`);
   wrap.dataset.key = key;
-  const fullByDefault = ['checkbox', 'checkboxes', 'radio', 'textarea'].includes(type);
+  const fullByDefault = ['checkbox', 'textarea'].includes(type);
   wrap.classList.add(`width-${settings.get('width') || (fullByDefault ? 'full' : defaultWidth)}`);
   if (settings.has('new row')) wrap.classList.add('new-row');
   const state = { def, wrap, controls: [] };
 
-  if (type === 'hidden') {
-    const input = el('input');
-    input.type = 'hidden';
-    setControlAttributes(input, def);
-    input.value = settings.get('value') ?? settings.get('default') ?? '';
-    wrap.append(input);
-    wrap.hidden = true;
-    state.controls = [input];
-  } else if (type === 'checkbox') {
+  if (type === 'checkbox') {
     const input = el('input', 'form-check-input');
     input.type = 'checkbox';
     setControlAttributes(input, def);
@@ -340,14 +266,6 @@ export function buildField({
     text.className = 'form-check-label';
     wrap.append(input, text);
     state.controls = [input];
-  } else if (type === 'radio' || type === 'checkboxes') {
-    const fieldset = el('fieldset', 'form-group');
-    fieldset.id = def.id;
-    const group = el('div', 'form-check-list');
-    fieldset.append(buildLabel(def, 'legend'), group);
-    wrap.append(fieldset);
-    fillOptions(group, readOptions(settings.get('options')), state);
-    state.group = fieldset;
   } else if (type === 'phone') {
     const box = el('div', 'form-phone');
     const code = el('select', 'form-input form-select form-phone-code');
@@ -391,7 +309,6 @@ export function buildField({
     if (control.matches('select')) control.removeAttribute('placeholder');
     const box = el('div', 'form-control-wrap');
     box.append(control);
-    if (type === 'password' && settings.has('toggle')) box.append(buildPasswordToggle(control));
     wrap.append(buildLabel(def), box);
     state.controls = [control];
     if (type === 'select') fillOptions(control, readOptions(settings.get('options')), state);
@@ -404,13 +321,6 @@ export function buildField({
     }
   }
 
-  if (settings.has('help')) {
-    const help = el('p', 'form-help');
-    help.id = `${def.id}-help`;
-    help.textContent = settings.get('help');
-    wrap.append(help);
-    state.helpId = help.id;
-  }
   const error = el('p', 'form-error');
   error.id = `${def.id}-error`;
   error.hidden = true;
@@ -422,16 +332,12 @@ export function buildField({
 }
 
 /**
- * A field's current value: text, the checked state of a checkbox, the chosen radio, the chosen
- * values of a checkbox group, or the number of a phone field.
+ * A field's current value: text, the checked state of a checkbox, or the number of a phone field.
  * @param {object} state
- * @returns {string|boolean|string[]}
+ * @returns {string|boolean}
  */
 function valueOf(state) {
-  const { type } = state.def;
-  if (type === 'checkbox') return state.controls[0].checked;
-  if (type === 'checkboxes') return state.controls.filter((c) => c.checked).map((c) => c.value);
-  if (type === 'radio') return state.controls.find((c) => c.checked)?.value || '';
+  if (state.def.type === 'checkbox') return state.controls[0].checked;
   return state.controls[0]?.value.trim() ?? '';
 }
 
@@ -499,7 +405,7 @@ function isRequired(state) {
 
 /**
  * Checks one field against its rules, in order: required, the type's or preset rule, length,
- * pattern, number and date limits, minimum age, minimum selections, and match.
+ * pattern, number and date limits, minimum age, and match.
  * @param {object} state
  * @returns {string} The first failing rule's message, or '' when the field is valid
  */
@@ -507,7 +413,7 @@ function check(state) {
   const { def } = state;
   const { settings, type } = def;
   const value = valueOf(state);
-  const empty = Array.isArray(value) ? !value.length : value === '' || value === false;
+  const empty = value === '' || value === false;
 
   if (isRequired(state)) {
     // a phone number without its country code asks for the code
@@ -521,12 +427,7 @@ function check(state) {
       return translate(key, { label: def.label.toLowerCase() });
     }
   }
-  if (empty) return '';
-  if (typeof value !== 'string') {
-    const min = Number(settings.get('min selected'));
-    if (Array.isArray(value) && min && value.length < min) return message(def, 'min selected', 'formMinSelected', { n: min });
-    return '';
-  }
+  if (empty || typeof value !== 'string') return '';
 
   const presetName = settings.get('rule') || (RULES[type] ? type : '');
   const preset = RULES[presetName];
@@ -587,7 +488,7 @@ export function setFieldError(wrap, text) {
  */
 export function validateField(wrap) {
   const state = fields.get(wrap);
-  if (!state || wrap.hidden) return true;
+  if (!state) return true;
   const text = check(state);
   setFieldError(wrap, text);
   return !text;
@@ -663,7 +564,7 @@ export function linkFields(form) {
 
 /**
  * Empties a form back to its defaults (e.g. after a successful send): the authored defaults and
- * presets (such as the +1 (US) phone code), no errors, passwords hidden again.
+ * presets (such as the +1 (US) phone code), no errors.
  * @param {HTMLFormElement} form
  */
 export function resetForm(form) {
@@ -672,7 +573,6 @@ export function resetForm(form) {
     wrap.classList.remove('is-touched');
     setFieldError(wrap, '');
   });
-  form.querySelectorAll('.form-password-toggle[aria-pressed="true"]').forEach((button) => button.click());
 }
 
 /**
@@ -713,7 +613,7 @@ function toNumber(value) {
  * @returns {*}
  */
 function convert(value, type) {
-  if (type === 'number') return Array.isArray(value) ? value.map(toNumber) : toNumber(value);
+  if (type === 'number') return toNumber(value);
   if (type === 'boolean') return typeof value === 'boolean' ? value : /^(true|yes|1|on)$/i.test(value);
   return value;
 }
@@ -845,11 +745,10 @@ function fieldSettings(field, cells) {
   settings.set('key', field.key);
   const [, , placeholderCell, requiredCell, errorCell] = cells;
   const placeholder = cellLines(placeholderCell);
-  if (CHOICE_TYPES.includes(field.type) && field.type !== 'country') {
-    // dropdowns and choice groups: the empty choice, then one option per line
-    if (field.type === 'select' && placeholder.length) settings.set('placeholder', placeholder[0]);
-    const options = field.type === 'select' ? placeholder.slice(1) : placeholder;
-    if (options.length) settings.set('options', options);
+  if (field.type === 'select') {
+    // dropdowns: the empty choice, then one option per line
+    if (placeholder.length) settings.set('placeholder', placeholder[0]);
+    if (placeholder.length > 1) settings.set('options', placeholder.slice(1));
   } else if (placeholder.length) {
     settings.set('placeholder', placeholder[0]);
   }

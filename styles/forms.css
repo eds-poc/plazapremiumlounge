@@ -1,7 +1,7 @@
 /* form fields (scripts/forms.js), measured from the source sign up form (/en-uk/sign-up): uppercase
    12px labels 8px above warm grey pill inputs (45px, 25px radius, no border), fields in rows 30px
    apart; a red * on required fields, the error in red under its field; round maroon checkboxes.
-   Fields sit in a 6-column grid: width full (6), half (3) or third (2); one column below 992px */
+   Fields sit in a 6-column grid: width full (6) or half (3); one column below 992px */
 .form-fields {
   /* one-off: the source required star, input text and select arrow colours */
   --form-required: #df1111;
@@ -9,31 +9,28 @@
   --form-row-gap: var(--spacing-9);
   --form-column-gap: var(--grid-gutter);
   --form-input-height: 45px;
+}
 
+/* the form, and each of its two columns (a field with newColumn) */
+.form-fields,
+.form-fields .form-column {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: var(--form-row-gap) var(--form-column-gap);
-  margin: 0;
 }
 
-.form-fields > * {
+.form-fields > *,
+.form-fields .form-column > * {
   grid-column: 1 / -1;
   min-width: 0;
-}
-
-.form-fields .form-field[hidden] {
-  display: none;
 }
 
 /* labels: Polysans 12px/500 uppercase, 1px letter spacing, 8px above the field */
 .form-fields .form-label {
   display: block;
   margin: 0 0 var(--spacing-3);
-  padding: 0;
-  color: var(--color-text);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
-  line-height: var(--line-height-body);
   letter-spacing: var(--letter-spacing-label);
   text-transform: uppercase;
 }
@@ -54,7 +51,6 @@
   padding: var(--spacing-5) var(--spacing-8);
   background-color: var(--color-surface-warm);
   color: var(--form-input-color);
-  font-family: var(--font-family-primary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-relaxed);
@@ -84,20 +80,11 @@
   resize: vertical;
 }
 
-/* help and error text under the field */
-.form-fields .form-help,
+/* the error text under the field */
 .form-fields .form-error {
   margin: var(--spacing-2) 0 0;
-  font-size: 13px;
-  line-height: var(--line-height-body);
-}
-
-.form-fields .form-help {
-  color: var(--color-text-secondary);
-}
-
-.form-fields .form-error {
   color: var(--color-error);
+  font-size: 13px;
 }
 
 /* dropdowns: the source's down arrow 25px from the right, 500 weight */
@@ -143,38 +130,8 @@
   border-radius: 0 var(--radius-input) var(--radius-input) 0;
 }
 
-/* password: the show / hide button inside the field */
-.form-fields .form-control-wrap {
-  position: relative;
-}
-
-.form-fields .form-password-toggle {
-  position: absolute;
-  top: 50%;
-  right: var(--spacing-6);
-  width: 32px;
-  height: 32px;
-  border: 0;
-  border-radius: var(--radius-circle);
-  padding: 0;
-  background: currentcolor;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  mask: url('/icons/eye.svg') center / 18px no-repeat;
-  transform: translateY(-50%);
-}
-
-.form-fields .form-password-toggle[aria-pressed='true'] {
-  mask-image: url('/icons/eye-off.svg');
-}
-
-.form-fields .form-control-wrap:has(.form-password-toggle) .form-input {
-  padding-right: calc(var(--spacing-6) + 40px);
-}
-
-/* checkboxes and radios: a 14px round maroon ring that fills when checked, the label 12px after */
-.form-fields .form-field-checkbox,
-.form-fields .form-check {
+/* checkboxes: a 14px round maroon ring that fills when checked, the label 12px after */
+.form-fields .form-field-checkbox {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -207,37 +164,17 @@
 .form-fields .form-check-label {
   flex: 1 1 0;
   min-width: 0;
-  margin: 0;
-  color: var(--color-text);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-body);
-  letter-spacing: normal;
-  text-transform: none;
   cursor: pointer;
 }
 
 .form-fields .form-check-label a:any-link {
-  color: var(--color-brand-primary);
   text-decoration: underline;
 }
 
-.form-fields .form-field-checkbox .form-error,
-.form-fields .form-field-checkbox .form-help {
+.form-fields .form-field-checkbox .form-error {
   flex-basis: 100%;
   padding-left: calc(14px + var(--spacing-5));
-}
-
-.form-fields .form-group {
-  margin: 0;
-  border: 0;
-  padding: 0;
-}
-
-.form-fields .form-check-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-4) var(--spacing-8);
 }
 
 /* a field with an error: a thin red ring */
@@ -262,26 +199,24 @@
   padding: 0;
   background: none;
   color: var(--color-brand-primary);
-  font-family: inherit;
   font-size: 13px;
   text-decoration: underline;
   cursor: pointer;
 }
 
-/* text between fields (one-cell rows), e.g. the heading over a checkbox */
-.form-fields .form-content > :first-child {
-  margin-top: 0;
-}
-
-.form-fields .form-content > :last-child {
-  margin-bottom: 0;
-}
-
-/* text between fields (one-cell rows), e.g. the source's lines over the two checkboxes (14px/500) */
+/* text between fields (one-cell rows), e.g. the source's lines over the two checkboxes (14px/500),
+   and the text beside the form (intro) */
 .form-fields .form-content {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  line-height: var(--line-height-body);
+}
+
+:is(.form-fields .form-content, .form-intro) > :first-child {
+  margin-top: 0;
+}
+
+:is(.form-fields .form-content, .form-intro) > :last-child {
+  margin-bottom: 0;
 }
 
 .form-fields .form-content + .form-field-checkbox {
@@ -298,7 +233,6 @@
   background-color: rgb(220 53 69 / 8%);
   color: var(--color-error);
   font-size: var(--font-size-sm);
-  line-height: var(--line-height-body);
 }
 
 .form-fields .form-status[hidden] {
@@ -327,17 +261,13 @@
   outline-offset: 2px;
 }
 
-/* the button: the source's space below the last field (50px, then its 20px spacer) */
+/* the button: the source's space below the last field (50px, then its 20px spacer); faded while
+   sending */
 .form-fields .form-submit {
   margin-top: calc(var(--spacing-11) + var(--spacing-7) - var(--form-row-gap));
 }
 
-.form-fields .form-submit .button {
-  margin: 0;
-}
-
 .form-fields .form-submit .button:disabled {
-  cursor: progress;
   opacity: 0.7;
 }
 
@@ -345,39 +275,20 @@
 .form-success {
   margin: 0;
   font-size: var(--font-size-md);
-  line-height: var(--line-height-body);
 }
 
-/* two columns of fields (a field with newColumn), each filled top to bottom, side by side from
-   768px; one column below */
 .form-fields .form-column {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: var(--form-row-gap) var(--form-column-gap);
   align-content: start;
 }
 
-.form-fields .form-column > * {
-  grid-column: 1 / -1;
-  min-width: 0;
-}
-
-/* the grid: from 992px a field can be half or a third of the row; new row starts a line */
-@media (width >=992px) {
+/* the grid: from 992px a field can be half the row; new row starts a line */
+@media (width >= 992px) {
   .form-fields .width-half {
     grid-column: span 3;
   }
 
-  .form-fields .width-third {
-    grid-column: span 2;
-  }
-
   .form-fields .new-row.width-half {
     grid-column: 1 / span 3;
-  }
-
-  .form-fields .new-row.width-third {
-    grid-column: 1 / span 2;
   }
 }
 
@@ -392,7 +303,6 @@
 @media (width < 768px) {
   .form-fields .form-submit.full-width-mobile .button {
     width: 100%;
-    max-width: none;
   }
 }
 

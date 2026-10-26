@@ -1,8 +1,5 @@
 /* the shared form styles, loaded with the block's own (before the block shows) */
 @import url('../../styles/forms.css');
 
-/* signup form: the fields, the button and the messages come from styles/forms.css (fields half
-   width from 992px, Title alone in the left half, one column below) */
-.signup-form {
-  display: block;
-}
+/* signup form: all its styles are the shared ones above (fields half width from 992px, Title alone
+   in the left half, one column below) */

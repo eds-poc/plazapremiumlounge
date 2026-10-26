@@ -246,9 +246,6 @@ const TEXTS = {
   formMinAge: {
     en: 'You must be at least {n} years old.', zh: '您必须年满 {n} 岁。', 'zh-HK': '您必須年滿 {n} 歲。', ja: '{n} 歳以上である必要があります。', pt: 'Você deve ter pelo menos {n} anos.',
   },
-  formMinSelected: {
-    en: 'Please choose at least {n}.', zh: '请至少选择 {n} 项。', 'zh-HK': '請至少選擇 {n} 項。', ja: '{n} 件以上選択してください。', pt: 'Escolha pelo menos {n}.',
-  },
   formSummary: {
     en: 'Please check the {n} highlighted fields.', zh: '请检查标出的 {n} 个字段。', 'zh-HK': '請檢查標示的 {n} 個欄位。', ja: '強調表示された {n} 件の項目を確認してください。', pt: 'Verifique os {n} campos destacados.',
   },
@@ -263,12 +260,6 @@ const TEXTS = {
   },
   formPhoneCode: {
     en: 'Country code', zh: '国家/地区代码', 'zh-HK': '國家/地區代碼', ja: '国番号', pt: 'Código do país',
-  },
-  formShowPassword: {
-    en: 'Show password', zh: '显示密码', 'zh-HK': '顯示密碼', ja: 'パスワードを表示', pt: 'Mostrar senha',
-  },
-  formHidePassword: {
-    en: 'Hide password', zh: '隐藏密码', 'zh-HK': '隱藏密碼', ja: 'パスワードを隠す', pt: 'Ocultar senha',
   },
   formSubmit: {
     en: 'Submit', zh: '提交', 'zh-HK': '提交', ja: '送信', pt: 'Enviar',
