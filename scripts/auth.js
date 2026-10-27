@@ -9,9 +9,6 @@
 import { DEFAULT_SITE, getSiteFolder } from './i18n.js';
 
 const TOKEN_KEY = 'token';
-// the clock difference allowed for `nbf`: a token issued by a server whose clock is a little ahead
-// of the visitor's can look "not valid yet" for a few seconds
-const LEEWAY_SECONDS = 30;
 // a JWT part: base64url characters only (letters, digits, - and _; no +, / or = padding)
 const PART = /^[A-Za-z0-9_-]+$/;
 
@@ -69,12 +66,10 @@ export function decodeJwt(token) {
 /**
  * Whether a token is a JWT that can be used now:
  * - `exp` (expiry) is required and must still be to come: `exp * 1000 > Date.now()`. A token
- *   without `exp` is refused, so none lasts forever; there is no leeway, so an expired token is
- *   refused at once.
+ *   without `exp` is refused, so none lasts forever; an expired token is refused at once.
  * - `nbf` (not before) is optional: the moment the token starts being valid. When present it must
- *   be a number and already past, allowing LEEWAY_SECONDS for a server clock a little ahead of the
- *   visitor's: `nbf * 1000 <= Date.now() + LEEWAY_SECONDS * 1000`. Without `nbf` the token is valid
- *   from when it's issued.
+ *   be a number and already past: `nbf * 1000 <= Date.now()`. Without `nbf` the token is valid from
+ *   when it's issued. No allowance is made for a server clock a little ahead of the visitor's.
  * @param {string} token
  * @returns {boolean}
  */
@@ -83,8 +78,7 @@ export function isTokenValid(token) {
   if (!payload) return false;
   const now = Date.now();
   if (typeof payload.exp !== 'number' || payload.exp * 1000 <= now) return false;
-  if (payload.nbf !== undefined
-    && (typeof payload.nbf !== 'number' || payload.nbf * 1000 > now + LEEWAY_SECONDS * 1000)) return false;
+  if (payload.nbf !== undefined && (typeof payload.nbf !== 'number' || payload.nbf * 1000 > now)) return false;
   return true;
 }
 
