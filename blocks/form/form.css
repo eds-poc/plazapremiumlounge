@@ -57,7 +57,8 @@
   box-shadow: var(--form-focus-ring);
 }
 
-.form .form-error {
+/* a field's error, and the form's own message under the button (e.g. the Login API's refusal) */
+.form :is(.form-error, .form-status) {
   margin: 0;
   color: var(--color-error);
   font-size: inherit;

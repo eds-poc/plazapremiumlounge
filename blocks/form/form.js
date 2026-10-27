@@ -1,7 +1,8 @@
 /*
  * Form: one row per field (label | type | options), one-cell rows shown as written, and a submit
  * button. The form only checks required fields; submitting fires a `form:submit` event with the
- * values and sends nothing, so a later script can handle it.
+ * values. The button row's `action: login` sends the form to the Login API (scripts/login.js), its
+ * message shown under the button; without an action nothing is sent, so a later script can.
  */
 
 import { CURRENCY_EVENT, getCurrency, setCurrency } from '../../scripts/currency.js';
@@ -255,6 +256,15 @@ export default function decorate(block) {
       button.textContent = label || 'Submit';
       wrap.append(button);
       form.append(wrap);
+      if (options.get('action')) {
+        form.dataset.action = options.get('action').toLowerCase();
+        // the form's own message (e.g. the API's refusal), under the button
+        const status = document.createElement('p');
+        status.className = 'form-status';
+        status.setAttribute('role', 'alert');
+        status.hidden = true;
+        form.append(status);
+      }
       afterSubmit = true;
       return;
     }
@@ -296,6 +306,10 @@ export default function decorate(block) {
     const values = Object.fromEntries(new FormData(form));
     form.dispatchEvent(new CustomEvent('form:submit', { bubbles: true, detail: { values, form } }));
     if (form.dataset.closeOnSubmit) form.closest('dialog')?.close();
+    // the login modal: sent to the Login API (the script loads on the first send)
+    if (form.dataset.action === 'login') {
+      import('../../scripts/login.js').then(({ login }) => login(form));
+    }
     // the language and currency modal: Apply opens the page in the chosen language with the
     // chosen currency, as the source (see scripts/language-currency.js)
     if (form.querySelector('.form-choice-input[name="language"], .form-choice-input[name="currency"]')) {

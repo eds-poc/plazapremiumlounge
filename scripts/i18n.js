@@ -291,6 +291,9 @@ const TEXTS = {
   formError: {
     en: 'Something went wrong. Please try again.', zh: '出现问题，请重试。', 'zh-HK': '出現問題，請重試。', ja: '問題が発生しました。もう一度お試しください。', pt: 'Algo deu errado. Tente novamente.',
   },
+  loginError: {
+    en: 'Sorry, we couldn’t log you in. Please try again.', zh: '抱歉，无法登录，请重试。', 'zh-HK': '抱歉，無法登入，請重試。', ja: 'ログインできませんでした。もう一度お試しください。', pt: 'Desculpe, não foi possível entrar. Tente novamente.',
+  },
   formNetworkError: {
     en: 'We couldn’t reach the server. Please check your connection and try again.',
     zh: '无法连接服务器，请检查网络后重试。',
