@@ -1,7 +1,6 @@
-/* partner-feature-cards: partner offer cards (source /en-uk/rockinthunder pricing grid): white
-   rounded cards with an eyebrow, a title and description, the price in a grey box and the
-   benefits with round markers. A card with a badge is highlighted: maroon border, deep shadow,
-   maroon eyebrow and price. One column, two from 768px with the source's 32px inset */
+/* partner-feature-cards: Pricing cards with eyebrow, title, description,
+   price box and benefit list. Featured card uses maroon border, shadow,
+   maroon eyebrow and price. Single column, 2 columns from 768px, with 32px padding. */
 .partner-feature-cards {
   --partner-cards-ink: var(--color-campaign-ink);
   --partner-cards-muted: #6b7280;
