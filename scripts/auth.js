@@ -3,7 +3,8 @@
  * checked (three parts, an `alg` other than `none`, an `exp` still to come, an `nbf` already past).
  * The browser can't check the signature (its key isn't in the page): the API checks the token on
  * every logged-in call. checkSession() runs on every page load, only when a token is stored: an
- * expired or broken one logs the visitor out and sends them to the home page.
+ * expired or broken one logs the visitor out and sends them to the home page; logout() (the
+ * header's account menu) does the same.
  */
 import { DEFAULT_SITE, getSiteFolder } from './i18n.js';
 
@@ -107,14 +108,29 @@ function homePath() {
 }
 
 /**
- * Logs out after the token has expired (or is broken) and goes to the home page, unless already
- * there (so it can't loop).
+ * Logs out and goes to the home page. Already there, it reloads when the header is built (so it
+ * shows Log In again); on page load it doesn't need to, so it can't loop.
+ * @param {{reload?: boolean, replace?: boolean}} [options] reload: when already home; replace:
+ *   the history entry (an expiry) rather than a new one (a logout)
  */
-function expireSession() {
+function endSession({ reload = false, replace = false } = {}) {
   clearToken();
   const home = homePath();
   const path = window.location.pathname.replace(/\/index(\.html)?$/, '/');
-  if (path !== home && path !== home.slice(0, -1) && path !== '/') window.location.replace(home);
+  if (path === home || path === home.slice(0, -1) || path === '/') {
+    if (reload) window.location.reload();
+  } else if (replace) {
+    window.location.replace(home);
+  } else {
+    window.location.assign(home);
+  }
+}
+
+/**
+ * Logout (the header's account menu): removes the token and goes to the home page.
+ */
+export function logout() {
+  endSession({ reload: true });
 }
 
 /**
@@ -126,13 +142,13 @@ export function checkSession() {
   const token = getToken();
   if (!token) return;
   if (!isTokenValid(token)) {
-    expireSession();
+    endSession({ replace: true });
     return;
   }
   const wait = decodeJwt(token).payload.exp * 1000 - Date.now();
   if (wait < MAX_TIMER) {
     setTimeout(() => {
-      if (getToken() === token) expireSession();
+      if (getToken() === token) endSession({ reload: true, replace: true });
     }, wait);
   }
 }

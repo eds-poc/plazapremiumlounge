@@ -3,8 +3,9 @@
  * submit (blocks/form/form.js loads this script on the first send). The button is busy until the
  * answer is in; a refusal's message shows under the button.
  * - `action: login`: `{ username, password }` to the Login API. A success answers `{ jwt, … }`: a
- *   `jwt` that is well formed and not expired (scripts/auth.js) logs the visitor in (the token is
- *   stored and the modal closes). A refusal answers `{ errorCode, message }` or `{ error }`.
+ *   `jwt` that is well formed and not expired (scripts/auth.js) logs the visitor in: the token is
+ *   stored and the page reloads, its header then logged in. A refusal answers `{ errorCode,
+ *   message }` or `{ error }`.
  * - `action: forgot-password`: `{ lastName, email }` to the ForgotPassword API. A refusal answers
  *   `{ resetCode: 'E…', resetMsg }` (with HTTP 200) or `{ error, fields }`; otherwise the email is
  *   sent: the fields give way to the success message (the row's `success:`, else the default).
@@ -61,7 +62,8 @@ function valueOf(form, type) {
 }
 
 /**
- * Login: the email as `username` and the password; logged in by a valid `jwt`.
+ * Login: the email as `username` and the password; logged in by a valid `jwt` (the page reloads,
+ * so the header shows the account badge).
  * @param {HTMLFormElement} form
  * @returns {Promise<void>}
  */
@@ -73,7 +75,7 @@ function login(form) {
     if (res.ok && token && isTokenValid(token)) {
       setToken(token);
       password.value = '';
-      form.closest('dialog')?.close();
+      window.location.reload();
       return;
     }
     // a refusal (its message), or an answer whose token is missing, broken or expired

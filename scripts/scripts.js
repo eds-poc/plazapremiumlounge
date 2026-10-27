@@ -17,7 +17,7 @@ import { installModalLinks, registerModalSections } from './modal.js';
 import { decorateIcons } from './icons.js';
 import { getLanguage } from './i18n.js';
 import { installVideoLinks } from './video.js';
-import { checkSession } from './auth.js';
+import { checkSession, logout } from './auth.js';
 
 if (window.trustedTypes && window.trustedTypes.createPolicy) {
   const innerTT = window.trustedTypes.createPolicy('tt-inner', {
@@ -250,6 +250,10 @@ async function loadEager(doc) {
   // a logged-in visitor's token: an expired or broken one logs out and goes home (nothing is
   // checked when nobody is logged in)
   checkSession();
+  // the header's account menu Logout (#logout): log out and go home
+  document.addEventListener('header:action', (e) => {
+    if (e.detail?.name === 'logout') logout();
+  });
   // the page language: page metadata `language`, else the site folder (e.g. /zh-cn/ → zh-CN)
   document.documentElement.lang = getLanguage();
   decorateTemplateAndTheme();
