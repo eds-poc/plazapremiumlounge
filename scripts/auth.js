@@ -2,17 +2,17 @@
  * The login session: the JWT the Login API answers with, kept in localStorage as `token` once it is
  * checked (three parts, an `alg` other than `none`, an `exp` still to come, an `nbf` already past).
  * The browser can't check the signature (its key isn't in the page): the API checks the token on
- * every logged-in call. checkSession() runs on every page load, only when a token is stored: an
- * expired or broken one logs the visitor out and sends them to the home page; logout() (the
- * header's account menu) does the same.
+ * every logged-in call. The token is checked against its expiry on login and on every page load
+ * (checkSession(), only when a token is stored): an expired or broken one logs the visitor out and
+ * sends them to the home page; logout() (the header's account menu) does the same.
  */
 import { DEFAULT_SITE, getSiteFolder } from './i18n.js';
 
 const TOKEN_KEY = 'token';
-// the clock difference allowed for `nbf` (a token issued by a server a little ahead of us)
+// the clock difference allowed for `nbf`: a token issued by a server whose clock is a little ahead
+// of the visitor's can look "not valid yet" for a few seconds
 const LEEWAY_SECONDS = 30;
-// the longest a browser timer can wait (about 24.8 days)
-const MAX_TIMER = 2 ** 31 - 1;
+// a JWT part: base64url characters only (letters, digits, - and _; no +, / or = padding)
 const PART = /^[A-Za-z0-9_-]+$/;
 
 /**
@@ -47,18 +47,44 @@ export function decodeJwt(token) {
   }
 }
 
+/*
+ * Dates and times, in plain terms: a JWT's `exp` (expiry), `nbf` (not before) and `iat` (issued at)
+ * are Unix timestamps, the number of SECONDS since 1 January 1970 00:00:00 UTC. JavaScript's
+ * Date.now() is the same count in MILLISECONDS, so `exp * 1000` and Date.now() are two moments on
+ * the same UTC timeline and are compared directly. No time zone is involved: the visitor's time
+ * zone (IST, GMT, …) only changes how a moment is written, not the moment itself, so the answer is
+ * the same everywhere at the same instant. Never convert to local time before comparing.
+ *
+ * To show a timestamp to a person, convert it only for display:
+ *   new Date(exp * 1000).toISOString()   // UTC: 1793127308 → "2026-10-27T18:55:08.000Z"
+ *   new Date(exp * 1000).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+ *                                        // IST: "28/10/2026, 12:25:08 am"
+ *   new Date(exp * 1000).toString()      // the visitor's own time zone
+ *
+ * What does matter is the visitor's system CLOCK (not its time zone): a clock set hours wrong makes
+ * the browser decide early or late. That only changes what the page shows; the API checks the
+ * token's expiry with its own clock on every logged-in call.
+ */
+
 /**
- * Whether a token is a JWT that hasn't expired: an `exp` (seconds) still to come, and an `nbf`, if
- * any, already past. A token without `exp` is refused, so none lasts forever.
+ * Whether a token is a JWT that can be used now:
+ * - `exp` (expiry) is required and must still be to come: `exp * 1000 > Date.now()`. A token
+ *   without `exp` is refused, so none lasts forever; there is no leeway, so an expired token is
+ *   refused at once.
+ * - `nbf` (not before) is optional: the moment the token starts being valid. When present it must
+ *   be a number and already past, allowing LEEWAY_SECONDS for a server clock a little ahead of the
+ *   visitor's: `nbf * 1000 <= Date.now() + LEEWAY_SECONDS * 1000`. Without `nbf` the token is valid
+ *   from when it's issued.
  * @param {string} token
  * @returns {boolean}
  */
 export function isTokenValid(token) {
   const { payload } = decodeJwt(token) || {};
   if (!payload) return false;
-  const now = Date.now() / 1000;
-  if (typeof payload.exp !== 'number' || payload.exp <= now) return false;
-  if (payload.nbf !== undefined && (typeof payload.nbf !== 'number' || payload.nbf > now + LEEWAY_SECONDS)) return false;
+  const now = Date.now();
+  if (typeof payload.exp !== 'number' || payload.exp * 1000 <= now) return false;
+  if (payload.nbf !== undefined
+    && (typeof payload.nbf !== 'number' || payload.nbf * 1000 > now + LEEWAY_SECONDS * 1000)) return false;
   return true;
 }
 
@@ -134,21 +160,11 @@ export function logout() {
 }
 
 /**
- * Checks the stored token on page load; nothing to check when nobody is logged in. An expired or
- * broken token logs out and goes home; a valid one is checked again when it expires, if the page is
- * still open then.
+ * Checks the stored token against its expiry on page load; nothing to check when nobody is logged
+ * in. An expired or broken token logs out and goes home (it replaces the history entry, so Back
+ * doesn't return to the page). A page left open past the expiry is checked on the next page load.
  */
 export function checkSession() {
   const token = getToken();
-  if (!token) return;
-  if (!isTokenValid(token)) {
-    endSession({ replace: true });
-    return;
-  }
-  const wait = decodeJwt(token).payload.exp * 1000 - Date.now();
-  if (wait < MAX_TIMER) {
-    setTimeout(() => {
-      if (getToken() === token) endSession({ reload: true, replace: true });
-    }, wait);
-  }
+  if (token && !isTokenValid(token)) endSession({ replace: true });
 }
