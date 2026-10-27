@@ -31,6 +31,45 @@ function toSearch(value) {
     .trim();
 }
 
+// the source's search order: a location's airport (name, English name, code), else its city,
+// country or region; the first of these that anything matches gives the list
+const TIERS = ['airport', 'city', 'country', 'region'];
+
+/**
+ * Whether the query starts a word of the text, as the source's search: at the start or after
+ * anything but a letter, so "hong" finds Hong Kong but not Zhongshan. A query of two or more
+ * words also matches when each of them does ("kong airport").
+ * @param {string} text Search text (see toSearch)
+ * @param {string} query Search text
+ * @returns {boolean}
+ */
+function matchesWords(text, query) {
+  if (!text || !query) return false;
+  const starts = (needle) => {
+    let i = text.indexOf(needle);
+    while (i !== -1) {
+      if (i === 0 || !/[a-z]/.test(text[i - 1])) return true;
+      i = text.indexOf(needle, i + 1);
+    }
+    return false;
+  };
+  if (starts(query)) return true;
+  const words = query.split(' ').filter(Boolean);
+  return words.length > 1 && words.every(starts);
+}
+
+/**
+ * The locations for a query, as the source's: all those whose airport matches; if none, all those
+ * whose city does ("abuja" → Nnamdi Azikiwe International Airport); then country, then region.
+ * @param {Object[]} locations
+ * @param {string} query Search text
+ * @returns {Object[]}
+ */
+function searchLocations(locations, query) {
+  const tier = TIERS.find((t) => locations.some((loc) => matchesWords(loc.search[t], query)));
+  return tier ? locations.filter((loc) => matchesWords(loc.search[tier], query)) : [];
+}
+
 /**
  * Resolves once the header has loaded (or after a while, without it).
  * @returns {Promise<void>}
@@ -73,7 +112,7 @@ async function readCityPages() {
  * @param {Object} json The locations service's answer
  * @param {Map<string, string>} pages Code → city page (see readCityPages)
  * @returns {{code: string, label: string, page: string, timeZone: string, lead: number,
- *   search: string}[]}
+ *   search: Object<string, string>}[]} `search`: the texts searched per tier (see TIERS)
  */
 function readLocations(json, pages) {
   const items = Array.isArray(json?.items) ? json.items : [];
@@ -86,10 +125,18 @@ function readLocations(json, pages) {
       return {
         code: item.iataCode,
         label,
+        name,
+        nameEN: String(item.nameEN || '').trim(),
         page: pages.get(item.iataCode),
         timeZone: readTimeZone(item.timeZone),
         lead: leads.length ? Math.max(...leads) : DEFAULT_LEAD_MINUTES,
-        search: toSearch(`${label} ${item.nameEN || ''}`),
+        search: {
+          airport: toSearch(`${name} ${item.nameEN || ''} ${item.iataCode}`),
+          city: toSearch(`${item.cityName || ''} ${item.cityNameEN || ''}`),
+          country: toSearch(`${item.countryName || ''} ${item.countryNameEN || ''}`),
+          // (the service gives the region's code only, e.g. CH)
+          region: toSearch(`${item.regionName || ''} ${item.regionCode || ''}`),
+        },
       };
     })
     .sort((a, b) => a.code.localeCompare(b.code));
@@ -214,7 +261,7 @@ function buildWhere(id, onPick) {
     }
     const query = toSearch(input.value);
     const all = !query || (chosen && input.value === chosen.label);
-    shown = all ? locations : locations.filter((loc) => loc.search.includes(query));
+    shown = all ? locations : searchLocations(locations, query);
     list.replaceChildren(...shown.map((loc) => {
       const option = el('li', 'booking-widget-option', loc.label);
       option.id = `${list.id}-${loc.code}`;
@@ -304,10 +351,12 @@ function buildWhere(id, onPick) {
     if (option) pick(shown[[...list.children].indexOf(option)]);
   });
   input.addEventListener('blur', () => {
-    // a location typed out in full counts as chosen
+    // a location typed out in full (its name, English name or code) counts as chosen
     if (!chosen && locations) {
       const typed = toSearch(input.value);
-      const match = typed && locations.filter((loc) => toSearch(loc.label) === typed);
+      const exact = (loc) => [loc.label, loc.name, loc.nameEN, loc.code]
+        .some((text) => text && toSearch(text) === typed);
+      const match = typed && locations.filter(exact);
       if (match?.length === 1) pick(match[0]);
     }
     close();

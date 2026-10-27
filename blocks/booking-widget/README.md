@@ -77,12 +77,20 @@ note, as the source's featured product. Book Now's dialog doesn't have it.
 
 ## The fields
 
-- **Where:** type part of an airport's name or code ("hong", "HKG").
+- **Where:** type an airport's name or code, or its city, country or region, as the source's:
+  - The list shows the airports whose name (or English name, or code) matches; if none does,
+    those whose city matches ("abuja" → Nnamdi Azikiwe International Airport), then country
+    ("nigeria" → Abuja and Lagos), then region code (e.g. CH).
+  - A match starts a word: "hong" finds Hong Kong, not Zhongshan; with two or more words, each must
+    match ("kong airport"). Case and accents don't matter; city and country also match in English
+    on the other language sites ("beijing" on /zh-cn/).
+  - The names are the locations service's (e.g. it calls Taiwan "Taiwan, Province of China", so
+    "china" lists Taipei's airports).
   - The list opens on focus, sorted by code, and shows what matches as you type, or "No airports
     found matching …".
   - Click a location to choose it, or use the arrow keys and Enter. Escape closes the list.
-  - Only a chosen location counts; typing again forgets it. A location typed out in full also
-    counts.
+  - Only a chosen location counts; typing again forgets it. A location typed out in full (its
+    name or code, e.g. HKG) also counts.
 - **Date:** the source's calendar (as the lounge page's): one month, previous and next, and no
   days before the location's today. Keyboard: the arrow keys, Home/End, Page Up/Down, and Enter
   to choose.
