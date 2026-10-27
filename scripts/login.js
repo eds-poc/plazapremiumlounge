@@ -1,22 +1,21 @@
 /*
  * Login: the login modal's form (Form block with `action: login` on its button row) sent to the
  * Login API as JSON `{ username, password }`. A refusal answers `{ errorCode, message }` or
- * `{ error }`: its message shows under the button. An answer with a JWT that is well formed and not
- * expired (scripts/auth.js) logs the visitor in: the token is stored and the modal closes.
+ * `{ error }`: its message shows under the button. A success answers `{ jwt, memberStatusCode,
+ * membershipID }`: a `jwt` that is well formed and not expired (scripts/auth.js) logs the visitor
+ * in (only the token is stored, the modal closes).
  */
 import apiUrl from './endpoints.js';
 import { translate } from './i18n.js';
 import { isTokenValid, setToken } from './auth.js';
 
 /**
- * The token in the Login API's answer: its `token` (or `accessToken`), at the top or under `data`.
+ * The token in the Login API's answer: its `jwt`.
  * @param {*} data
  * @returns {string}
  */
 function tokenFrom(data) {
-  const holder = [data, data?.data]
-    .find((part) => typeof part?.token === 'string' || typeof part?.accessToken === 'string');
-  return holder ? holder.token || holder.accessToken : '';
+  return typeof data?.jwt === 'string' ? data.jwt : '';
 }
 
 /**
