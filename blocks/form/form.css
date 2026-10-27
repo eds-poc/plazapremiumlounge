@@ -65,6 +65,15 @@
   line-height: var(--line-height-body);
 }
 
+/* a sent form (e.g. forgot password): its success message in place of the fields and button */
+.form .form-status.is-success {
+  color: var(--color-text);
+}
+
+.form .form-form.is-sent :is(.form-field, .form-submit) {
+  display: none;
+}
+
 /* checkbox: a 1em maroon ring that fills when checked, its label 0.5em + 5px after it */
 .form .form-field-checkbox {
   display: flex;

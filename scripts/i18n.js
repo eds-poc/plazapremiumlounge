@@ -291,6 +291,9 @@ const TEXTS = {
   formError: {
     en: 'Something went wrong. Please try again.', zh: '出现问题，请重试。', 'zh-HK': '出現問題，請重試。', ja: '問題が発生しました。もう一度お試しください。', pt: 'Algo deu errado. Tente novamente.',
   },
+  forgotPasswordSent: {
+    en: 'Email sent. Please check your mailbox.', zh: '邮件已发送，请查收您的邮箱。', 'zh-HK': '郵件已發送，請查閱您的郵箱。', ja: 'メールを送信しました。受信トレイをご確認ください。', pt: 'E-mail enviado. Verifique sua caixa de entrada.',
+  },
   loginError: {
     en: 'Sorry, we couldn’t log you in. Please try again.', zh: '抱歉，无法登录，请重试。', 'zh-HK': '抱歉，無法登入，請重試。', ja: 'ログインできませんでした。もう一度お試しください。', pt: 'Desculpe, não foi possível entrar. Tente novamente.',
   },
