@@ -1,6 +1,7 @@
 // Partner festival intro (source /en-uk/rockinthunder): an eyebrow pill, the heading, the
 // description and small print, then the campaign CTAs (label | value), the first light, the
-// others dark. Rows are read by content, so authors may add or leave out any of them.
+// others dark; the authored images form a column beside the text. Rows are read by content, so
+// authors may add or leave out any of them.
 
 const HEADING = /^H[1-6]$/;
 
@@ -107,6 +108,14 @@ function buildCta(cells) {
  * @param {Element} block
  */
 export default function decorate(block) {
+  // the images, wherever they are authored (usually a second cell beside the content), become the
+  // image column; they are taken out first so the rest reads as text
+  const media = [...block.querySelectorAll('picture, img:not(picture img)')].map((picture) => {
+    const item = el('div', 'partner-festival-content-image');
+    item.append(picture);
+    return item;
+  });
+
   const rows = [...block.querySelectorAll(':scope > div')];
   const contentLines = [];
   const ctas = [];
@@ -123,12 +132,19 @@ export default function decorate(block) {
     }
   });
 
-  const children = [];
-  if (contentLines.length) children.push(buildContent(contentLines));
+  const text = el('div', 'partner-festival-content-text');
+  if (contentLines.length) text.append(buildContent(contentLines));
   if (ctas.length) {
     const list = el('div', 'partner-festival-content-ctas');
     list.append(...ctas);
-    children.push(list);
+    text.append(list);
+  }
+  const children = [text];
+  if (media.length) {
+    const column = el('div', 'partner-festival-content-media');
+    column.append(...media);
+    children.push(column);
+    block.classList.add('has-media');
   }
   block.replaceChildren(...children);
 }

@@ -98,9 +98,66 @@
   box-shadow: var(--shadow-campaign-button-hover);
 }
 
+/* with images: the text, then the image column (the source's pass images) 48px below it */
+.partner-festival-content.has-media {
+  /* one-off: the source's 480px image column */
+  --partner-festival-media: 480px;
+  --partner-festival-gap: calc(var(--spacing-stack) * 2);
+
+  display: grid;
+  gap: var(--partner-festival-gap);
+}
+
+/* the images stacked 48px apart, at most 480px wide and centred until they sit beside the text */
+.partner-festival-content .partner-festival-content-media {
+  display: flex;
+  flex-direction: column;
+  gap: var(--partner-festival-gap);
+  width: 100%;
+  max-width: var(--partner-festival-media);
+  margin-inline: auto;
+}
+
+.partner-festival-content .partner-festival-content-image :is(picture, img) {
+  display: block;
+  width: 100%;
+}
+
+/* 16px corners, the source's soft shadow and a slight zoom on hover */
+.partner-festival-content .partner-festival-content-image img {
+  height: auto;
+  border-radius: var(--radius-campaign);
+  box-shadow: 0 16px 48px var(--color-border-translucent);
+  filter: drop-shadow(0 10px 15px rgb(0 0 0 / 8%));
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.partner-festival-content .partner-festival-content-image img:hover {
+  transform: scale(1.02);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .partner-festival-content .partner-festival-content-image img {
+    transition: none;
+  }
+}
+
 @media (width >=768px) {
   .partner-festival-content {
     padding-inline: calc(var(--spacing-9) + 2px);
+  }
+}
+
+/* breakpoint-exception: the source intro becomes two columns at 1024px */
+@media (width >=1024px) {
+  /* text left, centred against the images on the right: 480px, or half the width less the gap */
+  .partner-festival-content.has-media {
+    grid-template-columns: minmax(0, 1fr) min(var(--partner-festival-media), 50% - var(--partner-festival-gap) / 2);
+    align-items: center;
+  }
+
+  .partner-festival-content .partner-festival-content-media {
+    margin-inline: 0;
   }
 }
 
