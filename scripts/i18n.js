@@ -95,6 +95,13 @@ const TEXTS = {
     en: 'Airport dining', zh: '机场餐饮', 'zh-HK': '機場餐飲', ja: '空港ダイニング', pt: 'Restaurantes do aeroporto',
   },
   // property list (city lounge listing)
+  // the city pages' breadcrumb, in the source's words: "Home < Lounges in {country}"
+  propertyCrumbHome: {
+    en: 'Home', zh: '首页', 'zh-HK': '首頁', ja: 'ホーム', pt: 'Início',
+  },
+  propertyCrumbCountry: {
+    en: 'Lounges in {country}', zh: '{country}机场贵宾室', 'zh-HK': '{country}機場貴賓室', ja: '{country}のラウンジ', pt: 'Salas VIP em {country}',
+  },
   propertyFilters: {
     en: 'Filters', zh: '筛选', 'zh-HK': '篩選', ja: '絞り込み', pt: 'Filtros',
   },

@@ -63,6 +63,22 @@ For example, on `/en-uk/find/china-regions/hong-kong/hong-kong?date=2026-10-21&t
 60 lounge links to `/en-uk/find/lounge?propertycode=PRPRTY814&currency=HKD&date=2026-10-21&time=1600`.
 A query already on the authored link is kept.
 
+## Breadcrumb (automatic)
+
+The page's first Property List shows a breadcrumb above the filters and cards, as the source city
+pages: **Home < Lounges in Hong Kong SAR, China**. Nothing to author.
+
+- **The country** is the API's first lounge's `countryName`, in the page's language (as the API
+  gives it, e.g. 中国香港特别行政区 on /zh-cn/).
+- **Wording** per language, as the source: Lounges in {country} · {country}机场贵宾室 ·
+  {country}機場貴賓室 · {country}のラウンジ · Salas VIP em {country}. Neither item is a link, as on
+  the source.
+- **Without a country** (no lounges, a missing or empty `countryName`, or the service failing):
+  **Home** alone; Try again brings the country with the lounges.
+- **Look:** the Breadcrumb block's (`breadcrumb.css`, loaded by the block), 30px above the filters
+  and cards; on phones under the Filters button.
+- Only the first Property List on a page has it; later ones don't repeat it.
+
 ## Filters (for visitors)
 
 - **Groups:**
