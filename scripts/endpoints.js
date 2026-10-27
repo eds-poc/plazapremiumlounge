@@ -12,6 +12,12 @@ const BOOKING_API_DOMAIN = 'https://1074235-ppginternal-stage.adobeioruntime.net
 const BOOKING_ENDPOINTS = {
   // the airports and stations with their lounges, time zones and lead times (GET), per language
   locations: '/api/v1/web/ppg-app/locations',
+  // one airport's location with its lounges (GET, ?iataCode=&languageCode=)
+  bookingProperties: '/api/v1/web/ppg-app/GetAllProperties',
+  // a lounge's bookable services and their products for a start time (POST, JSON body)
+  bookingServices: '/api/v1/web/ppg-app/service-list',
+  // a lounge's products with its details (name, location, photos, features) (POST, JSON body)
+  bookingProducts: '/api/v1/web/ppg-app/products',
 };
 
 // endpoint paths, joined to the API domain

@@ -104,8 +104,9 @@ function decorateVideoPlayback(block) {
 
 /**
  * Decorates option booking, the source homepage's hero (`.homeBanner-wrapper`): the photo, the
- * title over it, the Booking Widget under the title, then any text after the title (e.g. the
- * booking note with its Group Booking link). Authored in any cells: the photo and the text; the
+ * title over it, the Booking Widget under the title (option lounge-card: the chosen airport's
+ * first lounge appears under the note), then any text after the title (e.g. the booking note with
+ * its Group Booking link). Authored in any cells: the photo and the text; the
  * widget is added here, so it's the same one as in Book Now.
  * @param {Element} block
  */
@@ -128,11 +129,19 @@ async function decorateBooking(block) {
   if (picture) media.append(picture);
   else block.classList.add('no-media');
   const widget = buildBlock('booking-widget', '');
+  // the homepage's widget shows the chosen airport's first lounge under it
+  widget.classList.add('lounge-card');
   const wrapper = el('div', 'booking-widget-wrapper');
   wrapper.append(widget);
   content.append(wrapper);
   if (note.children.length) content.append(note);
-  block.replaceChildren(media, content);
+  // the photo and the content, then the place for the widget's lounge card
+  const frame = el('div', 'hero-frame');
+  frame.append(media, content);
+  const products = el('div', 'hero-products');
+  products.dataset.bookingProducts = '';
+  block.dataset.bookingProductsHost = '';
+  block.replaceChildren(frame, products);
   decorateBlock(widget);
   await loadBlock(widget);
 }

@@ -1236,3 +1236,498 @@ dialog.modal:has(.booking-widget) :focus-visible {
     font-size: var(--font-size-sm);
   }
 }
+
+/* ---------- the homepage hero's lounge card (option lounge-card), as the source's featured
+   product: a white card under the hero's note (photos, then the lounge and its product), and a
+   button to the airport's lounges under it. Outside the block (after the hero's note), so it
+   declares its own values ---------- */
+.booking-widget-products {
+  --booking-widget-card-media: 38%;
+  --booking-widget-card-media-bg: #e5e5e5;
+  --booking-widget-card-select-border: #d0d0d0;
+  --booking-widget-card-feature: #5c5c5c;
+  --booking-widget-card-price: #6e0f2d;
+  --booking-widget-card-tip-shadow: 0 6px 15px -6px rgb(0 0 0 / 35%);
+  --booking-widget-card-arrow: 14px;
+  --booking-widget-card-dot: 9px;
+  --booking-widget-card-dot-target: 24px;
+
+  margin-top: var(--spacing-9);
+  color: var(--color-text-control);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-body);
+  text-align: start;
+}
+
+.booking-widget-products[hidden] {
+  display: none;
+}
+
+.booking-widget-products-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.booking-widget-card {
+  display: grid;
+  border-radius: var(--radius-campaign);
+  overflow: hidden;
+  background-color: var(--color-background);
+  box-shadow: var(--shadow-card);
+}
+
+/* the photos: the shared slider, dots only, as the source's */
+.booking-widget-card-media {
+  position: relative;
+  min-height: 300px;
+  background-color: var(--booking-widget-card-media-bg);
+}
+
+.booking-widget-card-slider {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.booking-widget-card-slider-track {
+  display: flex;
+  height: 100%;
+  transition: transform var(--duration-medium) ease;
+}
+
+.booking-widget-card-slider-slide {
+  flex: 0 0 100%;
+  height: 100%;
+}
+
+.booking-widget-card-slider-slide img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.booking-widget-card-slider-prev,
+.booking-widget-card-slider-next {
+  display: none;
+}
+
+/* the source's 9px white dots, each in a 24px target */
+.booking-widget-card-slider-dots {
+  position: absolute;
+  bottom: calc(var(--spacing-7) - (var(--booking-widget-card-dot-target) - var(--booking-widget-card-dot)) / 2);
+  left: 50%;
+  display: flex;
+  transform: translateX(-50%);
+}
+
+.booking-widget-card-slider-dot {
+  display: grid;
+  place-items: center;
+  width: var(--booking-widget-card-dot-target);
+  height: var(--booking-widget-card-dot-target);
+  border: 0;
+  border-radius: var(--radius-circle);
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.booking-widget-card-slider-dot::before {
+  content: '';
+  width: var(--booking-widget-card-dot);
+  height: var(--booking-widget-card-dot);
+  border-radius: var(--radius-circle);
+  background-color: var(--color-background);
+  opacity: 0.5;
+}
+
+.booking-widget-card-slider-dot[aria-current='true']::before {
+  opacity: 1;
+}
+
+.booking-widget-card-slider-dot:focus-visible {
+  outline: 2px solid var(--color-background);
+  outline-offset: -2px;
+}
+
+.booking-widget-card-content {
+  min-width: 0;
+  padding: 18px var(--spacing-bootstrap-3) var(--spacing-bootstrap-3);
+}
+
+/* the lounge: name, location line and a rule */
+.booking-widget-card-header {
+  margin: 0 0 14px;
+  border-bottom: 1px solid var(--color-divider);
+  padding-bottom: var(--spacing-4);
+}
+
+.booking-widget-card-title {
+  margin: 0 0 var(--spacing-1);
+  color: inherit;
+  font-family: inherit;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.booking-widget-card-place {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+/* the services as tabs (two or more) */
+.booking-widget-card-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+  margin: 0 0 var(--spacing-5);
+}
+
+.booking-widget-card-tabs[hidden] {
+  display: none;
+}
+
+.booking-widget-card-tab {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: var(--spacing-campaign-xs) 14px;
+  background: none;
+  color: var(--booking-widget-card-feature);
+  font: inherit;
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.03em;
+  cursor: pointer;
+}
+
+.booking-widget-card-tab[aria-selected='true'] {
+  border-color: var(--color-brand-primary-action);
+  background-color: var(--color-brand-primary-action);
+  color: var(--color-text-inverse);
+}
+
+.booking-widget-card-main {
+  display: grid;
+  gap: var(--spacing-bootstrap-3);
+}
+
+/* the product: the source's rounded drop-down with its triangle */
+.booking-widget-card-product-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.booking-widget-card-product {
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid var(--booking-widget-card-select-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-5) 40px var(--spacing-5) 14px;
+  background:
+    linear-gradient(45deg, transparent 50%, currentcolor 50%) right 20px center / 6px 6px no-repeat,
+    linear-gradient(-45deg, transparent 50%, currentcolor 50%) right 14px center / 6px 6px no-repeat,
+    var(--color-background);
+  color: var(--booking-widget-value, #1a1a1a);
+  font: inherit;
+  font-size: 15px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.35;
+  cursor: pointer;
+  appearance: none;
+}
+
+.booking-widget-card-product:focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+}
+
+/* the features: pills, then "+ N MORE" with the others in a tooltip */
+.booking-widget-card-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+  margin-top: 14px;
+}
+
+.booking-widget-card-features[hidden] {
+  display: none;
+}
+
+.booking-widget-card-feature {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: var(--spacing-campaign-xs) var(--spacing-5);
+  background: none;
+  color: var(--booking-widget-card-feature);
+  font: inherit;
+  font-size: 11px;
+  line-height: var(--line-height-body);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.booking-widget-card-more-wrap {
+  position: relative;
+}
+
+.booking-widget-card-feature-more {
+  color: var(--color-brand-primary-action);
+  cursor: pointer;
+}
+
+.booking-widget-card-feature-more:focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+}
+
+.booking-widget-card-tip {
+  position: absolute;
+  bottom: calc(100% + var(--spacing-3));
+  left: 50%;
+  z-index: 2;
+  display: none;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: 260px;
+  border-radius: var(--radius-xs);
+  padding: var(--spacing-7);
+  background-color: var(--color-surface-warm);
+  box-shadow: var(--booking-widget-card-tip-shadow);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  transform: translateX(-50%);
+}
+
+.booking-widget-card-feature-more:is(:hover, :focus-visible, [aria-expanded='true']) + .booking-widget-card-tip {
+  display: block;
+}
+
+.booking-widget-card-tip-title {
+  display: block;
+  margin: 0 0 var(--spacing-3);
+  font-weight: var(--font-weight-medium);
+}
+
+.booking-widget-card-tip ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.booking-widget-card-tip li {
+  display: flex;
+  gap: var(--spacing-3);
+  align-items: center;
+  color: var(--color-brand-primary-action);
+}
+
+.booking-widget-card-tip li::before {
+  content: '';
+  flex: none;
+  width: 12px;
+  height: 12px;
+  background-color: currentcolor;
+  mask: url('../../icons/check.svg') center / contain no-repeat;
+}
+
+/* the price: the price before a discount struck through, then the price */
+.booking-widget-card-price {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 22px;
+  align-items: baseline;
+  margin: 18px 0 0;
+}
+
+.booking-widget-card-price-was {
+  color: var(--color-campaign-note);
+  font-size: 15px;
+}
+
+.booking-widget-card-price-now {
+  color: var(--booking-widget-card-price);
+  font-size: 26.4px;
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: 1.1;
+}
+
+/* Book Now and More at {airport}: pills with the source's arrow */
+.booking-widget-card-actions {
+  display: grid;
+  gap: var(--spacing-4);
+  align-content: end;
+}
+
+.booking-widget-card-book,
+.booking-widget-products a.booking-widget-card-more,
+.booking-widget-products a.booking-widget-more-properties-link {
+  display: inline-flex;
+  gap: var(--spacing-2);
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-2) var(--spacing-7);
+  background-color: var(--color-brand-primary-action);
+  color: var(--color-text-inverse);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  text-align: center;
+  text-decoration: none;
+  text-transform: capitalize;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) ease-in-out, color var(--duration-fast) ease-in-out;
+}
+
+.booking-widget-card-book::after,
+.booking-widget-card-more::after {
+  content: '';
+  flex: none;
+  width: var(--booking-widget-card-arrow);
+  height: var(--booking-widget-card-arrow);
+  background-color: currentcolor;
+  mask: url('../../icons/arrow-long-right.svg') center / contain no-repeat;
+}
+
+.booking-widget-products .booking-widget-card-actions a.booking-widget-card-more {
+  border-color: var(--color-brand-primary);
+  background: none;
+  color: var(--color-brand-primary);
+}
+
+.booking-widget-products .booking-widget-card-actions :is(.booking-widget-card-book, a.booking-widget-card-more):hover,
+.booking-widget-products a.booking-widget-more-properties-link:hover {
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+.booking-widget-products .booking-widget-card-actions :is(.booking-widget-card-book, a.booking-widget-card-more):focus-visible,
+.booking-widget-products a.booking-widget-more-properties-link:focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+}
+
+/* the airport's lounges: centred under the card (or alone) */
+.booking-widget-more-properties {
+  margin-top: var(--spacing-9);
+  text-align: center;
+}
+
+.booking-widget-more-properties[hidden] {
+  display: none;
+}
+
+/* the loading card: the source's shimmering skeleton */
+.booking-widget-card-skeleton .booking-widget-card-content {
+  display: grid;
+  gap: var(--spacing-5);
+}
+
+.booking-widget-skeleton {
+  display: block;
+  border-radius: var(--radius-xs);
+  background:
+    linear-gradient(90deg, transparent, rgb(255 255 255 / 60%), transparent) 0 0 / 200% 100%,
+    var(--booking-widget-card-media-bg);
+  animation: booking-widget-shimmer 1.4s linear infinite;
+}
+
+.booking-widget-skeleton-title {
+  width: 60%;
+  height: 24px;
+}
+
+.booking-widget-skeleton-line {
+  width: 80%;
+  height: 14px;
+}
+
+.booking-widget-skeleton-select {
+  height: 46px;
+}
+
+.booking-widget-skeleton-tags {
+  width: 70%;
+  height: 30px;
+}
+
+.booking-widget-skeleton-price {
+  width: 40%;
+  height: 29px;
+}
+
+@keyframes booking-widget-shimmer {
+  from {
+    background-position: 100% 0, 0 0;
+  }
+
+  to {
+    background-position: -100% 0, 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .booking-widget-skeleton {
+    animation: none;
+  }
+
+  .booking-widget-card-slider-track {
+    transition: none;
+  }
+}
+
+/* phones: the card's own button to the airport's lounges is enough (as the source's) */
+@media (width < 768px) {
+  .booking-widget-products.has-card .booking-widget-more-properties {
+    display: none;
+  }
+}
+
+@media (width >= 768px) {
+  .booking-widget-card {
+    grid-template-columns: var(--booking-widget-card-media) 1fr;
+  }
+
+  .booking-widget-card-media {
+    min-height: 328px;
+  }
+
+  .booking-widget-card-content {
+    padding: 22px var(--spacing-stack) var(--spacing-7);
+  }
+
+  /* (the source's rule, then 33px to the product: its 12px margin and the row's gutters) */
+  .booking-widget-card-header {
+    margin-bottom: 33px;
+  }
+
+  .booking-widget-card-title {
+    margin-bottom: var(--spacing-3);
+    font-size: var(--font-size-2xl);
+  }
+
+  .booking-widget-card-place {
+    font-size: var(--font-size-sm);
+  }
+}
+
+/* from 992px: the product, features and price on the left (8/12), the buttons on the right */
+@media (width >= 992px) {
+  .booking-widget-card-main {
+    grid-template-columns: 2fr 1fr;
+    align-items: end;
+  }
+}

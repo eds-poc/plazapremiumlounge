@@ -321,6 +321,29 @@ const TEXTS = {
   bookingNoMatch: {
     en: 'No airports found matching "{query}"', zh: '未找到与“{query}”匹配的机场', 'zh-HK': '找不到與「{query}」相符的機場', ja: '「{query}」に一致する空港が見つかりません', pt: 'Nenhum aeroporto encontrado para "{query}"',
   },
+  // the homepage hero's lounge card (the source's featured product)
+  bookingProducts: {
+    en: 'Available products', zh: '可预订产品', 'zh-HK': '可預訂產品', ja: '予約可能な商品', pt: 'Produtos disponíveis',
+  },
+  bookingProduct: {
+    en: 'Product', zh: '产品', 'zh-HK': '產品', ja: '商品', pt: 'Produto',
+  },
+  bookingFeaturesMore: {
+    en: '+ {n} MORE', zh: '+ 还有 {n} 项', 'zh-HK': '+ 還有 {n} 項', ja: '+ 他 {n}', pt: '+ {n} MAIS',
+  },
+  bookingOtherFeatures: {
+    en: 'Other Features', zh: '其他特色', 'zh-HK': '其他特色', ja: 'その他の特徴', pt: 'Outras comodidades',
+  },
+  bookingMoreAt: {
+    en: 'More at {place}', zh: '查看更多在{place}', 'zh-HK': '查看更多在{place}', ja: 'もっと見る（{place}）', pt: 'Mais em {place}',
+  },
+  bookingMoreProperties: {
+    en: 'View more properties in {place}', zh: '在{place}查看更多休息室', 'zh-HK': '在{place}查看更多貴賓室', ja: '{place}の施設をもっと見る', pt: 'Ver mais propriedades em {place}',
+  },
+  // (the source's English; the other languages follow its "View more properties" wording)
+  bookingAllProperties: {
+    en: 'View all properties in {place}', zh: '在{place}查看所有休息室', 'zh-HK': '在{place}查看所有貴賓室', ja: '{place}のすべての施設を見る', pt: 'Ver todas as propriedades em {place}',
+  },
   bookingLocationsError: {
     en: 'We couldn’t load the airports.', zh: '无法加载机场列表。', 'zh-HK': '無法載入機場列表。', ja: '空港を読み込めませんでした。', pt: 'Não foi possível carregar os aeroportos.',
   },

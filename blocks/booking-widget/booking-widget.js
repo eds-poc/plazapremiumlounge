@@ -12,6 +12,8 @@ const LOCATIONS_TIMEOUT_MS = 15000;
 const HEADER_TIMEOUT_MS = 8000;
 // the lead time before an airport is chosen: the source's usual one hour
 const DEFAULT_LEAD_MINUTES = 60;
+// the pause after the last change before the choices are announced (as the source's 500ms)
+const ANNOUNCE_DELAY_MS = 500;
 // a menu link to a city's lounges ends with its airport codes: "Beijing (PEK/PKX)"
 const CITY_CODES = /\(([A-Z0-9]{3,4}(?:\/[A-Z0-9]{3,4})*)\)\s*$/;
 
@@ -311,8 +313,24 @@ function buildWhere(id, onPick) {
     close();
   });
 
+  /**
+   * Chooses the location with this code, once the locations are in (nothing when it isn't one).
+   * @param {string} code e.g. HKG
+   * @returns {Promise<boolean>} whether it was chosen
+   */
+  const pickCode = async (code) => {
+    try {
+      locations = await loadLocations();
+    } catch {
+      return false;
+    }
+    const loc = locations.find((l) => l.code === String(code || '').trim().toUpperCase());
+    if (loc) pick(loc);
+    return !!loc;
+  };
+
   return {
-    element: wrap, input, load, showError, chosen: () => chosen,
+    element: wrap, input, load, showError, chosen: () => chosen, pickCode,
   };
 }
 
@@ -531,6 +549,12 @@ function buildGuests(id) {
  * for every place it's used: in a dialog (Book Now) it's marked `in-modal`, and the styles lay it
  * out (a bar, a card on phones, or the dialog's stacked form). The block has no rows; the
  * locations come from the locations service, in the page's language.
+ *
+ * The choices are announced (`booking-widget:change`, half a second after the last change, with
+ * the location, date, time, guests and the search address), and a script can choose a location
+ * (`booking-widget:set-location` with `detail.airport`, e.g. a default from the visitor's
+ * position). Option `lounge-card` (the homepage hero adds it) shows the first bookable lounge of
+ * the chosen airport under the form (see booking-widget-lounge-card.js).
  * @param {Element} block
  */
 export default function decorate(block) {
@@ -556,7 +580,9 @@ export default function decorate(block) {
 
   // the first bookable slot at the chosen place (its time zone and lead time), keeping the
   // visitor's date and time when they're still bookable
-  const time = buildTime(id);
+  // (the change announcement, see below)
+  let announce = () => {};
+  const time = buildTime(id, () => announce());
   const refresh = () => {
     const asked = { date: picker.input.value, time: time.input.value };
     slot = chooseSlot(asked, place.timeZone, place.lead);
@@ -564,13 +590,18 @@ export default function decorate(block) {
     time.fill(slot.time, slot.date === slot.firstDay ? slot.earliest : null);
   };
   time.fill(slot.time, slot.earliest);
-  picker.input.addEventListener('change', refresh);
+  picker.input.addEventListener('change', () => {
+    refresh();
+    announce();
+  });
 
   const where = buildWhere(id, (loc) => {
     place = loc;
     refresh();
+    announce();
   });
   const guests = buildGuests(id);
+  guests.element.addEventListener('change', () => announce());
 
   const when = el('div', 'booking-widget-when');
   when.append(date.wrap, time.element);
@@ -587,16 +618,14 @@ export default function decorate(block) {
   const start = () => where.load();
   ['pointerover', 'focusin', 'touchstart'].forEach((type) => form.addEventListener(type, start, { once: true, passive: true }));
 
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
+  /**
+   * The visitor's choices and the search address (the city page with them), or null without a
+   * chosen location.
+   * @returns {Object|null}
+   */
+  const current = () => {
     const loc = where.chosen();
-    if (!loc) {
-      where.showError(true);
-      where.input.focus();
-      return;
-    }
-    refresh();
-    guests.fix();
+    if (!loc) return null;
     const data = new FormData(form);
     const choice = {
       airport: loc.code,
@@ -607,12 +636,46 @@ export default function decorate(block) {
     };
     const url = new URL(loc.page, window.location.origin);
     Object.entries(choice).forEach(([key, value]) => url.searchParams.set(key, value));
+    return {
+      ...choice, location: loc, url: url.href,
+    };
+  };
+
+  // the choices, half a second after the last change (as the source's results)
+  let timer;
+  announce = () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      const detail = current();
+      if (detail) block.dispatchEvent(new CustomEvent('booking-widget:change', { bubbles: true, detail }));
+    }, ANNOUNCE_DELAY_MS);
+  };
+  block.addEventListener('booking-widget:set-location', (e) => where.pickCode(e.detail?.airport));
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!where.chosen()) {
+      where.showError(true);
+      where.input.focus();
+      return;
+    }
+    refresh();
+    guests.fix();
+    const { location, ...detail } = current();
     // other scripts can take the search over (e.g. results in place) by cancelling the event
-    const event = new CustomEvent('booking-widget:search', {
-      bubbles: true, cancelable: true, detail: { ...choice, url: url.href },
-    });
-    if (block.dispatchEvent(event)) window.location.assign(url);
+    const event = new CustomEvent('booking-widget:search', { bubbles: true, cancelable: true, detail });
+    if (block.dispatchEvent(event)) window.location.assign(detail.url);
   });
 
   block.replaceChildren(form);
+
+  // the homepage hero's lounge card (not in Book Now)
+  if (block.classList.contains('lounge-card') && !inModal) {
+    import('./booking-widget-lounge-card.js')
+      .then((mod) => mod.default(block, { current }))
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error('booking-widget: the lounge card did not load', error);
+      });
+  }
 }

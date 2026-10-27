@@ -167,13 +167,31 @@
 
   position: relative;
   display: block;
-  min-height: var(--hero-booking-phone-height);
   margin: var(--spacing-6) var(--spacing-6) 0;
-  border-radius: var(--radius-lg);
   padding: 0;
+  color: var(--color-text-inverse);
+}
+
+/* phones: the photo, title, widget and note in a rounded card; the lounge card follows it */
+.hero.booking .hero-frame {
+  position: relative;
+  min-height: var(--hero-booking-phone-height);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   background-color: var(--color-brand-primary);
-  color: var(--color-text-inverse);
+}
+
+.hero.booking .hero-products {
+  position: relative;
+  z-index: 1;
+}
+
+.hero.booking .hero-products:empty {
+  display: none;
+}
+
+.hero.booking .hero-products .booking-widget-products {
+  margin-top: var(--spacing-4);
 }
 
 .hero.booking .hero-media,
@@ -226,15 +244,31 @@
 }
 
 @media (width >= 768px) {
+  /* the photo behind the whole hero, the lounge card too (as the source's) */
   .hero.booking {
     min-height: var(--hero-booking-tablet-height);
     margin: 0;
+    background-color: var(--color-brand-primary);
+  }
+
+  .hero.booking .hero-frame {
+    position: static;
+    min-height: 0;
     border-radius: 0;
     overflow: visible;
+    background: none;
   }
 
   .hero.booking .hero-media {
     overflow: hidden;
+  }
+
+  /* the card in the content's width, 30px under the note (its 20px padding and 10px) */
+  .hero.booking .hero-products {
+    box-sizing: border-box;
+    width: min(var(--hero-booking-width), 100% - 2 * var(--spacing-5));
+    margin: 0 auto;
+    padding: 0 var(--spacing-5) var(--spacing-9);
   }
 
   /* the source's 1400px wrapper, 12px from the page's sides, and its 12px padding */
@@ -271,9 +305,9 @@
 }
 
 @media (width >= 1200px) {
+  /* (at least 2:1, and taller with the lounge card under the note, as the source's) */
   .hero.booking {
-    aspect-ratio: 2 / 1;
-    min-height: 0;
+    min-height: 50vw;
   }
 
   .hero.booking .hero-content {
