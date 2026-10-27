@@ -30,6 +30,26 @@
   object-position: center;
 }
 
+/* option fixed-height: the source lounge passes banner (`.pagebannerImg`, as its trial restyles
+   it): 400px tall on every screen (a portrait crop on phones), the image centred and trimmed to
+   fill it, with 16px corners and 30px below. Before border-rounded, which makes the corners 20px */
+.image.fixed-height {
+  --image-fixed-height: 400px;
+
+  margin-bottom: var(--spacing-9);
+}
+
+.image.fixed-height .image-link,
+.image.fixed-height .image-media img {
+  border-radius: var(--radius-campaign);
+}
+
+.image.fixed-height .image-media img {
+  height: var(--image-fixed-height);
+  object-fit: cover;
+  object-position: center;
+}
+
 /* (on the link too, so its focus ring follows the corners) */
 .image.border-rounded .image-link,
 .image.border-rounded .image-media img {

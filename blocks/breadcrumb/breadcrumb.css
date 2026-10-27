@@ -1,61 +1,62 @@
+/* breadcrumb: the source offer pages' trail ("Offers < page") between the banner and the title:
+   the levels in a row, "<" between them, the earlier levels as grey links (no change on hover, as
+   the source), the page itself in maroon. 14px on phones, 16px from 768px. Started from the HSBC
+   offer branch's breadcrumb, with the source's values. Keep this file: the offer pages' automatic
+   breadcrumb needs it */
+.breadcrumb {
+  --breadcrumb-text: var(--color-text);
+  --breadcrumb-link: var(--color-text-secondary);
+  --breadcrumb-current: var(--color-brand-primary);
 
-/* Breadcrumb */
+  /* one-off: the source's (Bootstrap) separator grey */
+  --breadcrumb-separator: rgb(33 37 41 / 75%);
+}
+
+/* while the parent is read: the row's space kept, nothing shown yet */
+.breadcrumb.is-loading {
+  visibility: hidden;
+}
 
 .breadcrumb-list {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--spacing-2);
   margin: 0;
-  padding: 0;
+  padding: var(--spacing-4) 0 0;
   list-style: none;
+  color: var(--breadcrumb-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
 }
 
 .breadcrumb-list li {
-  display: flex;
-  align-items: center;
-  line-height: 1.5;
+  padding: var(--spacing-1) var(--spacing-2) var(--spacing-1) 0;
 }
 
-.breadcrumb-list li:not(:last-child)::after {
+/* the source's "<" before every level but the first */
+.breadcrumb-list li + li::before {
   content: '<';
-  margin-inline: var(--spacing-2);
-  color: var(--color-hsbc-grey);
+  padding-inline-end: var(--spacing-3);
+  color: var(--breadcrumb-separator);
 }
 
-/* Previous pages */
-
-.breadcrumb-list a {
-  color: var(--color-text-secondary);
+/* earlier levels: links, as the source (the same on hover; keyboard focus shows the site's ring) */
+.breadcrumb-list a:any-link,
+.breadcrumb-list a:hover {
+  color: var(--breadcrumb-link);
+  font-weight: var(--font-weight-medium);
   text-decoration: none;
-  transition: color 0.2s ease;
 }
 
-.breadcrumb-list a:hover,
-.breadcrumb-list a:focus-visible {
-  color: var(--color-brand-primary);
-  text-decoration: underline;
-}
-
-/* Current page */
-
+/* the page itself */
 .breadcrumb-list li[aria-current='page'] {
-  color: var(--color-brand-primary);
+  color: var(--breadcrumb-current);
   font-weight: var(--font-weight-medium);
 }
 
-/* Mobile */
-
-@media (width < 768px) {
-  .breadcrumb-list {
-    font-size: var(--body-font-size-xs);
-  }
-}
-
-/* Tablet and above */
-
 @media (width >= 768px) {
   .breadcrumb-list {
-    font-size: var(--body-font-size-s);
+    font-size: var(--font-size-md);
   }
 }

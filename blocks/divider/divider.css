@@ -1,0 +1,50 @@
+/* divider: a horizontal line between sections, built as the live site's hr (Eligible Lounges):
+   a 1px #ddd bar (its inline style) at 25% opacity (Bootstrap's hr), 28px above and below */
+.divider .divider-line {
+  height: var(--base-border-width);
+
+  /* one-off: the live hr's 28px margins */
+  margin: 28px 0;
+  border: 0;
+  background-color: var(--base-border);
+  opacity: 0.5;
+}
+
+/* section style divided: the sections of a list page (source Eligible Lounges), use with
+   fixed-width. No section padding (24px above the first, 48px below the last, as the source
+   container); headings 26px regular maroon; a bold label line 14px, 24px above its buttons and
+   34px below the buttons before. The line between sections is a Divider block, added by authors */
+main>.section.divided {
+  /* the source list page's single container: 15px at the sides (fixed-width alone doubles it) */
+  --fixed-width-padding: var(--spacing-6);
+
+  padding-block: 0;
+}
+
+main>.section.divided:first-child {
+  padding-top: var(--spacing-stack);
+}
+
+main>.section.divided:last-child {
+  padding-bottom: var(--spacing-bootstrap-5);
+}
+
+main .section.divided .default-content-wrapper h2 {
+  margin: 0 0 var(--spacing-stack);
+  color: var(--color-brand-plum);
+
+  /* one-off: the source list headings' 26px */
+  font-size: 26px;
+  font-weight: var(--font-weight-regular);
+  line-height: 1.3;
+}
+
+main .section.divided .default-content-wrapper>p:has(> strong:only-child) {
+  margin-bottom: var(--spacing-stack);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+main .section.divided .buttons-wrapper+.default-content-wrapper {
+  margin-top: var(--spacing-stack);
+}

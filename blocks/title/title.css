@@ -98,6 +98,38 @@
   font-size: var(--font-size-campaign-small);
 }
 
+/* option plum: a list page title (source Eligible Lounges): a 12px bold uppercase maroon
+   eyebrow, a 36px regular maroon heading, and the intro across the full width. The same at every
+   width and heading level; the intro's 24px is the only space below it */
+.title.plum {
+  margin-bottom: 0;
+}
+
+.title.plum .title-eyebrow {
+  margin: 0 0 var(--spacing-3);
+  color: var(--color-brand-plum);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: var(--line-height-body);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.title.plum .title-heading {
+  margin: 0 0 var(--spacing-7);
+  color: var(--color-brand-plum);
+
+  /* one-off: the source list page title's 36px */
+  font-size: 36px;
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-heading);
+}
+
+.title.plum .title-intro {
+  max-width: none;
+  margin: 0 0 var(--spacing-stack);
+}
+
 /* option gap-small: 30px to what follows instead of the usual space (e.g. Title editorial's 40px),
    as the source "Extended Journey Privileges" header above its cards */
 .title.gap-small {
@@ -152,6 +184,40 @@
 }
 
 .title.tagline .title-intro p {
+  margin: 0;
+}
+
+/* option headline: a partner campaign section header (source CTBC Reward `.section-title` and
+   `.section-subtitle`): a bold navy heading (22px, 24px above 480px, 28px above 768px) 15px above
+   grey 16px Arial text at most 800px wide; 30px to what follows. The same at every heading level.
+   Use with center-all */
+.title.headline {
+  --title-headline-size: 22px;
+  --title-headline-size-lg: 28px;
+  --title-headline-intro-max: 800px;
+
+  margin-bottom: var(--spacing-9);
+}
+
+.title.headline .title-heading {
+  margin: 0 0 var(--spacing-6);
+  color: var(--color-campaign-navy);
+  font-size: var(--title-headline-size);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: var(--line-height-heading);
+}
+
+.title.headline .title-intro {
+  max-width: var(--title-headline-intro-max);
+  margin: 0 auto;
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-campaign);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-loose);
+}
+
+.title.headline .title-intro p {
   margin: 0;
 }
 
@@ -213,6 +279,32 @@
   font-weight: var(--font-weight-campaign-bold);
 }
 
+/* option page-title: a page title band (source legal pages `section.pageTitle`): 50px above and
+   below the heading at every width, and no space under the heading. The section keeps its own
+   padding (25px, 35px from 768px, 50px from 992px), so the block adds the rest. Use in a section
+   with background grey */
+.title.page-title {
+  margin-bottom: 0;
+  padding-block: calc(var(--spacing-11) - var(--section-padding-block));
+}
+
+.title.page-title .title-heading {
+  margin-bottom: 0;
+}
+
+/* breakpoint-exception: the source campaign headings change above 480px and 768px */
+@media (width > 480px) {
+  .title.headline {
+    --title-headline-size: var(--font-size-2xl);
+  }
+}
+
+@media (width > 768px) {
+  .title.headline {
+    --title-headline-size: var(--title-headline-size-lg);
+  }
+}
+
 /* breakpoint-exception: the source lead-in's space changes above 600px */
 @media (width > 600px) {
   .title.tagline {
@@ -267,4 +359,80 @@
   .title h1.title-heading {
     font-size: var(--heading-page-size);
   }
+}
+
+/* option fluid: a campaign page title (source lounge passes `h1.title`, as its trial restyles
+   it): a maroon heading growing with the screen, 26px on phones up to 38px (6% of the width
+   between), at most 840px wide, 14px below. The same at every heading level. Use with center-all */
+.title.fluid {
+  --title-fluid-size: clamp(26px, 6vw, 38px);
+  --title-fluid-max: 840px;
+  --title-fluid-gap: 14px;
+  --title-fluid-weight: var(--font-weight-semi-bold);
+  --title-fluid-line-height: 1.25;
+}
+
+.title.fluid .title-heading {
+  max-width: var(--title-fluid-max);
+  margin: 0 0 var(--title-fluid-gap);
+  color: var(--color-brand-primary);
+  font-size: var(--title-fluid-size);
+  font-weight: var(--title-fluid-weight);
+  line-height: var(--title-fluid-line-height);
+}
+
+/* option highlight: a lead-in with a highlighted offer (source lounge passes
+   `#ppl-gtm-hero-block`): a maroon heading growing with the screen (16px on phones up to 22px,
+   3.2% of the width between) where **bold** words sit in a cream highlight with 8px corners, a
+   little larger and bolder, then grey 15.5px text; at most 820px wide, 8px below. The same at
+   every heading level. Use with center-all */
+.title.highlight {
+  --title-highlight-size: clamp(16px, 3.2vw, 22px);
+  --title-highlight-max: 820px;
+  --title-highlight-weight: var(--font-weight-medium);
+  --title-highlight-bg: #fdf3e3;
+  --title-highlight-color: #7c0040;
+  --title-highlight-pad: calc(2 * var(--spacing-1)) var(--spacing-5);
+  --title-highlight-radius: 8px;
+  --title-highlight-scale: 1.15em;
+  --title-highlight-intro-color: #5c4149;
+  --title-highlight-intro-size: 15.5px;
+
+  max-width: var(--title-highlight-max);
+  margin-bottom: var(--spacing-3);
+}
+
+.title.highlight .title-heading {
+  margin: 0 0 var(--spacing-5);
+  color: var(--color-brand-primary);
+  font-size: var(--title-highlight-size);
+  font-weight: var(--title-highlight-weight);
+  line-height: var(--line-height-loose);
+}
+
+.title.highlight .title-heading strong {
+  display: inline-block;
+  padding: var(--title-highlight-pad);
+  border-radius: var(--title-highlight-radius);
+  background-color: var(--title-highlight-bg);
+  color: var(--title-highlight-color);
+  font-size: var(--title-highlight-scale);
+  font-weight: var(--font-weight-bold);
+}
+
+.title.highlight .title-intro {
+  max-width: none;
+  margin: 0;
+  color: var(--title-highlight-intro-color);
+  font-size: var(--title-highlight-intro-size);
+  line-height: var(--line-height-loose);
+}
+
+.title.highlight .title-intro>* {
+  margin: 0;
+}
+
+.title.center-all:is(.fluid, .highlight),
+.title.center-all.fluid .title-heading {
+  margin-inline: auto;
 }

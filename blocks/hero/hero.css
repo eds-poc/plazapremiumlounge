@@ -35,3 +35,116 @@
     padding: 40px 32px;
   }
 }
+
+/* option video playback: the source's destination banner (`.destination-banner-wrapper`), a
+   full-width photo at 5:2 (cover, centred) with the video button centred 5% from the bottom: the
+   source's maroon pill (#711b45, 8px 30px, 20px radius), grey with dark text on hover. Authored
+   text sits centred over the photo, the title large in capitals, a line above it smaller */
+.hero.video-playback {
+  --hero-video-button: #711b45;
+  --hero-video-button-hover: #d4d4d4;
+
+  display: block;
+  aspect-ratio: 5 / 2;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+/* with text over the photo, a little more height on phones so the text and button fit */
+.hero.video-playback:has(.hero-content) {
+  min-height: 240px;
+}
+
+.hero.video-playback .hero-media,
+.hero.video-playback .hero-media picture {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero.video-playback .hero-media img {
+  object-position: center;
+}
+
+.hero.video-playback .hero-content {
+  position: absolute;
+  inset: 0 0 calc(5% + 48px);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--spacing-6);
+  font-family: var(--font-family-primary);
+  text-align: center;
+  text-shadow: 0 0 10px rgb(0 0 0 / 40%);
+}
+
+.hero.video-playback .hero-content > * {
+  max-width: 1200px;
+  margin: 0;
+  color: inherit;
+}
+
+.hero.video-playback .hero-eyebrow {
+  font-size: clamp(var(--font-size-lg), 2.5vw, 48px);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.hero.video-playback .hero-title {
+  font-size: clamp(var(--font-size-3xl), 5vw, 96px);
+  font-weight: 600;
+  line-height: var(--line-height-tight);
+  text-transform: uppercase;
+}
+
+.hero.video-playback .hero-actions {
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+  justify-content: center;
+  gap: var(--spacing-3);
+  width: max-content;
+  max-width: calc(100% - 2 * var(--spacing-6));
+  transform: translateX(-50%);
+}
+
+.hero.video-playback .hero-actions .button-wrapper {
+  margin: 0;
+}
+
+/* the default (primary) button is the source's maroon pill; other button styles keep their look.
+   On phones it keeps the site's smaller button size, so it covers less of the 5:2 photo */
+.hero.video-playback .hero-actions :is(a.button, button.button).primary {
+  min-width: 120px;
+  border-color: transparent;
+  border-radius: var(--radius-lg);
+  background-color: var(--hero-video-button);
+  color: var(--color-text-inverse);
+}
+
+@media (width >= 768px) {
+  .hero.video-playback .hero-actions :is(a.button, button.button).primary {
+    padding: var(--spacing-3) var(--spacing-9);
+    font-size: var(--font-size-md);
+  }
+}
+
+.hero.video-playback .hero-actions :is(a.button, button.button).primary:hover,
+.hero.video-playback .hero-actions :is(a.button, button.button).primary:focus-visible {
+  border-color: transparent;
+  background-color: var(--hero-video-button-hover);
+  color: var(--color-text);
+}
+
+.hero.video-playback :focus-visible {
+  outline-color: var(--color-text-inverse);
+}

@@ -26,6 +26,7 @@ Add them in brackets after the block name. They can be combined.
 | *(none)* | The image at its own shape | |
 | `offer-banner` | A fixed 5:2 shape on every screen (e.g. 1366 × 546 on desktop, 335 × 134 on mobile); the image is centred and its edges are trimmed to fill it. 30px space below | Offer page banner (Rogers Bank) |
 | `border-rounded` | 20px rounded corners | Offer page banner |
+| `fixed-height` | A banner 400px tall on every screen: the image is centred and its edges are trimmed to fill it (on phones it becomes a portrait crop, so keep the subject near the centre). 16px rounded corners and 30px space below. Add `border-rounded` for 20px corners | Lounge Passes banner |
 | `carousel` | A photo slideshow: every image in the block, one at a time in a 16:7 frame with 8px corners (each photo trimmed to fill it), fading to the next every 4 seconds and looping. A round pause/play button sits at the bottom right. It also waits while the pointer is on it, and doesn't start on its own for visitors who turned on reduced motion (they can press play). With one image, it's simply shown in the frame. Add `border-rounded` for 20px corners or `offer-banner` for the 5:2 shape | West Kowloon offer, lounge photo gallery |
 
 For `offer-banner`, keep the important parts of the image (text, logos) away from the left and

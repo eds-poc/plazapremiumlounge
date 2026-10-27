@@ -26,6 +26,22 @@ arrow.
 - **Button hover:** the button lightens and its shadow grows, without animation when reduced
   motion is on.
 
+## Options
+
+| Option | Look | Source example |
+| --- | --- | --- |
+| *(none)* | The maroon-to-plum gradient box above: light heading, pink text, gold button with an arrow | Rogers Bank "Apply Now" |
+| `light` | A partner campaign call to action: a cool grey box with 10px corners, 40px below what's above it; a bold navy heading (24px, 28px above 768px), grey 16px text at most 700px wide, 40px above an orange pill button (bold 16px, 18px above 768px) without an arrow, which lifts slightly on hover (not with reduced motion) | CTBC Reward "Ready to Upgrade Your Travel?" |
+
+### Example: light
+
+| Promo (light) |
+| --- |
+| ## Ready to Upgrade Your Travel?<br>Don't miss this limited-time opportunity to get 50% more value from your CTBC Reward Points<br>**[Start Converting Now](https://web.mysmarttraveller.com/signup?language=en&)** |
+
+On an offer page, put it in the last campaign section, with Section Metadata `Style` =
+`inset, medium-width`.
+
 ## Placement
 
 On an offer page, put it in its own section after the campaign bands, with Section Metadata

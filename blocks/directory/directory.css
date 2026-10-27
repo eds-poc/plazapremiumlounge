@@ -1,0 +1,139 @@
+/* Directory layout: mobile-first.
+   Uses a single column on mobile and two columns on larger screens. */
+.directory {
+  --directory-group-color: var(--color-brand-plum);
+  --directory-note-color: var(--color-brand-maroon-dark);
+  --directory-column-gap: var(--spacing-9);
+
+  container-type: inline-size;
+}
+
+/* the source's 24px above the first name of every column: a padding, as a column break drops
+   the margins at the top of a column */
+.directory .directory-columns {
+  padding-top: var(--spacing-stack);
+  columns: 1;
+}
+
+/* Mobile first */
+main .section.fixed-width>div {
+  max-width: 1140px;
+}
+
+/* Tablet and above */
+@media (width >=768px) {
+  .directory .directory-columns {
+    columns: 2;
+    column-gap: var(--directory-column-gap);
+  }
+}
+
+/* Large desktop for three-column variant */
+@media (width >=1200px) {
+  .directory.three .directory-columns {
+    columns: 3;
+  }
+}
+
+.directory.one .directory-columns {
+  columns: auto;
+}
+
+/* 25px after each list: the source's blank line (<br>) between airports */
+.directory .directory-entry {
+  margin-bottom: var(--spacing-8);
+  break-inside: avoid;
+}
+
+/* 49px above a name after a list: the live page's blank line (&nbsp;) after each country's list,
+   then the heading's 24px */
+.directory .directory-group-title {
+  margin: calc(var(--spacing-stack) + var(--spacing-8)) 0 var(--spacing-4);
+  color: var(--directory-group-color);
+  font-size: calc(var(--font-size-sm) + 1px);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-body);
+}
+
+/* the first name's space comes from the column padding above, so both columns start level */
+.directory .directory-group:first-child .directory-group-title {
+  margin-top: 0;
+}
+
+.directory .directory-entry-title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+
+  /* the source title's 22.4px line (bold text in a 16px line) */
+  line-height: var(--line-height-loose);
+}
+
+.directory .directory-items {
+  margin: 4px 0 0;
+  padding-left: var(--spacing-7);
+  list-style: disc;
+}
+
+.directory .directory-item {
+  margin: 0 0 3px;
+  padding: var(--spacing-1) var(--spacing-2);
+  color: var(--color-text-soft-dark);
+  font-size: var(--font-size-sm);
+  line-height: 1.55;
+}
+
+.directory .directory-note {
+  color: var(--directory-note-color);
+  font-weight: var(--font-weight-medium);
+}
+
+.directory a {
+  color: var(--color-link);
+  font-weight: var(--font-weight-medium);
+}
+
+.directory a:hover {
+  color: var(--color-link-hover);
+}
+
+
+
+main .section.divided .default-content-wrapper h2 {
+  font-weight: var(--font-weight-medium);
+}
+
+/* Smooth anchor navigation with mobile and desktop header offsets.
+   Applied only on pages using the directory block. */
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--nav-height);
+}
+
+
+.divided {
+  &.margin-bottom-100 {
+    margin-bottom: var(--margin-bottom-100);
+  }
+
+  .title.plum .title-heading {
+    font-weight: var(--font-weight-regular);
+  }
+
+  /* pill: a compact pill sized to its label */
+  .buttons {
+    a.button.pill,
+    button.button.pill {
+      min-width: 0;
+      font-size: var(--font-size-md);
+    }
+
+    a.button.primary.pill:not(:hover, :focus-visible),
+    button.button.primary.pill:not(:hover, :focus-visible) {
+      border-color: var(--color-brand-plum);
+      background-color: var(--color-brand-plum);
+    }
+  }
+}

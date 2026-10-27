@@ -31,10 +31,15 @@ Add them in brackets after the block name, e.g. `Title (center, compact)`.
 | `large-multiline-heading` | A large heading over several lines: 32px on mobile, 50px from 768px, with 16px above and 48px below the title. Put each line on its own soft line break (Shift+Enter); lines are 5px apart | About, Core Values |
 | `text-lg` | A large title: 28px, 40px from 1200px, the same at every heading level, in the font's own line height | Offer page titles (Rogers Bank) |
 | `editorial` | A campaign feature header: the eyebrow as a small gold label, a light maroon 28pt heading where *italic* words become a gold serif accent, and the intro as small grey text. The same at every width and heading level, with 40px to what follows. In a campaign band section (Section Metadata `Style` = `inset, band`), the band adds 40px above and 8% at the sides | Offer pages, Rogers Bank "Exquisite Comfort" |
+| `plum` | A list page title: the eyebrow as a 12px bold UPPERCASE maroon line, a 36px regular maroon heading, and the intro across the full width. The same at every width and heading level | Eligible Lounges |
 | `gap-small` | 30px to what follows instead of the usual space (e.g. `editorial`'s 40px) | Rogers Bank "Extended Journey Privileges", above its cards |
 | `center-all` | Centred at every width (`center` is left-aligned on mobile) | Rogers Bank "Exquisite Comfort" |
 | `tagline` | A lead-in: a maroon Georgia heading (22px on mobile up to 30px, growing with the screen), at most 640px wide, 10px above grey 15px Arial text at most 620px wide, as the source shows them. The same at every heading level. Use with `center-all`, in a `panel` band section | West Kowloon offer lead-in |
 | `callout` | A call-to-action header, at most 720px wide and centred: a maroon Georgia heading (20px on mobile up to 26px), 16px above the intro, which sits in a white box with a thin border and 8px corners (16px grey Arial text; **bold** in maroon). The same at every heading level. With the heading only, it has no space below, so a block can follow straight under it (e.g. Responsive Content). Use with `center-all`, in a `panel` band section | West Kowloon offer Smart Traveller redemption |
+| `fluid` | A campaign page title: a maroon heading that grows with the screen, 26px on phones up to 38px (from about 633px), at most 840px wide, 14px above what follows. The same at every heading level. Use with `center-all` | Lounge Passes page title |
+| `highlight` | A lead-in with a highlighted offer: a maroon heading that grows with the screen (16px on phones up to 22px), where the words you make **bold** sit in a cream highlight with rounded corners, a little larger and bolder; then grey 15.5px text. At most 820px wide, 8px above what follows. The same at every heading level. Use with `center-all` | Lounge Passes "Save up to 50% off" |
+| `headline` | A partner campaign section header: a bold navy heading (22px on mobile, 24px from 481px, 28px from 769px) 15px above grey 16px Arial text at most 800px wide, with 30px to what follows (e.g. Cards). The same at every heading level. Use with `center-all`, in a `medium-width` section | CTBC Reward offer "How It Works", "Travel Benefits" |
+| `page-title` | A page title band: 50px above and below the heading at every width, and no space under the heading. Use alone in a section with `background` = `grey` | Legal pages (`section.pageTitle`) |
 
 ### Example: editorial
 
@@ -58,6 +63,53 @@ page, put it in its own band section after the Planner (`Style` = `inset, band`,
 
 On an offer page, put each in its own band section with `Style` = `inset, band, panel` (`Background`
 = `white` for the lead-in, `mist` for the callout).
+
+### Example: legal pages
+
+The legal pages (Terms and Conditions, Data Privacy and Security Policy, Website Terms of Use)
+use no other block: a grey title band, then the text as default content.
+
+| Title (page-title) |
+| --- |
+| ## Terms and Conditions |
+
+| Section Metadata | |
+| --- | --- |
+| background | grey |
+
+---
+
+Last updated: 29 Sep 2025<br>…<br>**1. TERMS AND CONDITIONS**<br>1.1 These are these Terms and Conditions…
+
+- **Title band:** `Title (page-title)` with the heading 2 as on the source (`section.pageTitle`),
+  in its own section with `background` = `grey`.
+- **Text:** write clause headings as **bold** lines, not headings, as the source does. Lists stay
+  lists. A blank line starts a new paragraph; a soft line break (Shift+Enter) keeps lines together
+  (the Privacy Notice's sections).
+- **Width:** add Section Metadata `Style` = `fixed-width` to the text section for the source's
+  narrower text (Terms and Conditions); leave it out for the full content width.
+- **Metadata:** Title, Description and Keywords as the source page.
+
+### Example: fluid and highlight
+
+| Title (fluid, center-all) |
+| --- |
+| # One pass to unlock your access to global airport lounges |
+
+| Title (highlight, center-all) |
+| --- |
+| ## **Save up to 50% off** walk-in rates with exclusive online-only passes<br>One pass, infinite freedom. Whether you are flying solo or with a small group… |
+
+On the Lounge Passes page they open its grey section (Section Metadata `Background` = `grey`),
+followed by `Image (fixed-height)` and `Cards (icon-list)`.
+
+### Example: headline
+
+| Title (headline, center-all) |
+| --- |
+| ## How It Works<br>Follow these simple steps to convert points and unlock travel benefits |
+
+On an offer page, put it with the cards it introduces in a section with `Style` = `inset, medium-width`.
 
 ## Spacing
 

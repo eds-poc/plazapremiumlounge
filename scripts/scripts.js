@@ -9,12 +9,14 @@ import {
   loadSections,
   loadCSS,
   buildBlock,
+  getMetadata,
 } from './aem.js';
 // eslint-disable-next-line import/no-cycle
 import { installModalLinks, registerModalSections } from './modal.js';
 // icons: the DA icon library first, then the code /icons folder
 import { decorateIcons } from './icons.js';
 import { getLanguage } from './i18n.js';
+import { installVideoLinks } from './video.js';
 
 if (window.trustedTypes && window.trustedTypes.createPolicy) {
   const innerTT = window.trustedTypes.createPolicy('tt-inner', {
@@ -45,7 +47,9 @@ const LOADER_ID = 'spinner-overlay';
 let loader;
 
 /**
- * Shows the full-page loader (styled in styles.css), creating it on first use.
+ * Shows the full-page loader (styled in styles.css), creating it on first use. With a modal
+ * dialog open, the loader goes inside it: a modal dialog sits in the browser's top layer, above
+ * anything in the page.
  */
 export function showLoader() {
   if (!loader) {
@@ -56,7 +60,8 @@ export function showLoader() {
       loader.innerHTML = '<div id="global-spinner"><img src="/icons/PPL-loading-v2.webp" width="320" height="auto" alt="Loading..."></div>';
     }
   }
-  if (!loader.isConnected) document.body.prepend(loader);
+  const host = [...document.querySelectorAll('dialog[open]')].pop() || document.body;
+  if (loader.parentElement !== host) host.prepend(loader);
 }
 
 /**
@@ -130,6 +135,28 @@ function buildWidgetAutoBlocks(main) {
 }
 
 /**
+ * Adds the breadcrumb on pages with the metadata `breadcrumb` = `on` (set for a folder in the
+ * metadata sheet, e.g. the offers), unless the page authors one: just before the page title, at
+ * the end of the section before it (after the banner, as the source), else at the top of the
+ * title's section. Only in the page's own main: fragments (the nav, the footer, modal pages) are
+ * built with this too, but the page's metadata isn't theirs.
+ * @param {Element} main The container element
+ */
+function buildBreadcrumbAutoBlock(main) {
+  if (main !== document.querySelector('main')) return;
+  if (!/^(on|true|yes)$/i.test(getMetadata('breadcrumb').trim()) || main.querySelector('.breadcrumb')) return;
+  const heading = main.querySelector('h1, h2');
+  const section = heading?.closest('main > div') || main.querySelector(':scope > div');
+  if (!section) return;
+  const breadcrumb = buildBlock('breadcrumb', '');
+  const top = heading ? [...section.children].find((child) => child.contains(heading)) : null;
+  const before = section.previousElementSibling;
+  if (top && top !== section.firstElementChild) top.before(breadcrumb);
+  else if (heading && before) before.append(breadcrumb);
+  else section.prepend(breadcrumb);
+}
+
+/**
  * Builds all synthetic blocks in a container element.
  * @param {Element} main The container element
  */
@@ -153,6 +180,7 @@ function buildAutoBlocks(main) {
       });
     }
     buildWidgetAutoBlocks(main);
+    buildBreadcrumbAutoBlock(main);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Auto Blocking failed', error);
@@ -222,6 +250,8 @@ async function loadEager(doc) {
   document.documentElement.lang = getLanguage();
   decorateTemplateAndTheme();
   installModalLinks();
+  // YouTube, Vimeo and video file links play in the video popup, wherever they are authored
+  installVideoLinks();
   const main = doc.querySelector('main');
   if (main) {
     decorateMain(main);
