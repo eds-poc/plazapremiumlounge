@@ -1,0 +1,1238 @@
+/* booking widget: the source's booking search (#bookingWidget), one form laid out by where it is.
+   On a page (the homepage hero): a maroon bar from 768px (Where | Date and Time | Adult(s) and
+   Child(ren) | the search square), a card on phones (Where on maroon, the rest on white, Search
+   Lounges along the foot). In a dialog (Book Now, `in-modal`): the same bar from 1200px, below it
+   the source's Book Your Visit form (fields stacked, the calendar always open, Book Now). The
+   Where list, the time list and the calendar open under their fields */
+
+.booking-widget {
+  --booking-widget-bar: var(--color-brand-primary-action);
+  --booking-widget-bar-height: 86px;
+  --booking-widget-submit-width: 62px;
+  --booking-widget-bar-inset: var(--spacing-3);
+  --booking-widget-divider: #e8e8e8;
+  --booking-widget-value: #1a1a1a;
+  --booking-widget-counter-bg: #efefef;
+  --booking-widget-counter-width: 72px;
+  --booking-widget-target: 24px;
+  --booking-widget-label-soft: rgb(255 255 255 / 88%);
+  --booking-widget-placeholder: rgb(255 255 255 / 45%);
+  --booking-widget-card-shadow: 0 10px 36px rgb(0 0 0 / 22%);
+  --booking-widget-panel-border: var(--color-campaign-border);
+  --booking-widget-where-width: 153%;
+  --booking-widget-where-list: 220px;
+  --booking-widget-time-width: 132px;
+  --booking-widget-time-list: 200px;
+  --booking-widget-note: #bbb;
+  --booking-widget-dialog-date: rgb(255 255 255 / 60%);
+
+  /* the calendar (the source's jQuery UI datepicker, as the lounge page's) */
+  --booking-widget-calendar-width: 350px;
+  --booking-widget-calendar-shadow: 0 4px 8px rgb(10 10 10 / 10%);
+  --booking-widget-calendar-nav: 1.8em;
+  --booking-widget-calendar-day-size: 32px;
+  --booking-widget-calendar-day: #454545;
+  --booking-widget-calendar-close: 19px;
+
+  color: var(--color-text);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-body);
+}
+
+/* ---------- the form (phones on a page: the card) ---------- */
+.booking-widget-form {
+  position: relative;
+  border-radius: var(--radius-md);
+  box-shadow: var(--booking-widget-card-shadow);
+}
+
+.booking-widget-fields {
+  display: grid;
+}
+
+.booking-widget-field {
+  position: relative;
+  min-width: 0;
+}
+
+.booking-widget-label {
+  display: block;
+  margin: 0 0 var(--spacing-campaign-xs);
+  color: var(--color-brand-primary);
+  font-size: 11px;
+  font-weight: var(--font-weight-semi-bold);
+  line-height: var(--line-height-body);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* the values: plain text on the bar or the card, no field look (`:where`, so the places' own
+   rules win) */
+.booking-widget :where(.booking-widget-where-input, .booking-widget-date-text, .booking-widget-time-text,
+  .booking-widget-counter input) {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: var(--radius-xs);
+  padding: 0;
+  background: none;
+  color: var(--booking-widget-value);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-relaxed);
+  text-align: start;
+  cursor: pointer;
+}
+
+.booking-widget-where-input {
+  cursor: text;
+}
+
+.booking-widget :is(.booking-widget-where-input, .booking-widget-date-text, .booking-widget-time-text,
+  .booking-widget-counter input, .booking-widget-step, .booking-widget-submit,
+  .booking-widget-retry):focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+}
+
+/* Where: white on maroon, the rounded top of the card */
+.booking-widget-where {
+  padding: var(--spacing-bootstrap-3) 18px 18px var(--spacing-stack);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background-color: var(--color-brand-primary);
+}
+
+.booking-widget-where .booking-widget-label {
+  color: var(--booking-widget-label-soft);
+}
+
+.booking-widget .booking-widget-where-input {
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-lg);
+  line-height: 1.3;
+  text-overflow: ellipsis;
+}
+
+.booking-widget-where-input::placeholder {
+  color: var(--booking-widget-placeholder);
+  opacity: 1;
+}
+
+.booking-widget-error {
+  margin: var(--spacing-1) 0 0;
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-body);
+}
+
+.booking-widget-error:empty {
+  display: none;
+}
+
+/* Date and Time on white, side by side, a rule under them */
+.booking-widget-when {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  padding: 14px var(--spacing-9) var(--spacing-bootstrap-3);
+  border-bottom: 1px solid var(--booking-widget-divider);
+  background-color: var(--color-background);
+}
+
+.booking-widget-time-text {
+  display: flex;
+  gap: 0.35em;
+  align-items: baseline;
+}
+
+.booking-widget-time-unit {
+  font-weight: var(--font-weight-regular);
+}
+
+/* Guests on white: Adult(s) and Child(ren) side by side, each a grey pill counter */
+.booking-widget-guests {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-6);
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 14px 18px 18px;
+  background-color: var(--color-background);
+}
+
+.booking-widget-guests-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.booking-widget-label-note {
+  display: none;
+}
+
+.booking-widget-counter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-3) var(--spacing-5);
+  border-radius: var(--radius-pill);
+  background-color: var(--booking-widget-counter-bg);
+}
+
+.booking-widget .booking-widget-counter input {
+  min-width: 0;
+  min-height: var(--booking-widget-target);
+  text-align: center;
+  cursor: text;
+  appearance: textfield;
+}
+
+.booking-widget-counter input::-webkit-inner-spin-button,
+.booking-widget-counter input::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.booking-widget-step {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--booking-widget-target);
+  min-height: var(--booking-widget-target);
+  border: 0;
+  border-radius: var(--radius-xs);
+  padding: 0;
+  background: none;
+  color: var(--color-brand-primary);
+  font: inherit;
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* (at a limit the buttons look the same, as the source's; they're marked for screen readers) */
+
+/* Search Lounges: along the foot of the card */
+.booking-widget-submit {
+  display: flex;
+  gap: var(--spacing-4);
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  padding: 18px var(--spacing-7);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+  font: inherit;
+  font-size: 17px;
+  line-height: var(--line-height-heading);
+  text-transform: capitalize;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) ease-in-out;
+}
+
+.booking-widget-submit::after {
+  content: '';
+  flex: none;
+  width: 18px;
+  height: 18px;
+  background-color: currentcolor;
+  mask: url('../../icons/search-light.svg') center / contain no-repeat;
+}
+
+/* ---------- the open lists: Where and Time ---------- */
+.booking-widget-where-panel,
+.booking-widget-times {
+  position: absolute;
+  z-index: 3;
+  box-sizing: border-box;
+  margin: 0;
+  border: 1px solid var(--booking-widget-panel-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-warm);
+  color: var(--color-text);
+  text-align: start;
+}
+
+.booking-widget-where-panel {
+  top: 100%;
+  left: 0;
+  width: 100%;
+  padding: var(--spacing-6) var(--spacing-7);
+}
+
+.booking-widget-options {
+  max-height: var(--booking-widget-where-list);
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.booking-widget-option,
+.booking-widget-time-option {
+  padding: calc(var(--spacing-3) + var(--spacing-1)) var(--spacing-2);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-body);
+  cursor: pointer;
+}
+
+.booking-widget-option:hover,
+.booking-widget-option.is-active {
+  color: var(--color-text-strong);
+}
+
+.booking-widget-option.is-active {
+  background-color: var(--color-brand-tint);
+}
+
+.booking-widget-option[aria-selected='true'] {
+  color: var(--color-brand-primary-action);
+  font-weight: var(--font-weight-medium);
+}
+
+.booking-widget-where-status {
+  margin: 0;
+  padding: var(--spacing-3) var(--spacing-2);
+  color: var(--color-text-secondary);
+}
+
+.booking-widget-where-status:empty {
+  display: none;
+}
+
+.booking-widget-retry {
+  border: 0;
+  border-radius: var(--radius-xs);
+  padding: 0;
+  background: none;
+  color: var(--color-brand-primary-action);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* the time list: under the time, the chosen one bold in maroon */
+.booking-widget-times {
+  top: calc(100% + var(--spacing-3));
+  left: 0;
+  width: var(--booking-widget-time-width);
+  max-height: calc(var(--booking-widget-time-list) + 2 * var(--spacing-6));
+  padding: var(--spacing-6);
+  overflow-y: auto;
+  list-style: none;
+}
+
+.booking-widget-times:focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+}
+
+.booking-widget-time-option {
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+}
+
+.booking-widget-time-option:hover,
+.booking-widget-time-option.is-active {
+  color: var(--color-brand-primary-action);
+}
+
+.booking-widget-time-option[aria-selected='true'] {
+  color: var(--color-brand-primary-action);
+  font-weight: var(--font-weight-campaign-bold);
+}
+
+/* (the source shows the unavailable times like the others; here they're faded too) */
+.booking-widget-time-option[aria-disabled='true'] {
+  color: var(--color-text);
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ---------- the calendar: pops up under the date (the "Date" title and close, as the source's) */
+.booking-widget-date {
+  position: relative;
+}
+
+.booking-widget-date-value {
+  display: none;
+}
+
+.booking-widget-calendar {
+  position: absolute;
+  top: calc(100% + var(--spacing-4));
+  left: 0;
+  z-index: 3;
+  display: none;
+  box-sizing: border-box;
+  width: min(var(--booking-widget-calendar-width), calc(100vw - 2 * var(--spacing-6)));
+  padding: var(--spacing-7);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-warm);
+  box-shadow: var(--booking-widget-calendar-shadow);
+  color: var(--color-text);
+  font-family: var(--font-family-campaign);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+  text-align: start;
+}
+
+.booking-widget-date.is-open .booking-widget-calendar {
+  display: block;
+}
+
+/* "Date", its text above its short line box as the source's, and close at the top right */
+.booking-widget-calendar-top {
+  position: relative;
+  height: 13px;
+}
+
+.booking-widget-calendar-heading {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+}
+
+.booking-widget-calendar-close,
+.booking-widget-calendar-nav {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.booking-widget-calendar-close {
+  position: absolute;
+  top: 0;
+  right: var(--spacing-5);
+  width: var(--booking-widget-calendar-close);
+  height: 30px;
+}
+
+.booking-widget-calendar-close::before,
+.booking-widget-calendar-nav::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: currentcolor;
+  mask: url('../../icons/close-light.svg') center / contain no-repeat;
+}
+
+.booking-widget-calendar-header {
+  display: grid;
+  grid-template-columns: var(--booking-widget-calendar-nav) 1fr var(--booking-widget-calendar-nav);
+  align-items: center;
+  padding: 1.65em var(--spacing-6) 0.75em;
+}
+
+.booking-widget-calendar-title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: 1.8;
+  text-align: center;
+}
+
+.booking-widget-calendar-nav {
+  width: var(--booking-widget-calendar-nav);
+  height: var(--booking-widget-calendar-nav);
+  border-radius: var(--radius-xs);
+}
+
+.booking-widget-calendar-nav::before {
+  width: 14px;
+  height: 16px;
+  margin: auto;
+  mask-image: url('../../icons/arrow-left-light.svg');
+}
+
+.booking-widget-calendar-next::before {
+  mask-image: url('../../icons/arrow-right-light.svg');
+}
+
+.booking-widget-calendar-nav:hover {
+  color: var(--color-text-subtle);
+}
+
+.booking-widget-calendar-nav:disabled {
+  color: inherit;
+  opacity: 0.35;
+  cursor: default;
+}
+
+.booking-widget-calendar :is(.booking-widget-calendar-close, .booking-widget-calendar-nav):focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+}
+
+.booking-widget-calendar-grid {
+  width: 100%;
+  margin: 0 0 0.4em;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+
+.booking-widget-calendar-grid th {
+  padding: 0.7em 0.3em;
+  font-weight: var(--font-weight-campaign-bold);
+  text-align: center;
+}
+
+.booking-widget-calendar-grid td {
+  padding: calc(var(--spacing-1) / 2);
+  text-align: center;
+  cursor: pointer;
+}
+
+.booking-widget-calendar-grid td:not([data-date]),
+.booking-widget-calendar-grid td[aria-disabled='true'] {
+  cursor: default;
+}
+
+.booking-widget-calendar-grid td[aria-disabled='true'] {
+  opacity: 0.35;
+}
+
+.booking-widget-calendar-day {
+  display: inline-block;
+  width: var(--booking-widget-calendar-day-size);
+  height: var(--booking-widget-calendar-day-size);
+  border-radius: var(--radius-circle);
+  color: var(--booking-widget-calendar-day);
+  font-size: var(--font-size-sm);
+  line-height: 2.2;
+  vertical-align: middle;
+}
+
+.booking-widget-calendar-grid td[aria-selected='true'] .booking-widget-calendar-day {
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+.booking-widget-calendar-grid td:focus-visible {
+  outline: 0;
+}
+
+.booking-widget-calendar-grid td:focus-visible .booking-widget-calendar-day {
+  box-shadow: var(--shadow-focus);
+}
+
+/* on the phone card the calendar spans the card, under the date row */
+.booking-widget:not(.in-modal) .booking-widget-date {
+  position: static;
+}
+
+.booking-widget:not(.in-modal) .booking-widget-calendar {
+  top: auto;
+  left: 50%;
+  margin-top: var(--spacing-4);
+  transform: translateX(-50%);
+}
+
+/* ---------- in a dialog below 1200px: the source's Book Your Visit form ---------- */
+.booking-widget.in-modal {
+  color: var(--color-text-inverse);
+}
+
+.booking-widget.in-modal .booking-widget-form {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.booking-widget.in-modal .booking-widget-label {
+  margin: 0 0 var(--spacing-1);
+  color: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+/* Where: a pill with its label inside (the source's floating label) */
+.booking-widget.in-modal .booking-widget-where {
+  margin: 0 0 var(--spacing-7);
+  padding: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.booking-widget.in-modal .booking-widget-where .booking-widget-label {
+  position: absolute;
+  top: var(--spacing-bootstrap-3);
+  left: var(--spacing-7);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.booking-widget.in-modal .booking-widget-where-input {
+  min-height: 58px;
+  padding: 26px var(--spacing-7) var(--spacing-4);
+  border-radius: var(--radius-input);
+  background-color: var(--booking-widget-bar);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+}
+
+.booking-widget.in-modal .booking-widget-where-panel {
+  top: calc(100% + var(--spacing-1));
+}
+
+.booking-widget.in-modal .booking-widget-error {
+  margin: var(--spacing-2) var(--spacing-7) 0;
+}
+
+/* Date: the date as text over the calendar, always open; Time: a pill under it */
+.booking-widget.in-modal .booking-widget-when {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.booking-widget.in-modal .booking-widget-date-text,
+.booking-widget.in-modal .booking-widget-calendar-top {
+  display: none;
+}
+
+.booking-widget.in-modal .booking-widget-date-value {
+  display: block;
+  margin: 0;
+  color: var(--booking-widget-dialog-date);
+}
+
+.booking-widget.in-modal .booking-widget-calendar {
+  position: static;
+  display: block;
+  width: auto;
+  margin: var(--spacing-4) 0 var(--spacing-9);
+  padding: 0 var(--spacing-3) var(--spacing-3);
+  background-color: rgb(255 255 255 / 4%);
+  box-shadow: none;
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-sm);
+}
+
+.booking-widget.in-modal .booking-widget-calendar-header {
+  padding: var(--spacing-3) var(--spacing-5) var(--spacing-2);
+}
+
+.booking-widget.in-modal .booking-widget-calendar-nav:hover {
+  color: var(--booking-widget-dialog-date);
+}
+
+.booking-widget.in-modal .booking-widget-calendar-grid td .booking-widget-calendar-day {
+  color: inherit;
+}
+
+.booking-widget.in-modal .booking-widget-calendar-grid td[aria-selected='true'] .booking-widget-calendar-day {
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
+}
+
+.booking-widget.in-modal .booking-widget-time {
+  margin: 0 0 var(--spacing-stack);
+}
+
+.booking-widget.in-modal .booking-widget-time-text {
+  justify-content: center;
+  min-height: 41px;
+  padding: var(--spacing-4) var(--spacing-7);
+  border-radius: var(--radius-input);
+  background-color: var(--booking-widget-bar);
+  color: var(--color-text-inverse);
+  font-weight: var(--font-weight-medium);
+}
+
+.booking-widget.in-modal .booking-widget-time-text::after {
+  content: '';
+  position: absolute;
+  right: var(--spacing-7);
+  width: 12px;
+  height: 14px;
+  background-color: currentcolor;
+  mask: url('../../icons/arrow-down.svg') center / contain no-repeat;
+}
+
+.booking-widget.in-modal .booking-widget-time-unit {
+  display: none;
+}
+
+.booking-widget.in-modal .booking-widget-times {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Guest: the title, then a row per count (label left, counter right) */
+.booking-widget.in-modal .booking-widget-guests {
+  display: block;
+  padding: 0;
+  background: none;
+}
+
+.booking-widget.in-modal .booking-widget-guests-title {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0 0 var(--spacing-bootstrap-3);
+  padding: 0;
+  clip-path: none;
+  font-size: var(--font-size-sm);
+}
+
+.booking-widget.in-modal :is(.booking-widget-adults, .booking-widget-children) {
+  display: flex;
+  gap: var(--spacing-6);
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 var(--spacing-5);
+}
+
+.booking-widget.in-modal :is(.booking-widget-adults, .booking-widget-children) .booking-widget-label {
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+.booking-widget.in-modal .booking-widget-label-note {
+  display: inline;
+  margin-left: var(--spacing-2);
+  color: var(--booking-widget-note);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-light);
+  text-transform: none;
+}
+
+.booking-widget.in-modal .booking-widget-counter {
+  flex: none;
+  width: var(--booking-widget-counter-width);
+  padding: 0;
+  background: none;
+}
+
+.booking-widget.in-modal .booking-widget-counter input {
+  color: inherit;
+}
+
+.booking-widget.in-modal .booking-widget-step {
+  color: inherit;
+}
+
+/* Book Now: a white pill */
+.booking-widget.in-modal .booking-widget-submit {
+  margin: var(--spacing-7) 0 var(--spacing-6);
+  border: 1px solid transparent;
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-2) var(--spacing-7);
+  background-color: var(--color-background);
+  color: var(--color-brand-primary-action);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+.booking-widget.in-modal .booking-widget-submit::after {
+  display: none;
+}
+
+.booking-widget.in-modal .booking-widget-submit:hover {
+  background-color: var(--color-surface-warm);
+}
+
+/* ---------- the bar: on a page from 768px, in a dialog from 1200px ---------- */
+
+/* (the same rules twice, one per place: the layout changes with the width at which each place
+   becomes the bar) */
+@media (width >= 768px) {
+  .booking-widget:not(.in-modal) .booking-widget-form {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    min-height: calc(var(--booking-widget-bar-height) - 6px);
+    border-radius: var(--radius-lg);
+    padding-left: var(--booking-widget-bar-inset);
+    background-color: var(--booking-widget-bar);
+    box-shadow: none;
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-fields {
+    grid-template-columns: 5fr 4fr 3fr;
+  }
+
+  .booking-widget:not(.in-modal) :is(.booking-widget-where, .booking-widget-when, .booking-widget-guests) {
+    border: 0;
+    border-radius: 0;
+    padding: var(--spacing-7) 0;
+    background: none;
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-where {
+    padding-left: var(--spacing-3);
+  }
+
+  .booking-widget:not(.in-modal) :is(.booking-widget-when, .booking-widget-guests) {
+    border-left: 1px solid var(--color-text-inverse);
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-when {
+    grid-template-columns: 1fr 1fr;
+    padding-left: var(--spacing-bootstrap-3);
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-guests {
+    display: flex;
+    justify-content: center;
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-guests > .booking-widget-field {
+    flex: 0 0 calc(100% * 5 / 12);
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-label {
+    margin: 0 0 var(--spacing-1);
+    color: var(--color-text-inverse);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--letter-spacing-label);
+  }
+
+  .booking-widget:not(.in-modal) :is(.booking-widget-where-input, .booking-widget-date-text,
+    .booking-widget-time-text, .booking-widget-counter input) {
+    color: var(--color-text-inverse);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-relaxed);
+  }
+
+  .booking-widget:not(.in-modal) :is(.booking-widget-adults, .booking-widget-children) {
+    text-align: center;
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-counter {
+    width: var(--booking-widget-counter-width);
+    margin: 0 auto;
+    padding: 0;
+    background: none;
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-step {
+    color: var(--color-text-inverse);
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-where-input::placeholder {
+    color: var(--color-text-inverse);
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-submit {
+    width: 52px;
+    border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+    padding: var(--spacing-stack) var(--spacing-6);
+    background-color: var(--color-brand-primary-deep);
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-submit-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-submit::after {
+    width: 20px;
+    height: 20px;
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-where-panel {
+    top: 100%;
+    left: calc(-1 * var(--booking-widget-bar-inset));
+    width: var(--booking-widget-where-width);
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-date {
+    position: relative;
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-calendar {
+    top: calc(100% + var(--spacing-4));
+    left: 0;
+    margin-top: 0;
+    transform: none;
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-error {
+    position: absolute;
+    top: 100%;
+  }
+}
+
+@media (width >= 992px) {
+  .booking-widget:not(.in-modal) .booking-widget-form {
+    min-height: var(--booking-widget-bar-height);
+  }
+
+  .booking-widget:not(.in-modal) :is(.booking-widget-where-input, .booking-widget-date-text,
+    .booking-widget-time-text, .booking-widget-counter input) {
+    font-size: var(--font-size-lg);
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-submit {
+    width: var(--booking-widget-submit-width);
+    padding: 27px var(--spacing-7);
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-when {
+    grid-template-columns: 7fr 5fr;
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-time-unit {
+    font-size: var(--font-size-md);
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-option {
+    font-size: var(--font-size-lg);
+  }
+}
+
+@media (width >= 1200px) {
+  .booking-widget {
+    --booking-widget-bar-inset: 28px;
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-form {
+    border-radius: var(--radius-xl);
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-submit {
+    border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
+  }
+
+  .booking-widget:not(.in-modal) .booking-widget-when {
+    padding-left: 33px;
+  }
+
+  /* in a dialog: the same bar */
+  .booking-widget.in-modal .booking-widget-form {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    min-height: var(--booking-widget-bar-height);
+    border-radius: var(--radius-xl);
+    padding-left: var(--booking-widget-bar-inset);
+    background-color: var(--booking-widget-bar);
+  }
+
+  .booking-widget.in-modal .booking-widget-fields {
+    grid-template-columns: 5fr 4fr 3fr;
+  }
+
+  .booking-widget.in-modal :is(.booking-widget-where, .booking-widget-when, .booking-widget-guests) {
+    margin: 0;
+    padding: var(--spacing-7) 0;
+  }
+
+  .booking-widget.in-modal .booking-widget-where {
+    padding-left: var(--spacing-3);
+  }
+
+  .booking-widget.in-modal :is(.booking-widget-when, .booking-widget-guests) {
+    border-left: 1px solid var(--color-text-inverse);
+  }
+
+  .booking-widget.in-modal .booking-widget-when {
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    padding-left: 33px;
+  }
+
+  .booking-widget.in-modal .booking-widget-guests {
+    display: flex;
+    justify-content: center;
+  }
+
+  .booking-widget.in-modal .booking-widget-guests > .booking-widget-field {
+    flex: 0 0 calc(100% * 5 / 12);
+  }
+
+  .booking-widget.in-modal .booking-widget-guests-title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .booking-widget.in-modal .booking-widget-label,
+  .booking-widget.in-modal .booking-widget-where .booking-widget-label,
+  .booking-widget.in-modal :is(.booking-widget-adults, .booking-widget-children) .booking-widget-label {
+    position: static;
+    margin: 0 0 var(--spacing-1);
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--letter-spacing-label);
+    text-transform: uppercase;
+  }
+
+  .booking-widget.in-modal .booking-widget-label-note {
+    display: none;
+  }
+
+  .booking-widget.in-modal .booking-widget-where-input {
+    min-height: 0;
+    padding: 0;
+    border-radius: var(--radius-xs);
+    background: none;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-light);
+    line-height: var(--line-height-relaxed);
+  }
+
+  .booking-widget.in-modal .booking-widget-where-input::placeholder {
+    color: var(--color-text-inverse);
+  }
+
+  .booking-widget.in-modal .booking-widget-option {
+    font-size: var(--font-size-lg);
+  }
+
+  .booking-widget.in-modal .booking-widget-where-panel {
+    top: 100%;
+    left: calc(-1 * var(--booking-widget-bar-inset));
+    width: var(--booking-widget-where-width);
+  }
+
+  .booking-widget.in-modal .booking-widget-error {
+    position: absolute;
+    top: 100%;
+    margin: 0;
+  }
+
+  .booking-widget.in-modal .booking-widget-date-text {
+    display: block;
+    color: inherit;
+    font-size: var(--font-size-lg);
+  }
+
+  .booking-widget.in-modal .booking-widget-calendar-top {
+    display: block;
+  }
+
+  .booking-widget.in-modal .booking-widget-date-value {
+    display: none;
+  }
+
+  .booking-widget.in-modal .booking-widget-calendar {
+    position: absolute;
+    display: none;
+    width: var(--booking-widget-calendar-width);
+    margin: 0;
+    padding: var(--spacing-7);
+    background-color: var(--color-surface-warm);
+    box-shadow: var(--booking-widget-calendar-shadow);
+    color: var(--color-text);
+    font-size: var(--font-size-md);
+  }
+
+  .booking-widget.in-modal .booking-widget-date.is-open .booking-widget-calendar {
+    display: block;
+  }
+
+  .booking-widget.in-modal .booking-widget-calendar-header {
+    padding: 1.65em var(--spacing-6) 0.75em;
+  }
+
+  .booking-widget.in-modal .booking-widget-calendar-grid td .booking-widget-calendar-day {
+    color: var(--booking-widget-calendar-day);
+  }
+
+  .booking-widget.in-modal .booking-widget-calendar-grid td[aria-selected='true'] .booking-widget-calendar-day {
+    background-color: var(--color-brand-primary);
+    color: var(--color-text-inverse);
+  }
+
+  .booking-widget.in-modal .booking-widget-time {
+    margin: 0;
+  }
+
+  .booking-widget.in-modal .booking-widget-time-text {
+    justify-content: flex-start;
+    min-height: 0;
+    padding: 0;
+    border-radius: var(--radius-xs);
+    background: none;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-light);
+  }
+
+  .booking-widget.in-modal .booking-widget-time-text::after {
+    display: none;
+  }
+
+  .booking-widget.in-modal .booking-widget-time-unit {
+    display: inline;
+    font-size: var(--font-size-md);
+  }
+
+  .booking-widget.in-modal .booking-widget-times {
+    left: 0;
+    transform: none;
+  }
+
+  .booking-widget.in-modal :is(.booking-widget-adults, .booking-widget-children) {
+    display: block;
+    margin: 0;
+    text-align: center;
+  }
+
+  .booking-widget.in-modal .booking-widget-counter {
+    margin: 0 auto;
+  }
+
+  .booking-widget.in-modal .booking-widget-counter input {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-light);
+  }
+
+  .booking-widget.in-modal .booking-widget-submit {
+    width: var(--booking-widget-submit-width);
+    margin: 0;
+    border: 0;
+    border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
+    padding: 27px var(--spacing-7);
+    background-color: var(--color-brand-primary-deep);
+    color: var(--color-text-inverse);
+  }
+
+  .booking-widget.in-modal .booking-widget-submit:hover {
+    background-color: var(--color-brand-primary-deep);
+  }
+
+  .booking-widget.in-modal .booking-widget-submit-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .booking-widget.in-modal .booking-widget-submit::after {
+    display: block;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* ---------- the Book Now dialog: full screen, maroon, as the source's ---------- */
+dialog.modal:has(.booking-widget) {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+dialog.modal:has(.booking-widget)::backdrop {
+  background-color: var(--color-brand-primary);
+}
+
+dialog.modal:has(.booking-widget) .modal-content {
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+  background: none;
+}
+
+dialog.modal:has(.booking-widget) .modal-header {
+  padding: var(--spacing-9) var(--spacing-bootstrap-3) 0;
+  border: 0;
+  background: none;
+}
+
+dialog.modal:has(.booking-widget) .modal-header .modal-title {
+  margin: var(--spacing-7) 0 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+dialog.modal:has(.booking-widget) .modal-close {
+  position: absolute;
+  top: var(--spacing-3);
+  right: var(--spacing-bootstrap-3);
+  width: 19px;
+  height: 27px;
+  margin: 0;
+  mask-image: url('../../icons/close-light.svg');
+}
+
+dialog.modal:has(.booking-widget) .modal-close:hover {
+  color: var(--booking-widget-dialog-date, rgb(255 255 255 / 60%));
+}
+
+dialog.modal:has(.booking-widget) .modal-body {
+  padding: var(--spacing-7) var(--spacing-bootstrap-3) var(--spacing-bootstrap-3);
+}
+
+dialog.modal:has(.booking-widget) .modal-body > .booking-widget-wrapper ~ * {
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-light);
+  text-align: center;
+}
+
+dialog.modal:has(.booking-widget) .modal-body a {
+  color: inherit;
+}
+
+dialog.modal:has(.booking-widget) :focus-visible {
+  outline-color: var(--color-text-inverse);
+}
+
+@media (width >= 1200px) {
+  /* the bar under the close, the title for screen readers only */
+  dialog.modal:has(.booking-widget) .modal-header {
+    position: absolute;
+    inset: 0 0 auto;
+    padding: 0;
+  }
+
+  dialog.modal:has(.booking-widget) .modal-header .modal-title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  dialog.modal:has(.booking-widget) .modal-close {
+    top: var(--spacing-7);
+    right: var(--spacing-7);
+    width: var(--spacing-7);
+    height: var(--spacing-7);
+  }
+
+  dialog.modal:has(.booking-widget) .modal-body {
+    padding: 66px var(--spacing-7) var(--spacing-7);
+  }
+
+  dialog.modal:has(.booking-widget) .modal-body > .booking-widget-wrapper ~ * {
+    max-width: 800px;
+    margin: var(--spacing-7) auto 0;
+    font-size: var(--font-size-sm);
+  }
+}

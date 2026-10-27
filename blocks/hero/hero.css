@@ -148,3 +148,143 @@
 .hero.video-playback :focus-visible {
   outline-color: var(--color-text-inverse);
 }
+
+.section.hero-container:has(.hero.booking) {
+  padding-top: 0;
+}
+
+/* option booking: the source homepage's hero (`.homeBanner-wrapper`). From 1200px the photo fills
+   the top of the page at 2:1 under the transparent header, the title centred over it, then the
+   Booking Widget's bar and the note; from 768px the photo starts under the header (595px tall);
+   on phones a rounded card with the title, the widget's card and the note */
+.hero.booking {
+  --hero-booking-note: rgb(255 255 255 / 90%);
+  --hero-booking-tablet-height: 595px;
+  --hero-booking-phone-height: 420px;
+  --hero-booking-top: 130px;
+  --hero-booking-note-width: 800px;
+  --hero-booking-width: 1400px;
+
+  position: relative;
+  display: block;
+  min-height: var(--hero-booking-phone-height);
+  margin: var(--spacing-6) var(--spacing-6) 0;
+  border-radius: var(--radius-lg);
+  padding: 0;
+  overflow: hidden;
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+.hero.booking .hero-media,
+.hero.booking .hero-media picture {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero.booking .hero-content {
+  position: relative;
+  z-index: 1;
+  padding: var(--spacing-7) var(--spacing-6);
+  font-family: var(--font-family-primary);
+}
+
+.hero.booking .hero-title {
+  max-width: none;
+  margin: 0 0 var(--spacing-7);
+  color: inherit;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.hero.booking .hero-note {
+  margin-top: var(--spacing-7);
+  color: var(--hero-booking-note);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-light);
+  line-height: 1.55;
+}
+
+.hero.booking .hero-note p {
+  margin: 0;
+}
+
+.hero.booking .hero-note a {
+  color: var(--color-text-inverse);
+  font-weight: var(--font-weight-medium);
+  text-decoration: underline;
+}
+
+.hero.booking .hero-note a:hover {
+  color: var(--color-text-subtle);
+}
+
+.hero.booking :focus-visible {
+  outline-color: var(--color-text-inverse);
+}
+
+@media (width >= 768px) {
+  .hero.booking {
+    min-height: var(--hero-booking-tablet-height);
+    margin: 0;
+    border-radius: 0;
+    overflow: visible;
+  }
+
+  .hero.booking .hero-media {
+    overflow: hidden;
+  }
+
+  /* the source's 1400px wrapper, 12px from the page's sides, and its 12px padding */
+  .hero.booking .hero-content {
+    box-sizing: border-box;
+    width: min(var(--hero-booking-width), 100% - 2 * var(--spacing-5));
+    margin: 0 auto;
+    padding: var(--hero-booking-top) var(--spacing-5) var(--spacing-7);
+  }
+
+  /* the source's gaps: 60px from the title to the bar, 40px to the note (40 and 20 from 1200px) */
+  .hero.booking .hero-title {
+    margin-bottom: calc(2 * var(--spacing-9));
+    font-size: var(--font-size-4xl);
+    line-height: var(--line-height-tight);
+  }
+
+  .hero.booking .hero-note {
+    margin-top: 40px;
+    font-size: var(--font-size-sm);
+  }
+}
+
+@media (width >= 992px) {
+  .hero.booking .hero-title,
+  .hero.booking .hero-note {
+    text-align: center;
+  }
+
+  .hero.booking .hero-note {
+    max-width: var(--hero-booking-note-width);
+    margin-inline: auto;
+  }
+}
+
+@media (width >= 1200px) {
+  .hero.booking {
+    aspect-ratio: 2 / 1;
+    min-height: 0;
+  }
+
+  .hero.booking .hero-content {
+    padding-top: calc(var(--nav-height-desktop) + 37px);
+  }
+
+  .hero.booking .hero-title {
+    margin-bottom: 40px;
+  }
+
+  .hero.booking .hero-note {
+    margin-top: var(--spacing-7);
+  }
+}

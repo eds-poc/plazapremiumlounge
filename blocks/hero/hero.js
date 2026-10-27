@@ -1,3 +1,4 @@
+import { buildBlock, decorateBlock, loadBlock } from '../../scripts/aem.js';
 import { buildButton, readNestedButtons } from '../../scripts/buttons.js';
 import { labelBareVideoLink, toVideoDialogButton } from '../../scripts/video.js';
 
@@ -102,10 +103,47 @@ function decorateVideoPlayback(block) {
 }
 
 /**
+ * Decorates option booking, the source homepage's hero (`.homeBanner-wrapper`): the photo, the
+ * title over it, the Booking Widget under the title, then any text after the title (e.g. the
+ * booking note with its Group Booking link). Authored in any cells: the photo and the text; the
+ * widget is added here, so it's the same one as in Book Now.
+ * @param {Element} block
+ */
+async function decorateBooking(block) {
+  const picture = block.querySelector('picture');
+  const content = el('div', 'hero-content');
+  [...block.querySelectorAll(':scope > div > div')].forEach((cell) => {
+    content.append(...[...cell.children].filter((node) => !node.querySelector('picture')
+      && !node.matches('picture') && node.textContent.trim()));
+  });
+  const title = content.querySelector(HEADINGS);
+  title?.classList.add('hero-title');
+  const note = el('div', 'hero-note');
+  // the text after the title goes under the widget
+  if (title) {
+    while (title.nextElementSibling) note.append(title.nextElementSibling);
+  }
+
+  const media = el('div', 'hero-media');
+  if (picture) media.append(picture);
+  else block.classList.add('no-media');
+  const widget = buildBlock('booking-widget', '');
+  const wrapper = el('div', 'booking-widget-wrapper');
+  wrapper.append(widget);
+  content.append(wrapper);
+  if (note.children.length) content.append(note);
+  block.replaceChildren(media, content);
+  decorateBlock(widget);
+  await loadBlock(widget);
+}
+
+/**
  * Decorates the hero block. The default hero is styled by hero.css alone; option video playback
- * builds the destination banner with its video button.
+ * builds the destination banner with its video button, option booking the homepage's hero with
+ * the Booking Widget.
  * @param {Element} block The hero block element
  */
-export default function decorate(block) {
+export default async function decorate(block) {
   if (block.classList.contains('video-playback')) decorateVideoPlayback(block);
+  if (block.classList.contains('booking')) await decorateBooking(block);
 }

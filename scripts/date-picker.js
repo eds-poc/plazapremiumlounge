@@ -1,5 +1,5 @@
-import { getLanguage, translate } from '../../scripts/i18n.js';
-import { el } from '../../scripts/properties.js';
+import { getLanguage, translate } from './i18n.js';
+import { el } from './properties.js';
 
 // the source's calendar in each language (its jQuery UI datepicker regional settings): the first
 // day of the week, the weekday letters (from Sunday) and the month title
@@ -53,22 +53,26 @@ function addMonths(date, months) {
 }
 
 /**
- * The booking form's date, as the source's: the date as the source writes it, and a calendar of
+ * A booking form's date, as the source's: the date as the source writes it, and a calendar of
  * one month (the month and year, previous and next, the days; days before `min` can't be chosen,
- * and there's no last day). On desktop the calendar pops up under the date (with a "Date" title
- * and close); in the phone's Book Your Visit dialog it's always open under it (the styles decide,
- * by `.property-detail-modal`). The days are a grid with one tab stop: the arrow keys move a day
- * or a week, Home and End to the week's start and end, Page Up and Page Down a month (with Shift,
- * a year), Enter or Space choose; Escape closes the pop-up. Choosing another day closes the pop-up
- * and sets the form's `name` field (a hidden input), with a `change` event as the other fields.
- * @param {{name: string, value: string, min: string, format: Function}} options
+ * and there's no last day). It pops up under the date (with a "Date" title and close), or is
+ * always open under it: the form's styles decide (e.g. the lounge page's phone dialog,
+ * `.property-detail-modal`). Its classes start with `prefix` (`property-detail-date`,
+ * `property-detail-calendar-…`), so each form styles its own. The days are a grid with one tab
+ * stop: the arrow keys move a day or a week, Home and End to the week's start and end, Page Up
+ * and Page Down a month (with Shift, a year), Enter or Space choose; Escape closes the pop-up.
+ * Choosing another day closes the pop-up and sets the form's `name` field (a hidden input), with a
+ * `change` event as the other fields.
+ * @param {{name: string, value: string, min: string, format: Function, prefix?: string}} options
  *   `value` and `min` as YYYY-MM-DD; `format` writes a date as the source does
  * @returns {{element: HTMLElement, trigger: HTMLButtonElement, input: HTMLInputElement,
- *   close: Function}}
+ *   close: Function, update: Function}} `update({ value, min })` sets the date and the first day
+ *   that can be chosen (e.g. another airport's today), without a change event
  */
 export default function buildDatePicker({
-  name, value, min, format,
+  name, value, min: firstDay, format, prefix = 'property-detail',
 }) {
+  let min = firstDay;
   const lang = getLanguage();
   const base = lang.split('-')[0];
   const calendar = CALENDARS[base] || CALENDARS.en;
@@ -82,46 +86,46 @@ export default function buildDatePicker({
     .format(new Date(Date.UTC(2023, 0, 1 + day)));
   const fullDate = new Intl.DateTimeFormat(lang, { dateStyle: 'full', timeZone: 'UTC' });
 
-  const element = el('div', 'property-detail-date');
+  const element = el('div', `${prefix}-date`);
   const input = el('input');
   input.type = 'hidden';
   input.name = name;
   input.value = value;
-  const id = `property-detail-calendar-${Math.random().toString(36).slice(2, 8)}`;
-  const trigger = el('button', 'property-detail-date-text', format(value));
+  const id = `${prefix}-calendar-${Math.random().toString(36).slice(2, 8)}`;
+  const trigger = el('button', `${prefix}-date-text`, format(value));
   trigger.type = 'button';
   trigger.id = `${id}-trigger`;
   trigger.setAttribute('aria-expanded', 'false');
   trigger.setAttribute('aria-controls', id);
   // the dialog's version: the date as plain text over the open calendar
-  const shown = el('p', 'property-detail-date-value', format(value));
+  const shown = el('p', `${prefix}-date-value`, format(value));
   shown.setAttribute('aria-hidden', 'true');
 
-  const popup = el('div', 'property-detail-calendar');
+  const popup = el('div', `${prefix}-calendar`);
   popup.id = id;
   popup.setAttribute('role', 'group');
-  const top = el('div', 'property-detail-calendar-top');
-  const heading = el('p', 'property-detail-calendar-heading', translate('propertyDate'));
+  const top = el('div', `${prefix}-calendar-top`);
+  const heading = el('p', `${prefix}-calendar-heading`, translate('propertyDate'));
   heading.id = `${id}-heading`;
-  const close = el('button', 'property-detail-calendar-close');
+  const close = el('button', `${prefix}-calendar-close`);
   close.type = 'button';
   close.setAttribute('aria-label', translate('close'));
   top.append(heading, close);
   popup.setAttribute('aria-labelledby', heading.id);
-  const header = el('div', 'property-detail-calendar-header');
+  const header = el('div', `${prefix}-calendar-header`);
   const navButton = (label, className) => {
-    const btn = el('button', `property-detail-calendar-nav ${className}`);
+    const btn = el('button', `${prefix}-calendar-nav ${className}`);
     btn.type = 'button';
     btn.setAttribute('aria-label', label);
     return btn;
   };
-  const prev = navButton(translate('propertyCalendarPrev'), 'property-detail-calendar-prev');
-  const next = navButton(translate('propertyCalendarNext'), 'property-detail-calendar-next');
-  const title = el('p', 'property-detail-calendar-title');
+  const prev = navButton(translate('propertyCalendarPrev'), `${prefix}-calendar-prev`);
+  const next = navButton(translate('propertyCalendarNext'), `${prefix}-calendar-next`);
+  const title = el('p', `${prefix}-calendar-title`);
   title.id = `${id}-title`;
   title.setAttribute('aria-live', 'polite');
   header.append(prev, title, next);
-  const grid = el('table', 'property-detail-calendar-grid');
+  const grid = el('table', `${prefix}-calendar-grid`);
   grid.setAttribute('role', 'grid');
   grid.setAttribute('aria-labelledby', title.id);
   const head = el('thead');
@@ -169,7 +173,7 @@ export default function buildDatePicker({
           td.setAttribute('aria-label', fullDate.format(new Date(`${date}T00:00:00Z`)));
           td.setAttribute('aria-selected', String(date === input.value));
           if (date < min) td.setAttribute('aria-disabled', 'true');
-          td.append(el('span', 'property-detail-calendar-day', String(day)));
+          td.append(el('span', `${prefix}-calendar-day`, String(day)));
         }
         row.append(td);
       }
@@ -279,7 +283,23 @@ export default function buildDatePicker({
   });
   render();
 
+  /**
+   * Sets the date and the first day that can be chosen, redrawing the calendar (no change event:
+   * the form that calls it knows).
+   * @param {{value?: string, min?: string}} next
+   */
+  const update = ({ value: date, min: day } = {}) => {
+    if (day) min = day;
+    if (date) {
+      input.value = date;
+      trigger.textContent = format(date);
+      shown.textContent = format(date);
+    }
+    active = input.value < min ? min : input.value;
+    render();
+  };
+
   return {
-    element, trigger, input, close: () => hide(),
+    element, trigger, input, close: () => hide(), update,
   };
 }

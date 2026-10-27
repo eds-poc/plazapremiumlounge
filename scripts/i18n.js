@@ -298,6 +298,32 @@ const TEXTS = {
     ja: 'サーバーに接続できませんでした。接続を確認して、もう一度お試しください。',
     pt: 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.',
   },
+  // booking widget (the homepage hero and Book Now); the wording is the source widget's
+  bookingWhere: {
+    en: 'Where', zh: '地点', 'zh-HK': '地點', ja: '場所', pt: 'Onde',
+  },
+  bookingWherePlaceholder: {
+    en: 'Search for a City...', zh: '搜索城市...', 'zh-HK': '搜尋城市...', ja: '都市を検索...', pt: 'Buscar por uma Cidade...',
+  },
+  bookingGuests: {
+    en: 'Guest', zh: '宾客', 'zh-HK': '賓客', ja: 'ゲスト', pt: 'Passageiro',
+  },
+  bookingSearch: {
+    en: 'Search Lounges', zh: '搜索 贵宾室', 'zh-HK': '搜尋 貴賓室', ja: '検索 すべてのラウンジ', pt: 'Buscar Lounges',
+  },
+  bookingBookNow: {
+    en: 'Book Now', zh: '立即预订', 'zh-HK': '立即預訂', ja: '今すぐ予約', pt: 'Reserve Agora',
+  },
+  bookingSelectAirport: {
+    en: 'Please select an airport', zh: '请选择机场', 'zh-HK': '請選擇機場', ja: '空港を選択してください', pt: 'Por favor, selecione um aeroporto',
+  },
+  // (the source shows this one in English on every language site)
+  bookingNoMatch: {
+    en: 'No airports found matching "{query}"', zh: '未找到与“{query}”匹配的机场', 'zh-HK': '找不到與「{query}」相符的機場', ja: '「{query}」に一致する空港が見つかりません', pt: 'Nenhum aeroporto encontrado para "{query}"',
+  },
+  bookingLocationsError: {
+    en: 'We couldn’t load the airports.', zh: '无法加载机场列表。', 'zh-HK': '無法載入機場列表。', ja: '空港を読み込めませんでした。', pt: 'Não foi possível carregar os aeroportos.',
+  },
   // property detail (one lounge); the wording is the source detail pages' in each language
   propertyLounges: {
     en: 'Lounges', zh: '贵宾室', 'zh-HK': '貴賓室', ja: 'すべてのラウンジ', pt: 'Lounges',
