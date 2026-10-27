@@ -1,0 +1,131 @@
+/* partner-travel-package: Travel package redemption steps with numbered cards.
+   Stacked on mobile, 3-column layout with dashed connectors on tablet+. */
+.partner-travel-package {
+  --partner-travel-ink: var(--color-campaign-ink);
+  --partner-travel-title: #111827;
+  --partner-travel-copy: #4b5563;
+  --partner-travel-line: #e5e7eb;
+  --partner-travel-plum: #700040;
+  --partner-travel-circle: 56px;
+
+  margin-bottom: calc(var(--spacing-3) * 3);
+  padding: 32px var(--spacing-7);
+  border: var(--base-border-width) solid var(--color-border-subtle);
+  border-radius: calc(var(--radius-xs) * 4);
+  background-color: var(--color-background);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%), 0 8px 10px -6px rgb(0 0 0 / 10%);
+  font-family: var(--font-family-campaign);
+  text-align: center;
+}
+
+.partner-travel-package .partner-travel-package-eyebrow {
+  margin: 0 0 calc(var(--spacing-3) * 2);
+  color: var(--partner-travel-plum);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.partner-travel-package .partner-travel-package-heading {
+  margin: 0;
+  color: var(--partner-travel-ink);
+  font-family: var(--font-family-primary);
+  font-size: calc(var(--font-size-2xl) + 3px);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+}
+
+.partner-travel-package .partner-travel-package-intro {
+  margin: var(--spacing-5) auto 0;
+  color: var(--partner-travel-copy);
+  font-size: var(--spacing-6);
+}
+
+.partner-travel-package .partner-travel-package-steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: calc(var(--spacing-9) + 2px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.partner-travel-package .partner-travel-package-step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.partner-travel-package .partner-travel-package-number {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--partner-travel-circle);
+  height: var(--partner-travel-circle);
+  margin-bottom: calc(var(--spacing-8) - 1px);
+  border-radius: var(--radius-circle);
+  background-color: var(--color-brand-primary);
+  box-shadow: 0 16px 48px rgb(0 0 0 / 17.6%);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: 1;
+}
+
+/* the source's circle colours: maroon, plum, then the action maroon (repeating) */
+.partner-travel-package .partner-travel-package-step:nth-child(3n + 2) .partner-travel-package-number {
+  background-color: var(--partner-travel-plum);
+}
+
+.partner-travel-package .partner-travel-package-step:nth-child(3n) .partner-travel-package-number {
+  background-color: var(--color-brand-primary-action);
+}
+
+.partner-travel-package .partner-travel-package-step-title {
+  margin: 0 0 var(--spacing-3);
+  color: var(--partner-travel-title);
+  font-family: var(--font-family-primary);
+  font-size:var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+}
+
+.partner-travel-package .partner-travel-package-step-description {
+  /* one-off: the source's 320px description width */
+  max-width: 320px;
+  margin: 0;
+  color: var(--partner-travel-copy);
+  font-size: var(--spacing-6);
+  line-height: 1.625;
+}
+
+@media (width >=768px) {
+  .partner-travel-package {
+    margin-inline: 32px;
+    padding:calc(var(--spacing-5) * 4);
+  }
+
+  .partner-travel-package .partner-travel-package-steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /* the dashed line from the previous circle's centre to this one, behind the circles */
+  .partner-travel-package .partner-travel-package-step + .partner-travel-package-step::before {
+    position: absolute;
+    top: calc(var(--partner-travel-circle) / 2);
+    right: 50%;
+    left: -50%;
+    border-top: calc(var(--base-border-width) + 2px) dashed var(--partner-travel-line);
+    content: '';
+  }
+
+  /* a new row of three starts without a line */
+  .partner-travel-package .partner-travel-package-step:nth-child(3n + 1)::before {
+    display: none;
+  }
+}
