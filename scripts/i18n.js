@@ -94,6 +94,40 @@ const TEXTS = {
   airportDining: {
     en: 'Airport dining', zh: '机场餐饮', 'zh-HK': '機場餐飲', ja: '空港ダイニング', pt: 'Restaurantes do aeroporto',
   },
+  // offer list: the "Show me [All offers] ordered by [Latest]" filter line and the offer cards
+  offerShowMe: {
+    en: 'Show me', zh: '显示', 'zh-HK': '顯示', ja: '表示', pt: 'Mostrar',
+  },
+  offerOrderedBy: {
+    en: 'ordered by', zh: '排序方式', 'zh-HK': '排序方式', ja: '並び順', pt: 'ordenadas por',
+  },
+  offerAll: {
+    en: 'All offers', zh: '所有优惠', 'zh-HK': '所有優惠', ja: 'すべてのオファー', pt: 'Todas as ofertas',
+  },
+  offerLatest: {
+    en: 'Latest', zh: '最新', 'zh-HK': '最新', ja: '新しい順', pt: 'Mais recentes',
+  },
+  offerOldest: {
+    en: 'Oldest', zh: '最早', 'zh-HK': '最早', ja: '古い順', pt: 'Mais antigas',
+  },
+  offerLearnMore: {
+    en: 'Learn more', zh: '了解更多', 'zh-HK': '了解更多', ja: '詳しく見る', pt: 'Saiba mais',
+  },
+  offerCount: {
+    en: '{n} offers', zh: '{n} 项优惠', 'zh-HK': '{n} 項優惠', ja: '{n} 件のオファー', pt: '{n} ofertas',
+  },
+  offerCountOne: {
+    en: '1 offer', zh: '1 项优惠', 'zh-HK': '1 項優惠', ja: '1 件のオファー', pt: '1 oferta',
+  },
+  offerNoMatch: {
+    en: 'No offers match this selection.', zh: '没有符合所选条件的优惠。', 'zh-HK': '沒有符合所選條件的優惠。', ja: '条件に合うオファーはありません。', pt: 'Nenhuma oferta corresponde a esta seleção.',
+  },
+  offerEmpty: {
+    en: 'There are no offers right now.', zh: '目前没有优惠。', 'zh-HK': '目前沒有優惠。', ja: '現在ご利用いただけるオファーはありません。', pt: 'Não há ofertas no momento.',
+  },
+  offerError: {
+    en: 'We couldn’t load the offers.', zh: '无法加载优惠。', 'zh-HK': '無法載入優惠。', ja: 'オファーを読み込めませんでした。', pt: 'Não foi possível carregar as ofertas.',
+  },
   // property list (city lounge listing)
   // the city pages' breadcrumb, in the source's words: "Home < Lounges in {country}"
   propertyCrumbHome: {
