@@ -4,9 +4,11 @@
  * the page's language site's (/en-uk-offers.json), as the source offers page (`/en-uk/offers`):
  * - a "Show me [All offers ↓] ordered by [Latest ↓]" filter line, built here and styled by the
  *   Dropdown block's CSS;
- * - the offers as Cards (large), built here and decorated by the Cards block.
- * The selection is kept in the page address (`?category=limited-time&sort=oldest`, the defaults
- * left out), so a reload or a shared link shows the same offers; Back and Forward restore it.
+ * - the offers as Cards (large), built here and decorated by the Cards block, a page at a time
+ *   (the authored Page size, else 10), with the pagination of scripts/pagination.js below them.
+ * The selection and the page are kept in the page address (`?category=limited-time&sort=oldest
+ * &page=2`, the defaults left out), so a reload or a shared link shows the same offers; Back and
+ * Forward restore them.
  */
 import {
   buildBlock, decorateBlock, loadBlock, loadCSS,
@@ -14,6 +16,9 @@ import {
 import {
   DEFAULT_SITE, getLanguage, getSiteFolder, translate,
 } from '../../scripts/i18n.js';
+import {
+  createPager, readPageSize, setPage,
+} from '../../scripts/pagination.js';
 import {
   el, fetchJson, isPreview, toKey,
 } from '../../scripts/properties.js';
@@ -25,6 +30,9 @@ const ROW_LIMIT = 10000;
 const TITLE_SUFFIX = /\s*[|｜]\s*Plaza Premium Lounge\s*$/i;
 // the image the index gives a page without one (/default-meta-image.png, any size)
 const DEFAULT_IMAGE = /\/default-meta-image\.png(\?|$)/;
+// the cards per row from this width (the Cards block's large option): the first row's photos
+// load straight away, the first one first (the largest paint)
+const TWO_COLUMNS = '(width >= 768px)';
 const CATEGORY_PARAM = 'category';
 const SORT_PARAM = 'sort';
 const OLDEST = 'oldest';
@@ -32,18 +40,25 @@ const OLDEST = 'oldest';
 let blockCount = 0;
 
 /**
- * The source: the `Source` row's link (or text), else the block's only link or text, else the
- * offers of the page's language site (e.g. /en-uk-offers.json; pages outside one use en-uk's).
+ * The authored settings, rows of name | value (names ignore capitals and spaces):
+ * - `Source`: a link (or text); else the block's only link or text; else the offers of the page's
+ *   language site (e.g. /en-uk-offers.json; pages outside one use en-uk's);
+ * - `Page size`: the offers per page, e.g. 10 (the default, also for anything but a number).
  * @param {HTMLElement} block
- * @returns {string}
+ * @returns {{ source: string, pageSize: number }}
  */
-function readSource(block) {
+function readSettings(block) {
   const value = (cell) => (cell?.querySelector('a[href]')?.getAttribute('href') || cell?.textContent || '').trim();
   const rows = [...block.children].map((row) => [...row.children]);
-  const row = rows.find((cells) => cells.length >= 2 && toKey(cells[0].textContent) === 'source');
-  const authored = row ? value(row[1])
+  const row = (name) => rows.find((cells) => cells.length >= 2
+    && toKey(cells[0].textContent) === name);
+  const sourceRow = row('source');
+  const authored = sourceRow ? value(sourceRow[1])
     : (rows.length === 1 && rows[0].length === 1 && value(rows[0][0])) || '';
-  return authored || `/${getSiteFolder() || DEFAULT_SITE}-offers.json`;
+  return {
+    source: authored || `/${getSiteFolder() || DEFAULT_SITE}-offers.json`,
+    pageSize: readPageSize(row('page-size')?.[1].textContent),
+  };
 }
 
 /**
@@ -96,10 +111,27 @@ async function fetchRows(source) {
  * @returns {string}
  */
 function toPagePath(value) {
+  // (an empty value would resolve to the current page)
+  if (!value) return '';
   try {
     const url = new URL(value, window.location.href);
     if (url.origin !== window.location.origin) return '';
     return url.pathname === '/' ? '' : `${url.pathname}${url.search}`;
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * An image of the offers JSON as a full address, from any source (a path is on this site). The
+ * Cards block keeps its host and path and adds its own size query. '' when it isn't valid (an
+ * invalid address would stop the Cards block).
+ * @param {string} value
+ * @returns {string}
+ */
+function toImagePath(value) {
+  try {
+    return new URL(value, window.location.href).href;
   } catch {
     return '';
   }
@@ -124,15 +156,15 @@ function readOffers(rows) {
       .split(',')
       .map((name) => ({ key: toKey(name), name: name.trim() }))
       .filter((tag) => tag.key);
-    // this site's images from the current site (the Cards block adds the sizes); the index's
-    // placeholder for a page without an image (which this site doesn't have) is no image
+    // the image from any source (the Cards block adds the sizes); the index's placeholder for a
+    // page without an image (which this site doesn't have) is no image
     const raw = String(row.image ?? '').trim();
     const image = DEFAULT_IMAGE.test(raw) ? '' : raw;
     return {
       path,
       title,
       description: String(row.description ?? '').trim(),
-      image: image && (toPagePath(image).split('?')[0] || image),
+      image: image && toImagePath(image),
       tags,
       time: readTime(row),
     };
@@ -169,12 +201,12 @@ function readSelection(categories) {
 }
 
 /**
- * Puts the selection in the page address (the defaults removed), as a new history entry when
- * it changes.
+ * Puts the selection in the page address (the defaults removed) and goes back to the first page,
+ * as a new history entry when it changes.
  * @param {{ category: string, sort: string }} selection
  */
 function writeSelection({ category, sort }) {
-  const url = new URL(window.location.href);
+  const url = setPage(new URL(window.location.href), 1);
   if (category) url.searchParams.set(CATEGORY_PARAM, category);
   else url.searchParams.delete(CATEGORY_PARAM);
   if (sort) url.searchParams.set(SORT_PARAM, sort);
@@ -334,8 +366,11 @@ async function renderCards(offers, container, prefix) {
     if (offer.image) {
       picture = el('picture');
       const img = el('img');
-      img.src = offer.image;
+      // lazy before the src: this image is only read by the Cards block, which replaces it with
+      // its optimized picture, so it mustn't download (a lazy image out of the page doesn't)
+      img.loading = 'lazy';
       img.alt = '';
+      img.src = offer.image;
       picture.append(img);
     }
     const heading = el('h3', '', offer.title);
@@ -365,7 +400,7 @@ async function renderCards(offers, container, prefix) {
 async function load(block) {
   blockCount += 1;
   const prefix = `offer-list-${blockCount}`;
-  const source = readSource(block);
+  const { source, pageSize } = readSettings(block);
   const url = toSourceUrl(source);
   const message = el('p', 'offer-list-message');
   const status = el('p', 'offer-list-status visually-hidden');
@@ -421,16 +456,29 @@ async function load(block) {
   const categoryIds = new Set(categories.map((c) => c.id).filter(Boolean));
   let selection = readSelection(categoryIds);
 
-  // the offers of the selection, in its order (ties keep the file's order); the others are hidden
-  const apply = (announce) => {
+  // one page of the shown offers at a time, the page in the address (pagination.js); after a
+  // page change, back to the top of the block with focus on the page's first offer
+  const pager = createPager({
+    size: pageSize,
+    target: block,
+    focus: () => block.querySelector('.cards li:not([hidden])'),
+    onChange: ({ page }) => { block.dataset.page = page; },
+  });
+  results.append(pager.element);
+
+  // the offers of the selection, in its order (ties keep the file's order), paged by the pager;
+  // the others are hidden. `reset` goes back to the first page (a new selection)
+  const update = (announce, reset = false) => {
     const direction = selection.sort === OLDEST ? 1 : -1;
     const shown = offers
       .filter((offer) => !selection.category
         || offer.tags.some((tag) => tag.key === selection.category))
       .sort((a, b) => direction * (a.time - b.time) || a.index - b.index);
-    const visible = new Set(shown.map((offer) => offer.index));
-    items.forEach((item, i) => { item.hidden = !visible.has(i); });
-    list?.append(...shown.map((offer) => items[offer.index]));
+    const shownItems = shown.map((offer) => items[offer.index]);
+    const shownSet = new Set(shownItems);
+    items.forEach((item) => { if (!shownSet.has(item)) item.hidden = true; });
+    list?.append(...shownItems);
+    pager.setItems(shownItems, { reset });
     message.textContent = shown.length ? '' : translate('offerNoMatch');
     message.hidden = !!shown.length;
     block.dataset.category = selection.category;
@@ -442,22 +490,40 @@ async function load(block) {
 
   const filters = buildFilters(prefix, categories, (change) => {
     selection = { ...selection, ...change };
+    // writeSelection pushes one history entry with the page already removed
     writeSelection(selection);
-    apply(true);
+    update(true, true);
   });
   results.prepend(filters.filters, el('hr', 'offer-list-divider'));
   filters.show(selection);
-  apply(false);
+  // the page buttons' look first, then the first page and its buttons, all still hidden: the
+  // block is shown once, complete (no layout shift)
+  await pager.ready;
+  update(false);
+  // the first row's photos (the largest paint) load now, while the block is still hidden; the
+  // first is asked for first
+  const firstRow = window.matchMedia(TWO_COLUMNS).matches ? 2 : 1;
+  [...block.querySelectorAll('.cards li:not([hidden]) .cards-card-image img')]
+    .slice(0, firstRow)
+    .forEach((img, i) => {
+      img.loading = 'eager';
+      if (i === 0) img.fetchPriority = 'high';
+    });
   results.hidden = false;
   block.removeAttribute('aria-busy');
 
-  // Back and Forward restore the selection from the address
+  // Back and Forward restore the selection and the page from the address
   window.addEventListener('popstate', () => {
     const next = readSelection(categoryIds);
-    if (next.category === selection.category && next.sort === selection.sort) return;
+    const sameSelection = next.category === selection.category && next.sort === selection.sort;
+    if (sameSelection) {
+      pager.sync();
+      return;
+    }
     selection = next;
     filters.show(selection);
-    apply(true);
+    pager.sync({ render: false });
+    update(true);
   });
 }
 
