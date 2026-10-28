@@ -1,153 +1,141 @@
 /*
  * The homepage hero's lounge card (Booking Widget option lounge-card), as the source's
  * #booking-widget-products-section: when the visitor chooses an airport (or its date, time or
- * guests change), the first bookable lounge there with its services and products; else a button
- * to all the airport's lounges.
+ * guests change), the airport's featured lounge with its products and prices; else a button to
+ * all the airport's lounges.
  *
- * - The airport's lounges: the booking system's GetAllProperties (?iataCode=), in the page
- *   language. A lounge is bookable when it's a LOUNGE with online booking on (isTecoEnabled, not a
- *   redirection) at an airport (not a railway station), in the answer's order.
- * - Its services: service-list for the chosen start; the first lounge with bookable products
- *   (not a pass service) is shown, trying up to three.
- * - Its details: the products service (name, location line, photos, features, prices); the card
- *   doesn't wait for them, and does without them.
+ * One call, getbookingwidgetproducts (the source's own widget call): the booking system picks
+ * the airport's lounge (or keeps the one shown, when only the date, time or guests changed) and
+ * answers with its details and its products grouped by service. Railway stations get no card.
  */
 import apiUrl from '../../scripts/endpoints.js';
-import { getCurrency } from '../../scripts/currency.js';
 import { translate } from '../../scripts/i18n.js';
-import { toStartDateTime } from '../../scripts/booking.js';
 import {
   buildSlider, el, fetchJson, getApiLanguage, toUrl,
 } from '../../scripts/properties.js';
 
-// the services answer in about 2-4s, the lounges in 0.1-1.5s
-const PROPERTIES_TIMEOUT_MS = 10000;
-const SERVICES_TIMEOUT_MS = 20000;
+// the service answers in about 1.5-4.5s
 const PRODUCTS_TIMEOUT_MS = 20000;
-// how many bookable lounges are asked for their services before giving up
-const MAX_LOUNGES = 3;
 // the source shows four features, then "+ N MORE"
 const FEATURES_SHOWN = 4;
 // the source's photo change every 8 seconds
 const SLIDE_MS = 8000;
 const RAILWAY = 'RLWYSTN';
+// a pass service isn't bookable here (as the source's)
 const PASS = /pass/i;
 
-const airports = new Map();
 let count = 0;
 
 /**
- * An airport's location and lounges (once per page and language; a failure is forgotten).
- * @param {string} iata
- * @returns {Promise<{location: Object, lounges: Object[], total: number}>}
+ * Text from an API value, trimmed ('' for anything that isn't text).
+ * @param {*} value
+ * @returns {string}
  */
-function loadAirport(iata) {
-  const key = `${iata}|${getApiLanguage()}`;
-  if (!airports.has(key)) {
-    const url = apiUrl('bookingProperties');
-    url.searchParams.set('iataCode', iata);
-    url.searchParams.set('languageCode', getApiLanguage());
-    airports.set(key, fetchJson(url, PROPERTIES_TIMEOUT_MS).then((json) => {
-      const items = Array.isArray(json?.items) ? json.items : [];
-      const location = items.find((item) => item?.iataCode === iata) || null;
-      const properties = Array.isArray(location?.properties) ? location.properties : [];
-      const all = properties.filter((p) => p?.propertyCode && p.propertyTypeCode === 'LOUNGE');
-      const bookable = location && location.locationTypeCode !== RAILWAY
-        ? all.filter((p) => p.isTecoEnabled !== false && !p.isRedirection) : [];
-      return { location, lounges: bookable, total: all.length };
-    }).catch((error) => {
-      airports.delete(key);
-      throw error;
-    }));
+function text(value) {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+/**
+ * A product's price as the source shows it: the price before a discount and the price, in the
+ * adult rate's currency. A discount shows only when it's above 0 and differs from the base.
+ * @param {Object} item
+ * @param {string} fallbackCurrency
+ * @returns {{now: number, was: number|null, currency: string}|null} null when there's no price
+ */
+function readPrice(item, fallbackCurrency) {
+  const price = Array.isArray(item?.prices) ? item.prices[0] : null;
+  const base = Number(price?.basePrice);
+  if (!price || price.basePrice === null || price.basePrice === '' || !Number.isFinite(base)) return null;
+  const sale = Number(price.basePriceWithDiscount);
+  const rates = Array.isArray(price.baseRate) ? price.baseRate : [];
+  const adult = rates.find((r) => r?.groups === 'adult') || rates[0];
+  const currency = text(adult?.currency) || fallbackCurrency;
+  if (Number.isFinite(sale) && sale > 0 && Math.abs(sale - base) > 0.009) {
+    return { now: sale, was: base, currency };
   }
-  return airports.get(key);
+  return { now: base, was: null, currency };
 }
 
 /**
- * A lounge's bookable services for a start: services with products, not a pass service, the
- * shower last (as the source's tabs), each with its products in the answer's order.
- * @param {Object} json service-list's answer
- * @returns {{code: string, name: string, type: string, image: string,
- *   products: {code: string, name: string}[]}[]}
+ * A tab's name, as the source's: SHOWER, LOUNGE, else the service's name in capitals.
+ * @param {string} name
+ * @returns {string}
  */
-function readServices(json) {
-  const items = Array.isArray(json?.items) ? json.items : [];
-  return items
-    .map((s) => ({
-      code: String(s?.serviceCode || ''),
-      name: String(s?.serviceDisplayName || s?.serviceName || '').trim(),
-      type: String(s?.serviceType || '').trim(),
-      image: toUrl(s?.images?.path) || '',
-      products: (Array.isArray(s?.availableProducts) ? s.availableProducts : [])
-        .map((p) => ({ code: String(p?.productCode || ''), name: String(p?.displayName || '').trim() }))
-        .filter((p) => p.code && p.name),
-    }))
-    .filter((s) => s.code && s.products.length && !PASS.test(`${s.type} ${s.name}`))
-    .sort((a, b) => Number(/shower/i.test(a.type || a.name)) - Number(/shower/i.test(b.type || b.name)));
+function tabLabel(name) {
+  if (/shower/i.test(name)) return 'SHOWER';
+  if (/lounge/i.test(name)) return 'LOUNGE';
+  return (name || 'Service').toUpperCase();
 }
 
 /**
- * The lounge's details from the products service: name, location line, photos, features, and
- * each product's price (the price before a discount, and the price).
+ * The card's data from getbookingwidgetproducts' answer.
+ * - state `card`: the lounge with its bookable products (pass services left out), grouped by
+ *   service (the answer's itemGroups; else by serviceCode, the shower last, as the source's)
+ * - state `unavailable`: the lounge has online booking off (isTecoEnabled false): no products
+ * - state `none`: no answer, an error, nothing bookable (e.g. productApiError DCPE060/061), or no
+ *   lounge name
  * @param {Object} json
- * @param {string} code The lounge
- * @returns {Object|null}
+ * @returns {Object}
  */
-function readDetails(json, code) {
-  const items = Array.isArray(json?.items) ? json.items : [];
-  const location = items.flatMap((i) => i?.locations || [])
-    .find((l) => (l?.properties || []).some((p) => p?.code === code));
-  const property = location?.properties.find((p) => p.code === code);
-  if (!property) return null;
-  const prices = new Map();
-  items.forEach((item) => {
-    const price = item?.prices?.[0];
-    const base = Number(price?.basePrice);
-    const sale = Number(price?.basePriceWithDiscount);
-    const rates = Array.isArray(price?.baseRate) ? price.baseRate : [];
-    const currency = (rates.find((r) => r?.groups === 'adult') || rates[0])?.currency || '';
-    // (the test system answers 0 for unpriced products: those show no price)
-    if (item?.productCode && Number.isFinite(base) && base > 0) {
-      const now = Number.isFinite(sale) && sale > 0 ? sale : base;
-      const was = Math.abs(base - now) > 0.009 ? base : null;
-      prices.set(item.productCode, { now, was, currency });
-    }
-  });
-  const images = (Array.isArray(property.images) ? property.images : [])
-    .slice()
-    .sort((a, b) => (Number(a?.sequence) || 0) - (Number(b?.sequence) || 0))
-    .map((image) => toUrl(image?.path))
-    .filter(Boolean);
-  // the products' own photos (the source's card shows these), each once
-  const productImages = [...new Set(items
-    .flatMap((item) => (item?.images || []).map((image) => toUrl(image?.path))))]
-    .filter(Boolean);
-  return {
-    name: String(property.propertyDisplayName || '').trim(),
-    place: [property.shortLocation, location.locationName].map((t) => String(t || '').trim()).filter(Boolean).join(', '),
-    images,
-    productImages,
-    features: (Array.isArray(property.featureList) ? property.featureList : [])
-      .map((f) => String(typeof f === 'string' ? f : f?.name || '').trim())
+export function readCard(json) {
+  const none = { state: 'none', error: json?.productApiError || null };
+  if (!json || typeof json !== 'object' || String(json.statusCode) !== '200') return none;
+  const items = Array.isArray(json.items) ? json.items : [];
+  const fromItems = items[0]?.locations?.[0]?.properties?.[0]?.name;
+  const name = text(json.propertyDisplayName) || text(fromItems).replace(/\s*\([^)]*\)\s*$/, '');
+  if (!name) return none;
+  const currency = text(json.propertyCurrencyCode) || text(json.defaultCurrency);
+  const toItem = (item) => ({
+    code: text(item?.productCode),
+    name: text(item?.productDisplayName) || text(item?.productName) || text(item?.productCode),
+    service: text(item?.serviceCode),
+    serviceName: text(item?.serviceDisplayName) || text(item?.serviceName),
+    images: (Array.isArray(item?.images) ? item.images : [])
+      .map((i) => toUrl(i?.path))
       .filter(Boolean),
-    prices,
+    price: readPrice(item, currency),
+    available: item?.availability !== false,
+    catalogueCode: text(item?.prices?.[0]?.catalogueCode),
+  });
+  const bookable = (item) => item.code && item.name && !PASS.test(`${item.serviceName} ${item.service}`);
+  const card = {
+    name,
+    // (locationDisplayName: the test system's locationName can name another airport)
+    place: [json.shortLocation, json.locationDisplayName || json.locationName]
+      .map(text)
+      .filter(Boolean)
+      .join(', '),
+    propertyCode: text(json.propertyCode),
+    total: Number.parseInt(json.loungePropertyCount, 10) || 0,
+    images: (Array.isArray(json.images) ? json.images : [])
+      .map((i) => toUrl(i?.path))
+      .filter(Boolean),
+    features: (Array.isArray(json.features) ? json.features : [])
+      .map((f) => text(typeof f === 'string' ? f : f?.name))
+      .filter(Boolean),
   };
-}
+  if (json.isTecoEnabled === false) return { ...card, state: 'unavailable', groups: [] };
 
-/**
- * The name and location line from the lounges' list, until the details arrive: "Plaza Premium
- * Lounge (Near Gate 1, Departures)" at Hong Kong International Airport → the name, and
- * "Near Gate 1, Departures, Hong Kong International Airport".
- * @param {Object} lounge
- * @param {Object} location
- * @returns {{name: string, place: string}}
- */
-function readName(lounge, location) {
-  const full = String(lounge.propertyName || '').trim();
-  const match = full.match(/^(.*?)\s*\(([^)]*)\)\s*$/);
-  const name = (match ? match[1] : full).trim();
-  const place = [match?.[2], location?.name].map((t) => String(t || '').trim()).filter(Boolean).join(', ');
-  return { name, place };
+  const products = items.map(toItem).filter(bookable);
+  if (!products.length) return none;
+  // the answer's groups when it has them (their order), else grouped here
+  let groups = (Array.isArray(json.itemGroups) ? json.itemGroups : [])
+    .map((g) => ({
+      name: text(g?.serviceDisplayName),
+      items: (Array.isArray(g?.items) ? g.items : []).map(toItem).filter(bookable),
+    }))
+    .filter((g) => g.items.length);
+  const services = new Set(products.map((p) => p.service));
+  if (!groups.length || (groups.length === 1 && services.size > 1)) {
+    groups = [...services]
+      .map((service) => {
+        const groupItems = products.filter((p) => p.service === service);
+        return { name: groupItems[0].serviceName, items: groupItems, key: service.toLowerCase() };
+      })
+      .sort((a, b) => Number(/shower/i.test(a.name)) - Number(/shower/i.test(b.name))
+        || a.key.localeCompare(b.key));
+  }
+  return { ...card, state: 'card', groups };
 }
 
 /**
@@ -204,36 +192,6 @@ function renderFeatures(host, features, id) {
 }
 
 /**
- * Whether a photo loads (a browser refuses some, e.g. ones the image host sends as
- * application/octet-stream).
- * @param {string} src
- * @returns {Promise<boolean>}
- */
-function loads(src) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve(img.naturalWidth > 0);
-    img.onerror = () => resolve(false);
-    img.src = src;
-  });
-}
-
-/**
- * The first set of photos that loads, in order (the lounge's, the products', the service's),
- * from its first photo that loads (up to the second, so a refused set costs at most two
- * downloads); [] when none does.
- * @param {string[][]} sets
- * @returns {Promise<string[]>}
- */
-async function firstLoading(sets) {
-  const [set, ...rest] = sets.filter((x) => x.length);
-  if (!set) return [];
-  if (await loads(set[0])) return set;
-  if (set.length > 1 && await loads(set[1])) return set.slice(1);
-  return firstLoading(rest);
-}
-
-/**
  * The photos: the shared slider (dots, swipe), changing every 8 seconds as the source's, except
  * while the pointer or the focus is on it, the page is hidden, or motion is reduced.
  * @param {string[]} images
@@ -242,6 +200,7 @@ async function firstLoading(sets) {
  * @returns {HTMLElement}
  */
 function buildPhotos(images, name, place) {
+  if (!images.length) return el('div', 'booking-widget-card-slider is-empty');
   const slider = buildSlider({ images: images.map((src) => ({ src })), name, line: place }, false, 'booking-widget-card-slider');
   const next = slider.querySelector('.booking-widget-card-slider-next');
   if (!next || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return slider;
@@ -260,137 +219,119 @@ function buildPhotos(images, name, place) {
 }
 
 /**
- * The lounge card: photos, the name and location line, the service tabs (two or more services),
- * the product, the features, the price, Book Now and More at {airport}.
- * @param {Object} lounge
- * @param {Object[]} services
- * @param {Object} location
+ * The lounge card, as the source's: photos (the chosen product's, else the lounge's), the name
+ * and location line, the service tabs (two or more), the product, its "Filling Up" status, the
+ * features, the price, Book Now and More at {airport}. With online booking off: the lounge, its
+ * features and a disabled "Currently Unavailable" instead of the product and Book Now.
+ * @param {Object} data See readCard
  * @param {Object} choice The widget's choices (airport, url, …)
  * @param {string} id
- * @returns {{card: HTMLElement, setDetails: Function}}
+ * @returns {HTMLElement}
  */
-function buildCard(lounge, services, location, choice, id) {
+function buildCard(data, choice, id) {
   const card = el('article', 'booking-widget-card');
   const titleId = `${id}-title`;
   card.setAttribute('aria-labelledby', titleId);
-  const named = readName(lounge, location);
   const media = el('div', 'booking-widget-card-media');
-  const setPhotos = (images, name, place) => {
-    media.replaceChildren(images.length ? buildPhotos(images, name, place) : el('div', 'booking-widget-card-slider is-empty'));
-  };
-  const serviceImages = services.map((s) => s.image).filter(Boolean).slice(0, 1);
-  let photoSets = [serviceImages];
-  let photoTurn = 0;
-  /** Shows the first set of photos that loads (a later call wins over an earlier one). */
-  const choosePhotos = async () => {
-    photoTurn += 1;
-    const turn = photoTurn;
-    const images = await firstLoading(photoSets);
-    // (the name and location line as shown when the photos are ready)
-    const text = (sel) => card.querySelector(sel)?.textContent || '';
-    if (turn === photoTurn) setPhotos(images, text('.booking-widget-card-title'), text('.booking-widget-card-place'));
-  };
+  const setPhotos = (images) => media.replaceChildren(buildPhotos(images, data.name, data.place));
 
   const content = el('div', 'booking-widget-card-content');
   const header = el('div', 'booking-widget-card-header');
-  const title = el('h2', 'booking-widget-card-title', named.name);
+  const title = el('h2', 'booking-widget-card-title', data.name);
   title.id = titleId;
-  const place = el('p', 'booking-widget-card-place', named.place);
-  place.hidden = !named.place;
+  const place = el('p', 'booking-widget-card-place', data.place);
+  place.hidden = !data.place;
   header.append(title, place);
+
+  const features = el('div', 'booking-widget-card-features');
+  renderFeatures(features, data.features, id);
+  const left = el('div', 'booking-widget-card-offer');
+  const actions = el('div', 'booking-widget-card-actions');
+  const more = el('a', 'booking-widget-card-more', translate('bookingMoreAt', { place: choice.airport }));
+  more.href = choice.url;
+  const main = el('div', 'booking-widget-card-main');
+  main.append(left, actions);
+  card.append(media, content);
+
+  if (data.state === 'unavailable') {
+    card.classList.add('is-unavailable');
+    left.append(features);
+    const off = el('button', 'booking-widget-card-unavailable', translate('bookingUnavailable'));
+    off.type = 'button';
+    off.disabled = true;
+    actions.append(off, more);
+    content.append(header, main);
+    setPhotos(data.images);
+    return card;
+  }
 
   // the services as tabs when there are two or more (LOUNGE, SHOWER, …), as the source's
   const tabs = el('div', 'booking-widget-card-tabs');
   tabs.setAttribute('role', 'tablist');
-  tabs.hidden = services.length < 2;
+  tabs.hidden = data.groups.length < 2;
   const select = el('select', 'booking-widget-card-product');
   select.id = `${id}-product`;
   const selectLabel = el('label', 'booking-widget-card-product-label', translate('bookingProduct'));
   selectLabel.htmlFor = select.id;
+  const status = el('span', 'booking-widget-card-status', translate('bookingFillingUp'));
+  status.hidden = true;
   const choiceRow = el('div', 'booking-widget-card-choice');
-  choiceRow.append(selectLabel, select);
-  const features = el('div', 'booking-widget-card-features');
-  features.hidden = true;
+  choiceRow.append(selectLabel, select, status);
   const price = el('p', 'booking-widget-card-price');
   const was = el('s', 'booking-widget-card-price-was');
   const now = el('span', 'booking-widget-card-price-now');
   price.append(was, now);
-
-  const actions = el('div', 'booking-widget-card-actions');
+  left.append(choiceRow, features, price);
   // Book Now: the booking step comes later; the choice is announced meanwhile
   const book = el('button', 'booking-widget-card-book', translate('bookingBookNow'));
   book.type = 'button';
-  const more = el('a', 'booking-widget-card-more', translate('bookingMoreAt', { place: choice.airport }));
-  more.href = choice.url;
   actions.append(book, more);
-
-  const main = el('div', 'booking-widget-card-main');
-  const left = el('div', 'booking-widget-card-offer');
-  left.append(choiceRow, features, price);
-  main.append(left, actions);
   content.append(header, tabs, main);
-  card.append(media, content);
 
-  let details = null;
-  let service = services[0];
-  const showPrice = () => {
-    const amount = details?.prices.get(select.value);
-    was.textContent = amount?.was ? formatPrice(amount.was, amount.currency) : '';
-    was.hidden = !amount?.was;
+  let group = data.groups[0];
+  const product = () => group.items.find((p) => p.code === select.value) || group.items[0];
+  /** Shows the chosen product: its price, its status and its photos (else the lounge's). */
+  const showProduct = () => {
+    const p = product();
+    was.textContent = p.price?.was ? formatPrice(p.price.was, p.price.currency) : '';
+    was.hidden = !p.price?.was;
     // (no price: the source's dash)
-    now.textContent = amount ? formatPrice(amount.now, amount.currency) : '—';
+    now.textContent = p.price ? formatPrice(p.price.now, p.price.currency) : '—';
+    status.hidden = p.available;
+    setPhotos(p.images.length ? p.images : data.images);
   };
-  const showService = (s) => {
-    service = s;
-    select.replaceChildren(...s.products.map((p) => Object.assign(el('option', '', p.name), { value: p.code })));
-    [...tabs.children].forEach((tab) => tab.setAttribute('aria-selected', String(tab.dataset.service === s.code)));
-    showPrice();
+  const showGroup = (g) => {
+    group = g;
+    select.replaceChildren(...g.items.map((p) => Object.assign(el('option', '', p.name), { value: p.code })));
+    [...tabs.children].forEach((tab, i) => tab.setAttribute('aria-selected', String(data.groups[i] === g)));
+    showProduct();
   };
-  if (services.length > 1) {
-    tabs.append(...services.map((s) => {
-      const label = /shower/i.test(s.type || s.name) ? 'shower' : s.name || s.type;
-      const tab = el('button', 'booking-widget-card-tab', label.toUpperCase());
+  if (data.groups.length > 1) {
+    tabs.append(...data.groups.map((g) => {
+      const tab = el('button', 'booking-widget-card-tab', tabLabel(g.name));
       tab.type = 'button';
-      tab.dataset.service = s.code;
       tab.setAttribute('role', 'tab');
       tab.setAttribute('aria-controls', select.id);
-      tab.addEventListener('click', () => showService(s));
+      tab.addEventListener('click', () => showGroup(g));
       return tab;
     }));
   }
-  select.addEventListener('change', showPrice);
+  select.addEventListener('change', showProduct);
   book.addEventListener('click', () => {
+    const p = product();
     card.dispatchEvent(new CustomEvent('booking-widget:book', {
       bubbles: true,
       detail: {
         ...choice,
-        propertyCode: lounge.propertyCode,
-        serviceCode: service.code,
-        productCode: select.value,
+        propertyCode: data.propertyCode,
+        serviceCode: p.service,
+        productCode: p.code,
+        catalogueCode: p.catalogueCode,
       },
     }));
   });
-  showService(services[0]);
-  choosePhotos();
-
-  /**
-   * Fills in the lounge's details (name, location line, photos, features, prices).
-   * @param {Object|null} d
-   */
-  const setDetails = (d) => {
-    if (!d) return;
-    details = d;
-    if (d.name) title.textContent = d.name;
-    if (d.place) {
-      place.textContent = d.place;
-      place.hidden = false;
-    }
-    photoSets = [d.images, d.productImages, serviceImages];
-    choosePhotos();
-    renderFeatures(features, d.features, id);
-    showPrice();
-  };
-  return { card, setDetails };
+  showGroup(group);
+  return card;
 }
 
 /**
@@ -431,8 +372,10 @@ export default function decorateLoungeCard(block, { current }) {
     moreLink.textContent = translate(kind === 'more' ? 'bookingMoreProperties' : 'bookingAllProperties', { place: choice.location.label });
   };
 
+  // the lounge shown, so a new date, time or guests keep it (as the source's)
+  let shown = null;
   let generation = 0;
-  /** Shows the first bookable lounge for the widget's choices. */
+  /** Shows the airport's featured lounge for the widget's choices. */
   const show = async () => {
     const choice = current();
     generation += 1;
@@ -441,68 +384,48 @@ export default function decorateLoungeCard(block, { current }) {
     const stale = () => asked !== generation;
     section.hidden = false;
     section.classList.remove('has-card');
-    section.setAttribute('aria-busy', 'true');
-    status.textContent = translate('propertyLoading');
-    list.replaceChildren(buildSkeleton());
     setMore(choice, false);
     const fallback = () => {
+      shown = null;
       list.replaceChildren();
       setMore(choice, 'all');
     };
+    // (railway stations get no lounge card)
+    if (choice.location.type === RAILWAY) {
+      fallback();
+      return;
+    }
+    section.setAttribute('aria-busy', 'true');
+    status.textContent = translate('propertyLoading');
+    list.replaceChildren(buildSkeleton());
+    const body = {
+      selectedAirport: choice.airport,
+      selectedDate: choice.date,
+      selectedTime: choice.time,
+      adult: Number.parseInt(choice.adult, 10) || 1,
+      children: Number.parseInt(choice.children, 10) || 0,
+      promocode: '',
+      // (a lounge of another airport is unknown there: the service answers 404)
+      propertyCode: shown?.airport === choice.airport ? shown.code : '',
+      languageCode: getApiLanguage(),
+    };
     try {
-      const { location, lounges, total } = await loadAirport(choice.airport);
+      const data = readCard(await fetchJson(apiUrl('bookingWidgetProducts'), PRODUCTS_TIMEOUT_MS, { body }));
       if (stale()) return;
-      const start = toStartDateTime(choice.date, choice.time);
-      const currency = getCurrency();
-      /**
-       * Asks the bookable lounges for their services in turn (the next only when one has nothing
-       * bookable), up to MAX_LOUNGES.
-       * @param {number} i
-       * @returns {Promise<Object|null>} the lounge with its services and details, or null
-       */
-      const tryLounge = async (i) => {
-        const lounge = lounges[i];
-        if (!lounge || i >= MAX_LOUNGES || stale()) return null;
-        const body = {
-          propertyCode: lounge.propertyCode,
-          locationCode: '',
-          iataCode: choice.airport,
-          currencyCode: currency,
-          startDateTime: start,
-          journeyTypeCode: '',
-          terminalTypeCode: '',
-        };
-        // the details come with the services request, so the card doesn't wait for them later
-        const detailsBody = {
-          propertyCode: lounge.propertyCode,
-          iataCode: choice.airport,
-          currencyCode: currency,
-          startDateTime: start,
-          guests: { adult: Number(choice.adult) || 1, child: Number(choice.children) || 0 },
-        };
-        const details = fetchJson(apiUrl('bookingProducts'), PRODUCTS_TIMEOUT_MS, { body: detailsBody })
-          .then((json) => readDetails(json, lounge.propertyCode))
-          .catch(() => null);
-        const services = await fetchJson(apiUrl('bookingServices'), SERVICES_TIMEOUT_MS, { body })
-          .then(readServices)
-          .catch(() => []);
-        return services.length ? { lounge, services, details } : tryLounge(i + 1);
-      };
-      const found = await tryLounge(0);
-      if (stale()) return;
-      if (!found) {
+      if (data.state === 'none') {
+        // eslint-disable-next-line no-console
+        if (data.error) console.info('booking-widget: no bookable products', data.error.errorCode, data.error.message);
         fallback();
         return;
       }
-      const { card, setDetails } = buildCard(found.lounge, found.services, location, choice, id);
-      list.replaceChildren(card);
+      shown = { airport: choice.airport, code: data.propertyCode };
+      list.replaceChildren(buildCard(data, choice, id));
       section.classList.add('has-card');
-      setMore(choice, total > 1 ? 'more' : false);
-      found.details.then((d) => { if (!stale()) setDetails(d); });
+      setMore(choice, data.total > 1 ? 'more' : false);
     } catch (error) {
       if (stale()) return;
       // eslint-disable-next-line no-console
-      console.error('booking-widget: could not load the lounges', error);
+      console.error('booking-widget: could not load the lounge', error);
       fallback();
     } finally {
       if (!stale()) {

@@ -1452,6 +1452,35 @@ dialog.modal:has(.booking-widget) :focus-visible {
   box-shadow: var(--shadow-focus);
 }
 
+/* "Filling Up" under the product when it's nearly full (the source's status with its dot) */
+.booking-widget-card-choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+  align-items: center;
+}
+
+.booking-widget-card-status {
+  display: inline-flex;
+  gap: var(--spacing-2);
+  align-items: center;
+  color: var(--color-brand-primary-action);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.booking-widget-card-status::before {
+  content: '';
+  width: var(--spacing-3);
+  height: var(--spacing-3);
+  border-radius: var(--radius-circle);
+  background-color: currentcolor;
+}
+
+.booking-widget-card-status[hidden] {
+  display: none;
+}
+
 /* the features: pills, then "+ N MORE" with the others in a tooltip */
 .booking-widget-card-features {
   display: flex;
@@ -1570,6 +1599,7 @@ dialog.modal:has(.booking-widget) :focus-visible {
 }
 
 .booking-widget-card-book,
+.booking-widget-card-unavailable,
 .booking-widget-products a.booking-widget-card-more,
 .booking-widget-products a.booking-widget-more-properties-link {
   display: inline-flex;
@@ -1606,6 +1636,15 @@ dialog.modal:has(.booking-widget) :focus-visible {
   border-color: var(--color-brand-primary);
   background: none;
   color: var(--color-brand-primary);
+}
+
+/* online booking off: the source's disabled outline button (Bootstrap's 65%) */
+.booking-widget-card-unavailable:disabled {
+  border-color: var(--color-brand-primary);
+  background: none;
+  color: var(--color-brand-primary);
+  opacity: 0.65;
+  cursor: default;
 }
 
 .booking-widget-products .booking-widget-card-actions :is(.booking-widget-card-book, a.booking-widget-card-more):hover,

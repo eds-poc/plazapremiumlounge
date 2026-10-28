@@ -127,6 +127,8 @@ function readLocations(json, pages) {
         label,
         name,
         nameEN: String(item.nameEN || '').trim(),
+        // ARPRT (airport) or RLWYSTN (railway station)
+        type: String(item.locationTypeCode || ''),
         page: pages.get(item.iataCode),
         timeZone: readTimeZone(item.timeZone),
         lead: leads.length ? Math.max(...leads) : DEFAULT_LEAD_MINUTES,

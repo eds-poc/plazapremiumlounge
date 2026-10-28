@@ -52,25 +52,30 @@ Every Book Now button that links to `#book-now` opens it.
 ## The lounge card (homepage hero only)
 
 When the visitor chooses an airport (and again when the date, time or guests change, half a
-second after the last change), the hero shows **the airport's first bookable lounge** under the
-note, as the source's featured product. Book Now's dialog doesn't have it.
+second after the last change), the hero shows **the airport's featured lounge** under the note, as
+the source's featured product. Book Now's dialog doesn't have it.
 
-- **Which lounge:** the first lounge at that airport, in the booking system's order, that is
-  bookable: a lounge (not a pass), online booking on, not sent to another site. The airport mustn't
-  be a railway station. It's shown when it has bookable products at the chosen start; if it has
-  none, the next one is tried (up to three lounges).
+- **Which lounge:** the booking system picks it for the airport (and keeps the one shown when only
+  the date, time or guests change). Railway stations get no card.
 - **The card** (as the source's):
-  - the lounge's photos (dots; a new photo every 8 seconds, paused on hover or focus)
-  - its name and location line ("Near Gate 1, Departures, Hong Kong International Airport")
-  - the services as tabs when there are two or more (LOUNGE, PRIVATE RESTING AREA, SHOWER last)
-  - the products in a drop-down
+  - photos: the chosen product's (else the lounge's); dots, a new photo every 8 seconds, paused
+    on hover or focus
+  - the lounge's name and location line ("International Departure, Nnamdi Azikiwe International
+    Airport")
+  - the services as tabs when there are two or more, in the booking system's order (e.g.
+    PRIVATE RESTING AREA, LOUNGE, SHOWER)
+  - the products in a drop-down, with "Filling Up" when one is nearly full
   - four features, then "+ N MORE" with the others on hover, focus or a tap
-  - the price: the price before a discount struck through, then the price ("—" without one)
-  - **Book Now** (no booking yet: it announces the choice) and **More at HKG** (the city page)
+  - the price for the guests: the price before a discount struck through, then the price ("—"
+    without one)
+  - **Book Now** (no booking yet: it announces the choice) and **More at ABV** (the city page)
+- **Online booking off** for the lounge: the card with its photos and features, and a disabled
+  **Currently Unavailable** instead of the product, the price and Book Now.
 - **Under the card:** "View more properties in Hong Kong International Airport (HKG)", when the
   airport has two or more lounges (not on phones, where More at is enough).
-- **No card** (no bookable lounge, nothing bookable at that time, a service error or an invalid
-  answer): **"View all properties in …"**, to the airport's city page with the choices.
+- **No card** (nothing bookable at that time, e.g. the lounge's lead time isn't met, a service
+  error or an invalid answer): **"View all properties in …"**, to the airport's city page with the
+  choices.
 - While it loads, a shimmering card stands in its place.
 - On phones the card follows the hero's rounded photo card; from 768px it sits on the photo, under
   the note.
@@ -125,8 +130,10 @@ choices in the address:
 | Nothing matches | "No airports found matching "…"" |
 | The locations service fails (an error, or 15 seconds) | "We couldn't load the airports." and Try again |
 | The lounge card is loading | A shimmering card ("Loading…" for screen readers) |
-| No bookable lounge, nothing bookable, or the lounge services fail | No card; "View all properties in {airport}" |
-| The lounge's details (photos, features) fail | The card without features, with the service's photo |
+| Nothing bookable at that time (e.g. "Property lead time is not met", DCPE060; not available, DCPE061) | No card; "View all properties in {airport}" (the reason goes to the browser console) |
+| The service fails (an HTTP error, no answer within 20 seconds, not JSON, statusCode not 200) | The same |
+| Online booking is off for the lounge | The card with "Currently Unavailable" |
+| A product without a price / photos / features / location line | "—" / the lounge's photos, else a grey box / no features / no line |
 
 ## For developers
 
@@ -150,20 +157,32 @@ choices in the address:
   - `booking-widget:change`, half a second after the last change of the location, date, time or
     guests, with the same `detail` plus `location` (the chosen location).
   - `booking-widget:book`, from the lounge card's Book Now, with the choice plus `propertyCode`,
-    `serviceCode` and `productCode` (for the booking step to come).
+    `serviceCode`, `productCode` and `catalogueCode` (for the booking step to come).
 - **Choosing a location from a script** (e.g. a default from the visitor's position, later): send
   the block `booking-widget:set-location` with `detail.airport`:
   `block.dispatchEvent(new CustomEvent('booking-widget:set-location', { detail: { airport: 'HKG' } }))`.
   The location is chosen as if the visitor had picked it (the lounge card follows).
 - **Lounge card** (`booking-widget-lounge-card.js`, option `lounge-card`, added by the hero; not
   in a dialog):
-  - `apiUrl('bookingProperties')` (GetAllProperties `?iataCode=&languageCode=`) → the bookable
-    lounges.
-  - `apiUrl('bookingServices')` (service-list, POST) → the lounge's services and products for the
-    start (the visitor's currency).
-  - `apiUrl('bookingProducts')` (products, POST) → the name, location line, photos, features and
-    prices. Its product codes don't match service-list's on the test system, so the prices show
-    "—" there; they show when the codes match.
+  - One call: `apiUrl('bookingWidgetProducts')` (getbookingwidgetproducts, POST) with
+    `{ selectedAirport, selectedDate (YYYY-MM-DD), selectedTime (HHmm), adult, children,
+    promocode: '', propertyCode, languageCode }`. `propertyCode` is the lounge shown when only the
+    date, time or guests changed (another airport's code answers 404), else empty. Prices come in
+    the lounge's currency (the service ignores a currency).
+  - The answer → the card (`readCard`):
+
+    | Card | Answer |
+    | --- | --- |
+    | Card or not | `statusCode` "200", `isTecoEnabled` (false → Currently Unavailable), bookable `items` (pass services left out); `productApiError` explains an empty one |
+    | Name | `propertyDisplayName`, else the item's property name without its brackets |
+    | Location line | `shortLocation`, `locationDisplayName` (else `locationName`) |
+    | Tabs, products | `itemGroups[]` (`serviceDisplayName`, `items`), else the items grouped by `serviceCode`; `productDisplayName` |
+    | Price | `prices[0]`: `basePriceWithDiscount` (when above 0 and not the same) and `basePrice`, in the adult `baseRate` currency |
+    | Photos | the product's `images[]`, else the lounge's `images[]` |
+    | Features | `features[].name` |
+    | Filling Up | `availability` false |
+    | View more | `loungePropertyCount` above 1 |
+    | Book Now | `prices[0].catalogueCode`, `productCode`, `serviceCode`, `propertyCode` |
   - It goes in its host's place: an element with `data-booking-products` inside one marked
     `data-booking-products-host` (the hero's), else after the widget.
   - Stale answers (an earlier choice) are dropped.

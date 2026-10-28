@@ -328,6 +328,14 @@ const TEXTS = {
   bookingProduct: {
     en: 'Product', zh: '产品', 'zh-HK': '產品', ja: '商品', pt: 'Produto',
   },
+  // a lounge with online booking off (the source's wording)
+  bookingUnavailable: {
+    en: 'Currently Unavailable', zh: '目前无法预订', 'zh-HK': '目前無法預訂', ja: '現在ご利用いただけません', pt: 'Atualmente indisponível',
+  },
+  // a product that's nearly full (the source's English; the other languages are translations)
+  bookingFillingUp: {
+    en: 'Filling Up', zh: '即将满额', 'zh-HK': '即將滿額', ja: '残りわずか', pt: 'Quase lotado',
+  },
   bookingFeaturesMore: {
     en: '+ {n} MORE', zh: '+ 还有 {n} 项', 'zh-HK': '+ 還有 {n} 項', ja: '+ 他 {n}', pt: '+ {n} MAIS',
   },
