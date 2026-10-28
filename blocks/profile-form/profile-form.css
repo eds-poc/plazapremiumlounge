@@ -78,13 +78,15 @@
 
 .profile-form .form-fields > .form-field-checkbox .form-check-label {
   font-size: var(--body-font-size);
+  line-height: var(--line-height-body);
 }
 
-/* the source's 17px square checkbox, a white tick on maroon when checked */
+/* the source's 17px square checkbox, centred on the label's first line; a white tick on maroon
+   when checked */
 .profile-form .form-fields .form-check-input {
   width: 17px;
   height: 17px;
-  margin-top: 0;
+  margin-top: calc((var(--body-font-size) * var(--line-height-body) - 17px) / 2);
   border-color: #ccc;
   border-radius: 3px;
 }

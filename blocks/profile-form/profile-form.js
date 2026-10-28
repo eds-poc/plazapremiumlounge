@@ -17,9 +17,11 @@ const FIELDS = {
     type: 'phone',
     key: 'phone',
     newColumn: true,
-    settings: { 'prefix key': 'countryPhoneCode', 'prefix default': '+1 (US)', 'max length': 12 },
+    settings: {
+      'prefix key': 'countryPhoneCode', 'prefix default': '+1 (US)', 'max length': 12, width: 'half',
+    },
   },
-  birthday: { type: 'text', key: 'dob', settings: { disabled: '', width: 'half' } },
+  birthday: { type: 'text', key: 'dob', settings: { disabled: '', width: 'half', 'new row': '' } },
   ageRange: { type: 'select', key: 'ageRange', settings: { width: 'half' } },
   countryOfResidence: { type: 'country', key: 'countryOfResidence' },
   nationality: { type: 'country', key: 'nationality' },
