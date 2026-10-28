@@ -21,6 +21,8 @@ const ENDPOINTS = {
   login: '/api/v1/web/app_demo/Login',
   // the forgot password modal's submit (POST, JSON: lastName, email)
   forgotPassword: '/api/v1/web/app_demo/ForgotPassword',
+  // the logged-in member's profile (GET, Authorization: Bearer <jwt>)
+  getProfile: '/api/v1/web/app_demo/GetProfile',
   propertyDetail: '/api/v1/web/app_demo/GetPropertyDetail',
   // a lounge's bookable services and their products for a start time (POST, JSON body)
   propertyServices: '/api/v1/web/app_demo/GetServices',

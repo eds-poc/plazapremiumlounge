@@ -344,6 +344,15 @@ const TEXTS = {
   forgotPasswordSent: {
     en: 'Email sent. Please check your mailbox.', zh: '邮件已发送，请查收您的邮箱。', 'zh-HK': '郵件已發送，請查閱您的郵箱。', ja: 'メールを送信しました。受信トレイをご確認ください。', pt: 'E-mail enviado. Verifique sua caixa de entrada.',
   },
+  profileLoading: {
+    en: 'Loading your profile…', zh: '正在加载您的资料…', 'zh-HK': '正在載入您的資料…', ja: 'プロフィールを読み込んでいます…', pt: 'Carregando seu perfil…',
+  },
+  profileLoadError: {
+    en: 'We couldn’t load your profile.', zh: '无法加载您的资料。', 'zh-HK': '無法載入您的資料。', ja: 'プロフィールを読み込めませんでした。', pt: 'Não foi possível carregar seu perfil.',
+  },
+  profilePoints: {
+    en: '{points} (valid until {date})', zh: '{points}（有效期至 {date}）', 'zh-HK': '{points}（有效期至 {date}）', ja: '{points}（{date} まで有効）', pt: '{points} (válido até {date})',
+  },
   loginError: {
     en: 'Sorry, we couldn’t log you in. Please try again.', zh: '抱歉，无法登录，请重试。', 'zh-HK': '抱歉，無法登入，請重試。', ja: 'ログインできませんでした。もう一度お試しください。', pt: 'Desculpe, não foi possível entrar. Tente novamente.',
   },

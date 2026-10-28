@@ -1,0 +1,64 @@
+/* side nav: the account pages' links (the source .sidebar-menu): small maroon links, no bullets,
+   the current page's in the heavier weight */
+.side-nav .side-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.side-nav .side-nav-link:any-link {
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+}
+
+.side-nav .side-nav-item.is-active .side-nav-link {
+  font-weight: var(--font-weight-medium);
+}
+
+/* phones: the links above the content */
+.side-nav {
+  margin-bottom: var(--spacing-9);
+}
+
+/* the section right under the page title: the source's 20px after the line, not a section's
+   full spacing */
+main > .section:has(> .side-nav-wrapper) {
+  padding-top: var(--spacing-7);
+}
+
+/* breakpoint-exception: the source's col-sm-3 / col-sm-9 (576px): the section holding the side nav
+   is two columns, the nav a quarter of the width beside the rest of the section's content; the
+   section's width moves from its parts to the section itself */
+@media (width >= 576px) {
+  main > .section:has(> .side-nav-wrapper) {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+    column-gap: var(--grid-gutter);
+    align-items: start;
+    max-width: var(--container-max-width);
+    margin-inline: auto;
+    padding-inline: var(--container-padding);
+  }
+
+  main > .section:has(> .side-nav-wrapper) > div {
+    grid-column: 2;
+    max-width: none;
+    margin: 0;
+    padding-inline: 0;
+  }
+
+  main > .section:has(> .side-nav-wrapper) > .side-nav-wrapper {
+    grid-column: 1;
+    grid-row: 1 / span 10;
+  }
+
+  .side-nav {
+    margin-bottom: 0;
+  }
+}
