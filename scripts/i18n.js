@@ -110,6 +110,91 @@ const TEXTS = {
   paginationStatus: {
     en: 'Page {n} of {total}', zh: '第 {n} 页，共 {total} 页', 'zh-HK': '第 {n} 頁，共 {total} 頁', ja: '{n} / {total} ページ', pt: 'Página {n} de {total}',
   },
+  // booking list (My Bookings): the tabs, the booking cards, their actions and the messages
+  bookingTabs: {
+    en: 'Bookings', zh: '预订', 'zh-HK': '預訂', ja: '予約', pt: 'Reservas',
+  },
+  bookingUpcoming: {
+    en: 'Upcoming', zh: '即将到来', 'zh-HK': '即將到來', ja: '今後の予約', pt: 'Próximas',
+  },
+  bookingPast: {
+    en: 'Past Bookings', zh: '过往预订', 'zh-HK': '過往預訂', ja: '過去の予約', pt: 'Reservas anteriores',
+  },
+  bookingCancelled: {
+    en: 'Cancelled', zh: '已取消', 'zh-HK': '已取消', ja: 'キャンセル済み', pt: 'Canceladas',
+  },
+  bookingOrder: {
+    en: 'Order No. {id}', zh: '订单编号 {id}', 'zh-HK': '訂單編號 {id}', ja: '注文番号 {id}', pt: 'Pedido nº {id}',
+  },
+  bookingDate: {
+    en: 'Date:', zh: '日期：', 'zh-HK': '日期：', ja: '日付：', pt: 'Data:',
+  },
+  bookingTime: {
+    en: 'Time:', zh: '时间：', 'zh-HK': '時間：', ja: '時間：', pt: 'Hora:',
+  },
+  bookingGuests: {
+    en: 'Guests:', zh: '宾客：', 'zh-HK': '賓客：', ja: 'ゲスト：', pt: 'Hóspedes:',
+  },
+  bookingServices: {
+    en: 'Services:', zh: '服务：', 'zh-HK': '服務：', ja: 'サービス：', pt: 'Serviços:',
+  },
+  bookingAdult: {
+    en: '1 Adult', zh: '1 位成人', 'zh-HK': '1 位成人', ja: '大人 1 名', pt: '1 adulto',
+  },
+  bookingAdults: {
+    en: '{n} Adults', zh: '{n} 位成人', 'zh-HK': '{n} 位成人', ja: '大人 {n} 名', pt: '{n} adultos',
+  },
+  bookingChild: {
+    en: '1 Child', zh: '1 位儿童', 'zh-HK': '1 位兒童', ja: '子供 1 名', pt: '1 criança',
+  },
+  bookingChildren: {
+    en: '{n} Children', zh: '{n} 位儿童', 'zh-HK': '{n} 位兒童', ja: '子供 {n} 名', pt: '{n} crianças',
+  },
+  bookingTaxes: {
+    en: '(Includes applicable taxes and fees)', zh: '（包括适用的税费）', 'zh-HK': '（包括適用的稅費）', ja: '（税金・手数料込み）', pt: '(Inclui impostos e taxas aplicáveis)',
+  },
+  bookingResend: {
+    en: 'Resend Booking Confirmation', zh: '重新发送预订确认', 'zh-HK': '重新發送預訂確認', ja: '予約確認を再送信', pt: 'Reenviar confirmação da reserva',
+  },
+  bookingViewModify: {
+    en: 'View/Modify Booking', zh: '查看/修改预订', 'zh-HK': '查看/修改預訂', ja: '予約の確認・変更', pt: 'Ver/alterar reserva',
+  },
+  bookingView: {
+    en: 'View Booking', zh: '查看预订', 'zh-HK': '查看預訂', ja: '予約を確認', pt: 'Ver reserva',
+  },
+  bookingCancel: {
+    en: 'Cancel Booking', zh: '取消预订', 'zh-HK': '取消預訂', ja: '予約をキャンセル', pt: 'Cancelar reserva',
+  },
+  bookingCancelConfirm: {
+    en: 'Cancel booking {id}?', zh: '要取消预订 {id} 吗？', 'zh-HK': '要取消預訂 {id} 嗎？', ja: '予約 {id} をキャンセルしますか？', pt: 'Cancelar a reserva {id}?',
+  },
+  bookingResent: {
+    en: 'The booking confirmation was sent again.', zh: '已重新发送预订确认。', 'zh-HK': '已重新發送預訂確認。', ja: '予約確認を再送信しました。', pt: 'A confirmação da reserva foi reenviada.',
+  },
+  bookingCancelDone: {
+    en: 'Booking {id} was cancelled.', zh: '预订 {id} 已取消。', 'zh-HK': '預訂 {id} 已取消。', ja: '予約 {id} をキャンセルしました。', pt: 'A reserva {id} foi cancelada.',
+  },
+  bookingActionError: {
+    en: 'That didn’t work. Please try again.', zh: '操作未成功，请重试。', 'zh-HK': '操作未成功，請重試。', ja: '処理できませんでした。もう一度お試しください。', pt: 'Não foi possível. Tente novamente.',
+  },
+  bookingNoneUpcoming: {
+    en: 'You have no upcoming bookings.', zh: '您没有即将到来的预订。', 'zh-HK': '您沒有即將到來的預訂。', ja: '今後の予約はありません。', pt: 'Você não tem reservas próximas.',
+  },
+  bookingNonePast: {
+    en: 'You have no past bookings.', zh: '您没有过往预订。', 'zh-HK': '您沒有過往預訂。', ja: '過去の予約はありません。', pt: 'Você não tem reservas anteriores.',
+  },
+  bookingNoneCancelled: {
+    en: 'You have no cancelled bookings.', zh: '您没有已取消的预订。', 'zh-HK': '您沒有已取消的預訂。', ja: 'キャンセル済みの予約はありません。', pt: 'Você não tem reservas canceladas.',
+  },
+  bookingLogin: {
+    en: 'Log in to see your bookings.', zh: '登录以查看您的预订。', 'zh-HK': '登入以查看您的預訂。', ja: 'ログインすると予約を確認できます。', pt: 'Entre para ver suas reservas.',
+  },
+  bookingLoginButton: {
+    en: 'Log In', zh: '登录', 'zh-HK': '登入', ja: 'ログイン', pt: 'Entrar',
+  },
+  bookingError: {
+    en: 'We couldn’t load your bookings.', zh: '无法加载您的预订。', 'zh-HK': '無法載入您的預訂。', ja: '予約を読み込めませんでした。', pt: 'Não foi possível carregar suas reservas.',
+  },
   // offer list: the "Show me [All offers] ordered by [Latest]" filter line and the offer cards
   offerShowMe: {
     en: 'Show me', zh: '显示', 'zh-HK': '顯示', ja: '表示', pt: 'Mostrar',
