@@ -22,4 +22,4 @@ active one.
 
 In the section with the page's main content (e.g. before the Profile Form block): from 576px the section
 is two columns, the links a quarter of the width beside the rest of its content; on phones the links
-sit above it.
+sit above it as full-width grey tabs, the active one maroon.

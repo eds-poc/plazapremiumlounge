@@ -211,6 +211,7 @@ function setControlAttributes(control, def) {
   // as the default value, so a form reset goes back to it
   if (settings.has('default') && 'defaultValue' in control) control.defaultValue = settings.get('default');
   if (settings.has('readonly')) control.readOnly = true;
+  if (settings.has('disabled')) control.disabled = true;
   const autocomplete = settings.get('autocomplete') || AUTOCOMPLETE[def.key] || TYPE_AUTOCOMPLETE[def.type];
   if (autocomplete) control.autocomplete = autocomplete;
   const rule = RULES[settings.get('rule')] || RULES[def.type];

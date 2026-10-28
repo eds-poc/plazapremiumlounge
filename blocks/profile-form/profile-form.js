@@ -19,7 +19,7 @@ const FIELDS = {
     newColumn: true,
     settings: { 'prefix key': 'countryPhoneCode', 'prefix default': '+1 (US)', 'max length': 12 },
   },
-  birthday: { type: 'text', key: 'dob', settings: { readonly: '', width: 'half' } },
+  birthday: { type: 'text', key: 'dob', settings: { disabled: '', width: 'half' } },
   ageRange: { type: 'select', key: 'ageRange', settings: { width: 'half' } },
   countryOfResidence: { type: 'country', key: 'countryOfResidence' },
   nationality: { type: 'country', key: 'nationality' },
@@ -165,6 +165,13 @@ export default function decorate(block) {
   const [basic, optional] = form.querySelectorAll(':scope > .form-column');
   // the second box's title is the text row just before its first field
   if (basic?.lastElementChild?.matches('.form-content')) optional?.prepend(basic.lastElementChild);
+  // each box in its own column (the source's .col-md-6 > .boxLiner)
+  [basic, optional].filter(Boolean).forEach((box) => {
+    const column = document.createElement('div');
+    column.className = 'profile-form-column';
+    box.replaceWith(column);
+    column.append(box);
+  });
   // the text rows, after the email field
   const details = new Map();
   const email = fieldElement(form, 'userName');

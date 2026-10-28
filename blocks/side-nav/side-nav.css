@@ -1,18 +1,17 @@
-/* side nav: the account pages' links (the source .sidebar-menu): small maroon links, no bullets,
-   the current page's in the heavier weight */
+/* side nav: the account pages' links (the source .sidebar-menu): light 16px maroon links, no
+   bullets, the current page's in the heavier weight */
 .side-nav .side-nav-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-4);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .side-nav .side-nav-link:any-link {
+  display: inline-block;
+  padding: 7px var(--spacing-2);
   color: var(--color-brand-primary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-light);
   line-height: var(--line-height-body);
 }
 
@@ -20,9 +19,24 @@
   font-weight: var(--font-weight-medium);
 }
 
-/* phones: the links above the content */
+/* phones: the links above the content, as full-width grey tabs, the current page's maroon */
 .side-nav {
-  margin-bottom: var(--spacing-9);
+  margin-bottom: var(--spacing-8);
+}
+
+@media (width < 576px) {
+  /* one-off: the source's tab grey */
+  .side-nav .side-nav-link:any-link {
+    display: block;
+    border-bottom: 1px solid var(--base-border);
+    padding: var(--spacing-4) var(--spacing-6);
+    background-color: #eee;
+  }
+
+  .side-nav .side-nav-item.is-active .side-nav-link {
+    background-color: var(--color-brand-primary);
+    color: var(--color-text-inverse);
+  }
 }
 
 /* the page title's line to the side nav and content: 36px in all (one-off, the source), not the

@@ -42,7 +42,7 @@ home; any other failure shows "We couldn't load your profile." with Try again.
 | membershipNo | `membershipID` | |
 | points | `points`, `pointsExpiry` | "150 (valid until 12/31/2027 11:59:59 PM)", the date as given, no time zone change |
 | phone | `phone`, `countryPhoneCode` | Empty number when `phone` is null; the code +1 (US) unless given |
-| birthday | `dob` | Read-only |
+| birthday | `dob` | Disabled (shown, not editable or sent) |
 | ageRange | `ageRange` | |
 | countryOfResidence | `countryName` | Matched by name in the countries service (e.g. "United States" → "United States of America") |
 | nationality | `nationality` | Only by a name; stays Select until the API gives one |
