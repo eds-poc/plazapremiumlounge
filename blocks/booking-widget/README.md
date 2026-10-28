@@ -177,7 +177,7 @@ choices in the address:
     | Name | `propertyDisplayName`, else the item's property name without its brackets |
     | Location line | `shortLocation`, `locationDisplayName` (else `locationName`) |
     | Tabs, products | `itemGroups[]` (`serviceDisplayName`, `items`), else the items grouped by `serviceCode`; `productDisplayName` |
-    | Price | `prices[0]`: `basePriceWithDiscount` (when above 0 and not the same) and `basePrice`, in the adult `baseRate` currency |
+    | Price | `prices[0]`: `basePriceWithDiscount` (when above 0 and not the same) and `basePrice`, in the adult `baseRate` currency. The service prices all the guests: e.g. ABV, 1 adult and 2 children → `baseRate` adult 50, child 100, `basePrice` USD 150 |
     | Photos | the product's `images[]`, else the lounge's `images[]` |
     | Features | `features[].name` |
     | Filling Up | `availability` false |
