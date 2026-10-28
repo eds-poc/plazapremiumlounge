@@ -25,10 +25,10 @@
   margin-bottom: var(--spacing-9);
 }
 
-/* the section right under the page title: the source's 20px after the line, not a section's
-   full spacing */
+/* the page title's line to the side nav and content: 36px in all (one-off, the source), not the
+   two sections' spacing plus the line's own margin (the title's section, at the end) */
 main > .section:has(> .side-nav-wrapper) {
-  padding-top: var(--spacing-7);
+  padding-top: 36px;
 }
 
 /* breakpoint-exception: the source's col-sm-3 / col-sm-9 (576px): the section holding the side nav
@@ -61,4 +61,13 @@ main > .section:has(> .side-nav-wrapper) {
   .side-nav {
     margin-bottom: 0;
   }
+}
+
+/* the page title's section, right before the side nav's: no spacing under its line */
+main > .section:has(+ .section > .side-nav-wrapper) {
+  padding-bottom: 0;
+}
+
+main > .section:has(+ .section > .side-nav-wrapper) .divider-line {
+  margin-bottom: 0;
 }
