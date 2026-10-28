@@ -65,6 +65,43 @@
   background-color: var(--color-surface-warm);
 }
 
+/* Contact Number: the source's 274px pill, the code as "+1 ▾" (as wide as its 1 to 3 digits need)
+   and a thin line before the number */
+.profile-form .form-fields .form-phone {
+  width: 274px;
+  max-width: 100%;
+}
+
+.profile-form .form-fields .profile-phone-code {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--spacing-3);
+  border-right: 1px solid var(--color-border);
+  padding: 0 var(--spacing-5) 0 var(--spacing-6);
+  color: var(--form-input-color);
+  font-size: var(--font-size-sm);
+}
+
+/* the small down triangle */
+.profile-form .form-fields .profile-phone-code::after {
+  content: '';
+  border-top: 4px solid currentcolor;
+  border-inline: 3.5px solid transparent;
+}
+
+/* the dropdown over the code, invisible: the click opens its list of countries */
+.profile-form .form-fields .profile-phone-code .form-phone-code {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  opacity: 0;
+}
+
 /* the membership number and points: a label and the value as text */
 .profile-form .profile-detail p {
   margin: 0;

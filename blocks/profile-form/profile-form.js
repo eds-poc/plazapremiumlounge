@@ -17,11 +17,9 @@ const FIELDS = {
     type: 'phone',
     key: 'phone',
     newColumn: true,
-    settings: {
-      'prefix key': 'countryPhoneCode', 'prefix default': '+1 (US)', 'max length': 12, width: 'half',
-    },
+    settings: { 'prefix key': 'countryPhoneCode', 'prefix default': '+1 (US)', 'max length': 12 },
   },
-  birthday: { type: 'text', key: 'dob', settings: { disabled: '', width: 'half', 'new row': '' } },
+  birthday: { type: 'text', key: 'dob', settings: { disabled: '', width: 'half' } },
   ageRange: { type: 'select', key: 'ageRange', settings: { width: 'half' } },
   countryOfResidence: { type: 'country', key: 'countryOfResidence' },
   nationality: { type: 'country', key: 'nationality' },
@@ -142,7 +140,10 @@ function fill(form, profile, details) {
     const code = String(profile.countryPhoneCode ?? '').replace(/\D/g, '');
     const codeSelect = fieldElement(form, 'phone')?.querySelector('.form-phone-code');
     // a code several countries share (+1) keeps the default (+1 (US)) when it already is that code
-    if (code && codeSelect && codeSelect.value !== `+${code}`) selectValue(codeSelect, `+${code}`);
+    if (code && codeSelect && codeSelect.value !== `+${code}`) {
+      selectValue(codeSelect, `+${code}`);
+      codeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    }
   }).catch(() => { /* the fields show their own "couldn't load" with a retry */ });
 }
 
@@ -190,6 +191,21 @@ export default function decorate(block) {
     details.set(name, value);
     if (email) email.after(item); else basic?.append(item);
   });
+  // the phone code shown as the dial code alone ("+1", the source), the dropdown (still listing
+  // the countries) invisible over it
+  const codeSelect = fieldElement(form, 'phone')?.querySelector('.form-phone-code');
+  if (codeSelect) {
+    const code = document.createElement('span');
+    code.className = 'profile-phone-code';
+    const shown = document.createElement('span');
+    shown.setAttribute('aria-hidden', 'true');
+    codeSelect.replaceWith(code);
+    code.append(codeSelect, shown);
+    const show = () => { shown.textContent = codeSelect.value; };
+    codeSelect.addEventListener('change', show);
+    // once the list is in and its default chosen
+    getCountries().then(show).catch(() => { /* the field shows its own retry */ });
+  }
   // the newsletter checkbox and Save below the boxes
   const promotion = fieldElement(form, 'isReceivePromotion');
   const submit = form.querySelector('.form-submit');
