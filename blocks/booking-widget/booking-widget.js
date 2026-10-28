@@ -352,19 +352,20 @@ function buildWhere(id, onPick) {
    * Starts loading the locations (once), redrawing an open list when they arrive. The visitor's
    * nearest airport is chosen then, as the source's, unless the visitor has typed or chosen, or
    * is in the box (the list they opened stays open).
+   * @returns {Promise<void>} Settles once that's done (or the load failed)
    */
-  const load = () => {
-    loadLocations().then((answer) => {
+  const load = () => loadLocations()
+    .then((answer) => {
       ({ locations } = answer);
       if (answer.nearest && !touched && document.activeElement !== input) pick(answer.nearest);
       else if (isOpen()) render();
-    }).catch((err) => {
+    })
+    .catch((err) => {
       // eslint-disable-next-line no-console
       console.error('booking-widget: could not load the locations', err);
       failed = true;
       if (isOpen()) render();
     });
-  };
 
   input.addEventListener('focus', () => { load(); open(); });
   input.addEventListener('click', () => { if (!isOpen()) open(); });
@@ -717,14 +718,27 @@ export default function decorate(block) {
   submit.append(el('span', 'booking-widget-submit-label', action));
   form.append(fields, submit);
 
-  // the locations load when the visitor first comes to the form (not with the page)
-  const start = () => where.load();
+  // the locations load when the visitor first comes to the form, or before (see below); Search
+  // waits for them and the visitor's nearest airport chosen from them (on a failure it comes
+  // back, with Where's message and Try again)
+  submit.disabled = true;
+  let started = null;
+  const start = () => {
+    started ||= where.load().finally(() => { submit.disabled = false; });
+  };
   ['pointerover', 'focusin', 'touchstart'].forEach((type) => form.addEventListener(type, start, { once: true, passive: true }));
   // outside a dialog (the homepage hero), once the page has loaded, so the visitor's nearest
-  // airport is chosen without them (the Book Now dialog's form chooses it when they come to it)
+  // airport is chosen without them; in the Book Now dialog, when it opens (the form shows)
   if (!inModal) {
     if (document.readyState === 'complete') start();
     else window.addEventListener('load', start, { once: true });
+  } else {
+    const shown = new IntersectionObserver((entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      shown.disconnect();
+      start();
+    });
+    shown.observe(form);
   }
 
   /**

@@ -135,7 +135,7 @@ choices in the address:
 | Situation | Visitors see |
 | --- | --- |
 | Search without a chosen location | "Please select an airport" under Where (white), and the focus goes back to Where |
-| The locations are loading | "Loading…" in the open list |
+| The locations are loading | Search Lounges (or Book Now) is disabled (faded) until they're in and the nearest airport is chosen; "Loading…" in the open list. On the homepage they load once the page has loaded; in Book Now, when the dialog opens |
 | Nothing matches | "No airports found matching "…"" |
 | The locations service fails (an error, 15 seconds, not JSON, no locations in the answer) | "We couldn't load the airports." and Try again; no airport is chosen |
 | The nearest airport can't be found, or isn't in Where | Where stays empty (and the hero shows no card) until the visitor chooses |
@@ -151,7 +151,8 @@ choices in the address:
   system's service (its own domain, with the live site's codes), with `languageCode` (the page's
   API language).
   - It's loaded once per page, for every form on it: by the homepage hero's form once the page
-    has loaded, else when the visitor first comes to a form (pointer, focus or touch). It isn't
+    has loaded, by the Book Now dialog's when it opens, else when the visitor first comes to a
+    form (pointer, focus or touch). The form's submit button is disabled until then. It isn't
     cached (`no-store`: the nearest airport is the visitor's).
   - The answer → Where (each of `data`):
 

@@ -9,6 +9,9 @@
   --booking-widget-bar: var(--color-brand-primary-action);
   --booking-widget-bar-height: 86px;
   --booking-widget-submit-width: 62px;
+
+  /* Search while the locations load (Bootstrap's disabled look, as the card's Currently Unavailable) */
+  --booking-widget-submit-busy: 0.65;
   --booking-widget-bar-inset: var(--spacing-3);
   --booking-widget-divider: #e8e8e8;
   --booking-widget-value: #1a1a1a;
@@ -249,6 +252,12 @@
   height: 18px;
   background-color: currentcolor;
   mask: url('../../icons/search-light.svg') center / contain no-repeat;
+}
+
+/* until the locations are in and the visitor's nearest airport is chosen */
+.booking-widget-submit:disabled {
+  opacity: var(--booking-widget-submit-busy);
+  cursor: progress;
 }
 
 /* ---------- the open lists: Where and Time ---------- */
@@ -749,7 +758,7 @@
   display: none;
 }
 
-.booking-widget.in-modal .booking-widget-submit:hover {
+.booking-widget.in-modal .booking-widget-submit:not(:disabled):hover {
   background-color: var(--color-surface-warm);
 }
 
@@ -1114,7 +1123,7 @@
     color: var(--color-text-inverse);
   }
 
-  .booking-widget.in-modal .booking-widget-submit:hover {
+  .booking-widget.in-modal .booking-widget-submit:not(:disabled):hover {
     background-color: var(--color-brand-primary-deep);
   }
 
