@@ -17,6 +17,10 @@ const ENDPOINTS = {
   newsletter: '/api/v1/web/app_demo/Newsletter',
   // the Contact Form submit: a placeholder path until the contact API exists
   contact: '/api/v1/web/app_demo/Contact',
+  // the login modal's submit (POST, JSON: username, password); answers with a JWT
+  login: '/api/v1/web/app_demo/Login',
+  // the forgot password modal's submit (POST, JSON: lastName, email)
+  forgotPassword: '/api/v1/web/app_demo/ForgotPassword',
   propertyDetail: '/api/v1/web/app_demo/GetPropertyDetail',
   // a lounge's bookable services and their products for a start time (POST, JSON body)
   propertyServices: '/api/v1/web/app_demo/GetServices',

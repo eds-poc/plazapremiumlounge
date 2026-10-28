@@ -71,8 +71,10 @@ on desktop, a "View Profile" panel on tablet and mobile (full screen on phones).
   `[Profile](/en-uk/membership/update-profile)`, `[Change Password](…)`, `[Manage Booking](…)`,
   `[Logout](#logout)`. Page links show an arrow in the panel; `#logout` (no modal of that name)
   fires `header:action` with `name: 'logout'` for the login code.
-- **Not connected to a real login yet:** `scripts/logged-in-user.js` holds a temporary flag
-  (off) and a sample name. Add `?logged-in` to a page address to preview the logged-in header.
+- **Logged in:** when the stored login token (`localStorage` `token`, see `scripts/auth.js`) is a
+  valid, unexpired JWT, the user icon becomes the initials badge: the first letters of the
+  token's `firstName` and `lastName` (without a name, the user icon). The Account menu's
+  `#logout` logs out and goes to the home page.
   Logged out, nothing changes and the Account menu section isn't shown.
 
 ## Page options
