@@ -165,6 +165,11 @@
   --hero-booking-note-width: 800px;
   --hero-booking-width: 1400px;
 
+  /* the source's overlays over the photo, for the white text: a dark gradient on the phone card
+     (.landing-hero-backdrop::after), 30% black from 768px (.fw-home-banner::before) */
+  --hero-booking-overlay: linear-gradient(rgb(0 0 0 / 20%) 0, rgb(0 0 0 / 50%) 55%, rgb(0 0 0 / 78%) 100%);
+  --hero-booking-overlay-wide: rgb(0 0 0 / 30%);
+
   position: relative;
   display: block;
   margin: var(--spacing-6) var(--spacing-6) 0;
@@ -172,12 +177,14 @@
   color: var(--color-text-inverse);
 }
 
-/* phones: the photo, title, widget and note in a rounded card; the lounge card follows it */
+/* phones: the photo, title, widget and note in a rounded card; the lounge card follows it. The
+   photo is clipped to the card's corners, not the card itself, so the widget's lists and calendar
+   can open past it; the card (with them) stays above the lounge card */
 .hero.booking .hero-frame {
   position: relative;
+  z-index: 2;
   min-height: var(--hero-booking-phone-height);
   border-radius: var(--radius-lg);
-  overflow: hidden;
   background-color: var(--color-brand-primary);
 }
 
@@ -188,6 +195,11 @@
 
 .hero.booking .hero-products:empty {
   display: none;
+}
+
+/* while the lounge card's other features show, its tooltip opens over the hero's content */
+.hero.booking .hero-products:has(.booking-widget-card-feature-more:is(:hover, :focus-visible, [aria-expanded='true'])) {
+  z-index: 3;
 }
 
 .hero.booking .hero-products .booking-widget-products {
@@ -201,9 +213,23 @@
   z-index: 0;
 }
 
+.hero.booking .hero-media {
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.hero.booking .hero-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--hero-booking-overlay);
+  pointer-events: none;
+}
+
+/* above the lounge card, so Where's list, the time list and the calendar open over it */
 .hero.booking .hero-content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   padding: var(--spacing-7) var(--spacing-6);
   font-family: var(--font-family-primary);
 }
@@ -261,6 +287,10 @@
 
   .hero.booking .hero-media {
     overflow: hidden;
+  }
+
+  .hero.booking .hero-media::after {
+    background: var(--hero-booking-overlay-wide);
   }
 
   /* the card in the content's width, 30px under the note (its 20px padding and 10px) */

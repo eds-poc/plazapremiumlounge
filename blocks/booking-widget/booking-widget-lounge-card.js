@@ -162,6 +162,29 @@ function buildSkeleton() {
 }
 
 /**
+ * Places the other features' tooltip as the source's Popper: above "+ N MORE", else below it when
+ * there's more room there than above (under the fixed header), and moved sideways to stay in the
+ * window.
+ * @param {HTMLElement} wrap
+ * @param {HTMLElement} tip
+ */
+function placeTip(wrap, tip) {
+  wrap.classList.remove('is-below');
+  tip.style.removeProperty('--booking-widget-card-tip-shift');
+  tip.style.display = 'block';
+  const more = wrap.getBoundingClientRect();
+  const box = tip.getBoundingClientRect();
+  const gap = more.top - box.bottom;
+  const above = box.top - (document.querySelector('header .header-bar')?.offsetHeight || 0);
+  const below = window.innerHeight - (more.bottom + gap + box.height);
+  if (above < 0 && below > above) wrap.classList.add('is-below');
+  const right = document.documentElement.clientWidth - gap;
+  const shift = Math.max(gap - box.left, 0) - Math.max(box.right - right, 0);
+  if (shift) tip.style.setProperty('--booking-widget-card-tip-shift', `${shift}px`);
+  tip.style.removeProperty('display');
+}
+
+/**
  * The features: the first four as pills, then "+ N MORE" with the others in a tooltip (on
  * hover, focus or a tap), as the source's.
  * @param {HTMLElement} host
@@ -183,10 +206,14 @@ function renderFeatures(host, features, id) {
   const list = el('ul');
   list.append(...rest.map((f) => el('li', '', f)));
   tip.append(el('span', 'booking-widget-card-tip-title', translate('bookingOtherFeatures')), list);
-  more.addEventListener('click', () => more.setAttribute('aria-expanded', String(more.getAttribute('aria-expanded') !== 'true')));
+  const wrap = el('span', 'booking-widget-card-more-wrap');
+  ['pointerenter', 'focus'].forEach((type) => more.addEventListener(type, () => placeTip(wrap, tip)));
+  more.addEventListener('click', () => {
+    placeTip(wrap, tip);
+    more.setAttribute('aria-expanded', String(more.getAttribute('aria-expanded') !== 'true'));
+  });
   more.addEventListener('keydown', (e) => { if (e.key === 'Escape') more.setAttribute('aria-expanded', 'false'); });
   more.addEventListener('blur', () => more.setAttribute('aria-expanded', 'false'));
-  const wrap = el('span', 'booking-widget-card-more-wrap');
   wrap.append(more, tip);
   host.append(wrap);
 }

@@ -1247,7 +1247,11 @@ dialog.modal:has(.booking-widget) :focus-visible {
   --booking-widget-card-select-border: #d0d0d0;
   --booking-widget-card-feature: #5c5c5c;
   --booking-widget-card-price: #6e0f2d;
-  --booking-widget-card-tip-shadow: 0 6px 15px -6px rgb(0 0 0 / 35%);
+  --booking-widget-card-rule: #e5e5e5;
+  --booking-widget-card-tip-shadow: 0 6px 15px -6px rgb(0 0 0 / 20%);
+  --booking-widget-card-tip-width: 300px;
+  --booking-widget-card-tip-arrow: 6px;
+  --booking-widget-card-tip-gap: calc(var(--spacing-3) + var(--booking-widget-card-tip-arrow));
   --booking-widget-card-arrow: 14px;
   --booking-widget-card-dot: 9px;
   --booking-widget-card-dot-target: 24px;
@@ -1273,18 +1277,20 @@ dialog.modal:has(.booking-widget) :focus-visible {
   white-space: nowrap;
 }
 
+/* not clipped, so the other features' tooltip can open past it; the photos are clipped instead */
 .booking-widget-card {
   display: grid;
   border-radius: var(--radius-campaign);
-  overflow: hidden;
   background-color: var(--color-background);
   box-shadow: var(--shadow-card);
 }
 
-/* the photos: the shared slider, dots only, as the source's */
+/* the photos: the shared slider, dots only, as the source's (the card's top corners on phones) */
 .booking-widget-card-media {
   position: relative;
   min-height: 300px;
+  border-radius: var(--radius-campaign) var(--radius-campaign) 0 0;
+  overflow: hidden;
   background-color: var(--booking-widget-card-media-bg);
 }
 
@@ -1364,12 +1370,12 @@ dialog.modal:has(.booking-widget) :focus-visible {
 /* the lounge: name, location line and a rule */
 .booking-widget-card-header {
   margin: 0 0 14px;
-  border-bottom: 1px solid var(--color-divider);
+  border-bottom: 1px solid var(--booking-widget-card-rule);
   padding-bottom: var(--spacing-4);
 }
 
 .booking-widget-card-title {
-  margin: 0 0 var(--spacing-1);
+  margin: 0 0 calc(2 * var(--spacing-1));
   color: inherit;
   font-family: inherit;
   font-size: var(--font-size-lg);
@@ -1513,6 +1519,13 @@ dialog.modal:has(.booking-widget) :focus-visible {
 .booking-widget-card-feature-more {
   color: var(--color-brand-primary-action);
   cursor: pointer;
+  transition: background-color var(--duration-fast) ease-in-out, color var(--duration-fast) ease-in-out;
+}
+
+.booking-widget-card-feature-more:hover {
+  border-color: var(--color-brand-primary-action);
+  background-color: var(--color-brand-primary-action);
+  color: var(--color-text-inverse);
 }
 
 .booking-widget-card-feature-more:focus-visible {
@@ -1520,22 +1533,51 @@ dialog.modal:has(.booking-widget) :focus-visible {
   box-shadow: var(--shadow-focus);
 }
 
+/* the source's tooltip: above "+ N MORE" with its arrow, below when there's no room above
+   (placeTip), and moved sideways to stay in the window */
 .booking-widget-card-tip {
   position: absolute;
-  bottom: calc(100% + var(--spacing-3));
+  bottom: calc(100% + var(--booking-widget-card-tip-gap));
   left: 50%;
-  z-index: 2;
+  z-index: 5;
   display: none;
   box-sizing: border-box;
   width: max-content;
-  max-width: 260px;
+  max-width: min(var(--booking-widget-card-tip-width), 100vw - 2 * var(--booking-widget-card-tip-gap));
   border-radius: var(--radius-xs);
   padding: var(--spacing-7);
   background-color: var(--color-surface-warm);
   box-shadow: var(--booking-widget-card-tip-shadow);
-  color: var(--color-text);
+  color: var(--color-text-strong);
   font-size: var(--font-size-sm);
+  line-height: var(--line-height-body);
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: normal;
+  transform: translateX(calc(-50% + var(--booking-widget-card-tip-shift, 0px)));
+}
+
+/* the arrow, centred on "+ N MORE" */
+.booking-widget-card-tip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: calc(50% - var(--booking-widget-card-tip-shift, 0px));
+  border: var(--booking-widget-card-tip-arrow) solid transparent;
+  border-top-color: var(--color-surface-warm);
   transform: translateX(-50%);
+}
+
+.booking-widget-card-more-wrap.is-below .booking-widget-card-tip {
+  top: calc(100% + var(--booking-widget-card-tip-gap));
+  bottom: auto;
+}
+
+.booking-widget-card-more-wrap.is-below .booking-widget-card-tip::after {
+  top: auto;
+  bottom: 100%;
+  border-top-color: transparent;
+  border-bottom-color: var(--color-surface-warm);
 }
 
 .booking-widget-card-feature-more:is(:hover, :focus-visible, [aria-expanded='true']) + .booking-widget-card-tip {
@@ -1545,7 +1587,8 @@ dialog.modal:has(.booking-widget) :focus-visible {
 .booking-widget-card-tip-title {
   display: block;
   margin: 0 0 var(--spacing-3);
-  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-campaign-bold);
 }
 
 .booking-widget-card-tip ul {
@@ -1558,7 +1601,9 @@ dialog.modal:has(.booking-widget) :focus-visible {
   display: flex;
   gap: var(--spacing-3);
   align-items: center;
+  padding: var(--spacing-1) var(--spacing-2);
   color: var(--color-brand-primary-action);
+  font-weight: var(--font-weight-medium);
 }
 
 .booking-widget-card-tip li::before {
@@ -1619,7 +1664,7 @@ dialog.modal:has(.booking-widget) :focus-visible {
   text-decoration: none;
   text-transform: capitalize;
   cursor: pointer;
-  transition: background-color var(--duration-fast) ease-in-out, color var(--duration-fast) ease-in-out;
+  transition: background-color var(--duration-medium), color var(--duration-medium), border-color var(--duration-medium);
 }
 
 .booking-widget-card-book::after,
@@ -1647,8 +1692,16 @@ dialog.modal:has(.booking-widget) :focus-visible {
   cursor: default;
 }
 
-.booking-widget-products .booking-widget-card-actions :is(.booking-widget-card-book, a.booking-widget-card-more):hover,
+/* hover, as the source's: Book Now and the airport's lounges turn white with a maroon outline,
+   More at {airport} fills */
+.booking-widget-products .booking-widget-card-actions .booking-widget-card-book:hover,
 .booking-widget-products a.booking-widget-more-properties-link:hover {
+  border-color: var(--color-brand-primary);
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
+}
+
+.booking-widget-products .booking-widget-card-actions a.booking-widget-card-more:hover {
   background-color: var(--color-brand-primary);
   color: var(--color-text-inverse);
 }
@@ -1742,6 +1795,7 @@ dialog.modal:has(.booking-widget) :focus-visible {
 
   .booking-widget-card-media {
     min-height: 328px;
+    border-radius: var(--radius-campaign) 0 0 var(--radius-campaign);
   }
 
   .booking-widget-card-content {
