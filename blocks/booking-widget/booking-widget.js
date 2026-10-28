@@ -6,7 +6,8 @@ import {
 } from '../../scripts/booking.js';
 import { el, fetchJson, getApiLanguage } from '../../scripts/properties.js';
 
-// the locations service answers in about 0.1-4s (a 640KB list, cached by the browser for an hour)
+// the locations service answers in about 1-4s (a 130KB list, not cached: its nearest airport is
+// the visitor's)
 const LOCATIONS_TIMEOUT_MS = 15000;
 // how long to wait for the header (its menu's city links say where a location's lounges are)
 const HEADER_TIMEOUT_MS = 8000;
@@ -106,57 +107,96 @@ async function readCityPages() {
 }
 
 /**
+ * The service's text as shown: without invisible characters (a zero-width space ends one name)
+ * and with single spaces ("香港国际机场  (HKG)").
+ * @param {*} value
+ * @returns {string}
+ */
+function toText(value) {
+  return String(value ?? '').replace(/[\u200b-\u200d\ufeff]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+/**
  * The locations a visitor can search: each airport or station with a city lounge page on this
  * site (the others are left out), named as the source ("Hong Kong International Airport (HKG)"),
- * with its time zone and the longest lead time of its lounges, sorted by code as the source.
- * @param {Object} json The locations service's answer
+ * with its time zone and lead time, sorted by code as the source. Entries without a code or a
+ * name are left out, and a repeated code counts once.
+ * @param {Object[]} data The locations service's `data`
  * @param {Map<string, string>} pages Code → city page (see readCityPages)
  * @returns {{code: string, label: string, page: string, timeZone: string, lead: number,
  *   search: Object<string, string>}[]} `search`: the texts searched per tier (see TIERS)
  */
-function readLocations(json, pages) {
-  const items = Array.isArray(json?.items) ? json.items : [];
-  return items
-    .filter((item) => item?.iataCode && pages.has(item.iataCode) && item.status !== 'Inactive')
+function readLocations(data, pages) {
+  const seen = new Set();
+  return data
     .map((item) => {
-      const name = String(item.name || item.nameEN || '').trim();
-      const label = name ? `${name} (${item.iataCode})` : item.iataCode;
-      const leads = (item.properties || []).map((p) => readLeadTime(p.leadTime));
+      const code = toText(item?.iata || item?.id).toUpperCase();
+      // the name in the page's language: `displayName` without its " (HKG)"
+      let shown = toText(item?.displayName);
+      if (code && shown.endsWith(`(${code})`)) shown = shown.slice(0, -code.length - 2).trim();
+      const nameEN = toText(item?.nameEn);
+      const name = shown || nameEN;
+      if (!code || !name || seen.has(code) || item.status === 'Inactive') return null;
+      seen.add(code);
+      const lead = Number.parseFloat(item.maxLeadTime);
       return {
-        code: item.iataCode,
-        label,
+        code,
+        label: `${name} (${code})`,
         name,
-        nameEN: String(item.nameEN || '').trim(),
-        // ARPRT (airport) or RLWYSTN (railway station)
-        type: String(item.locationTypeCode || ''),
-        page: pages.get(item.iataCode),
-        timeZone: readTimeZone(item.timeZone),
-        lead: leads.length ? Math.max(...leads) : DEFAULT_LEAD_MINUTES,
+        nameEN,
+        // ARPRT (airport) or RLWYSTN (railway station), when the service gives it
+        type: toText(item.locationTypeCode),
+        page: pages.get(code),
+        timeZone: readTimeZone(item.timezone),
+        // (hours; 0: none)
+        lead: Number.isFinite(lead) ? readLeadTime(lead) : DEFAULT_LEAD_MINUTES,
         search: {
-          airport: toSearch(`${name} ${item.nameEN || ''} ${item.iataCode}`),
-          city: toSearch(`${item.cityName || ''} ${item.cityNameEN || ''}`),
-          country: toSearch(`${item.countryName || ''} ${item.countryNameEN || ''}`),
-          // (the service gives the region's code only, e.g. CH)
-          region: toSearch(`${item.regionName || ''} ${item.regionCode || ''}`),
+          airport: toSearch(`${name} ${nameEN} ${code}`),
+          city: toSearch(`${toText(item.city)} ${toText(item.cityEn)}`),
+          country: toSearch(`${toText(item.country)} ${toText(item.countryEn)}`),
+          // (a name, or for some regions their code only, e.g. CH)
+          region: toSearch(`${toText(item.region)} ${toText(item.regionCode)}`),
         },
       };
     })
+    .filter((loc) => loc?.page)
     .sort((a, b) => a.code.localeCompare(b.code));
 }
 
 /**
- * The locations in the page's language, loaded once per page (every widget on it shares them).
- * A failed load is forgotten, so Try again asks again.
- * @returns {Promise<Object[]>}
+ * The airport nearest the visitor, as the service found it from their position (`defaultOption`),
+ * or null when it couldn't (none, no code, inactive).
+ * @param {Object} json The locations service's answer
+ * @returns {{code: string, type: string}|null}
+ */
+function readNearest(json) {
+  const option = json?.defaultOption;
+  const code = toText(option?.iataCode).toUpperCase();
+  if (!code || option.status === 'Inactive') return null;
+  return { code, type: toText(option.locationTypeCode) };
+}
+
+/**
+ * The locations in the page's language and the visitor's nearest one (when it's one of them),
+ * loaded once per page (every widget on it shares them). A failed load is forgotten, so Try
+ * again asks again; an answer without locations is a failure.
+ * @returns {Promise<{locations: Object[], nearest: Object|null}>}
  */
 function loadLocations() {
   const language = getApiLanguage();
   if (!loads.has(language)) {
-    const url = apiUrl('locations');
-    url.searchParams.set('propertyTypeCode', 'LOUNGE');
+    const url = apiUrl('geoLocation');
     url.searchParams.set('languageCode', language);
     const load = Promise.all([fetchJson(url, LOCATIONS_TIMEOUT_MS), readCityPages()])
-      .then(([json, pages]) => readLocations(json, pages))
+      .then(([json, pages]) => {
+        if (!Array.isArray(json?.data) || !json.data.length) throw new Error('no locations in the answer');
+        const locations = readLocations(json.data, pages);
+        const found = readNearest(json);
+        const nearest = found && locations.find((loc) => loc.code === found.code);
+        // (the station rule of the lounge card: the nearest one's type, until `data` has them)
+        if (nearest && !nearest.type) nearest.type = found.type;
+        return { locations, nearest: nearest || null };
+      })
       .catch((error) => {
         loads.delete(language);
         throw error;
@@ -218,6 +258,8 @@ function buildWhere(id, onPick) {
   let locations = null;
   let failed = false;
   let chosen = null;
+  // whether the visitor (or a script) has typed or chosen: the nearest airport is then left out
+  let touched = false;
   let shown = [];
   let active = -1;
 
@@ -298,6 +340,7 @@ function buildWhere(id, onPick) {
   };
 
   const pick = (loc) => {
+    touched = true;
     chosen = loc;
     input.value = loc.label;
     showError(false);
@@ -305,11 +348,16 @@ function buildWhere(id, onPick) {
     onPick(loc);
   };
 
-  /** Starts loading the locations (once), redrawing an open list when they arrive. */
+  /**
+   * Starts loading the locations (once), redrawing an open list when they arrive. The visitor's
+   * nearest airport is chosen then, as the source's, unless the visitor has typed or chosen, or
+   * is in the box (the list they opened stays open).
+   */
   const load = () => {
-    loadLocations().then((list2) => {
-      locations = list2;
-      if (isOpen()) render();
+    loadLocations().then((answer) => {
+      ({ locations } = answer);
+      if (answer.nearest && !touched && document.activeElement !== input) pick(answer.nearest);
+      else if (isOpen()) render();
     }).catch((err) => {
       // eslint-disable-next-line no-console
       console.error('booking-widget: could not load the locations', err);
@@ -321,6 +369,7 @@ function buildWhere(id, onPick) {
   input.addEventListener('focus', () => { load(); open(); });
   input.addEventListener('click', () => { if (!isOpen()) open(); });
   input.addEventListener('input', () => {
+    touched = true;
     if (chosen && input.value !== chosen.label) chosen = null;
     showError(false);
     open();
@@ -370,8 +419,10 @@ function buildWhere(id, onPick) {
    * @returns {Promise<boolean>} whether it was chosen
    */
   const pickCode = async (code) => {
+    // (asked for: the nearest airport no longer applies)
+    touched = true;
     try {
-      locations = await loadLocations();
+      ({ locations } = await loadLocations());
     } catch {
       return false;
     }
@@ -599,13 +650,14 @@ function buildGuests(id) {
  * choices in the address (`?airport=HKG&date=2026-10-30&time=1600&adult=2&children=1`). One form
  * for every place it's used: in a dialog (Book Now) it's marked `in-modal`, and the styles lay it
  * out (a bar, a card on phones, or the dialog's stacked form). The block has no rows; the
- * locations come from the locations service, in the page's language.
+ * locations come from the locations service, in the page's language, with the airport nearest
+ * the visitor, which is chosen for them.
  *
  * The choices are announced (`booking-widget:change`, half a second after the last change, with
  * the location, date, time, guests and the search address), and a script can choose a location
- * (`booking-widget:set-location` with `detail.airport`, e.g. a default from the visitor's
- * position). Option `lounge-card` (the homepage hero adds it) shows the first bookable lounge of
- * the chosen airport under the form (see booking-widget-lounge-card.js).
+ * (`booking-widget:set-location` with `detail.airport`). Option `lounge-card` (the homepage hero
+ * adds it) shows the first bookable lounge of the chosen airport under the form (see
+ * booking-widget-lounge-card.js).
  * @param {Element} block
  */
 export default function decorate(block) {
@@ -668,6 +720,12 @@ export default function decorate(block) {
   // the locations load when the visitor first comes to the form (not with the page)
   const start = () => where.load();
   ['pointerover', 'focusin', 'touchstart'].forEach((type) => form.addEventListener(type, start, { once: true, passive: true }));
+  // outside a dialog (the homepage hero), once the page has loaded, so the visitor's nearest
+  // airport is chosen without them (the Book Now dialog's form chooses it when they come to it)
+  if (!inModal) {
+    if (document.readyState === 'complete') start();
+    else window.addEventListener('load', start, { once: true });
+  }
 
   /**
    * The visitor's choices and the search address (the city page with them), or null without a

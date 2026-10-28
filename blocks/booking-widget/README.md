@@ -82,20 +82,29 @@ the source's featured product. Book Now's dialog doesn't have it.
 
 ## The fields
 
-- **Where:** type an airport's name or code, or its city, country or region, as the source's:
+- **Where:** the visitor's nearest airport is already chosen (see below); type an airport's name
+  or code, or its city, country or region, as the source's:
   - The list shows the airports whose name (or English name, or code) matches; if none does,
     those whose city matches ("abuja" → Nnamdi Azikiwe International Airport), then country
-    ("nigeria" → Abuja and Lagos), then region code (e.g. CH).
+    ("nigeria" → Abuja and Lagos), then region (its name, or for some its code, e.g. CH).
   - A match starts a word: "hong" finds Hong Kong, not Zhongshan; with two or more words, each must
     match ("kong airport"). Case and accents don't matter; city and country also match in English
     on the other language sites ("beijing" on /zh-cn/).
-  - The names are the locations service's (e.g. it calls Taiwan "Taiwan, Province of China", so
-    "china" lists Taipei's airports).
+  - The names are the locations service's, as it sends them (without invisible characters or
+    double spaces).
   - The list opens on focus, sorted by code, and shows what matches as you type, or "No airports
     found matching …".
   - Click a location to choose it, or use the arrow keys and Enter. Escape closes the list.
   - Only a chosen location counts; typing again forgets it. A location typed out in full (its
     name or code, e.g. HKG) also counts.
+- **The nearest airport,** as the source's: the locations service also finds the airport nearest
+  the visitor (from where they are), and both forms (the homepage hero and Book Now) choose it
+  without the visitor, as if they had picked it: the date and time follow its time zone and lead
+  time, and the hero's lounge card shows its lounge. It isn't chosen when:
+  - the service doesn't find one, or it isn't in Where (not a location of the service, or its city
+    isn't in the menu on this language site, e.g. Washington on /zh-hk/);
+  - the visitor has already typed in or chosen Where, or is in the box;
+  - a script chose a location (`booking-widget:set-location`).
 - **Date:** the source's calendar (as the lounge page's): one month, previous and next, and no
   days before the location's today. Keyboard: the arrow keys, Home/End, Page Up/Down, and Enter
   to choose.
@@ -128,7 +137,8 @@ choices in the address:
 | Search without a chosen location | "Please select an airport" under Where (white), and the focus goes back to Where |
 | The locations are loading | "Loading…" in the open list |
 | Nothing matches | "No airports found matching "…"" |
-| The locations service fails (an error, or 15 seconds) | "We couldn't load the airports." and Try again |
+| The locations service fails (an error, 15 seconds, not JSON, no locations in the answer) | "We couldn't load the airports." and Try again; no airport is chosen |
+| The nearest airport can't be found, or isn't in Where | Where stays empty (and the hero shows no card) until the visitor chooses |
 | The lounge card is loading | A shimmering card ("Loading…" for screen readers) |
 | Nothing bookable at that time (e.g. "Property lead time is not met", DCPE060; not available, DCPE061) | No card; "View all properties in {airport}" (the reason goes to the browser console) |
 | The service fails (an HTTP error, no answer within 20 seconds, not JSON, statusCode not 200) | The same |
@@ -137,14 +147,25 @@ choices in the address:
 
 ## For developers
 
-- **Data:** `apiUrl('locations')` in `scripts/endpoints.js` is the booking system's service (its
-  own domain, with the live site's property codes), with `propertyTypeCode=LOUNGE` and the page's
-  API language.
-  - It's loaded once per page, when the visitor first comes to a form (pointer, focus or touch),
-    not with the page.
-  - The browser keeps it for an hour.
-  - Each location's lead time is the longest of its lounges' `leadTime`; its time zone is read
-    from `timeZone`.
+- **Data:** `apiUrl('geoLocation')` in `scripts/endpoints.js` (getGeoLocation, GET) is the booking
+  system's service (its own domain, with the live site's codes), with `languageCode` (the page's
+  API language).
+  - It's loaded once per page, for every form on it: by the homepage hero's form once the page
+    has loaded, else when the visitor first comes to a form (pointer, focus or touch). It isn't
+    cached (`no-store`: the nearest airport is the visitor's).
+  - The answer → Where (each of `data`):
+
+    | Where | Answer |
+    | --- | --- |
+    | Code | `iata` (else `id`); entries without a code or name are left out, a repeated code counts once |
+    | Label | `displayName` ("Name (HKG)"), else `nameEn` and the code |
+    | Search | the name, `nameEn` and code; `city`, `cityEn`; `country`, `countryEn`; `region`, `regionCode` |
+    | Time zone | `timezone` (its IANA name, e.g. Asia/Hong_Kong; without one, the visitor's) |
+    | Lead time | `maxLeadTime`, in hours (0: none; missing: 1 hour) |
+    | Station (the lounge card's rule) | `locationTypeCode` RLWYSTN, when the service sends it |
+
+  - The nearest airport: `defaultOption.iataCode` (not when `status` is Inactive), when it's in
+    Where; its `locationTypeCode` too, until `data` has the types.
 - **Shared code:** the calendar is `scripts/date-picker.js` (with the prefix `booking-widget`).
   The slots, lead time, date format and guest rules are `scripts/booking.js`. The lounge page's
   booking panel uses both too.
@@ -158,10 +179,11 @@ choices in the address:
     guests, with the same `detail` plus `location` (the chosen location).
   - `booking-widget:book`, from the lounge card's Book Now, with the choice plus `propertyCode`,
     `serviceCode`, `productCode` and `catalogueCode` (for the booking step to come).
-- **Choosing a location from a script** (e.g. a default from the visitor's position, later): send
+- **Choosing a location from a script:** send
   the block `booking-widget:set-location` with `detail.airport`:
   `block.dispatchEvent(new CustomEvent('booking-widget:set-location', { detail: { airport: 'HKG' } }))`.
-  The location is chosen as if the visitor had picked it (the lounge card follows).
+  The location is chosen as if the visitor had picked it (the lounge card follows), instead of the
+  nearest airport.
 - **Lounge card** (`booking-widget-lounge-card.js`, option `lounge-card`, added by the hero; not
   in a dialog):
   - One call: `apiUrl('bookingWidgetProducts')` (getbookingwidgetproducts, POST) with

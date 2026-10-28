@@ -10,8 +10,9 @@ const BOOKING_API_DOMAIN = 'https://1074235-ppginternal-stage.adobeioruntime.net
 
 // endpoint paths on the booking API domain
 const BOOKING_ENDPOINTS = {
-  // the airports and stations with their lounges, time zones and lead times (GET), per language
-  locations: '/api/v1/web/ppg-app/locations',
+  // the airports and stations (names, time zones, lead times) and the one nearest the visitor,
+  // from their position (GET), per language
+  geoLocation: '/api/v1/web/ppg-app/getGeoLocation',
   // an airport's featured lounge for a start and guests: its details (name, location line,
   // photos, features) and its products with prices, grouped by service (POST, JSON body)
   bookingWidgetProducts: '/api/v1/web/ppg-app/getbookingwidgetproducts',
