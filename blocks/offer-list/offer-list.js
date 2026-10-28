@@ -30,8 +30,6 @@ const ROW_LIMIT = 10000;
 const TITLE_SUFFIX = /\s*[|｜]\s*Plaza Premium Lounge\s*$/i;
 // the image the index gives a page without one (/default-meta-image.png, any size)
 const DEFAULT_IMAGE = /\/default-meta-image\.png(\?|$)/;
-// a page image of this site (media_ and its content hash), the same file on every host of it
-const MEDIA_IMAGE = /\/media_[\da-f]+\.[a-z\d]+$/i;
 // the cards per row from this width (the Cards block's large option): the first row's photos
 // load straight away, the first one first (the largest paint)
 const TWO_COLUMNS = '(width >= 768px)';
@@ -125,18 +123,15 @@ function toPagePath(value) {
 }
 
 /**
- * An image of the offers JSON as the current site's: a page image (`/…/media_<hash>.<ext>`, the
- * same file on any branch, preview or live of the site; the index gives it on the live host) as
- * a path, so it loads over this site's connection; another image as it is. The size query is
- * dropped (the Cards block adds its own). '' when it isn't valid.
+ * An image of the offers JSON as a full address, from any source (a path is on this site). The
+ * Cards block keeps its host and path and adds its own size query. '' when it isn't valid (an
+ * invalid address would stop the Cards block).
  * @param {string} value
  * @returns {string}
  */
 function toImagePath(value) {
   try {
-    const url = new URL(value, window.location.href);
-    const ours = url.origin === window.location.origin || MEDIA_IMAGE.test(url.pathname);
-    return ours ? url.pathname : url.href;
+    return new URL(value, window.location.href).href;
   } catch {
     return '';
   }
@@ -161,8 +156,8 @@ function readOffers(rows) {
       .split(',')
       .map((name) => ({ key: toKey(name), name: name.trim() }))
       .filter((tag) => tag.key);
-    // this site's images from the current site (the Cards block adds the sizes); the index's
-    // placeholder for a page without an image (which this site doesn't have) is no image
+    // the image from any source (the Cards block adds the sizes); the index's placeholder for a
+    // page without an image (which this site doesn't have) is no image
     const raw = String(row.image ?? '').trim();
     const image = DEFAULT_IMAGE.test(raw) ? '' : raw;
     return {
