@@ -72,6 +72,21 @@ export function hideLoader() {
   loader?.remove();
 }
 
+// blocks loading their data (holdLoader): the page's first load doesn't take the loader away
+// while one of them still holds it
+let holds = 0;
+
+/**
+ * Holds the full-page loader while a block loads its data, and lets it go once the last holder is
+ * done, wherever the block is on the page (even in the first section, loaded with the page).
+ * @param {boolean} busy true to hold the loader, false to let it go
+ */
+export function holdLoader(busy) {
+  holds = Math.max(0, holds + (busy ? 1 : -1));
+  if (holds) showLoader();
+  else hideLoader();
+}
+
 /**
  * Shows the loader as soon as a link click leaves the page, and hides it again when the
  * browser restores the page from its back/forward cache.
@@ -311,7 +326,8 @@ function loadDelayed() {
 async function loadPage() {
   showLoader();
   await loadEager(document);
-  hideLoader();
+  // unless a block is still loading its data (holdLoader)
+  if (!holds) hideLoader();
   await loadLazy(document);
   installNavigationLoader();
   loadDelayed();
