@@ -185,13 +185,16 @@ main > .section:has(> .view-booking-wrapper) {
   text-transform: uppercase;
 }
 
+/* the read-only fields: the warm grey at half opacity (the text itself stays as it is), also when
+   focused */
 .view-booking .form-fields .form-input[readonly] {
+  background-color: color-mix(in srgb, var(--color-surface-warm) 50%, transparent);
   color: var(--color-text-subtle);
   cursor: default;
 }
 
 .view-booking .form-fields .form-input[readonly]:focus {
-  background-color: var(--color-surface-warm);
+  background-color: color-mix(in srgb, var(--color-surface-warm) 50%, transparent);
 }
 
 /* the totals: a black line above, the rows on the right, 30px above and below them (to the terms'
@@ -273,8 +276,18 @@ main > .section:has(> .view-booking-wrapper) {
   margin: 0 0 var(--spacing-5);
 }
 
+/* lists as the source: 45px in, each item 20px from the next (a nested list's last item and its
+   own item: 40px to the next item) */
+.view-booking .view-booking-term-body :is(ul, ol) {
+  padding-left: 45px;
+}
+
 .view-booking .view-booking-term-body li {
-  padding-bottom: var(--spacing-3);
+  padding-bottom: var(--spacing-7);
+}
+
+.view-booking .view-booking-term-body li > :is(p, ul, ol) {
+  margin-bottom: 0;
 }
 
 .view-booking .view-booking-term-body hr {
