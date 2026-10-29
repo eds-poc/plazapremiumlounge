@@ -1,7 +1,7 @@
 import apiUrl from '../../scripts/endpoints.js';
 import { authHeaders, getToken, logout } from '../../scripts/auth.js';
 import { getLanguage, translate } from '../../scripts/i18n.js';
-import { holdLoader } from '../../scripts/scripts.js';
+import { hideLoader, showLoader } from '../../scripts/scripts.js';
 
 // an order id as in the address (?bookingid=HKBC-11339-64SCYL)
 const ORDER_ID = /^[A-Za-z0-9-]{1,40}$/;
@@ -376,9 +376,20 @@ export default function decorate(block) {
     body.hidden = false;
   };
 
+  // the site's full-page loader until the booking is in (the text for screen readers). The block is
+  // first on its page, so the page's first load takes the loader away once the block is built:
+  // while the booking loads, it's put straight back (before the next paint, so it doesn't flicker)
+  const keepLoader = new MutationObserver(() => {
+    if (!document.getElementById('spinner-overlay')) showLoader();
+  });
+  const loaded = () => {
+    keepLoader.disconnect();
+    hideLoader();
+  };
+
   const load = () => {
-    // the site's full-page loader until the booking is in (the text for screen readers)
-    holdLoader(true);
+    showLoader();
+    keepLoader.observe(document.body, { childList: true });
     showMessage(text('loading') || translate('bookingLoading'));
     block.setAttribute('aria-busy', 'true');
     fetch(apiUrl('getOrderDetail'), {
@@ -403,10 +414,10 @@ export default function decorate(block) {
         fill(order);
         message.hidden = true;
         block.removeAttribute('aria-busy');
-        holdLoader(false);
+        loaded();
       })
       .catch((error) => {
-        holdLoader(false);
+        loaded();
         block.removeAttribute('aria-busy');
         if (error.notFound) showMessage(text('notFound') || translate('bookingNotFound'));
         else showMessage(text('error') || translate('bookingLoadError'), load);

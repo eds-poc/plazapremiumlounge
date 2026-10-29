@@ -2,7 +2,7 @@ import { buildForm, fieldElement, getCountries } from '../../scripts/forms.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { authHeaders, logout } from '../../scripts/auth.js';
 import { getLanguage, translate } from '../../scripts/i18n.js';
-import { holdLoader } from '../../scripts/scripts.js';
+import { hideLoader, showLoader } from '../../scripts/scripts.js';
 
 /*
  * The profile form's fields, each keyed by its GetProfile name. The authoring gives each field's
@@ -225,7 +225,7 @@ export default function decorate(block) {
 
   const load = () => {
     // the site's full-page loader until the profile is in (the text for screen readers)
-    holdLoader(true);
+    showLoader();
     message.replaceChildren(translate('profileLoading'));
     message.hidden = false;
     form.setAttribute('aria-busy', 'true');
@@ -247,10 +247,10 @@ export default function decorate(block) {
         message.hidden = true;
         form.removeAttribute('aria-busy');
         // once the countries are in too (fill chooses them first), loaded or not
-        getCountries().catch(() => {}).then(() => holdLoader(false));
+        getCountries().catch(() => {}).then(hideLoader);
       })
       .catch(() => {
-        holdLoader(false);
+        hideLoader();
         const retry = document.createElement('button');
         retry.type = 'button';
         retry.className = 'profile-retry';

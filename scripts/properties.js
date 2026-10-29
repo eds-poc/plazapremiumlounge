@@ -7,7 +7,7 @@ import { getMetadata } from './aem.js';
 import { applyButtonAction } from './button-actions.js';
 import apiUrl from './endpoints.js';
 import { DEFAULT_SITE, getSiteFolder, translate } from './i18n.js';
-import { holdLoader } from './scripts.js';
+import { hideLoader, showLoader } from './scripts.js';
 
 // property types shown, as the source pages: lounges, and passes (gift cards)
 export const LOUNGE = 'LOUNGE';
@@ -17,6 +17,8 @@ const SWIPE_PX = 40;
 const API_LANGUAGES = { 'en-uk': 'en' };
 // "Plaza Premium First" as the API names it in each language (compared without spaces)
 const FIRST_BRANDS = ['plazapremiumfirst', '环亚优逸庭', '環亞優逸庭', 'プラザプレミアムファースト'];
+
+let loading = 0;
 
 /**
  * Creates an element with an optional class name and text.
@@ -43,12 +45,13 @@ export function isPreview() {
 
 /**
  * Shows the site's full-page loader (the same as on page load) while any property block on the
- * page is loading, and hides it once the last one is done (the site's holdLoader, shared with the
- * other blocks that load data).
+ * page is loading, and hides it once the last one is done.
  * @param {boolean} busy
  */
 export function setLoading(busy) {
-  holdLoader(busy);
+  loading = Math.max(0, loading + (busy ? 1 : -1));
+  if (loading) showLoader();
+  else hideLoader();
 }
 
 /**
