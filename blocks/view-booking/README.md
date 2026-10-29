@@ -5,8 +5,9 @@ the order number, one box per booked item (location, date and time, guests, serv
 purchaser, the totals and the terms. Authors write the texts; the booking comes from the
 **GetOrderDetail** API for the address's `bookingid`, with the member's login token.
 
-The page needs a login: a visitor without a valid token on `/<lang>/view-booking` is sent to the
-home page (as the members' pages). If GetOrderDetail refuses the token (401), the visitor is logged
+The page needs a login: a page with `members-only` true (the metadata sheet's column, e.g. a row
+`/**/view-booking`, or the page's own Metadata) sends a visitor without a valid token to the home
+page. If GetOrderDetail refuses the token (401), the visitor is logged
 out and sent home. A missing or unknown booking shows the `notFound` text; any other failure shows
 the `error` text with Try again. The site's loader shows until the booking is in.
 
@@ -73,7 +74,7 @@ the `error` text with Try again. The site's loader shows until the booking is in
 ## Look
 
 As the live site: the booking pages' maroon band at the top, right under the header (drawn by the
-block, from 768px; the same styles as the Booking Steps block, `styles/booking-steps.css`); the item's five parts in a row with thin lines between them from 992px (each
+block, from 768px; its styles are shared in `styles/booking-steps.css` for other booking blocks); the item's five parts in a row with thin lines between them from 992px (each
 label beside its value), stacked below (each label grey above its maroon value); the purchaser's
 fields two to a row from 992px; the totals on the right, the subtotal and discounts only from 992px
 (as the source); the terms in grey under a black line.

@@ -1,7 +1,7 @@
 /* the shared form styles (the purchaser's read-only fields), loaded with the block's own */
 @import url('../../styles/forms.css');
 
-/* the booking pages' maroon band at the top (shared with the Booking Steps block) */
+/* the booking pages' maroon band at the top (shared styles, for the booking blocks that show it) */
 @import url('../../styles/booking-steps.css');
 
 /* view booking: the source Review your Booking page. The title after a back arrow, the order
