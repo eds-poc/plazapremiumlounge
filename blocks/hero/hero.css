@@ -148,3 +148,226 @@
 .hero.video-playback :focus-visible {
   outline-color: var(--color-text-inverse);
 }
+
+.section.hero-container:has(.hero.booking) {
+  padding-top: 0;
+}
+
+/* option booking: the source homepage's hero (`.homeBanner-wrapper`). From 1200px the photo fills
+   the top of the page at 2:1 under the transparent header, the title centred over it, then the
+   Booking Widget's bar and the note; from 768px the photo starts under the header (595px tall);
+   on phones a rounded card with the title, the widget's card and the note */
+.hero.booking {
+  --hero-booking-note: rgb(255 255 255 / 90%);
+  --hero-booking-tablet-height: 595px;
+  --hero-booking-phone-height: 420px;
+  --hero-booking-top: 130px;
+  --hero-booking-note-width: 800px;
+  --hero-booking-width: 1400px;
+
+  /* the source's overlays over the photo, for the white text: a dark gradient on the phone card
+     (.landing-hero-backdrop::after), 30% black from 768px (.fw-home-banner::before) */
+  --hero-booking-overlay: linear-gradient(rgb(0 0 0 / 20%) 0, rgb(0 0 0 / 50%) 55%, rgb(0 0 0 / 78%) 100%);
+  --hero-booking-overlay-wide: rgb(0 0 0 / 30%);
+
+  /* the widget's height (measured: the phone card, then the bar from 768px and from 992px): its
+     place is kept while it loads, since the hero shows without waiting for it */
+  --hero-booking-widget-height: 302px;
+
+  position: relative;
+  display: block;
+  margin: var(--spacing-6) var(--spacing-6) 0;
+  padding: 0;
+  color: var(--color-text-inverse);
+}
+
+/* phones: the photo, title, widget and note in a rounded card; the lounge card follows it. The
+   photo is clipped to the card's corners, not the card itself, so the widget's lists and calendar
+   can open past it; the card (with them) stays above the lounge card */
+.hero.booking .hero-frame {
+  position: relative;
+  z-index: 2;
+  min-height: var(--hero-booking-phone-height);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-brand-primary);
+}
+
+.hero.booking .hero-products {
+  position: relative;
+  z-index: 1;
+}
+
+.hero.booking .hero-products:empty {
+  display: none;
+}
+
+/* while the lounge card's other features show, its tooltip opens over the hero's content */
+.hero.booking .hero-products:has(.booking-widget-card-feature-more:is(:hover, :focus-visible, [aria-expanded='true'])) {
+  z-index: 3;
+}
+
+.hero.booking .hero-products .booking-widget-products {
+  margin-top: var(--spacing-4);
+}
+
+/* while the widget loads: its place kept, nothing shown (no unstyled form, no jump) */
+.hero.booking .booking-widget-wrapper:has(> .booking-widget:not([data-block-status='loaded'])) {
+  min-height: var(--hero-booking-widget-height);
+}
+
+.hero.booking .booking-widget-wrapper > .booking-widget:not([data-block-status='loaded']) {
+  visibility: hidden;
+}
+
+.hero.booking .hero-media,
+.hero.booking .hero-media picture {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero.booking .hero-media {
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.hero.booking .hero-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--hero-booking-overlay);
+  pointer-events: none;
+}
+
+/* above the lounge card, so Where's list, the time list and the calendar open over it */
+.hero.booking .hero-content {
+  position: relative;
+  z-index: 2;
+  padding: var(--spacing-7) var(--spacing-6);
+  font-family: var(--font-family-primary);
+}
+
+.hero.booking .hero-title {
+  max-width: none;
+  margin: 0 0 var(--spacing-7);
+  color: inherit;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.hero.booking .hero-note {
+  margin-top: var(--spacing-7);
+  color: var(--hero-booking-note);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-light);
+  line-height: 1.55;
+}
+
+.hero.booking .hero-note p {
+  margin: 0;
+}
+
+.hero.booking .hero-note a {
+  color: var(--color-text-inverse);
+  font-weight: var(--font-weight-medium);
+  text-decoration: underline;
+}
+
+.hero.booking .hero-note a:hover {
+  color: var(--color-text-subtle);
+}
+
+.hero.booking :focus-visible {
+  outline-color: var(--color-text-inverse);
+}
+
+@media (width >= 768px) {
+  /* the photo behind the whole hero, the lounge card too (as the source's) */
+  .hero.booking {
+    --hero-booking-widget-height: 82.8px;
+
+    min-height: var(--hero-booking-tablet-height);
+    margin: 0;
+    background-color: var(--color-brand-primary);
+  }
+
+  .hero.booking .hero-frame {
+    position: static;
+    min-height: 0;
+    border-radius: 0;
+    overflow: visible;
+    background: none;
+  }
+
+  .hero.booking .hero-media {
+    overflow: hidden;
+  }
+
+  .hero.booking .hero-media::after {
+    background: var(--hero-booking-overlay-wide);
+  }
+
+  /* the card in the content's width, 30px under the note (its 20px padding and 10px) */
+  .hero.booking .hero-products {
+    box-sizing: border-box;
+    width: min(var(--hero-booking-width), 100% - 2 * var(--spacing-5));
+    margin: 0 auto;
+    padding: 0 var(--spacing-5) var(--spacing-9);
+  }
+
+  /* the source's 1400px wrapper, 12px from the page's sides, and its 12px padding */
+  .hero.booking .hero-content {
+    box-sizing: border-box;
+    width: min(var(--hero-booking-width), 100% - 2 * var(--spacing-5));
+    margin: 0 auto;
+    padding: var(--hero-booking-top) var(--spacing-5) var(--spacing-7);
+  }
+
+  /* the source's gaps: 60px from the title to the bar, 40px to the note (40 and 20 from 1200px) */
+  .hero.booking .hero-title {
+    margin-bottom: calc(2 * var(--spacing-9));
+    font-size: var(--font-size-4xl);
+    line-height: var(--line-height-tight);
+  }
+
+  .hero.booking .hero-note {
+    margin-top: 40px;
+    font-size: var(--font-size-sm);
+  }
+}
+
+@media (width >= 992px) {
+  .hero.booking {
+    --hero-booking-widget-height: 86px;
+  }
+
+  .hero.booking .hero-title,
+  .hero.booking .hero-note {
+    text-align: center;
+  }
+
+  .hero.booking .hero-note {
+    max-width: var(--hero-booking-note-width);
+    margin-inline: auto;
+  }
+}
+
+@media (width >= 1200px) {
+  /* (at least 2:1, and taller with the lounge card under the note, as the source's) */
+  .hero.booking {
+    min-height: 50vw;
+  }
+
+  .hero.booking .hero-content {
+    padding-top: calc(var(--nav-height-desktop) + 37px);
+  }
+
+  .hero.booking .hero-title {
+    margin-bottom: 40px;
+  }
+
+  .hero.booking .hero-note {
+    margin-top: var(--spacing-7);
+  }
+}

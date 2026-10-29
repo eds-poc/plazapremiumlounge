@@ -1,0 +1,12 @@
+{
+  "env": { "node": true, "browser": true },
+  "rules": {
+    "no-console": "off",
+    "no-await-in-loop": "off",
+    "no-restricted-syntax": "off",
+    "no-continue": "off",
+    "import/extensions": "off",
+    "import/no-unresolved": "off",
+    "max-len": "off"
+  }
+}

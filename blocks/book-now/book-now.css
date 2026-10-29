@@ -1,0 +1,10 @@
+/* book now: one button in the site's button styles (styles.css), opening the Book Now dialog */
+.book-now.center {
+  text-align: center;
+}
+
+/* (preview site only) why the button isn't shown, or a value that's ignored */
+.book-now-hint {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
