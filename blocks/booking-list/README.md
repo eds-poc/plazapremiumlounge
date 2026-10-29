@@ -5,7 +5,8 @@ The logged-in member's bookings, as the source "My Bookings" page
 - **Tabs:** Upcoming, Past Bookings and Cancelled (the labels as authored). Upcoming shows first.
   Each tab's bookings load the first time it's opened; opening it again shows them straight away.
 - **A card per booking:** the lounge's photos (a slider), the order number, the lounge and where
-  it is, the date, time, guests and services, the price, and the booking's actions.
+  it is, the date, time, guests, services and additional services, the price, and the booking's
+  actions; a line below each card.
 - **Pages:** 10 bookings at a time, with « 1 2 3 » buttons below the cards when there are more.
 - **Not logged in:** a members' page (`/en-uk/membership/…`) sends the visitor to the home page
   (`/en-uk/`). On any other page the block shows "Log in to see your bookings." and a **Log In**
@@ -58,7 +59,8 @@ carry the lounge.
 | Its place and the airport | `orderItems[].shortLocation`, `orderItems[].locationName` (else the booking's `locationName`) |
 | Date: `30-Nov-2026`, Time: `1600 hrs` | `serviceDate` (`30 Nov 2026 16:00:00`), shown as given (the lounge's local time) |
 | Guests: `2 Adults`, `2 Adults, 1 Child` | `guests.adult`, `guests.child` |
-| Services: `Lounge Use 3 hrs + Sakura Shrimp Spice (50g)` | each `orderItems[]`'s `productDisplayName` (and `quantity` when more than 1), joined with + |
+| Services: `Lounge Use - 3 Hours` | the first order item's `productDisplayName` (else `productName`) |
+| Additional Services: `1 x Sakura Shrimp Spice (50g)`, one per line below the label | the other order items: `quantity` x `productDisplayName`; no row without any |
 | `HKD 1,763.64` (Includes applicable taxes and fees) | `currencyCode`, `totalPrice` |
 | The tab | `bookingSchedule`: `Upcoming booking`, `Past booking`, `Cancelled` |
 

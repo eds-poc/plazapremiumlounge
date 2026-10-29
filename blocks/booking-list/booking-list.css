@@ -1,13 +1,11 @@
 /* booking list: the source "My Bookings" page (`.txtContent`, `.top-nav`, `.loungeCard`): maroon
    tabs (the chosen one underlined), then a card per booking, the lounge's photos at the left
    (7 of 12 columns from 768px, as the source's col-md-7) and the details at the right: the order
-   number, the lounge and where it is, date / time / guests / services (grey labels, maroon
-   values), the price and the actions. Sizes measured on the source screenshot; the photo slider's
-   values are the city lounge cards' (blocks/property-list) */
+   number, the lounge and where it is, date / time / guests / services / additional services (grey
+   labels, maroon values), the price and the actions, a line below each card. Sizes and spacing are
+   the source page's computed styles, in the site's tokens; the photo slider's values are the city
+   lounge cards' (blocks/property-list) */
 .booking-list {
-  /* one-off: the source tabs, 40px apart; 48px between cards */
-  --booking-list-tab-gap: 40px;
-  --booking-list-card-gap: var(--spacing-bootstrap-5);
   --booking-list-gallery-ratio: 13 / 9;
   --booking-list-chevron: 32px;
   --booking-list-dot: 8px;
@@ -27,22 +25,24 @@
   display: none;
 }
 
-/* ---------- tabs ---------- */
+/* ---------- tabs ----------
+   as the source's `.top-nav li`: each tab padded at both sides (the first indented), 14px with
+   10px sides on phones, 18px with 20px from 576px */
 .booking-list .booking-list-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-3) var(--spacing-8);
-  margin: 0 0 var(--spacing-9);
+  row-gap: var(--spacing-3);
+  margin: 0 0 var(--spacing-10);
 }
 
 .booking-list .booking-list-tab {
   margin: 0;
-  padding: 0;
+  padding: 0 var(--spacing-4);
   border: 0;
   background: none;
   color: var(--color-brand-primary);
   font: inherit;
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-body);
   cursor: pointer;
@@ -50,7 +50,6 @@
 
 .booking-list .booking-list-tab[aria-selected='true'] {
   text-decoration: underline;
-  text-underline-offset: 3px;
 }
 
 .booking-list .booking-list-tab:hover {
@@ -68,14 +67,21 @@
   list-style: none;
 }
 
+/* as the source's `.loungeCard`: 12px above and below the content, then a line and 30px to the
+   next card */
 .booking-list .booking-list-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--spacing-7);
+  row-gap: var(--spacing-7);
+  margin: 0 0 var(--spacing-9);
+  padding-block: var(--spacing-5);
+  border-bottom: var(--base-border-width) solid var(--color-border);
 }
 
-.booking-list .booking-list-card + .booking-list-card:not([hidden]) {
-  margin-top: var(--booking-list-card-gap);
+/* the photos and the details keep the source's 12px column padding */
+.booking-list .booking-list-media,
+.booking-list .booking-list-details {
+  padding-inline: var(--spacing-5);
 }
 
 .booking-list .booking-list-details {
@@ -85,10 +91,10 @@
 }
 
 .booking-list .booking-list-order {
-  margin: 0 0 var(--spacing-6);
+  margin: 0 0 var(--spacing-2);
   font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-heading);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
   overflow-wrap: anywhere;
 }
 
@@ -100,8 +106,7 @@
 .booking-list .booking-list-lounge {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-1);
-  margin: 0 0 var(--spacing-9);
+  margin: var(--spacing-4) 0 0;
 }
 
 .booking-list .booking-list-lounge-name {
@@ -112,15 +117,16 @@
 
 .booking-list .booking-list-lounge-line {
   color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-light);
   line-height: var(--line-height-body);
 }
 
 .booking-list .booking-list-info {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-3);
-  margin: 0 0 var(--spacing-10);
+  gap: var(--spacing-2);
+  margin: var(--spacing-8) 0 var(--spacing-10);
 }
 
 .booking-list .booking-list-info-item {
@@ -133,13 +139,26 @@
 
 .booking-list .booking-list-info dt {
   color: var(--color-text-secondary);
-  font-weight: var(--font-weight-regular);
+  font-weight: var(--font-weight-light);
 }
 
 .booking-list .booking-list-info dd {
   margin: 0;
-  color: var(--color-brand-primary);
+  color: var(--color-brand-primary-action);
   font-weight: var(--font-weight-medium);
+}
+
+/* additional services: below their label, one per line */
+.booking-list .booking-list-info-item-list {
+  row-gap: var(--spacing-2);
+}
+
+.booking-list .booking-list-info-item-list dd {
+  flex-basis: 100%;
+}
+
+.booking-list .booking-list-info-line {
+  display: block;
 }
 
 .booking-list .booking-list-price {
@@ -150,35 +169,41 @@
 
 .booking-list .booking-list-price b {
   color: var(--color-text);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
 }
 
 .booking-list .booking-list-price span {
   color: var(--color-text-secondary);
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-light);
 }
 
-/* the actions: maroon underlined links, one per line, as the source */
+/* the actions: maroon underlined links, one per line, as the source (12px with 10px below each
+   on phones, 14px from 768px) */
 .booking-list .booking-list-actions {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--spacing-1);
-  margin: 0;
+  margin: 0 0 var(--spacing-6);
   padding: 0;
   list-style: none;
 }
 
+/* each action its own line, as tall as its text (no line box around it) */
+.booking-list .booking-list-actions > li {
+  display: flex;
+}
+
 .booking-list .booking-list-action {
   margin: 0;
-  padding: 0;
+  padding: 0 0 var(--spacing-4);
   border: 0;
   background: none;
   color: var(--color-brand-primary);
   font: inherit;
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-light);
   line-height: var(--line-height-body);
   text-align: start;
   text-decoration: underline;
@@ -322,21 +347,27 @@
   opacity: 1;
 }
 
-@media (width >= 768px) {
-  .booking-list .booking-list-tabs {
-    gap: var(--spacing-3) var(--booking-list-tab-gap);
-    margin-bottom: var(--spacing-11);
-  }
-
+@media (width >= 576px) {
   .booking-list .booking-list-tab {
-    font-size: var(--font-size-xl);
+    padding-inline: var(--spacing-7);
+    font-size: var(--font-size-lg);
   }
+}
 
-  /* the source's col-md-7 / col-md-5 */
+@media (width >= 768px) {
+  /* the source's col-md-7 / col-md-5, their padding the gutter between them */
   .booking-list .booking-list-card {
     grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    gap: var(--grid-gutter);
     align-items: start;
+  }
+
+  .booking-list .booking-list-actions {
+    margin-bottom: var(--spacing-7);
+  }
+
+  .booking-list .booking-list-action {
+    padding-bottom: 0;
+    font-size: var(--font-size-sm);
   }
 }
 

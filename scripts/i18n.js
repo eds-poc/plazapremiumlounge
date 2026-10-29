@@ -138,6 +138,9 @@ const TEXTS = {
   bookingServices: {
     en: 'Services:', zh: '服务：', 'zh-HK': '服務：', ja: 'サービス：', pt: 'Serviços:',
   },
+  bookingAdditionalServices: {
+    en: 'Additional Services:', zh: '附加服务：', 'zh-HK': '附加服務：', ja: '追加サービス：', pt: 'Serviços adicionais:',
+  },
   bookingAdult: {
     en: '1 Adult', zh: '1 位成人', 'zh-HK': '1 位成人', ja: '大人 1 名', pt: '1 adulto',
   },

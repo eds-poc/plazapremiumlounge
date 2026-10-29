@@ -158,8 +158,8 @@ function formatPrice(currency, total) {
 /**
  * A tab's bookings, from the API's list for it: those with an order number, in the tab's order
  * (upcoming soonest first, the others latest first; the API's order for the same time). The
- * lounge (its name, place and photos) is the order items' (the first with one); each item is a
- * service.
+ * lounge (its name, place and photos) is the order items' (the first with one). The first item
+ * is the booking's service, the others its additional services ("1 x Sakura Shrimp Spice").
  * @param {Object[]} items
  * @param {string} tab
  * @returns {Object[]}
@@ -172,13 +172,8 @@ function readBookings(items, tab) {
     const orderItems = (Array.isArray(row.orderItems) ? row.orderItems : []).filter(Boolean);
     const lounge = orderItems.find((item) => item.propertyDisplayName || item.propertyName) || {};
     const photos = orderItems.find((item) => Array.isArray(item.images) && item.images.length);
-    const services = orderItems
-      .map((item) => {
-        const label = clean(item.productDisplayName || item.productName);
-        const quantity = Number(item.quantity) || 1;
-        return label && (quantity > 1 ? `${label} × ${quantity}` : label);
-      })
-      .filter(Boolean);
+    const serviceName = (item) => clean(item?.productDisplayName || item?.productName);
+    const [service, ...extras] = orderItems;
     return {
       index,
       orderId,
@@ -190,7 +185,11 @@ function readBookings(items, tab) {
         .filter(Boolean).join(', '),
       date: readServiceDate(row.serviceDate),
       guests: formatGuests(row.guests),
-      services: services.join(' + '),
+      service: serviceName(service),
+      // as the source: the quantity, then the name
+      additionalServices: extras
+        .map((item) => serviceName(item) && `${Number(item.quantity) || 1} x ${serviceName(item)}`)
+        .filter(Boolean),
       price: formatPrice(row.currencyCode, row.totalPrice ?? row.orderTotalPrice?.totalPrice),
       // in the API's order (the photos have no sequence here), as buildSlider takes them
       images: (photos?.images || [])
@@ -365,10 +364,17 @@ function buildCard(booking, { viewPage, eager, prefix }) {
   if (booking.line) lounge.append(el('span', 'booking-list-lounge-line', booking.line));
 
   const info = el('dl', 'booking-list-info');
-  const add = (label, valueText) => {
-    if (!valueText) return;
+  // a label and its value; a list of values goes below the label, one per line
+  const add = (label, value) => {
+    const lines = [value].flat().filter(Boolean);
+    if (!lines.length) return;
     const item = el('div', 'booking-list-info-item');
-    item.append(el('dt', '', translate(label)), el('dd', '', valueText));
+    const dd = el('dd', '', Array.isArray(value) ? '' : value);
+    if (Array.isArray(value)) {
+      item.classList.add('booking-list-info-item-list');
+      dd.append(...lines.map((line) => el('span', 'booking-list-info-line', line)));
+    }
+    item.append(el('dt', '', translate(label)), dd);
     info.append(item);
   };
   if (booking.date) {
@@ -377,7 +383,8 @@ function buildCard(booking, { viewPage, eager, prefix }) {
     add('bookingTime', `${hhmm} ${translate('propertyHours')}`);
   }
   add('bookingGuests', booking.guests);
-  add('bookingServices', booking.services);
+  add('bookingServices', booking.service);
+  add('bookingAdditionalServices', booking.additionalServices);
 
   const price = el('p', 'booking-list-price');
   price.append(el('b', '', booking.price), el('span', '', translate('bookingTaxes')));
