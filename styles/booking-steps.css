@@ -1,10 +1,12 @@
 /* the booking steps band (the source .lounge-booking-steps), shared by the Booking Steps block and
    the blocks that show it themselves (View Booking): maroon across the page's whole width (painted
    past its container, so the page doesn't scroll sideways), the steps centred in white (faded but
-   the current one), an arrow between them; 15px above and below (30px tall without steps). From
-   768px only, as the source */
+   the current one), an arrow between them; 15px above and below at least 22px of steps (52px tall,
+   with or without steps). From 768px only, as the source */
 .booking-steps {
   display: none;
+  box-sizing: content-box;
+  min-height: 22px;
   padding: var(--spacing-6) 0;
   background-color: var(--color-brand-primary);
   box-shadow: 0 0 0 100vmax var(--color-brand-primary);
