@@ -11,8 +11,9 @@ import { DEFAULT_SITE, getSiteFolder } from './i18n.js';
 const TOKEN_KEY = 'token';
 // a JWT part: base64url characters only (letters, digits, - and _; no +, / or = padding)
 const PART = /^[A-Za-z0-9_-]+$/;
-// the members' pages (a language folder, then membership): only for a logged-in visitor
-const MEMBERS_PAGE = /^\/[a-z]{2}-[a-z]{2}\/membership\//;
+// the members' pages (a language folder, then membership, or the view booking page): only for a
+// logged-in visitor
+const MEMBERS_PAGE = /^\/[a-z]{2}-[a-z]{2}\/(?:membership\/|view-booking(?:\.html)?\/?$)/;
 
 /**
  * One base64url part of a JWT, as JSON.
