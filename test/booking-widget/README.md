@@ -21,6 +21,7 @@ served: `.hlxignore` lists `test/*`.
 | `locations.test.mjs` | getGeoLocation: the Where list and the nearest airport, real and routed answers, failures, flows (25) |
 | `search-button.test.mjs` | Search disabled until the locations and the nearest airport are in (22) |
 | `axe.test.mjs` | axe on the card, unavailable and Filling Up states |
+| `book-now.test.mjs` | The Book Now block: options and label, the same dialog as the header's, focus and Escape, airport preselect, search, no dialog, first section, 5 languages (21) |
 | `perf.mjs` | LCP, CLS (with shift sources), TBT, typing delay, API calls and bytes, when Search turns on and the card shows; mobile (4x CPU, slow 4G) and desktop; `node perf.mjs <label> [runs]` |
 | `snapshot.mjs` | Computed styles and boxes of the hero, card and dialog at five widths with fixed answers, to prove a CSS change is visually identical; `node snapshot.mjs <label>` |
 
