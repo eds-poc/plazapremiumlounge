@@ -170,6 +170,10 @@
   --hero-booking-overlay: linear-gradient(rgb(0 0 0 / 20%) 0, rgb(0 0 0 / 50%) 55%, rgb(0 0 0 / 78%) 100%);
   --hero-booking-overlay-wide: rgb(0 0 0 / 30%);
 
+  /* the widget's height (measured: the phone card, then the bar from 768px and from 992px): its
+     place is kept while it loads, since the hero shows without waiting for it */
+  --hero-booking-widget-height: 302px;
+
   position: relative;
   display: block;
   margin: var(--spacing-6) var(--spacing-6) 0;
@@ -204,6 +208,15 @@
 
 .hero.booking .hero-products .booking-widget-products {
   margin-top: var(--spacing-4);
+}
+
+/* while the widget loads: its place kept, nothing shown (no unstyled form, no jump) */
+.hero.booking .booking-widget-wrapper:has(> .booking-widget:not([data-block-status='loaded'])) {
+  min-height: var(--hero-booking-widget-height);
+}
+
+.hero.booking .booking-widget-wrapper > .booking-widget:not([data-block-status='loaded']) {
+  visibility: hidden;
 }
 
 .hero.booking .hero-media,
@@ -272,6 +285,8 @@
 @media (width >= 768px) {
   /* the photo behind the whole hero, the lounge card too (as the source's) */
   .hero.booking {
+    --hero-booking-widget-height: 82.8px;
+
     min-height: var(--hero-booking-tablet-height);
     margin: 0;
     background-color: var(--color-brand-primary);
@@ -323,6 +338,10 @@
 }
 
 @media (width >= 992px) {
+  .hero.booking {
+    --hero-booking-widget-height: 86px;
+  }
+
   .hero.booking .hero-title,
   .hero.booking .hero-note {
     text-align: center;

@@ -196,7 +196,10 @@ choices in the address:
   - A newer choice cancels the request before it; answers are kept for the page, so the same
     choices again show at once.
   - The hero hints the widget's scripts (`modulepreload`) and a connection to the booking service
-    (`preconnect`), so its first view doesn't wait for one import after another.
+    (`preconnect`). It doesn't wait for the widget: its photo (the page's largest paint) starts
+    loading at once, and the widget's place is kept, invisible, while it loads
+    (`--hero-booking-widget-height` in hero.css: the phone card, then the bar), so nothing moves
+    when it shows.
   - One call: `apiUrl('bookingWidgetProducts')` (getbookingwidgetproducts, POST) with
     `{ selectedAirport, selectedDate (YYYY-MM-DD), selectedTime (HHmm), adult, children,
     promocode: '', propertyCode, languageCode }`. `propertyCode` is the lounge shown when only the

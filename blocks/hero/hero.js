@@ -5,8 +5,8 @@ import { labelBareVideoLink, toVideoDialogButton } from '../../scripts/video.js'
 
 const HEADINGS = 'h1, h2, h3, h4, h5, h6';
 // the Booking Widget's scripts (option booking): fetched together, not one after another as each
-// import is found, since the hero shows once the widget is in (its styles aren't hinted: loadBlock
-// fetches them alongside, and loadCSS takes any link to a stylesheet's address as loaded)
+// import is found (its styles aren't hinted: loadBlock fetches them alongside, and loadCSS takes
+// any link to a stylesheet's address as loaded)
 const BOOKING_MODULES = [
   'blocks/booking-widget/booking-widget.js',
   'blocks/booking-widget/booking-widget-lounge-card.js',
@@ -145,11 +145,17 @@ function hintBookingWidget() {
  * first lounge appears under the note), then any text after the title (e.g. the booking note with
  * its Group Booking link). Authored in any cells: the photo and the text; the
  * widget is added here, so it's the same one as in Book Now.
+ *
+ * The photo is the page's largest paint: it starts loading at once, and the hero shows without
+ * waiting for the widget, which loads alongside in its kept place (see hero.css).
  * @param {Element} block
  */
-async function decorateBooking(block) {
+function decorateBooking(block) {
   hintBookingWidget();
   const picture = block.querySelector('picture');
+  // (else it would start only once the section's blocks, the widget too, are in)
+  const photo = picture?.querySelector('img');
+  if (photo) photo.loading = 'eager';
   const content = el('div', 'hero-content');
   [...block.querySelectorAll(':scope > div > div')].forEach((cell) => {
     content.append(...[...cell.children].filter((node) => !node.querySelector('picture')
@@ -181,7 +187,7 @@ async function decorateBooking(block) {
   block.dataset.bookingProductsHost = '';
   block.replaceChildren(frame, products);
   decorateBlock(widget);
-  await loadBlock(widget);
+  loadBlock(widget);
 }
 
 /**
@@ -192,5 +198,5 @@ async function decorateBooking(block) {
  */
 export default async function decorate(block) {
   if (block.classList.contains('video-playback')) decorateVideoPlayback(block);
-  if (block.classList.contains('booking')) await decorateBooking(block);
+  if (block.classList.contains('booking')) decorateBooking(block);
 }
