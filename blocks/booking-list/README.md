@@ -24,7 +24,7 @@ The logged-in member's bookings, as the source "My Bookings" page
 - An empty `Booking List` table is enough: put it on the My Bookings page, with the page heading
   above it if the page has one.
 
-### Testing before the booking API exists
+### Testing without a login
 
 | Booking List | |
 | --- | --- |
@@ -32,19 +32,23 @@ The logged-in member's bookings, as the source "My Bookings" page
 
 - **Source** (testing only): a JSON file on this site in the booking API's shape. The block shows
   its bookings **without a login and without the API**, so use it only on test pages (e.g. in
-  `/drafts/`). `sample-bookings.json` next to this block has 4 sample bookings: 1 upcoming, 2 past
+  `/drafts/`). `sample-bookings.json` next to this block has 5 sample bookings: 2 upcoming, 2 past
   and 1 cancelled.
 
 ## What each card shows
 
+The API's response is a list of bookings; each booking's `orderItems` are its services, and they
+carry the lounge.
+
 | On the card | From the booking API |
 | --- | --- |
-| Photos | `images[]` (`path`, in `sequence` order), as the properties API |
+| Photos | `orderItems[].images[]` (`path`, in the given order), of the first item with photos |
 | Order No. … | `orderId` |
-| Lounge name, then its place and the airport | `propertyName`; `shortLocation`, `locationName` |
+| Lounge name | `orderItems[].propertyDisplayName` (`Plaza Premium First`), else `propertyName` |
+| Its place and the airport | `orderItems[].shortLocation`, `orderItems[].locationName` (else the booking's `locationName`) |
 | Date: `30-Nov-2026`, Time: `1600 hrs` | `serviceDate` (`30 Nov 2026 16:00:00`), shown as given (the lounge's local time) |
-| Guests: `2 Adults`, `1 Adult, 1 Child` | `guests.adult`, `guests.child` |
-| Services: `Lounge Use 3 hrs + Sakura Shrimp Spice (50g)` | `services[].name` (and `quantity` when more than 1), joined with + |
+| Guests: `2 Adults`, `2 Adults, 1 Child` | `guests.adult`, `guests.child` |
+| Services: `Lounge Use 3 hrs + Sakura Shrimp Spice (50g)` | each `orderItems[]`'s `productDisplayName` (and `quantity` when more than 1), joined with + |
 | `HKD 1,763.64` (Includes applicable taxes and fees) | `currencyCode`, `totalPrice` |
 | The tab | `bookingSchedule`: `Upcoming booking`, `Past booking`, `Cancelled` |
 
@@ -52,7 +56,7 @@ The logged-in member's bookings, as the source "My Bookings" page
 
 | Tab | Actions |
 | --- | --- |
-| Upcoming | **Resend Booking Confirmation** (unless `isEligibleForResend` is `false`), **View/Modify Booking** (`isEligibleForModify`) or **View Booking**, **Cancel Booking** (`isEligibleForCancel`) |
+| Upcoming | **Resend Booking Confirmation** (the API has no flag for it: every upcoming booking), **View/Modify Booking** (`isEligibleForModify`) or **View Booking**, **Cancel Booking** (`isEligibleForCancel`) |
 | Past Bookings, Cancelled | **View Booking** |
 
 - **Resend Booking Confirmation** asks the API to send it again and says so on the card.
@@ -80,14 +84,15 @@ translations (`scripts/i18n.js`), by page language. Dates use the page language'
 
 ## For developers
 
-- The bookings come from `apiUrl('bookingList')` (`scripts/endpoints.js`), `GET` with
-  `languageCode` and the login token (`scripts/auth.js`) as `Authorization: Bearer <token>`.
-  The response is `{ items: [...] }`. A 401 or 403 logs the visitor out (`clearToken`) and the
-  block shows the login prompt. Any other failure, or `{ errorCode, message }`, shows "We couldn't
-  load your bookings.".
-- **Placeholder paths:** the booking APIs don't exist yet. `bookingList`,
-  `resendBookingConfirmation` and `cancelBooking` (`POST`, JSON `{ orderId }`, with the token) are
-  in `scripts/endpoints.js` with placeholder paths, to be set to the real ones.
+- The bookings come from `apiUrl('bookingList')` (`scripts/endpoints.js`): a `POST` with
+  `languageCode` and `propertyTypeCode=LOUNGE` in the address and the login token
+  (`scripts/auth.js`) as `Authorization: Bearer <token>`. The response is the list of bookings
+  (`{ items: [...] }` works too). A 401 or 403 (`{ "error": "…" }`) logs the visitor out
+  (`clearToken`) and the block shows the login prompt. Any other failure, or a `{ error }` or
+  `{ errorCode, message }` answer, shows "We couldn't load your bookings.".
+- **Placeholder paths:** the resend and cancel APIs don't exist yet. `resendBookingConfirmation`
+  and `cancelBooking` (`POST`, JSON `{ orderId }`, with the token) are in `scripts/endpoints.js`
+  with placeholder paths, to be set to the real ones.
 - The block listens for `auth:change` (login, logout) and loads again.
 - The photo slider is `buildSlider` from `scripts/properties.js` (prefix `booking-list-slider`),
   the pages `createPager` from `scripts/pagination.js` (`setItems` per tab, `sync` on

@@ -30,10 +30,11 @@ const ENDPOINTS = {
   propertyPrice: '/api/v1/web/app_demo/GetPrice',
   // a pass (product) with its prices, for a product code and currency (GET)
   productPasses: '/api/v1/web/app_demo/GetProductPasses',
-  // the logged-in member's bookings (GET, the login token as a Bearer token): placeholder paths
-  // until the booking APIs exist, as resending a booking's confirmation and cancelling it (POST,
-  // JSON: orderId)
+  // the logged-in member's bookings (POST, languageCode and propertyTypeCode in the address, the
+  // login token as a Bearer token)
   bookingList: '/api/v1/web/app_demo/GetBookingList',
+  // resending a booking's confirmation and cancelling it (POST, JSON: orderId): placeholder paths
+  // until these APIs exist
   resendBookingConfirmation: '/api/v1/web/app_demo/ResendBookingConfirmation',
   cancelBooking: '/api/v1/web/app_demo/CancelBooking',
 };

@@ -6,8 +6,8 @@
  *   time, guests, services, price and the booking's actions (resend the confirmation, view or
  *   modify, cancel), a page at a time (scripts/pagination.js).
  * The bookings come from the booking list API with the login token (scripts/auth.js). A `Source`
- * row reads a JSON in the API's shape instead, without a login: for testing before the API
- * exists (e.g. the sample-bookings.json next to this block).
+ * row reads a JSON in the API's shape instead, without a login: for testing (e.g. the
+ * sample-bookings.json next to this block).
  */
 import { clearToken, getToken, isTokenValid } from '../../scripts/auth.js';
 import apiUrl from '../../scripts/endpoints.js';
@@ -21,6 +21,8 @@ import {
 
 const TIMEOUT_MS = 8000;
 const STATUS_PARAM = 'status';
+// the bookings asked of the API: the lounges'
+const PROPERTY_TYPE = 'LOUNGE';
 // the tabs, in their order: the address value, the label and the empty message; the first is
 // the default (no `status` in the address)
 const TABS = [
@@ -133,23 +135,32 @@ function formatPrice(currency, total) {
 }
 
 /**
- * The bookings of the API's items: those with an order number and a tab; the photos as
- * buildSlider takes them, in the lounge's order.
+ * API text, trimmed, its runs of spaces made one ("Plaza Premium First " → "Plaza Premium First").
+ * @param {*} value
+ * @returns {string}
+ */
+function clean(value) {
+  return String(value ?? '').replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * The bookings of the API's list: those with an order number and a tab. The lounge (its name,
+ * place and photos) is the order items' (the first with one); each item is a service.
  * @param {Object[]} items
  * @returns {Object[]}
  */
 function readBookings(items) {
   return items.map((row, index) => {
-    const orderId = String(row.orderId ?? '').trim();
-    const tab = tabOf(row);
-    if (!orderId || !tab) return null;
-    const name = String(row.propertyName ?? '').trim();
-    const shortLocation = String(row.shortLocation ?? '').trim();
-    const locationName = String(row.locationName ?? '').trim();
-    const services = (Array.isArray(row.services) ? row.services : [])
-      .map((s) => {
-        const label = String(s?.name ?? '').trim();
-        const quantity = Number(s?.quantity) || 1;
+    const orderId = clean(row?.orderId);
+    const tab = orderId && tabOf(row);
+    if (!tab) return null;
+    const orderItems = (Array.isArray(row.orderItems) ? row.orderItems : []).filter(Boolean);
+    const lounge = orderItems.find((item) => item.propertyDisplayName || item.propertyName) || {};
+    const photos = orderItems.find((item) => Array.isArray(item.images) && item.images.length);
+    const services = orderItems
+      .map((item) => {
+        const label = clean(item.productDisplayName || item.productName);
+        const quantity = Number(item.quantity) || 1;
         return label && (quantity > 1 ? `${label} × ${quantity}` : label);
       })
       .filter(Boolean);
@@ -157,20 +168,22 @@ function readBookings(items) {
       index,
       orderId,
       tab,
-      name,
+      // the display name is the lounge's alone; propertyName adds its place in brackets
+      name: clean(lounge.propertyDisplayName || lounge.propertyName),
       // the lounge's place in the airport, then the airport, as the source's address line
-      line: [shortLocation, locationName].filter(Boolean).join(', '),
+      line: [clean(lounge.shortLocation), clean(lounge.locationName || row.locationName)]
+        .filter(Boolean).join(', '),
       date: readServiceDate(row.serviceDate),
       guests: formatGuests(row.guests),
       services: services.join(' + '),
-      price: formatPrice(row.currencyCode, row.totalPrice),
-      images: (Array.isArray(row.images) ? row.images : [])
-        .map((image, i) => ({ src: toUrl(image?.path), order: Number(image?.sequence) || i + 1 }))
-        .filter((image) => image.src)
-        .sort((a, b) => a.order - b.order),
+      price: formatPrice(row.currencyCode, row.totalPrice ?? row.orderTotalPrice?.totalPrice),
+      // in the API's order (the photos have no sequence here), as buildSlider takes them
+      images: (photos?.images || [])
+        .map((image) => ({ src: toUrl(image?.path) }))
+        .filter((image) => image.src),
       canModify: row.isEligibleForModify === true,
       canCancel: row.isEligibleForCancel === true,
-      // resending is allowed for upcoming bookings unless the API says otherwise
+      // the API has no flag for resending: every upcoming booking can (unless one says otherwise)
       canResend: tab === 'upcoming' && row.isEligibleForResend !== false,
     };
   }).filter(Boolean);
@@ -178,18 +191,19 @@ function readBookings(items) {
 
 /**
  * Fetches JSON with a timeout, with the login token when there is one. Rejects with an Error that
- * has `status` (0 for a network failure or the timeout); a 200 with the API's error object
- * (`{ errorCode, message }`) is a failure too.
+ * has `status` (0 for a network failure or the timeout); a 200 with an API error object
+ * (`{ errorCode, message }` or `{ error }`) is a failure too.
  * @param {string} url
- * @param {{ token?: string, body?: Object }} [options] `body`: a POST of that object as JSON
- * @returns {Promise<Object>}
+ * @param {{ token?: string, body?: Object, method?: string }} [options] `body`: a POST of that
+ *   object as JSON; `method`: else GET
+ * @returns {Promise<Object|Object[]>}
  */
-async function request(url, { token, body } = {}) {
+async function request(url, { token, body, method = body ? 'POST' : 'GET' } = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
     const resp = await fetch(url, {
-      method: body ? 'POST' : 'GET',
+      method,
       signal: controller.signal,
       headers: {
         Accept: 'application/json',
@@ -200,8 +214,9 @@ async function request(url, { token, body } = {}) {
     });
     if (!resp.ok) throw Object.assign(new Error(`HTTP ${resp.status}`), { status: resp.status });
     const json = await resp.json();
-    if (json?.errorCode) {
-      throw Object.assign(new Error(`${json.errorCode}: ${json.message || ''}`), { status: resp.status });
+    if (json?.errorCode || json?.error) {
+      const text = json.errorCode ? `${json.errorCode}: ${json.message || ''}` : String(json.error);
+      throw Object.assign(new Error(text), { status: resp.status });
     }
     return json;
   } catch (error) {
@@ -394,17 +409,19 @@ async function load(block, settings, prefix, notice = '') {
   let items;
   setLoading(true);
   try {
-    let url;
+    // the API is a POST with its parameters in the address; a Source file is a GET
+    let json;
     if (testing) {
-      url = new URL(settings.source, window.location.origin).href;
+      json = await request(new URL(settings.source, window.location.origin).href);
     } else {
       const api = apiUrl('bookingList');
       api.searchParams.set('languageCode', getApiLanguage());
-      url = api.href;
+      api.searchParams.set('propertyTypeCode', PROPERTY_TYPE);
+      json = await request(api.href, { token, method: 'POST' });
     }
-    const json = await request(url, { token: testing ? '' : token });
-    if (!Array.isArray(json?.items)) throw new Error('Unexpected response: no items');
-    items = json.items;
+    // the bookings are the response (a list), or its `items`
+    items = Array.isArray(json) ? json : json?.items;
+    if (!Array.isArray(items)) throw new Error('Unexpected response: not a list of bookings');
   } catch (error) {
     block.removeAttribute('aria-busy');
     // an expired or refused token logs out: the auth:change listener shows the login prompt
