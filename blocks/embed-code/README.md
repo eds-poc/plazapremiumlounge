@@ -1,6 +1,6 @@
 # Embed Code: authoring guide
 
-Adds third-party code to a page: **scripts** and **styles** go into the page's `<head>`, and **iframes** show where the block is placed. Use it for tracking tags, chat widgets, booking forms, maps, videos and small CSS fixes.
+Adds third-party code to a page: **scripts** and **styles** go into the page's `<head>`, and **HTML** (including iframes) shows where the block is placed. Any HTML tag is supported, with nested markup and attributes preserved. Use it for tracking tags, chat widgets, booking forms, maps, videos and small CSS fixes.
 
 > Code in this block runs for every visitor of the page. Only paste code from a source you trust, and test the page in preview before publishing.
 
@@ -13,8 +13,9 @@ Adds third-party code to a page: **scripts** and **styles** go into the page's `
 | Style | https://example.com/theme.css |  |  |
 | Style | `.promo-banner { color: #8a6d3b; }` |  |  |
 | Iframe | https://example.com/booking | Booking form | 600 |
+| HTML | `<div class="widget"><p>Welcome</p></div>` |  |  |
 
-- **Cell 1:** what the row is: `Script`, `Style` or `Iframe` (any capitalisation).
+- **Cell 1:** what the row is: `Script`, `Style`, `Iframe` or `HTML` (any capitalisation).
 - **Cell 2:** a file or page address, or the code itself.
 - **Cells 3 and 4 (iframes only, optional):** a title and a height.
 - **Rows run in order**, top to bottom. Empty rows are skipped.
@@ -73,17 +74,17 @@ Most providers (YouTube, Google Maps, chat and booking tools, tag managers) give
 
 - A cell can hold several tags at once, e.g. a `<script>` file followed by a `<script>` with its setup code. They run in the order they are written.
 - **Kept:** the snippet's settings, such as `async`, `type`, `id`, `data-…` attributes, `media` on styles, and `allow`, `allowfullscreen`, `title` on iframes.
-- **Removed:** inline event handlers (`onload="…"`, `onclick="…"`) and anything inside `<noscript>`, which isn't needed when scripts run.
+- **HTML is preserved:** any tag, nested content, inline event handlers and `<noscript>` content are kept. Only use trusted code.
 - **Iframe size:** a `width` and `height` in the snippet (e.g. `560` × `315`) become the iframe's shape, so it still fills the column at that proportion.
 - **Scripts marked `async`** don't hold up the rows after them.
 
 ## Without a label
 
-A row with just one cell is read from its content. (In a row with more cells, the first cell must be `Script`, `Style` or `Iframe`; otherwise the first cell is read as the content.)
+A row with just one cell is read from its content. (In a row with more cells, the first cell must be `Script`, `Style`, `Iframe` or `HTML`; otherwise the first cell is read as the content.)
 
 | Content | Treated as |
 | --- | --- |
-| Pasted `<script>`, `<style>`, `<link>` or `<iframe>` code | That tag |
+| Pasted HTML code | HTML in the block, with scripts and styles loaded into the head |
 | An address ending in `.js` | Script file |
 | An address ending in `.css` | Stylesheet |
 | Any other address | Iframe |
@@ -100,7 +101,7 @@ When in doubt, add the label. In particular, a plain line of **CSS needs the `St
 ## Where to put the block
 
 - **Anywhere on the page.** A block with only scripts and styles takes up no space; put it at the end of the page so it doesn't affect the layout.
-- **Iframes show where the block is**, so place the block where the content should appear.
+- **HTML and iframes show where the block is**, so place the block where the content should appear.
 - **On many pages:** put the block in a fragment and add that fragment to each page.
 - Code runs when the block's section loads. Blocks near the top load first, and blocks further down load shortly after the page appears.
 
