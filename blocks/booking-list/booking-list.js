@@ -9,7 +9,7 @@
  * row reads a JSON in the API's shape instead, without a login: for testing (e.g. the
  * sample-bookings.json next to this block).
  */
-import { clearToken, getToken, isTokenValid } from '../../scripts/auth.js';
+import { getToken, isTokenValid, logout } from '../../scripts/auth.js';
 import apiUrl from '../../scripts/endpoints.js';
 import {
   DEFAULT_SITE, getLanguage, getSiteFolder, translate,
@@ -424,9 +424,9 @@ async function load(block, settings, prefix, notice = '') {
     if (!Array.isArray(items)) throw new Error('Unexpected response: not a list of bookings');
   } catch (error) {
     block.removeAttribute('aria-busy');
-    // an expired or refused token logs out: the auth:change listener shows the login prompt
+    // the token refused (invalid or expired): log out and go home
     if (!testing && [401, 403].includes(error.status)) {
-      clearToken();
+      logout();
       return;
     }
     message.textContent = translate('bookingError');

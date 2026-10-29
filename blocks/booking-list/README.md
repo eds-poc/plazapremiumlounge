@@ -6,8 +6,11 @@ The logged-in member's bookings, as the source "My Bookings" page
 - **A card per booking:** the lounge's photos (a slider), the order number, the lounge and where
   it is, the date, time, guests and services, the price, and the booking's actions.
 - **Pages:** 10 bookings at a time, with « 1 2 3 » buttons below the cards when there are more.
-- **Not logged in:** "Log in to see your bookings." and a **Log In** button that opens the site's
-  login modal. After logging in, the bookings show on the same page.
+- **Not logged in:** a members' page (`/en-uk/membership/…`) sends the visitor to the home page
+  (`/en-uk/`). On any other page the block shows "Log in to see your bookings." and a **Log In**
+  button that opens the site's login modal; after logging in, the bookings show on the same page.
+- **Login refused or expired** (the booking API answers 401 or 403): the visitor is logged out and
+  goes to the home page.
 
 ## Table: all rows optional
 
@@ -88,7 +91,7 @@ translations (`scripts/i18n.js`), by page language. Dates use the page language'
   `languageCode` and `propertyTypeCode=LOUNGE` in the address and the login token
   (`scripts/auth.js`) as `Authorization: Bearer <token>`. The response is the list of bookings
   (`{ items: [...] }` works too). A 401 or 403 (`{ "error": "…" }`) logs the visitor out
-  (`clearToken`) and the block shows the login prompt. Any other failure, or a `{ error }` or
+  and goes home (`logout`). Any other failure, or a `{ error }` or
   `{ errorCode, message }` answer, shows "We couldn't load your bookings.".
 - **Placeholder paths:** the resend and cancel APIs don't exist yet. `resendBookingConfirmation`
   and `cancelBooking` (`POST`, JSON `{ orderId }`, with the token) are in `scripts/endpoints.js`
