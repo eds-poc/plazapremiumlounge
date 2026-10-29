@@ -23,12 +23,19 @@ const TIMEOUT_MS = 8000;
 const STATUS_PARAM = 'status';
 // the bookings asked of the API: the lounges'
 const PROPERTY_TYPE = 'LOUNGE';
-// the tabs, in their order: the address value, the label and the empty message; the first is
-// the default (no `status` in the address)
+// the tabs, in their order: the address value, the API's `status` (as it spells it), the label
+// (when none is authored) and the empty message; the first is the default (no `status` in the
+// address)
 const TABS = [
-  { id: 'upcoming', label: 'bookingUpcoming', none: 'bookingNoneUpcoming' },
-  { id: 'past', label: 'bookingPast', none: 'bookingNonePast' },
-  { id: 'cancelled', label: 'bookingCancelled', none: 'bookingNoneCancelled' },
+  {
+    id: 'upcoming', status: 'Upcoming booking', label: 'bookingUpcoming', none: 'bookingNoneUpcoming',
+  },
+  {
+    id: 'past', status: 'Past booking', label: 'bookingPast', none: 'bookingNonePast',
+  },
+  {
+    id: 'cancelled', status: 'Cancelled', label: 'bookingCancelled', none: 'bookingNoneCancelled',
+  },
 ];
 // the source's English month names (its dates are 30-Nov-2026); other languages use their own
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -38,11 +45,23 @@ const SERVICE_DATE = /^(\d{1,2}) ([A-Za-z]{3}) (\d{4}) (\d{1,2}):(\d{2})/;
 let blockCount = 0;
 
 /**
- * The authored settings, rows of name | value (names ignore capitals and spaces): `View page`
- * (the booking page, a link or path; else /{site}/view-booking), `Page size` (bookings per page,
- * 10 without it) and `Source` (testing only: a JSON on this site in the API's shape).
+ * API or authored text, trimmed, its runs of spaces made one ("Plaza Premium First " →
+ * "Plaza Premium First").
+ * @param {*} value
+ * @returns {string}
+ */
+function clean(value) {
+  return String(value ?? '').replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * The authored settings, rows of name | value (names ignore capitals and spaces): `Upcoming tab`,
+ * `Past tab`, `Cancelled tab` (the tabs' labels; else the site's translations), `View page` (the
+ * booking page, a link or path; else /{site}/view-booking), `Page size` (bookings per page, 10
+ * without it) and `Source` (testing only: a JSON on this site in the API's shape).
  * @param {HTMLElement} block
- * @returns {{ viewPage: string, pageSize: number, source: string }}
+ * @returns {{ labels: Object<string, string>, viewPage: string, pageSize: number,
+ *   source: string }}
  */
 function readSettings(block) {
   const rows = [...block.children].map((row) => [...row.children]);
@@ -59,6 +78,7 @@ function readSettings(block) {
     }
   };
   return {
+    labels: Object.fromEntries(TABS.map((tab) => [tab.id, clean(cell(`${tab.id}-tab`)?.textContent)])),
     viewPage: sameSite(value(cell('view-page'))) || `/${getSiteFolder() || DEFAULT_SITE}/view-booking`,
     pageSize: readPageSize(value(cell('page-size'))),
     source: sameSite(value(cell('source'))),
@@ -66,8 +86,9 @@ function readSettings(block) {
 }
 
 /**
- * The tab of a booking, from the API's `bookingSchedule` ("Upcoming booking", "Past booking",
- * "Cancelled"), else its `bookingStatus`; '' for anything else (not shown).
+ * The tab of a booking in a Source file (the API answers a tab at a time), from its
+ * `bookingSchedule` ("Upcoming booking", "Past booking", "Cancelled"), else its `bookingStatus`;
+ * '' for anything else (not shown).
  * @param {Object} row
  * @returns {string}
  */
@@ -135,25 +156,19 @@ function formatPrice(currency, total) {
 }
 
 /**
- * API text, trimmed, its runs of spaces made one ("Plaza Premium First " → "Plaza Premium First").
- * @param {*} value
- * @returns {string}
- */
-function clean(value) {
-  return String(value ?? '').replace(/\s+/g, ' ').trim();
-}
-
-/**
- * The bookings of the API's list: those with an order number and a tab. The lounge (its name,
- * place and photos) is the order items' (the first with one); each item is a service.
+ * A tab's bookings, from the API's list for it: those with an order number, in the tab's order
+ * (upcoming soonest first, the others latest first; the API's order for the same time). The
+ * lounge (its name, place and photos) is the order items' (the first with one); each item is a
+ * service.
  * @param {Object[]} items
+ * @param {string} tab
  * @returns {Object[]}
  */
-function readBookings(items) {
+function readBookings(items, tab) {
+  const direction = tab === 'upcoming' ? 1 : -1;
   return items.map((row, index) => {
     const orderId = clean(row?.orderId);
-    const tab = orderId && tabOf(row);
-    if (!tab) return null;
+    if (!orderId) return null;
     const orderItems = (Array.isArray(row.orderItems) ? row.orderItems : []).filter(Boolean);
     const lounge = orderItems.find((item) => item.propertyDisplayName || item.propertyName) || {};
     const photos = orderItems.find((item) => Array.isArray(item.images) && item.images.length);
@@ -186,7 +201,8 @@ function readBookings(items) {
       // the API has no flag for resending: every upcoming booking can (unless one says otherwise)
       canResend: tab === 'upcoming' && row.isEligibleForResend !== false,
     };
-  }).filter(Boolean);
+  }).filter(Boolean)
+    .sort((a, b) => direction * ((a.date?.time ?? 0) - (b.date?.time ?? 0)) || a.index - b.index);
 }
 
 /**
@@ -194,16 +210,15 @@ function readBookings(items) {
  * has `status` (0 for a network failure or the timeout); a 200 with an API error object
  * (`{ errorCode, message }` or `{ error }`) is a failure too.
  * @param {string} url
- * @param {{ token?: string, body?: Object, method?: string }} [options] `body`: a POST of that
- *   object as JSON; `method`: else GET
+ * @param {{ token?: string, body?: Object }} [options] `body`: a POST of that object as JSON
  * @returns {Promise<Object|Object[]>}
  */
-async function request(url, { token, body, method = body ? 'POST' : 'GET' } = {}) {
+async function request(url, { token, body } = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
     const resp = await fetch(url, {
-      method,
+      method: body ? 'POST' : 'GET',
       signal: controller.signal,
       headers: {
         Accept: 'application/json',
@@ -225,6 +240,30 @@ async function request(url, { token, body, method = body ? 'POST' : 'GET' } = {}
   } finally {
     clearTimeout(timer);
   }
+}
+
+/**
+ * A tab's bookings as the API lists them: a POST of the language, the property type and the tab's
+ * `status`, with the login token. A Source file has every tab's: its bookings of the tab.
+ * @param {{ source: string }} settings
+ * @param {string} tab
+ * @returns {Promise<Object[]>}
+ */
+async function fetchBookings({ source }, tab) {
+  const json = source
+    ? await request(new URL(source, window.location.origin).href)
+    : await request(apiUrl('bookingList').href, {
+      token: getToken(),
+      body: {
+        languageCode: getApiLanguage(),
+        propertyTypeCode: PROPERTY_TYPE,
+        status: TABS.find((t) => t.id === tab).status,
+      },
+    });
+  // the bookings are the response (a list), or its `items`
+  const items = Array.isArray(json) ? json : json?.items;
+  if (!Array.isArray(items)) throw new Error('Unexpected response: not a list of bookings');
+  return source ? items.filter((row) => tabOf(row) === tab) : items;
 }
 
 /**
@@ -252,15 +291,16 @@ function writeTab(tab) {
  * The tabs: a tablist of buttons, the arrows, Home and End moving between them (and choosing).
  * @param {string} prefix Unique per block, for the ids
  * @param {string} panelId The list the tabs control
+ * @param {Object<string, string>} labels The authored labels by tab ('' for the translation)
  * @param {function(string): void} onSelect
  * @returns {{ element: HTMLElement, show: function(string): void }}
  */
-function buildTabs(prefix, panelId, onSelect) {
+function buildTabs(prefix, panelId, labels, onSelect) {
   const list = el('div', 'booking-list-tabs');
   list.setAttribute('role', 'tablist');
   list.setAttribute('aria-label', translate('bookingTabs'));
   const buttons = TABS.map((tab) => {
-    const button = el('button', 'booking-list-tab', translate(tab.label));
+    const button = el('button', 'booking-list-tab', labels[tab.id] || translate(tab.label));
     button.type = 'button';
     button.id = `${prefix}-tab-${tab.id}`;
     button.dataset.tab = tab.id;
@@ -317,7 +357,7 @@ function buildCard(booking, { viewPage, eager, prefix }) {
   const title = el('h3', 'booking-list-order');
   const titleLink = el('a', '', translate('bookingOrder', { id: booking.orderId }));
   titleLink.href = viewHref;
-  titleLink.id = `${prefix}-order-${booking.index + 1}`;
+  titleLink.id = `${prefix}-order-${booking.tab}-${booking.index + 1}`;
   title.append(titleLink);
 
   const lounge = el('p', 'booking-list-lounge');
@@ -406,46 +446,9 @@ async function load(block, settings, prefix, notice = '') {
   block.replaceChildren(results, message, status);
   block.setAttribute('aria-busy', 'true');
 
-  let items;
-  setLoading(true);
-  try {
-    // the API is a POST with its parameters in the address; a Source file is a GET
-    let json;
-    if (testing) {
-      json = await request(new URL(settings.source, window.location.origin).href);
-    } else {
-      const api = apiUrl('bookingList');
-      api.searchParams.set('languageCode', getApiLanguage());
-      api.searchParams.set('propertyTypeCode', PROPERTY_TYPE);
-      json = await request(api.href, { token, method: 'POST' });
-    }
-    // the bookings are the response (a list), or its `items`
-    items = Array.isArray(json) ? json : json?.items;
-    if (!Array.isArray(items)) throw new Error('Unexpected response: not a list of bookings');
-  } catch (error) {
-    block.removeAttribute('aria-busy');
-    // the token refused (invalid or expired): log out and go home
-    if (!testing && [401, 403].includes(error.status)) {
-      logout();
-      return;
-    }
-    message.textContent = translate('bookingError');
-    message.hidden = false;
-    // eslint-disable-next-line no-console
-    console.error(`booking-list: couldn't load the bookings (${error.message})`);
-    return;
-  } finally {
-    setLoading(false);
-  }
-
-  const bookings = readBookings(items);
   const panel = el('ul', 'booking-list-cards');
   panel.id = `${prefix}-panel`;
   panel.setAttribute('role', 'tabpanel');
-  const cards = bookings.map((booking, i) => buildCard(booking, {
-    viewPage: settings.viewPage, eager: i === 0, prefix,
-  }));
-  panel.append(...cards);
 
   let tab = readTab();
   const pager = createPager({
@@ -454,30 +457,61 @@ async function load(block, settings, prefix, notice = '') {
     onChange: ({ page }) => { block.dataset.page = page; },
   });
 
-  // the bookings of the tab, upcoming soonest first, the others latest first (the API's order for
-  // the same time), paged by the pager; `reset` goes back to the first page (a new tab)
-  const update = (announce, reset = false) => {
-    const direction = tab === 'upcoming' ? 1 : -1;
-    const shown = bookings
-      .filter((b) => b.tab === tab)
-      .sort((a, b) => direction * ((a.date?.time ?? 0) - (b.date?.time ?? 0)) || a.index - b.index);
-    const shownCards = shown.map((b) => cards[bookings.indexOf(b)]);
-    const shownSet = new Set(shownCards);
-    cards.forEach((card) => { if (!shownSet.has(card)) card.hidden = true; });
-    panel.append(...shownCards);
-    pager.setItems(shownCards, { reset });
-    panel.setAttribute('aria-labelledby', `${prefix}-tab-${tab}`);
-    const current = TABS.find((t) => t.id === tab);
-    message.textContent = shown.length ? '' : translate(current.none);
-    message.hidden = !!shown.length;
-    block.dataset.status = tab;
-    if (announce) status.textContent = shown.length ? '' : message.textContent;
+  // each tab's cards, asked of the API the first time the tab is shown and kept: coming back to
+  // a tab shows them again without asking. A failed request isn't kept (the tab asks again).
+  const cache = new Map();
+  const cardsOf = (id) => {
+    if (!cache.has(id)) {
+      // the first photo loads early on the first tab shown only
+      const eager = !cache.size;
+      const cards = fetchBookings(settings, id).then((items) => readBookings(items, id)
+        .map((booking, i) => buildCard(booking, {
+          viewPage: settings.viewPage, eager: eager && i === 0, prefix,
+        })));
+      cards.catch(() => cache.delete(id));
+      cache.set(id, cards);
+    }
+    return cache.get(id);
   };
 
-  const tabs = buildTabs(prefix, panel.id, (next) => {
+  // shows a tab's bookings, paged by the pager (`reset`: from the first page, a new tab), with
+  // the site's loader while they're asked for; a slower answer for a tab left meanwhile is ignored
+  let shown = 0;
+  const show = async (id, { announce = false, reset = false } = {}) => {
+    shown += 1;
+    const current = shown;
+    let cards = null;
+    setLoading(true);
+    try {
+      cards = await cardsOf(id);
+    } catch (error) {
+      // the token refused (invalid or expired): log out and go home
+      if (!testing && [401, 403].includes(error.status)) {
+        logout();
+        return;
+      }
+      // eslint-disable-next-line no-console
+      console.error(`booking-list: couldn't load the ${id} bookings (${error.message})`);
+    } finally {
+      setLoading(false);
+    }
+    if (current !== shown) return;
+    panel.replaceChildren(...(cards || []));
+    pager.setItems(cards || [], { reset });
+    panel.setAttribute('aria-labelledby', `${prefix}-tab-${id}`);
+    let text = '';
+    if (!cards) text = translate('bookingError');
+    else if (!cards.length) text = translate(TABS.find((t) => t.id === id).none);
+    message.textContent = text;
+    message.hidden = !text;
+    block.dataset.status = id;
+    if (announce) status.textContent = text;
+  };
+
+  const tabs = buildTabs(prefix, panel.id, settings.labels, (next) => {
     tab = next;
     writeTab(tab);
-    update(true, true);
+    show(tab, { announce: true, reset: true });
   });
 
   // resend the confirmation, or cancel the booking (after a confirmation), with the API
@@ -517,10 +551,10 @@ async function load(block, settings, prefix, notice = '') {
     results.append(done);
   }
   results.append(tabs.element, panel, pager.element);
-  // the page buttons' look first, then the tab's first page, all still hidden: shown at once
+  // the page buttons' look first, then the tab's bookings, all still hidden: shown at once
   await pager.ready;
   tabs.show(tab);
-  update(false);
+  await show(tab);
   results.hidden = false;
   block.removeAttribute('aria-busy');
 
@@ -538,7 +572,7 @@ async function load(block, settings, prefix, notice = '') {
     tab = next;
     tabs.show(tab);
     pager.sync({ render: false });
-    update(true);
+    show(tab, { announce: true });
   };
   window.addEventListener('popstate', onHistory);
 }

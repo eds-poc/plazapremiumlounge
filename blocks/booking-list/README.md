@@ -2,7 +2,8 @@
 
 The logged-in member's bookings, as the source "My Bookings" page
 (`/en-uk/membership/my-booking`):
-- **Tabs:** Upcoming, Past Bookings and Cancelled. Upcoming shows first.
+- **Tabs:** Upcoming, Past Bookings and Cancelled (the labels as authored). Upcoming shows first.
+  Each tab's bookings load the first time it's opened; opening it again shows them straight away.
 - **A card per booking:** the lounge's photos (a slider), the order number, the lounge and where
   it is, the date, time, guests and services, the price, and the booking's actions.
 - **Pages:** 10 bookings at a time, with « 1 2 3 » buttons below the cards when there are more.
@@ -16,9 +17,15 @@ The logged-in member's bookings, as the source "My Bookings" page
 
 | Booking List | |
 | --- | --- |
+| Upcoming tab | Upcoming |
+| Past tab | Past Bookings |
+| Cancelled tab | Cancelled |
 | View page | [/en-uk/view-booking](/en-uk/view-booking) |
 | Page size | 10 |
 
+- **Upcoming tab**, **Past tab**, **Cancelled tab** (optional): the tabs' labels, in the page's
+  language. A tab without its row shows the site's translation (`Upcoming`, `Past Bookings`,
+  `Cancelled` in English).
 - **View page** (optional): the page that shows one booking, as a link or path on this site.
   Each card's order number and **View Booking** / **View/Modify Booking** link go to it with
   the booking added (`/en-uk/view-booking?bookingid=HKBC-11339-64SCYL`). Without the row, the
@@ -81,18 +88,24 @@ work. Choosing a tab goes back to page 1.
 
 ## Interface text
 
-The tabs, labels, guests, the taxes note, the actions and the messages come from the site's
-translations (`scripts/i18n.js`), by page language. Dates use the page language's month names
+The tabs (when not authored), labels, guests, the taxes note, the actions and the messages come
+from the site's translations (`scripts/i18n.js`), by page language. Dates use the page language's month names
 (English: `30-Nov-2026`, as the source).
 
 ## For developers
 
-- The bookings come from `apiUrl('bookingList')` (`scripts/endpoints.js`): a `POST` with
-  `languageCode` and `propertyTypeCode=LOUNGE` in the address and the login token
-  (`scripts/auth.js`) as `Authorization: Bearer <token>`. The response is the list of bookings
-  (`{ items: [...] }` works too). A 401 or 403 (`{ "error": "…" }`) logs the visitor out
-  and goes home (`logout`). Any other failure, or a `{ error }` or
-  `{ errorCode, message }` answer, shows "We couldn't load your bookings.".
+- The bookings come from `apiUrl('bookingList')` (`scripts/endpoints.js`), a tab at a time: a
+  `POST` of JSON `{ "languageCode": "en", "propertyTypeCode": "LOUNGE", "status": "Upcoming booking" }`
+  with the login token (`scripts/auth.js`) as `Authorization: Bearer <token>`. `status` is the
+  tab's, as the API spells it (case-sensitive): `Upcoming booking`, `Past booking` or
+  `Cancelled`. The response is the tab's list of bookings (`{ items: [...] }` works too).
+- Each tab is asked for once, the first time it's shown, and kept for the page; a failed request
+  isn't kept, so opening the tab again asks again. A cancellation loads the list again (the
+  current tab asked for anew).
+- A 401 or 403 (`{ "error": "…" }`) logs the visitor out and goes home (`logout`). Any other
+  failure, or a `{ error }` or `{ errorCode, message }` answer, shows "We couldn't load your
+  bookings." in that tab.
+- A Source file is read once per tab too, its bookings sorted into the tabs by `bookingSchedule`.
 - **Placeholder paths:** the resend and cancel APIs don't exist yet. `resendBookingConfirmation`
   and `cancelBooking` (`POST`, JSON `{ orderId }`, with the token) are in `scripts/endpoints.js`
   with placeholder paths, to be set to the real ones.
@@ -100,6 +113,8 @@ translations (`scripts/i18n.js`), by page language. Dates use the page language'
 - The photo slider is `buildSlider` from `scripts/properties.js` (prefix `booking-list-slider`),
   the pages `createPager` from `scripts/pagination.js` (`setItems` per tab, `sync` on
   Back/Forward).
-- The tabs are a tablist (the arrows, Home and End move between them); the cards are put together
-  hidden and shown at once, so the page doesn't shift while the bookings load. The block keeps
+- The tabs are a tablist (the arrows, Home and End move between them); the first tab's cards are
+  put together hidden and shown at once, so the page doesn't shift while the bookings load. A
+  tab's request shows the site's loader (`setLoading`), the previous tab's cards staying until
+  its bookings arrive. The block keeps
   `data-status` and `data-page`.
