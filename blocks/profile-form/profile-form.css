@@ -1,0 +1,198 @@
+/* the shared form styles, loaded with the block's own (before the block shows) */
+@import url('../../styles/forms.css');
+
+/* profile form: the source Update Profile page. Two boxes side by side from 768px (a thin grey border,
+   the title underlined), labels in plain case right above the fields, the read-only fields greyed;
+   the newsletter checkbox and Save (right) below the boxes. The fields 15px apart, 30px from 992px
+   (the source .form-group) */
+.profile-form .form-fields {
+  --form-row-gap: var(--spacing-6);
+  --form-input-height: 48px;
+}
+
+/* each box in its column (the source .col-md-6), both as tall as the taller one */
+.profile-form .form-fields > .profile-form-column {
+  display: grid;
+}
+
+/* the box (the source .boxLiner); under the last field the source's 30px field spacing (15px below
+   992px) */
+.profile-form .form-fields .form-column {
+  align-content: start;
+  border: 1px solid var(--base-border);
+  padding: var(--spacing-6) var(--spacing-7) calc(var(--spacing-6) + var(--form-row-gap));
+}
+
+/* the box's title (the source .profile-title): underlined, 25px above the first field */
+.profile-form .form-fields .form-column > .form-content {
+  margin-bottom: calc(var(--spacing-8) - var(--form-row-gap));
+  border-bottom: 1px solid var(--base-border);
+  padding-bottom: var(--spacing-3);
+}
+
+.profile-form .form-fields .form-column > .form-content :is(h2, h3, h4) {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+/* labels: the body text (14px, 16px from 768px), right above the field */
+.profile-form .form-fields .form-label {
+  margin: 0;
+  font-size: var(--body-font-size);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+/* no required marks, as the source */
+.profile-form .form-fields .form-required {
+  display: none;
+}
+
+.profile-form .form-fields .form-input {
+  font-size: var(--font-size-md);
+}
+
+/* the read-only and disabled fields (not the lists while they load) */
+.profile-form .form-fields input.form-input:is([readonly], :disabled) {
+  color: var(--color-text-subtle);
+  cursor: default;
+}
+
+.profile-form .form-fields .form-input[readonly]:focus {
+  background-color: var(--color-surface-warm);
+}
+
+/* Contact Number: the source's 274px pill, the code as "+1 ▾" (as wide as its 1 to 3 digits need)
+   and a thin line before the number */
+.profile-form .form-fields .form-phone {
+  width: 274px;
+  max-width: 100%;
+}
+
+.profile-form .form-fields .profile-phone-code {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--spacing-3);
+  border-right: 1px solid var(--color-border);
+  padding: 0 var(--spacing-5) 0 var(--spacing-6);
+  color: var(--form-input-color);
+  font-size: var(--font-size-sm);
+}
+
+/* the small down triangle */
+.profile-form .form-fields .profile-phone-code::after {
+  content: '';
+  border-top: 4px solid currentcolor;
+  border-inline: 3.5px solid transparent;
+}
+
+/* the dropdown over the code, invisible: the click opens its list of countries */
+.profile-form .form-fields .profile-phone-code .form-phone-code {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  opacity: 0;
+}
+
+/* the membership number and points: a label and the value as text */
+.profile-form .profile-detail p {
+  margin: 0;
+}
+
+/* below the boxes: the checkbox 60px under them, Save 30px under it (the source spacers) */
+.profile-form .form-fields > .form-field-checkbox {
+  gap: 0 var(--spacing-3);
+  margin-top: calc(var(--spacing-11) + var(--spacing-4) - var(--form-row-gap));
+}
+
+.profile-form .form-fields > .form-field-checkbox .form-check-label {
+  font-size: var(--body-font-size);
+  line-height: var(--line-height-body);
+}
+
+/* the source's 17px square checkbox, centred on the label's first line; a white tick on maroon
+   when checked */
+.profile-form .form-fields .form-check-input {
+  width: 17px;
+  height: 17px;
+  margin-top: calc((var(--body-font-size) * var(--line-height-body) - 17px) / 2);
+  border-color: #ccc;
+  border-radius: 3px;
+}
+
+.profile-form .form-fields .form-check-input:checked {
+  border-color: #711b45;
+  background: #711b45 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2' d='m3.5 8.5 3 3 6-7'/%3E%3C/svg%3E") center / 11px no-repeat;
+  box-shadow: none;
+}
+
+.profile-form .form-fields > .form-submit {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: calc(var(--spacing-9) - var(--form-row-gap));
+}
+
+/* Save: the source's 16px light text, 12px 50px padding */
+.profile-form .form-fields .form-submit .button {
+  padding: var(--spacing-5) var(--spacing-11);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-relaxed);
+}
+
+/* it stays disabled until the update API exists: the site's disabled grey, not faded */
+.profile-form .form-fields .form-submit .button:disabled {
+  opacity: 1;
+}
+
+/* the loading and error message above the form */
+.profile-form .profile-message {
+  margin: 0 0 var(--spacing-7);
+  font-size: var(--font-size-sm);
+}
+
+.profile-form .profile-retry {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--color-brand-primary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* breakpoint-exception: design-system breakpoint (768px): the boxes stacked 20px apart below it,
+   then the checkbox 80px under the second (its 20px and the 60px); side by side from it */
+@media (width < 768px) {
+  .profile-form .form-fields > .profile-form-column + .profile-form-column {
+    margin-top: calc(var(--spacing-7) - var(--form-row-gap));
+  }
+
+  .profile-form .form-fields > .form-field-checkbox {
+    margin-top: calc(var(--spacing-12) - var(--form-row-gap));
+  }
+}
+
+@media (width >= 768px) {
+  .profile-form .form-fields > .profile-form-column {
+    grid-column: span 3;
+  }
+}
+
+/* from 992px: the fields 30px apart, the box titles 24px */
+@media (width >= 992px) {
+  .profile-form .form-fields {
+    --form-row-gap: var(--spacing-9);
+  }
+
+  .profile-form .form-fields .form-column > .form-content :is(h2, h3, h4) {
+    font-size: var(--font-size-2xl);
+  }
+}
