@@ -353,6 +353,10 @@ const TEXTS = {
   profilePoints: {
     en: '{points} (valid until {date})', zh: '{points}（有效期至 {date}）', 'zh-HK': '{points}（有效期至 {date}）', ja: '{points}（{date} まで有効）', pt: '{points} (válido até {date})',
   },
+  // the View Booking block's add-ons column title (when the block has no authored text for it)
+  bookingAdditionalServices: {
+    en: 'Additional Services', zh: '附加服务', 'zh-HK': '附加服務', ja: '追加サービス', pt: 'Serviços adicionais',
+  },
   // the View Booking block's messages (when the block has no authored text for them)
   bookingLoading: {
     en: 'Loading your booking…', zh: '正在加载您的预订…', 'zh-HK': '正在載入您的預訂…', ja: 'ご予約を読み込んでいます…', pt: 'Carregando sua reserva…',

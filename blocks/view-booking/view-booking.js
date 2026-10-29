@@ -8,6 +8,8 @@ const ORDER_ID = /^[A-Za-z0-9-]{1,40}$/;
 
 // the tags kept in the terms' HTML (from the API); anything else is dropped, its text kept
 const TERMS_TAGS = new Set(['P', 'BR', 'STRONG', 'B', 'EM', 'I', 'U', 'UL', 'OL', 'LI', 'HR', 'A']);
+// the terms' block tags: the text between them is a paragraph of its own
+const TERMS_BLOCKS = new Set(['P', 'UL', 'OL', 'HR']);
 
 let count = 0;
 
@@ -104,7 +106,9 @@ function visitTime(value) {
  */
 function safeTerms(html) {
   const fragment = document.createDocumentFragment();
-  const source = new DOMParser().parseFromString(String(html || ''), 'text/html').body;
+  // the answer's links with doubled quotes (href=""https://…"") as plain links
+  const repaired = String(html || '').replace(/href=""(https?:\/\/[^"\s]+)""/gi, 'href="$1"');
+  const source = new DOMParser().parseFromString(repaired, 'text/html').body;
   const copy = (from, to) => {
     from.childNodes.forEach((node) => {
       if (node.nodeType === Node.TEXT_NODE) {
@@ -133,19 +137,63 @@ function safeTerms(html) {
       }
       const element = document.createElement(node.tagName.toLowerCase());
       copy(node, element);
-      // the answer's empty paragraphs are left out
-      if (element.tagName === 'P' && !element.textContent.trim() && !element.children.length) return;
+      // the answer's empty paragraphs are left out (at the top they still end the text before them)
+      if (element.tagName === 'P' && !element.textContent.trim() && !element.children.length
+        && to !== fragment) return;
       to.append(element);
     });
   };
   copy(source, fragment);
-  // plain text becomes one paragraph
-  if (!fragment.querySelector?.('p, ul, ol') && fragment.textContent.trim()) {
-    const p = el('p');
-    p.append(fragment);
-    fragment.append(p);
-  }
-  return fragment;
+  // the text outside any paragraph (e.g. between the answer's stray </p>) in paragraphs of its own,
+  // one per run between blocks; the empty paragraphs only end a run
+  const terms = document.createDocumentFragment();
+  let run = null;
+  [...fragment.childNodes].forEach((node) => {
+    if (node.nodeType === Node.ELEMENT_NODE && TERMS_BLOCKS.has(node.tagName)) {
+      run = null;
+      if (node.tagName !== 'P' || node.textContent.trim() || node.children.length) terms.append(node);
+      return;
+    }
+    if (!run) {
+      if (node.nodeType === Node.TEXT_NODE && !node.textContent.trim()) return;
+      run = el('p');
+      terms.append(run);
+    }
+    run.append(node);
+  });
+  return terms;
+}
+
+/**
+ * Whether a booked item is a lounge service (else an add-on, e.g. a retail product), by its
+ * serviceType (its propertyTypeCode is the lounge's, the same for its add-ons).
+ * @param {object} item
+ * @returns {boolean}
+ */
+function isLounge(item) {
+  return String(item.serviceType || '').toUpperCase() === 'LOUNGE';
+}
+
+/**
+ * The booked items as boxes: the items at the same lounge and start time together, the (first)
+ * lounge service as the box and the other items there (not lounge services) as its add-ons; a
+ * second lounge service at the same place and time gets a box of its own.
+ * @param {object[]} items
+ * @returns {{main: object, addOns: object[]}[]}
+ */
+function groupItems(items) {
+  const visits = new Map();
+  items.forEach((item) => {
+    const key = `${item.propertyCode || ''}|${item.startDate || ''}`;
+    if (!visits.has(key)) visits.set(key, []);
+    visits.get(key).push(item);
+  });
+  return [...visits.values()].flatMap((list) => {
+    const lounges = list.filter(isLounge);
+    if (!lounges.length) return [{ main: list[0], addOns: list.slice(1) }];
+    const addOns = list.filter((item) => !isLounge(item));
+    return lounges.map((main, i) => ({ main, addOns: i ? [] : addOns }));
+  });
 }
 
 /**
@@ -215,13 +263,14 @@ export default function decorate(block) {
 
   /**
    * One booked item's box: location (and the edit and cancel links), date and time, guests,
-   * services, price.
-   * @param {object} item
+   * services, its add-ons (additional services, when there are any), price (the item and its
+   * add-ons).
+   * @param {{main: object, addOns: object[]}} group
    * @param {string} currency
    * @param {object} order
    * @returns {HTMLElement}
    */
-  const itemBox = (item, currency, order) => {
+  const itemBox = ({ main: item, addOns }, currency, order) => {
     const box = el('div', 'view-booking-box');
     const cell = (name, title) => {
       const part = el('div', `view-booking-cell view-booking-${name}`);
@@ -290,8 +339,20 @@ export default function decorate(block) {
     service.append(el('li', '', item.productDisplayName || item.productName || ''));
     services.append(service);
 
+    // the add-ons: "1 x Plaza Premium Lounge Sakura Shrimp Spice (50g)"
+    if (addOns.length) {
+      const extras = cell('additional-services', text('additionalServices') || translate('bookingAdditionalServices'));
+      const list = el('ul', 'view-booking-service-list');
+      addOns.forEach((addOn) => {
+        list.append(el('li', '', `${Number(addOn.quantity) || 1} x ${addOn.productDisplayName || addOn.productName || ''}`));
+      });
+      extras.append(list);
+    }
+
+    const itemPrice = (part) => Number(part.itemPriceDetails?.productTotalPrice?.totalPrice) || 0;
+    const amount = [item, ...addOns].reduce((sum, part) => sum + itemPrice(part), 0);
     const price = cell('price', text('price'));
-    price.append(el('p', 'view-booking-price-amount', money(item.itemPriceDetails?.productTotalPrice?.totalPrice, currency)));
+    price.append(el('p', 'view-booking-price-amount', money(amount, currency)));
     return box;
   };
 
@@ -307,7 +368,7 @@ export default function decorate(block) {
 
     parts.push(el('h2', 'view-booking-order', `${text('orderNo')} ${order.orderId || orderId}`.trim()));
     if (text('details')) parts.push(el('p', 'view-booking-label', text('details')));
-    items.forEach((item) => parts.push(itemBox(item, currency, order)));
+    groupItems(items).forEach((group) => parts.push(itemBox(group, currency, order)));
 
     // the purchaser, read-only (the shared form look)
     const contact = order.contactInfo || order.guests?.[0] || {};

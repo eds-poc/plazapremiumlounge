@@ -28,6 +28,7 @@ the `error` text with Try again. The site's loader shows until the booking is in
 | adults | Adult(s): |
 | children | Child(ren): |
 | services | Services |
+| additionalServices | Additional Services |
 | price | Price |
 | edit | [Edit Booking](/en-uk/edit-booking) |
 | cancel | [Cancel Booking](/en-uk/cancel-your-booking) |
@@ -51,6 +52,8 @@ the `error` text with Try again. The site's loader shows until the booking is in
   shows only when the booking allows it (`isEligibleForModify`, `isEligibleForCancel`). Delete a
   row to hide that link.
 - **children**: optional (else the API's own "Child(ren)"); a guest line with 0 isn't shown.
+- **additionalServices**: the title of the add-ons part, shown only on a booking with add-ons
+  (optional; else "Additional Services" in the visitor's language).
 - **A purchaser row** (title … email) left out hides that field. **subtotal** left out hides the
   subtotal; the discounts show with the API's names (e.g. "10% Discount [PPL Pass]:").
 - **notFound**, **error**, **loading** (optional): the messages; without them, the visitor's
@@ -64,8 +67,9 @@ the `error` text with Try again. The site's loader shows until the booking is in
 | Location | `orderItems[].propertyDisplayName`, `shortLocation`, `locationName` | the name, then "Near Gate 35, West Hall. Hong Kong International Airport"; a link only if the answer gives a `propertyUrl` |
 | Date, Time | `orderItems[].startDate` | "30-Nov-2026" and "1600", the lounge's local time as given |
 | Guests | `orderItems[].guestsCount.adult`, `.child` | |
-| Services | `orderItems[].productDisplayName` | |
-| Price | `orderItems[].itemPriceDetails.productTotalPrice.totalPrice` | with the item's currency, "HKD 1,763.64" |
+| Services | `orderItems[].productDisplayName` | the lounge service (`serviceType` LOUNGE); the items at the same lounge and start time (`propertyCode`, `startDate`) are one box |
+| Additional Services | the box's other items: `quantity`, `productDisplayName` | "1 x Plaza Premium Lounge Sakura Shrimp Spice (50g)" |
+| Price | `orderItems[].itemPriceDetails.productTotalPrice.totalPrice` | the box's items added up, with their currency, "HKD 1,871.64" |
 | Purchaser | `contactInfo` (`title`, `firstName`, `lastName`, `countryCode` + `contactNumber`, `emailId`), `orderItems[0].countryOfResidence` | read-only; the phone as "(+1) 78787888" |
 | Subtotal, Total | `orderTotalPrice.totalBasePrice`, `.totalPrice` | |
 | Discounts | `orderItems[].itemPriceDetails.discounts[]` (`name`, `value`) | "- HKD 195.96" |
@@ -74,7 +78,7 @@ the `error` text with Try again. The site's loader shows until the booking is in
 ## Look
 
 As the live site: the booking pages' maroon band at the top, right under the header (drawn by the
-block, from 768px; its styles are shared in `styles/booking-steps.css` for other booking blocks); the item's five parts in a row with thin lines between them from 992px (each
+block, from 768px; its styles are shared in `styles/booking-steps.css` for other booking blocks); the item's five parts (six with add-ons) in a row with thin lines between them from 992px (each
 label beside its value), stacked below (each label grey above its maroon value); the purchaser's
 fields two to a row from 992px; the totals on the right, the subtotal and discounts only from 992px
 (as the source); the terms in grey under a black line.

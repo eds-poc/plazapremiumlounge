@@ -5,8 +5,9 @@
 @import url('../../styles/booking-steps.css');
 
 /* view booking: the source Review your Booking page. The title after a back arrow, the order
-   number, one box per booked item (a row of five parts with thin lines between them from 992px,
-   stacked below), the purchaser's read-only fields, the totals (right) and the terms */
+   number, one box per booked lounge visit (a row of five parts, six with add-ons, with thin lines
+   between them from 992px, stacked below), the purchaser's read-only fields, the totals (right)
+   and the terms */
 .view-booking {
   --view-booking-accent: var(--color-brand-primary-action);
   --view-booking-value: var(--color-brand-primary);
@@ -36,14 +37,15 @@ main > .section:has(> .view-booking-wrapper) {
   line-height: var(--line-height-heading);
 }
 
-/* the source's 24px maroon arrow, 15px before the title */
+/* the source's 24px maroon arrow (21px wide, its line as heavy as the source's), 15px before the
+   title */
 .view-booking .view-booking-back {
   display: block;
   flex: none;
-  width: 24px;
+  width: 21px;
   height: 24px;
   background-color: var(--color-brand-primary);
-  mask: url('../../icons/arrow-left-light.svg') center / contain no-repeat;
+  mask: url('../../icons/arrow-left-regular.svg') center / contain no-repeat;
 }
 
 .view-booking .view-booking-message {
@@ -98,12 +100,12 @@ main > .section:has(> .view-booking-wrapper) {
 }
 
 /* the parts' own titles show from 992px (below, the labels say what each value is), except the
-   services' and the price's */
+   services', the additional services' and the price's */
 .view-booking :is(.view-booking-location, .view-booking-date-time, .view-booking-guests) .view-booking-cell-title {
   display: none;
 }
 
-.view-booking .view-booking-services .view-booking-cell-title {
+.view-booking :is(.view-booking-services, .view-booking-additional-services) .view-booking-cell-title {
   color: var(--color-text-secondary);
   font-weight: var(--font-weight-regular);
 }
@@ -192,8 +194,8 @@ main > .section:has(> .view-booking-wrapper) {
   background-color: var(--color-surface-warm);
 }
 
-/* the totals: a black line above, the rows on the right; below 992px only the total (as the
-   source) */
+/* the totals: a black line above, the rows on the right, 30px above and below them (to the terms'
+   line); below 992px only the total (as the source) */
 .view-booking .view-booking-totals {
   display: flex;
   flex-direction: column;
@@ -201,7 +203,7 @@ main > .section:has(> .view-booking-wrapper) {
   gap: var(--spacing-7);
   margin-top: var(--spacing-9);
   border-top: 1px solid var(--view-booking-line);
-  padding-top: var(--spacing-9);
+  padding-block: var(--spacing-9) var(--spacing-7);
 }
 
 .view-booking .view-booking-total-row {
@@ -298,7 +300,7 @@ main > .section:has(> .view-booking-wrapper) {
   }
 }
 
-/* from 992px (the source's desktop): the item's five parts spread in a row (location 250px, price
+/* from 992px (the source's desktop): the item's parts spread in a row (location 250px, price
    8%, the others 15%), a thin line 16px before each but the first; each label (light) beside its
    value; all the totals, half the width, in the source's sizes */
 @media (width >= 992px) {
