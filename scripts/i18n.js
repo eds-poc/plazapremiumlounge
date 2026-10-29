@@ -353,6 +353,10 @@ const TEXTS = {
   profilePoints: {
     en: '{points} (valid until {date})', zh: '{points}（有效期至 {date}）', 'zh-HK': '{points}（有效期至 {date}）', ja: '{points}（{date} まで有効）', pt: '{points} (válido até {date})',
   },
+  // the Booking Steps block's name for screen readers
+  bookingSteps: {
+    en: 'Booking steps', zh: '预订步骤', 'zh-HK': '預訂步驟', ja: '予約の手順', pt: 'Etapas da reserva',
+  },
   // the View Booking block's messages (when the block has no authored text for them)
   bookingLoading: {
     en: 'Loading your booking…', zh: '正在加载您的预订…', 'zh-HK': '正在載入您的預訂…', ja: 'ご予約を読み込んでいます…', pt: 'Carregando sua reserva…',

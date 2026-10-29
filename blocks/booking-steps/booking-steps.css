@@ -1,0 +1,7 @@
+/* the shared band styles (styles/booking-steps.css), loaded with the block's own */
+@import url('../../styles/booking-steps.css');
+
+/* the band's section: no spacing of its own, right under the header */
+main > .section:has(> .booking-steps-wrapper) {
+  padding-block: 0;
+}

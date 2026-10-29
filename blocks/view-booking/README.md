@@ -72,7 +72,8 @@ the `error` text with Try again. The site's loader shows until the booking is in
 
 ## Look
 
-As the live site: the item's five parts in a row with thin lines between them from 992px (each
+As the live site: the booking pages' maroon band at the top, right under the header (drawn by the
+block, from 768px; the same styles as the Booking Steps block, `styles/booking-steps.css`); the item's five parts in a row with thin lines between them from 992px (each
 label beside its value), stacked below (each label grey above its maroon value); the purchaser's
 fields two to a row from 992px; the totals on the right, the subtotal and discounts only from 992px
 (as the source); the terms in grey under a black line.

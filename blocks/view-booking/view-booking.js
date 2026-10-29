@@ -190,7 +190,9 @@ export default function decorate(block) {
   message.hidden = true;
   const body = el('div', 'view-booking-body');
   body.hidden = true;
-  block.replaceChildren(heading, message, body);
+  // the booking pages' maroon band at the top (no steps on this page; styles/booking-steps.css)
+  const band = el('div', 'booking-steps');
+  block.replaceChildren(band, heading, message, body);
 
   const params = new URLSearchParams(window.location.search);
   const orderId = (params.get('bookingid') || params.get('orderId') || '').trim();
