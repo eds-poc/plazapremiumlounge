@@ -1,8 +1,20 @@
 import { buildBlock, decorateBlock, loadBlock } from '../../scripts/aem.js';
 import { buildButton, readNestedButtons } from '../../scripts/buttons.js';
+import apiUrl from '../../scripts/endpoints.js';
 import { labelBareVideoLink, toVideoDialogButton } from '../../scripts/video.js';
 
 const HEADINGS = 'h1, h2, h3, h4, h5, h6';
+// the Booking Widget's scripts (option booking): fetched together, not one after another as each
+// import is found, since the hero shows once the widget is in (its styles aren't hinted: loadBlock
+// fetches them alongside, and loadCSS takes any link to a stylesheet's address as loaded)
+const BOOKING_MODULES = [
+  'blocks/booking-widget/booking-widget.js',
+  'blocks/booking-widget/booking-widget-lounge-card.js',
+  'scripts/booking.js',
+  'scripts/date-picker.js',
+  'scripts/properties.js',
+  'scripts/button-actions.js',
+];
 const BUTTONS_HEADER = /^buttons?\s*(?:\(([^)]*)\))?$/i;
 
 /**
@@ -103,6 +115,31 @@ function decorateVideoPlayback(block) {
 }
 
 /**
+ * Adds a resource hint to the page's head (once per address).
+ * @param {string} rel e.g. modulepreload, preconnect
+ * @param {string} href
+ * @param {Object<string, string>} [attrs]
+ */
+function addHint(rel, href, attrs = {}) {
+  if (document.head.querySelector(`link[rel="${rel}"][href="${href}"]`)) return;
+  const link = document.createElement('link');
+  link.rel = rel;
+  link.href = href;
+  Object.entries(attrs).forEach(([name, value]) => link.setAttribute(name, value));
+  document.head.append(link);
+}
+
+/**
+ * Hints for option booking: the widget's scripts all at once, and a connection to
+ * the booking service, which the widget calls soon after (its locations, then the lounge card).
+ */
+function hintBookingWidget() {
+  const base = window.hlx?.codeBasePath || '';
+  BOOKING_MODULES.forEach((path) => addHint('modulepreload', `${base}/${path}`));
+  addHint('preconnect', apiUrl('geoLocation').origin, { crossorigin: 'anonymous' });
+}
+
+/**
  * Decorates option booking, the source homepage's hero (`.homeBanner-wrapper`): the photo, the
  * title over it, the Booking Widget under the title (option lounge-card: the chosen airport's
  * first lounge appears under the note), then any text after the title (e.g. the booking note with
@@ -111,6 +148,7 @@ function decorateVideoPlayback(block) {
  * @param {Element} block
  */
 async function decorateBooking(block) {
+  hintBookingWidget();
   const picture = block.querySelector('picture');
   const content = el('div', 'hero-content');
   [...block.querySelectorAll(':scope > div > div')].forEach((cell) => {

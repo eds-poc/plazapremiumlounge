@@ -8,6 +8,7 @@
  * the airport's lounge (or keeps the one shown, when only the date, time or guests changed) and
  * answers with its details and its products grouped by service. Railway stations get no card.
  */
+import { loadCSS } from '../../scripts/aem.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { translate } from '../../scripts/i18n.js';
 import {
@@ -25,6 +26,8 @@ const RAILWAY = 'RLWYSTN';
 const PASS = /pass/i;
 
 let count = 0;
+// the service's answers for this page, by request (the same choices again show at once)
+const answers = new Map();
 
 /**
  * Text from an API value, trimmed ('' for anything that isn't text).
@@ -362,14 +365,33 @@ function buildCard(data, choice, id) {
 }
 
 /**
+ * The service's answer for a request: from this page's earlier answers, else asked for (a newer
+ * request cancels it through `signal`).
+ * @param {Object} body
+ * @param {AbortSignal} signal
+ * @returns {Promise<Object>}
+ */
+async function fetchProducts(body, signal) {
+  const key = JSON.stringify(body);
+  if (answers.has(key)) return answers.get(key);
+  const json = await fetchJson(apiUrl('bookingWidgetProducts'), PRODUCTS_TIMEOUT_MS, { body, signal });
+  answers.set(key, json);
+  return json;
+}
+
+/**
  * Adds the lounge card: in its host's place for it (`data-booking-products` inside an element
- * marked `data-booking-products-host`, e.g. the hero's), else after the widget's place.
+ * marked `data-booking-products-host`, e.g. the hero's), else after the widget's place. It shows
+ * once an airport is chosen: its loading skeleton has the usual card's height, so the card
+ * replaces it without moving the page.
  * @param {Element} block The Booking Widget
  * @param {{current: Function}} widget The widget's current choices
  */
-export default function decorateLoungeCard(block, { current }) {
+export default async function decorateLoungeCard(block, { current }) {
   count += 1;
   const id = `booking-widget-card-${count}`;
+  // (its look, before it shows)
+  await loadCSS(`${window.hlx.codeBasePath}/blocks/booking-widget/booking-widget-lounge-card.css`);
   const section = el('div', 'booking-widget-products');
   section.hidden = true;
   const list = el('div', 'booking-widget-products-list');
@@ -402,6 +424,7 @@ export default function decorateLoungeCard(block, { current }) {
   // the lounge shown, so a new date, time or guests keep it (as the source's)
   let shown = null;
   let generation = 0;
+  let request = null;
   /** Shows the airport's featured lounge for the widget's choices. */
   const show = async () => {
     const choice = current();
@@ -419,12 +442,15 @@ export default function decorateLoungeCard(block, { current }) {
     };
     // (railway stations get no lounge card)
     if (choice.location.type === RAILWAY) {
+      request?.abort();
       fallback();
       return;
     }
     section.setAttribute('aria-busy', 'true');
     status.textContent = translate('propertyLoading');
     list.replaceChildren(buildSkeleton());
+    request?.abort();
+    request = new AbortController();
     const body = {
       selectedAirport: choice.airport,
       selectedDate: choice.date,
@@ -437,7 +463,7 @@ export default function decorateLoungeCard(block, { current }) {
       languageCode: getApiLanguage(),
     };
     try {
-      const data = readCard(await fetchJson(apiUrl('bookingWidgetProducts'), PRODUCTS_TIMEOUT_MS, { body }));
+      const data = readCard(await fetchProducts(body, request.signal));
       if (stale()) return;
       if (data.state === 'none') {
         // eslint-disable-next-line no-console

@@ -139,7 +139,7 @@ choices in the address:
 | Nothing matches | "No airports found matching "…"" |
 | The locations service fails (an error, 15 seconds, not JSON, no locations in the answer) | "We couldn't load the airports." and Try again; no airport is chosen |
 | The nearest airport can't be found, or isn't in Where | Where stays empty (and the hero shows no card) until the visitor chooses |
-| The lounge card is loading | A shimmering card ("Loading…" for screen readers) |
+| The lounge card is loading | A shimmering card at the usual card's height, so the card replaces it without moving the page ("Loading…" for screen readers) |
 | Nothing bookable at that time (e.g. "Property lead time is not met", DCPE060; not available, DCPE061) | No card; "View all properties in {airport}" (the reason goes to the browser console) |
 | The service fails (an HTTP error, no answer within 20 seconds, not JSON, statusCode not 200) | The same |
 | Online booking is off for the lounge | The card with "Currently Unavailable" |
@@ -150,8 +150,8 @@ choices in the address:
 - **Data:** `apiUrl('geoLocation')` in `scripts/endpoints.js` (getGeoLocation, GET) is the booking
   system's service (its own domain, with the live site's codes), with `languageCode` (the page's
   API language).
-  - It's loaded once per page, for every form on it: by the homepage hero's form once the page
-    has loaded, by the Book Now dialog's when it opens, else when the visitor first comes to a
+  - It's loaded once per page, for every form on it: by the homepage hero's form once its photo
+    (or the page) has loaded, by the Book Now dialog's when it opens, else when the visitor first comes to a
     form (pointer, focus or touch). The form's submit button is disabled until then. It isn't
     cached (`no-store`: the nearest airport is the visitor's).
   - The answer → Where (each of `data`):
@@ -177,7 +177,8 @@ choices in the address:
     `{ airport, date, time, adult, children, url }`. Cancel it (`preventDefault`) to handle the
     search in place.
   - `booking-widget:change`, half a second after the last change of the location, date, time or
-    guests, with the same `detail` plus `location` (the chosen location).
+    guests (straight after a location chosen for the visitor: the nearest airport, or a script's),
+    with the same `detail` plus `location` (the chosen location).
   - `booking-widget:book`, from the lounge card's Book Now, with the choice plus `propertyCode`,
     `serviceCode`, `productCode` and `catalogueCode` (for the booking step to come).
 - **Choosing a location from a script:** send
@@ -185,8 +186,17 @@ choices in the address:
   `block.dispatchEvent(new CustomEvent('booking-widget:set-location', { detail: { airport: 'HKG' } }))`.
   The location is chosen as if the visitor had picked it (the lounge card follows), instead of the
   nearest airport.
-- **Lounge card** (`booking-widget-lounge-card.js`, option `lounge-card`, added by the hero; not
-  in a dialog):
+- **Lounge card** (`booking-widget-lounge-card.js` and its own `booking-widget-lounge-card.css`,
+  loaded with it, so other pages don't load the card's styles; option `lounge-card`, added by the
+  hero; not in a dialog):
+  - Its skeleton has the usual card's height per width (block variable
+    `--booking-widget-card-skeleton-height`), so the card replaces it without moving the page. It
+    shows once an airport is chosen, not before: reserving the place from the start moved the page
+    a lot more whenever no airport was found (measured CLS 0.29 on phones).
+  - A newer choice cancels the request before it; answers are kept for the page, so the same
+    choices again show at once.
+  - The hero hints the widget's scripts (`modulepreload`) and a connection to the booking service
+    (`preconnect`), so its first view doesn't wait for one import after another.
   - One call: `apiUrl('bookingWidgetProducts')` (getbookingwidgetproducts, POST) with
     `{ selectedAirport, selectedDate (YYYY-MM-DD), selectedTime (HHmm), adult, children,
     promocode: '', propertyCode, languageCode }`. `propertyCode` is the lounge shown when only the

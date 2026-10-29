@@ -225,7 +225,8 @@ function field(className, label, ...controls) {
  * the visitor types, and says when nothing matches). A combobox: the arrow keys move through the
  * list, Enter chooses, Escape closes. Only a chosen location counts; typing again forgets it.
  * @param {string} id
- * @param {Function} onPick Called with the chosen location
+ * @param {Function} onPick Called with the chosen location, and whether it was chosen for the
+ *   visitor (the nearest airport, or a script's choice) rather than by them
  * @returns {Object}
  */
 function buildWhere(id, onPick) {
@@ -339,13 +340,13 @@ function buildWhere(id, onPick) {
     }
   };
 
-  const pick = (loc) => {
+  const pick = (loc, auto = false) => {
     touched = true;
     chosen = loc;
     input.value = loc.label;
     showError(false);
     close();
-    onPick(loc);
+    onPick(loc, auto);
   };
 
   /**
@@ -357,7 +358,8 @@ function buildWhere(id, onPick) {
   const load = () => loadLocations()
     .then((answer) => {
       ({ locations } = answer);
-      if (answer.nearest && !touched && document.activeElement !== input) pick(answer.nearest);
+      const nearest = !touched && document.activeElement !== input && answer.nearest;
+      if (nearest) pick(nearest, true);
       else if (isOpen()) render();
     })
     .catch((err) => {
@@ -428,7 +430,7 @@ function buildWhere(id, onPick) {
       return false;
     }
     const loc = locations.find((l) => l.code === String(code || '').trim().toUpperCase());
-    if (loc) pick(loc);
+    if (loc) pick(loc, true);
     return !!loc;
   };
 
@@ -699,10 +701,11 @@ export default function decorate(block) {
     announce();
   });
 
-  const where = buildWhere(id, (loc) => {
+  const where = buildWhere(id, (loc, auto) => {
     place = loc;
     refresh();
-    announce();
+    // (a choice made for the visitor needs no pause for more changes)
+    announce(auto);
   });
   const guests = buildGuests(id);
   guests.element.addEventListener('change', () => announce());
@@ -727,11 +730,16 @@ export default function decorate(block) {
     started ||= where.load().finally(() => { submit.disabled = false; });
   };
   ['pointerover', 'focusin', 'touchstart'].forEach((type) => form.addEventListener(type, start, { once: true, passive: true }));
-  // outside a dialog (the homepage hero), once the page has loaded, so the visitor's nearest
-  // airport is chosen without them; in the Book Now dialog, when it opens (the form shows)
+  // outside a dialog (the homepage hero), once its photo has loaded (so the request doesn't
+  // compete with it) or the page has, whichever comes first, so the visitor's nearest airport is
+  // chosen without them; in the Book Now dialog, when it opens (the form shows)
   if (!inModal) {
-    if (document.readyState === 'complete') start();
-    else window.addEventListener('load', start, { once: true });
+    const photo = block.closest('.hero')?.querySelector('.hero-media img');
+    if (document.readyState === 'complete' || (photo?.complete && photo.naturalWidth)) start();
+    else {
+      window.addEventListener('load', start, { once: true });
+      ['load', 'error'].forEach((type) => photo?.addEventListener(type, start, { once: true }));
+    }
   } else {
     const shown = new IntersectionObserver((entries) => {
       if (!entries.some((e) => e.isIntersecting)) return;
@@ -764,14 +772,15 @@ export default function decorate(block) {
     };
   };
 
-  // the choices, half a second after the last change (as the source's results)
+  // the choices, half a second after the last change (as the source's results), or straight after
+  // (in a task of their own, so the listeners' work doesn't lengthen the choosing one)
   let timer;
-  announce = () => {
+  announce = (now = false) => {
     clearTimeout(timer);
     timer = setTimeout(() => {
       const detail = current();
       if (detail) block.dispatchEvent(new CustomEvent('booking-widget:change', { bubbles: true, detail }));
-    }, ANNOUNCE_DELAY_MS);
+    }, now ? 0 : ANNOUNCE_DELAY_MS);
   };
   block.addEventListener('booking-widget:set-location', (e) => where.pickCode(e.detail?.airport));
 
