@@ -68,14 +68,14 @@
 }
 
 /* as the source's `.loungeCard`: 12px above and below the content, then a line and 30px to the
-   next card */
+   next card; the line the source's #ccc (the site's token of that grey is the disabled one) */
 .booking-list .booking-list-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   row-gap: var(--spacing-7);
   margin: 0 0 var(--spacing-9);
   padding-block: var(--spacing-5);
-  border-bottom: var(--base-border-width) solid var(--color-border);
+  border-bottom: var(--base-border-width) solid var(--color-disabled-bg);
 }
 
 /* the photos and the details keep the source's 12px column padding */
