@@ -25,6 +25,10 @@ const ENDPOINTS = {
   getProfile: '/api/v1/web/app_demo/GetProfile',
   // a booking (order) of the logged-in member (POST, JSON: orderId; Authorization: Bearer <jwt>)
   getOrderDetail: '/api/v1/web/app_demo/GetOrderDetail',
+  // the add-ons on sale for a booking's lounge and start time (POST, JSON: orderId, startDateTime,
+  // propertyCode, iataCode, currencyCode; Authorization: Bearer <jwt>): a placeholder path until
+  // the add-ons API exists (answer: see blocks/edit-booking/README.md)
+  getAddOns: '/api/v1/web/app_demo/GetAddOns',
   propertyDetail: '/api/v1/web/app_demo/GetPropertyDetail',
   // a lounge's bookable services and their products for a start time (POST, JSON body)
   propertyServices: '/api/v1/web/app_demo/GetServices',

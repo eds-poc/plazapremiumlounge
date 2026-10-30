@@ -270,6 +270,21 @@ main > .section:has(> .edit-booking-wrapper) {
   border-top: 1px solid var(--edit-booking-line);
 }
 
+/* the note when the add-ons can't be changed (the source's red message) */
+.edit-booking .edit-booking-addons-note {
+  margin: 0 0 var(--spacing-6);
+  color: var(--color-error);
+}
+
+.edit-booking .edit-booking-addons-note p {
+  margin: 0;
+}
+
+.edit-booking .edit-booking-addons-note a:any-link {
+  color: inherit;
+  text-decoration: underline;
+}
+
 .edit-booking .edit-booking-addon-list {
   margin: 0;
   padding: 0;
@@ -368,6 +383,35 @@ main > .section:has(> .edit-booking-wrapper) {
    the changes to confirm */
 .edit-booking-popup {
   --form-row-gap: var(--spacing-6);
+}
+
+/* an add-on's description (14px, its links underlined), its image (at most 200px tall) and unit */
+.edit-booking-popup .edit-booking-addon-details {
+  display: grid;
+  gap: var(--spacing-4);
+  font-size: var(--font-size-sm);
+}
+
+.edit-booking-popup .edit-booking-addon-description :is(p, ul, ol) {
+  margin: 0 0 var(--spacing-3);
+}
+
+.edit-booking-popup .edit-booking-addon-description a:any-link {
+  color: var(--color-brand-primary);
+  text-decoration: underline;
+}
+
+.edit-booking-popup .edit-booking-addon-image {
+  display: block;
+  width: 100%;
+  max-height: 200px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+}
+
+.edit-booking-popup .edit-booking-addon-unit {
+  margin: 0;
+  font-weight: var(--font-weight-medium);
 }
 
 .edit-booking-popup .edit-booking-quantity {

@@ -1,6 +1,8 @@
-import { getToken } from '../../scripts/auth.js';
+import apiUrl from '../../scripts/endpoints.js';
+import { authHeaders, getToken } from '../../scripts/auth.js';
 import { translate } from '../../scripts/i18n.js';
 import { openModal } from '../../scripts/modal-dialog.js';
+import { safeHtml, toUrl } from '../../scripts/properties.js';
 import {
   bookingId, bookingLoader, dayText, fetchOrder, groupItems, itemPrice, money, orderCurrency,
   readTexts,
@@ -81,12 +83,67 @@ function minutesOf(time) {
 }
 
 /**
+ * An API value as a number, or undefined when it isn't one (empty, missing, text).
+ * @param {*} value
+ * @returns {number|undefined}
+ */
+function toNumber(value) {
+  if (value === '' || value === null || value === undefined) return undefined;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : undefined;
+}
+
+/**
+ * A POST to an API endpoint (JSON both ways; with the login token when `login`): its answer, or a
+ * rejection when it fails, answers an error or is cancelled.
+ * @param {string} name An endpoints.js key
+ * @param {object} body
+ * @param {AbortSignal} signal
+ * @param {boolean} [login]
+ * @returns {Promise<object>}
+ */
+function postJson(name, body, signal, login = false) {
+  return fetch(apiUrl(name), {
+    method: 'POST',
+    headers: { ...(login ? authHeaders() : {}), 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    signal,
+  }).then((res) => {
+    if (!res.ok) throw new Error(`${name} ${res.status}`);
+    return res.json();
+  });
+}
+
+/**
+ * An add-on's description (API HTML) as safe content: paragraphs, lists, bold and italic, and
+ * links to web pages only (opening in a new tab).
+ * @param {string} html
+ * @returns {DocumentFragment}
+ */
+function safeDescription(html) {
+  // scripts, styles and frames dropped with their text (the rest keeps only its text)
+  const source = new DOMParser().parseFromString(html || '', 'text/html').body;
+  source.querySelectorAll('script, style, template, noscript, iframe, object').forEach((n) => n.remove());
+  const content = safeHtml(source.innerHTML, { blocks: true });
+  content.querySelectorAll('a').forEach((a) => {
+    if (!/^https?:$/.test(new URL(a.href, window.location.href).protocol)) {
+      a.replaceWith(...a.childNodes);
+      return;
+    }
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+  });
+  return content;
+}
+
+/**
  * Decorates the Edit Booking block: a member's booking to change (the source Edit Your Booking
  * page), from GetOrderDetail for the address's `bookingid`, with the member's login token: the
- * date, the start time and the service, and the booking's additional services, with a summary that
- * follows the choices. Once something changed, Submit & Review Changes asks for a confirmation;
- * saving waits for the booking change API (the confirmation's button stays disabled). Authors
- * write the texts (Key | Text rows, see README).
+ * date, the start time and the service (the lounge's products for that time, GetServices), and
+ * the additional services (the booked ones and the ones on sale for that time, GetAddOns), with a
+ * summary that follows the choices. Once something changed, Submit & Review Changes asks for a
+ * confirmation; saving waits for the booking change API (the confirmation's button stays
+ * disabled). Authors write the texts (Key | Text rows, see README).
  * @param {Element} block The Edit Booking block element
  */
 export default function decorate(block) {
@@ -173,19 +230,40 @@ export default function decorate(block) {
     const adults = Number(guests.adult) || 0;
     const children = Number(guests.child) || 0;
     const address = [item.shortLocation, item.locationName].map((p) => String(p || '').trim()).filter(Boolean).join(', ');
-    const services = [{ code: item.productCode || 'booked', name: item.productDisplayName || item.productName || '' }];
+    // the services to choose from: the booked one until GetServices answers for the time
+    const bookedService = { code: item.productCode || 'booked', name: item.productDisplayName || item.productName || '' };
+    let services = [bookedService];
+
+    // the additional services by product code: the booked ones (their price as booked), then the
+    // ones on sale for the chosen time (GetAddOns: their prices, stock, description and image)
+    const addOnCode = (addOn) => addOn.productCode || addOn.productDisplayName;
+    const catalog = new Map(booked.map((addOn) => {
+      const qty = Number(addOn.quantity) || 1;
+      const rates = addOn.itemPriceDetails?.baseRate || [];
+      const rate = (group) => {
+        const r = rates.find((x) => x.groups === group);
+        return r && Number(r.count) ? Number(r.price) / Number(r.count) : 0;
+      };
+      return [addOnCode(addOn), {
+        name: addOn.productDisplayName || addOn.productName || '',
+        basedOn: addOn.basedOn || '',
+        unitPrice: itemPrice(addOn) / qty,
+        adultPrice: rate('adult'),
+        childPrice: rate('child'),
+        booked: true,
+      }];
+    }));
+    let addOnsUnavailable = false;
 
     // the booking as booked, and as the visitor changes it
     const original = {
       day: start?.[1] || '',
       time: start?.[2] ? `${start[2]}${start[3]}` : '',
-      service: services[0].code,
-      addOns: new Map(booked.map((addOn) => [
-        addOn.productCode || addOn.productDisplayName, Number(addOn.quantity) || 1,
-      ])),
+      service: bookedService.code,
+      addOns: new Map(booked.map((addOn) => [addOnCode(addOn), Number(addOn.quantity) || 1])),
     };
     const state = { ...original, addOns: new Map(original.addOns) };
-    const serviceName = (code) => services.find((s) => s.code === code)?.name || '';
+    const serviceName = (code) => [...services, bookedService].find((x) => x.code === code)?.name || '';
     const guestsText = (withChildren) => [
       adults ? `${adults} ${text('adults') || ''}`.trim() : '',
       children || withChildren ? `${children} ${text('children') || ''}`.trim() : '',
@@ -209,13 +287,18 @@ export default function decorate(block) {
     const fitTimes = (select, day) => {
       [...select.options].forEach((option) => { option.disabled = !bookable(day, option.value); });
     };
+    const serviceSelects = [];
+    const fillServices = (select) => {
+      select.replaceChildren(...services.map((x) => {
+        const option = el('option', '', x.name);
+        option.value = x.code;
+        return option;
+      }));
+    };
     const serviceSelect = (className) => {
       const select = el('select', className);
-      services.forEach((service) => {
-        const option = el('option', '', service.name);
-        option.value = service.code;
-        select.append(option);
-      });
+      fillServices(select);
+      serviceSelects.push(select);
       return select;
     };
     const field = (label, control, className = '') => {
@@ -283,10 +366,7 @@ export default function decorate(block) {
     const time = timeSelect('form-input form-select');
     const timeWrap = el('div', 'edit-booking-time');
     timeWrap.append(time, el('span', 'edit-booking-hrs', text('hours')));
-    const guestPill = (value) => {
-      const pill = el('output', 'edit-booking-count', value);
-      return pill;
-    };
+    const guestPill = (value) => el('output', 'edit-booking-count', value);
     const childLabel = el('span', '', text('children'));
     const service = serviceSelect('form-input form-select');
     form.append(
@@ -324,24 +404,12 @@ export default function decorate(block) {
     lounge.append(panel);
     main.append(lounge);
 
-    // the additional services: the booking's add-ons (the ones on sale need the add-ons API)
+    // the additional services: a title over a line, then one row per add-on with Add or Edit
     const extras = el('section', 'edit-booking-addons');
-    const addOnRows = new Map();
-    if (booked.length) {
-      extras.append(el('h2', 'edit-booking-addons-title', text('additionalService')), el('hr'));
-      const list = el('ul', 'edit-booking-addon-list');
-      booked.forEach((addOn) => {
-        const code = addOn.productCode || addOn.productDisplayName;
-        const li = el('li', 'edit-booking-addon');
-        const name = el('span', 'edit-booking-addon-name', addOn.productDisplayName || addOn.productName || '');
-        const action = button('edit-booking-addon-button');
-        li.append(name, action);
-        list.append(li);
-        addOnRows.set(code, { addOn, action });
-      });
-      extras.append(list);
-      main.append(extras);
-    }
+    const addOnList = el('ul', 'edit-booking-addon-list');
+    const addOnNote = el('div', 'edit-booking-addons-note');
+    const addOnActions = new Map();
+    main.append(extras);
 
     const submit = button('button primary edit-booking-submit', text('submit'));
     submit.hidden = true;
@@ -368,16 +436,14 @@ export default function decorate(block) {
       node.replaceChildren(value);
       if (value && text('hours')) node.append(el('span', 'edit-booking-unit', text('hours')));
     };
+    const qtyOf = (code, map = state.addOns) => map.get(code) || 0;
     const changed = () => state.day !== original.day || state.time !== original.time
       || state.service !== original.service
-      || [...state.addOns].some(([code, qty]) => original.addOns.get(code) !== qty);
+      || [...catalog.keys()].some((code) => qtyOf(code) !== qtyOf(code, original.addOns));
     const servicesNodes = () => {
       const nodes = [el('span', 'edit-booking-service', serviceName(state.service))];
-      state.addOns.forEach((qty, code) => {
-        if (qty > 0) {
-          const { addOn } = addOnRows.get(code);
-          nodes.push(el('span', 'edit-booking-service', `${qty} x ${addOn.productDisplayName || addOn.productName || ''}`));
-        }
+      catalog.forEach((entry, code) => {
+        if (qtyOf(code) > 0) nodes.push(el('span', 'edit-booking-service', `${qtyOf(code)} x ${entry.name}`));
       });
       return nodes;
     };
@@ -388,7 +454,7 @@ export default function decorate(block) {
       date.shown.textContent = dayText(state.day);
       fitTimes(time, state.day);
       time.value = state.time;
-      service.value = state.service;
+      serviceSelects.forEach((select) => { select.value = state.service; });
       rowDate.value.textContent = dayText(state.day);
       timeValue(state.time, rowTime.value);
       rowGuests.value.textContent = guestsText(true);
@@ -397,24 +463,11 @@ export default function decorate(block) {
       timeValue(state.time, sumTime);
       sumGuests.textContent = guestsText(false);
       sumServices.replaceChildren(...servicesNodes());
-      addOnRows.forEach(({ action }, code) => {
-        action.textContent = (state.addOns.get(code) || 0) > 0 ? text('edit') : text('add');
+      addOnActions.forEach((action, code) => {
+        action.textContent = qtyOf(code) > 0 ? text('edit') : text('add');
       });
       submit.hidden = !changed();
     };
-    // a day changed: a start time no longer bookable moves to the first that is
-    const setDay = (day) => {
-      if (!day) return;
-      state.day = day;
-      if (!bookable(day, state.time)) {
-        state.time = TIMES.find((t) => bookable(day, t)) || state.time;
-      }
-      refresh();
-    };
-
-    date.input.addEventListener('change', () => setDay(date.input.value));
-    time.addEventListener('change', () => { state.time = time.value; refresh(); });
-    service.addEventListener('change', () => { state.service = service.value; refresh(); });
 
     /**
      * A popup (the site's modal): its title, its content, and a Confirm button.
@@ -443,6 +496,209 @@ export default function decorate(block) {
       return ok;
     };
 
+    /**
+     * An add-on's popup (built on its first open): its description, image and unit, the quantity
+     * (per unit, up to its stock) or the adults and children it's for (per person, with All
+     * guests), and its total from the unit prices.
+     * @param {string} code
+     * @returns {() => void} opens it
+     */
+    const addOnPopups = new Map();
+    const addOnPopup = (code) => {
+      if (addOnPopups.has(code)) return addOnPopups.get(code);
+      const entry = catalog.get(code);
+      const perPerson = /person/i.test(entry.basedOn);
+      const total = el('b', 'edit-booking-total');
+      const stepper = (label, limit) => {
+        const wrap = el('div', 'edit-booking-stepper');
+        const minus = button('edit-booking-step', '−');
+        const plus = button('edit-booking-step', '+');
+        const value = el('output', 'edit-booking-qty', 0);
+        minus.setAttribute('aria-label', `${label} −`);
+        plus.setAttribute('aria-label', `${label} +`);
+        const set = (n) => {
+          value.value = String(Math.max(0, Math.min(limit(), n)));
+          minus.disabled = Number(value.value) <= 0;
+          plus.disabled = Number(value.value) >= limit();
+        };
+        const step = (by) => {
+          set(Number(value.value) + by);
+          wrap.dispatchEvent(new Event('change', { bubbles: true }));
+        };
+        minus.addEventListener('click', () => step(-1));
+        plus.addEventListener('click', () => step(1));
+        const line = el('div', 'edit-booking-quantity');
+        line.append(el('span', 'edit-booking-quantity-label', label), wrap);
+        wrap.append(minus, value, plus);
+        return { line, set, get: () => Number(value.value) };
+      };
+      // per unit: up to the stock left plus the booked quantity (99 when the stock isn't known)
+      const stock = () => (entry.stock === undefined
+        ? 99 : entry.stock + qtyOf(code, original.addOns));
+      const lines = perPerson
+        ? [stepper(text('adults'), () => adults), stepper(text('children'), () => children)]
+        : [stepper(text('quantity'), stock)];
+      const all = el('label', 'form-check-label edit-booking-all');
+      const allBox = el('input', 'form-check-input');
+      allBox.type = 'checkbox';
+      all.prepend(allBox, ` ${text('allGuests')}`);
+      const updateTotal = () => {
+        const amount = perPerson
+          ? lines[0].get() * entry.adultPrice + lines[1].get() * entry.childPrice
+          : lines[0].get() * entry.unitPrice;
+        total.textContent = money(amount, entry.currency || currency);
+        if (perPerson) allBox.checked = lines[0].get() === adults && lines[1].get() === children;
+      };
+      allBox.addEventListener('change', () => {
+        lines[0].set(allBox.checked ? adults : 0);
+        lines[1].set(allBox.checked ? children : 0);
+        updateTotal();
+      });
+      const details = el('div', 'edit-booking-addon-details');
+      const box = el('div', 'edit-booking-addon-popup');
+      box.addEventListener('change', updateTotal);
+      const totalLine = el('p', 'edit-booking-total-line');
+      totalLine.append(el('span', '', text('serviceTotal')), ' ', total);
+      box.append(...lines.map((l) => l.line));
+      if (perPerson && text('allGuests')) box.append(all);
+      box.append(totalLine);
+      const save = button('button tertiary edit-booking-addon-save');
+      save.addEventListener('click', () => {
+        state.addOns.set(code, perPerson ? lines[0].get() + lines[1].get() : lines[0].get());
+        refresh();
+        save.closest('dialog')?.close();
+      });
+      const open = () => {
+        // the details as the latest answer gives them
+        details.replaceChildren();
+        if (entry.description) details.append(el('div', 'edit-booking-addon-description'));
+        details.firstChild?.append(safeDescription(entry.description));
+        if (entry.image) {
+          const img = el('img', 'edit-booking-addon-image');
+          img.src = entry.image;
+          img.alt = entry.name;
+          img.loading = 'lazy';
+          details.append(img);
+        }
+        if (entry.unitLabel) details.append(el('p', 'edit-booking-addon-unit', entry.unitLabel));
+        const qty = qtyOf(code);
+        if (perPerson) {
+          lines[0].set(Math.min(qty, adults));
+          lines[1].set(Math.max(0, qty - adults));
+        } else lines[0].set(qty);
+        save.textContent = qty > 0 ? text('update') : text('add');
+        updateTotal();
+        popup(`addon-${code}`, entry.name, () => [details, box, save], addOnActions.get(code));
+      };
+      addOnPopups.set(code, open);
+      return open;
+    };
+
+    // the add-ons' rows (the section shows when there are add-ons, or the note that they can't be
+    // changed)
+    const renderAddOns = () => {
+      addOnActions.clear();
+      addOnList.replaceChildren(...[...catalog].map(([code, entry]) => {
+        const li = el('li', 'edit-booking-addon');
+        const action = button('edit-booking-addon-button');
+        action.addEventListener('click', () => addOnPopup(code)());
+        addOnActions.set(code, action);
+        li.append(el('span', 'edit-booking-addon-name', entry.name), action);
+        return li;
+      }));
+      // the note as authored (its link to customer service kept)
+      const note = addOnsUnavailable ? texts.get('addonsunavailable') : null;
+      addOnNote.replaceChildren(...[...(note?.childNodes || [])].map((n) => n.cloneNode(true)));
+      extras.replaceChildren(el('h2', 'edit-booking-addons-title', text('additionalService')), el('hr'));
+      if (note) extras.append(addOnNote);
+      extras.append(addOnList);
+      extras.hidden = !catalog.size && !note;
+    };
+
+    // the lounge's products and add-ons for the chosen day and time (a newer request cancels an
+    // older one). On a failure the lists stay as they are (the booked service, the booked add-ons)
+    let pending;
+    const loadOptions = () => {
+      pending?.abort();
+      pending = new AbortController();
+      const { signal } = pending;
+      const startDateTime = `${state.day} ${state.time.slice(0, 2)}:${state.time.slice(2)}:00`;
+      const where = {
+        propertyCode: item.propertyCode, iataCode: item.iataCode, currencyCode: currency,
+      };
+      const atBooking = state.day === original.day && state.time === original.time;
+
+      postJson('propertyServices', { startDateTime, ...where }, signal).then((json) => {
+        const list = Array.isArray(json?.items) ? json.items : [];
+        const match = list.find((x) => x.serviceCode && x.serviceCode === item.serviceCode)
+          || list.find((x) => String(x.serviceType).toUpperCase() === 'LOUNGE');
+        const products = (match?.availableProducts || [])
+          .filter((p) => p.productCode)
+          .map((p) => ({ code: p.productCode, name: p.displayName || p.productCode }));
+        // the booked product stays on the list at the booked time
+        if (atBooking && !products.some((p) => p.code === bookedService.code)) {
+          products.unshift(bookedService);
+        }
+        if (!products.length) return;
+        services = products;
+        if (!services.some((p) => p.code === state.service)) state.service = services[0].code;
+        serviceSelects.forEach(fillServices);
+        refresh();
+      }).catch(() => { /* the list as it is */ });
+
+      postJson('getAddOns', { orderId, startDateTime, ...where }, signal, true).then((json) => {
+        const list = (Array.isArray(json?.items) ? json.items : []).filter((x) => x.productCode);
+        // the ones on sale before, not booked and no longer on sale, leave (and their quantity)
+        [...catalog].forEach(([code, entry]) => {
+          if (!entry.booked && !list.some((x) => x.productCode === code)) {
+            catalog.delete(code);
+            state.addOns.delete(code);
+            addOnPopups.delete(code);
+          }
+        });
+        list.forEach((x) => {
+          const entry = catalog.get(x.productCode) || { booked: false };
+          Object.assign(entry, {
+            name: String(x.displayName || entry.name || x.productCode),
+            basedOn: String(x.basedOn || entry.basedOn || ''),
+            unitPrice: toNumber(x.unitPrice) ?? (entry.unitPrice || 0),
+            adultPrice: toNumber(x.adultUnitPrice) ?? (entry.adultPrice || 0),
+            childPrice: toNumber(x.childUnitPrice) ?? (entry.childPrice || 0),
+            stock: toNumber(x.availableInventory),
+            currency: String(x.currency || ''),
+            description: String(x.description || ''),
+            image: toUrl(x.image),
+            unitLabel: String(x.unitLabel || ''),
+          });
+          catalog.set(x.productCode, entry);
+        });
+        // none on sale for a booking with add-ons: the source's note that they can't be changed
+        addOnsUnavailable = !list.length && booked.length > 0;
+        renderAddOns();
+        refresh();
+      }).catch(() => { /* the booked add-ons only */ });
+    };
+
+    // a day changed: a start time no longer bookable moves to the first that is
+    const setDay = (day) => {
+      if (!day) return;
+      state.day = day;
+      if (!bookable(day, state.time)) {
+        state.time = TIMES.find((t) => bookable(day, t)) || state.time;
+      }
+      refresh();
+      loadOptions();
+    };
+    const setTime = (value) => {
+      state.time = value;
+      refresh();
+      loadOptions();
+    };
+
+    date.input.addEventListener('change', () => setDay(date.input.value));
+    time.addEventListener('change', () => setTime(time.value));
+    service.addEventListener('change', () => { state.service = service.value; refresh(); });
+
     // the phone popups: date, time, service
     const popDate = el('input', 'form-input edit-booking-popup-date');
     popDate.type = 'date';
@@ -458,8 +714,7 @@ export default function decorate(block) {
       fitTimes(popTime, state.day);
       popTime.value = state.time;
       popup('time', text('time'), () => [
-        field(text('time'), popTime),
-        confirmButton(() => { state.time = popTime.value; refresh(); }),
+        field(text('time'), popTime), confirmButton(() => setTime(popTime.value)),
       ], rowTime.edit);
     });
     const popService = serviceSelect('form-input form-select');
@@ -470,80 +725,6 @@ export default function decorate(block) {
         field(title, popService),
         confirmButton(() => { state.service = popService.value; refresh(); }),
       ], rowService.edit);
-    });
-
-    // an add-on's popup: the quantity (per unit) or the guests it's for (per person), its total
-    addOnRows.forEach(({ addOn, action }, code) => {
-      const perPerson = /person/i.test(addOn.basedOn || '');
-      const bookedQty = Number(addOn.quantity) || 1;
-      const rates = addOn.itemPriceDetails?.baseRate || [];
-      const rate = (group) => {
-        const r = rates.find((x) => x.groups === group);
-        return r && Number(r.count) ? Number(r.price) / Number(r.count) : 0;
-      };
-      const unit = itemPrice(addOn) / bookedQty;
-      const total = el('b', 'edit-booking-total');
-      const stepper = (label, max) => {
-        const wrap = el('div', 'edit-booking-stepper');
-        const minus = button('edit-booking-step', '−');
-        const plus = button('edit-booking-step', '+');
-        const value = el('output', 'edit-booking-qty', 0);
-        minus.setAttribute('aria-label', `${label} −`);
-        plus.setAttribute('aria-label', `${label} +`);
-        const set = (n) => {
-          value.value = String(Math.max(0, Math.min(max, n)));
-          minus.disabled = Number(value.value) <= 0;
-          plus.disabled = Number(value.value) >= max;
-        };
-        minus.addEventListener('click', () => { set(Number(value.value) - 1); wrap.dispatchEvent(new Event('change', { bubbles: true })); });
-        plus.addEventListener('click', () => { set(Number(value.value) + 1); wrap.dispatchEvent(new Event('change', { bubbles: true })); });
-        const line = el('div', 'edit-booking-quantity');
-        line.append(el('span', 'edit-booking-quantity-label', label), wrap);
-        wrap.append(minus, value, plus);
-        return { line, set, get: () => Number(value.value) };
-      };
-      const lines = perPerson
-        ? [stepper(text('adults'), adults), stepper(text('children'), children)]
-        : [stepper(text('quantity'), 99)];
-      const all = el('label', 'form-check-label edit-booking-all');
-      const allBox = el('input', 'form-check-input');
-      allBox.type = 'checkbox';
-      all.prepend(allBox, ` ${text('allGuests')}`);
-      const updateTotal = () => {
-        const amount = perPerson
-          ? lines[0].get() * rate('adult') + lines[1].get() * rate('child')
-          : lines[0].get() * unit;
-        total.textContent = money(amount, currency);
-        if (perPerson) allBox.checked = lines[0].get() === adults && lines[1].get() === children;
-      };
-      allBox.addEventListener('change', () => {
-        lines[0].set(allBox.checked ? adults : 0);
-        lines[1].set(allBox.checked ? children : 0);
-        updateTotal();
-      });
-      const box = el('div', 'edit-booking-addon-popup');
-      box.addEventListener('change', updateTotal);
-      const totalLine = el('p', 'edit-booking-total-line');
-      totalLine.append(el('span', '', text('serviceTotal')), ' ', total);
-      box.append(...lines.map((l) => l.line));
-      if (perPerson && text('allGuests')) box.append(all);
-      box.append(totalLine);
-      const save = button('button edit-booking-addon-save', text('update'));
-      save.addEventListener('click', () => {
-        const qty = perPerson ? lines[0].get() + lines[1].get() : lines[0].get();
-        state.addOns.set(code, qty);
-        refresh();
-        save.closest('dialog')?.close();
-      });
-      action.addEventListener('click', () => {
-        const qty = state.addOns.get(code) || 0;
-        if (perPerson) {
-          lines[0].set(Math.min(qty, adults));
-          lines[1].set(Math.max(0, qty - adults));
-        } else lines[0].set(qty);
-        updateTotal();
-        popup(`addon-${code}`, addOn.productDisplayName || addOn.productName || '', () => [box, save], action);
-      });
     });
 
     // Submit & Review Changes: the changes, old → new, to confirm (saving waits for the API)
@@ -565,9 +746,9 @@ export default function decorate(block) {
       if (state.day !== original.day) lines.push([text('summaryDate'), dayText(original.day), dayText(state.day)]);
       if (state.time !== original.time) lines.push([text('summaryTime'), original.time, state.time]);
       if (state.service !== original.service) lines.push([text('summaryServices'), serviceName(original.service), serviceName(state.service)]);
-      state.addOns.forEach((qty, code) => {
-        const before = original.addOns.get(code) || 0;
-        if (qty !== before) lines.push([`${addOnRows.get(code).addOn.productDisplayName || ''}:`, before, qty]);
+      catalog.forEach((entry, code) => {
+        const before = qtyOf(code, original.addOns);
+        if (qtyOf(code) !== before) lines.push([`${entry.name}:`, before, qtyOf(code)]);
       });
       changesList.replaceChildren(...lines.map(([label, before, after]) => {
         const li = el('li');
@@ -577,7 +758,9 @@ export default function decorate(block) {
       popup('confirm', text('confirmTitle'), () => confirmNodes, submit);
     });
 
+    renderAddOns();
     refresh();
+    loadOptions();
     const layout = el('div', 'edit-booking-layout');
     layout.append(main, summary);
     body.replaceChildren(layout);
