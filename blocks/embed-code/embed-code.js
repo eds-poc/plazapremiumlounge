@@ -150,6 +150,42 @@ function readRow(row) {
 }
 
 /**
+ * Runs script code from the head. The page has loaded by the time the block runs, so the
+ * DOMContentLoaded (and, once loaded, load) listeners the code adds would never be called:
+ * they are called straight after the code instead.
+ * @param {HTMLScriptElement} script
+ */
+function runScript(script) {
+  const listeners = [];
+  const targets = [document, window];
+  targets.forEach((target) => {
+    const add = target.addEventListener;
+    target.addEventListener = (type, listener, options) => {
+      if (type === 'DOMContentLoaded' || (type === 'load' && document.readyState === 'complete')) {
+        listeners.push({ target, type, listener });
+      } else {
+        add.call(target, type, listener, options);
+      }
+    };
+  });
+  try {
+    document.head.append(script);
+  } finally {
+    targets.forEach((target) => delete target.addEventListener);
+  }
+  listeners.forEach(({ target, type, listener }) => {
+    try {
+      const event = new Event(type);
+      if (typeof listener === 'function') listener.call(target, event);
+      else listener?.handleEvent?.(event);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('embed-code: script error', error);
+    }
+  });
+}
+
+/**
  * Adds the scripts to the head in authored order. A script file is waited for before the
  * next script runs (code that uses it can follow it), unless it is marked `async`.
  * @param {object[]} scripts
@@ -169,7 +205,7 @@ async function injectScripts(scripts) {
       const script = document.createElement('script');
       Object.entries(rest).forEach(([name, value]) => script.setAttribute(name, value));
       script.textContent = code;
-      document.head.append(script);
+      runScript(script);
     }
   }
 }
