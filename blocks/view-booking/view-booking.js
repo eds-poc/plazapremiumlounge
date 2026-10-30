@@ -1,10 +1,9 @@
-import apiUrl from '../../scripts/endpoints.js';
-import { authHeaders, getToken, logout } from '../../scripts/auth.js';
-import { getLanguage, translate } from '../../scripts/i18n.js';
-import { hideLoader, showLoader } from '../../scripts/scripts.js';
-
-// an order id as in the address (?bookingid=HKBC-11339-64SCYL)
-const ORDER_ID = /^[A-Za-z0-9-]{1,40}$/;
+import { getToken } from '../../scripts/auth.js';
+import { translate } from '../../scripts/i18n.js';
+import {
+  bookingId, bookingLoader, fetchOrder, groupItems, itemPrice, money, orderCurrency, readTexts,
+  visitTime,
+} from '../../scripts/bookings.js';
 
 // the tags kept in the terms' HTML (from the API); anything else is dropped, its text kept
 const TERMS_TAGS = new Set(['P', 'BR', 'STRONG', 'B', 'EM', 'I', 'U', 'UL', 'OL', 'LI', 'HR', 'A']);
@@ -51,52 +50,6 @@ const PURCHASER = [
   { key: 'contactNumber', width: 'half', value: (c) => phoneText(c) },
   { key: 'email', width: 'full', value: (c) => c.emailId },
 ];
-
-/**
- * The page's locale for numbers and dates (English pages as the source: en-US).
- * @returns {string}
- */
-function locale() {
-  const lang = getLanguage();
-  return lang.startsWith('en') ? 'en-US' : lang;
-}
-
-/**
- * An amount as on the source: "HKD 1,763.64".
- * @param {*} value
- * @param {string} currency
- * @returns {string}
- */
-function money(value, currency) {
-  const number = Number(value);
-  if (!Number.isFinite(number)) return '';
-  const amount = new Intl.NumberFormat(locale(), {
-    minimumFractionDigits: 2, maximumFractionDigits: 2,
-  }).format(number);
-  return currency ? `${currency} ${amount}` : amount;
-}
-
-/**
- * The visit's date and time as given (the lounge's local time, never moved to another time zone):
- * "30-Nov-2026" on the English pages (the source), the language's medium date elsewhere, and
- * "1600" for the time.
- * @param {string} value e.g. "2026-11-30 16:00:00"
- * @returns {{date: string, time: string}}
- */
-function visitTime(value) {
-  const m = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
-  if (!m) return { date: value ? String(value) : '', time: '' };
-  const [, y, mo, d, h, mi] = m;
-  const date = new Date(Date.UTC(+y, +mo - 1, +d));
-  let day;
-  if (getLanguage().startsWith('en')) {
-    const month = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: 'UTC' }).format(date);
-    day = `${d}-${month}-${y}`;
-  } else {
-    day = new Intl.DateTimeFormat(locale(), { dateStyle: 'medium', timeZone: 'UTC' }).format(date);
-  }
-  return { date: day, time: h !== undefined ? `${h}${mi}` : '' };
-}
 
 /**
  * The terms' HTML from the API, keeping only simple text tags and web or site links (as text
@@ -165,53 +118,6 @@ function safeTerms(html) {
 }
 
 /**
- * Whether a booked item is a lounge service (else an add-on, e.g. a retail product), by its
- * serviceType (its propertyTypeCode is the lounge's, the same for its add-ons).
- * @param {object} item
- * @returns {boolean}
- */
-function isLounge(item) {
-  return String(item.serviceType || '').toUpperCase() === 'LOUNGE';
-}
-
-/**
- * The booked items as boxes: the items at the same lounge and start time together, the (first)
- * lounge service as the box and the other items there (not lounge services) as its add-ons; a
- * second lounge service at the same place and time gets a box of its own.
- * @param {object[]} items
- * @returns {{main: object, addOns: object[]}[]}
- */
-function groupItems(items) {
-  const visits = new Map();
-  items.forEach((item) => {
-    const key = `${item.propertyCode || ''}|${item.startDate || ''}`;
-    if (!visits.has(key)) visits.set(key, []);
-    visits.get(key).push(item);
-  });
-  return [...visits.values()].flatMap((list) => {
-    const lounges = list.filter(isLounge);
-    if (!lounges.length) return [{ main: list[0], addOns: list.slice(1) }];
-    const addOns = list.filter((item) => !isLounge(item));
-    return lounges.map((main, i) => ({ main, addOns: i ? [] : addOns }));
-  });
-}
-
-/**
- * The authored texts, by row name (Key | Text): the text cell of each row.
- * @param {Element} block
- * @returns {Map<string, Element>}
- */
-function readTexts(block) {
-  const texts = new Map();
-  [...block.children].forEach((row) => {
-    const [key, cell] = row.children;
-    const name = key?.textContent.trim().toLowerCase();
-    if (name && cell) texts.set(name, cell);
-  });
-  return texts;
-}
-
-/**
  * Decorates the View Booking block: a member's booking (the source Review your Booking page), from
  * GetOrderDetail for the address's `bookingid`, with the member's login token. Authors write the
  * texts (Key | Text rows, see README); the booking itself comes from the API.
@@ -242,8 +148,7 @@ export default function decorate(block) {
   const band = el('div', 'booking-steps');
   block.replaceChildren(band, heading, message, body);
 
-  const params = new URLSearchParams(window.location.search);
-  const orderId = (params.get('bookingid') || params.get('orderId') || '').trim();
+  const orderId = bookingId();
   const showMessage = (content, retry) => {
     message.replaceChildren(content);
     if (retry) {
@@ -254,7 +159,7 @@ export default function decorate(block) {
     }
     message.hidden = false;
   };
-  if (!ORDER_ID.test(orderId)) {
+  if (!orderId) {
     showMessage(text('notFound') || translate('bookingNotFound'));
     return;
   }
@@ -349,7 +254,6 @@ export default function decorate(block) {
       extras.append(list);
     }
 
-    const itemPrice = (part) => Number(part.itemPriceDetails?.productTotalPrice?.totalPrice) || 0;
     const amount = [item, ...addOns].reduce((sum, part) => sum + itemPrice(part), 0);
     const price = cell('price', text('price'));
     price.append(el('p', 'view-booking-price-amount', money(amount, currency)));
@@ -362,8 +266,7 @@ export default function decorate(block) {
    */
   const fill = (order) => {
     const items = Array.isArray(order.orderItems) ? order.orderItems : [];
-    const currency = items[0]?.itemPriceDetails?.baseRate?.[0]?.currency
-      || order.payment?.paymentOrders?.[0]?.paymentCurrency || '';
+    const currency = orderCurrency(order);
     const parts = [];
 
     parts.push(el('h2', 'view-booking-order', `${text('orderNo')} ${order.orderId || orderId}`.trim()));
@@ -437,48 +340,23 @@ export default function decorate(block) {
     body.hidden = false;
   };
 
-  // the site's full-page loader until the booking is in (the text for screen readers). The block is
-  // first on its page, so the page's first load takes the loader away once the block is built:
-  // while the booking loads, it's put straight back (before the next paint, so it doesn't flicker)
-  const keepLoader = new MutationObserver(() => {
-    if (!document.getElementById('spinner-overlay')) showLoader();
-  });
-  const loaded = () => {
-    keepLoader.disconnect();
-    hideLoader();
-  };
-
+  // the site's full-page loader until the booking is in (the text for screen readers); a refused
+  // token logs out and goes home (the loader stays meanwhile)
+  const loader = bookingLoader();
   const load = () => {
-    showLoader();
-    keepLoader.observe(document.body, { childList: true });
+    loader.start();
     showMessage(text('loading') || translate('bookingLoading'));
     block.setAttribute('aria-busy', 'true');
-    fetch(apiUrl('getOrderDetail'), {
-      method: 'POST',
-      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId }),
-    })
-      .then((res) => {
-        // the token refused (invalid or expired): log out and go home (the loader stays meanwhile)
-        if (res.status === 401) {
-          logout();
-          return null;
-        }
-        return res.json().catch(() => ({})).then((data) => {
-          if (res.status === 404 || (res.ok && !data?.orderId)) throw Object.assign(new Error('booking'), { notFound: true });
-          if (!res.ok || data.error || Number(data.serviceResponseCode) >= 400) throw new Error('booking');
-          return data;
-        });
-      })
+    fetchOrder(orderId)
       .then((order) => {
         if (!order) return;
         fill(order);
         message.hidden = true;
         block.removeAttribute('aria-busy');
-        loaded();
+        loader.done();
       })
       .catch((error) => {
-        loaded();
+        loader.done();
         block.removeAttribute('aria-busy');
         if (error.notFound) showMessage(text('notFound') || translate('bookingNotFound'));
         else showMessage(text('error') || translate('bookingLoadError'), load);

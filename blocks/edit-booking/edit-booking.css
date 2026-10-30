@@ -1,0 +1,554 @@
+/* the shared form styles (the date, time and service fields), loaded with the block's own */
+@import url('../../styles/forms.css');
+
+/* the booking pages' maroon band at the top, with the steps (shared styles) */
+@import url('../../styles/booking-steps.css');
+
+/* edit booking: the source Edit Your Booking page. The title after a back arrow, the intro, the
+   lounge (its name and address over a grey line, folding away on phones), the form (date, time,
+   guests, service; from 992px) or its rows with Edit (below), the additional services, Submit &
+   Review Changes; the summary card beside it from 992px, under it below */
+.edit-booking {
+  --edit-booking-value: var(--color-brand-primary-action);
+  --edit-booking-line: var(--color-border-translucent);
+
+  /* one-off: the source's grey labels and the light note ("Complimentary for under 2 years old") */
+  --edit-booking-label: rgb(0 0 0 / 60%);
+  --edit-booking-note: #bbb;
+
+  /* one-off: the source's 16px (Bootstrap 1rem) gaps: label to field, around the add-ons' line */
+  --edit-booking-gap: 16px;
+
+  padding-block: var(--section-padding-block) var(--spacing-9);
+  color: var(--color-text);
+}
+
+/* the band right under the header (the section's top spacing is the block's own) */
+main > .section:has(> .edit-booking-wrapper) {
+  padding-top: 0;
+}
+
+.edit-booking .booking-steps {
+  margin-bottom: var(--spacing-9);
+}
+
+/* the title: 18px below 768px (the site's section heading size), 25px below (35px from 992px) */
+.edit-booking .edit-booking-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-6);
+  margin: 0 0 var(--spacing-8);
+  font-size: var(--heading-section-size);
+  line-height: var(--line-height-heading);
+}
+
+/* the source's maroon arrow (16px tall below 768px, 24px from it), 15px before the title */
+.edit-booking .edit-booking-back {
+  display: block;
+  flex: none;
+  width: 14px;
+  height: 16px;
+  background-color: var(--color-brand-primary);
+  mask: url('../../icons/arrow-left-regular.svg') center / contain no-repeat;
+}
+
+.edit-booking .edit-booking-message {
+  margin: 0;
+}
+
+.edit-booking .edit-booking-retry,
+.edit-booking .edit-booking-edit {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--color-brand-primary);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.edit-booking .edit-booking-layout {
+  display: grid;
+  gap: var(--spacing-7) var(--grid-gutter);
+}
+
+.edit-booking .edit-booking-main {
+  min-width: 0;
+}
+
+.edit-booking .edit-booking-intro p {
+  margin: 0;
+}
+
+/* the lounge: its name (20px) and address (16px light, 8px under it), 25px above and below them,
+   a grey line under; below 992px an arrow on the right folds its details away */
+.edit-booking .edit-booking-toggle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0 var(--spacing-6);
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+  padding: var(--spacing-8) 0;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.edit-booking :is(.edit-booking-lounge-name, .edit-booking-lounge-address) {
+  grid-column: 1;
+}
+
+.edit-booking .edit-booking-lounge-name {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.edit-booking .edit-booking-lounge-address {
+  display: block;
+  padding-top: var(--spacing-3);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-heading);
+}
+
+.edit-booking .edit-booking-toggle::after {
+  content: '';
+  grid-area: 1 / 2 / span 2;
+  width: 16px;
+  height: 16px;
+  background-color: currentcolor;
+  mask: url('../../icons/arrow-down.svg') center / contain no-repeat;
+  transition: transform var(--duration-medium) var(--ease-standard);
+}
+
+.edit-booking .edit-booking-toggle[aria-expanded='false']::after {
+  transform: rotate(180deg);
+}
+
+.edit-booking .edit-booking-panel {
+  padding: var(--spacing-4) 0 var(--spacing-7);
+}
+
+.edit-booking .edit-booking-panel.is-collapsed {
+  display: none;
+}
+
+/* the form (from 992px): labels 16px above the pills, the date and time side by side */
+.edit-booking .edit-booking-form {
+  display: none;
+  color: var(--color-text-secondary);
+}
+
+.edit-booking .edit-booking-form .form-label {
+  margin-bottom: var(--spacing-3);
+}
+
+.edit-booking .edit-booking-note {
+  color: var(--edit-booking-note);
+  font-weight: var(--font-weight-light);
+  text-transform: none;
+}
+
+/* the day: the source's text ("01-Dec-2026") in the pill, the browser's date field over it */
+.edit-booking .edit-booking-date,
+.edit-booking .edit-booking-time {
+  position: relative;
+  border-radius: var(--radius-input);
+}
+
+.edit-booking .edit-booking-date:focus-within {
+  box-shadow: var(--shadow-focus);
+}
+
+.edit-booking .edit-booking-date-text {
+  display: flex;
+  align-items: center;
+  font-size: var(--font-size-sm);
+}
+
+.edit-booking .edit-booking-date-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* "hrs" after the time in the pill (the time is 4 digits) */
+.edit-booking .edit-booking-hrs {
+  position: absolute;
+  inset: 0 auto 0 calc(var(--spacing-8) + 4ch);
+  display: flex;
+  align-items: center;
+  padding-inline: 4px;
+  color: var(--color-text-strong);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  pointer-events: none;
+}
+
+/* the guests: as booked, locked (centred, grey) */
+.edit-booking .edit-booking-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--form-input-height);
+  border-radius: var(--radius-input);
+  background-color: var(--color-surface-warm);
+  color: var(--color-text-secondary);
+  font-size: 15px;
+}
+
+/* below 992px: the choices as rows, the grey label over the maroon value, Edit on the right */
+.edit-booking .edit-booking-rows {
+  margin: 0;
+}
+
+.edit-booking .edit-booking-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-bottom: var(--spacing-5);
+  padding-bottom: var(--spacing-4);
+}
+
+.edit-booking .edit-booking-row dt {
+  color: var(--edit-booking-label);
+  font-weight: var(--font-weight-light);
+}
+
+.edit-booking .edit-booking-row dd {
+  grid-column: 1;
+  margin: 0;
+  color: var(--edit-booking-value);
+  font-weight: var(--font-weight-medium);
+}
+
+.edit-booking .edit-booking-edit {
+  grid-area: 1 / 2 / span 2;
+  align-self: start;
+  font-weight: var(--font-weight-light);
+}
+
+/* "hrs" after a time, in the medium weight */
+.edit-booking .edit-booking-unit {
+  padding-inline: 4px;
+  font-weight: var(--font-weight-medium);
+}
+
+/* the additional services: a warm grey box below 992px (wider than the text, as the source), an
+   uppercase title over a line, each service over a black line with its button on the right */
+.edit-booking .edit-booking-addons {
+  margin: var(--spacing-6) calc(-1 * var(--spacing-6)) var(--spacing-6);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-6);
+  background-color: var(--color-surface-warm);
+}
+
+.edit-booking .edit-booking-addons-title {
+  margin: 0 0 var(--spacing-3);
+  color: var(--color-text-control);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-label);
+  line-height: var(--line-height-body);
+  text-transform: uppercase;
+}
+
+.edit-booking .edit-booking-addons hr {
+  margin: var(--edit-booking-gap) 0;
+  border: 0;
+  border-top: 1px solid var(--edit-booking-line);
+}
+
+.edit-booking .edit-booking-addon-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.edit-booking .edit-booking-addon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-6);
+  margin-bottom: var(--spacing-4);
+  border-bottom: 1px solid var(--color-text-strong);
+  padding-bottom: var(--spacing-6);
+}
+
+.edit-booking .edit-booking-addon-name {
+  flex: 0 1 230px;
+  color: var(--color-text-control);
+  font-weight: var(--font-weight-light);
+}
+
+/* the service's button: white with a maroon line (the source's tertiary button, 12px below 992px) */
+.edit-booking .edit-booking-addon-button {
+  flex: none;
+  min-width: 79px;
+  border: 1px solid var(--color-brand-primary);
+  border-radius: 24px;
+  padding: var(--spacing-2);
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
+  font: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-relaxed);
+  cursor: pointer;
+}
+
+.edit-booking .edit-booking-addon-button:hover,
+.edit-booking .edit-booking-addon-button:focus-visible {
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+.edit-booking .edit-booking-submit {
+  margin-bottom: var(--spacing-6);
+  padding: var(--spacing-3) var(--spacing-8);
+}
+
+.edit-booking .edit-booking-submit[hidden] {
+  display: none;
+}
+
+/* the summary card: warm grey, 20px round, the title 20px, the location and the rows (label grey,
+   value maroon) */
+.edit-booking .edit-booking-summary {
+  align-self: start;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-7) var(--spacing-7) var(--spacing-9);
+  background-color: var(--color-surface-warm);
+  color: var(--edit-booking-label);
+}
+
+.edit-booking .edit-booking-summary-title {
+  margin: 0 0 var(--spacing-7);
+  color: var(--color-text);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.edit-booking .edit-booking-summary-location {
+  margin: 0;
+}
+
+.edit-booking .edit-booking-summary-rows {
+  margin: 0;
+  padding-top: var(--spacing-7);
+}
+
+.edit-booking .edit-booking-summary-row {
+  padding-bottom: var(--spacing-4);
+}
+
+.edit-booking .edit-booking-summary-row dd {
+  margin: 0;
+  color: var(--edit-booking-value);
+  font-weight: var(--font-weight-medium);
+}
+
+.edit-booking .edit-booking-service {
+  display: block;
+}
+
+/* the popups (the site's modal, outside the block): the fields, the add-on's quantities and total,
+   the changes to confirm */
+.edit-booking-popup {
+  --form-row-gap: var(--spacing-6);
+}
+
+.edit-booking-popup .edit-booking-quantity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-6);
+}
+
+.edit-booking-popup .edit-booking-addon-popup {
+  display: grid;
+  gap: var(--spacing-3);
+}
+
+.edit-booking-popup .edit-booking-stepper {
+  display: flex;
+  align-items: center;
+  width: 150px;
+  border-radius: var(--radius-input);
+  background-color: var(--color-surface-warm);
+}
+
+.edit-booking-popup .edit-booking-step {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: none;
+  color: var(--color-brand-primary);
+  font: inherit;
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+}
+
+.edit-booking-popup .edit-booking-step:disabled {
+  color: var(--color-disabled-text);
+  cursor: default;
+}
+
+.edit-booking-popup .edit-booking-qty {
+  flex: 1;
+  text-align: center;
+}
+
+.edit-booking-popup .edit-booking-all {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.edit-booking-popup .edit-booking-total-line {
+  margin: var(--spacing-6) 0 0;
+}
+
+.edit-booking-popup .edit-booking-total {
+  color: var(--color-brand-primary-action);
+}
+
+.edit-booking-popup .edit-booking-changes {
+  margin: 0;
+  padding-left: var(--spacing-7);
+}
+
+.edit-booking-popup .edit-booking-change-label {
+  font-weight: var(--font-weight-medium);
+}
+
+.edit-booking-popup .edit-booking-pending {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.edit-booking-popup .edit-booking-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--spacing-4);
+  margin: 0;
+}
+
+.edit-booking-popup .button {
+  justify-self: start;
+}
+
+.edit-booking-popup .button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* the design-system breakpoint (768px): the 24px arrow, the title on its own top spacing, the
+   add-ons' box no wider than the text */
+@media (width >= 768px) {
+  .edit-booking {
+    padding-top: 0;
+  }
+
+  .edit-booking .booking-steps {
+    margin-bottom: var(--spacing-11);
+  }
+
+  .edit-booking .edit-booking-back {
+    width: 21px;
+    height: 24px;
+  }
+
+  /* the add-ons' box within the page's narrower side spacing */
+  .edit-booking .edit-booking-addons {
+    margin-inline: 0;
+  }
+}
+
+/* from 992px (the source's desktop): the form instead of the rows, the summary card beside (a
+   third of the row, as the source's columns), the lounge no longer folds, the add-ons on white */
+@media (width >= 992px) {
+  .edit-booking .edit-booking-title {
+    margin-bottom: var(--spacing-10);
+  }
+
+  .edit-booking .edit-booking-layout {
+    grid-template-columns: calc((100% + var(--grid-gutter)) * 2 / 3 - var(--grid-gutter)) minmax(0, 1fr);
+  }
+
+  .edit-booking .edit-booking-toggle {
+    pointer-events: none;
+  }
+
+  .edit-booking .edit-booking-toggle::after {
+    content: none;
+  }
+
+  .edit-booking .edit-booking-panel.is-collapsed {
+    display: block;
+  }
+
+  .edit-booking .edit-booking-form {
+    display: grid;
+  }
+
+  .edit-booking .edit-booking-form .form-label {
+    margin-bottom: var(--edit-booking-gap);
+  }
+
+  .edit-booking .edit-booking-rows {
+    display: none;
+  }
+
+  .edit-booking .edit-booking-addons {
+    margin: var(--edit-booking-gap) 0 var(--spacing-9);
+    border-radius: 0;
+    padding: 0;
+    background: none;
+  }
+
+  .edit-booking .edit-booking-addon {
+    margin-bottom: var(--spacing-4);
+    border-bottom: 0;
+    padding: var(--spacing-4) 0;
+  }
+
+  .edit-booking .edit-booking-addon-button {
+    width: 180px;
+    font-size: 15px;
+  }
+
+  .edit-booking .edit-booking-summary {
+    padding-bottom: 63px;
+  }
+
+  .edit-booking .edit-booking-summary-title {
+    padding-bottom: var(--spacing-6);
+  }
+
+  .edit-booking .edit-booking-summary-rows {
+    padding-top: var(--edit-booking-gap);
+  }
+
+  .edit-booking .edit-booking-summary-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.3em;
+    padding-bottom: 3px;
+  }
+}
