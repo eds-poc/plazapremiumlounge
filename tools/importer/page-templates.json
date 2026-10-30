@@ -34,10 +34,23 @@
     {
       "name": "html-embed",
       "urls": [
-        "https://www.plazapremiumlounge.com/en-uk/offers/beyond_the_event"
+        "https://www.plazapremiumlounge.com/en-uk/offers/beyond_the_event",
+        "https://www.plazapremiumlounge.com/en-uk/offers/petit",
+        "https://www.plazapremiumlounge.com/en-uk/offers/autumn-travel",
+        "https://www.plazapremiumlounge.com/en-uk/offers/pplxsandman-winnipeg",
+        "https://www.plazapremiumlounge.com/en-uk/offers/ppl-pass-canada",
+        "https://www.plazapremiumlounge.com/en-uk/offers/st-benefits",
+        "https://www.plazapremiumlounge.com/en-uk/offers/smart-traveller-benefit",
+        "https://www.plazapremiumlounge.com/en-uk/offers/vino-volo-dining-pass"
       ],
-      "description": "Page whose body is authored HTML (Kentico Froala, .fr-view, with its own CSS and JS): the page title, then the HTML as-is in an Embed Code block",
+      "description": "Page whose body is authored HTML (Kentico Froala, .fr-view, with its own CSS and JS): the page banner, the page title, then the HTML as-is in an Embed Code block",
       "blocks": [
+        {
+          "name": "image",
+          "instances": [
+            ".contentWrapper .pageBanner .pagebannerImg"
+          ]
+        },
         {
           "name": "title",
           "instances": [
@@ -52,6 +65,18 @@
         }
       ],
       "sections": [
+        {
+          "id": "section-banner",
+          "name": "Page banner",
+          "selector": [
+            ".contentWrapper .pageBanner"
+          ],
+          "style": null,
+          "blocks": [
+            "image"
+          ],
+          "defaultContent": []
+        },
         {
           "id": "section-1",
           "name": "Page title",

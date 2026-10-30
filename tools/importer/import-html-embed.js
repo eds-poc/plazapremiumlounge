@@ -1,15 +1,21 @@
 /* eslint-disable */
 /* global WebImporter */
 
-import embedCodeParser, { damPath } from './parsers/embed-code.js';
+import embedCodeParser, { damPath, isLocal, pageStyles } from './parsers/embed-code.js';
 
 const PAGE_TEMPLATE = {
   name: 'html-embed',
   urls: [
     'https://www.plazapremiumlounge.com/en-uk/offers/beyond_the_event',
   ],
-  description: 'Page whose body is authored HTML (Kentico Froala, .fr-view, with its own CSS and JS): the page title, then the HTML as-is in an Embed Code block',
+  description: 'Page whose body is authored HTML (Kentico Froala, .fr-view, with its own CSS and JS): the page banner, the page title, then the HTML as-is in an Embed Code block',
   blocks: [
+    {
+      name: 'image',
+      instances: [
+        '.contentWrapper .pageBanner .pagebannerImg',
+      ],
+    },
     {
       name: 'title',
       instances: [
@@ -24,6 +30,16 @@ const PAGE_TEMPLATE = {
     },
   ],
   sections: [
+    {
+      id: 'section-banner',
+      name: 'Page banner',
+      selector: ['.contentWrapper .pageBanner'],
+      style: null,
+      blocks: [
+        'image',
+      ],
+      defaultContent: [],
+    },
     {
       id: 'section-1',
       name: 'Page title',
@@ -54,12 +70,34 @@ function meta(document, name) {
   return el ? el.getAttribute('content').trim() : '';
 }
 
-/** The page title, as the Title block (text-lg), like the other offer pages. */
-function titleBlock(document) {
+/**
+ * The page banner (the source's .pageBanner background image) as the Image block
+ * (offer-banner, border-rounded), like the other offer pages; a same-site image moves to the
+ * DAM. Its breadcrumb is not taken: the site adds one to every page.
+ */
+function bannerBlock(document, alt, { originalURL, damFolder, assets }) {
+  const banner = document.querySelector('.contentWrapper .pageBanner .pagebannerImg, .pageBanner .pagebannerImg');
+  const match = (banner?.getAttribute('style') || '').match(/url\(\s*(['"]?)([^'")]+)\1\s*\)/i);
+  if (!match) return null;
+  const img = document.createElement('img');
+  img.src = isLocal(match[2], originalURL)
+    ? damPath(new URL(match[2], originalURL).href, damFolder, assets)
+    : new URL(match[2], originalURL).href;
+  img.alt = alt;
+  return WebImporter.Blocks.createBlock(document, { name: 'Image (offer-banner, border-rounded)', cells: [[img]] });
+}
+
+/** The page title text (outside the authored HTML). */
+function titleText(document) {
   const source = document.querySelector('.contentWrapper .title-wrapper .title, .contentWrapper .title-wrapper h1, .contentWrapper .title-wrapper h2');
-  if (!source || !source.textContent.trim()) return null;
+  return source ? source.textContent.trim() : '';
+}
+
+/** The page title, as the Title block (text-lg), like the other offer pages. */
+function titleBlock(document, text) {
+  if (!text) return null;
   const h2 = document.createElement('h2');
-  h2.textContent = source.textContent.trim();
+  h2.textContent = text;
   return WebImporter.Blocks.createBlock(document, { name: 'Title (text-lg)', cells: [[h2]] });
 }
 
@@ -74,8 +112,15 @@ export default {
 
     const main = document.createElement('main');
 
-    // section 1: the page title (outside the authored HTML)
-    const title = titleBlock(document);
+    // the page title, also the banner's alt text
+    const text = titleText(document);
+    const title = titleBlock(document, text);
+
+    // first section: the page banner
+    const banner = bannerBlock(document, text, { originalURL, damFolder, assets });
+    if (banner) main.append(banner, document.createElement('hr'));
+
+    // next section: the page title
     if (title) {
       main.append(title, WebImporter.Blocks.createBlock(document, {
         name: 'Section Metadata',
@@ -85,19 +130,23 @@ export default {
 
     // section 2: each piece of authored HTML, as-is, in its own Embed Code block
     const blocks = [];
-    [...document.querySelectorAll('.fr-view')]
-      .filter((element) => !element.parentElement.closest('.fr-view') && element.innerHTML.trim())
-      .forEach((element) => {
-        const holder = document.createElement('div');
-        element.replaceWith(holder);
-        holder.append(element);
-        try {
-          embedCodeParser(element, { document, originalURL, damFolder, assets });
-          blocks.push(...holder.childNodes);
-        } catch (e) {
-          console.error('Failed to parse embed-code (.fr-view):', e);
-        }
-      });
+    const frViews = [...document.querySelectorAll('.fr-view')]
+      .filter((element) => !element.parentElement.closest('.fr-view') && element.innerHTML.trim());
+    // the page's inline <style>s, each with the .fr-view it styles (before any is replaced)
+    const styles = pageStyles(document, frViews);
+    frViews.forEach((element) => {
+      const holder = document.createElement('div');
+      element.replaceWith(holder);
+      holder.append(element);
+      try {
+        embedCodeParser(element, {
+          document, originalURL, damFolder, assets, styles: styles.get(element),
+        });
+        blocks.push(...holder.childNodes);
+      } catch (e) {
+        console.error('Failed to parse embed-code (.fr-view):', e);
+      }
+    });
     if (blocks.length) {
       if (main.children.length) main.append(document.createElement('hr'));
       main.append(...blocks);
@@ -129,7 +178,7 @@ export default {
       report: {
         title: metadata.Title || '',
         template: PAGE_TEMPLATE.name,
-        blocks: [...(title ? ['title'] : []), ...blocks.map(() => 'embed-code')],
+        blocks: [...(banner ? ['image'] : []), ...(title ? ['title'] : []), ...blocks.map(() => 'embed-code')],
         assets: JSON.stringify(assets),
       },
     }];

@@ -44,6 +44,38 @@ function refersTo(code, selectors) {
   });
 }
 
+/** The classes used in the authored HTML (Froala's own fr-* left out), as CSS selectors. */
+function innerSelectors(element) {
+  const selectors = new Set();
+  element.querySelectorAll('[class]').forEach((el) => el.classList.forEach((name) => {
+    if (!/^fr-/.test(name)) selectors.add(`.${name}`);
+  }));
+  return [...selectors];
+}
+
+/**
+ * The page's <style>s for each piece of authored HTML. The site's own CSS comes in files, so
+ * every inline <style> outside the .fr-views is authored for the page: it goes with the .fr-view
+ * whose top elements it styles, else with the one whose classes it styles, else with the first.
+ * @param {Document} document
+ * @param {Element[]} frViews The page's top-level .fr-views
+ * @returns {Map<Element, Element[]>}
+ */
+export function pageStyles(document, frViews) {
+  const styles = new Map(frViews.map((el) => [el, []]));
+  if (!frViews.length) return styles;
+  [...document.querySelectorAll('style')]
+    .filter((style) => !frViews.some((el) => el.contains(style)) && style.textContent.trim())
+    .forEach((style) => {
+      const css = style.textContent;
+      const owner = frViews.find((el) => refersTo(css, topSelectors(el)))
+        || frViews.find((el) => refersTo(css, innerSelectors(el)))
+        || frViews[0];
+      styles.get(owner).push(style);
+    });
+  return styles;
+}
+
 function decodeBase64(text) {
   return new TextDecoder().decode(Uint8Array.from(atob(text), (c) => c.charCodeAt(0)));
 }
@@ -134,12 +166,15 @@ export function damPath(absolute, damFolder, assets) {
  * @param {string} options.damFolder The DAM folder for the page's assets, e.g.
  *   /media-da/en-uk/offers/beyond-the-event
  * @param {object} options.assets Collects the moved assets: source address → DAM path
+ * @param {Element[]} [options.styles] The page's <style>s for this .fr-view (see pageStyles);
+ *   without it, every inline <style> on the page
  */
-export default function parse(element, { document, originalURL, damFolder, assets }) {
+export default function parse(element, {
+  document, originalURL, damFolder, assets, styles: assigned,
+}) {
   const selectors = topSelectors(element);
 
-  const styles = [...document.querySelectorAll('style')]
-    .filter((style) => !element.contains(style) && refersTo(style.textContent, selectors));
+  const styles = assigned || pageStyles(document, [element]).get(element);
   const scripts = [...document.querySelectorAll(INERT_SCRIPT)]
     .filter((script) => !element.contains(script)
       && !('src' in JSON.parse(decodeBase64(script.getAttribute('data-inert-attrs') || 'e30=')))
