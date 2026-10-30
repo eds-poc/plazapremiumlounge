@@ -9,6 +9,8 @@
  * - no metadata block shows on the page (it must be the page's last section)
  *
  * Usage: node verify-pages.mjs --urls <file> [--base http://localhost:3000]
+ *   --base  e.g. https://<branch>--plazapremiumlounge--eds-poc.aem.page to check the previewed
+ *           pages (their code is still compared with the local .plain.html)
  */
 import fs from 'fs';
 
@@ -112,7 +114,10 @@ try {
   // one page at a time, each closed before the next
   // eslint-disable-next-line no-restricted-syntax
   for (const url of urls) {
-    const local = `${base}/content${documentPath(url)}`;
+    // the local preview serves imported pages under /content; an aem.page/aem.live host doesn't
+    const local = /\/\/(localhost|127\.0\.0\.1)[:/]/.test(base)
+      ? `${base}/content${documentPath(url)}`
+      : `${base}${documentPath(url)}`;
     const page = await browser.newPage();
     const errors = [];
     page.on('pageerror', (e) => errors.push(e.message));

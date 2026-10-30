@@ -151,7 +151,23 @@ browser for the snippet's own interactions (filters, tabs, carousels), e.g. with
 `browser_evaluate`. In this local preview, `Style | inset` text and an empty page title also
 show on the existing pages: that's the preview, not the migration.
 
-### 7. Report
+### 7. Upload and preview (only when the user asks for it)
+
+- **Images first:** upload every DAM file the Embed Code uses (the report's `assets` that appear
+  in the code) to DA at the same `/media-da/...` path, and preview each. The code points at
+  those paths, and `content.da.live` needs a login, so they must be served by EDS.
+- **Pages:** the app's upload (**Sync → Content**) moves each page's real `<img>`s (banner,
+  share image) to the page's hidden DA folder as `content.da.live` URLs, the site's convention;
+  the Embed Code is left as is. The local files then differ from DA in those addresses only:
+  matching them locally breaks the local preview's banners (login needed), so say so rather
+  than changing them.
+- **Preview content is shared by all branches** (a branch only changes the code): previewing a
+  page replaces it on `main--…aem.page` too, where snippet scripts need `main`'s
+  `embed-code` to have `runScript`.
+- **Check the previewed pages:**
+  `node $S/verify-pages.mjs --urls <file> --base https://<branch>--plazapremiumlounge--eds-poc.aem.page`
+
+### 8. Report
 
 Per page: the local path, the blocks used, the assets moved, anything left out or not working
 (e.g. buttons calling source-site functions such as `AddToCart()`), and that the change is in
