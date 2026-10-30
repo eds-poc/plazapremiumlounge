@@ -5,29 +5,38 @@
  * Log In button, in one narrow column. Any partner's password page can use it.
  * Authored rows, in any order: the image (a picture), the label text, then the button text
  * (optional, else "Log In"); other rows are left out.
- * The partner is found from the metadata (partner-member-name): this page's own, else that of the
- * page in `?returnUrl=` (metadata.json), else this page's name when metadata.json has that
- * partner (/en-uk/travelwise → travelwise). Log In sends the partner name and the password to the
- * PartnerLogin API (partnerLogin in scripts/scripts.js); the login must succeed, name the same
- * partner and give a valid token (a signed, unexpired JWT for this partner), which is stored for
- * the partner's pages (checkPartnerAccess in scripts/scripts.js). Then the visitor goes to the
- * returnUrl page when it's this site's page for the same partner, else to the partner's page in
- * metadata.json; on any failure they stay here with the error under the button. A
- * `?reason=expired|logout` notice is shown on arrival.
+ * The partner login lives here:
+ * - the partner is found from the metadata (partner-member-name): this page's own, else that of
+ *   the page in `?returnUrl=` (metadata.json), else this page's name when metadata.json has that
+ *   partner (/en-uk/travelwise → travelwise);
+ * - Log In sends `{ partnername, password }` to the PartnerLogin API, which answers
+ *   `{ statusCode: "200", token, tokenType: "Bearer", expiresIn }` (or 400 with a message);
+ * - the login must succeed, name the same partner, and its token must be a signed, unexpired JWT
+ *   whose partner claim (partnerName) is this partner;
+ * - the login is stored as `partner-token-<partner>` = `{ token, expiresAt }` (the earlier of the
+ *   token's `exp` and `expiresIn`), which the partner's pages check (checkPartnerAccess in
+ *   scripts/scripts.js, which only decides access);
+ * - then the visitor goes to the returnUrl page when it's this site's page for the same partner,
+ *   else to the partner's page in metadata.json; on any failure they stay here with the error
+ *   under the button. A `?reason=expired|logout` notice is shown on arrival.
+ * Nothing is logged.
  */
 import { getMetadata } from '../../scripts/aem.js';
+import { decodeJwt, isTokenValid } from '../../scripts/auth.js';
+import apiUrl from '../../scripts/endpoints.js';
 import {
   DEFAULT_SITE, getLanguage, getSiteFolder, translate,
 } from '../../scripts/i18n.js';
-import {
-  getPartnerOfPath, getPartnerPage, partnerLogin, toPartnerName, toSitePath,
-} from '../../scripts/scripts.js';
+import { PARTNER_TOKEN_KEY } from '../../scripts/scripts.js';
 import { attachValidation, buildField, validateForm } from '../../scripts/forms.js';
 
 // the source field's limit (maxlength 20)
 const PASSWORD_MAX_LENGTH = 20;
+const PARTNER_META = 'partner-member-name';
 const RETURN_PARAM = 'returnUrl';
 const REASON_PARAM = 'reason';
+// the source site's host names: a returnUrl on them (the source's own links) stays on this site
+const SITE_HOSTS = ['www.plazapremiumlounge.com', 'plazapremiumlounge.com'];
 
 // the block's own texts, by language (as scripts/i18n.js: the page language, its base, else en)
 const TEXTS = {
@@ -90,13 +99,185 @@ function el(tag, className) {
 }
 
 /**
+ * A partner name as compared everywhere: trimmed, lower case.
+ * @param {*} value
+ * @returns {string}
+ */
+function toPartnerName(value) {
+  return String(value ?? '').trim().toLowerCase();
+}
+
+/**
+ * A page on this site from a returnUrl, as a path with its query and hash: a path, or a full
+ * address on this site or the source site's host; '' for anything else (another website, `//host`,
+ * `javascript:`), so a link can't send the visitor away.
+ * @param {string|null} value
+ * @returns {string}
+ */
+function toSitePath(value) {
+  if (!value) return '';
+  let url;
+  try {
+    url = new URL(value, window.location.origin);
+  } catch {
+    return '';
+  }
+  if (!/^https?:$/.test(url.protocol)) return '';
+  if (url.origin !== window.location.origin && !SITE_HOSTS.includes(url.hostname)) return '';
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
+let bulkMetadata;
+
+/**
+ * The site's metadata.json rows (one request per page; none when it can't be read).
+ * @returns {Promise<object[]>}
+ */
+function getBulkMetadata() {
+  if (!bulkMetadata) {
+    bulkMetadata = fetch('/metadata.json')
+      .then((res) => (res.ok ? res.json() : {}))
+      .then((json) => (Array.isArray(json?.data) ? json.data : []))
+      .catch(() => []);
+  }
+  return bulkMetadata;
+}
+
+/**
+ * Whether a metadata.json URL pattern matches a path (`**` any part of the path, `*` one part).
+ * @param {string} pattern
+ * @param {string} path
+ * @returns {boolean}
+ */
+function matchesUrl(pattern, path) {
+  const escape = (value) => value.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
+  const source = String(pattern || '').split('**')
+    .map((part) => part.split('*').map(escape).join('[^/]*'))
+    .join('.*');
+  return !!source && new RegExp(`^${source}$`).test(path);
+}
+
+/**
+ * The partner of a page, from metadata.json (the last matching row with a partner-member-name,
+ * as later rows override earlier ones); '' when it isn't a partner page.
+ * @param {string} path
+ * @returns {Promise<string>}
+ */
+async function getPartnerOfPath(path) {
+  const rows = await getBulkMetadata();
+  return rows.reduce((found, row) => {
+    const partner = toPartnerName(row[PARTNER_META]);
+    return partner && matchesUrl(row.URL, path) ? partner : found;
+  }, '');
+}
+
+/**
+ * A partner's page (its first metadata.json row with a plain URL, no pattern), e.g.
+ * /en-uk/offers/travelwise for travelwise; '' when there's none.
+ * @param {string} partner
+ * @returns {Promise<string>}
+ */
+async function getPartnerPage(partner) {
+  const rows = await getBulkMetadata();
+  const row = rows.find((r) => toPartnerName(r[PARTNER_META]) === partner
+    && r.URL && !r.URL.includes('*'));
+  return row ? row.URL : '';
+}
+
+/**
+ * Whether a login token can be used for a partner: it must exist, be a signed JWT, be unexpired
+ * (scripts/auth.js: `exp` to come, `nbf` past) and name this partner in its partner claim
+ * (`partnerName`, else `partnername` or `partner`). The API checks the signature itself.
+ * @param {*} token
+ * @param {string} partner
+ * @returns {boolean}
+ */
+function isPartnerTokenValid(token, partner) {
+  if (typeof token !== 'string' || !token || !partner) return false;
+  const jwt = decodeJwt(token);
+  if (!jwt || !isTokenValid(token)) return false;
+  const { payload } = jwt;
+  return toPartnerName(payload.partnerName ?? payload.partnername ?? payload.partner) === partner;
+}
+
+/**
+ * When a login expires (milliseconds): the token's `exp`, or sooner when the answer's
+ * `expiresIn` (seconds from now) ends first.
+ * @param {string} token A valid token (isPartnerTokenValid)
+ * @param {*} expiresIn
+ * @returns {number}
+ */
+function loginExpiry(token, expiresIn) {
+  const exp = decodeJwt(token).payload.exp * 1000;
+  const seconds = Number(expiresIn);
+  return seconds > 0 ? Math.min(exp, Date.now() + seconds * 1000) : exp;
+}
+
+/**
+ * Stores a partner's login for its pages (scripts/scripts.js reads it).
+ * @param {string} partner
+ * @param {string} token
+ * @param {number} expiresAt
+ */
+function storeLogin(partner, token, expiresAt) {
+  try {
+    localStorage.setItem(`${PARTNER_TOKEN_KEY}${partner}`, JSON.stringify({ token, expiresAt }));
+  } catch {
+    // no storage (e.g. blocked): the partner's pages will ask for the password again
+  }
+}
+
+/**
+ * Sends a partner's password to the PartnerLogin API and checks the answer: the login must
+ * succeed (its status and `statusCode`), a partner name in the answer must be this partner, and
+ * its token (`token`, else `partnerToken`) must be valid (isPartnerTokenValid). A valid login is
+ * stored. Nothing is logged.
+ * @param {string} partner The partner-member-name
+ * @param {string} password
+ * @returns {Promise<{ok: boolean, reason?: 'invalid'|'mismatch'|'token'|'error'|'network',
+ *   message?: string}>} message: the API's own message for a refused login
+ */
+async function partnerLogin(partner, password) {
+  let response;
+  try {
+    response = await fetch(apiUrl('partnerLogin'), {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ partnername: partner, password }),
+      cache: 'no-store',
+    });
+  } catch {
+    return { ok: false, reason: 'network' };
+  }
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+  const status = Number(data?.statusCode) || response.status;
+  if (!response.ok || status >= 400) {
+    const message = typeof data?.message === 'string' ? data.message.trim() : '';
+    return { ok: false, reason: response.status >= 500 ? 'error' : 'invalid', message };
+  }
+  const answered = toPartnerName(data?.partnername ?? data?.partnerName);
+  if (answered && answered !== partner) return { ok: false, reason: 'mismatch' };
+  const token = data?.token ?? data?.partnerToken;
+  if (!isPartnerTokenValid(token, partner)) return { ok: false, reason: 'token' };
+  const expiresAt = loginExpiry(token, data?.expiresIn);
+  if (expiresAt <= Date.now()) return { ok: false, reason: 'token' };
+  storeLogin(partner, token, expiresAt);
+  return { ok: true };
+}
+
+/**
  * The partner this password page is for, from the metadata (see the top of this file); '' when
  * none is found.
  * @param {string} returnPath The returnUrl page as a path on this site, or ''
  * @returns {Promise<string>}
  */
 async function findPartner(returnPath) {
-  const own = toPartnerName(getMetadata('partner-member-name'));
+  const own = toPartnerName(getMetadata(PARTNER_META));
   if (own) return own;
   if (returnPath) {
     const partner = await getPartnerOfPath(new URL(returnPath, window.location.origin).pathname);

@@ -17,10 +17,7 @@ import { installModalLinks, registerModalSections } from './modal.js';
 import { decorateIcons } from './icons.js';
 import { DEFAULT_SITE, getLanguage, getSiteFolder } from './i18n.js';
 import { installVideoLinks } from './video.js';
-import {
-  checkSession, decodeJwt, isTokenValid, logout,
-} from './auth.js';
-import apiUrl from './endpoints.js';
+import { checkSession, logout } from './auth.js';
 
 if (window.trustedTypes && window.trustedTypes.createPolicy) {
   const innerTT = window.trustedTypes.createPolicy('tt-inner', {
@@ -246,227 +243,74 @@ export function decorateMain(main) {
 }
 
 /*
- * Partner pages: a page whose metadata (usually the site's metadata.json) has a
+ * Partner page access: a page whose metadata (usually the site's metadata.json) has a
  * `partner-member-name` (e.g. /en-uk/offers/travelwise: travelwise) is for that partner's members.
- * Without a valid partner token the visitor is sent to the partner's password page,
- * /{site}/{partner} (e.g. /en-uk/travelwise, with the Travelwise Password block), with the page in
- * `?returnUrl=`, as on the source site. The password goes to the PartnerLogin API, which answers
- * with a token; the token is kept in the browser per partner and checked on every partner page
- * load: it must be a signed JWT, unexpired, whose partner claim (`partnerName`) is the page's
- * partner-member-name.
- * The pages' content is still public (Edge Delivery serves it to anyone): this keeps visitors to
- * the partner's flow, it doesn't make the content secret.
+ * It shows only while the browser holds an unexpired login for that partner: the record the
+ * partner's password page stores after checking the PartnerLogin answer
+ * (blocks/travelwise-password), `partner-token-<partner>` = `{ token, expiresAt }`. Otherwise the
+ * visitor goes to the password page, /{site}/{partner}?returnUrl=<page> (with `&reason=expired`
+ * when a login was stored), as on the source site. Checked on load, when the page comes back from
+ * the back/forward cache or the tab is shown again, and at the login's expiry on an open page.
+ * Only access is decided here; the login itself is the block's. The pages' content is still public
+ * (Edge Delivery serves it to anyone): this keeps visitors to the partner's flow.
  */
 const PARTNER_META = 'partner-member-name';
-const PARTNER_TOKEN_KEY = 'partner-token-';
+// the stored login of a partner: this prefix and the partner name (written by the password page)
+export const PARTNER_TOKEN_KEY = 'partner-token-';
 // the password page's block: a page with it is never sent to the password page
 const PARTNER_PASSWORD_BLOCK = 'travelwise-password';
-// the source site's host names: a returnUrl on them (the source's own links) stays on this site
-const SITE_HOSTS = ['www.plazapremiumlounge.com', 'plazapremiumlounge.com'];
-let bulkMetadata;
+// the longest delay a browser timer keeps (about 24.8 days); a longer wait is re-armed
+const MAX_TIMER_MS = 2147483647;
+let expiryTimer;
 
 /**
- * A partner name as compared everywhere: trimmed, lower case.
- * @param {*} value
- * @returns {string}
+ * When a stored partner login expires (milliseconds), or 0 when there's none or it can't be read.
+ * @param {string|null} stored The stored record (JSON)
+ * @returns {number}
  */
-export function toPartnerName(value) {
-  return String(value ?? '').trim().toLowerCase();
-}
-
-/**
- * The stored token of a partner, or ''.
- * @param {string} partner
- * @returns {string}
- */
-export function getPartnerToken(partner) {
+function loginExpiry(stored) {
   try {
-    return localStorage.getItem(`${PARTNER_TOKEN_KEY}${partner}`) || '';
+    const login = JSON.parse(stored);
+    const usable = typeof login?.token === 'string' && login.token && Number.isFinite(login.expiresAt);
+    return usable ? login.expiresAt : 0;
   } catch {
-    return '';
+    return 0;
   }
 }
 
 /**
- * Stores a partner's token (checked first by the caller).
- * @param {string} partner
- * @param {string} token
- */
-export function setPartnerToken(partner, token) {
-  try {
-    localStorage.setItem(`${PARTNER_TOKEN_KEY}${partner}`, token);
-  } catch {
-    // no storage (e.g. blocked): the visitor will be asked for the password again
-  }
-}
-
-/**
- * Removes a partner's token.
- * @param {string} partner
- */
-export function clearPartnerToken(partner) {
-  try {
-    localStorage.removeItem(`${PARTNER_TOKEN_KEY}${partner}`);
-  } catch {
-    // nothing stored
-  }
-}
-
-/**
- * Whether a partner token can be used for a partner: it must exist, be a signed JWT, be unexpired
- * (scripts/auth.js: `exp` to come, `nbf` past) and name this partner in its partner claim
- * (`partnerName`, else `partnername` or `partner`); a token without that claim, or for another
- * partner, isn't. The API checks the signature itself.
- * @param {*} token
- * @param {string} partner The page's partner-member-name
- * @returns {boolean}
- */
-export function isPartnerTokenValid(token, partner) {
-  if (typeof token !== 'string' || !token || !partner) return false;
-  const jwt = decodeJwt(token);
-  if (!jwt || !isTokenValid(token)) return false;
-  const { payload } = jwt;
-  const named = toPartnerName(payload.partnerName ?? payload.partnername ?? payload.partner);
-  return named === toPartnerName(partner);
-}
-
-/**
- * The partner's password page in the visitor's language site: /{site}/{partner}.
- * @param {string} partner
- * @returns {string}
- */
-export function partnerPasswordPath(partner) {
-  return `/${getSiteFolder() || DEFAULT_SITE}/${partner}`;
-}
-
-/**
- * A page on this site from a returnUrl, as a path with its query and hash: a path, or a full
- * address on this site or the source site's host; '' for anything else (another website, `//host`,
- * `javascript:`), so a link can't send the visitor away.
- * @param {string|null} value
- * @returns {string}
- */
-export function toSitePath(value) {
-  if (!value) return '';
-  let url;
-  try {
-    url = new URL(value, window.location.origin);
-  } catch {
-    return '';
-  }
-  if (!/^https?:$/.test(url.protocol)) return '';
-  if (url.origin !== window.location.origin && !SITE_HOSTS.includes(url.hostname)) return '';
-  return `${url.pathname}${url.search}${url.hash}`;
-}
-
-/**
- * The site's metadata.json rows (one request per page; none when it can't be read).
- * @returns {Promise<object[]>}
- */
-function getBulkMetadata() {
-  if (!bulkMetadata) {
-    bulkMetadata = fetch('/metadata.json')
-      .then((res) => (res.ok ? res.json() : {}))
-      .then((json) => (Array.isArray(json?.data) ? json.data : []))
-      .catch(() => []);
-  }
-  return bulkMetadata;
-}
-
-/**
- * Whether a metadata.json URL pattern matches a path (`**` any part of the path, `*` one part).
- * @param {string} pattern
- * @param {string} path
- * @returns {boolean}
- */
-function matchesUrl(pattern, path) {
-  const escape = (text) => text.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
-  const source = String(pattern || '').split('**')
-    .map((part) => part.split('*').map(escape).join('[^/]*'))
-    .join('.*');
-  return !!source && new RegExp(`^${source}$`).test(path);
-}
-
-/**
- * The partner of a page, from metadata.json (the last matching row with a partner-member-name,
- * as later rows override earlier ones); '' when it isn't a partner page.
- * @param {string} path
- * @returns {Promise<string>}
- */
-export async function getPartnerOfPath(path) {
-  const rows = await getBulkMetadata();
-  return rows.reduce((found, row) => {
-    const partner = toPartnerName(row[PARTNER_META]);
-    return partner && matchesUrl(row.URL, path) ? partner : found;
-  }, '');
-}
-
-/**
- * A partner's page (its first metadata.json row with a plain URL, no pattern), e.g.
- * /en-uk/offers/travelwise for travelwise; '' when there's none.
- * @param {string} partner
- * @returns {Promise<string>}
- */
-export async function getPartnerPage(partner) {
-  const rows = await getBulkMetadata();
-  const row = rows.find((r) => toPartnerName(r[PARTNER_META]) === partner && r.URL && !r.URL.includes('*'));
-  return row ? row.URL : '';
-}
-
-/**
- * Sends a partner's password to the PartnerLogin API and checks the answer
- * (`{ statusCode: "200", token, tokenType: "Bearer", expiresIn }`): the login must succeed, a
- * partner name in the answer must be this partner, and its token (`token`, else `partnerToken`)
- * must be valid (isPartnerTokenValid). A valid token is stored. Nothing is logged.
- * @param {string} partner The partner-member-name
- * @param {string} password
- * @returns {Promise<{ok: boolean, reason?: 'invalid'|'mismatch'|'token'|'error'|'network',
- *   message?: string}>} message: the API's own message for a refused login
- */
-export async function partnerLogin(partner, password) {
-  let response;
-  try {
-    response = await fetch(apiUrl('partnerLogin'), {
-      method: 'POST',
-      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ partnername: partner, password }),
-      cache: 'no-store',
-    });
-  } catch {
-    return { ok: false, reason: 'network' };
-  }
-  let data = null;
-  try {
-    data = await response.json();
-  } catch {
-    data = null;
-  }
-  const status = Number(data?.statusCode) || response.status;
-  if (!response.ok || status >= 400) {
-    const message = typeof data?.message === 'string' ? data.message.trim() : '';
-    return { ok: false, reason: response.status >= 500 ? 'error' : 'invalid', message };
-  }
-  const answered = toPartnerName(data?.partnername ?? data?.partnerName);
-  if (answered && answered !== partner) return { ok: false, reason: 'mismatch' };
-  const token = data?.token ?? data?.partnerToken;
-  if (!isPartnerTokenValid(token, partner)) return { ok: false, reason: 'token' };
-  setPartnerToken(partner, token);
-  return { ok: true };
-}
-
-/**
- * Sends a visitor without a valid token for the page's partner (its `partner-member-name`) to the
- * partner's password page, with this page as the returnUrl; the history entry is replaced, so Back
- * doesn't return here. Pages without a partner, and the password page itself, are left alone.
+ * Shows the page while the page's partner has an unexpired stored login; otherwise removes the
+ * record and sends the visitor to the partner's password page with this page as the returnUrl
+ * (replacing the history entry, so Back doesn't return here). A page left open is checked again
+ * when its login expires. Pages without a partner, and the password page itself, are left alone.
  * @returns {boolean} Whether the page can show
  */
 function checkPartnerAccess() {
-  const partner = toPartnerName(getMetadata(PARTNER_META));
+  const partner = String(getMetadata(PARTNER_META) || '').trim().toLowerCase();
   if (!partner || document.querySelector(`main .${PARTNER_PASSWORD_BLOCK}`)) return true;
-  if (isPartnerTokenValid(getPartnerToken(partner), partner)) return true;
-  clearPartnerToken(partner);
-  const login = new URL(partnerPasswordPath(partner), window.location.origin);
+  const key = `${PARTNER_TOKEN_KEY}${partner}`;
+  let stored = null;
+  try {
+    stored = localStorage.getItem(key);
+  } catch {
+    stored = null;
+  }
+  const expiresAt = loginExpiry(stored);
+  if (expiresAt > Date.now()) {
+    clearTimeout(expiryTimer);
+    // just after the expiry, so the check sees it expired
+    const delay = Math.min(expiresAt - Date.now() + 1000, MAX_TIMER_MS);
+    expiryTimer = setTimeout(checkPartnerAccess, delay);
+    return true;
+  }
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // nothing stored
+  }
+  const login = new URL(`/${getSiteFolder() || DEFAULT_SITE}/${partner}`, window.location.origin);
   login.searchParams.set('returnUrl', window.location.href);
+  if (stored) login.searchParams.set('reason', 'expired');
   window.location.replace(login.href);
   return false;
 }
@@ -538,11 +382,15 @@ function loadDelayed() {
 }
 
 async function loadPage() {
-  // a partner page without a valid partner token goes to the partner's password page before
+  // a partner page without an unexpired partner login goes to the partner's password page before
   // anything shows; checked again when the page comes back from the browser's back/forward cache
+  // and when the tab is shown again
   if (!checkPartnerAccess()) return;
   window.addEventListener('pageshow', (e) => {
     if (e.persisted) checkPartnerAccess();
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') checkPartnerAccess();
   });
   showLoader();
   await loadEager(document);
