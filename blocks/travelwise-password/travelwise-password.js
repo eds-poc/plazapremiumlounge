@@ -1,32 +1,30 @@
 /*
- * Travelwise Password: the source's password page for the Travelwise partner offer
- * (/en-uk/travelwise, `.password-wrapper`): an image, the sentence that labels the password field
- * ("A password is required to access this page"), the password and a Log In button, in one narrow
- * column.
+ * Travelwise Password: the source's password page for a partner's members-only pages, e.g.
+ * /en-uk/travelwise for the Travelwise offer (`.password-wrapper`): an image, the sentence that
+ * labels the password field ("A password is required to access this page"), the password and a
+ * Log In button, in one narrow column. Any partner's password page can use it.
  * Authored rows, in any order: the image (a picture), the label text, then the button text
  * (optional, else "Log In"); other rows are left out.
- * The password goes to the Travelwise login endpoint (LOGIN_PATH, on the site's API domain) as
- * JSON `{ password }` with the browser's cookies; the backend checks it and keeps the session in
- * its own cookie (HttpOnly, set by the backend only). It answers 2xx when the password is right,
- * 401 when it's wrong. The endpoint isn't built yet: until it is, every attempt shows the
- * connection message. Nothing is stored or logged here. On success the visitor goes to the page
- * in `?returnUrl=` when it's this site's Travelwise offer page, else to the offer page of their
- * language site. A `?reason=expired|logout` notice is shown on arrival.
+ * The partner is found from the metadata (partner-member-name): this page's own, else that of the
+ * page in `?returnUrl=` (metadata.json), else this page's name when metadata.json has that
+ * partner (/en-uk/travelwise → travelwise). Log In sends the partner name and the password to the
+ * PartnerLogin API (partnerLogin in scripts/scripts.js); the login must succeed, name the same
+ * partner and give a valid partnerToken. Then the visitor goes to the returnUrl page when it's
+ * this site's page for the same partner, else to the partner's page in metadata.json; on any
+ * failure they stay here with the error under the button. A `?reason=expired|logout` notice is
+ * shown on arrival.
  */
+import { getMetadata } from '../../scripts/aem.js';
 import {
   DEFAULT_SITE, getLanguage, getSiteFolder, translate,
 } from '../../scripts/i18n.js';
-import apiUrl from '../../scripts/endpoints.js';
+import {
+  getPartnerOfPath, getPartnerPage, partnerLogin, toPartnerName, toSitePath,
+} from '../../scripts/scripts.js';
 import { attachValidation, buildField, validateForm } from '../../scripts/forms.js';
 
-// the Travelwise login endpoint (POST), on the API domain of scripts/endpoints.js
-const LOGIN_PATH = '/api/v1/web/app_demo/TravelwiseLogin';
 // the source field's limit (maxlength 20)
 const PASSWORD_MAX_LENGTH = 20;
-// the offer page the password opens, in the visitor's language site
-const OFFER_PAGE = 'offers/travelwise';
-// a page this one may send the visitor back to: a language site's Travelwise offer page
-const RETURN_PAGE = /^\/[a-z]{2}-[a-z]{2}\/offers\/travelwise\/?$/;
 const RETURN_PARAM = 'returnUrl';
 const REASON_PARAM = 'reason';
 
@@ -40,7 +38,15 @@ const TEXTS = {
     en: 'Log In', zh: '登录', 'zh-HK': '登入', ja: 'ログイン', pt: 'Entrar',
   },
   invalid: {
-    en: 'Incorrect password. Please try again.', zh: '密码不正确，请重试。', 'zh-HK': '密碼不正確，請重試。', ja: 'パスワードが正しくありません。もう一度お試しください。', pt: 'Senha incorreta. Tente novamente.',
+    en: 'Invalid password. Please try again.', zh: '密码不正确，请重试。', 'zh-HK': '密碼不正確，請重試。', ja: 'パスワードが正しくありません。もう一度お試しください。', pt: 'Senha inválida. Tente novamente.',
+  },
+  // the login succeeded but its answer isn't for this page's partner, or has no valid token
+  access: {
+    en: 'We couldn’t confirm your access to this page. Please try again.',
+    zh: '无法确认您可以访问此页面，请重试。',
+    'zh-HK': '無法確認您可以存取此頁面，請重試。',
+    ja: 'このページへのアクセスを確認できませんでした。もう一度お試しください。',
+    pt: 'Não foi possível confirmar seu acesso a esta página. Tente novamente.',
   },
   error: {
     en: 'We couldn’t check your password right now. Please try again later.',
@@ -56,7 +62,7 @@ const TEXTS = {
     en: 'You have logged out.', zh: '您已退出登录。', 'zh-HK': '您已登出。', ja: 'ログアウトしました。', pt: 'Você saiu.',
   },
 };
-// the `?reason=` notices (the offer page's session ended)
+// the `?reason=` notices (the partner page's session ended)
 const REASONS = ['expired', 'logout'];
 
 /**
@@ -83,62 +89,35 @@ function el(tag, className) {
 }
 
 /**
- * The Travelwise offer page of the visitor's language site (/zh-cn/offers/travelwise on a Chinese
- * page, else the default site's).
- * @returns {string}
+ * The partner this password page is for, from the metadata (see the top of this file); '' when
+ * none is found.
+ * @param {string} returnPath The returnUrl page as a path on this site, or ''
+ * @returns {Promise<string>}
  */
-function offerPath() {
-  return `/${getSiteFolder() || DEFAULT_SITE}/${OFFER_PAGE}`;
+async function findPartner(returnPath) {
+  const own = toPartnerName(getMetadata('partner-member-name'));
+  if (own) return own;
+  if (returnPath) {
+    const partner = await getPartnerOfPath(new URL(returnPath, window.location.origin).pathname);
+    if (partner) return partner;
+  }
+  const name = toPartnerName(window.location.pathname.split('/').filter(Boolean).pop());
+  return name && await getPartnerPage(name) ? name : '';
 }
 
 /**
- * Where to go after logging in: the `?returnUrl=` page when it's a path on this site (starting with
- * one /, no backslash) to a Travelwise offer page, with its query and hash; anything else (another
- * website, `//host`, `javascript:`, another page) gives the offer page, so the link can't send the
- * visitor elsewhere.
- * @param {string|null} value
- * @returns {string}
+ * Where to go after logging in: the returnUrl page when it's this partner's page, else the
+ * partner's page in metadata.json, else the language site's home page.
+ * @param {string} partner
+ * @param {string} returnPath The returnUrl page as a path on this site, or ''
+ * @returns {Promise<string>}
  */
-function returnPath(value) {
-  const fallback = offerPath();
-  if (!value || !value.startsWith('/') || value.startsWith('//') || value.includes('\\')) return fallback;
-  let url;
-  try {
-    url = new URL(value, window.location.origin);
-  } catch {
-    return fallback;
+async function destination(partner, returnPath) {
+  if (returnPath) {
+    const path = new URL(returnPath, window.location.origin).pathname;
+    if (await getPartnerOfPath(path) === partner) return returnPath;
   }
-  if (url.origin !== window.location.origin || !RETURN_PAGE.test(url.pathname)) return fallback;
-  return `${url.pathname}${url.search}${url.hash}`;
-}
-
-/**
- * Sends the password and reads the answer by its status only (the body isn't read or kept):
- * 'ok' (2xx, the backend has set its session cookie), 'invalid' (401, a wrong password), 'error'
- * (any other status) or 'network' (no answer).
- * @param {string} password
- * @returns {Promise<'ok'|'invalid'|'error'|'network'>}
- */
-async function sendPassword(password) {
-  let response;
-  try {
-    response = await fetch(new URL(LOGIN_PATH, apiUrl('login')), {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        // the backend accepts the request only with this header (its cross-site request check)
-        'X-Requested-With': 'travelwise',
-      },
-      body: JSON.stringify({ password }),
-      credentials: 'include',
-      cache: 'no-store',
-    });
-  } catch {
-    return 'network';
-  }
-  if (response.ok) return 'ok';
-  return response.status === 401 ? 'invalid' : 'error';
+  return await getPartnerPage(partner) || `/${getSiteFolder() || DEFAULT_SITE}/`;
 }
 
 /**
@@ -157,8 +136,8 @@ function readRows(block) {
 }
 
 /**
- * Decorates the Travelwise Password block: the image, then a form with the labelled password field,
- * the Log In button and a message line under it (a wrong password, a failed request, or the
+ * Decorates the Travelwise Password block: the image, then a form with the labelled password
+ * field, the Log In button and a message line under it (a refused login, a failed request, or the
  * `?reason=` notice), as the source's `#spanResult`. The field is checked as the visitor goes and
  * on submit (required, at most 20 characters); while the password is being checked the button is
  * disabled and further submits are ignored.
@@ -245,6 +224,8 @@ export default function decorate(block) {
   };
 
   const params = new URLSearchParams(window.location.search);
+  const returnPath = toSitePath(params.get(RETURN_PARAM));
+  const partnerFound = findPartner(returnPath);
   const reason = params.get(REASON_PARAM);
   // after the live region is in the page, so it's announced
   if (REASONS.includes(reason)) requestAnimationFrame(() => showMessage(text(reason)));
@@ -262,15 +243,19 @@ export default function decorate(block) {
     if (validateForm(form).length) return;
     sending = true;
     setBusy(true);
-    const result = await sendPassword(input.value);
-    if (result === 'ok') {
-      // replaces this page in the history: Back from the offer page doesn't return to the form
-      window.location.replace(returnPath(params.get(RETURN_PARAM)));
+    const partner = await partnerFound;
+    const result = partner ? await partnerLogin(partner, input.value) : { ok: false, reason: 'mismatch' };
+    if (result.ok) {
+      // replaces this page in the history: Back from the partner page doesn't return to the form
+      window.location.replace(await destination(partner, returnPath));
       return;
     }
     sending = false;
     setBusy(false);
-    const failure = result === 'network' ? translate('formNetworkError') : text(result);
+    let failure;
+    if (result.reason === 'network') failure = translate('formNetworkError');
+    else if (result.reason === 'mismatch' || result.reason === 'token') failure = text('access');
+    else failure = result.message || text(result.reason === 'error' ? 'error' : 'invalid');
     showMessage(failure, { error: true, focus: true });
   });
 }

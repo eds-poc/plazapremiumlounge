@@ -21,6 +21,9 @@ const ENDPOINTS = {
   login: '/api/v1/web/app_demo/Login',
   // the forgot password modal's submit (POST, JSON: lastName, email)
   forgotPassword: '/api/v1/web/app_demo/ForgotPassword',
+  // a partner page's password (POST, JSON: partnername, password); answers with a partnerToken,
+  // or 400 with a message
+  partnerLogin: '/api/v1/web/app_demo/PartnerLogin',
   // the logged-in member's profile (GET, Authorization: Bearer <jwt>)
   getProfile: '/api/v1/web/app_demo/GetProfile',
   propertyDetail: '/api/v1/web/app_demo/GetPropertyDetail',
