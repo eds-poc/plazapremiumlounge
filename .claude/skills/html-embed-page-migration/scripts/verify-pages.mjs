@@ -2,7 +2,7 @@
 /**
  * Checks each imported page in the local preview (http://localhost:3000/content/<path>):
  * - the Embed Code block shows the authored HTML (not hidden, has height)
- * - its CSS and inline scripts are in the head
+ * - every inline <style>/<script> in its code (read from the local .plain.html) is in the head
  * - its scripts ran: no element still waiting for a script (e.g. [data-anim] at opacity 0
  *   after scrolling to it), no page errors
  * - every image in it loads, and none still points at the source site
@@ -31,8 +31,36 @@ function documentPath(url) {
     .split('/').map((s) => s.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')).join('/');
 }
 
-async function check(page, sourceHost) {
-  return page.evaluate(async (host) => {
+/** Decodes the character references of the page's escaped code. */
+function unescapeHtml(text) {
+  const named = {
+    amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
+  };
+  return text.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, ref) => {
+    if (ref[0] === '#') {
+      const code = ref[1].toLowerCase() === 'x' ? parseInt(ref.slice(2), 16) : parseInt(ref.slice(1), 10);
+      return Number.isNaN(code) ? m : String.fromCodePoint(code);
+    }
+    return named[ref.toLowerCase()] ?? m;
+  });
+}
+
+/**
+ * The start of each inline <style> and <script> in the page's Embed Code blocks (from the local
+ * .plain.html), whitespace collapsed: what the head must hold once the blocks have run.
+ */
+function expectedHeadCode(file) {
+  if (!fs.existsSync(file)) return [];
+  const html = fs.readFileSync(file, 'utf-8');
+  return [...html.matchAll(/<pre><code>([\s\S]*?)<\/code><\/pre>/g)]
+    .map((m) => unescapeHtml(m[1]))
+    .flatMap((code) => [...code.matchAll(/<(style|script)\b([^>]*)>([\s\S]*?)<\/\1>/gi)])
+    .filter((m) => !/\bsrc=/i.test(m[2]) && m[3].trim())
+    .map((m) => ({ type: m[1].toLowerCase(), start: m[3].replace(/\s+/g, ' ').trim().slice(0, 80) }));
+}
+
+async function check(page, sourceHost, expected) {
+  return page.evaluate(async ({ host, expected: wanted }) => {
     const wait = (ms) => new Promise((r) => { setTimeout(r, ms); });
     for (let i = 0; i < 20 && !document.querySelector('.embed-code[data-block-status="loaded"]'); i += 1) {
       // eslint-disable-next-line no-await-in-loop
@@ -52,7 +80,8 @@ async function check(page, sourceHost) {
       img.loading = 'eager';
       return img.complete ? null : new Promise((r) => { img.onload = r; img.onerror = r; setTimeout(r, 8000); });
     }));
-    const headCode = [...document.head.querySelectorAll('style, script')].map((s) => s.textContent).join('\n');
+    const headCode = [...document.head.querySelectorAll('style, script')]
+      .map((s) => s.textContent.replace(/\s+/g, ' ').trim()).join('\n');
     return {
       title: document.querySelector('main .title h1, main .title h2')?.textContent.trim() || null,
       blocks: blocks.map((b) => ({
@@ -60,10 +89,8 @@ async function check(page, sourceHost) {
         height: Math.round(b.getBoundingClientRect().height),
         classes: [...new Set([...b.querySelectorAll('[class]')].flatMap((e) => [...e.classList]))].slice(0, 3),
       })),
-      headHasCode: blocks.length > 0 && blocks.every((b) => {
-        const cls = [...b.querySelectorAll('[class]')].flatMap((e) => [...e.classList]).find((c) => !/^fr-/.test(c));
-        return cls ? headCode.includes(cls) : true;
-      }),
+      missingFromHead: wanted.filter(({ start }) => !headCode.includes(start))
+        .map(({ type, start }) => `<${type}> ${start.slice(0, 40)}…`),
       waiting: blocks.flatMap((b) => [...b.querySelectorAll('[data-anim]')])
         .filter((e) => getComputedStyle(e).opacity === '0').length,
       brokenImages: imgs.filter((i) => !i.naturalWidth).map((i) => i.getAttribute('src')),
@@ -76,7 +103,7 @@ async function check(page, sourceHost) {
       }),
       metadataShown: !!document.querySelector('main .metadata'),
     };
-  }, sourceHost);
+  }, { host: sourceHost, expected });
 }
 
 let failures = 0;
@@ -92,13 +119,14 @@ try {
     try {
       const response = await page.goto(local, { waitUntil: 'load', timeout: 60000 });
       if (!response || !response.ok()) throw new Error(`HTTP ${response?.status()} for ${local}`);
-      const r = await check(page, new URL(url).hostname);
+      const expected = expectedHeadCode(`content${documentPath(url)}.plain.html`);
+      const r = await check(page, new URL(url).hostname, expected);
       const problems = [];
       if (!r.blocks.length) problems.push('no Embed Code block');
       r.blocks.forEach((b, i) => {
         if (b.hidden || b.height < 10) problems.push(`Embed Code block ${i + 1} shows nothing`);
       });
-      if (!r.headHasCode) problems.push('the block\'s CSS/scripts are not in the head');
+      if (r.missingFromHead.length) problems.push(`not in the head (the block's CSS/scripts): ${r.missingFromHead.join(' · ')}`);
       if (r.waiting) problems.push(`${r.waiting} element(s) still hidden, waiting for a script (did it run?)`);
       if (r.brokenImages.length) problems.push(`broken images: ${r.brokenImages.join(', ')}`);
       if (r.sourceImages.length) problems.push(`images still on the source site: ${r.sourceImages.join(', ')}`);

@@ -23,7 +23,9 @@ const { bdSnapshotKey } = await import(`${SCRAPE_SCRIPTS}/bd-scrape.js`);
 
 const SNAPSHOT_DIR = 'migration-work/source-snapshots';
 // the main area's parts the import script handles or leaves out on purpose
-const HANDLED = ['.fr-view', '.title-wrapper', '.newsletter-wrapper', '.spacer30', '[data-inert-script]', 'style', 'noscript'];
+// (#divErrorMsg: the template's hidden "An error occurred" message; .offer-place-wrapper: the
+// template's server-rendered pass listing (e.g. ppl-pass-canada), left out by decision)
+const HANDLED = ['.fr-view', '.pageBanner', '.title-wrapper', '.newsletter-wrapper', '.spacer30', '#divErrorMsg', '.offer-place-wrapper', '[data-inert-script]', 'style', 'noscript'];
 
 const args = process.argv.slice(2);
 const urlsFile = args[args.indexOf('--urls') + 1];
@@ -53,14 +55,30 @@ function analyze({ url, handled }) {
   const frViews = [...document.querySelectorAll('.fr-view')]
     .filter((el) => !el.parentElement.closest('.fr-view') && el.innerHTML.trim());
 
-  const blocks = frViews.map((el) => {
+  const topOf = (el) => {
     const selectors = new Set();
     [...el.children].forEach((child) => {
       child.classList.forEach((c) => { if (!/^fr-/.test(c)) selectors.add(`.${c}`); });
       if (child.id) selectors.add(`#${child.id}`);
     });
-    const sel = [...selectors];
-    const styles = [...document.querySelectorAll('style')].filter((s) => !el.contains(s) && refersTo(s.textContent, sel));
+    return [...selectors];
+  };
+  const innerOf = (el) => [...new Set([...el.querySelectorAll('[class]')]
+    .flatMap((e) => [...e.classList]).filter((c) => !/^fr-/.test(c)).map((c) => `.${c}`))];
+  // as parsers/embed-code.js pageStyles: every inline <style> outside the .fr-views is the page's
+  // own; it goes with the .fr-view it styles (top elements, then any class), else the first
+  const owners = new Map(frViews.map((el) => [el, []]));
+  [...document.querySelectorAll('style')]
+    .filter((s) => !frViews.some((el) => el.contains(s)) && s.textContent.trim())
+    .forEach((s) => {
+      const owner = frViews.find((el) => refersTo(s.textContent, topOf(el)))
+        || frViews.find((el) => refersTo(s.textContent, innerOf(el))) || frViews[0];
+      if (owner) owners.get(owner).push(s);
+    });
+
+  const blocks = frViews.map((el) => {
+    const sel = topOf(el);
+    const styles = owners.get(el);
     const scripts = [...document.querySelectorAll('[data-inert-script]')].filter((s) => {
       const attrs = JSON.parse(decode(s.getAttribute('data-inert-attrs')) || '{}');
       return !el.contains(s) && !attrs.src && refersTo(decode(s.getAttribute('data-inert-script')), sel);
@@ -158,10 +176,10 @@ results.forEach((r) => {
   if (!r.frViews.length) console.log('  ❌ no .fr-view: not a page for this approach');
   r.frViews.forEach((b, i) => {
     console.log(`  .fr-view ${i + 1}: ${b.topSelectors.join(' ') || '(no class/id on top elements)'} · ${b.htmlLength} chars`
-      + ` · ${b.styles} style(s) outside (${b.stylesInHead} in head) · ${b.inlineScripts} inline script(s) outside`
+      + ` · ${b.styles} page style(s) (${b.stylesInHead} in head) · ${b.inlineScripts} inline script(s) outside`
       + ` · ${b.scriptsInside} script(s) and ${b.externalFilesInside} file link(s) inside`
       + ` · assets: ${b.sameSiteAssets} same-site (to DAM), ${b.otherHostAssets} other host`);
-    if (!b.topSelectors.length) console.log('    ⚠️  no class/id to match the page\'s styles and scripts by: check by hand');
+    if (!b.topSelectors.length) console.log('    ℹ️  no class/id on its top elements: page scripts can\'t be matched to it (check by hand if the page has one for it)');
   });
   r.unhandled.forEach((u) => console.log(`  ⚠️  outside .fr-view, not handled: ${u.element} "${u.text}"${u.images.length ? ` images: ${u.images.join(', ')}` : ''}`));
 });
