@@ -79,24 +79,13 @@
         },
         {
           "id": "section-1",
-          "name": "Page title",
+          "name": "Page title and authored HTML",
           "selector": [
-            ".contentWrapper .title-wrapper"
+            ".contentWrapper section.offer"
           ],
           "style": "inset",
           "blocks": [
-            "title"
-          ],
-          "defaultContent": []
-        },
-        {
-          "id": "section-2",
-          "name": "Authored HTML",
-          "selector": [
-            ".fr-view"
-          ],
-          "style": null,
-          "blocks": [
+            "title",
             "embed-code"
           ],
           "defaultContent": []

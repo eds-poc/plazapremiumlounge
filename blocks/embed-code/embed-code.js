@@ -103,6 +103,18 @@ function parseSnippet(code) {
     const iframe = buildIframe(attrs);
     if (iframe) node.replaceWith(iframe);
   });
+  // an image's width/height attributes are its size, as where the code comes from (the site's
+  // `main img` rule sets both to auto): a width with the height kept in proportion (so it still
+  // shrinks to fit), else a height
+  doc.querySelectorAll('img[width], img[height]').forEach((img) => {
+    const size = (name) => {
+      const value = (img.getAttribute(name) || '').trim();
+      return /^\d+(\.\d+)?(px)?$/.test(value) ? `${parseFloat(value)}px` : '';
+    };
+    if (img.style.width || img.style.height) return;
+    if (size('width')) img.style.width = size('width');
+    else if (size('height')) img.style.height = size('height');
+  });
   [...doc.head.childNodes, ...doc.body.childNodes].forEach((node) => {
     if (node.nodeType === Node.TEXT_NODE && !node.textContent.trim()) return;
     items.push({ type: 'html', node });

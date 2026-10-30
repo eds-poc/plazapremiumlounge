@@ -42,20 +42,11 @@ const PAGE_TEMPLATE = {
     },
     {
       id: 'section-1',
-      name: 'Page title',
-      selector: ['.contentWrapper .title-wrapper'],
+      name: 'Page title and authored HTML',
+      selector: ['.contentWrapper section.offer'],
       style: 'inset',
       blocks: [
         'title',
-      ],
-      defaultContent: [],
-    },
-    {
-      id: 'section-2',
-      name: 'Authored HTML',
-      selector: ['.fr-view'],
-      style: null,
-      blocks: [
         'embed-code',
       ],
       defaultContent: [],
@@ -120,15 +111,7 @@ export default {
     const banner = bannerBlock(document, text, { originalURL, damFolder, assets });
     if (banner) main.append(banner, document.createElement('hr'));
 
-    // next section: the page title
-    if (title) {
-      main.append(title, WebImporter.Blocks.createBlock(document, {
-        name: 'Section Metadata',
-        cells: { style: 'inset' },
-      }));
-    }
-
-    // section 2: each piece of authored HTML, as-is, in its own Embed Code block
+    // each piece of authored HTML, as-is, in its own Embed Code block
     const blocks = [];
     const frViews = [...document.querySelectorAll('.fr-view')]
       .filter((element) => !element.parentElement.closest('.fr-view') && element.innerHTML.trim());
@@ -147,9 +130,13 @@ export default {
         console.error('Failed to parse embed-code (.fr-view):', e);
       }
     });
-    if (blocks.length) {
-      if (main.children.length) main.append(document.createElement('hr'));
-      main.append(...blocks);
+    // next section: the page title and the authored HTML, together in one inset section as on
+    // the source (both in its section.offer, so the HTML lines up with the title)
+    if (title || blocks.length) {
+      main.append(...[title].filter(Boolean), ...blocks, WebImporter.Blocks.createBlock(document, {
+        name: 'Section Metadata',
+        cells: { style: 'inset' },
+      }));
     }
 
     // page metadata; a same-site share image moves to the DAM too

@@ -39,7 +39,7 @@ as-is. Reference page: `https://www.plazapremiumlounge.com/en-uk/offers/beyond_t
 
 | File | Role |
 | --- | --- |
-| `tools/importer/import-html-embed.js` | Import script (template `html-embed`): page banner (`.pageBanner` background image) → Image (offer-banner, border-rounded) in the first section, alt = page title (the breadcrumb is left out: the site adds one); title → Title (text-lg) + inset section; each `.fr-view` → Embed Code; metadata in the last section. The import report's `assets` lists the DAM moves. |
+| `tools/importer/import-html-embed.js` | Import script (template `html-embed`): page banner (`.pageBanner` background image) → Image (offer-banner, border-rounded) in the first section, alt = page title (the breadcrumb is left out: the site adds one); title → Title (text-lg) and each `.fr-view` → Embed Code, together in one inset section (on the source both are in `section.offer`, so the HTML lines up with the title; `embed-code.css` adds the source's 30px spacer between them); metadata in the last section. The import report's `assets` lists the DAM moves. |
 | `tools/importer/parsers/embed-code.js` | Builds the Embed Code block from a `.fr-view` (styles, HTML, scripts, DAM paths). |
 | `blocks/embed-code/` | Renders the pasted HTML in place, moves scripts and styles to the head, and calls the `DOMContentLoaded`/`load` listeners embedded scripts add (they would never fire otherwise). |
 | `.claude/skills/html-embed-page-migration/scripts/` | The steps below. |
@@ -164,6 +164,8 @@ show on the existing pages: that's the preview, not the migration.
 - **Preview content is shared by all branches** (a branch only changes the code): previewing a
   page replaces it on `main--…aem.page` too, where snippet scripts need `main`'s
   `embed-code` to have `runScript`.
+- **Publishing a page publishes only the page:** its `/media-da/...` images must be published
+  too, or they're missing on `aem.live` (they 404 there while previewed on `aem.page`).
 - **Check the previewed pages:**
   `node $S/verify-pages.mjs --urls <file> --base https://<branch>--plazapremiumlounge--eds-poc.aem.page`
 
@@ -192,8 +194,9 @@ import overwrites the pages.
 - **Template pass listing** (`section.offer-place-wrapper`, server-rendered pass cards with
   Add to Cart, e.g. on `/en-uk/offers/ppl-pass-canada`): left out. (Quick Buy would be the
   block, but the passes service didn't have those passes.)
-- **Site styles the snippet relies on:** plain rich text using the source site's Bootstrap
-  classes (e.g. `btn btn-primary`) shows them as plain links, and images sized only with
-  `width`/`height` attributes show at full size, as the site's `main img { width: auto;
-  height: auto }` overrides those attributes. Left as-is by decision; name the pages affected.
+- **Site styles the snippet relies on:** `embed-code.css` gives the source's Bootstrap buttons
+  (`btn btn-primary`, `btn btn-default`) their source look, and `embed-code.js` turns images'
+  `width`/`height` attributes into their size (the site's `main img` rule overrides those
+  attributes). Other site classes in plain rich text (e.g. `hidden-xs`, `spacer20`) have no
+  styles on EDS: compare with the source and name what differs.
 - **Source-site functions** (e.g. `AddToCart()`) don't exist on EDS: those buttons do nothing.

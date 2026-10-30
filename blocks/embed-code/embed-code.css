@@ -1,5 +1,55 @@
-.embed-code-container {
+/* a section with only scripts and styles (its blocks hidden) takes no space */
+.embed-code-container:not(:has(> :not([hidden]))) {
   --section-padding-block: 0;
+}
+
+/* pasted HTML right after the page title: the source's 30px spacer between them (spacer30), as
+   padding so it adds to the title's margin instead of collapsing into it */
+.title-wrapper + .embed-code-wrapper {
+  padding-top: var(--spacing-9);
+}
+
+/* buttons in pasted HTML with the source site's Bootstrap classes (`btn btn-primary`,
+   `btn btn-default`): the source's look, as the site's buttons (styles.css a.button) */
+.embed-code :is(a, button).btn {
+  display: inline-block;
+  min-width: 120px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-2) var(--spacing-7);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-relaxed);
+  text-align: center;
+  text-decoration: none;
+  text-transform: capitalize;
+  cursor: pointer;
+  transition:
+    color var(--duration-medium) var(--ease-standard),
+    background-color var(--duration-medium) var(--ease-standard),
+    border-color var(--duration-medium) var(--ease-standard);
+}
+
+/* primary: filled maroon, inverts to white on hover (as a.button.primary) */
+.embed-code :is(a, button).btn.btn-primary {
+  background-color: var(--color-brand-primary-action);
+  color: var(--color-text-inverse);
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--color-brand-primary);
+    background-color: var(--color-background);
+    color: var(--color-brand-primary);
+  }
+}
+
+/* default: filled plum, 16px, no minimum width (source .btn-default) */
+.embed-code :is(a, button).btn.btn-default {
+  min-width: 0;
+  background-color: var(--color-brand-plum);
+  font-size: var(--font-size-md);
+  color: var(--color-text-inverse);
 }
 
 .embed-code:has(iframe) {
