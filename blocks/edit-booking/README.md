@@ -30,7 +30,9 @@ text with Try again. The site's loader shows until the booking is in.
   a popup: the description, image and unit, the quantity (per unit, up to the stock) or the adults
   and children it's for (per person, with All guests), and the service total. An add-on no longer
   on sale after a change leaves the list (unless booked). If GetAddOns fails (or doesn't exist
-  yet), the section shows the booked add-ons only (none: no section). If it answers none on sale
+  yet), the section shows the booked add-ons only (none: no section); on the preview and local
+  sites only (`.aem.page`, localhost) it shows the sample add-ons of `sample-addons.json` (the two
+  staging shows) instead, so the section can be reviewed. Never on `.aem.live` or the real site. If it answers none on sale
   for a booking with add-ons, the **addonsUnavailable** note shows (the source's message).
 
 Once something changed, **Submit & Review Changes** shows: a popup lists each change (before →

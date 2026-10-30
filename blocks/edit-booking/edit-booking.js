@@ -2,7 +2,7 @@ import apiUrl from '../../scripts/endpoints.js';
 import { authHeaders, getToken } from '../../scripts/auth.js';
 import { translate } from '../../scripts/i18n.js';
 import { openModal } from '../../scripts/modal-dialog.js';
-import { safeHtml, toUrl } from '../../scripts/properties.js';
+import { isPreview, safeHtml, toUrl } from '../../scripts/properties.js';
 import {
   bookingId, bookingLoader, dayText, fetchOrder, groupItems, itemPrice, money, orderCurrency,
   readTexts,
@@ -646,7 +646,13 @@ export default function decorate(block) {
         refresh();
       }).catch(() => { /* the list as it is */ });
 
-      postJson('getAddOns', { orderId, startDateTime, ...where }, signal, true).then((json) => {
+      // until the add-ons API exists: on the preview and local sites only, sample add-ons (the
+      // two staging shows, blocks/edit-booking/sample-addons.json) so the section can be reviewed
+      postJson('getAddOns', { orderId, startDateTime, ...where }, signal, true).catch((error) => {
+        if (!isPreview() || signal.aborted) throw error;
+        return fetch(`${window.hlx.codeBasePath}/blocks/edit-booking/sample-addons.json`, { signal })
+          .then((res) => (res.ok ? res.json() : Promise.reject(error)));
+      }).then((json) => {
         const list = (Array.isArray(json?.items) ? json.items : []).filter((x) => x.productCode);
         // the ones on sale before, not booked and no longer on sale, leave (and their quantity)
         [...catalog].forEach(([code, entry]) => {

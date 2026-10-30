@@ -1,0 +1,32 @@
+{
+  "items": [
+    {
+      "productCode": "PRD3876",
+      "catalogueCode": "PRD3876-Add-On-PRPRTY817-LOUNGE-LCTN517-RTPLN3862",
+      "displayName": "Plaza Premium Lounge Sakura Shrimp Spice (50g)",
+      "description": "<p>Sweet Sakura shrimp combined with garlic and chilli delivers a bold yet balanced savoury-umami profile, pairing perfectly with signature lounge dishes such as fish ball noodles. Please collect your Plaza Premium Lounge Sakura Shrimp Spice during the same visit as your lounge access.</p><p>T&amp;C apply</p>",
+      "image": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prd_images/Sakura Shrimp Spice PPL IBE KV_product_3772_product_3839_product_3876.png",
+      "basedOn": "Per Unit",
+      "unitLabel": "Pieces",
+      "currency": "HKD",
+      "unitPrice": 108,
+      "adultUnitPrice": 0,
+      "childUnitPrice": 0,
+      "availableInventory": 30
+    },
+    {
+      "productCode": "PRD3877",
+      "catalogueCode": "PRD3877-Add-On-PRPRTY813-LOUNGE-LCTN517-RTPLN3858",
+      "displayName": "Plaza Premium Lounge XO Sauce (100g)",
+      "description": "<p>Handcrafted with fresh ingredients, our secret-recipe XO Sauce offers a perfect blend of savoury, spicy and umami notes to elevate any dish. Please collect your Plaza Premium First XO Sauce on the same day as your lounge access.</p><p>T&amp;C apply</p>",
+      "image": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prd_images/XO sauce 100g_product_3837_product_3877.jpg",
+      "basedOn": "Per Unit",
+      "unitLabel": "Pieces",
+      "currency": "HKD",
+      "unitPrice": 108,
+      "adultUnitPrice": 0,
+      "childUnitPrice": 0,
+      "availableInventory": 15
+    }
+  ]
+}
