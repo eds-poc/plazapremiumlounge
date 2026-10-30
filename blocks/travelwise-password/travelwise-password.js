@@ -9,10 +9,11 @@
  * page in `?returnUrl=` (metadata.json), else this page's name when metadata.json has that
  * partner (/en-uk/travelwise → travelwise). Log In sends the partner name and the password to the
  * PartnerLogin API (partnerLogin in scripts/scripts.js); the login must succeed, name the same
- * partner and give a valid partnerToken. Then the visitor goes to the returnUrl page when it's
- * this site's page for the same partner, else to the partner's page in metadata.json; on any
- * failure they stay here with the error under the button. A `?reason=expired|logout` notice is
- * shown on arrival.
+ * partner and give a valid token (a signed, unexpired JWT for this partner), which is stored for
+ * the partner's pages (checkPartnerAccess in scripts/scripts.js). Then the visitor goes to the
+ * returnUrl page when it's this site's page for the same partner, else to the partner's page in
+ * metadata.json; on any failure they stay here with the error under the button. A
+ * `?reason=expired|logout` notice is shown on arrival.
  */
 import { getMetadata } from '../../scripts/aem.js';
 import {

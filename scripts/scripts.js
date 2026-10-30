@@ -251,8 +251,9 @@ export function decorateMain(main) {
  * Without a valid partner token the visitor is sent to the partner's password page,
  * /{site}/{partner} (e.g. /en-uk/travelwise, with the Travelwise Password block), with the page in
  * `?returnUrl=`, as on the source site. The password goes to the PartnerLogin API, which answers
- * with a partnerToken; the token is kept in the browser per partner and checked on every partner
- * page load (a JWT must be unexpired and, when it names a partner, name this one).
+ * with a token; the token is kept in the browser per partner and checked on every partner page
+ * load: it must be a signed JWT, unexpired, whose partner claim (`partnerName`) is the page's
+ * partner-member-name.
  * The pages' content is still public (Edge Delivery serves it to anyone): this keeps visitors to
  * the partner's flow, it doesn't make the content secret.
  */
@@ -260,8 +261,6 @@ const PARTNER_META = 'partner-member-name';
 const PARTNER_TOKEN_KEY = 'partner-token-';
 // the password page's block: a page with it is never sent to the password page
 const PARTNER_PASSWORD_BLOCK = 'travelwise-password';
-// a token that isn't a JWT: one word of token characters
-const OPAQUE_TOKEN = /^[\w~+/=-]{8,}$/;
 // the source site's host names: a returnUrl on them (the source's own links) stays on this site
 const SITE_HOSTS = ['www.plazapremiumlounge.com', 'plazapremiumlounge.com'];
 let bulkMetadata;
@@ -314,22 +313,21 @@ export function clearPartnerToken(partner) {
 }
 
 /**
- * Whether a partnerToken can be used for a partner: a JWT must be signed, unexpired
- * (scripts/auth.js) and, when it names a partner (`partnername`, `partnerName` or `partner`), name
- * this one; a token that isn't a JWT must be one word of token characters. The API checks the
- * token itself.
+ * Whether a partner token can be used for a partner: it must exist, be a signed JWT, be unexpired
+ * (scripts/auth.js: `exp` to come, `nbf` past) and name this partner in its partner claim
+ * (`partnerName`, else `partnername` or `partner`); a token without that claim, or for another
+ * partner, isn't. The API checks the signature itself.
  * @param {*} token
- * @param {string} partner
+ * @param {string} partner The page's partner-member-name
  * @returns {boolean}
  */
 export function isPartnerTokenValid(token, partner) {
   if (typeof token !== 'string' || !token || !partner) return false;
   const jwt = decodeJwt(token);
-  if (!jwt) return token.split('.').length !== 3 && OPAQUE_TOKEN.test(token);
-  if (!isTokenValid(token)) return false;
+  if (!jwt || !isTokenValid(token)) return false;
   const { payload } = jwt;
-  const named = toPartnerName(payload.partnername ?? payload.partnerName ?? payload.partner);
-  return !named || named === partner;
+  const named = toPartnerName(payload.partnerName ?? payload.partnername ?? payload.partner);
+  return named === toPartnerName(partner);
 }
 
 /**
@@ -416,9 +414,10 @@ export async function getPartnerPage(partner) {
 }
 
 /**
- * Sends a partner's password to the PartnerLogin API and checks the answer: the login must
- * succeed, a partner name in the answer must be this partner, and its partnerToken must be valid
- * (isPartnerTokenValid). A valid token is stored. Nothing is logged.
+ * Sends a partner's password to the PartnerLogin API and checks the answer
+ * (`{ statusCode: "200", token, tokenType: "Bearer", expiresIn }`): the login must succeed, a
+ * partner name in the answer must be this partner, and its token (`token`, else `partnerToken`)
+ * must be valid (isPartnerTokenValid). A valid token is stored. Nothing is logged.
  * @param {string} partner The partner-member-name
  * @param {string} password
  * @returns {Promise<{ok: boolean, reason?: 'invalid'|'mismatch'|'token'|'error'|'network',
@@ -449,8 +448,9 @@ export async function partnerLogin(partner, password) {
   }
   const answered = toPartnerName(data?.partnername ?? data?.partnerName);
   if (answered && answered !== partner) return { ok: false, reason: 'mismatch' };
-  if (!isPartnerTokenValid(data?.partnerToken, partner)) return { ok: false, reason: 'token' };
-  setPartnerToken(partner, data.partnerToken);
+  const token = data?.token ?? data?.partnerToken;
+  if (!isPartnerTokenValid(token, partner)) return { ok: false, reason: 'token' };
+  setPartnerToken(partner, token);
   return { ok: true };
 }
 
