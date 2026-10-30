@@ -30,6 +30,53 @@
           ]
         }
       ]
+    },
+    {
+      "name": "html-embed",
+      "urls": [
+        "https://www.plazapremiumlounge.com/en-uk/offers/beyond_the_event"
+      ],
+      "description": "Page whose body is authored HTML (Kentico Froala, .fr-view, with its own CSS and JS): the page title, then the HTML as-is in an Embed Code block",
+      "blocks": [
+        {
+          "name": "title",
+          "instances": [
+            ".contentWrapper .title-wrapper"
+          ]
+        },
+        {
+          "name": "embed-code",
+          "instances": [
+            ".fr-view"
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "id": "section-1",
+          "name": "Page title",
+          "selector": [
+            ".contentWrapper .title-wrapper"
+          ],
+          "style": "inset",
+          "blocks": [
+            "title"
+          ],
+          "defaultContent": []
+        },
+        {
+          "id": "section-2",
+          "name": "Authored HTML",
+          "selector": [
+            ".fr-view"
+          ],
+          "style": null,
+          "blocks": [
+            "embed-code"
+          ],
+          "defaultContent": []
+        }
+      ]
     }
   ]
 }
