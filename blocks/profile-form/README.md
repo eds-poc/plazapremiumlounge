@@ -5,10 +5,11 @@ and Optional Information, filled from the GetProfile API with the member's login
 newsletter checkbox and Save below. Authors write the texts; the block's code sets the fields, where
 each value comes from, and the layout. **Save is disabled until the update API exists.**
 
-The page needs a login: a visitor without a valid token on a members' page (`members-only` true in
-the metadata sheet, e.g. a row `/**/membership/**`) is sent to the home page. If GetProfile refuses
-the token (401), the visitor is logged out and sent home; any other failure shows "We couldn't load
-your profile." with Try again.
+The page needs a login: a guest on a members' page (`members-only` true in the metadata sheet, e.g.
+a row `/**/membership/**`) is sent to the home page with the page in `?redirectUrl=`; the login
+modal opens there, and after logging in the guest comes back here. An expired login, or GetProfile
+refusing the token (401), logs out and goes home; any other failure shows "We couldn't load your
+profile." with Try again.
 
 ## Table: 5 columns
 

@@ -4,7 +4,8 @@
  * answer is in; a refusal's message shows under the button.
  * - `action: login`: `{ username, password }` to the Login API. A success answers `{ jwt, … }`: a
  *   `jwt` that is well formed and not expired (scripts/auth.js) logs the visitor in: the token is
- *   stored and the page reloads, its header then logged in. A refusal answers `{ errorCode,
+ *   stored and the page reloads, its header then logged in (or the visitor goes to the page in the
+ *   address's `redirectUrl`, the members' page they came from). A refusal answers `{ errorCode,
  *   message }` or `{ error }`.
  * - `action: forgot-password`: `{ lastName, email }` to the ForgotPassword API. A refusal answers
  *   `{ resetCode: 'E…', resetMsg }` (with HTTP 200) or `{ error, fields }`; otherwise the email is
@@ -12,7 +13,7 @@
  */
 import apiUrl from './endpoints.js';
 import { translate } from './i18n.js';
-import { isTokenValid, setToken } from './auth.js';
+import { isTokenValid, redirectTarget, setToken } from './auth.js';
 
 /**
  * Posts a form's data as JSON with its button busy, then hands the answer to `done`; a network
@@ -75,7 +76,10 @@ function login(form) {
     if (res.ok && token && isTokenValid(token)) {
       setToken(token);
       password.value = '';
-      window.location.reload();
+      // back to the members' page the visitor came from (replacing the home page in the history)
+      const target = redirectTarget();
+      if (target) window.location.replace(target);
+      else window.location.reload();
       return;
     }
     // a refusal (its message), or an answer whose token is missing, broken or expired
