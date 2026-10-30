@@ -1,0 +1,296 @@
+[
+  {
+    "bookingSchedule": "Cancelled",
+    "bookingStatus": "Cancelled",
+    "currencyCode": "INR",
+    "fullfilmentStatus": "Cancelled",
+    "guests": {
+      "adult": 1,
+      "child": 0
+    },
+    "isEligibleForCancel": false,
+    "isEligibleForModify": false,
+    "locationName": "Addis Ababa Bole International Airport",
+    "orderId": "HKBC-10686-63QZH4",
+    "orderItems": [
+      {
+        "images": [
+          {
+            "name": "ADD_gallery",
+            "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/ADD_gallery_1600_800.jpg?ext=.jpg"
+          }
+        ],
+        "locationName": "Addis Ababa Bole International Airport",
+        "productDisplayName": "Lounge Use - 4 Hours",
+        "productName": "Lounge Use - 4 Hours",
+        "propertyDisplayName": "Plaza Premium Lounge ",
+        "propertyName": "Plaza Premium Lounge  (International Departures, Terminal 2)",
+        "propertyTypeCode": "LOUNGE",
+        "quantity": 1,
+        "shortLocation": "International Departures, Terminal 2"
+      }
+    ],
+    "serviceDate": "01 Oct 2026 10:00:00",
+    "totalPrice": 3693.1
+  },
+  {
+    "bookingSchedule": "Past booking",
+    "bookingStatus": "Order_Confirmed",
+    "currencyCode": "USD",
+    "fullfilmentStatus": "NoShow",
+    "guests": {
+      "adult": 1,
+      "child": 0
+    },
+    "isEligibleForCancel": false,
+    "isEligibleForModify": false,
+    "locationName": "Addis Ababa Bole International Airport",
+    "orderId": "HKBC-10686-63QZH6",
+    "orderItems": [
+      {
+        "images": [
+          {
+            "name": "ADD_gallery",
+            "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/ADD_gallery_1600_800.jpg?ext=.jpg"
+          }
+        ],
+        "locationName": "Addis Ababa Bole International Airport",
+        "productDisplayName": "Lounge Use - 4 Hours",
+        "productName": "Lounge Use - 4 Hours",
+        "propertyDisplayName": "Plaza Premium Lounge ",
+        "propertyName": "Plaza Premium Lounge  (International Departures, Terminal 2)",
+        "propertyTypeCode": "LOUNGE",
+        "quantity": 1,
+        "shortLocation": "International Departures, Terminal 2"
+      }
+    ],
+    "serviceDate": "01 Oct 2026 10:30:00",
+    "totalPrice": 40
+  },
+  {
+    "bookingSchedule": "Past booking",
+    "bookingStatus": "Order_Confirmed",
+    "currencyCode": "HKD",
+    "fullfilmentStatus": "Completed",
+    "guests": {
+      "adult": 1,
+      "child": 0
+    },
+    "isEligibleForCancel": false,
+    "isEligibleForModify": false,
+    "locationName": "Hong Kong International Airport",
+    "orderId": "HKBC-10273-64SCYJ",
+    "orderItems": [
+      {
+        "images": [
+          {
+            "name": "1.jpg",
+            "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/1_property_815.jpg"
+          },
+          {
+            "name": "2.jpg",
+            "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/2_property_815.jpg"
+          },
+          {
+            "name": "3.jpg",
+            "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/3_property_815.jpg"
+          },
+          {
+            "name": "4.jpg",
+            "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/4_property_815.jpg"
+          },
+          {
+            "name": "5.jpg",
+            "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/5_property_815.jpg"
+          },
+          {
+            "name": "6.jpg",
+            "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/6_property_815.jpg"
+          }
+        ],
+        "locationName": "Hong Kong International Airport",
+        "productDisplayName": "Lounge Use 3 hrs",
+        "productName": "Lounge Use 3 hrs",
+        "propertyCode": "PRPRTY815",
+        "propertyDisplayName": "Plaza Premium First ",
+        "propertyName": "Plaza Premium First  (Near Gate 1, East Hall)",
+        "propertyTypeCode": "LOUNGE",
+        "quantity": 1,
+        "shortLocation": "Near Gate 1, East Hall"
+      },
+      {
+        "images": [
+          {
+            "name": "1.jpg",
+            "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/1_property_815.jpg"
+          },
+          {
+            "name": "2.jpg",
+            "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/2_property_815.jpg"
+          },
+          {
+            "name": "3.jpg",
+            "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/3_property_815.jpg"
+          },
+          {
+            "name": "4.jpg",
+            "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/4_property_815.jpg"
+          },
+          {
+            "name": "5.jpg",
+            "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/5_property_815.jpg"
+          },
+          {
+            "name": "6.jpg",
+            "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/6_property_815.jpg"
+          }
+        ],
+        "locationName": "Hong Kong International Airport",
+        "productDisplayName": "Sakura Shrimp Spice (50g)",
+        "productName": "Sakura Shrimp Spice (50g)",
+        "propertyCode": "PRPRTY815",
+        "propertyDisplayName": "Plaza Premium First ",
+        "propertyName": "Plaza Premium First  (Near Gate 1, East Hall)",
+        "propertyTypeCode": "LOUNGE",
+        "quantity": 1,
+        "shortLocation": "Near Gate 1, East Hall"
+      }
+    ],
+    "serviceDate": "27 Oct 2026 18:30:00",
+    "totalPrice": 1088
+  },
+  {
+    "bookingSchedule": "Upcoming booking",
+    "bookingStatus": "Order_Confirmed",
+    "currencyCode": "HKD",
+    "fullfilmentStatus": "Completed",
+    "guests": {
+      "adult": 2,
+      "child": 0
+    },
+    "isEligibleForCancel": true,
+    "isEligibleForModify": true,
+    "locationName": "Hong Kong International Airport",
+    "orderId": "HKBC-11339-64SCYL",
+    "orderItems": [
+      {
+        "images": [
+          {
+            "name": "PPF_35_v1",
+            "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v1.jpg?ext=.jpg"
+          },
+          {
+            "name": "PPF_35_v2",
+            "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v2.jpg?ext=.jpg"
+          },
+          {
+            "name": "PPF_35_v3",
+            "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v3.jpg?ext=.jpg"
+          },
+          {
+            "name": "PPF_35_v4",
+            "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v4.jpg?ext=.jpg"
+          },
+          {
+            "name": "PPF_35_v5",
+            "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v5.jpg?ext=.jpg"
+          },
+          {
+            "name": "PPF_35_v6",
+            "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v6.jpg?ext=.jpg"
+          },
+          {
+            "name": "PPF_35_v7",
+            "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v7.jpg?ext=.jpg"
+          },
+          {
+            "name": "PPF_35_v8",
+            "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v8.jpg?ext=.jpg"
+          },
+          {
+            "name": "PPF_35_v9",
+            "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v9.jpg?ext=.jpg"
+          }
+        ],
+        "locationName": "Hong Kong International Airport",
+        "productDisplayName": "Lounge Use - 3 Hours",
+        "productName": "Lounge Use - 3 Hours",
+        "propertyCode": "PRPRTY817",
+        "propertyDisplayName": "Plaza Premium First ",
+        "propertyName": "Plaza Premium First  (Near Gate 35, West Hall)",
+        "propertyTypeCode": "LOUNGE",
+        "quantity": 1,
+        "shortLocation": "Near Gate 35, West Hall"
+      }
+    ],
+    "serviceDate": "30 Nov 2026 16:00:00",
+    "totalPrice": 1763.64
+  },
+  {
+    "bookingSchedule": "Upcoming booking",
+    "bookingStatus": "Order_Confirmed",
+    "currencyCode": "HKD",
+    "fullfilmentStatus": "Completed",
+    "guests": {
+      "adult": 2,
+      "child": 1
+    },
+    "isEligibleForCancel": false,
+    "isEligibleForModify": false,
+    "locationName": "Hong Kong International Airport",
+    "orderId": "HKBC-10240-64SCZM",
+    "orderItems": [
+      {
+        "images": [
+          {
+            "name": "HKG_T1_Dep_G35_2",
+            "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-02.jpg?ext=.jpg"
+          },
+          {
+            "name": "HKG_T1_Dep_G35_3",
+            "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-03.jpg?ext=.jpg"
+          },
+          {
+            "name": "HKG_T1_Dep_G35_4",
+            "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-04.jpg?ext=.jpg"
+          },
+          {
+            "name": "HKG_T1_Dep_G35_5",
+            "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-05.jpg?ext=.jpg"
+          },
+          {
+            "name": "HKG_T1_Dep_G35_6",
+            "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-06.jpg?ext=.jpg"
+          },
+          {
+            "name": "HKG_T1_Dep_G35_7",
+            "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-07.jpg?ext=.jpg"
+          },
+          {
+            "name": "HKG_T1_Dep_G35_8",
+            "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-08.jpg?ext=.jpg"
+          },
+          {
+            "name": "HKG_T1_Dep_G35_9",
+            "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-09.jpg?ext=.jpg"
+          },
+          {
+            "name": "HKG_T1_Dep_G35_1_property_813.jpg",
+            "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_T1_Dep_G35_1_property_813_property_813.jpg"
+          }
+        ],
+        "locationName": "Hong Kong International Airport",
+        "productDisplayName": "Lounge Experience 5 hrs - Sakura Shrimp Spice (50g)",
+        "productName": "Lounge Experience 5 hrs - Sakura Shrimp Spice (50g)",
+        "propertyCode": "PRPRTY813",
+        "propertyDisplayName": "Plaza Premium Lounge ",
+        "propertyName": "Plaza Premium Lounge  (Near Gate 35, Departures)",
+        "propertyTypeCode": "LOUNGE",
+        "quantity": 1,
+        "shortLocation": "Near Gate 35, Departures"
+      }
+    ],
+    "serviceDate": "31 Dec 2026 16:30:00",
+    "totalPrice": 2322
+  }
+]
