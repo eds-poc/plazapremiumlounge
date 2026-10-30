@@ -1,0 +1,470 @@
+/* the shared form styles (the purchaser's read-only fields), loaded with the block's own */
+@import url('../../styles/forms.css');
+
+/* the booking pages' maroon band at the top (shared styles, for the booking blocks that show it) */
+@import url('../../styles/booking-steps.css');
+
+/* view booking: the source Review your Booking page. The title after a back arrow, the order
+   number, one box per booked lounge visit (a row of five parts, six with add-ons, with thin lines
+   between them from 992px, stacked below), the purchaser's read-only fields, the totals (right)
+   and the terms */
+.view-booking {
+  --view-booking-accent: var(--color-brand-primary-action);
+  --view-booking-value: var(--color-brand-primary);
+  --view-booking-line: var(--color-text-strong);
+
+  /* one-off: the source's light grey labels below 992px ("Date:", "Services") */
+  --view-booking-label: #888;
+
+  padding-block: var(--section-padding-block) var(--spacing-11);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+}
+
+/* the band right under the header (the section's top spacing is the block's own), the page's
+   spacing between it and the title */
+main > .section:has(> .view-booking-wrapper) {
+  padding-top: 0;
+}
+
+.view-booking .booking-steps {
+  margin-bottom: var(--section-padding-block);
+}
+
+/* the title: the site's section heading size (18px, the source's fluid size from 768px, 32px from
+   1200px), 25px below (35px from 992px) */
+.view-booking .view-booking-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-6);
+  margin: 0 0 var(--spacing-8);
+  font-size: var(--heading-section-size);
+  line-height: var(--line-height-heading);
+}
+
+/* the source's maroon arrow (16px tall below 768px, 24px from it; its line as heavy as the
+   source's), 15px before the title */
+.view-booking .view-booking-back {
+  display: block;
+  flex: none;
+  width: 14px;
+  height: 16px;
+  background-color: var(--color-brand-primary);
+  mask: url('../../icons/arrow-left-regular.svg') center / contain no-repeat;
+}
+
+.view-booking .view-booking-message {
+  margin: 0;
+}
+
+.view-booking .view-booking-retry {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--color-brand-primary);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* the order number and the small uppercase label under it */
+.view-booking .view-booking-order {
+  margin: 0 0 var(--spacing-3);
+  color: var(--view-booking-accent);
+  font-size: var(--font-size-lg);
+}
+
+.view-booking .view-booking-label {
+  margin: 0;
+  color: var(--view-booking-accent);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+}
+
+/* a booked item: its parts stacked below 992px (the body size: 14px, 16px from 768px; 20px above
+   and below), a grey line under them; all its text 16px from 992px */
+.view-booking .view-booking-box {
+  display: grid;
+  font-size: var(--body-font-size);
+  border-bottom: 1px solid var(--color-text-secondary);
+  padding: var(--spacing-7) 0;
+}
+
+/* below 992px each row (a link, a label and its value, a service) 2px from the one before and
+   10px from the next, as the source's list items: the parts follow on without other spacing */
+.view-booking :is(.view-booking-actions li, .view-booking-detail, .view-booking-service-list li) {
+  margin-bottom: var(--spacing-4);
+  padding-top: var(--spacing-1);
+}
+
+.view-booking .view-booking-cell p,
+.view-booking .view-booking-details,
+.view-booking .view-booking-details dd,
+.view-booking .view-booking-service-list {
+  margin: 0;
+}
+
+/* the part titles: 16px (as all the box), 8px above their content */
+.view-booking .view-booking-cell .view-booking-cell-title {
+  margin-bottom: var(--spacing-3);
+  font-weight: var(--font-weight-medium);
+}
+
+/* the parts' own titles show from 992px (below, the labels say what each value is), except the
+   services' and the price's; the add-ons follow on under the services, as more services */
+.view-booking :is(.view-booking-location, .view-booking-date-time, .view-booking-guests, .view-booking-additional-services) .view-booking-cell-title {
+  display: none;
+}
+
+.view-booking .view-booking-services .view-booking-cell-title {
+  margin-bottom: 0;
+  color: var(--view-booking-label);
+  font-weight: var(--font-weight-light);
+}
+
+/* below 992px a label like the others ("Services:") */
+.view-booking .view-booking-services .view-booking-cell-title::after {
+  content: ':';
+}
+
+/* the location part 20px above the next (its last link without its own space) */
+.view-booking .view-booking-location {
+  margin-bottom: var(--spacing-7);
+}
+
+.view-booking .view-booking-actions > :last-child {
+  margin-bottom: 0;
+}
+
+.view-booking .view-booking-lounge {
+  color: var(--view-booking-value);
+  font-weight: var(--font-weight-medium);
+}
+
+.view-booking .view-booking-lounge span {
+  display: block;
+}
+
+.view-booking .view-booking-actions {
+  display: grid;
+  margin: var(--spacing-7) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.view-booking .view-booking-actions a:any-link {
+  color: var(--view-booking-value);
+  font-weight: var(--font-weight-medium);
+  text-decoration: underline;
+}
+
+/* label and value: the label light grey above its maroon value (phones and tablets) */
+.view-booking .view-booking-details {
+  display: grid;
+}
+
+.view-booking .view-booking-details dt {
+  color: var(--view-booking-label);
+  font-weight: var(--font-weight-light);
+}
+
+.view-booking .view-booking-details dd {
+  color: var(--view-booking-value);
+  font-weight: var(--font-weight-medium);
+}
+
+/* the services and the "hrs" label in the lighter maroon */
+.view-booking .view-booking-service-list,
+.view-booking .view-booking-unit {
+  color: var(--view-booking-accent);
+  font-weight: var(--font-weight-medium);
+}
+
+/* "hrs": the source's 16px label on a 24px line, 4px from the time */
+.view-booking .view-booking-unit {
+  padding-inline: 4px;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-relaxed);
+}
+
+.view-booking .view-booking-service-list {
+  padding: 0;
+  list-style: none;
+}
+
+.view-booking .view-booking-price {
+  text-align: right;
+}
+
+.view-booking .view-booking-price-amount {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+}
+
+/* the purchaser: an uppercase maroon title, then the shared read-only fields */
+.view-booking .view-booking-purchaser {
+  margin-top: var(--spacing-9);
+}
+
+.view-booking .view-booking-section-title {
+  margin: 0 0 var(--spacing-8);
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+}
+
+/* the read-only fields: the warm grey at half opacity (the text itself stays as it is), also when
+   focused */
+.view-booking .form-fields .form-input[readonly] {
+  background-color: color-mix(in srgb, var(--color-surface-warm) 50%, transparent);
+  color: var(--color-text-subtle);
+  cursor: default;
+}
+
+.view-booking .form-fields .form-input[readonly]:focus {
+  background-color: color-mix(in srgb, var(--color-surface-warm) 50%, transparent);
+}
+
+/* the totals: a black line above, the rows on the right, 30px above and below them (to the terms'
+   line); below 992px only the total (as the source) */
+.view-booking .view-booking-totals {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-7);
+  margin-top: var(--spacing-9);
+  border-top: 1px solid var(--view-booking-line);
+  padding-block: var(--spacing-9) var(--spacing-6);
+}
+
+.view-booking .view-booking-total-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--spacing-7);
+  width: 100%;
+}
+
+/* the label (and its note) wraps; the amount (below) stays on the right, on one line */
+.view-booking .view-booking-total-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.view-booking .view-booking-total-row:not(.is-total) {
+  display: none;
+}
+
+.view-booking .view-booking-total-row p {
+  margin: 0;
+}
+
+.view-booking .view-booking-total-label span {
+  display: block;
+  color: var(--view-booking-line);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-light);
+}
+
+.view-booking .view-booking-total-label .view-booking-total-note {
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+}
+
+.view-booking .view-booking-total-amount {
+  flex: none;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* the terms: grey text (12px, 14px from 768px) under a black line, each group's title (as given,
+   in capitals) in the medium weight right above its text */
+.view-booking .view-booking-terms {
+  margin-top: var(--spacing-4);
+  border-top: 1px solid var(--view-booking-line);
+  padding-top: var(--spacing-9);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.view-booking .view-booking-terms .view-booking-section-title {
+  margin-bottom: var(--spacing-3);
+  color: var(--color-text);
+  text-transform: none;
+}
+
+.view-booking .view-booking-term-title {
+  margin: 0;
+  font-size: inherit;
+  font-weight: var(--font-weight-medium);
+}
+
+.view-booking .view-booking-term-body :is(p, ul, ol) {
+  margin: 0 0 var(--spacing-5);
+}
+
+/* lists as the source: 45px in, each item 20px from the next (a nested list's last item and its
+   own item: 40px to the next item) */
+.view-booking .view-booking-term-body :is(ul, ol) {
+  padding-left: 45px;
+}
+
+.view-booking .view-booking-term-body li {
+  padding-bottom: var(--spacing-7);
+}
+
+.view-booking .view-booking-term-body li > :is(p, ul, ol) {
+  margin-bottom: 0;
+}
+
+.view-booking .view-booking-term-body hr {
+  margin: var(--spacing-6) 0;
+  border: 0;
+  border-top: 1px solid var(--base-border);
+}
+
+.view-booking .view-booking-term-body a:any-link {
+  color: var(--color-text);
+  font-weight: var(--font-weight-regular);
+  text-decoration: underline;
+}
+
+/* the design-system breakpoint (768px): the 24px arrow, the terms 14px */
+@media (width >= 768px) {
+  .view-booking {
+    padding-top: 0;
+  }
+
+  .view-booking .view-booking-back {
+    width: 21px;
+    height: 24px;
+  }
+
+  .view-booking .view-booking-terms {
+    font-size: var(--font-size-sm);
+  }
+}
+
+/* from 992px (the source's desktop): the item's parts spread in a row (location 250px, price
+   8%, the others 15%), a thin line 16px before each but the first; each label (light) beside its
+   value; all the totals, half the width, in the source's sizes */
+@media (width >= 992px) {
+  .view-booking .view-booking-title {
+    margin-bottom: var(--spacing-10);
+  }
+
+  .view-booking .view-booking-label {
+    margin-bottom: var(--spacing-8);
+  }
+
+  .view-booking .view-booking-box {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-6) 0;
+  }
+
+  .view-booking :is(.view-booking-actions li, .view-booking-detail, .view-booking-service-list li) {
+    margin-bottom: 0;
+    padding-top: 0;
+  }
+
+  .view-booking :is(.view-booking-actions, .view-booking-details) {
+    gap: var(--spacing-3);
+  }
+
+  .view-booking .view-booking-price-amount {
+    font-size: var(--font-size-md);
+  }
+
+  .view-booking .view-booking-cell {
+    position: relative;
+    width: 15%;
+  }
+
+  .view-booking .view-booking-cell.view-booking-location {
+    width: 250px;
+    margin-bottom: 0;
+  }
+
+  .view-booking .view-booking-cell.view-booking-price {
+    width: 8%;
+    min-width: max-content;
+  }
+
+  .view-booking .view-booking-cell + .view-booking-cell::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 -16px;
+    width: 1px;
+    background-color: var(--color-text);
+  }
+
+  .view-booking .view-booking-cell .view-booking-cell-title {
+    display: block;
+    margin-bottom: var(--spacing-3);
+    color: var(--color-text);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .view-booking .view-booking-services .view-booking-cell-title::after {
+    content: none;
+  }
+
+  .view-booking .view-booking-detail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--spacing-2);
+  }
+
+  .view-booking .view-booking-details dt {
+    color: var(--color-text);
+    font-weight: var(--font-weight-light);
+  }
+
+  .view-booking .view-booking-price {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .view-booking .view-booking-totals {
+    padding-bottom: var(--spacing-7);
+  }
+
+  .view-booking .view-booking-total-row {
+    width: 50%;
+  }
+
+  .view-booking .view-booking-total-row:not(.is-total) {
+    display: flex;
+  }
+
+  .view-booking .view-booking-total-label span {
+    font-size: var(--font-size-xl);
+  }
+
+  .view-booking .view-booking-total-amount {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-regular);
+  }
+
+  .view-booking .is-discount .view-booking-total-amount {
+    color: var(--view-booking-accent);
+  }
+
+  .view-booking .is-total .view-booking-total-amount {
+    font-size: 28px;
+    font-weight: var(--font-weight-medium);
+  }
+}
+
+/* from 1200px: the order number 24px (the source's) */
+@media (width >= 1200px) {
+  .view-booking .view-booking-order {
+    font-size: var(--font-size-2xl);
+  }
+}
