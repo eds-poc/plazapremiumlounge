@@ -112,20 +112,29 @@ main > .section:has(> .view-booking-wrapper) {
 }
 
 /* the parts' own titles show from 992px (below, the labels say what each value is), except the
-   services', the additional services' and the price's */
-.view-booking :is(.view-booking-location, .view-booking-date-time, .view-booking-guests) .view-booking-cell-title {
+   services' and the price's; the add-ons follow on under the services, as more services */
+.view-booking :is(.view-booking-location, .view-booking-date-time, .view-booking-guests, .view-booking-additional-services) .view-booking-cell-title {
   display: none;
 }
 
-.view-booking :is(.view-booking-services, .view-booking-additional-services) .view-booking-cell-title {
+.view-booking .view-booking-services .view-booking-cell-title {
   margin-bottom: 0;
   color: var(--view-booking-label);
   font-weight: var(--font-weight-light);
 }
 
 /* below 992px a label like the others ("Services:") */
-.view-booking :is(.view-booking-services, .view-booking-additional-services) .view-booking-cell-title::after {
+.view-booking .view-booking-services .view-booking-cell-title::after {
   content: ':';
+}
+
+/* the location part 20px above the next (its last link without its own space) */
+.view-booking .view-booking-location {
+  margin-bottom: var(--spacing-7);
+}
+
+.view-booking .view-booking-actions > :last-child {
+  margin-bottom: 0;
 }
 
 .view-booking .view-booking-lounge {
@@ -378,6 +387,7 @@ main > .section:has(> .view-booking-wrapper) {
 
   .view-booking .view-booking-cell.view-booking-location {
     width: 250px;
+    margin-bottom: 0;
   }
 
   .view-booking .view-booking-cell.view-booking-price {
@@ -400,7 +410,7 @@ main > .section:has(> .view-booking-wrapper) {
     font-weight: var(--font-weight-medium);
   }
 
-  .view-booking :is(.view-booking-services, .view-booking-additional-services) .view-booking-cell-title::after {
+  .view-booking .view-booking-services .view-booking-cell-title::after {
     content: none;
   }
 
