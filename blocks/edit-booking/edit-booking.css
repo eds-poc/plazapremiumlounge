@@ -81,7 +81,8 @@ main > .section:has(> .edit-booking-wrapper) {
 }
 
 /* the lounge: its name (20px) and address (16px light, 8px under it), 25px above and below them,
-   a grey line under; below 992px an arrow on the right folds its details away */
+   a grey line under; an accordion, as the source: the arrow 15px from the right (down when open,
+   right when folded) folds its details away */
 .edit-booking .edit-booking-toggle {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -122,13 +123,14 @@ main > .section:has(> .edit-booking-wrapper) {
   grid-area: 1 / 2 / span 2;
   width: 16px;
   height: 16px;
+  margin-right: var(--spacing-6);
   background-color: currentcolor;
   mask: url('../../icons/arrow-down.svg') center / contain no-repeat;
   transition: transform var(--duration-medium) var(--ease-standard);
 }
 
 .edit-booking .edit-booking-toggle[aria-expanded='false']::after {
-  transform: rotate(180deg);
+  transform: rotate(-90deg);
 }
 
 .edit-booking .edit-booking-panel {
@@ -525,7 +527,7 @@ main > .section:has(> .edit-booking-wrapper) {
 }
 
 /* from 992px (the source's desktop): the form instead of the rows, the summary card beside (a
-   third of the row, as the source's columns), the lounge no longer folds, the add-ons on white */
+   third of the row, as the source's columns), the add-ons on white */
 @media (width >= 992px) {
   .edit-booking .edit-booking-title {
     margin-bottom: var(--spacing-10);
@@ -535,20 +537,10 @@ main > .section:has(> .edit-booking-wrapper) {
     grid-template-columns: calc((100% + var(--grid-gutter)) * 2 / 3 - var(--grid-gutter)) minmax(0, 1fr);
   }
 
-  .edit-booking .edit-booking-toggle {
-    pointer-events: none;
-  }
-
-  .edit-booking .edit-booking-toggle::after {
-    content: none;
-  }
-
-  .edit-booking .edit-booking-panel.is-collapsed {
-    display: block;
-  }
-
+  /* the space under the service field as the source's: its 30px under each field, then 16px */
   .edit-booking .edit-booking-form {
     display: grid;
+    margin-bottom: calc(var(--spacing-9) + var(--edit-booking-gap));
   }
 
   .edit-booking .edit-booking-form .form-label {

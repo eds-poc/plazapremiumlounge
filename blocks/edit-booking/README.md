@@ -40,7 +40,8 @@ after) under the confirmation text. Its Confirm button stays disabled until the 
 API is in (the `pending` text says so).
 
 Below 992px the choices show as rows (label, value, Edit), each Edit opening a popup with its field
-and Confirm; the lounge's details fold away with the arrow; the summary card follows the page.
+and Confirm; the summary card follows the page. At every width the lounge is an accordion, as
+the source: its name and address (the arrow on the right) fold its details away.
 
 ## Table: 2 columns (Key | Text)
 

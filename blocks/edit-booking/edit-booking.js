@@ -335,7 +335,7 @@ export default function decorate(block) {
       main.append(introBox);
     }
 
-    // the lounge, its details folding away on phones (as the source's accordion)
+    // the lounge, an accordion (as the source's): its name and address fold its details away
     const lounge = el('div', 'edit-booking-lounge');
     const toggle = button('edit-booking-toggle');
     toggle.setAttribute('aria-expanded', 'true');
