@@ -185,8 +185,11 @@ the choices in the address:
   - `booking-widget:change`, half a second after the last change of the location, date, time or
     guests (straight after a location chosen for the visitor: the nearest airport, or a script's),
     with the same `detail` plus `location` (the chosen location).
-  - `booking-widget:book`, from the lounge card's Book Now, with the choice plus `propertyCode`,
-    `serviceCode`, `productCode` and `catalogueCode` (for the booking step to come).
+  - `booking-widget:book`, from the lounge card's Book Now button, with the choice plus
+    `propertyCode`, `propertyName`, `place`, `serviceCode`, `productCode`, `productName`,
+    `catalogueCode`, `price` and `currency`. The site puts it into the cart (see
+    [docs/cart.md](../../docs/cart.md)); while it's there the button reads Remove From Cart and
+    sends `cart:remove` (`detail.catalogueCode`).
 - **Choosing a location from a script:** send
   the block `booking-widget:set-location` with `detail.airport`:
   `block.dispatchEvent(new CustomEvent('booking-widget:set-location', { detail: { airport: 'HKG' } }))`.

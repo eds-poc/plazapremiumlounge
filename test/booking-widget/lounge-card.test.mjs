@@ -117,7 +117,8 @@ if (!only || only === 'real') {
   check('airport change: propertyCode empty', b3.selectedAirport === 'HKG' && b3.propertyCode === '', JSON.stringify({ a: b3.selectedAirport, p: b3.propertyCode }));
   check('HKG: card, View more properties (7 lounges)', s.card && /View more properties in Hong Kong International Airport \(HKG\)/.test(s.more || ''), `${s.title} | ${s.more}`);
   check('HKG: discount struck (995 → 895.50)', /HKD \d+\.\d\d/.test(s.was || '') && /HKD \d+\.\d\d/.test(s.now || ''), `${s.was} | ${s.now}`);
-  // Book Now: the event, no navigation
+  // Book Now: the event, no navigation (the cart it goes into answers here, not the stage service)
+  await page.route(/ppg-app\/cart(\?|$)/, (r) => r.fulfill(json(r.request().method() === 'POST' ? { cartId: 'CRT_TEST' } : { errorCode: 'BKNG001', message: 'Cart not found' })));
   const booked = page.evaluate(() => new Promise((resolve) => { document.addEventListener('booking-widget:book', (e) => resolve(e.detail), { once: true }); }));
   const url = page.url();
   await page.locator('.booking-widget-card-book').click();

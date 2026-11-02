@@ -231,6 +231,35 @@ header .header-utility-label {
   display: none;
 }
 
+/* the cart's count, as the source's: an 18px black circle over the icon's top right (out of the
+   flow, so nothing moves when it shows) */
+header .header-cart-count {
+  --header-cart-count-size: 18px;
+  --header-cart-count-top: -9px;
+
+  /* (on phones and tablets the user icon is close by: the badge stays clear of it) */
+  --header-cart-count-right: -7px;
+
+  position: absolute;
+  top: var(--header-cart-count-top);
+  right: var(--header-cart-count-right);
+  min-width: var(--header-cart-count-size);
+  height: var(--header-cart-count-size);
+  box-sizing: border-box;
+  border-radius: var(--radius-pill);
+  padding: 0 var(--spacing-1);
+  background-color: var(--color-text-strong);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--header-cart-count-size);
+  text-align: center;
+}
+
+header .header-cart-count[hidden] {
+  display: none;
+}
+
 /* menu button: three 23px lines, a white close cross when the menu is open */
 header .header-toggle {
   position: relative;
@@ -813,6 +842,12 @@ header .header-cart-dropdown p {
   header .header {
     --header-height: var(--nav-height-desktop);
     --header-link-line: 105px;
+  }
+
+  /* (the icon has 5px either side here: the source's -11px from the glyph) */
+  header .header-cart-count {
+    --header-cart-count-top: -5px;
+    --header-cart-count-right: -6px;
   }
 
   header.is-scrolled .header {

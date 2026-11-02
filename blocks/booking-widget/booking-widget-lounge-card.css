@@ -443,6 +443,11 @@
   mask: url('../../icons/arrow-long-right.svg') center / contain no-repeat;
 }
 
+/* (Remove From Cart: no arrow) */
+.booking-widget-card-book.is-in-cart::after {
+  content: none;
+}
+
 .booking-widget-products .booking-widget-card-actions a.booking-widget-card-more {
   border-color: var(--color-brand-primary);
   background: none;

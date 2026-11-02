@@ -1,0 +1,190 @@
+{
+  "ageGroup": [{
+    "description": "Adult(s)",
+    "group": "adult",
+    "primary": true,
+    "range": "2-NaN",
+    "status": true
+  }, {
+    "description": "Child(ren)",
+    "group": "child",
+    "primary": false,
+    "range": "0-2",
+    "status": true
+  }],
+  "agentCode": "PPL",
+  "agentType": "master",
+  "amountPayable": 0,
+  "cartId": "CRT_6DP2rtBSa",
+  "cartTotalPrice": {
+    "totalAdditionalPrice": 0,
+    "totalAdditionalWaiverAmount": 0,
+    "totalBasePrice": 1755.72,
+    "totalDiscounts": 175.57,
+    "totalMarkupWaiverAmount": 0,
+    "totalPrice": 1580.15,
+    "totalPriceUsd": 202.13,
+    "totalPromocodeAmount": 0,
+    "totalPromocodeAmountUsd": 0,
+    "totalTax": 0
+  },
+  "cityName": "Hong Kong SAR",
+  "countryCode": "HK",
+  "countryName": "Hong Kong SAR, China",
+  "createdTime": "2026-11-02 17:56:42",
+  "currency": "HKD",
+  "customerCode": "PPL",
+  "products": [{
+    "additionalAttributes": [],
+    "arrtureSku": "",
+    "basedOn": "Per Person",
+    "cartItemId": "CRT_ITM_fRRpxE5vC",
+    "catalogueCode": "PRD3345-Regular-PRPRTY813-LOUNGE-LCTN517-RTPLN3514",
+    "createdDate": "2026-11-02 17:56:42",
+    "disclaimer": "This lounge is located in the restricted area of the Departures Level near Gate 35. To access the lounge, you must have already checked in for your onward flight and be in possession of a valid boarding pass. Please contact your respective airline if you...",
+    "guestsCount": {
+      "adult": "2",
+      "child": "1"
+    },
+    "images": [{
+      "name": "PPF-Departures_product_3345.jpg",
+      "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prd_images/PPF-Departures_product_3345.jpg"
+    }],
+    "isFlightNumberMandatory": false,
+    "isStLoginMandatory": false,
+    "itemPriceDetails": {
+      "additionalCharges": [],
+      "baseRate": [{
+        "count": 2,
+        "currency": "HKD",
+        "groups": "adult",
+        "price": 1300.72,
+        "totalMarkUpCharge": 0
+      }, {
+        "count": 1,
+        "currency": "HKD",
+        "groups": "child",
+        "price": 455,
+        "totalMarkUpCharge": 0
+      }],
+      "discounts": [{
+        "code": "DSCNT1128",
+        "currency": "HKD",
+        "deltaType": "Discount [-]",
+        "discountValue": 10,
+        "isSTDiscount": false,
+        "name": "10% Online Discount [Lounge Booking]",
+        "type": "Percentage %",
+        "value": 175.57
+      }],
+      "isSTRatePlan": false,
+      "priceCode": "RTPLN3514",
+      "priceName": "Standard â€“ Lounge (2022)",
+      "productTotalPrice": {
+        "totalAdditionalPrice": 0,
+        "totalBasePrice": 1755.72,
+        "totalDiscounts": 175.57,
+        "totalMarkUpCharge": 0,
+        "totalPrice": 1580.15,
+        "totalPriceUSD": 202.13,
+        "totalPromocodeAmount": 0,
+        "totalPromocodeAmountUSD": 0,
+        "totalTax": 0
+      },
+      "taxes": [],
+      "termsPolicies": [{
+        "description": "Use the escalator or lift near Gate 35.",
+        "isAttachedToEmail": true,
+        "isDisplayOnWebsite": true,
+        "sequence": "0",
+        "termsCode": "SLSTRM1528",
+        "termsName": "GETTING HERE"
+      }, {
+        "description": "<p>Private Relaxation Area: Cancellation/ amendments may be made up to 24 hours before the indicated check-in time. A fee of AUD 10 per person or 25% of the total booking amount, whichever is higher, is payable.</p><p>All other services: Cancellation/ amendments may be made up to 6 hours before the indicated arrival time. A fee of AUD 10 per person is payable.</p><p>Late cancellation and/ or failure to arrive at the facility will be considered as No Show and the booking will not be refunded. Please refer to our full <a href=\"\">Terms &amp; Conditions</a>.</p>",
+        "isAttachedToEmail": true,
+        "isDisplayOnWebsite": true,
+        "sequence": "1",
+        "termsCode": "SLSTRM1371",
+        "termsName": "CANCELLATIONS  &  AMENDMENTS"
+      }]
+    },
+    "locationCode": "LCTN517",
+    "locationName": "Hong Kong International Airport",
+    "maxNoOfProductsAllowed": 10,
+    "priceDetails": {
+      "additionalCharges": [],
+      "baseRate": [{
+        "currency": "HKD",
+        "groups": "adult",
+        "price": 1300.72
+      }, {
+        "currency": "HKD",
+        "groups": "child",
+        "price": 455
+      }],
+      "discounts": [{
+        "code": "DSCNT1128",
+        "currency": "HKD",
+        "deltaType": "Discount [-]",
+        "isSTDiscount": false,
+        "name": "10% Online Discount [Lounge Booking]",
+        "type": "Percentage %",
+        "value": 10
+      }],
+      "isSTRatePlan": false,
+      "priceCode": "RTPLN3514",
+      "priceName": "Standard â€“ Lounge (2022)",
+      "taxes": [],
+      "termsPolicies": [{
+        "description": "Use the escalator or lift near Gate 35.",
+        "isAttachedToEmail": true,
+        "isDisplayOnWebsite": true,
+        "sequence": "0",
+        "termsCode": "SLSTRM1528",
+        "termsName": "GETTING HERE"
+      }, {
+        "description": "<p>Private Relaxation Area: Cancellation/ amendments may be made up to 24 hours before the indicated check-in time. A fee of AUD 10 per person or 25% of the total booking amount, whichever is higher, is payable.</p><p>All other services: Cancellation/ amendments may be made up to 6 hours before the indicated arrival time. A fee of AUD 10 per person is payable.</p><p>Late cancellation and/ or failure to arrive at the facility will be considered as No Show and the booking will not be refunded. Please refer to our full <a href=\"\">Terms &amp; Conditions</a>.</p>",
+        "isAttachedToEmail": true,
+        "isDisplayOnWebsite": true,
+        "sequence": "1",
+        "termsCode": "SLSTRM1371",
+        "termsName": "CANCELLATIONS  &  AMENDMENTS"
+      }]
+    },
+    "productCode": "PRD3345",
+    "productDisplayName": "Lounge Experience - 2 hrs",
+    "productId": 3345,
+    "productName": "Lounge Experience - 2 hrs",
+    "productType": "Regular",
+    "productVarients": [{
+      "attributeKey": "Duration",
+      "mandatory": false,
+      "name": "Duration",
+      "value": "2 hours"
+    }],
+    "propertyCode": "PRPRTY813",
+    "propertyDisplayName": "Plaza Premium Lounge ",
+    "propertyName": "Plaza Premium Lounge  (Near Gate 35, Departures)",
+    "propertyTypeCode": "LOUNGE",
+    "propertyTypeId": 6,
+    "propertyTypeName": "Lounge",
+    "quantity": 1,
+    "quantityText": "",
+    "serviceCode": "SRVC1619",
+    "serviceDisplayName": "Lounge",
+    "serviceName": "Lounge",
+    "serviceType": "LOUNGE",
+    "shortLocation": "Near Gate 35, Departures",
+    "startDate": "2026-11-04 15:00:00"
+  }],
+  "sortedTermsPolicies": [{
+    "description": "Use the escalator or lift near Gate 35.",
+    "termsName": "GETTING HERE"
+  }, {
+    "description": "<p>Private Relaxation Area: Cancellation/ amendments may be made up to 24 hours before the indicated check-in time. A fee of AUD 10 per person or 25% of the total booking amount, whichever is higher, is payable.</p><p>All other services: Cancellation/ amendments may be made up to 6 hours before the indicated arrival time. A fee of AUD 10 per person is payable.</p><p>Late cancellation and/ or failure to arrive at the facility will be considered as No Show and the booking will not be refunded. Please refer to our full <a href=\"\">Terms &amp; Conditions</a>.</p>",
+    "termsName": "CANCELLATIONS  &  AMENDMENTS"
+  }],
+  "totalAmendmentCharge": 0,
+  "totalCancellationCharge": 0,
+  "totalRefundAmount": 0
+}

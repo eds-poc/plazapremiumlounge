@@ -12,6 +12,7 @@
 import { loadCSS } from '../../scripts/aem.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { translate } from '../../scripts/i18n.js';
+import { isInCart, onCartChange } from '../../scripts/cart-state.js';
 import {
   buildSlider, el, fetchJson, getApiLanguage, toUrl,
 } from '../../scripts/properties.js';
@@ -252,6 +253,16 @@ function buildPhotos(images, name, place) {
 }
 
 /**
+ * Book Now, or Remove From Cart while its product (`data-catalogue-code`) is in the cart.
+ * @param {HTMLButtonElement} book
+ */
+function showInCart(book) {
+  const inCart = isInCart(book.dataset.catalogueCode);
+  book.classList.toggle('is-in-cart', inCart);
+  book.textContent = translate(inCart ? 'cartRemoveFromCart' : 'bookingBookNow');
+}
+
+/**
  * The lounge card, as the source's: photos (the chosen product's, else the lounge's), the name
  * and location line, the service tabs (two or more), the product, its "Filling Up" status, the
  * features, the price, Book Now and More at {airport}. With online booking off: the lounge, its
@@ -315,7 +326,8 @@ function buildCard(data, choice, id) {
   const now = el('span', 'booking-widget-card-price-now');
   price.append(was, now);
   left.append(choiceRow, features, price);
-  // Book Now: the booking step comes later; the choice is announced meanwhile
+  // Book Now: the product goes into the cart (announced; see scripts/cart.js); while it's there,
+  // the button takes it out (Remove From Cart, as the source's)
   const book = el('button', 'booking-widget-card-book', translate('bookingBookNow'));
   book.type = 'button';
   actions.append(book, more);
@@ -332,6 +344,8 @@ function buildCard(data, choice, id) {
     now.textContent = p.price ? formatPrice(p.price.now, p.price.currency) : '—';
     status.hidden = p.available;
     setPhotos(p.images.length ? p.images : data.images);
+    book.dataset.catalogueCode = p.catalogueCode;
+    showInCart(book);
   };
   const showGroup = (g) => {
     group = g;
@@ -352,14 +366,23 @@ function buildCard(data, choice, id) {
   select.addEventListener('change', showProduct);
   book.addEventListener('click', () => {
     const p = product();
-    card.dispatchEvent(new CustomEvent('booking-widget:book', {
+    if (isInCart(p.catalogueCode)) {
+      book.dispatchEvent(new CustomEvent('cart:remove', { bubbles: true, detail: { catalogueCode: p.catalogueCode } }));
+      return;
+    }
+    book.dispatchEvent(new CustomEvent('booking-widget:book', {
       bubbles: true,
       detail: {
         ...choice,
         propertyCode: data.propertyCode,
+        propertyName: data.name,
+        place: data.place,
         serviceCode: p.service,
         productCode: p.code,
+        productName: p.name,
         catalogueCode: p.catalogueCode,
+        price: p.price?.now,
+        currency: p.price?.currency,
       },
     }));
   });
@@ -394,6 +417,8 @@ async function fetchProducts(body, signal, fresh = false) {
 export default async function decorateLoungeCard(block, { current }) {
   count += 1;
   const id = `booking-widget-card-${count}`;
+  // (once for every card: Book Now or Remove From Cart as the cart changes, in other tabs too)
+  if (count === 1) onCartChange(() => document.querySelectorAll('.booking-widget-card-book').forEach(showInCart));
   // (its look, before it shows)
   await loadCSS(`${window.hlx.codeBasePath}/blocks/booking-widget/booking-widget-lounge-card.css`);
   const section = el('div', 'booking-widget-products');

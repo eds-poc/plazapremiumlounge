@@ -1,0 +1,259 @@
+/* the cart's dialogs (scripts/mini-cart.js), as the source's #cart-popup and its dialogs, inside
+   the site's dialog (styles/modal.css): the mini cart is a panel at the top right from 768px,
+   the width of the screen on phones; Checkout Cart, the failure message and the remove
+   confirmation are centred */
+dialog.modal:is(.mini-cart-modal, .cart-message-modal, .cart-confirm-modal) {
+  /* the source's measures */
+  --cart-panel-width: 420px;
+  --cart-panel-gap: 28px;
+  --cart-panel-radius: 18px;
+  --cart-rule: 1px solid var(--color-text-strong);
+  --cart-label: rgb(0 0 0 / 60%);
+  --cart-value: var(--color-brand-primary-action);
+  --cart-detail-size: 13px;
+  --cart-title-size: 20px;
+  --cart-total-size: var(--font-size-lg);
+  --cart-button-height: 35px;
+  --cart-button-padding: 6px 20px;
+  --cart-gap: 8px;
+  --cart-detail-gap: 3px;
+  --cart-confirm-button: 90px;
+
+  font-family: var(--font-family-primary);
+}
+
+dialog.modal.mini-cart-modal {
+  width: 100%;
+  max-width: none;
+  margin: var(--spacing-3) 0 auto;
+}
+
+dialog.modal.mini-cart-modal .modal-content {
+  border-radius: var(--cart-panel-radius);
+  background-color: var(--color-surface-warm);
+}
+
+/* the title on the panel's colour, over a black line (the source's .sm-cart-header) */
+dialog.modal.mini-cart-modal .modal-header {
+  margin: 0 var(--modal-padding);
+  border-bottom: var(--cart-rule);
+  padding: var(--modal-padding) 0 var(--spacing-6);
+  background: none;
+  color: var(--color-text);
+}
+
+dialog.modal.mini-cart-modal .modal-header .modal-title {
+  font-size: var(--cart-title-size);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.2;
+}
+
+dialog.modal.mini-cart-modal .modal-close {
+  color: var(--color-text-strong, #000);
+  opacity: 0.5;
+}
+
+dialog.modal.mini-cart-modal .modal-close:hover {
+  opacity: 1;
+}
+
+dialog.modal.mini-cart-modal .modal-close:focus-visible {
+  outline-color: var(--color-brand-primary);
+}
+
+dialog.modal.mini-cart-modal .modal-body {
+  padding-top: var(--spacing-7);
+}
+
+.mini-cart-line {
+  margin-bottom: var(--spacing-4);
+  border-bottom: var(--cart-rule);
+  padding-bottom: var(--spacing-4);
+}
+
+.mini-cart-name {
+  display: flex;
+  gap: var(--spacing-2);
+  align-items: center;
+  margin: 0 0 var(--spacing-2);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.2;
+}
+
+/* the source's ⊗ after the lounge's name */
+.mini-cart-remove {
+  flex: none;
+  width: var(--font-size-md);
+  height: var(--font-size-md);
+  border: 0;
+  padding: 0;
+  background-color: var(--color-brand-primary);
+  cursor: pointer;
+  mask: url('../icons/circle-xmark-light.svg') center / contain no-repeat;
+}
+
+.mini-cart-remove:hover {
+  background-color: var(--color-brand-primary-action);
+}
+
+.mini-cart-place,
+.mini-cart-details {
+  margin: 0;
+  font-size: var(--cart-detail-size);
+  line-height: 1.4;
+}
+
+.mini-cart-place {
+  color: var(--cart-label);
+}
+
+.mini-cart-detail {
+  display: flex;
+  gap: var(--spacing-2);
+  padding-bottom: var(--cart-detail-gap);
+}
+
+.mini-cart-detail dt {
+  color: var(--cart-label);
+  font-weight: var(--font-weight-light);
+}
+
+.mini-cart-detail dd {
+  margin: 0;
+  color: var(--cart-value);
+  font-weight: var(--font-weight-medium);
+}
+
+.mini-cart-hours {
+  padding-left: var(--spacing-1);
+}
+
+.mini-cart-row {
+  display: flex;
+  gap: var(--spacing-4);
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--spacing-4);
+}
+
+.mini-cart-label {
+  color: var(--cart-label);
+  font-weight: var(--font-weight-light);
+}
+
+.mini-cart-discount .mini-cart-amount {
+  color: var(--color-brand-primary-action);
+}
+
+.mini-cart-total {
+  align-items: flex-end;
+}
+
+.mini-cart-total .mini-cart-label {
+  display: flex;
+  flex-direction: column;
+}
+
+.mini-cart-note {
+  padding-top: var(--spacing-1);
+  font-size: var(--font-size-sm);
+  line-height: 1.2;
+}
+
+.mini-cart-total .mini-cart-amount {
+  color: var(--color-text);
+  font-size: var(--cart-total-size);
+  font-weight: var(--font-weight-medium);
+}
+
+.mini-cart-actions {
+  display: grid;
+  gap: var(--cart-gap);
+  margin-top: var(--spacing-4);
+}
+
+/* the source's cart buttons: a filled pill (hover: outlined) and an outlined one (hover: filled) */
+.cart-button {
+  box-sizing: border-box;
+  min-height: var(--cart-button-height);
+  border: 1px solid transparent;
+  border-radius: var(--radius-xl);
+  padding: var(--cart-button-padding);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  cursor: pointer;
+  transition: background-color var(--duration-normal) var(--ease-standard), color var(--duration-normal) var(--ease-standard);
+}
+
+.cart-button-primary {
+  background-color: var(--color-brand-primary-action);
+  color: var(--color-text-inverse);
+}
+
+.cart-button-primary:hover {
+  border-color: var(--color-brand-primary);
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
+}
+
+.cart-button-secondary {
+  border-color: var(--color-brand-primary);
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.cart-button-secondary:hover {
+  border-color: var(--color-background);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+/* Checkout Cart and the failure message: centred, the site dialog's maroon title, the message,
+   then the button the full width */
+dialog.modal:is(.cart-message-modal, .cart-confirm-modal) {
+  margin: auto;
+}
+
+.cart-message-modal .cart-dialog-body p {
+  margin: 0 0 var(--spacing-7);
+}
+
+.cart-message-modal .cart-button {
+  width: 100%;
+}
+
+/* the remove confirmation: no title, the question and the product, Cancel and Yes at the right */
+dialog.modal.cart-confirm-modal .modal-header {
+  display: none;
+}
+
+.cart-confirm-message {
+  margin: var(--spacing-2) 0;
+}
+
+.cart-confirm-product {
+  display: block;
+}
+
+.cart-confirm-actions {
+  display: flex;
+  gap: var(--spacing-2);
+  justify-content: flex-end;
+  margin-top: var(--modal-padding);
+}
+
+.cart-confirm-actions .cart-button {
+  min-width: var(--cart-confirm-button);
+}
+
+@media (width >= 768px) {
+  dialog.modal.mini-cart-modal {
+    width: var(--cart-panel-width);
+    margin: var(--cart-panel-gap) var(--cart-panel-gap) auto auto;
+  }
+}

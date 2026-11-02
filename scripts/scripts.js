@@ -242,6 +242,33 @@ export function decorateMain(main) {
   decorateButtons(main);
 }
 
+// the cart: what the blocks that sell announce, and the cart type each product is (the cart's code
+// loads on the first one; see scripts/cart.js and scripts/mini-cart.js)
+const CART_EVENTS = {
+  // the homepage lounge card's Book Now
+  'booking-widget:book': 'lounge',
+};
+
+/**
+ * Puts announced products into the cart (`CART_EVENTS`), and takes them out on `cart:remove`
+ * (`detail.catalogueCode`, e.g. the lounge card's Remove From Cart).
+ */
+function installCart() {
+  Object.entries(CART_EVENTS).forEach(([name, type]) => {
+    document.addEventListener(name, (e) => {
+      // (the button is off at once, while the cart's code loads; the cart turns it back on)
+      const from = e.target.closest?.('button');
+      if (from) from.disabled = true;
+      import('./mini-cart.js')
+        .then(({ addAndShow }) => addAndShow({ ...e.detail, type }, e.target))
+        .finally(() => { if (from) from.disabled = false; });
+    });
+  });
+  document.addEventListener('cart:remove', (e) => {
+    import('./mini-cart.js').then(({ removeAndShow }) => removeAndShow(e.detail?.catalogueCode));
+  });
+}
+
 /**
  * Loads everything needed to get to LCP.
  * @param {Element} doc The container element
@@ -260,6 +287,7 @@ async function loadEager(doc) {
   installModalLinks();
   // YouTube, Vimeo and video file links play in the video popup, wherever they are authored
   installVideoLinks();
+  installCart();
   const main = doc.querySelector('main');
   if (main) {
     decorateMain(main);
