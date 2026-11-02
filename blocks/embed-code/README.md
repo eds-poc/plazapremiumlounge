@@ -36,6 +36,7 @@ Adds third-party code to a page: **scripts** and **styles** go into the page's `
 
 - **The page doesn't wait for scripts.** Content shows straight away; a slow third-party file only delays the rows after it.
 - **Each script file loads only once**, even if several blocks or fragments on the page use it.
+- **Code written to run on page load still runs.** The page has loaded by the time the block runs, so `DOMContentLoaded` (and `load`) listeners that script code adds are called straight after the code.
 
 ## Styles
 

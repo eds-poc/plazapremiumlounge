@@ -103,6 +103,18 @@ function parseSnippet(code) {
     const iframe = buildIframe(attrs);
     if (iframe) node.replaceWith(iframe);
   });
+  // an image's width/height attributes are its size, as where the code comes from (the site's
+  // `main img` rule sets both to auto): a width with the height kept in proportion (so it still
+  // shrinks to fit), else a height
+  doc.querySelectorAll('img[width], img[height]').forEach((img) => {
+    const size = (name) => {
+      const value = (img.getAttribute(name) || '').trim();
+      return /^\d+(\.\d+)?(px)?$/.test(value) ? `${parseFloat(value)}px` : '';
+    };
+    if (img.style.width || img.style.height) return;
+    if (size('width')) img.style.width = size('width');
+    else if (size('height')) img.style.height = size('height');
+  });
   [...doc.head.childNodes, ...doc.body.childNodes].forEach((node) => {
     if (node.nodeType === Node.TEXT_NODE && !node.textContent.trim()) return;
     items.push({ type: 'html', node });
@@ -150,6 +162,42 @@ function readRow(row) {
 }
 
 /**
+ * Runs script code from the head. The page has loaded by the time the block runs, so the
+ * DOMContentLoaded (and, once loaded, load) listeners the code adds would never be called:
+ * they are called straight after the code instead.
+ * @param {HTMLScriptElement} script
+ */
+function runScript(script) {
+  const listeners = [];
+  const targets = [document, window];
+  targets.forEach((target) => {
+    const add = target.addEventListener;
+    target.addEventListener = (type, listener, options) => {
+      if (type === 'DOMContentLoaded' || (type === 'load' && document.readyState === 'complete')) {
+        listeners.push({ target, type, listener });
+      } else {
+        add.call(target, type, listener, options);
+      }
+    };
+  });
+  try {
+    document.head.append(script);
+  } finally {
+    targets.forEach((target) => delete target.addEventListener);
+  }
+  listeners.forEach(({ target, type, listener }) => {
+    try {
+      const event = new Event(type);
+      if (typeof listener === 'function') listener.call(target, event);
+      else listener?.handleEvent?.(event);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('embed-code: script error', error);
+    }
+  });
+}
+
+/**
  * Adds the scripts to the head in authored order. A script file is waited for before the
  * next script runs (code that uses it can follow it), unless it is marked `async`.
  * @param {object[]} scripts
@@ -169,7 +217,7 @@ async function injectScripts(scripts) {
       const script = document.createElement('script');
       Object.entries(rest).forEach(([name, value]) => script.setAttribute(name, value));
       script.textContent = code;
-      document.head.append(script);
+      runScript(script);
     }
   }
 }
