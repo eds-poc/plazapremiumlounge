@@ -22,8 +22,6 @@ import apiUrl from '../../scripts/endpoints.js';
 import { DEFAULT_SITE, getSiteFolder, translate } from '../../scripts/i18n.js';
 import { attachValidation, buildField, validateForm } from '../../scripts/forms.js';
 
-// the password's longest length without a Max length row (the source field's maxlength)
-const PASSWORD_MAX_LENGTH = 20;
 const PARTNER_PARAM = 'partner';
 const RETURN_PARAM = 'returnUrl';
 const REASON_PARAM = 'reason';
@@ -98,7 +96,8 @@ function toSitePath(value) {
  * name | value. Rows of one cell are the label, then the button text, in order.
  * @param {Element} block
  * @returns {{picture: HTMLPictureElement|null, texts: Object<string, string>, partner: string,
- *   partnerPage: string, maxLength: number}}
+ *   partnerPage: string, maxLength: number}} maxLength: the authored Max length (a positive
+ *   whole number), else 0 (no limit)
  */
 function readRows(block) {
   const picture = block.querySelector('picture');
@@ -114,12 +113,16 @@ function readRows(block) {
     .map(([c]) => clean(c.textContent)).filter(Boolean);
   texts.label ||= label || '';
   texts.button ||= button || '';
+  const authoredMax = value(cell(SETTINGS.maxLength));
+  const maxLength = /^\d+$/.test(authoredMax) ? Number(authoredMax) : 0;
 
   const { hostname } = window.location;
   if (hostname.endsWith('.aem.page') || hostname === 'localhost') {
     // a row name mistyped leaves its text out without a word: say so on preview pages
     const known = [...Object.values(TEXTS), ...Object.values(SETTINGS)].map(toRowKey);
     const missing = Object.entries(TEXTS).filter(([key]) => !texts[key]).map(([, name]) => name);
+    // without a Max length (a positive whole number), the password has no length limit
+    if (!maxLength) missing.push(SETTINGS.maxLength);
     const unknown = rows.filter((cells) => cells.length >= 2)
       .map((cells) => clean(cells[0].textContent))
       .filter((name) => name && !known.includes(toRowKey(name)));
@@ -129,13 +132,12 @@ function readRows(block) {
     }
   }
 
-  const maxLength = parseInt(value(cell(SETTINGS.maxLength)), 10);
   return {
     picture,
     texts,
     partner: toPartnerName(value(cell(SETTINGS.partner))),
     partnerPage: toSitePath(value(cell(SETTINGS.partnerPage))),
-    maxLength: maxLength > 0 ? maxLength : PASSWORD_MAX_LENGTH,
+    maxLength,
   };
 }
 
@@ -224,9 +226,9 @@ function failureMessage({ reason, message }, texts) {
 /**
  * Decorates the Partner Password block: the image, then a form with the labelled password field,
  * the button and a message line under it (a refused login, a failed request, or the `?reason=`
- * notice). The field is checked as the visitor goes and on submit (required, at most Max length
- * characters); while the password is being checked the button is disabled and further submits are
- * ignored.
+ * notice). The field is checked as the visitor goes and on submit (required, and at most Max length
+ * characters when that row is authored); while the password is being checked the button is
+ * disabled and further submits are ignored.
  * @param {Element} block The partner-password block element
  */
 export default function decorate(block) {
@@ -238,13 +240,16 @@ export default function decorate(block) {
   const settings = new Map([
     ['key', 'password'],
     // not the sign up password rule (8 to 15 characters, mixed case and a digit) that a password
-    // field gets by default: the shared password is only required, at most maxLength long
+    // field gets by default: the shared password is only required, and at most Max length long
+    // when that row is authored
     ['rule', 'none'],
     ['required', texts.required],
-    ['max length', String(maxLength)],
     ['autocomplete', 'current-password'],
   ]);
-  if (texts.tooLong) settings.set('max length message', texts.tooLong);
+  if (maxLength) {
+    settings.set('max length', String(maxLength));
+    if (texts.tooLong) settings.set('max length message', texts.tooLong);
+  }
   const form = el('form', 'partner-password-form form-fields');
   const field = buildField({
     label: texts.label,
@@ -255,6 +260,9 @@ export default function decorate(block) {
   // no required star (the only field)
   field.querySelector('.form-required')?.remove();
   const input = field.querySelector('input');
+  // without a Max length, no limit: not the sign up password's maxlength (15) that forms.js gives
+  // a password field by default
+  if (!maxLength) input.removeAttribute('maxlength');
 
   const submit = el('div', 'form-submit');
   const button = el('button', 'button primary');

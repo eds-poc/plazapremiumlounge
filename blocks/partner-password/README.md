@@ -42,7 +42,8 @@ texts: a message left out shows the login API's message, or a general form messa
 | --- | --- |
 | Label | Above the field: the field's label |
 | Button | The button |
-| Required message, Max length message | Under the field: no password, or one longer than Max length |
+| Required message | Under the field: no password |
+| Max length message | Under the field: a password longer than Max length (only with a Max length row) |
 | Invalid message | Under the button: the password was refused |
 | Access message | Under the button: the login isn't for this partner |
 | Error message | Under the button: the login service failed |
@@ -54,7 +55,9 @@ texts: a message left out shows the login API's message, or a general form messa
   `travelwise`).
 - **Partner page** (optional): where to go after logging in when there's no `?returnUrl=`, a link
   or path on this site.
-- **Max length** (optional): the password's longest length, 20 without it.
+- **Max length** (optional): the password's longest length, a whole number (e.g. `20`). Without
+  it (or with `0` or text), the password has no length limit; the preview console warning lists
+  it.
 - Row names ignore capitals and spaces; the rows can be in any order. Rows of one cell are read as
   the Label, then the Button.
 
