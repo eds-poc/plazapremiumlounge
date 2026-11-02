@@ -22,10 +22,6 @@ const PARTNER_PAGE_META = 'partner-password-page';
 const PARTNER_TOKEN_KEY = 'partner-token-';
 // the password page's block: a page with it is never sent to the password page
 const PARTNER_PASSWORD_BLOCK = 'partner-password';
-// the longest delay a browser timer keeps (about 24.8 days); a longer wait is re-armed
-const MAX_TIMER_MS = 2147483647;
-let partnerTimer;
-let partnerWatching = false;
 
 /**
  * One base64url part of a JWT, as JSON.
@@ -264,23 +260,14 @@ function partnerPasswordPage(partner) {
  * metadata sheet) shows only while an unexpired login for that partner is stored (its password
  * page stores it). Otherwise the record is removed and the visitor goes to the password page with
  * `?partner=<partner>&returnUrl=<page>` (and `&reason=expired` when a login had been stored),
- * replacing the history entry. Checked again when the page comes back from the back/forward cache,
- * when the tab is shown again and when the login expires on an open page. The content is still
- * public (Edge Delivery serves it to anyone): this keeps visitors to the partner's flow.
+ * replacing the history entry. Checked on page load only: a page already open (or restored with
+ * Back) stays until the next page load. The content is still public (Edge Delivery serves it to
+ * anyone): this keeps visitors to the partner's flow.
  * @returns {boolean} Whether the page can show
  */
 export function checkPartnerAccess() {
   const partner = toPartnerName(getMetadata(PARTNER_META));
   if (!partner || document.querySelector(`main .${PARTNER_PASSWORD_BLOCK}`)) return true;
-  if (!partnerWatching) {
-    partnerWatching = true;
-    window.addEventListener('pageshow', (e) => {
-      if (e.persisted) checkPartnerAccess();
-    });
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') checkPartnerAccess();
-    });
-  }
   const key = `${PARTNER_TOKEN_KEY}${partner}`;
   let stored = null;
   try {
@@ -288,14 +275,7 @@ export function checkPartnerAccess() {
   } catch {
     stored = null;
   }
-  const expiresAt = partnerTokenExpiry(stored);
-  clearTimeout(partnerTimer);
-  if (expiresAt > Date.now()) {
-    // just after the expiry, so the check sees it expired
-    const delay = Math.min(expiresAt - Date.now() + 1000, MAX_TIMER_MS);
-    partnerTimer = setTimeout(checkPartnerAccess, delay);
-    return true;
-  }
+  if (partnerTokenExpiry(stored) > Date.now()) return true;
   try {
     localStorage.removeItem(key);
   } catch {
