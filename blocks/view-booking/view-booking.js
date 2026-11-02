@@ -255,7 +255,7 @@ export default function decorate(block) {
     message.hidden = false;
   };
   if (!ORDER_ID.test(orderId)) {
-    showMessage(text('notFound') || translate('bookingNotFound'));
+    showMessage(text('notFound'));
     return;
   }
   // no login: the page's login check is already sending the visitor home
@@ -341,7 +341,7 @@ export default function decorate(block) {
 
     // the add-ons: "1 x Plaza Premium Lounge Sakura Shrimp Spice (50g)"
     if (addOns.length) {
-      const extras = cell('additional-services', text('additionalServices') || translate('bookingAdditionalServices'));
+      const extras = cell('additional-services', text('additionalServices'));
       const list = el('ul', 'view-booking-service-list');
       addOns.forEach((addOn) => {
         list.append(el('li', '', `${Number(addOn.quantity) || 1} x ${addOn.productDisplayName || addOn.productName || ''}`));
@@ -451,7 +451,7 @@ export default function decorate(block) {
   const load = () => {
     showLoader();
     keepLoader.observe(document.body, { childList: true });
-    showMessage(text('loading') || translate('bookingLoading'));
+    showMessage(text('loading'));
     block.setAttribute('aria-busy', 'true');
     fetch(apiUrl('getOrderDetail'), {
       method: 'POST',
@@ -480,8 +480,8 @@ export default function decorate(block) {
       .catch((error) => {
         loaded();
         block.removeAttribute('aria-busy');
-        if (error.notFound) showMessage(text('notFound') || translate('bookingNotFound'));
-        else showMessage(text('error') || translate('bookingLoadError'), load);
+        if (error.notFound) showMessage(text('notFound'));
+        else showMessage(text('error'), load);
       });
   };
   load();
