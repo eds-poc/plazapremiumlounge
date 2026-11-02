@@ -14,9 +14,9 @@ const FIELDS = {
   lastName: {
     type: 'text', key: 'lastName', required: true, settings: { 'max length': 200 },
   },
-  // the source's contact number: digits, +, - and /, at most 15, no country code
+  // the contact number: numbers only (the number keypad on phones), at most 11, no country code
   contactNumber: {
-    type: 'text', key: 'contactNumber', required: true, settings: { rule: 'phone', 'max length': 15 },
+    type: 'tel', key: 'contactNumber', required: true, settings: { rule: 'digits', 'max length': 11 },
   },
   countryOfResidence: {
     type: 'country', key: 'countryOfResidence', required: true, settings: { 'value type': 'number' },
