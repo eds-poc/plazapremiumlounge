@@ -1,25 +1,17 @@
 /*
- * Travelwise Password: the source's password page for a partner's members-only pages, e.g.
- * /en-uk/travelwise for the Travelwise offer (`.password-wrapper`): an image, the sentence that
- * labels the password field ("A password is required to access this page"), the password and a
- * Log In button, in one narrow column. Any partner's password page can use it.
- * Authored rows, in any order: the image (a picture), the label text, then the button text
- * (optional, else "Log In"); other rows are left out.
- * The partner login lives here:
- * - the partner is found from the metadata (partner-member-name): this page's own, else that of
- *   the page in `?returnUrl=` (metadata.json), else this page's name when metadata.json has that
- *   partner (/en-uk/travelwise → travelwise);
- * - Log In sends `{ partnername, password }` to the PartnerLogin API, which answers
- *   `{ statusCode: "200", token, tokenType: "Bearer", expiresIn }` (or 400 with a message);
- * - the login must succeed, name the same partner, and its token must be a signed, unexpired JWT
- *   whose partner claim (partnerName) is this partner;
- * - the login is stored as `partner-token-<partner>` = `{ token, expiresAt }` (the earlier of the
- *   token's `exp` and `expiresIn`), which the partner's pages check (checkPartnerAccess in
- *   scripts/scripts.js, which only decides access);
- * - then the visitor goes to the returnUrl page when it's this site's page for the same partner,
- *   else to the partner's page in metadata.json; on any failure they stay here with the error
- *   under the button. A `?reason=expired|logout` notice is shown on arrival.
- * Nothing is logged.
+ * Travelwise Password: Partner members-only login page (e.g. /en-uk/travelwise).
+ * Displays an image, password prompt, password field, and Log In button in a single column.
+ * Authored rows: image, label text, and optional button text (defaults to "Log In").
+ *
+ * Partner login:
+ * - Resolve partner from page metadata, returnUrl metadata, or page name.
+ * - Submit { partnerName, password } to PartnerLogin API.
+ * - Validate successful response, matching partner, and a valid unexpired JWT.
+ * - Store as `partner-token-<partner>` with token and expiry.
+ * - Redirect to the requested partner page; otherwise show an error message.
+ * - Show notices for `?reason=expired` or `?reason=logout`.
+ *
+ * No data is logged.
  */
 import { getMetadata } from '../../scripts/aem.js';
 import { decodeJwt, isTokenValid } from '../../scripts/auth.js';
