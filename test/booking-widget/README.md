@@ -20,6 +20,7 @@ served: `.hlxignore` lists `test/*`.
 | `lounge-card.test.mjs` | The lounge card from getbookingwidgetproducts: real airports, routed answers and errors, request flow (46) |
 | `locations.test.mjs` | getGeoLocation: the Where list and the nearest airport, real and routed answers, failures, flows (25) |
 | `search-button.test.mjs` | Search disabled until the locations and the nearest airport are in (22) |
+| `hero-search.test.mjs` | The hero's Search as the source's: the page stays, the card asked again after 0.5 s (the shown lounge kept, not from the page's earlier answers), focus on Search, a double click asks once, no location; Book Now's dialog still opens the city page; 1440 and 375 (23) |
 | `axe.test.mjs` | axe on the card, unavailable and Filling Up states |
 | `book-now.test.mjs` | The Book Now block: options and label, the same dialog as the header's, focus and Escape, airport preselect, search, no dialog, first section, 5 languages (21) |
 | `perf.mjs` | LCP, CLS (with shift sources), TBT, typing delay, API calls and bytes, when Search turns on and the card shows; mobile (4x CPU, slow 4G) and desktop; `node perf.mjs <label> [runs]` |

@@ -1,7 +1,8 @@
 # Booking Widget: authoring guide
 
 The source's booking search: **Where**, **Date**, **Time**, **Adult(s)** and **Child(ren)**, then
-a search that opens the lounges of the chosen city on this site. One form, used in two places:
+a search: in the homepage hero, the chosen airport's lounge card again; in Book Now, the lounges
+of the chosen city on this site. One form, used in two places:
 
 - **The homepage hero** (a [Hero](#the-homepage-hero-hero-booking) with the option `booking`):
   a maroon bar over the photo from 768px; a card on phones (Where on maroon, the rest on white,
@@ -117,8 +118,13 @@ the source's featured product. Book Now's dialog doesn't have it.
 
 ## The search
 
-Search Lounges (or Book Now) opens the chosen location's **city page on this site**, with the
-choices in the address:
+**In the homepage hero,** Search Lounges works as the source's hero: the page stays, and half a
+second after the click the lounge card under the form is asked for again for the choices (the
+lounge shown is kept, and the answer is asked for afresh, not taken from earlier on the page). The
+focus stays on the button.
+
+**In Book Now,** the dialog's button opens the chosen location's **city page on this site**, with
+the choices in the address:
 
 `/en-uk/find/china-regions/hong-kong/hong-kong?airport=HKG&date=2026-10-30&time=1600&adult=2&children=1`
 
@@ -175,7 +181,7 @@ choices in the address:
 - **Events** (they bubble):
   - `booking-widget:search`, before opening the city page, with `detail` =
     `{ airport, date, time, adult, children, url }`. Cancel it (`preventDefault`) to handle the
-    search in place.
+    search in place. The hero's lounge card does this (option `lounge-card`).
   - `booking-widget:change`, half a second after the last change of the location, date, time or
     guests (straight after a location chosen for the visitor: the nearest airport, or a script's),
     with the same `detail` plus `location` (the chosen location).

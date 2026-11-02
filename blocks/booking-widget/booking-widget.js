@@ -659,7 +659,8 @@ function buildGuests(id) {
  * The choices are announced (`booking-widget:change`, half a second after the last change, with
  * the location, date, time, guests and the search address), and a script can choose a location
  * (`booking-widget:set-location` with `detail.airport`). Option `lounge-card` (the homepage hero
- * adds it) shows the first bookable lounge of the chosen airport under the form (see
+ * adds it) shows the first bookable lounge of the chosen airport under the form, and its Search
+ * asks for that card again instead of opening the city page, as the source's hero (see
  * booking-widget-lounge-card.js).
  * @param {Element} block
  */

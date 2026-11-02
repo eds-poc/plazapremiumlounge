@@ -2,7 +2,8 @@
  * The homepage hero's lounge card (Booking Widget option lounge-card), as the source's
  * #booking-widget-products-section: when the visitor chooses an airport (or its date, time or
  * guests change), the airport's featured lounge with its products and prices; else a button to
- * all the airport's lounges.
+ * all the airport's lounges. Its Search, as the source's hero, asks for the card again in place
+ * (the page stays).
  *
  * One call, getbookingwidgetproducts (the source's own widget call): the booking system picks
  * the airport's lounge (or keeps the one shown, when only the date, time or guests changed) and
@@ -22,6 +23,8 @@ const FEATURES_SHOWN = 4;
 // the source's photo change every 8 seconds
 const SLIDE_MS = 8000;
 const RAILWAY = 'RLWYSTN';
+// the source's hero Search asks for the card again half a second after the click
+const SEARCH_DELAY_MS = 500;
 // a pass service isn't bookable here (as the source's)
 const PASS = /pass/i;
 
@@ -369,11 +372,12 @@ function buildCard(data, choice, id) {
  * request cancels it through `signal`).
  * @param {Object} body
  * @param {AbortSignal} signal
+ * @param {boolean} [fresh] Ask even when answered before (Search)
  * @returns {Promise<Object>}
  */
-async function fetchProducts(body, signal) {
+async function fetchProducts(body, signal, fresh = false) {
   const key = JSON.stringify(body);
-  if (answers.has(key)) return answers.get(key);
+  if (!fresh && answers.has(key)) return answers.get(key);
   const json = await fetchJson(apiUrl('bookingWidgetProducts'), PRODUCTS_TIMEOUT_MS, { body, signal });
   answers.set(key, json);
   return json;
@@ -425,8 +429,12 @@ export default async function decorateLoungeCard(block, { current }) {
   let shown = null;
   let generation = 0;
   let request = null;
-  /** Shows the airport's featured lounge for the widget's choices. */
-  const show = async () => {
+  /**
+   * Shows the airport's featured lounge for the widget's choices.
+   * @param {{fresh?: boolean}} [options] fresh: ask the service again (Search), not this page's
+   *   earlier answer
+   */
+  const show = async ({ fresh = false } = {}) => {
     const choice = current();
     generation += 1;
     const asked = generation;
@@ -463,7 +471,7 @@ export default async function decorateLoungeCard(block, { current }) {
       languageCode: getApiLanguage(),
     };
     try {
-      const data = readCard(await fetchProducts(body, request.signal));
+      const data = readCard(await fetchProducts(body, request.signal, fresh));
       if (stale()) return;
       if (data.state === 'none') {
         // eslint-disable-next-line no-console
@@ -488,7 +496,15 @@ export default async function decorateLoungeCard(block, { current }) {
     }
   };
 
-  block.addEventListener('booking-widget:change', show);
+  block.addEventListener('booking-widget:change', () => show());
+  // Search, as the source's hero: the page stays, and the card is asked for again for the choices
+  // (the lounge shown kept), half a second after the click; a click before then starts it over
+  let searchTimer;
+  block.addEventListener('booking-widget:search', (e) => {
+    e.preventDefault();
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => show({ fresh: true }), SEARCH_DELAY_MS);
+  });
   // a location chosen before this loaded (e.g. by a script)
   if (current()) show();
 }
