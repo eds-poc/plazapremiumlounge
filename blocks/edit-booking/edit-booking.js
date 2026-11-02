@@ -208,7 +208,7 @@ export default function decorate(block) {
   };
   const orderId = bookingId();
   if (!orderId) {
-    showMessage(text('notFound') || translate('bookingNotFound'));
+    showMessage(text('notFound'));
     return;
   }
   // no login: the page's login check is already sending the visitor home
@@ -768,7 +768,7 @@ export default function decorate(block) {
     const confirmNodes = [
       el('p', 'edit-booking-confirm-text', text('confirmText')),
       changesList,
-      el('p', 'edit-booking-pending', text('pending') || translate('bookingChangesPending')),
+      el('p', 'edit-booking-pending', text('pending')),
       actions,
     ];
     submit.addEventListener('click', () => {
@@ -801,7 +801,7 @@ export default function decorate(block) {
   const loader = bookingLoader();
   const load = () => {
     loader.start();
-    showMessage(text('loading') || translate('bookingLoading'));
+    showMessage(text('loading'));
     block.setAttribute('aria-busy', 'true');
     fetchOrder(orderId)
       .then((order) => {
@@ -814,8 +814,8 @@ export default function decorate(block) {
       .catch((error) => {
         loader.done();
         block.removeAttribute('aria-busy');
-        if (error.notFound) showMessage(text('notFound') || translate('bookingNotFound'));
-        else showMessage(text('error') || translate('bookingLoadError'), load);
+        if (error.notFound) showMessage(text('notFound'));
+        else showMessage(text('error'), load);
       });
   };
   load();

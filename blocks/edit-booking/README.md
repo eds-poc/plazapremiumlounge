@@ -78,6 +78,10 @@ the source: its name and address (the arrow on the right) fold its details away.
 | confirmText | Are you sure? Do you want to update the booking? |
 | cancel | Cancel |
 | confirm | Confirm |
+| pending | Saving changes online is coming soon. |
+| loading | Loading your booking… |
+| notFound | We couldn’t find this booking. |
+| error | We couldn’t load your booking. |
 
 - **steps**: a list; the current step in bold. From 768px the band shows the names with arrows;
   below it the numbers up to the current step and the current step's **phoneStep** name (else its
@@ -87,8 +91,10 @@ the source: its name and address (the arrow on the right) fold its details away.
 - **lengthOfStay**: the title of the phone's service popup (optional; else **service**).
 - **addonsUnavailable**: shown as authored (links kept), only when no add-ons are on sale for a
   booking that has some.
-- **pending**, **notFound**, **error**, **loading** (optional): the messages; without them, the
-  visitor's language's defaults.
+- **pending**, **loading**, **notFound**, **error**: the messages (pending under the changes to
+  confirm; loading for screen readers, while the site's loader shows; error with Try again). The
+  block has no texts of its own: each language's page writes them, and a row left out shows no
+  text.
 
 ## APIs
 

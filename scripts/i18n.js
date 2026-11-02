@@ -353,21 +353,6 @@ const TEXTS = {
   profilePoints: {
     en: '{points} (valid until {date})', zh: '{points}（有效期至 {date}）', 'zh-HK': '{points}（有效期至 {date}）', ja: '{points}（{date} まで有効）', pt: '{points} (válido até {date})',
   },
-  // the Edit Booking block's messages (when the block has no authored text for them; View Booking
-  // shows only its authored ones)
-  bookingLoading: {
-    en: 'Loading your booking…', zh: '正在加载您的预订…', 'zh-HK': '正在載入您的預訂…', ja: 'ご予約を読み込んでいます…', pt: 'Carregando sua reserva…',
-  },
-  bookingLoadError: {
-    en: 'We couldn’t load your booking.', zh: '无法加载您的预订。', 'zh-HK': '無法載入您的預訂。', ja: 'ご予約を読み込めませんでした。', pt: 'Não foi possível carregar sua reserva.',
-  },
-  bookingNotFound: {
-    en: 'We couldn’t find this booking.', zh: '找不到此预订。', 'zh-HK': '找不到此預訂。', ja: 'このご予約が見つかりませんでした。', pt: 'Não encontramos esta reserva.',
-  },
-  // the Edit Booking block: saving a change waits for the booking change API
-  bookingChangesPending: {
-    en: 'Saving changes online is coming soon.', zh: '在线保存更改功能即将推出。', 'zh-HK': '網上儲存更改功能即將推出。', ja: 'オンラインでの変更の保存は近日対応予定です。', pt: 'Em breve será possível salvar alterações online.',
-  },
   loginError: {
     en: 'Sorry, we couldn’t log you in. Please try again.', zh: '抱歉，无法登录，请重试。', 'zh-HK': '抱歉，無法登入，請重試。', ja: 'ログインできませんでした。もう一度お試しください。', pt: 'Desculpe, não foi possível entrar. Tente novamente.',
   },
