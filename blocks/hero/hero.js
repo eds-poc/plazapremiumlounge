@@ -1,7 +1,20 @@
+import { buildBlock, decorateBlock, loadBlock } from '../../scripts/aem.js';
 import { buildButton, readNestedButtons } from '../../scripts/buttons.js';
+import apiUrl from '../../scripts/endpoints.js';
 import { labelBareVideoLink, toVideoDialogButton } from '../../scripts/video.js';
 
 const HEADINGS = 'h1, h2, h3, h4, h5, h6';
+// the Booking Widget's scripts (option booking): fetched together, not one after another as each
+// import is found (its styles aren't hinted: loadBlock fetches them alongside, and loadCSS takes
+// any link to a stylesheet's address as loaded)
+const BOOKING_MODULES = [
+  'blocks/booking-widget/booking-widget.js',
+  'blocks/booking-widget/booking-widget-lounge-card.js',
+  'scripts/booking.js',
+  'scripts/date-picker.js',
+  'scripts/properties.js',
+  'scripts/button-actions.js',
+];
 const BUTTONS_HEADER = /^buttons?\s*(?:\(([^)]*)\))?$/i;
 
 /**
@@ -102,10 +115,88 @@ function decorateVideoPlayback(block) {
 }
 
 /**
+ * Adds a resource hint to the page's head (once per address).
+ * @param {string} rel e.g. modulepreload, preconnect
+ * @param {string} href
+ * @param {Object<string, string>} [attrs]
+ */
+function addHint(rel, href, attrs = {}) {
+  if (document.head.querySelector(`link[rel="${rel}"][href="${href}"]`)) return;
+  const link = document.createElement('link');
+  link.rel = rel;
+  link.href = href;
+  Object.entries(attrs).forEach(([name, value]) => link.setAttribute(name, value));
+  document.head.append(link);
+}
+
+/**
+ * Hints for option booking: the widget's scripts all at once, and a connection to
+ * the booking service, which the widget calls soon after (its locations, then the lounge card).
+ */
+function hintBookingWidget() {
+  const base = window.hlx?.codeBasePath || '';
+  BOOKING_MODULES.forEach((path) => addHint('modulepreload', `${base}/${path}`));
+  addHint('preconnect', apiUrl('geoLocation').origin, { crossorigin: 'anonymous' });
+}
+
+/**
+ * Decorates option booking, the source homepage's hero (`.homeBanner-wrapper`): the photo, the
+ * title over it, the Booking Widget under the title (option lounge-card: the chosen airport's
+ * first lounge appears under the note), then any text after the title (e.g. the booking note with
+ * its Group Booking link). Authored in any cells: the photo and the text; the
+ * widget is added here, so it's the same one as in Book Now.
+ *
+ * The photo is the page's largest paint: it starts loading at once, and the hero shows without
+ * waiting for the widget, which loads alongside in its kept place (see hero.css).
+ * @param {Element} block
+ */
+function decorateBooking(block) {
+  hintBookingWidget();
+  const picture = block.querySelector('picture');
+  // (else it would start only once the section's blocks, the widget too, are in)
+  const photo = picture?.querySelector('img');
+  if (photo) photo.loading = 'eager';
+  const content = el('div', 'hero-content');
+  [...block.querySelectorAll(':scope > div > div')].forEach((cell) => {
+    content.append(...[...cell.children].filter((node) => !node.querySelector('picture')
+      && !node.matches('picture') && node.textContent.trim()));
+  });
+  const title = content.querySelector(HEADINGS);
+  title?.classList.add('hero-title');
+  const note = el('div', 'hero-note');
+  // the text after the title goes under the widget
+  if (title) {
+    while (title.nextElementSibling) note.append(title.nextElementSibling);
+  }
+
+  const media = el('div', 'hero-media');
+  if (picture) media.append(picture);
+  else block.classList.add('no-media');
+  const widget = buildBlock('booking-widget', '');
+  // the homepage's widget shows the chosen airport's first lounge under it
+  widget.classList.add('lounge-card');
+  const wrapper = el('div', 'booking-widget-wrapper');
+  wrapper.append(widget);
+  content.append(wrapper);
+  if (note.children.length) content.append(note);
+  // the photo and the content, then the place for the widget's lounge card
+  const frame = el('div', 'hero-frame');
+  frame.append(media, content);
+  const products = el('div', 'hero-products');
+  products.dataset.bookingProducts = '';
+  block.dataset.bookingProductsHost = '';
+  block.replaceChildren(frame, products);
+  decorateBlock(widget);
+  loadBlock(widget);
+}
+
+/**
  * Decorates the hero block. The default hero is styled by hero.css alone; option video playback
- * builds the destination banner with its video button.
+ * builds the destination banner with its video button, option booking the homepage's hero with
+ * the Booking Widget.
  * @param {Element} block The hero block element
  */
-export default function decorate(block) {
+export default async function decorate(block) {
   if (block.classList.contains('video-playback')) decorateVideoPlayback(block);
+  if (block.classList.contains('booking')) decorateBooking(block);
 }
