@@ -43,7 +43,7 @@ profile." with Try again.
 | firstName, lastName, email | `firstName`, `lastName`, `userName` | Read-only |
 | membershipNo | `membershipID` | |
 | points | `points`, `pointsExpiry` | "150 (valid until 12/31/2027 11:59:59 PM)", the date as given, no time zone change |
-| phone | `phone`, `countryPhoneCode` | Empty number when `phone` is null; the code +1 (US) unless given |
+| phone | `phone`, `countryPhoneCode` | Empty number when `phone` is null; the code +1 (US) unless given. The number: numbers only (anything else typed or pasted is left out), at most 11 |
 | birthday | `dob` | Disabled (shown, not editable or sent) |
 | ageRange | `ageRange` | |
 | countryOfResidence | `countryName` | Matched by name in the countries service (e.g. "United States" → "United States of America") |

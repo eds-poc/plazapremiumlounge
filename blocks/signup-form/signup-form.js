@@ -16,12 +16,14 @@ const FIELDS = {
     type: 'country', key: 'countryOfResidence', required: true, settings: { value: 'countryId', 'value type': 'number' },
   },
   // the code (countryPhoneCode) and the number (phone), +1 (US) to start with, following the
-  // country of residence
+  // country of residence; the number: numbers only (the number keypad on phones), at most 11
   phone: {
     type: 'phone',
     key: 'phone',
     required: true,
-    settings: { 'prefix key': 'countryPhoneCode', 'prefix default': '+1 (US)', 'value type': 'number' },
+    settings: {
+      'prefix key': 'countryPhoneCode', 'prefix default': '+1 (US)', 'value type': 'number', rule: 'digits', 'max length': 11,
+    },
   },
   email: {
     type: 'email', key: 'email', required: true, settings: { 'max length': 200 },
