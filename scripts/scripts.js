@@ -15,9 +15,9 @@ import {
 import { installModalLinks, registerModalSections } from './modal.js';
 // icons: the DA icon library first, then the code /icons folder
 import { decorateIcons } from './icons.js';
-import { DEFAULT_SITE, getLanguage, getSiteFolder } from './i18n.js';
+import { getLanguage } from './i18n.js';
 import { installVideoLinks } from './video.js';
-import { checkSession, logout } from './auth.js';
+import { checkPartnerAccess, checkSession, logout } from './auth.js';
 
 if (window.trustedTypes && window.trustedTypes.createPolicy) {
   const innerTT = window.trustedTypes.createPolicy('tt-inner', {
@@ -242,79 +242,6 @@ export function decorateMain(main) {
   decorateButtons(main);
 }
 
-/*
- * Partner page access: a page whose metadata (usually the site's metadata.json) has a
- * `partner-member-name` (e.g. /en-uk/offers/travelwise: travelwise) is for that partner's members.
- * It shows only while the browser holds an unexpired login for that partner: the record the
- * partner's password page stores after checking the PartnerLogin answer
- * (blocks/travelwise-password), `partner-token-<partner>` = `{ token, expiresAt }`. Otherwise the
- * visitor goes to the password page, /{site}/{partner}?returnUrl=<page> (with `&reason=expired`
- * when a login was stored), as on the source site. Checked on load, when the page comes back from
- * the back/forward cache or the tab is shown again, and at the login's expiry on an open page.
- * Only access is decided here; the login itself is the block's. The pages' content is still public
- * (Edge Delivery serves it to anyone): this keeps visitors to the partner's flow.
- */
-const PARTNER_META = 'partner-member-name';
-// the stored login of a partner: this prefix and the partner name (written by the password page)
-export const PARTNER_TOKEN_KEY = 'partner-token-';
-// the password page's block: a page with it is never sent to the password page
-const PARTNER_PASSWORD_BLOCK = 'travelwise-password';
-// the longest delay a browser timer keeps (about 24.8 days); a longer wait is re-armed
-const MAX_TIMER_MS = 2147483647;
-let expiryTimer;
-
-/**
- * When a stored partner login expires (milliseconds), or 0 when there's none or it can't be read.
- * @param {string|null} stored The stored record (JSON)
- * @returns {number}
- */
-function loginExpiry(stored) {
-  try {
-    const login = JSON.parse(stored);
-    const usable = typeof login?.token === 'string' && login.token && Number.isFinite(login.expiresAt);
-    return usable ? login.expiresAt : 0;
-  } catch {
-    return 0;
-  }
-}
-
-/**
- * Shows the page while the page's partner has an unexpired stored login; otherwise removes the
- * record and sends the visitor to the partner's password page with this page as the returnUrl
- * (replacing the history entry, so Back doesn't return here). A page left open is checked again
- * when its login expires. Pages without a partner, and the password page itself, are left alone.
- * @returns {boolean} Whether the page can show
- */
-function checkPartnerAccess() {
-  const partner = String(getMetadata(PARTNER_META) || '').trim().toLowerCase();
-  if (!partner || document.querySelector(`main .${PARTNER_PASSWORD_BLOCK}`)) return true;
-  const key = `${PARTNER_TOKEN_KEY}${partner}`;
-  let stored = null;
-  try {
-    stored = localStorage.getItem(key);
-  } catch {
-    stored = null;
-  }
-  const expiresAt = loginExpiry(stored);
-  if (expiresAt > Date.now()) {
-    clearTimeout(expiryTimer);
-    // just after the expiry, so the check sees it expired
-    const delay = Math.min(expiresAt - Date.now() + 1000, MAX_TIMER_MS);
-    expiryTimer = setTimeout(checkPartnerAccess, delay);
-    return true;
-  }
-  try {
-    localStorage.removeItem(key);
-  } catch {
-    // nothing stored
-  }
-  const login = new URL(`/${getSiteFolder() || DEFAULT_SITE}/${partner}`, window.location.origin);
-  login.searchParams.set('returnUrl', window.location.href);
-  if (stored) login.searchParams.set('reason', 'expired');
-  window.location.replace(login.href);
-  return false;
-}
-
 /**
  * Loads everything needed to get to LCP.
  * @param {Element} doc The container element
@@ -323,6 +250,8 @@ async function loadEager(doc) {
   // a logged-in visitor's token: an expired or broken one logs out and goes home (nothing is
   // checked when nobody is logged in)
   checkSession();
+  // a partner page without its partner's login goes to the partner's password page (auth.js)
+  if (!checkPartnerAccess()) return false;
   // the header's account menu Logout (#logout): log out and go home
   document.addEventListener('header:action', (e) => {
     if (e.detail?.name === 'logout') logout();
@@ -348,6 +277,7 @@ async function loadEager(doc) {
   } catch (e) {
     // do nothing
   }
+  return true;
 }
 
 /**
@@ -382,18 +312,9 @@ function loadDelayed() {
 }
 
 async function loadPage() {
-  // a partner page without an unexpired partner login goes to the partner's password page before
-  // anything shows; checked again when the page comes back from the browser's back/forward cache
-  // and when the tab is shown again
-  if (!checkPartnerAccess()) return;
-  window.addEventListener('pageshow', (e) => {
-    if (e.persisted) checkPartnerAccess();
-  });
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') checkPartnerAccess();
-  });
   showLoader();
-  await loadEager(document);
+  // false: a partner page is going to its password page (the loader stays up until it does)
+  if (!await loadEager(document)) return;
   hideLoader();
   await loadLazy(document);
   installNavigationLoader();

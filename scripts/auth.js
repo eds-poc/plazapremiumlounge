@@ -5,7 +5,9 @@
  * every logged-in call. The token is checked against its expiry on login and on every page load
  * (checkSession(), only when a token is stored): an expired or broken one logs the visitor out and
  * sends them to the home page; logout() (the header's account menu) does the same.
+ * Partner pages have their own login, a partner token per partner (see checkPartnerAccess()).
  */
+import { getMetadata } from './aem.js';
 import { DEFAULT_SITE, getSiteFolder } from './i18n.js';
 
 const TOKEN_KEY = 'token';
@@ -13,6 +15,17 @@ const TOKEN_KEY = 'token';
 const PART = /^[A-Za-z0-9_-]+$/;
 // the members' pages (a language folder, then membership): only for a logged-in visitor
 const MEMBERS_PAGE = /^\/[a-z]{2}-[a-z]{2}\/membership\//;
+// partner pages: the metadata naming the page's partner, and the optional one for its password page
+const PARTNER_META = 'partner-member-name';
+const PARTNER_PAGE_META = 'partner-password-page';
+// a partner's stored login: this prefix and the partner name, `{ token, expiresAt }`
+const PARTNER_TOKEN_KEY = 'partner-token-';
+// the password page's block: a page with it is never sent to the password page
+const PARTNER_PASSWORD_BLOCK = 'partner-password';
+// the longest delay a browser timer keeps (about 24.8 days); a longer wait is re-armed
+const MAX_TIMER_MS = 2147483647;
+let partnerTimer;
+let partnerWatching = false;
 
 /**
  * One base64url part of a JWT, as JSON.
@@ -175,4 +188,123 @@ export function checkSession() {
  */
 export function authHeaders() {
   return { Accept: 'application/json', Authorization: `Bearer ${getToken()}` };
+}
+
+/**
+ * A partner name as compared everywhere: trimmed, lower case.
+ * @param {*} value
+ * @returns {string}
+ */
+export function toPartnerName(value) {
+  return String(value ?? '').trim().toLowerCase();
+}
+
+/**
+ * Whether a token can be used for a partner: a signed, unexpired JWT (isTokenValid) that names the
+ * partner in its partner claim (`partnerName`, else `partnername` or `partner`). The API checks
+ * the signature itself.
+ * @param {*} token
+ * @param {string} partner
+ * @returns {boolean}
+ */
+export function isPartnerTokenValid(token, partner) {
+  if (typeof token !== 'string' || !token || !partner || !isTokenValid(token)) return false;
+  const { payload } = decodeJwt(token);
+  return toPartnerName(payload.partnerName ?? payload.partnername ?? payload.partner) === partner;
+}
+
+/**
+ * Stores a partner's login (checked first by the caller) for the partner's pages.
+ * @param {string} partner
+ * @param {string} token
+ * @param {number} expiresAt When the login ends (milliseconds)
+ */
+export function setPartnerToken(partner, token, expiresAt) {
+  try {
+    localStorage.setItem(`${PARTNER_TOKEN_KEY}${partner}`, JSON.stringify({ token, expiresAt }));
+  } catch {
+    // no storage (e.g. blocked): the partner's pages will ask for the password again
+  }
+}
+
+/**
+ * When a stored partner login expires (milliseconds), or 0 when there's none or it can't be read.
+ * @param {string|null} stored The stored record (JSON)
+ * @returns {number}
+ */
+function partnerTokenExpiry(stored) {
+  try {
+    const login = JSON.parse(stored);
+    const usable = typeof login?.token === 'string' && login.token && Number.isFinite(login.expiresAt);
+    return usable ? login.expiresAt : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * The partner's password page: the page's `partner-password-page` metadata (a path or link on this
+ * site), else /{site}/{partner}.
+ * @param {string} partner
+ * @returns {URL}
+ */
+function partnerPasswordPage(partner) {
+  const authored = getMetadata(PARTNER_PAGE_META).trim();
+  const fallback = `/${getSiteFolder() || DEFAULT_SITE}/${partner}`;
+  try {
+    const url = new URL(authored || fallback, window.location.origin);
+    return url.origin === window.location.origin ? url : new URL(fallback, window.location.origin);
+  } catch {
+    return new URL(fallback, window.location.origin);
+  }
+}
+
+/**
+ * Partner pages: a page with `partner-member-name` metadata (e.g. set for the page in the bulk
+ * metadata sheet) shows only while an unexpired login for that partner is stored (its password
+ * page stores it). Otherwise the record is removed and the visitor goes to the password page with
+ * `?partner=<partner>&returnUrl=<page>` (and `&reason=expired` when a login had been stored),
+ * replacing the history entry. Checked again when the page comes back from the back/forward cache,
+ * when the tab is shown again and when the login expires on an open page. The content is still
+ * public (Edge Delivery serves it to anyone): this keeps visitors to the partner's flow.
+ * @returns {boolean} Whether the page can show
+ */
+export function checkPartnerAccess() {
+  const partner = toPartnerName(getMetadata(PARTNER_META));
+  if (!partner || document.querySelector(`main .${PARTNER_PASSWORD_BLOCK}`)) return true;
+  if (!partnerWatching) {
+    partnerWatching = true;
+    window.addEventListener('pageshow', (e) => {
+      if (e.persisted) checkPartnerAccess();
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') checkPartnerAccess();
+    });
+  }
+  const key = `${PARTNER_TOKEN_KEY}${partner}`;
+  let stored = null;
+  try {
+    stored = localStorage.getItem(key);
+  } catch {
+    stored = null;
+  }
+  const expiresAt = partnerTokenExpiry(stored);
+  clearTimeout(partnerTimer);
+  if (expiresAt > Date.now()) {
+    // just after the expiry, so the check sees it expired
+    const delay = Math.min(expiresAt - Date.now() + 1000, MAX_TIMER_MS);
+    partnerTimer = setTimeout(checkPartnerAccess, delay);
+    return true;
+  }
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // nothing stored
+  }
+  const login = partnerPasswordPage(partner);
+  login.searchParams.set('partner', partner);
+  login.searchParams.set('returnUrl', window.location.href);
+  if (stored) login.searchParams.set('reason', 'expired');
+  window.location.replace(login.href);
+  return false;
 }
