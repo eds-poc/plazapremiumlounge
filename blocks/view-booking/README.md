@@ -43,6 +43,7 @@ the `error` text with Try again. The site's loader shows until the booking is in
 | total | Total |
 | taxes | (Includes applicable taxes and fees) |
 | terms | Terms and Conditions |
+| loading | Loading your booking… |
 | notFound | We couldn’t find this booking. |
 | error | We couldn’t load your booking. |
 
@@ -52,12 +53,12 @@ the `error` text with Try again. The site's loader shows until the booking is in
   shows only when the booking allows it (`isEligibleForModify`, `isEligibleForCancel`). Delete a
   row to hide that link.
 - **children**: optional (else the API's own "Child(ren)"); a guest line with 0 isn't shown.
-- **additionalServices**: the title of the add-ons part, shown only on a booking with add-ons
-  (optional; else "Additional Services" in the visitor's language).
+- **additionalServices**: the title of the add-ons part, shown only on a booking with add-ons.
 - **A purchaser row** (title … email) left out hides that field. **subtotal** left out hides the
   subtotal; the discounts show with the API's names (e.g. "10% Discount [PPL Pass]:").
-- **notFound**, **error**, **loading** (optional): the messages; without them, the visitor's
-  language's defaults.
+- **loading**, **notFound**, **error**: the messages (loading for screen readers, while the
+  site's loader shows; error with Try again). The block has no texts of its own: each language's
+  page writes them, and a row left out shows no text.
 
 ## Where the values come from (GetOrderDetail)
 
