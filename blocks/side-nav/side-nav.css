@@ -19,12 +19,13 @@
   font-weight: var(--font-weight-medium);
 }
 
-/* phones: the links above the content, as full-width grey tabs, the current page's maroon */
+/* phones and small tablets (below 768px): the links above the content, as full-width grey tabs, the
+   current page's maroon */
 .side-nav {
   margin-bottom: var(--spacing-8);
 }
 
-@media (width < 576px) {
+@media (width < 768px) {
   /* one-off: the source's tab grey */
   .side-nav .side-nav-link:any-link {
     display: block;
@@ -45,10 +46,11 @@ main > .section:has(> .side-nav-wrapper) {
   padding-top: 36px;
 }
 
-/* breakpoint-exception: the source's col-sm-3 / col-sm-9 (576px): the section holding the side nav
-   is two columns, the nav a quarter of the width beside the rest of the section's content; the
-   section's width moves from its parts to the section itself */
-@media (width >= 576px) {
+/* from 768px (the design-system breakpoint; the source switches at 576px, where the active link is
+   hard to see in a narrow column): the section holding the side nav is two columns, the nav a
+   quarter of the width beside the rest of the section's content; the section's width moves from
+   its parts to the section itself */
+@media (width >= 768px) {
   main > .section:has(> .side-nav-wrapper) {
     box-sizing: border-box;
     display: grid;

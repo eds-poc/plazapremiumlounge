@@ -29,7 +29,7 @@ where the form is sent (the `contact` endpoint, a placeholder until the contact 
 | `typeOfEnquiry` ✱ | Type of enquiry: dropdown, authored list |
 | `title` | Title dropdown |
 | `firstName` ✱, `lastName` ✱ | Names, at most 200 |
-| `contactNumber` ✱ | Digits, +, - and /, at most 15 |
+| `contactNumber` ✱ | Numbers only (the number keypad on phones; anything else typed or pasted is left out), at most 11 |
 | `countryOfResidence` ✱ | Country, from the countries service |
 | `email` ✱ | Email address, at most 200; **starts the second column** |
 | `bookingReference` | At most 200 |

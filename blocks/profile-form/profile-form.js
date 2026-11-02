@@ -2,6 +2,7 @@ import { buildForm, fieldElement, getCountries } from '../../scripts/forms.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { authHeaders, logout } from '../../scripts/auth.js';
 import { getLanguage, translate } from '../../scripts/i18n.js';
+import { hideLoader, showLoader } from '../../scripts/scripts.js';
 
 /*
  * The profile form's fields, each keyed by its GetProfile name. The authoring gives each field's
@@ -223,12 +224,14 @@ export default function decorate(block) {
   block.replaceChildren(message, form);
 
   const load = () => {
+    // the site's full-page loader until the profile is in (the text for screen readers)
+    showLoader();
     message.replaceChildren(translate('profileLoading'));
     message.hidden = false;
     form.setAttribute('aria-busy', 'true');
     fetch(apiUrl('getProfile'), { headers: authHeaders() })
       .then((res) => {
-        // the token refused (invalid or expired): log out and go home
+        // the token refused (invalid or expired): log out and go home (the loader stays meanwhile)
         if (res.status === 401) {
           logout();
           return null;
@@ -243,8 +246,11 @@ export default function decorate(block) {
         fill(form, profile, details);
         message.hidden = true;
         form.removeAttribute('aria-busy');
+        // once the countries are in too (fill chooses them first), loaded or not
+        getCountries().catch(() => {}).then(hideLoader);
       })
       .catch(() => {
+        hideLoader();
         const retry = document.createElement('button');
         retry.type = 'button';
         retry.className = 'profile-retry';
