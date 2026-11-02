@@ -126,19 +126,26 @@ main > .section:has(> .edit-booking-wrapper) {
   margin-right: var(--spacing-6);
   background-color: currentcolor;
   mask: url('../../icons/arrow-down.svg') center / contain no-repeat;
-  transition: transform var(--duration-medium) var(--ease-standard);
+  transition: transform 0.35s ease;
 }
 
 .edit-booking .edit-booking-toggle[aria-expanded='false']::after {
   transform: rotate(-90deg);
 }
 
-.edit-booking .edit-booking-panel {
+.edit-booking .edit-booking-panel-body {
   padding: var(--spacing-4) 0 var(--spacing-7);
 }
 
 .edit-booking .edit-booking-panel.is-collapsed {
   display: none;
+}
+
+/* opening and folding: the height slides (the source's 0.35s), the content clipped meanwhile; the
+   arrow turns at the same pace */
+.edit-booking .edit-booking-panel.is-sliding {
+  overflow: hidden;
+  transition: height 0.35s ease;
 }
 
 /* the form (from 992px): labels 16px above the pills, the date and time side by side */
@@ -586,5 +593,11 @@ main > .section:has(> .edit-booking-wrapper) {
     flex-wrap: wrap;
     gap: 0 0.3em;
     padding-bottom: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .edit-booking .edit-booking-toggle::after {
+    transition: none;
   }
 }

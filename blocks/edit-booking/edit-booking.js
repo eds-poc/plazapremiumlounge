@@ -353,10 +353,31 @@ export default function decorate(block) {
     count += 1;
     panel.id = `edit-booking-panel-${count}`;
     toggle.setAttribute('aria-controls', panel.id);
+    // opening and folding slide, as the source's (its height from where it is to its full height
+    // or to 0; at once with reduced motion). A click mid-slide turns it back from where it is
+    const settle = () => {
+      panel.classList.remove('is-sliding');
+      panel.style.height = '';
+      panel.classList.toggle('is-collapsed', toggle.getAttribute('aria-expanded') !== 'true');
+    };
+    panel.addEventListener('transitionend', (e) => {
+      if (e.target === panel && e.propertyName === 'height') settle();
+    });
     toggle.addEventListener('click', () => {
       const open = toggle.getAttribute('aria-expanded') !== 'true';
       toggle.setAttribute('aria-expanded', String(open));
-      panel.classList.toggle('is-collapsed', !open);
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        settle();
+        return;
+      }
+      const from = panel.classList.contains('is-collapsed') ? 0 : panel.getBoundingClientRect().height;
+      panel.classList.remove('is-collapsed');
+      panel.classList.add('is-sliding');
+      panel.style.height = `${from}px`;
+      // the start height applied before the end one, so the change slides
+      // eslint-disable-next-line no-unused-expressions
+      panel.offsetHeight;
+      panel.style.height = open ? `${panel.scrollHeight}px` : '0px';
     });
 
     // from 992px: the form
@@ -400,7 +421,10 @@ export default function decorate(block) {
     const rowTime = row(text('summaryTime') || text('time'), true);
     const rowGuests = row(text('summaryGuests'), false);
     const rowService = row(text('summaryServices') || text('service'), true);
-    panel.append(form, rows);
+    // the details in a box of their own (its spacing kept while the panel's height slides)
+    const panelBody = el('div', 'edit-booking-panel-body');
+    panelBody.append(form, rows);
+    panel.append(panelBody);
     lounge.append(panel);
     main.append(lounge);
 
