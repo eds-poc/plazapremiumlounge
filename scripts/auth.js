@@ -6,13 +6,19 @@
  * (checkSession(), only when a token is stored): an expired or broken one logs the visitor out and
  * sends them to the home page; logout() (the header's account menu) does the same.
  */
+import { getMetadata } from './aem.js';
 import { DEFAULT_SITE, getSiteFolder } from './i18n.js';
 
 const TOKEN_KEY = 'token';
 // a JWT part: base64url characters only (letters, digits, - and _; no +, / or = padding)
 const PART = /^[A-Za-z0-9_-]+$/;
-// the members' pages (a language folder, then membership): only for a logged-in visitor
-const MEMBERS_PAGE = /^\/[a-z]{2}-[a-z]{2}\/membership\//;
+
+// a members' page, only for a logged-in visitor: `members-only` true in the site's metadata sheet
+// (a row per URL or pattern, e.g. /**/membership/** and /**/view-booking) or in the page's own
+// Metadata
+function isMembersPage() {
+  return /^(true|yes)$/i.test(getMetadata('members-only').trim());
+}
 
 /**
  * One base64url part of a JWT, as JSON.
@@ -157,14 +163,14 @@ export function logout() {
 
 /**
  * Checks the stored token against its expiry on page load; nothing to check when nobody is logged
- * in, except on a members' page (MEMBERS_PAGE), which needs a valid token. An expired or broken
+ * in, except on a members' page (isMembersPage), which needs a valid token. An expired or broken
  * token, or none on a members' page, logs out and goes home (it replaces the history entry, so
  * Back doesn't return to the page). A page left open past the expiry is checked on the next page
  * load.
  */
 export function checkSession() {
   const token = getToken();
-  if (token ? !isTokenValid(token) : MEMBERS_PAGE.test(window.location.pathname)) {
+  if (token ? !isTokenValid(token) : isMembersPage()) {
     endSession({ replace: true });
   }
 }

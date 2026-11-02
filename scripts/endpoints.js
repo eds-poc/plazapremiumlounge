@@ -23,6 +23,8 @@ const ENDPOINTS = {
   forgotPassword: '/api/v1/web/app_demo/ForgotPassword',
   // the logged-in member's profile (GET, Authorization: Bearer <jwt>)
   getProfile: '/api/v1/web/app_demo/GetProfile',
+  // a booking (order) of the logged-in member (POST, JSON: orderId; Authorization: Bearer <jwt>)
+  getOrderDetail: '/api/v1/web/app_demo/GetOrderDetail',
   propertyDetail: '/api/v1/web/app_demo/GetPropertyDetail',
   // a lounge's bookable services and their products for a start time (POST, JSON body)
   propertyServices: '/api/v1/web/app_demo/GetServices',

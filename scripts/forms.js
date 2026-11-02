@@ -43,6 +43,8 @@ const RULES = {
   },
   // source sign up: digits, +, - and /, at most 20
   phone: { pattern: /^[0-9+\-/\s]+$/, maxLength: 20, message: 'formPhone' },
+  // numbers only (e.g. a contact number without its country code)
+  digits: { pattern: /^\d+$/, message: 'formPhone' },
   url: { pattern: /^https?:\/\/[^\s.]+\.\S+$/i, message: 'formUrl' },
   postcode: { pattern: /^[A-Za-z0-9][A-Za-z0-9 -]{1,9}$/, message: 'formPostcode' },
 };
@@ -217,6 +219,14 @@ function setControlAttributes(control, def) {
   const rule = RULES[settings.get('rule')] || RULES[def.type];
   const max = settings.get('max length') || rule?.maxLength;
   if (max && control.matches('input:not([type="date"]):not([type="number"]), textarea')) control.maxLength = Number(max);
+  // numbers only: the number keypad, and anything else typed or pasted is left out
+  if (settings.get('rule') === 'digits') {
+    control.inputMode = 'numeric';
+    control.addEventListener('input', () => {
+      const digits = control.value.replace(/\D/g, '');
+      if (digits !== control.value) control.value = digits;
+    });
+  }
   if (settings.has('required')) control.required = true;
 }
 
