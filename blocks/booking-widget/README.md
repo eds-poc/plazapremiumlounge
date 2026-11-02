@@ -39,7 +39,7 @@ Every Book Now button that links to `#book-now` opens it.
 
 - **Photo:** behind the hero. From 1200px it fills the top of the page at 2:1, under the
   transparent header (page metadata `header` = `transparent`). From 768px it starts under the
-  header, 595px tall. On phones it's a rounded card.
+  header, 595px tall. On phones it's a rounded card that fills the first screen under the header.
 - **Title:** any heading level, e.g. `Your destination before departure`. It's 40px, centred from
   992px, and 32px on phones.
 - **Text after the title** goes under the widget, e.g. "Bookings must be made at least 1 hour
@@ -192,7 +192,9 @@ choices in the address:
   - Its skeleton has the usual card's height per width (block variable
     `--booking-widget-card-skeleton-height`), so the card replaces it without moving the page. It
     shows once an airport is chosen, not before: reserving the place from the start moved the page
-    a lot more whenever no airport was found (measured CLS 0.29 on phones).
+    a lot more whenever no airport was found (measured CLS 0.29 on phones). On phones the hero's
+    photo card fills the first screen (hero.css), so the card arrives below the fold and moves
+    nothing in view (mobile CLS 0.20 → about 0.01–0.05, what's left being the web fonts' swap).
   - A newer choice cancels the request before it; answers are kept for the page, so the same
     choices again show at once.
   - The hero hints the widget's scripts (`modulepreload`) and a connection to the booking service

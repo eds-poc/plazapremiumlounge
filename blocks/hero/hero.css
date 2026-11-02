@@ -183,11 +183,13 @@
 
 /* phones: the photo, title, widget and note in a rounded card; the lounge card follows it. The
    photo is clipped to the card's corners, not the card itself, so the widget's lists and calendar
-   can open past it; the card (with them) stays above the lounge card */
+   can open past it; the card (with them) stays above the lounge card. It fills the phone's first
+   screen under the header (the hero's margin above it and below it), so what follows starts below
+   the fold: the lounge card, which comes once the nearest airport is known, moves nothing in view */
 .hero.booking .hero-frame {
   position: relative;
   z-index: 2;
-  min-height: var(--hero-booking-phone-height);
+  min-height: max(var(--hero-booking-phone-height), 100svh - var(--nav-height) - 2 * var(--spacing-6));
   border-radius: var(--radius-lg);
   background-color: var(--color-brand-primary);
 }
