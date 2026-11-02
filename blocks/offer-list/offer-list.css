@@ -1,0 +1,76 @@
+/* offer list: the source offers page (`section.offer`): the "Show me … ordered by …" filter line
+   (the Dropdown block's look, from dropdown.css), a thin line, then the offers as Cards (large),
+   each with a "Learn more →" link below the text */
+.offer-list {
+  /* one-off: the source's 30px spacer plus the line's 16px margin, above and below it */
+  --offer-list-divider-space: 46px;
+}
+
+/* CLS guard: the offers load after the page renders, so keep a screen's height until they arrive
+   (aria-busy is set while loading, removed once shown): the footer stays below the fold, and the
+   filter line with a row of cards is taller than that, so nothing below moves into view */
+.offer-list[aria-busy='true'] {
+  min-height: 100vh;
+}
+
+/* the filter line sits in this block, so no Dropdown block spacing below it */
+.offer-list .offer-list-filters {
+  margin: 0;
+}
+
+/* the source line: the text colour at 25% */
+.offer-list .offer-list-divider {
+  margin: var(--offer-list-divider-space) 0;
+  border: 0;
+  color: inherit;
+  border-top: var(--base-border-width) solid currentcolor;
+  opacity: 0.25;
+}
+
+/* cards the selection leaves out: hidden even if the Cards block gives its items a display */
+.offer-list .cards > ul > li[hidden] {
+  display: none;
+}
+
+/* a card's content never widens its column (e.g. an image that fails to load) */
+.offer-list .cards > ul > li {
+  min-width: 0;
+}
+
+/* the photo's 5:3 room is kept even when its image fails to load (a broken image with no alt
+   text has no height, and the card would shrink after it shows) */
+.offer-list .cards .cards-card-image {
+  aspect-ratio: 5 / 3;
+}
+
+.offer-list .cards-card-body .offer-list-more {
+  margin: 0;
+}
+
+/* Learn more: a maroon link with a solid arrow 5px after it, as the source */
+.offer-list .offer-list-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-md);
+}
+
+/* one-off: the source's arrow (Font Awesome solid), 14px wide at the 16px link text */
+.offer-list .offer-list-link::after {
+  content: '';
+  flex: none;
+  width: 0.875em;
+  height: 0.75em;
+  background-color: currentcolor;
+  mask: url('../../icons/arrow-right-solid.svg') center / contain no-repeat;
+}
+
+.offer-list .offer-list-message {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+}
+
+.offer-list .offer-list-message[hidden] {
+  display: none;
+}

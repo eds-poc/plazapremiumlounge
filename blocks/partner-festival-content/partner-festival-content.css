@@ -1,0 +1,170 @@
+/* partner-festival-content: Intro section with eyebrow, title, copy,
+   small print, and CTA cards. Responsive layout matching reference design. */
+.partner-festival-content {
+  --partner-festival-ink: var(--color-campaign-ink);
+  --partner-festival-muted: #6b7280;
+  --partner-festival-label: #9ca3af;
+  --partner-festival-surface: #f9fafb;
+
+  margin-bottom: 64px;
+  color: var(--color-text);
+  font-family: var(--font-family-campaign);
+}
+
+.partner-festival-content .partner-festival-content-eyebrow {
+  display: inline-block;
+  margin: 0 0 var(--spacing-stack);
+  padding:calc(var(--spacing-2) + 1px) calc(var(--spacing-9) + 2px);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-brand-tint);
+  color: var(--color-brand-primary-action);
+  font-size: 8.5pt;
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: 1.4;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.partner-festival-content .partner-festival-content-heading {
+  margin: 0;
+  color: var(--partner-festival-ink);
+  font-family: var(--font-family-primary);
+  font-size: calc(var(--font-size-3xl) + 4px);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+/* the description: no space between paragraphs, as the source (the eyebrow keeps its own) */
+.partner-festival-content .partner-festival-content-content > p:not(.partner-festival-content-eyebrow) {
+  margin: 0;
+  font-size: var(--font-size-md);
+  line-height: 1.625;
+}
+
+.partner-festival-content .partner-festival-content-content > p.partner-festival-content-note {
+  color: var(--partner-festival-muted);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.partner-festival-content .partner-festival-content-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-stack);
+}
+
+.partner-festival-content .partner-festival-content-cta {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing-1) + 2px);
+  padding: calc(var(--spacing-6) + 1px) var(--spacing-stack);
+  border: var(--base-border-width) solid var(--color-border-subtle);
+  border-radius: var(--radius-campaign);
+  background-color: var(--partner-festival-surface);
+  color: var(--partner-festival-ink);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: 1.4;
+  text-decoration: none;
+}
+
+/* the second and later CTAs: maroon, as the source "Lounge Pass Validity" */
+.partner-festival-content .partner-festival-content-cta ~ .partner-festival-content-cta {
+  border-width: 0;
+  background-color: var(--color-brand-primary);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%), 0 2px 4px -2px rgb(0 0 0 / 10%);
+  color: var(--color-text-inverse);
+}
+
+.partner-festival-content .partner-festival-content-cta-label {
+  color: var(--partner-festival-label);
+  font-size: calc(var(--font-size-2xs) - 1px);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.partner-festival-content .partner-festival-content-cta ~ .partner-festival-content-cta .partner-festival-content-cta-label {
+  color: rgb(255 255 255 / 70%);
+}
+
+.partner-festival-content .partner-festival-content-cta-value {
+  font-size: calc(var(--font-size-xs) + 1px);
+}
+
+.partner-festival-content a.partner-festival-content-cta:hover,
+.partner-festival-content a.partner-festival-content-cta:focus-visible {
+  box-shadow: var(--shadow-campaign-button-hover);
+}
+
+/* with images: the text, then the image column (the source's pass images) 48px below it */
+.partner-festival-content.has-media {
+  /* one-off: the source's 480px image column */
+  --partner-festival-media: 480px;
+  --partner-festival-gap: calc(var(--spacing-stack) * 2);
+
+  display: grid;
+  gap: var(--partner-festival-gap);
+}
+
+/* the images stacked 48px apart, at most 480px wide and centred until they sit beside the text */
+.partner-festival-content .partner-festival-content-media {
+  display: flex;
+  flex-direction: column;
+  gap: var(--partner-festival-gap);
+  width: 100%;
+  max-width: var(--partner-festival-media);
+  margin-inline: auto;
+}
+
+.partner-festival-content .partner-festival-content-image :is(picture, img) {
+  display: block;
+  width: 100%;
+}
+
+/* 16px corners, the source's soft shadow and a slight zoom on hover */
+.partner-festival-content .partner-festival-content-image img {
+  height: auto;
+  border-radius: var(--radius-campaign);
+  box-shadow: 0 16px 48px var(--color-border-translucent);
+  filter: drop-shadow(0 10px 15px rgb(0 0 0 / 8%));
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.partner-festival-content .partner-festival-content-image img:hover {
+  transform: scale(1.02);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .partner-festival-content .partner-festival-content-image img {
+    transition: none;
+  }
+}
+
+@media (width >=768px) {
+  .partner-festival-content {
+    padding-inline: calc(var(--spacing-9) + 2px);
+  }
+}
+
+/* breakpoint-exception: the source intro becomes two columns at 1024px */
+@media (width >=1024px) {
+  /* text left, centred against the images on the right: 480px, or half the width less the gap */
+  .partner-festival-content.has-media {
+    grid-template-columns: minmax(0, 1fr) min(var(--partner-festival-media), 50% - var(--partner-festival-gap) / 2);
+    align-items: center;
+  }
+
+  .partner-festival-content .partner-festival-content-media {
+    margin-inline: 0;
+  }
+}
+
+@media (width >=1024px) {
+  /* one-off: the source's text column (654px beside its 480px images) */
+  .partner-festival-content .partner-festival-content-content,
+  .partner-festival-content .partner-festival-content-ctas {
+    max-width: 654px;
+  }
+}

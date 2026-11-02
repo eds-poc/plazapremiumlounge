@@ -134,6 +134,14 @@
   outline-offset: calc(-1 * var(--spacing-1));
 }
 
+/* the smallest phones: the menu no wider than its toggle, so a toggle in the middle of the line
+   (e.g. the Offer List's "Show me [All offers ↓]") doesn't push the 200px menu off the screen */
+@media (width < 360px) {
+  .dropdown .dropdown-menu {
+    min-width: 100%;
+  }
+}
+
 @media (width >= 768px) {
   .dropdown .dropdown-field {
     font-size: var(--dropdown-size);

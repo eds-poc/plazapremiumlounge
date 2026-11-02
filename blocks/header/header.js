@@ -5,7 +5,7 @@ import {
   modalNameFromHref, openNamedModal, whenModal,
 } from '../../scripts/modal.js';
 import { CURRENCY_EVENT, getCurrency } from '../../scripts/currency.js';
-import { getLoggedInUser, initialsFrom } from '../../scripts/logged-in-user.js';
+import { getLoggedInUser } from '../../scripts/logged-in-user.js';
 import { getDefaultSharedPagePath, getSharedPagePath, translate } from '../../scripts/i18n.js';
 import { setIconSources } from '../../scripts/icons.js';
 
@@ -436,23 +436,28 @@ function wireAction(link, header) {
 
 /**
  * The logged-in user's badge and account menu, in place of the Log In icon: the initials in a
- * circle; on desktop a dropdown under it, on tablet and mobile a "View Profile" panel (the source
- * #mobileProfileNavModal). The menu items are the links of the nav's Account menu section;
- * `#name` items (e.g. `#logout`) fire `header:action`.
- * @param {{fullName: string, initials: string, section: HTMLElement|null, header: HTMLElement}} o
+ * circle (without a name, the user icon); on desktop a dropdown under it, on tablet and mobile a
+ * "View Profile" panel (the source #mobileProfileNavModal). The menu items are the links of the
+ * nav's Account menu section; `#name` items (e.g. `#logout`) fire `header:action`.
+ * @param {{fullName: string, initials: string, icon: Element|null, section: HTMLElement|null,
+ *   header: HTMLElement}} o
  * @returns {{wrapper: HTMLElement, panel: HTMLDialogElement|null}}
  */
 function buildAccount({
-  fullName, initials, section, header,
+  fullName, initials, icon, section, header,
 }) {
   const wrapper = el('span', 'header-account');
   const button = el('button', 'header-utility is-account');
   button.type = 'button';
-  button.setAttribute('aria-label', translate('account', { name: fullName }));
-  const badge = el('span', 'header-initials');
-  badge.setAttribute('aria-hidden', 'true');
-  badge.textContent = initials;
-  button.append(badge);
+  button.setAttribute('aria-label', fullName ? translate('account', { name: fullName }) : translate('accountTitle'));
+  if (initials || !icon) {
+    const badge = el('span', 'header-initials');
+    badge.setAttribute('aria-hidden', 'true');
+    badge.textContent = initials;
+    button.append(badge);
+  } else {
+    button.append(icon);
+  }
   wrapper.append(button);
 
   const links = [...(section?.querySelectorAll('li > a[href]') || [])];
@@ -617,16 +622,20 @@ export default async function decorate(block) {
   const pageOf = (href) => href.split('#')[0] || href;
   const footerLinks = [...(menuFooter?.querySelectorAll('.header-menu-footer-link') || [])];
   const footerHrefs = new Set(footerLinks.map((l) => pageOf(hrefOf(l))));
-  // logged in: the user icon action becomes the initials badge with the account menu
+  // logged in (a valid token): the user icon action becomes the initials badge with the account
+  // menu
   const user = getLoggedInUser();
-  const initials = user ? initialsFrom(user.fullName) : '';
   let account = null;
   if (utilities.length) {
     const wrap = el('div', 'header-utilities');
     utilities.forEach((u) => {
-      if (initials && !account && u.querySelector('.icon-user')) {
+      if (user && !account && u.querySelector('.icon-user')) {
         account = buildAccount({
-          fullName: user.fullName, initials, section: accountSection, header,
+          fullName: user.fullName,
+          initials: user.initials,
+          icon: u.querySelector('.icon-user').cloneNode(true),
+          section: accountSection,
+          header,
         });
         wrap.append(account.wrapper);
         return;

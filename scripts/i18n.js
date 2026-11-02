@@ -94,6 +94,56 @@ const TEXTS = {
   airportDining: {
     en: 'Airport dining', zh: '机场餐饮', 'zh-HK': '機場餐飲', ja: '空港ダイニング', pt: 'Restaurantes do aeroporto',
   },
+  // pagination of lists (scripts/pagination.js): the landmark and its buttons
+  paginationLabel: {
+    en: 'Pagination', zh: '分页', 'zh-HK': '分頁', ja: 'ページ送り', pt: 'Paginação',
+  },
+  paginationPage: {
+    en: 'Page {n}', zh: '第 {n} 页', 'zh-HK': '第 {n} 頁', ja: '{n} ページ', pt: 'Página {n}',
+  },
+  paginationPrevious: {
+    en: 'Previous page', zh: '上一页', 'zh-HK': '上一頁', ja: '前のページ', pt: 'Página anterior',
+  },
+  paginationNext: {
+    en: 'Next page', zh: '下一页', 'zh-HK': '下一頁', ja: '次のページ', pt: 'Próxima página',
+  },
+  paginationStatus: {
+    en: 'Page {n} of {total}', zh: '第 {n} 页，共 {total} 页', 'zh-HK': '第 {n} 頁，共 {total} 頁', ja: '{n} / {total} ページ', pt: 'Página {n} de {total}',
+  },
+  // offer list: the "Show me [All offers] ordered by [Latest]" filter line and the offer cards
+  offerShowMe: {
+    en: 'Show me', zh: '显示', 'zh-HK': '顯示', ja: '表示', pt: 'Mostrar',
+  },
+  offerOrderedBy: {
+    en: 'ordered by', zh: '排序方式', 'zh-HK': '排序方式', ja: '並び順', pt: 'ordenadas por',
+  },
+  offerAll: {
+    en: 'All offers', zh: '所有优惠', 'zh-HK': '所有優惠', ja: 'すべてのオファー', pt: 'Todas as ofertas',
+  },
+  offerLatest: {
+    en: 'Latest', zh: '最新', 'zh-HK': '最新', ja: '新しい順', pt: 'Mais recentes',
+  },
+  offerOldest: {
+    en: 'Oldest', zh: '最早', 'zh-HK': '最早', ja: '古い順', pt: 'Mais antigas',
+  },
+  offerLearnMore: {
+    en: 'Learn more', zh: '了解更多', 'zh-HK': '了解更多', ja: '詳しく見る', pt: 'Saiba mais',
+  },
+  offerCount: {
+    en: '{n} offers', zh: '{n} 项优惠', 'zh-HK': '{n} 項優惠', ja: '{n} 件のオファー', pt: '{n} ofertas',
+  },
+  offerCountOne: {
+    en: '1 offer', zh: '1 项优惠', 'zh-HK': '1 項優惠', ja: '1 件のオファー', pt: '1 oferta',
+  },
+  offerNoMatch: {
+    en: 'No offers match this selection.', zh: '没有符合所选条件的优惠。', 'zh-HK': '沒有符合所選條件的優惠。', ja: '条件に合うオファーはありません。', pt: 'Nenhuma oferta corresponde a esta seleção.',
+  },
+  offerEmpty: {
+    en: 'There are no offers right now.', zh: '目前没有优惠。', 'zh-HK': '目前沒有優惠。', ja: '現在ご利用いただけるオファーはありません。', pt: 'Não há ofertas no momento.',
+  },
+  offerError: {
+    en: 'We couldn’t load the offers.', zh: '无法加载优惠。', 'zh-HK': '無法載入優惠。', ja: 'オファーを読み込めませんでした。', pt: 'Não foi possível carregar as ofertas.',
+  },
   // property list (city lounge listing)
   // the city pages' breadcrumb, in the source's words: "Home < Lounges in {country}"
   propertyCrumbHome: {
@@ -290,6 +340,21 @@ const TEXTS = {
   },
   formError: {
     en: 'Something went wrong. Please try again.', zh: '出现问题，请重试。', 'zh-HK': '出現問題，請重試。', ja: '問題が発生しました。もう一度お試しください。', pt: 'Algo deu errado. Tente novamente.',
+  },
+  forgotPasswordSent: {
+    en: 'Email sent. Please check your mailbox.', zh: '邮件已发送，请查收您的邮箱。', 'zh-HK': '郵件已發送，請查閱您的郵箱。', ja: 'メールを送信しました。受信トレイをご確認ください。', pt: 'E-mail enviado. Verifique sua caixa de entrada.',
+  },
+  profileLoading: {
+    en: 'Loading your profile…', zh: '正在加载您的资料…', 'zh-HK': '正在載入您的資料…', ja: 'プロフィールを読み込んでいます…', pt: 'Carregando seu perfil…',
+  },
+  profileLoadError: {
+    en: 'We couldn’t load your profile.', zh: '无法加载您的资料。', 'zh-HK': '無法載入您的資料。', ja: 'プロフィールを読み込めませんでした。', pt: 'Não foi possível carregar seu perfil.',
+  },
+  profilePoints: {
+    en: '{points} (valid until {date})', zh: '{points}（有效期至 {date}）', 'zh-HK': '{points}（有效期至 {date}）', ja: '{points}（{date} まで有効）', pt: '{points} (válido até {date})',
+  },
+  loginError: {
+    en: 'Sorry, we couldn’t log you in. Please try again.', zh: '抱歉，无法登录，请重试。', 'zh-HK': '抱歉，無法登入，請重試。', ja: 'ログインできませんでした。もう一度お試しください。', pt: 'Desculpe, não foi possível entrar. Tente novamente.',
   },
   formNetworkError: {
     en: 'We couldn’t reach the server. Please check your connection and try again.',

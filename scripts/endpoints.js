@@ -29,6 +29,14 @@ const ENDPOINTS = {
   newsletter: '/api/v1/web/app_demo/Newsletter',
   // the Contact Form submit: a placeholder path until the contact API exists
   contact: '/api/v1/web/app_demo/Contact',
+  // the login modal's submit (POST, JSON: username, password); answers with a JWT
+  login: '/api/v1/web/app_demo/Login',
+  // the forgot password modal's submit (POST, JSON: lastName, email)
+  forgotPassword: '/api/v1/web/app_demo/ForgotPassword',
+  // the logged-in member's profile (GET, Authorization: Bearer <jwt>)
+  getProfile: '/api/v1/web/app_demo/GetProfile',
+  // a booking (order) of the logged-in member (POST, JSON: orderId; Authorization: Bearer <jwt>)
+  getOrderDetail: '/api/v1/web/app_demo/GetOrderDetail',
   propertyDetail: '/api/v1/web/app_demo/GetPropertyDetail',
   // a lounge's bookable services and their products for a start time (POST, JSON body)
   propertyServices: '/api/v1/web/app_demo/GetServices',
@@ -36,6 +44,13 @@ const ENDPOINTS = {
   propertyPrice: '/api/v1/web/app_demo/GetPrice',
   // a pass (product) with its prices, for a product code and currency (GET)
   productPasses: '/api/v1/web/app_demo/GetProductPasses',
+  // the logged-in member's bookings (POST, JSON: languageCode, propertyTypeCode, status; the
+  // login token as a Bearer token)
+  bookingList: '/api/v1/web/app_demo/GetBookingList',
+  // resending a booking's confirmation and cancelling it (POST, JSON: orderId): placeholder paths
+  // until these APIs exist
+  resendBookingConfirmation: '/api/v1/web/app_demo/ResendBookingConfirmation',
+  cancelBooking: '/api/v1/web/app_demo/CancelBooking',
 };
 
 /**
