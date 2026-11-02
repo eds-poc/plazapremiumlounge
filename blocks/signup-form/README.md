@@ -31,7 +31,7 @@ redirect to the confirmation page (`sign-up-successful-page` in the visitor's la
 | `firstName` ✱ | First name: letters, apostrophes and hyphens, at most 50 |
 | `lastName` ✱ | Last name: letters, apostrophes and hyphens, at most 200 |
 | `countryOfResidence` ✱ | Country, from the countries service |
-| `phone` ✱ | Country code (+1 (US) to start with, then the country of residence's) and number: numbers only (anything else typed or pasted is left out), at most 11 |
+| `phone` ✱ | Country code (+1 (US) to start with, then the country of residence's) and number: numbers only (anything else typed or pasted is left out), at most 12 |
 | `email` ✱ | Email address, at most 200 |
 | `confirmEmail` ✱ | Must match the email address |
 | `password` ✱ | 8 to 15 characters with a lower case, an upper case letter and a number |

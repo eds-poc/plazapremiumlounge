@@ -18,9 +18,9 @@ const FIELDS = {
     type: 'phone',
     key: 'phone',
     newColumn: true,
-    // the number: numbers only (the number keypad on phones), at most 11
+    // the number: numbers only (the number keypad on phones), at most 12
     settings: {
-      'prefix key': 'countryPhoneCode', 'prefix default': '+1 (US)', rule: 'digits', 'max length': 11,
+      'prefix key': 'countryPhoneCode', 'prefix default': '+1 (US)', rule: 'digits', 'max length': 12,
     },
   },
   birthday: { type: 'text', key: 'dob', settings: { disabled: '', width: 'half' } },
