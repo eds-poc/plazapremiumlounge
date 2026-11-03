@@ -33,6 +33,9 @@ const ENDPOINTS = {
   // locationOfService, languageCode; answer: { items: [{ value, text }] }): placeholder paths until
   // the group booking APIs exist
   groupBooking: '/api/v1/web/app_demo/GroupBooking',
+  // the lounge booking request (Group Booking Form, option booking-request): a placeholder path
+  // until its API exists; its areas come from groupBookingAreas with form: 'bookingRequest'
+  bookingRequest: '/api/v1/web/app_demo/BookingRequest',
   groupBookingAreas: '/api/v1/web/app_demo/GetGroupBookingAreas',
   // the login modal's submit (POST, JSON: username, password); answers with a JWT
   login: '/api/v1/web/app_demo/Login',

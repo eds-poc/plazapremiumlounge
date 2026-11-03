@@ -50,3 +50,26 @@ then this block.
 - **groupBooking** (POST, JSON): the fields above by key, and `h-captcha-response`.
 - **groupBookingAreas** (POST, JSON `{ locationOfService, languageCode }`): answers
   `{ items: [{ value, text }] }`. Until it exists, Area of Service stays empty and optional.
+
+## Option `booking-request`: the Lounge Booking Request form
+
+`Group Booking Form (booking request)` is the live site's `/en-uk/makeabooking` form: the same
+block, rows and checks, with its own fields, sent to the `bookingRequest` endpoint (a placeholder
+until the API exists). On the page: a **Title (center, intro-wide)**, a **Divider**, then the block.
+No `people` row (there is no minimum) and no newsletter checkbox; the captcha and the button stay
+in the second column, side by side when it has room (as the source). 41px fields, the columns 64px
+apart, as the Contact Us form.
+
+| Field | What it is |
+| --- | --- |
+| `locationOfService` ✱, `areaOfService` ✱ | As above (the areas request adds `form: "bookingRequest"`) |
+| `emailAddress` ✱, `contactNumber` ✱ | As above |
+| `smartTravellerMembershipNumber` | Text, at most 200 |
+| `title` ✱, `firstName` ✱, `lastName` ✱, `servicesRequired` ✱ | As above |
+| `numberOfPrivateRestingAreas` ✱ | Dropdown (`N/A`, 1 to 10) |
+| `travelType` ✱ | Dropdown (Arrival, Departure, Transit) |
+| `noOfAdults` ✱ (**starts the second column**), `noOfChildren` | Dropdowns, side by side |
+| `serviceStartDate` ✱, `serviceStartTime` | Date from today; − and + by half an hour from 10:00 AM |
+| `serviceEndDate` ✱, `serviceEndTime` | Date not before the start date (its picker starts there; its Error line 2 is the message); − and + by half an hour from 11:00 AM |
+| `remarks` | A 12-line text box, sent as `remark` |
+| `consent` ✱ | Privacy checkbox |

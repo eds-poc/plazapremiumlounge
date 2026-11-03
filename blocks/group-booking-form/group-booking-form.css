@@ -50,11 +50,54 @@
    and the steppers */
 @media (width >= 768px) {
   .group-booking-form .form-fields > :is(.form-captcha, .form-submit),
-  .group-booking-form .form-fields .form-column > .form-field-stepper {
+  .group-booking-form .form-fields .form-column > .form-field-stepper.width-half {
     grid-column: span 3;
   }
 
   .group-booking-form .form-fields > .form-captcha {
     margin-top: 0;
+  }
+}
+
+/* option booking-request: the source lounge booking request form (/en-uk/makeabooking), as the
+   Contact Us form: 41px fields, the two columns 64px apart, the captcha 58px under the Privacy
+   Policy checkbox and the button under it in the second column, side by side when the column has
+   room for both (the source's col-xl-6) */
+.group-booking-form.booking-request .form-fields {
+  --form-input-height: 41px;
+}
+
+.group-booking-form.booking-request .form-fields .form-column {
+  container-type: inline-size;
+}
+
+.group-booking-form.booking-request .form-fields .form-checks {
+  /* one-off: the source's 25px lines (22px of text, 3px apart) */
+  gap: 3px;
+}
+
+.group-booking-form.booking-request .form-fields .form-column > .form-captcha {
+  margin-top: calc(58px - var(--form-row-gap));
+}
+
+.group-booking-form.booking-request .form-fields .form-captcha + .form-submit {
+  margin-top: calc(var(--spacing-bootstrap-3) - var(--form-row-gap));
+}
+
+@container (width >= 600px) {
+  .group-booking-form.booking-request .form-fields .form-column > :is(.form-captcha, .form-submit) {
+    grid-column: span 3;
+  }
+
+  .group-booking-form.booking-request .form-fields .form-captcha + .form-submit {
+    margin-top: calc(58px - var(--form-row-gap));
+  }
+}
+
+/* breakpoint-exception: the source's col-md-6 (768px), the two columns side by side */
+@media (width >= 768px) {
+  .group-booking-form.booking-request .form-fields.has-columns {
+    /* one-off: the source's 64px between its columns */
+    column-gap: 64px;
   }
 }
