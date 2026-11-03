@@ -172,6 +172,59 @@
   text-decoration: underline;
 }
 
+/* a group of checkboxes (`checkboxes`): under its label, one per line, each as a checkbox field */
+.form-fields .form-checks {
+  display: grid;
+  gap: var(--spacing-1);
+}
+
+.form-fields .form-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0 var(--spacing-5);
+}
+
+/* a stepper (`stepper`): − and + at the ends of the pill, the value (500) centred between them */
+.form-fields .form-stepper {
+  display: flex;
+  align-items: center;
+  padding-inline: var(--spacing-4);
+}
+
+.form-fields .form-stepper-step {
+  flex: none;
+  width: 30px;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--color-text-strong);
+  font: inherit;
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.form-fields .form-stepper-value {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+}
+
+.form-fields .form-stepper-value:focus {
+  outline: none;
+}
+
+.form-fields .form-stepper:focus-within {
+  box-shadow: var(--shadow-focus);
+}
+
 .form-fields .form-field-checkbox .form-error {
   flex-basis: 100%;
   padding-left: calc(14px + var(--spacing-5));

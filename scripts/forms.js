@@ -17,7 +17,7 @@ import apiUrl from './endpoints.js';
 import { addCaptcha, CAPTCHA_KEY } from './captcha.js';
 
 const INPUT_TYPES = ['text', 'email', 'password', 'tel', 'number', 'date', 'url'];
-const FIELD_TYPES = [...INPUT_TYPES, 'textarea', 'select', 'checkbox', 'country', 'phone'];
+const FIELD_TYPES = [...INPUT_TYPES, 'textarea', 'select', 'checkbox', 'checkboxes', 'country', 'phone', 'stepper'];
 const CHOICE_TYPES = ['select', 'country'];
 // autofill hints by key (sign up and contact forms), else by type
 const AUTOCOMPLETE = {
@@ -201,6 +201,32 @@ function buildLabel(def) {
 }
 
 /**
+ * A stepper's value as shown: a time of day in minutes ("6:00 PM"), or a number with its unit
+ * ("3.5 hours").
+ * @param {number} value
+ * @param {Map<string, string>} settings `format: time`, else `unit`
+ * @returns {string}
+ */
+function stepperText(value, settings) {
+  if (settings.get('format') === 'time') {
+    const date = new Date(Date.UTC(2000, 0, 1, Math.floor(value / 60), value % 60));
+    return new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'UTC' }).format(date);
+  }
+  return [value, settings.get('unit')].filter(Boolean).join(' ');
+}
+
+/**
+ * A stepper's value as sent: a time as "18:00", else the number.
+ * @param {number} value
+ * @param {Map<string, string>} settings
+ * @returns {string}
+ */
+function stepperValue(value, settings) {
+  if (settings.get('format') !== 'time') return String(value);
+  return `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
+}
+
+/**
  * Sets the attributes every text-like control shares: name, id, placeholder, autofill, limits.
  * @param {HTMLElement} control
  * @param {object} def
@@ -265,7 +291,7 @@ export function buildField({
   };
   const wrap = el('div', `form-field form-field-${type}`);
   wrap.dataset.key = key;
-  const fullByDefault = ['checkbox', 'textarea'].includes(type);
+  const fullByDefault = ['checkbox', 'checkboxes', 'textarea'].includes(type);
   wrap.classList.add(`width-${settings.get('width') || (fullByDefault ? 'full' : defaultWidth)}`);
   if (settings.has('new row')) wrap.classList.add('new-row');
   const state = { def, wrap, controls: [] };
@@ -279,6 +305,68 @@ export function buildField({
     text.className = 'form-check-label';
     wrap.append(input, text);
     state.controls = [input];
+  } else if (type === 'checkboxes') {
+    // a group: its label, then one checkbox per option (authored one per line), one per line
+    const group = el('div', 'form-checks');
+    group.setAttribute('role', 'group');
+    const name = buildLabel(def);
+    name.removeAttribute('for');
+    name.id = `${def.id}-label`;
+    group.setAttribute('aria-labelledby', name.id);
+    state.controls = readOptions(settings.get('options')).map((option, i) => {
+      const line = el('div', 'form-check');
+      const input = el('input', 'form-check-input');
+      input.type = 'checkbox';
+      input.id = `${def.id}-${i}`;
+      input.name = key;
+      input.value = option.value;
+      const text = el('label', 'form-check-label');
+      text.htmlFor = input.id;
+      text.textContent = option.text;
+      line.append(input, text);
+      group.append(line);
+      return input;
+    });
+    wrap.append(name, group);
+  } else if (type === 'stepper') {
+    // − and + around the value, from `default` by `step` between `min` and `max` (a time goes
+    // round the clock)
+    const min = Number(settings.get('min') || 0);
+    const max = Number(settings.get('max') || (settings.get('format') === 'time' ? 1439 : 99));
+    const step = Number(settings.get('step') || 1);
+    const start = Number(settings.get('default') || min);
+    const box = el('div', 'form-input form-stepper');
+    const shown = el('input', 'form-stepper-value');
+    shown.id = def.id;
+    shown.readOnly = true;
+    shown.setAttribute('aria-live', 'polite');
+    const minus = el('button', 'form-stepper-step');
+    const plus = el('button', 'form-stepper-step');
+    minus.type = 'button';
+    plus.type = 'button';
+    minus.textContent = '-';
+    plus.textContent = '+';
+    minus.setAttribute('aria-label', `${label} −`);
+    plus.setAttribute('aria-label', `${label} +`);
+    const set = (value) => {
+      state.value = value;
+      shown.value = stepperText(value, settings);
+    };
+    const move = (by) => {
+      let next = state.value + by;
+      if (settings.get('format') === 'time') next = (next + 1440) % 1440;
+      else next = Math.min(max, Math.max(min, next));
+      set(next);
+      shown.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+    minus.addEventListener('click', () => move(-step));
+    plus.addEventListener('click', () => move(step));
+    // a form reset goes back to the start value
+    wrap.addEventListener('reset', () => set(start));
+    set(start);
+    box.append(minus, shown, plus);
+    wrap.append(buildLabel(def), box);
+    state.controls = [shown];
   } else if (type === 'phone') {
     const box = el('div', 'form-phone');
     const code = el('select', 'form-input form-select form-phone-code');
@@ -351,6 +439,9 @@ export function buildField({
  */
 function valueOf(state) {
   if (state.def.type === 'checkbox') return state.controls[0].checked;
+  // the checked options, each followed by ";" (as the source sends them: "LoungeUse;Massage;")
+  if (state.def.type === 'checkboxes') return state.controls.filter((c) => c.checked).map((c) => `${c.value};`).join('');
+  if (state.def.type === 'stepper') return stepperValue(state.value, state.def.settings);
   return state.controls[0]?.value.trim() ?? '';
 }
 
@@ -436,11 +527,11 @@ function check(state) {
     if (empty) {
       if (settings.get('required')) return settings.get('required');
       if (type === 'checkbox') return translate('formRequiredCheck');
-      const key = CHOICE_TYPES.includes(type) ? 'formRequiredChoice' : 'formRequired';
+      const key = [...CHOICE_TYPES, 'checkboxes'].includes(type) ? 'formRequiredChoice' : 'formRequired';
       return translate(key, { label: def.label.toLowerCase() });
     }
   }
-  if (empty || typeof value !== 'string') return '';
+  if (empty || typeof value !== 'string' || ['checkboxes', 'stepper'].includes(type)) return '';
 
   const presetName = settings.get('rule') || (RULES[type] ? type : '');
   const preset = RULES[presetName];
@@ -583,6 +674,7 @@ export function linkFields(form) {
 export function resetForm(form) {
   form.reset();
   form.querySelectorAll('.form-field').forEach((wrap) => {
+    wrap.dispatchEvent(new Event('reset'));
     wrap.classList.remove('is-touched');
     setFieldError(wrap, '');
   });
@@ -762,6 +854,12 @@ function fieldSettings(field, cells) {
     // dropdowns: the empty choice, then one option per line
     if (placeholder.length) settings.set('placeholder', placeholder[0]);
     if (placeholder.length > 1) settings.set('options', placeholder.slice(1));
+  } else if (field.type === 'checkboxes') {
+    // a group: one option per line
+    settings.set('options', placeholder);
+  } else if (field.type === 'stepper') {
+    // a stepper: the unit after its number ("hours")
+    if (placeholder.length) settings.set('unit', placeholder[0]);
   } else if (placeholder.length) {
     settings.set('placeholder', placeholder[0]);
   }
