@@ -9,6 +9,7 @@ import { loadCSS } from './aem.js';
 import { translate, getLanguage } from './i18n.js';
 import { getCart, onCartChange } from './cart-state.js';
 import { addToCart, refreshCart, removeFromCart } from './cart.js';
+import { hideLoader, showLoader } from './loader.js';
 
 const styles = loadCSS(`${window.hlx.codeBasePath}/styles/cart.css`);
 
@@ -29,7 +30,7 @@ function el(tag, className, text) {
 /**
  * A button, as the source's cart buttons (primary: filled; secondary: outlined).
  * @param {string} label
- * @param {'primary'|'secondary'} kind
+ * @param {'primary'|'secondary'|'soft'} kind
  * @param {Function} onClick
  * @returns {HTMLButtonElement}
  */
@@ -109,17 +110,20 @@ class CartDialog {
   }
 
   /**
-   * Opens it (closing any other site dialog).
+   * Opens it, closing any other site dialog (or over it, with `stack`). As the source's, only
+   * its own controls close it: not Esc, not a click beside it (it bounces).
    * @param {HTMLElement} [trigger] Focus returns there when it closes
+   * @param {{stack?: boolean}} [options]
    * @returns {Promise<HTMLDialogElement|null>}
    */
-  async open(trigger) {
+  async open(trigger, { stack = false } = {}) {
     await styles;
     const { openModal } = await import('./modal-dialog.js');
     return openModal({
       key: this.key,
       trigger,
-      content: () => Object.assign([this.root], { styles: [this.className] }),
+      stack,
+      content: () => Object.assign([this.root], { styles: [this.className], static: true }),
     });
   }
 
@@ -134,31 +138,28 @@ const failure = new CartDialog('cart-failure', 'cart-message-modal');
 // (the source's remove confirmation has no title)
 const confirm = new CartDialog('cart-remove', 'cart-confirm-modal', false);
 
-/** Closes the open site dialog, if any. */
-function closeDialogs() {
-  document.querySelectorAll('dialog.modal[open]').forEach((d) => d.close());
-}
-
 /**
- * The remove confirmation (the source's ⊗): Cancel goes back to the mini cart, Yes takes the
- * booking out (and closes).
+ * The remove confirmation (the source's ⊗), over the mini cart: Cancel closes it (the mini cart
+ * stays); Yes takes the booking out, then, as the source, the loader shows over the mini cart and
+ * the page loads again.
  * @param {Object} line
- * @param {HTMLElement} trigger What opened the mini cart (focus goes back there)
+ * @param {HTMLElement} from The ⊗ (focus goes back there on Cancel)
  */
-function confirmRemove(line, trigger) {
+function confirmRemove(line, from) {
   const message = el('p', 'cart-confirm-message', translate('cartRemoveConfirm'));
   message.append(el('span', 'cart-confirm-product', line.product || line.name));
   const actions = el('div', 'cart-confirm-actions');
   actions.append(
-    // eslint-disable-next-line no-use-before-define
-    button(translate('cartCancel'), 'primary', () => openMiniCart(trigger)),
-    button(translate('cartYes'), 'primary', () => {
-      removeFromCart(line.catalogueCode);
-      closeDialogs();
+    button(translate('cartCancel'), 'primary', () => confirm.dialog?.close()),
+    button(translate('cartYes'), 'soft', () => {
+      confirm.dialog?.close();
+      removeFromCart(line.catalogueCode, { quiet: true });
+      showLoader();
+      window.location.reload();
     }),
   );
   confirm.fill('', [message, actions]);
-  confirm.open(trigger);
+  confirm.open(from, { stack: true });
 }
 
 /**
@@ -173,7 +174,7 @@ function renderMiniCart(cart) {
     const remove = el('button', 'mini-cart-remove');
     remove.type = 'button';
     remove.setAttribute('aria-label', translate('cartRemoveItem', { name: line.product || line.name }));
-    remove.addEventListener('click', () => confirmRemove(line, mini.dialog?.trigger));
+    remove.addEventListener('click', () => confirmRemove(line, remove));
     name.append(remove);
     box.append(name);
     if (line.place) box.append(el('p', 'mini-cart-place', line.place));
@@ -249,23 +250,38 @@ onCartChange((cart) => {
 });
 
 /**
- * Adds a product and shows the answer, as the source: the mini cart, "Checkout Cart" (its View
- * Cart opens the mini cart), or the failure message. The button that asked is disabled meanwhile.
+ * Turns the button that asked off while the cart works (as the source's: disabled and
+ * aria-disabled), or back on.
+ * @param {HTMLElement|null} from
+ * @param {boolean} busy
+ */
+function setBusy(from, busy) {
+  if (!from) return;
+  if (from.tagName === 'BUTTON') from.disabled = busy;
+  ['aria-disabled', 'aria-busy'].forEach((name) => {
+    if (busy) from.setAttribute(name, 'true');
+    else from.removeAttribute(name);
+  });
+}
+
+/**
+ * Adds a product and shows the answer, as the source: the site's loader while the booking system
+ * answers (the button that asked off), then the mini cart, "Checkout Cart" (its View Cart opens
+ * the mini cart), or the failure message.
  * @param {Object} item The product, as its type's adapter in cart.js takes it
  * @param {HTMLElement} [trigger] The button (or what holds it)
  */
 export async function addAndShow(item, trigger) {
   // (the event may come from anything: only an element is a trigger)
   const from = trigger instanceof Element ? trigger.closest('button, a') || trigger : null;
-  const isButton = from?.tagName === 'BUTTON';
-  if (isButton) from.disabled = true;
-  from?.setAttribute('aria-busy', 'true');
+  setBusy(from, true);
+  showLoader();
   let result;
   try {
     result = await addToCart(item);
   } finally {
-    if (isButton) from.disabled = false;
-    from?.removeAttribute('aria-busy');
+    hideLoader();
+    setBusy(from, false);
   }
   if (result.status === 'added') {
     await openMiniCart(from, { fresh: true });

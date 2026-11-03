@@ -18,6 +18,7 @@ import { decorateIcons } from './icons.js';
 import { getLanguage } from './i18n.js';
 import { installVideoLinks } from './video.js';
 import { checkSession, logout } from './auth.js';
+import { hideLoader, showLoader } from './loader.js';
 
 if (window.trustedTypes && window.trustedTypes.createPolicy) {
   const innerTT = window.trustedTypes.createPolicy('tt-inner', {
@@ -44,33 +45,8 @@ if (window.trustedTypes && window.trustedTypes.createPolicy) {
   });
 }
 
-const LOADER_ID = 'spinner-overlay';
-let loader;
-
-/**
- * Shows the full-page loader (styled in styles.css), creating it on first use. With a modal
- * dialog open, the loader goes inside it: a modal dialog sits in the browser's top layer, above
- * anything in the page.
- */
-export function showLoader() {
-  if (!loader) {
-    loader = document.getElementById(LOADER_ID);
-    if (!loader) {
-      loader = document.createElement('div');
-      loader.id = LOADER_ID;
-      loader.innerHTML = '<div id="global-spinner"><img src="/icons/PPL-loading-v2.webp" width="320" height="auto" alt="Loading..."></div>';
-    }
-  }
-  const host = [...document.querySelectorAll('dialog[open]')].pop() || document.body;
-  if (loader.parentElement !== host) host.prepend(loader);
-}
-
-/**
- * Hides the full-page loader.
- */
-export function hideLoader() {
-  loader?.remove();
-}
+// the full-page loader (scripts/loader.js), offered here too, as before
+export { showLoader, hideLoader };
 
 /**
  * Shows the loader as soon as a link click leaves the page, and hides it again when the
@@ -256,12 +232,22 @@ const CART_EVENTS = {
 function installCart() {
   Object.entries(CART_EVENTS).forEach(([name, type]) => {
     document.addEventListener(name, (e) => {
-      // (the button is off at once, while the cart's code loads; the cart turns it back on)
+      // (as the source's, at once: the button off and the site's loader, while the cart's code
+      // loads; the cart keeps them until the booking system has answered)
       const from = e.target.closest?.('button');
-      if (from) from.disabled = true;
+      if (from) {
+        from.disabled = true;
+        from.setAttribute('aria-disabled', 'true');
+      }
+      showLoader();
       import('./mini-cart.js')
         .then(({ addAndShow }) => addAndShow({ ...e.detail, type }, e.target))
-        .finally(() => { if (from) from.disabled = false; });
+        .finally(() => {
+          hideLoader();
+          if (!from) return;
+          from.disabled = false;
+          from.removeAttribute('aria-disabled');
+        });
     });
   });
   document.addEventListener('cart:remove', (e) => {

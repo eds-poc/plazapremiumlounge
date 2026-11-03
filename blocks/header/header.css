@@ -231,15 +231,14 @@ header .header-utility-label {
   display: none;
 }
 
-/* the cart's count, as the source's: an 18px black circle over the icon's top right (out of the
-   flow, so nothing moves when it shows) */
+/* the cart's count, as the source's: on the desktop bar only (see below), an 18px black circle
+   over the icon's top right (out of the flow, so nothing moves when it shows) */
 header .header-cart-count {
   --header-cart-count-size: 18px;
-  --header-cart-count-top: -9px;
+  --header-cart-count-top: -5px;
+  --header-cart-count-right: -6px;
 
-  /* (on phones and tablets the user icon is close by: the badge stays clear of it) */
-  --header-cart-count-right: -7px;
-
+  display: none;
   position: absolute;
   top: var(--header-cart-count-top);
   right: var(--header-cart-count-right);
@@ -256,9 +255,6 @@ header .header-cart-count {
   text-align: center;
 }
 
-header .header-cart-count[hidden] {
-  display: none;
-}
 
 /* menu button: three 23px lines, a white close cross when the menu is open */
 header .header-toggle {
@@ -845,9 +841,8 @@ header .header-cart-dropdown p {
   }
 
   /* (the icon has 5px either side here: the source's -11px from the glyph) */
-  header .header-cart-count {
-    --header-cart-count-top: -5px;
-    --header-cart-count-right: -6px;
+  header .header-cart-count:not([hidden]) {
+    display: block;
   }
 
   header.is-scrolled .header {

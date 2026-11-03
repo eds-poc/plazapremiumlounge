@@ -18,6 +18,11 @@ dialog.modal:is(.mini-cart-modal, .cart-message-modal, .cart-confirm-modal) {
   --cart-gap: 8px;
   --cart-detail-gap: 3px;
   --cart-confirm-button: 90px;
+  --cart-footer-padding: 12px;
+  --cart-footer-button-margin: 4px 4px 15px;
+  --cart-footer-button-padding: 8px 10px;
+  --cart-soft: rgb(104 18 53 / 10%);
+  --cart-soft-hover-border: rgb(86 94 100);
 
   font-family: var(--font-family-primary);
 }
@@ -48,9 +53,13 @@ dialog.modal.mini-cart-modal .modal-header .modal-title {
   line-height: 1.2;
 }
 
+/* the source's cross (Bootstrap's close, icons/close-thin.svg), half-tone black */
 dialog.modal.mini-cart-modal .modal-close {
-  color: var(--color-text-strong, #000);
+  width: var(--font-size-md);
+  height: var(--font-size-md);
+  color: var(--color-text-strong);
   opacity: 0.5;
+  mask-image: url('../icons/close-thin.svg');
 }
 
 dialog.modal.mini-cart-modal .modal-close:hover {
@@ -233,22 +242,60 @@ dialog.modal.cart-confirm-modal .modal-header {
 }
 
 .cart-confirm-message {
-  margin: var(--spacing-2) 0;
+  margin: var(--spacing-3) 0;
 }
 
 .cart-confirm-product {
   display: block;
 }
 
+/* the source's modal footer: a light line the full width, the buttons at the right */
 .cart-confirm-actions {
   display: flex;
-  gap: var(--spacing-2);
+  flex-wrap: wrap;
   justify-content: flex-end;
-  margin-top: var(--modal-padding);
+  margin: var(--modal-padding) calc(-1 * var(--modal-padding)) calc(-1 * var(--modal-padding));
+  border-top: 1px solid var(--color-border-subtle);
+  padding: var(--cart-footer-padding);
 }
 
 .cart-confirm-actions .cart-button {
   min-width: var(--cart-confirm-button);
+  margin: var(--cart-footer-button-margin);
+  padding: var(--cart-footer-button-padding);
+}
+
+/* Yes: the source's light maroon (10%), filled maroon on hover */
+.cart-button-soft {
+  background-color: var(--cart-soft);
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.cart-button-soft:hover {
+  border-color: var(--cart-soft-hover-border);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+/* phones: the source's smaller text, each detail's label over its value */
+@media (width < 768px) {
+  dialog.modal.mini-cart-modal {
+    font-size: var(--font-size-sm);
+  }
+
+  .mini-cart-name {
+    font-size: var(--font-size-sm);
+  }
+
+  .mini-cart-detail {
+    display: block;
+    padding-bottom: var(--spacing-4);
+  }
+
+  .mini-cart-detail dt {
+    display: block;
+  }
 }
 
 @media (width >= 768px) {

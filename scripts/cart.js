@@ -244,7 +244,14 @@ export function addToCart(item) {
   pending = (async () => {
     const adapter = ADAPTERS[item?.type];
     if (!adapter) return { status: 'refused', reason: 'invalid' };
-    const cart = getCart();
+    let cart = getCart();
+    // the booking system has the last word on what the cart holds (as the source's, where it
+    // answers 409): a cart it no longer has doesn't hold the add back
+    if (cart?.lines.length) {
+      try {
+        cart = await refreshCart();
+      } catch { /* (unreachable: what this site knows stands) */ }
+    }
     const rule = RULES.map((r) => r({ cart, item })).find(Boolean);
     if (rule) return { status: 'refused', reason: rule };
     const check = adapter.check(item);
@@ -283,11 +290,12 @@ export function addToCart(item) {
  * Takes a product out of the cart. The cart API has no call for that yet, so the cart (one
  * booking) is forgotten on this site.
  * @param {string} catalogueCode
+ * @param {{quiet?: boolean}} [options] quiet: no `cart:change` (the page loads again next)
  * @returns {boolean} Whether it was in the cart
  */
-export function removeFromCart(catalogueCode) {
+export function removeFromCart(catalogueCode, { quiet = false } = {}) {
   const cart = getCart();
   if (!cart?.lines.some((line) => line.catalogueCode === catalogueCode)) return false;
-  forgetCart();
+  forgetCart(!quiet);
   return true;
 }

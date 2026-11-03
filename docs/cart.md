@@ -7,27 +7,33 @@ the same way (see [Adding a product type](#adding-a-product-type)).
 
 ## What visitors see (as the source's)
 
-- **Book Now** on the lounge card: the button is off while the product goes into the cart, then
-  the **mini cart** opens, the header's cart shows **1**, and the card's button reads
-  **Remove From Cart** (it takes the booking out at once, no question asked).
-- **The mini cart** (a panel at the top right from 768px, the screen's width on phones):
+- **Book Now** on the lounge card: at once the button is off (disabled, aria-disabled) and the
+  site's full-page loader shows; when the booking system has answered (the cart made and read
+  back) the loader goes, the **mini cart** opens, the header's cart shows **1**, and the card's
+  button reads **Remove From Cart** (it takes the booking out at once, no question asked).
+- **The cart's dialogs stay open on Esc and a click beside them** (they bounce), as the source's
+  (`data-bs-backdrop="static" data-bs-keyboard="false"`): only their own controls close them.
+- **The mini cart** (a 420px panel at the top right from 768px, the screen's width on phones):
   - the lounge's name with a ⊗ (remove), its location
   - Date (`02-Nov-2026`, `2026年11月02日`), Time (`1800hrs`), Guests (`2 Adult(s), 1 Child(ren)`),
-    Services (the product)
+    Services (the product); on phones each label is over its value, in 14px text
   - Service Total and the discounts when there are discounts, then Total (Includes applicable
     taxes and fees)
   - **Check Out** and **Edit**: not wired yet (they announce `cart:checkout` / `cart:edit`, for
     the booking steps to come)
-- **⊗**: "Would you like to remove this order from the shopping cart?" with the product;
-  **Cancel** goes back to the mini cart, **Yes** takes the booking out.
-- **A second booking while one is in the cart**: **Checkout Cart** — "Please proceed to checkout
-  before adding new item into cart." — and **View Cart** (opens the mini cart). As the source's,
-  a lounge goes into an empty cart only.
+- **⊗**: "Would you like to remove this order from the shopping cart?" with the product, over the
+  mini cart (both show); **Cancel** (maroon) closes only the question; **Yes** (light maroon)
+  takes the booking out, shows the loader and loads the page again, as the source's.
+- **A second booking while one is in the cart**: the loader while the cart is read from the
+  booking system, then **Checkout Cart** — "Please proceed to checkout before adding new item into
+  cart." — and **View Cart** (opens the mini cart). As the source's, a lounge goes into an empty
+  cart only.
 - **The add fails** (the service's error, a 4xx/5xx, the network, a timeout, not JSON): the
   site's dialog with "Unable to add to cart." (the source shows a browser alert). Nothing is kept.
-- **The header's cart**: the count on the icon (with the count for screen readers); with
-  something in the cart it opens the mini cart, empty it shows the nav's `cart` section ("Your
-  cart is empty") as before.
+- **The header's cart**: the count on the icon on the desktop bar (from 1200px; the source's phone
+  and tablet header shows none), the count for screen readers on every screen; with something in
+  the cart it opens the mini cart, empty it shows the nav's `cart` section ("Your cart is empty")
+  as before.
 - Texts in the five languages, as the source's (see `cart*` in `scripts/i18n.js`).
 
 Not there yet (no API for them): the source's **View more options** (add-ons) and the **promo
@@ -39,7 +45,7 @@ code** field, Check Out's add-ons step and the checkout itself.
 | --- | --- |
 | `scripts/cart-state.js` | The cart on this site (small: the header loads it on every page): the cart id in the cookie `cartid` (a day, as the source's) and a summary of the cart's last answer in localStorage `ppl-cart` (lines, totals, currency), so the count and the mini cart show without a request. `getCart`, `cartCount`, `isInCart`, `saveCart`, `forgetCart`, `onCartChange` (`cart:change` on document, other tabs too). A summary without its cookie, past its day, or whose bookings are over is forgotten. |
 | `scripts/cart.js` | The cart without UI: `addToCart(item)` (the type's adapter, the cart's rules, the API), `refreshCart()`, `removeFromCart(catalogueCode)`, `registerAdapter(type, adapter)`. One add at a time. |
-| `scripts/mini-cart.js` + `styles/cart.css` | The UI in the site's dialog (`modal-dialog.js`): the mini cart, Checkout Cart, the remove confirmation, the failure message. `addAndShow(item, trigger)`, `openMiniCart(trigger)`. |
+| `scripts/mini-cart.js` + `styles/cart.css` | The UI in the site's dialog (`modal-dialog.js`, with its `static` content and `stack` options): the mini cart, Checkout Cart, the remove confirmation (stacked over the mini cart), the failure message; the site's loader (`scripts/loader.js`) while the booking system answers. `addAndShow(item, trigger)`, `openMiniCart(trigger)`. |
 | `scripts/scripts.js` | `installCart()`: what the blocks announce → the cart (`CART_EVENTS`: `booking-widget:book` is a `lounge`), and `cart:remove` (`detail.catalogueCode`). The cart's code loads on the first product. |
 | `blocks/header` | The count on the cart icon; the icon opens the mini cart when the cart holds something. |
 | `blocks/booking-widget` (lounge card) | Book Now announces `booking-widget:book` (the choice, `catalogueCode`, `currency`, the names and price); Remove From Cart announces `cart:remove`. |

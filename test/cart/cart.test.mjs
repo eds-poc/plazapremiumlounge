@@ -34,10 +34,12 @@ async function openHome({
     extraRoute: async (p) => {
       if (init) await p.addInitScript(init);
       await p.route(/ppg-app\/getGeoLocation/, async (r) => {
-        const resp = await r.fetch();
-        const body = await resp.json();
-        body.defaultOption = null;
-        await r.fulfill({ response: resp, body: JSON.stringify(body) });
+        try {
+          const resp = await r.fetch();
+          const body = await resp.json();
+          body.defaultOption = null;
+          await r.fulfill({ response: resp, body: JSON.stringify(body) });
+        } catch { /* (the page closed meanwhile) */ }
       });
       await p.route(/ppg-app\/getbookingwidgetproducts/, (r) => (r.request().method() === 'POST' ? r.fulfill(json(PRODUCTS)) : r.fallback()));
       await p.route(/ppg-app\/cart(\?|$)/, async (r) => {
@@ -80,9 +82,10 @@ async function pick(page, code = 'HKG') {
 
 const state = (page) => page.evaluate(() => ({
   badge: document.querySelector('header .header-cart-count:not([hidden])')?.textContent || null,
+  badgeShown: !!document.querySelector('header .header-cart-count') && getComputedStyle(document.querySelector('header .header-cart-count')).display !== 'none',
   label: document.querySelector('header a.header-utility .icon-cart')?.closest('a')?.getAttribute('aria-label'),
   book: document.querySelector('.booking-widget-card-book')?.textContent,
-  open: [...document.querySelectorAll('dialog.modal[open]')].map((d) => d.className.replace('modal ', '')),
+  open: [...document.querySelectorAll('dialog.modal[open]')].map((d) => [...d.classList].find((c) => /^(mini-)?cart-/.test(c))),
   cookie: document.cookie.match(/cartid=([^;]+)/)?.[1] || null,
   stored: JSON.parse(localStorage.getItem('ppl-cart') || 'null'),
 }));
@@ -106,20 +109,27 @@ async function addFlow(width) {
   const page = await openHome({ width });
   await pick(page);
   await page.locator('.booking-widget-card-book').click();
-  const disabled = await page.evaluate(() => document.querySelector('.booking-widget-card-book').disabled);
+  await page.waitForSelector('#spinner-overlay', { state: 'attached', timeout: 3000 }).catch(() => {});
+  const during = await page.evaluate(() => {
+    const b = document.querySelector('.booking-widget-card-book');
+    const l = document.getElementById('spinner-overlay');
+    return { disabled: b.disabled, aria: b.getAttribute('aria-disabled'), loader: !!l && getComputedStyle(l).display !== 'none' };
+  });
   await page.waitForSelector('dialog.mini-cart-modal[open]', { timeout: 15000 });
   await page.waitForTimeout(600);
   const s = await state(page);
+  const loaderAfter = await page.evaluate(() => !!document.getElementById('spinner-overlay'));
   const [body] = page.api.posts;
   const choice = await page.evaluate((w) => ({ date: new FormData(document.querySelector(`${w} form`)).get('date'), time: new FormData(document.querySelector(`${w} form`)).get('time') }), W);
-  check(`${width} add: Book Now disabled while adding`, disabled === true);
+  check(`${width} add: Book Now disabled (aria-disabled) and the site's loader while adding, as live`, during.disabled === true && during.aria === 'true' && during.loader, JSON.stringify(during));
+  check(`${width} add: the loader gone with the mini cart`, !loaderAfter);
   check(`${width} add: one POST, the API's body`, page.api.posts.length === 1 && body.currency === 'USD' && body.pointOfPurchase === 'Online' && body.channel === 'B2C' && body.isThirdPartyFulfilment === false
       && body.products.length === 1 && body.products[0].catalogueCode === CODE && body.products[0].quantity === 1
       && body.products[0].startDate === `${choice.date} ${choice.time.slice(0, 2)}:${choice.time.slice(2)}:00`
       && JSON.stringify(body.products[0].guestsCount) === '{"adult":"1","child":"0"}', JSON.stringify(body));
   check(`${width} add: then one GET ?cartId=&locale=en`, page.api.gets.length === 1 && /cartId=CRT_TEST1&locale=en$/.test(page.api.gets[0]), page.api.gets.join(' '));
   check(`${width} add: cookie and summary kept`, s.cookie === 'CRT_TEST1' && s.stored?.cartId === 'CRT_TEST1' && s.stored.lines[0].catalogueCode === CODE && s.stored.expires > Date.now() + 23 * 3600e3, JSON.stringify({ cookie: s.cookie, id: s.stored?.cartId }));
-  check(`${width} add: header count 1 (screen readers too)`, s.badge === '1' && /Cart, 1 item\(s\)/.test(s.label), `${s.badge} | ${s.label}`);
+  check(`${width} add: header count 1 ${width >= 1200 ? 'shown' : 'not shown on this header (as live)'}, for screen readers too`, s.badge === '1' && s.badgeShown === (width >= 1200) && /Cart, 1 item\(s\)/.test(s.label), `${s.badge} shown=${s.badgeShown} | ${s.label}`);
   check(`${width} add: the card's button is Remove From Cart`, s.book === 'Remove From Cart', s.book);
   const m = await miniText(page);
   console.log('  mini cart', JSON.stringify(m));
@@ -137,10 +147,17 @@ async function addFlow(width) {
     setTimeout(() => resolve(got), 200);
   }));
   check(`${width} Check Out and Edit announce cart:checkout / cart:edit`, JSON.stringify(announced) === '["cart:checkout:CRT_TEST1","cart:edit:CRT_TEST1"]' && new URL(page.url()).pathname === '/en-uk/', JSON.stringify(announced));
-  // Escape: closed, focus back on the card's button
+  // as live (static): Esc and a click beside it don't close it; ✕ does, focus back on the button
   await page.keyboard.press('Escape');
   await page.waitForTimeout(400);
-  check(`${width} Escape closes it, focus back on the card's button`, (await state(page)).open.length === 0 && await page.evaluate(() => document.activeElement?.classList.contains('booking-widget-card-book')));
+  const afterEsc = (await state(page)).open;
+  await page.mouse.click(width >= 768 ? 100 : 187, width >= 768 ? 450 : 880 - 60);
+  await page.waitForTimeout(400);
+  const afterClick = (await state(page)).open;
+  check(`${width} Esc and a click beside it: still open (as live)`, JSON.stringify(afterEsc) === '["mini-cart-modal"]' && JSON.stringify(afterClick) === '["mini-cart-modal"]', JSON.stringify([afterEsc, afterClick]));
+  await page.locator('dialog.mini-cart-modal[open] .modal-close').click();
+  await page.waitForTimeout(400);
+  check(`${width} ✕ closes it, focus back on the card's button`, (await state(page)).open.length === 0 && await page.evaluate(() => document.activeElement?.classList.contains('booking-widget-card-book')));
 
   // another product while the cart holds a booking: Checkout Cart, no request
   await page.evaluate(() => {
@@ -157,7 +174,10 @@ async function addFlow(width) {
   })));
   await page.waitForSelector('dialog.cart-message-modal[open]', { timeout: 10000 });
   const cf = await page.evaluate(() => document.querySelector('dialog.cart-message-modal[open]').textContent.replace(/\s+/g, ' ').trim());
-  check(`${width} a second booking: Checkout Cart, no request`, cf === 'Checkout CartPlease proceed to checkout before adding new item into cart.View Cart' && page.api.posts.length === 1, cf);
+  check(`${width} a second booking: the cart read first (GET), then Checkout Cart, no POST`, cf === 'Checkout CartPlease proceed to checkout before adding new item into cart.View Cart' && page.api.posts.length === 1 && page.api.gets.length === 2, `${cf} | gets ${page.api.gets.length}`);
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
+  check(`${width} Checkout Cart: Esc doesn't close it (as live)`, JSON.stringify((await state(page)).open) === '["cart-message-modal"]');
   await page.locator('dialog.cart-message-modal[open] .cart-button').click();
   await page.waitForSelector('dialog.mini-cart-modal[open]', { timeout: 5000 });
   check(`${width} View Cart opens the mini cart`, JSON.stringify((await state(page)).open) === '["mini-cart-modal"]');
@@ -166,16 +186,30 @@ async function addFlow(width) {
   await page.locator('dialog.mini-cart-modal[open] .mini-cart-remove').click();
   await page.waitForSelector('dialog.cart-confirm-modal[open]');
   const cq = await page.evaluate(() => document.querySelector('dialog.cart-confirm-modal[open] .cart-confirm-message').textContent);
-  check(`${width} ⊗: the confirmation`, cq === 'Would you like to remove this order from the shopping cart?Lounge Experience - 2 hrs', cq);
+  const both = (await state(page)).open;
+  check(`${width} ⊗: the confirmation, over the mini cart (as live)`, cq === 'Would you like to remove this order from the shopping cart?Lounge Experience - 2 hrs' && JSON.stringify(both) === '["mini-cart-modal","cart-confirm-modal"]', `${cq} | ${JSON.stringify(both)}`);
+  const look = await page.evaluate(() => {
+    const [cancel, yes] = document.querySelectorAll('dialog.cart-confirm-modal .cart-confirm-actions .cart-button');
+    const c = getComputedStyle(cancel); const y = getComputedStyle(yes);
+    return [c.backgroundColor, c.color, y.backgroundColor, y.color, getComputedStyle(document.querySelector('.cart-confirm-actions')).borderTopColor];
+  });
+  check(`${width} the confirmation's buttons and footer line (as live)`, JSON.stringify(look) === '["rgb(104, 18, 53)","rgb(255, 255, 255)","rgba(104, 18, 53, 0.1)","rgb(83, 14, 42)","rgb(222, 226, 230)"]', JSON.stringify(look));
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
+  check(`${width} the confirmation: Esc doesn't close it (as live)`, (await state(page)).open.includes('cart-confirm-modal'));
   await page.locator('dialog.cart-confirm-modal[open] .cart-button', { hasText: 'Cancel' }).click();
-  await page.waitForSelector('dialog.mini-cart-modal[open]');
-  check(`${width} Cancel: back to the mini cart, still in the cart`, (await state(page)).cookie === 'CRT_TEST1');
+  await page.waitForTimeout(400);
+  check(`${width} Cancel: only the confirmation closes, still in the cart`, JSON.stringify((await state(page)).open) === '["mini-cart-modal"]' && (await state(page)).cookie === 'CRT_TEST1', JSON.stringify((await state(page)).open));
   await page.locator('dialog.mini-cart-modal[open] .mini-cart-remove').click();
   await page.waitForSelector('dialog.cart-confirm-modal[open]');
+  await page.evaluate(() => window.addEventListener('pagehide', () => sessionStorage.setItem('loaderAtUnload', String(!!document.getElementById('spinner-overlay')))));
+  const reloaded = page.waitForEvent('load', { timeout: 20000 });
   await page.locator('dialog.cart-confirm-modal[open] .cart-button', { hasText: 'Yes' }).click();
-  await page.waitForTimeout(800);
+  await reloaded;
+  await page.waitForTimeout(1500);
+  const loaderOnYes = await page.evaluate(() => sessionStorage.getItem('loaderAtUnload') === 'true');
   const gone = await state(page);
-  check(`${width} Yes: out of the cart (cookie, summary, count, the card's Book Now), closed`, !gone.cookie && !gone.stored && !gone.badge && gone.label === 'Cart' && gone.book === 'Book Now' && !gone.open.length, JSON.stringify(gone));
+  check(`${width} Yes: the loader, the page loads again (as live), out of the cart`, loaderOnYes && !gone.cookie && !gone.stored && !gone.badge && gone.label === 'Cart' && !gone.open.length, JSON.stringify(gone));
   check(`${width} no page errors`, !page.errors.length, page.errors.join(' | '));
   await page.close();
 }
@@ -189,7 +223,7 @@ for (const width of WIDTHS) await addFlow(width);
   await page.waitForSelector('dialog.mini-cart-modal[open]', { timeout: 15000 });
   await page.waitForTimeout(800);
   check('double click on Book Now: one POST', page.api.posts.length === 1, `${page.api.posts.length}`);
-  await page.keyboard.press('Escape');
+  await page.locator('dialog.mini-cart-modal[open] .modal-close').click();
   await page.locator('.booking-widget-card-book').click();
   await page.waitForTimeout(600);
   const s = await state(page);
@@ -241,6 +275,9 @@ for (const [name, post] of [
 
 // a stored cart: the count at once, no request; the icon opens the mini cart (and reads the cart)
 const stored = (extra = {}) => `(() => {
+  // (once per tab: not again when the page loads again, e.g. after Yes)
+  if (sessionStorage.getItem('cart-seeded')) return;
+  sessionStorage.setItem('cart-seeded', '1');
   document.cookie = 'cartid=CRT_KEPT; path=/';
   localStorage.setItem('ppl-cart', JSON.stringify(Object.assign({
     cartId: 'CRT_KEPT', currency: 'HKD', expires: Date.now() + 3600e3,
@@ -271,7 +308,9 @@ const stored = (extra = {}) => `(() => {
   await page.locator('header a.header-utility:has(.icon-cart)').first().click();
   await page.waitForSelector('dialog.mini-cart-modal[open]', { timeout: 10000 });
   await page.locator('dialog.mini-cart-modal[open] .mini-cart-remove').click();
+  const reloaded = page.waitForEvent('load', { timeout: 20000 });
   await page.locator('dialog.cart-confirm-modal[open] .cart-button', { hasText: 'Yes' }).click();
+  await reloaded;
   await page.waitForTimeout(2500);
   const s = await state(page);
   check('removed while the cart is being read: stays removed', !s.cookie && !s.stored && !s.badge, JSON.stringify(s));
@@ -353,7 +392,7 @@ if (process.env.AXE_CORE) {
     await axe(page, `${width} remove confirmation`);
     await page.locator('dialog.cart-confirm-modal[open] .cart-button', { hasText: 'Cancel' }).click();
     await page.waitForSelector('dialog.mini-cart-modal[open]');
-    await page.keyboard.press('Escape');
+    await page.locator('dialog.mini-cart-modal[open] .modal-close').click();
     await page.evaluate(() => document.dispatchEvent(new CustomEvent('booking-widget:book', {
       detail: {
         catalogueCode: 'PRD1-Regular-X', date: '2099-01-01', time: '1500', adult: '1', children: '0', currency: 'USD',
