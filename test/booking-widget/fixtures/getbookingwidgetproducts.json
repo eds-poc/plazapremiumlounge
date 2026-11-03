@@ -1,0 +1,324 @@
+{
+  "address": "Airside, International Terminal, Located on after second security check and second floor on the left side, Adnan Menderes International Airport, Izmir, Turkey",
+  "defaultCurrency": "USD",
+  "email": "turkey@plaza-network.com",
+  "factSheetUrls": [],
+  "features": [
+    {
+      "image": "https://img.plazapremiumlounge.com/static_images/feature_images/Accessible_washroom.png",
+      "name": "Accessible washroom"
+    },
+    {
+      "image": "https://img.plazapremiumlounge.com/static_images/feature_images/Bar.png",
+      "name": "Bar"
+    },
+    {
+      "image": "https://img.plazapremiumlounge.com/static_images/feature_images/Charging_Station.png",
+      "name": "Charging Station"
+    },
+    {
+      "image": "https://img.plazapremiumlounge.com/static_images/feature_images/Flight_Information.png",
+      "name": "Flight Information"
+    },
+    {
+      "image": "https://img.plazapremiumlounge.com/static_images/feature_images/Food_and_Beverage.png",
+      "name": "Food & Beverage"
+    },
+    {
+      "image": "https://img.plazapremiumlounge.com/static_images/feature_images/Lounge_Chairs.png",
+      "name": "Lounge Chairs/ Bay"
+    },
+    {
+      "image": "https://img.plazapremiumlounge.com/static_images/feature_images/Lounge_Chairs.png",
+      "name": "Newspapers / Magazines"
+    },
+    {
+      "image": "https://img.plazapremiumlounge.com/static_images/feature_images/Lounge_Chairs.png",
+      "name": "Nursing Room"
+    },
+    {
+      "image": "https://img.plazapremiumlounge.com/static_images/feature_images/WiFi.png",
+      "name": "Wi-Fi"
+    }
+  ],
+  "images": [
+    {
+      "name": "Primeclass_Int_Dep_thumb.jpg",
+      "path": "https://img.plazapremiumlounge.com/static_images/prop_images/Primeclass_Int_Dep_thumb_property_1101.jpg"
+    },
+    {
+      "name": "Primeclass_Int_Dep_1.jpg",
+      "path": "https://img.plazapremiumlounge.com/static_images/prop_images/Primeclass_Int_Dep_1_property_1101.jpg"
+    },
+    {
+      "name": "WebPrimeclass_Int_Dep_2.jpg",
+      "path": "https://img.plazapremiumlounge.com/static_images/prop_images/WebPrimeclass_Int_Dep_2_property_1101.jpg"
+    },
+    {
+      "name": "Primeclass_Int_Dep_3.jpg",
+      "path": "https://img.plazapremiumlounge.com/static_images/prop_images/Primeclass_Int_Dep_3_property_1101.jpg"
+    }
+  ],
+  "isTecoEnabled": true,
+  "itemCount": 1,
+  "itemGroups": [
+    {
+      "items": [
+        {
+          "accuralPoints": "",
+          "additionalAttributes": null,
+          "arrtureSku": "",
+          "availability": true,
+          "basedOn": "Per Person",
+          "classValue": null,
+          "createdDate": "2026-04-28 14:18:36",
+          "giftCardName": "",
+          "images": [
+            {
+              "name": "SDS_Lou_Int_Dep_New_Int_T_Top.jpg",
+              "path": "https://img.plazapremiumlounge.com/static_images/prd_images/SDS_Lou_Int_Dep_New_Int_T_Top.jpg"
+            }
+          ],
+          "isFlightNumberMandatory": false,
+          "isPromoRejected": null,
+          "isStLoginMandatory": false,
+          "isThirdPartyFulfilment": false,
+          "journeyTypes": [],
+          "lastModifiedDate": "2026-04-28 18:44:28",
+          "locations": [
+            {
+              "countryCode": "NG",
+              "countryName": "Nigeria",
+              "locationCode": "LCTN994",
+              "locationName": "Nnamdi Azikiwe International Airport",
+              "properties": [
+                {
+                  "code": "PRPRTY1343",
+                  "description": "\n<br />\nSDS Departure and Arrival Lounge is a shining example of elite exclusivity in a refined setting, allowing arriving passengers to relax while waiting for their transportation or the next leg of their journey.<br />\n<br />\nThis lounge is owned and managed by a third party operator.<br />\n&nbsp;",
+                  "name": "SDS Lounge (International Departure)",
+                  "propertyType": "Lounge",
+                  "propertyTypeCode": "LOUNGE"
+                }
+              ]
+            }
+          ],
+          "masNoOfProductsAllowed": 10,
+          "maxAdults": 0,
+          "maxChildrens": 0,
+          "maxOccupancy": 0,
+          "minOccupancy": 0,
+          "numberOfVists": 0,
+          "packages": [],
+          "passCategory": null,
+          "prices": [
+            {
+              "additionalCharges": [],
+              "availableInventory": 20,
+              "basePrice": 50,
+              "basePriceUsd": null,
+              "basePriceUsdCaps": null,
+              "basePriceWithDiscount": 50,
+              "baseRate": [
+                {
+                  "currency": "USD",
+                  "groups": "adult",
+                  "price": 50,
+                  "priceWithMarkup": 50
+                },
+                {
+                  "currency": "USD",
+                  "groups": "child",
+                  "price": 0,
+                  "priceWithMarkup": 0
+                }
+              ],
+              "catalogueCode": "PRD2983-Regular-PRPRTY1343-LOUNGE-LCTN994-RTPLN9640",
+              "discounts": [],
+              "endDate": null,
+              "isMinimumAmountMet": true,
+              "isSTRatePlan": false,
+              "priceCode": "RTPLN9640",
+              "priceName": "Standard - 3rd Party Lounge",
+              "promocode": null,
+              "startDate": "2025-12-16",
+              "taxes": [],
+              "termsPolicies": [
+                {
+                  "description": "<p>Cancellation/ amendments may be made up to 6 hours before the indicated arrival time. A fee of USD10 per person is payable.</p>\n<p>Late cancellation and/ or failure to arrive at the facility will be considered as No Show and the booking will not be refunded. Please refer to our full <a href=\"https://www.plazapremiumlounge.com/en-uk/terms-and-conditions\" target=\" _blank\">Terms & Conditions</a>.</p>\n<p>Amendments are also subject to payment of price difference, if any.</p>\n<p>Lounge access is subject to capacity at the time of your arrival. While your booking confirms your eligibility, it does not guarantee immediate seating.</p>",
+                  "termsCode": "SLSTRM58",
+                  "termsName": "LOUNGE - TERMS AND CONDITIONS"
+                },
+                {
+                  "description": "<ul>SERVICE AND LOCATION\n<li>Guests must make sure that the area of their selected service location matches the area of the airport/ terminal where their flight will depart. For example, passengers departing for Domestic Departures will not be able to use our service locations in International Departures. For North American airports, passengers departing from the U.S. Transborder or U.S. Departures areas will not be able access our service locations in Domestic or International Departures. Please contact your airline to verify your flight departure/ terminal details.</li>\n<li>Departures/Transit lounges are located in the restricted area of the airport. Guests must be in possession of a valid onward boarding pass and travel documents to access the lounge. Departing passengers will need to pass through immigration and customs before proceeding to the departure lounge. Transit passengers must possess an onward boarding pass (please contact your airline for onward boarding pass details).</li>\n<li>Arrival lounges are located outside the restricted area. Guests must be in possession of valid travel documents to clear security and enter the country, where applicable, in order to access the lounge.</li>\n<li>Shower usage (for lounge packages) is subject to availability and on a first-come-first-served basis. Guests who wish to use the shower must register with the lounge reception.</li></ul>\n\n<ul>CHILD POLICY\n<li>Children under the age of two (2) may enjoy complimentary access/use.</li>\n<li>Discounted fee is available for children between two (2) and eleven (11) years old. Discounted fees differ by facilities and location</li>\n<li>Full fee is payable for guests aged twelve (12) and above.</li>\n<li>All children must be accompanied at all times by an adult who is at least 18 years old.</li></ul>\n\n<ul>TRANSACTION FEE\n<li>A transaction fee (“Fee”) could be imposed on your total transaction amount by the card issuing bank. You shall be solely liable to pay the Fee. We are not responsible for any liabilities arising from non-payment of Fee.</li></ul>",
+                  "termsCode": "SLSTRM52",
+                  "termsName": "GENERAL - TERMS AND CONDITIONS"
+                }
+              ],
+              "totalPrice": 50,
+              "totalPriceUsd": null,
+              "totalPriceUsdCaps": null,
+              "totalPromocodeAmount": null
+            }
+          ],
+          "productCategory": null,
+          "productCode": "PRD2983",
+          "productDescription": "Lounge Use - 3 Hours",
+          "productDisplayName": "Lounge Use - 3 Hours",
+          "productDurationInMinutes": 180,
+          "productName": "Lounge Use - 3 Hours",
+          "productSeq": 0,
+          "productType": "Regular",
+          "productVarients": [
+            {
+              "mandatory": true,
+              "name": "Duration",
+              "value": "3 hours"
+            }
+          ],
+          "quantityLabel": "",
+          "serviceCode": "SRVC334",
+          "serviceDisplayName": "Lounge",
+          "serviceName": "Lounge",
+          "serviceType": "Per Person",
+          "shortProductDescription": "Lounge Use - 3 Hours"
+        }
+      ],
+      "serviceDisplayName": "Lounge",
+      "serviceType": "SRVC334"
+    }
+  ],
+  "items": [
+    {
+      "accuralPoints": "",
+      "additionalAttributes": null,
+      "arrtureSku": "",
+      "availability": true,
+      "basedOn": "Per Person",
+      "classValue": null,
+      "createdDate": "2026-04-28 14:18:36",
+      "giftCardName": "",
+      "images": [
+        {
+          "name": "SDS_Lou_Int_Dep_New_Int_T_Top.jpg",
+          "path": "https://img.plazapremiumlounge.com/static_images/prd_images/SDS_Lou_Int_Dep_New_Int_T_Top.jpg"
+        }
+      ],
+      "isFlightNumberMandatory": false,
+      "isPromoRejected": null,
+      "isStLoginMandatory": false,
+      "isThirdPartyFulfilment": false,
+      "journeyTypes": [],
+      "lastModifiedDate": "2026-04-28 18:44:28",
+      "locations": [
+        {
+          "countryCode": "NG",
+          "countryName": "Nigeria",
+          "locationCode": "LCTN994",
+          "locationName": "Nnamdi Azikiwe International Airport",
+          "properties": [
+            {
+              "code": "PRPRTY1343",
+              "description": "\n<br />\nSDS Departure and Arrival Lounge is a shining example of elite exclusivity in a refined setting, allowing arriving passengers to relax while waiting for their transportation or the next leg of their journey.<br />\n<br />\nThis lounge is owned and managed by a third party operator.<br />\n&nbsp;",
+              "name": "SDS Lounge (International Departure)",
+              "propertyType": "Lounge",
+              "propertyTypeCode": "LOUNGE"
+            }
+          ]
+        }
+      ],
+      "masNoOfProductsAllowed": 10,
+      "maxAdults": 0,
+      "maxChildrens": 0,
+      "maxOccupancy": 0,
+      "minOccupancy": 0,
+      "numberOfVists": 0,
+      "packages": [],
+      "passCategory": null,
+      "prices": [
+        {
+          "additionalCharges": [],
+          "availableInventory": 20,
+          "basePrice": 50,
+          "basePriceUsd": null,
+          "basePriceUsdCaps": null,
+          "basePriceWithDiscount": 50,
+          "baseRate": [
+            {
+              "currency": "USD",
+              "groups": "adult",
+              "price": 50,
+              "priceWithMarkup": 50
+            },
+            {
+              "currency": "USD",
+              "groups": "child",
+              "price": 0,
+              "priceWithMarkup": 0
+            }
+          ],
+          "catalogueCode": "PRD2983-Regular-PRPRTY1343-LOUNGE-LCTN994-RTPLN9640",
+          "discounts": [],
+          "endDate": null,
+          "isMinimumAmountMet": true,
+          "isSTRatePlan": false,
+          "priceCode": "RTPLN9640",
+          "priceName": "Standard - 3rd Party Lounge",
+          "promocode": null,
+          "startDate": "2025-12-16",
+          "taxes": [],
+          "termsPolicies": [
+            {
+              "description": "<p>Cancellation/ amendments may be made up to 6 hours before the indicated arrival time. A fee of USD10 per person is payable.</p>\n<p>Late cancellation and/ or failure to arrive at the facility will be considered as No Show and the booking will not be refunded. Please refer to our full <a href=\"https://www.plazapremiumlounge.com/en-uk/terms-and-conditions\" target=\" _blank\">Terms & Conditions</a>.</p>\n<p>Amendments are also subject to payment of price difference, if any.</p>\n<p>Lounge access is subject to capacity at the time of your arrival. While your booking confirms your eligibility, it does not guarantee immediate seating.</p>",
+              "termsCode": "SLSTRM58",
+              "termsName": "LOUNGE - TERMS AND CONDITIONS"
+            },
+            {
+              "description": "<ul>SERVICE AND LOCATION\n<li>Guests must make sure that the area of their selected service location matches the area of the airport/ terminal where their flight will depart. For example, passengers departing for Domestic Departures will not be able to use our service locations in International Departures. For North American airports, passengers departing from the U.S. Transborder or U.S. Departures areas will not be able access our service locations in Domestic or International Departures. Please contact your airline to verify your flight departure/ terminal details.</li>\n<li>Departures/Transit lounges are located in the restricted area of the airport. Guests must be in possession of a valid onward boarding pass and travel documents to access the lounge. Departing passengers will need to pass through immigration and customs before proceeding to the departure lounge. Transit passengers must possess an onward boarding pass (please contact your airline for onward boarding pass details).</li>\n<li>Arrival lounges are located outside the restricted area. Guests must be in possession of valid travel documents to clear security and enter the country, where applicable, in order to access the lounge.</li>\n<li>Shower usage (for lounge packages) is subject to availability and on a first-come-first-served basis. Guests who wish to use the shower must register with the lounge reception.</li></ul>\n\n<ul>CHILD POLICY\n<li>Children under the age of two (2) may enjoy complimentary access/use.</li>\n<li>Discounted fee is available for children between two (2) and eleven (11) years old. Discounted fees differ by facilities and location</li>\n<li>Full fee is payable for guests aged twelve (12) and above.</li>\n<li>All children must be accompanied at all times by an adult who is at least 18 years old.</li></ul>\n\n<ul>TRANSACTION FEE\n<li>A transaction fee (“Fee”) could be imposed on your total transaction amount by the card issuing bank. You shall be solely liable to pay the Fee. We are not responsible for any liabilities arising from non-payment of Fee.</li></ul>",
+              "termsCode": "SLSTRM52",
+              "termsName": "GENERAL - TERMS AND CONDITIONS"
+            }
+          ],
+          "totalPrice": 50,
+          "totalPriceUsd": null,
+          "totalPriceUsdCaps": null,
+          "totalPromocodeAmount": null
+        }
+      ],
+      "productCategory": null,
+      "productCode": "PRD2983",
+      "productDescription": "Lounge Use - 3 Hours",
+      "productDisplayName": "Lounge Use - 3 Hours",
+      "productDurationInMinutes": 180,
+      "productName": "Lounge Use - 3 Hours",
+      "productSeq": 0,
+      "productType": "Regular",
+      "productVarients": [
+        {
+          "mandatory": true,
+          "name": "Duration",
+          "value": "3 hours"
+        }
+      ],
+      "quantityLabel": "",
+      "serviceCode": "SRVC334",
+      "serviceDisplayName": "Lounge",
+      "serviceName": "Lounge",
+      "serviceType": "Per Person",
+      "shortProductDescription": "Lounge Use - 3 Hours"
+    }
+  ],
+  "lmsOutletCode": "11132",
+  "locationDisplayName": "Nnamdi Azikiwe International Airport",
+  "locationName": "Adnan Menderes International Airport",
+  "loungeDescription": "<p>The Lounge at Izmir Adnan Menderes Airport offers 24/7 service, a rich buffet, fast Wi-Fi, and modern seating for a stylish and relaxing break.<br><br>This lounge is owned and managed by a third party operator.</p>",
+  "loungePropertyCount": 1,
+  "message": "OK",
+  "operatingHours": "24 Hours Daily",
+  "phone": "+852 (HK) 5700 5329",
+  "productApiError": null,
+  "propertyCode": "PRPRTY1343",
+  "propertyCurrencyCode": "USD",
+  "propertyDisplayName": "SDS Lounge",
+  "shortLocation": "International Departure",
+  "statusCode": "200"
+}

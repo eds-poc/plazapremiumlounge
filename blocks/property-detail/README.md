@@ -67,7 +67,7 @@ shared. Lounge cards in the [Property List](../property-list/README.md) link her
   The + and − buttons stop at the limits (they look the same, as the source's). Fewer adults
   take the children down with them (3 adults + 6 children, then 2 adults: 2 + 4). A typed count
   is held to the limits as it's typed, and an emptied field goes back to the least it can be.
-- **Date:** the source's calendar (`date-picker.js`): one month, previous and next, days before
+- **Date:** the source's calendar (`scripts/date-picker.js`, shared with the [Booking Widget](../booking-widget/README.md)): one month, previous and next, days before
   the first bookable one faded and unavailable, no last day. On desktop it pops up under the date
   (with a "Date" title and close) and closes on a pick, Escape, close or a click outside; in the
   phone's Book Your Visit dialog it's always open under the date. Month names, weekdays and the
