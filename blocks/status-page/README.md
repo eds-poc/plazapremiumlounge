@@ -23,6 +23,17 @@ The parts can also be split over several rows or cells; the block reads them in 
 line with an image is the image, the first heading is the title, everything else is the text. A
 part left out isn't shown (no empty space).
 
+## Adding the icon in DA
+
+1. Click in the Status Page cell, on the first line (above the title).
+2. Insert the image (drag the file in, or use the editor's image option). DA keeps it in the
+   page's hidden folder, e.g. `en-uk/.500/` for `en-uk/500`.
+3. Give the image its alt text (e.g. "Internal Server Error").
+4. Keep the order: the image, the title as Heading 1, then the paragraphs. Preview the page.
+
+SVG and PNG both work; the icon shows 81px wide whatever its file size. To replace it, delete the
+image in the cell, insert the new one, set its alt text and preview again.
+
 ## Examples
 
 **404** (`/en-uk/404`)

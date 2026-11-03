@@ -4,6 +4,7 @@
  * and the text (paragraphs, links). The block fills its section in the brand maroon.
  */
 const HEADINGS = 'h1, h2, h3, h4, h5, h6';
+const IMAGES = 'picture, img';
 
 /**
  * Creates an element with an optional class name.
@@ -30,7 +31,19 @@ function readLines(block) {
       return [Object.assign(el('p'), { textContent: cell.textContent.trim() })];
     }
     return children;
-  }).filter((line) => line.textContent.trim() || line.querySelector('picture, img'));
+  }).filter((line) => line.textContent.trim()
+    || line.matches(IMAGES) || line.querySelector(IMAGES));
+}
+
+/**
+ * The image of a line: the line itself (a picture or an image straight in the cell), else the
+ * picture or image in it (e.g. in a paragraph); null when it has none.
+ * @param {Element} line
+ * @returns {Element|null}
+ */
+function imageOf(line) {
+  if (line.matches(IMAGES)) return line;
+  return line.querySelector('picture') || line.querySelector('img');
 }
 
 /**
@@ -42,7 +55,7 @@ function readLines(block) {
  */
 export default function decorate(block) {
   const lines = readLines(block);
-  const imageLine = lines.find((line) => line.querySelector('picture, img'));
+  const imageLine = lines.find(imageOf);
   const others = lines.filter((line) => line !== imageLine);
   let title = others.find((line) => line.matches(HEADINGS));
   if (!title && others.length) {
@@ -54,7 +67,7 @@ export default function decorate(block) {
   const notice = el('div', 'status-page-notice');
   if (imageLine) {
     const image = el('div', 'status-page-image');
-    image.append(imageLine.querySelector('picture') || imageLine.querySelector('img'));
+    image.append(imageOf(imageLine));
     notice.append(image);
   }
   if (title) {
