@@ -17,7 +17,8 @@ const BOOKING_ENDPOINTS = {
   // photos, features) and its products with prices, grouped by service (POST, JSON body)
   bookingWidgetProducts: '/api/v1/web/ppg-app/getbookingwidgetproducts',
   // the cart: POST (JSON: currency, products, pointOfPurchase, channel, isThirdPartyFulfilment)
-  // creates a cart with the products and answers its cartId; GET ?cartId=&locale= reads it
+  // creates a cart with the products and answers its cartId; GET ?cartId=&locale= reads it;
+  // DELETE ?cartId= deletes (empties) it
   cart: '/api/v1/web/ppg-app/cart',
 };
 

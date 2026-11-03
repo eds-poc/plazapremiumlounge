@@ -11,4 +11,4 @@ the routed GET carries what was posted).
 
 `node cart.test.mjs [width]` — the add, Checkout Cart, removing, a double click, failures, a cart
 made but not read back, a stored cart, removal during a read, expiry, BKNG001, another tab,
-zh-cn, axe (72 checks).
+zh-cn, removing through DELETE (the card, ⊗ → Yes, failures, CRT_ERR_004), axe (78 checks).

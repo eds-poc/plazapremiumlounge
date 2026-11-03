@@ -41,14 +41,17 @@ function button(label, kind, onClick) {
   return b;
 }
 
+// the source's amounts, in every language: "HKD 1,755.00"
+const AMOUNT = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
 /**
- * An amount as the source shows it: "GBP 44.10".
+ * An amount as the source shows it: "GBP 44.10", "HKD 1,755.00".
  * @param {number} amount
  * @param {string} currency
  * @returns {string}
  */
 function formatAmount(amount, currency) {
-  return Number.isFinite(amount) ? `${currency ? `${currency} ` : ''}${amount.toFixed(2)}` : '—';
+  return Number.isFinite(amount) ? `${currency ? `${currency} ` : ''}${AMOUNT.format(amount)}` : '—';
 }
 
 /**
@@ -67,14 +70,14 @@ function formatCartDate(start) {
 }
 
 /**
- * The guests as the source's cart: "2 Adult(s), 1 Child(ren)".
+ * The guests as the source's cart: "2 Adult(s) 1 Child(ren)" (its two values side by side).
  * @param {{adults: number, children: number}} line
  * @returns {string}
  */
 function formatGuests(line) {
   const parts = [`${line.adults} ${translate('propertyAdults')}`];
   if (line.children > 0) parts.push(`${line.children} ${translate('propertyChildren')}`);
-  return parts.join(', ');
+  return parts.join(' ');
 }
 
 /**
@@ -140,8 +143,9 @@ const confirm = new CartDialog('cart-remove', 'cart-confirm-modal', false);
 
 /**
  * The remove confirmation (the source's ⊗), over the mini cart: Cancel closes it (the mini cart
- * stays); Yes takes the booking out, then, as the source, the loader shows over the mini cart and
- * the page loads again.
+ * stays); Yes shows the loader over the mini cart while the booking system deletes the cart, then,
+ * as the source, the page loads again; a failure keeps the cart and the mini cart, with the
+ * source's message.
  * @param {Object} line
  * @param {HTMLElement} from The ⊗ (focus goes back there on Cancel)
  */
@@ -151,11 +155,18 @@ function confirmRemove(line, from) {
   const actions = el('div', 'cart-confirm-actions');
   actions.append(
     button(translate('cartCancel'), 'primary', () => confirm.dialog?.close()),
-    button(translate('cartYes'), 'soft', () => {
+    button(translate('cartYes'), 'soft', async () => {
       confirm.dialog?.close();
-      removeFromCart(line.catalogueCode, { quiet: true });
       showLoader();
-      window.location.reload();
+      const { status } = await removeFromCart(line.catalogueCode, { quiet: true });
+      if (status !== 'failed') {
+        window.location.reload();
+        return;
+      }
+      // (as the source: the mini cart stays, with the message)
+      hideLoader();
+      // eslint-disable-next-line no-use-before-define
+      showFailure('cartRemoveFailed', from, { stack: true });
     }),
   );
   confirm.fill('', [message, actions]);
@@ -290,16 +301,39 @@ export async function addAndShow(item, trigger) {
     checkoutFirst.fill(translate('cartCheckoutFirstTitle'), [el('p', '', translate('cartCheckoutFirst')), view]);
     await checkoutFirst.open(from);
   } else {
-    failure.fill(translate('cartTitle'), [el('p', '', translate('cartAddFailed'))]);
-    await failure.open(from);
+    // eslint-disable-next-line no-use-before-define
+    await showFailure('cartAddFailed', from);
   }
 }
 
 /**
- * Takes a product out at once (the lounge card's Remove From Cart, without a confirmation, as
- * the source's).
- * @param {string} catalogueCode
+ * A failure's message (the source's alert, in the site's dialog), e.g. "Unable to add to cart."
+ * @param {string} key The text's key
+ * @param {HTMLElement} [trigger]
+ * @param {{stack?: boolean}} [options] Over the open dialog (e.g. the mini cart)
  */
-export function removeAndShow(catalogueCode) {
-  removeFromCart(catalogueCode);
+async function showFailure(key, trigger, options) {
+  failure.fill(translate('cartTitle'), [el('p', '', translate(key))]);
+  await failure.open(trigger, options);
+}
+
+/**
+ * Takes a product out at once (the lounge card's Remove From Cart, without a confirmation, as
+ * the source's): the button off and the site's loader while the booking system deletes the cart;
+ * a failure keeps it, with the source's message.
+ * @param {string} catalogueCode
+ * @param {HTMLElement} [trigger] The button
+ */
+export async function removeAndShow(catalogueCode, trigger) {
+  const from = trigger instanceof Element ? trigger.closest('button, a') || trigger : null;
+  setBusy(from, true);
+  showLoader();
+  let result;
+  try {
+    result = await removeFromCart(catalogueCode);
+  } finally {
+    hideLoader();
+    setBusy(from, false);
+  }
+  if (result.status === 'failed') await showFailure('cartRemoveFailed', from);
 }

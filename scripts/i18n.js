@@ -597,6 +597,10 @@ const TEXTS = {
   cartAddFailed: {
     en: 'Unable to add to cart.', zh: '无法加入购物车。', 'zh-HK': '無法加入購物車。', ja: 'カートに追加できませんでした。', pt: 'Não foi possível adicionar ao carrinho.',
   },
+  // (the source's alert, English on every site)
+  cartRemoveFailed: {
+    en: 'Unable to remove from cart.', zh: '无法从购物车移除。', 'zh-HK': '無法從購物車移除。', ja: 'カートから削除できませんでした。', pt: 'Não foi possível remover do carrinho.',
+  },
   // the pass finder (the source's wording in English)
   passFinderSearch: {
     en: 'Search by pass name or location', zh: '按通行证名称或地点搜索', 'zh-HK': '按通行證名稱或地點搜尋', ja: 'パス名または場所で検索', pt: 'Pesquise por nome do passe ou local',

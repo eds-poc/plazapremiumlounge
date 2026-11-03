@@ -251,7 +251,21 @@ function installCart() {
     });
   });
   document.addEventListener('cart:remove', (e) => {
-    import('./mini-cart.js').then(({ removeAndShow }) => removeAndShow(e.detail?.catalogueCode));
+    // (as adding: the button off and the loader at once)
+    const from = e.target.closest?.('button');
+    if (from) {
+      from.disabled = true;
+      from.setAttribute('aria-disabled', 'true');
+    }
+    showLoader();
+    import('./mini-cart.js')
+      .then(({ removeAndShow }) => removeAndShow(e.detail?.catalogueCode, e.target))
+      .finally(() => {
+        hideLoader();
+        if (!from) return;
+        from.disabled = false;
+        from.removeAttribute('aria-disabled');
+      });
   });
 }
 

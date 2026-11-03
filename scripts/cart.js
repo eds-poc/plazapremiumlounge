@@ -1,10 +1,10 @@
 /*
  * The cart, without UI (see mini-cart.js): products go in through their type's adapter (only
  * lounges for now; lounge passes and others get their own adapter), after the cart's rules, as
- * the source's cart. The booking system's cart API makes a cart with the products (POST) and
- * reads it back (GET); there is no call yet to add to a cart or take an item out, so the cart
- * holds one booking, as the source's does for a lounge, and taking it out forgets the cart on
- * this site. The cart's id and a summary are kept by cart-state.js.
+ * the source's cart. The booking system's cart API makes a cart with the products (POST), reads
+ * it back (GET) and deletes it (DELETE); there is no call yet to add to a cart or take a single
+ * item out, so the cart holds one booking, as the source's does for a lounge, and taking it out
+ * deletes the cart. The cart's id and a summary are kept by cart-state.js.
  */
 import { getMetadata } from './aem.js';
 import apiUrl from './endpoints.js';
@@ -41,20 +41,22 @@ function apiLanguage() {
 }
 
 /**
- * Fetches the cart service's JSON (a POST with `body`), giving up after the timeout. A failure
- * (HTTP, network, not JSON, or the service's error object: `{ errorCode, message }`, or nested as
- * `{ error: { … } }`) rejects with an Error carrying `status` and the service's error as
- * `service`.
+ * Fetches the cart service's JSON (a POST with `body`; or `method`, e.g. DELETE), giving up after
+ * the timeout. A failure (HTTP, network, not JSON, or the service's error object: `{ errorCode,
+ * message }`, or nested as `{ error: { … } }`) rejects with an Error carrying `status` and the
+ * service's error as `service`.
  * @param {URL} url
  * @param {Object} [body]
+ * @param {string} [method]
  * @returns {Promise<Object>}
  */
-async function fetchJson(url, body) {
+async function fetchJson(url, body, method) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), CART_TIMEOUT_MS);
   try {
     const resp = await fetch(url, {
       signal: controller.signal,
+      ...(method && { method }),
       ...(body && {
         method: 'POST',
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
@@ -287,15 +289,48 @@ export function addToCart(item) {
 }
 
 /**
- * Takes a product out of the cart. The cart API has no call for that yet, so the cart (one
- * booking) is forgotten on this site.
+ * Deletes the cart in the booking system (DELETE ?cartId=; it empties the cart), then forgets it
+ * here. A cart the system doesn't know (CRT_ERR_004, or BKNG001) is gone already: forgotten too.
+ * Any other failure keeps it.
+ * @param {string} [cartId]
+ * @param {{quiet?: boolean}} [options] quiet: no `cart:change` (the page loads again next)
+ * @returns {Promise<{status: 'removed'|'failed', error?: Error}>}
+ */
+export async function deleteCart(cartId = getCartId(), { quiet = false } = {}) {
+  if (!cartId) return { status: 'removed' };
+  const url = apiUrl('cart');
+  url.searchParams.set('cartId', cartId);
+  try {
+    await fetchJson(url, undefined, 'DELETE');
+  } catch (error) {
+    if (!['CRT_ERR_004', 'BKNG001'].includes(error.service?.errorCode)) {
+      // eslint-disable-next-line no-console
+      console.error('cart: the cart was not deleted', error);
+      return { status: 'failed', error };
+    }
+  }
+  // (unless it's another cart by now)
+  if (getCartId() === cartId) forgetCart(!quiet);
+  return { status: 'removed' };
+}
+
+let removing = null;
+
+/**
+ * Takes a product out of the cart. The cart holds one booking and the booking system deletes
+ * carts (not single items yet), so the cart is deleted. One at a time: a second click while it's
+ * under way gets the same answer.
  * @param {string} catalogueCode
  * @param {{quiet?: boolean}} [options] quiet: no `cart:change` (the page loads again next)
- * @returns {boolean} Whether it was in the cart
+ * @returns {Promise<{status: 'removed'|'failed'|'absent', error?: Error}>} absent: it wasn't in
+ *   the cart
  */
 export function removeFromCart(catalogueCode, { quiet = false } = {}) {
+  if (removing) return removing;
   const cart = getCart();
-  if (!cart?.lines.some((line) => line.catalogueCode === catalogueCode)) return false;
-  forgetCart(!quiet);
-  return true;
+  if (!cart?.lines.some((line) => line.catalogueCode === catalogueCode)) {
+    return Promise.resolve({ status: 'absent' });
+  }
+  removing = deleteCart(cart.cartId, { quiet }).finally(() => { removing = null; });
+  return removing;
 }
