@@ -1,20 +1,22 @@
-/* status-page: the source's 404, 500 and Maintenance pages (`section.maroonBg`), measured at
-   375px, 768px, 992px, 1200px and 1440px: the section in the brand maroon with white text, its
-   padding the site's section padding (25px, 35px from 768px, 50px from 992px); a 720px high area
-   with, in its middle, a centred column of at most 800px: the 81px image, 20px, the title
-   (Polysans 32px/500, 60px from 1200px, 8px under it), 20px, the text (16px, 20px from 768px,
-   paragraphs 20px apart) */
+/* status-page: the source's 404, 500 and Maintenance pages (`section.maroonBg`), measured from
+   320px to 2560px. Mobile first:
+   - phones (the base rules): the section in the brand maroon with white text and the site's
+     section padding (25px); an area at least 720px high with, in its middle, a centred column
+     the width of the screen less the gutters: the 81px image, 20px, the title (Polysans 32px/500,
+     8px under it), 20px, the text (16px, paragraphs 20px apart);
+   - from 768px: the text 20px (the section padding 35px, from the site's tokens);
+   - from 992px: the section padding 50px (the site's tokens);
+   - from 1200px: the title 60px; the column at most 800px wherever it fits */
 main > .section.status-page-container {
   background-color: var(--color-brand-primary);
   color: var(--color-text-inverse);
 }
 
 .status-page {
-  /* one-off: the source's area height, image size and desktop title size */
+  /* one-off: the source's area height, column width and image size */
   --status-page-height: 720px;
   --status-page-width: 800px;
   --status-page-image-size: 81px;
-  --status-page-title-size: 60px;
 
   display: grid;
   place-items: center;
@@ -77,6 +79,7 @@ main > .section.status-page-container {
 
 @media (width >= 1200px) {
   .status-page .status-page-title {
-    font-size: var(--status-page-title-size);
+    /* one-off: the source's desktop title size */
+    font-size: 60px;
   }
 }
