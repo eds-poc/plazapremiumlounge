@@ -51,8 +51,9 @@ const timeAt = (key, minutes, extra = {}) => ({
 });
 
 const FORMS = {
-  // the source /en-uk/group-booking: at least 10 people, a start and a length of stay
-  'group-booking': {
+  // option group-form, the source /en-uk/group-booking: at least 10 people, a start and a length
+  // of stay; the captcha and the button under the two columns
+  'group-form': {
     action: 'groupBooking',
     minPeople: 10,
     fields: {
@@ -70,9 +71,9 @@ const FORMS = {
       subscribeNewsletter: { type: 'checkbox', key: 'subscribeNewsletter', settings: { 'value type': 'boolean' } },
     },
   },
-  // the source /en-uk/makeabooking (Lounge Booking Request): a start and an end, the membership
-  // number, the private resting areas and the travel type; the captcha and the button stay in the
-  // second column
+  // the block itself, the source /en-uk/makeabooking (Lounge Booking Request): a start and an end,
+  // the membership number, the private resting areas and the travel type; the captcha and the
+  // button stay in the second column
   'booking-request': {
     action: 'bookingRequest',
     keepCaptcha: true,
@@ -97,17 +98,17 @@ const FORMS = {
 };
 
 /**
- * Decorates the Group Booking Form block: the group booking request form (the source
- * /en-uk/group-booking), or with the option `booking-request` the lounge booking request form (the
- * source /en-uk/makeabooking). One authored row per field (Field | Label | Placeholder | Required |
+ * Decorates the Booking Form block: the lounge booking request form (the source
+ * /en-uk/makeabooking), or with the option `group-form` the group booking request form (the source
+ * /en-uk/group-booking). One authored row per field (Field | Label | Placeholder | Required |
  * Error), and the rows submit / success / error / captcha, as the Contact Form; the row `people`
  * (its Error cell) is the group booking's message when there are fewer than 10 people. Two columns
  * from 768px (No. of Adults starts the second); the group booking's captcha and button under them.
  * The areas of service follow the chosen location (the groupBookingAreas endpoint).
- * @param {Element} block The Group Booking Form block element
+ * @param {Element} block The Booking Form block element
  */
 export default function decorate(block) {
-  const name = block.classList.contains('booking-request') ? 'booking-request' : 'group-booking';
+  const name = block.classList.contains('group-form') ? 'group-form' : 'booking-request';
   const config = FORMS[name];
   // the authored Error lines of a row (for the checks made here, not by the form)
   const errorsOf = (row) => {
