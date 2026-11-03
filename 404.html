@@ -7,13 +7,13 @@
     content="script-src 'nonce-aem' 'strict-dynamic' 'unsafe-inline' http: https:; base-uri 'self'; object-src 'none';"
     move-to-http-header="true"
   >
-  <title>Page not found</title>
+  <title>404 Not Found</title>
   <script nonce="aem" type="text/javascript">
     window.isErrorPage = true;
     window.errorCode = '404';
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta property="og:title" content="Page not found">
+  <meta property="og:title" content="404 Not Found">
   <script nonce="aem" src="/scripts/scripts.js" type="module"></script>
   <script nonce="aem" type="module">
     window.addEventListener('load', () => {
@@ -21,7 +21,7 @@
         const { origin, pathname } = new URL(document.referrer);
         if (origin === window.location.origin) {
           const backBtn = document.createElement('a');
-          backBtn.classList.add('button', 'error-button-back');
+          backBtn.classList.add('button', 'white', 'error-button-back');
           backBtn.href = pathname;
           backBtn.textContent = 'Go back';
           backBtn.title = 'Go back';
@@ -36,35 +36,26 @@
     sampleRUM('404', { source: document.referrer });
   </script>
   <link rel="stylesheet" href="/styles/styles.css">
-  <style>
-    main.error {
-      min-height: calc(100vh - var(--nav-height));
-      display: flex;
-      align-items: center;
-    }
-
-    main.error .error-number {
-      width: 100%;
-    }
-
-    main.error .error-number text {
-      font-family: monospace;
-    }
-  </style>
   <link rel="stylesheet" href="/styles/lazy-styles.css">
 </head>
 
 <body>
   <header></header>
+  <!-- the en-uk/404 design: a Status Page block (blocks/status-page), decorated as on any page -->
   <main class="error">
-    <div class="section">
-      <svg viewBox="1 0 38 18" class="error-number">
-        <text x="0" y="17">404</text>
-      </svg>
-      <h2 class="error-message">Page Not Found</h2>
-      <p class="button-container">
-        <a href="/" class="button secondary error-button-home">Go home</a>
-      </p>
+    <div>
+      <div class="status-page">
+        <div>
+          <div>
+            <p><img src="/icons/404-icon.svg" alt="Not Found" width="81" height="81"></p>
+            <h1>Not Found</h1>
+            <p>It seems the page you're looking for doesn't exist, has been moved or is currently undergoing maintenance. You will be redirected to our homepage in a few moments, or you can click here to get there sooner.</p>
+            <p class="button-container">
+              <a href="/" class="button white error-button-home">Go home</a>
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
   <footer></footer>
