@@ -47,11 +47,11 @@ function imageOf(line) {
 }
 
 /**
- * Decorates the Status Page block: the image, the title and the text, centred in a column of at
- * most 800px, in the middle of a 720px high area. The first line with an image is the image; the
- * first heading is the title (its authored level kept; with no heading, the first text line
- * becomes an h1); every other line is the text. A part left out isn't shown.
- * @param {Element} block The status-page block element
+ * Decorates the Status Page block by rendering a centered image, title, and text.
+ * The first image becomes the status icon, the first heading becomes the title,
+ * and the remaining content is displayed as text. Missing elements are ignored.
+ *
+ * @param {Element} block The status-page block element.
  */
 export default function decorate(block) {
   const lines = readLines(block);
