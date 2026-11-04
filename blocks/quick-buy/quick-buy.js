@@ -1,7 +1,7 @@
 import { translate } from '../../scripts/i18n.js';
 import {
-  PASSES_TIMEOUT_MS as TIMEOUT_MS, addToCart, buildPoints, formatPrice, icon, openPassDetails,
-  readCurrency, readPass,
+  PASSES_TIMEOUT_MS as TIMEOUT_MS, buildAddButton, buildPoints, formatPrice, icon, openPassDetails,
+  readCurrency, readPass, takeSelectedPass,
 } from '../../scripts/passes.js';
 import {
   el, fetchPass, fetchPassList, getApiContext, isPreview, readApiRow, readPassList,
@@ -122,11 +122,7 @@ function buildCard(product) {
     learn.setAttribute('aria-haspopup', 'dialog');
     learn.setAttribute('aria-label', `${translate('quickBuyLearnMore')}: ${pass.name}`);
     learn.addEventListener('click', () => openPassDetails(pass, learn, ADD_TO_CART));
-    const add = el('button', 'quick-buy-add', translate('quickBuyAddToCart'));
-    add.type = 'button';
-    add.setAttribute('aria-label', `${translate('quickBuyAddToCart')}: ${pass.name}`);
-    add.addEventListener('click', () => addToCart(add, pass, ADD_TO_CART));
-    actions.append(learn, add);
+    actions.append(learn, buildAddButton(pass, 'quick-buy-add', ADD_TO_CART));
     card.removeAttribute('aria-busy');
   };
   return { card, fill, isFilled: () => !!shown };
@@ -246,7 +242,11 @@ export default function decorate(block) {
             list.set(product.code, item);
             fill(pass);
           });
-        return Promise.allSettled(others.map(askOne)).then(() => finish(list));
+        return Promise.allSettled(others.map(askOne)).then(() => {
+          finish(list);
+          // the promotional address's pass (?selectedPassID=) into the cart
+          takeSelectedPass(list, block, ADD_TO_CART);
+        });
       })
       .catch((error) => {
         // eslint-disable-next-line no-console

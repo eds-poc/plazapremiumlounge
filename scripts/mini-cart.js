@@ -1,9 +1,11 @@
 /*
  * The cart's UI, as the source's (#cart-popup and its dialogs), in the site's dialog
- * (modal-dialog.js): the mini cart (the booking with its date, time, guests and service, the
- * totals, Check Out and Edit), "Checkout Cart" when the cart already holds a booking, the remove
- * confirmation and the add's failure message. Loaded when a product is added or the header's cart
- * opens with something in it; the cart itself is cart.js, its state cart-state.js.
+ * (modal-dialog.js): the mini cart (a lounge booking with its date, time, guests and service, or
+ * passes with their quantity; the totals, Check Out, and Edit for a lounge), "Checkout Cart" when
+ * the cart's rules refuse a product, the remove confirmation and the failure messages. Loaded when
+ * a product is added or the header's cart opens with something in it; the cart itself is cart.js,
+ * its state cart-state.js. Everything follows the cart in place (no page reload, unlike the
+ * source's after a removal).
  */
 import { loadCSS } from './aem.js';
 import { translate, getLanguage } from './i18n.js';
@@ -143,9 +145,10 @@ const confirm = new CartDialog('cart-remove', 'cart-confirm-modal', false);
 
 /**
  * The remove confirmation (the source's ⊗), over the mini cart: Cancel closes it (the mini cart
- * stays); Yes shows the loader over the mini cart while the booking system deletes the cart, then,
- * as the source, the page loads again; a failure keeps the cart and the mini cart, with the
- * source's message.
+ * stays); Yes shows the loader over the mini cart while the booking system takes the line out.
+ * The source then loads the page again; here the mini cart shows the lines left (focus on the
+ * first one's ⊗), or closes when the cart is empty, and the header and the buttons follow, in
+ * place. A failure keeps the cart and the mini cart, with the source's message.
  * @param {Object} line
  * @param {HTMLElement} from The ⊗ (focus goes back there on Cancel)
  */
@@ -158,15 +161,20 @@ function confirmRemove(line, from) {
     button(translate('cartYes'), 'soft', async () => {
       confirm.dialog?.close();
       showLoader();
-      const { status } = await removeFromCart(line.catalogueCode, { quiet: true });
-      if (status !== 'failed') {
-        window.location.reload();
+      let result;
+      try {
+        result = await removeFromCart(line.catalogueCode);
+      } finally {
+        hideLoader();
+      }
+      if (result.status === 'failed') {
+        // (as the source: the mini cart stays, with the message)
+        // eslint-disable-next-line no-use-before-define
+        showFailure('cartRemoveFailed', from, { stack: true });
         return;
       }
-      // (as the source: the mini cart stays, with the message)
-      hideLoader();
-      // eslint-disable-next-line no-use-before-define
-      showFailure('cartRemoveFailed', from, { stack: true });
+      // (the mini cart has followed the cart: what's left, or closed, focus back to its trigger)
+      if (mini.dialog?.open) (mini.dialog.querySelector('.mini-cart-remove') || mini.dialog).focus();
     }),
   );
   confirm.fill('', [message, actions]);
@@ -180,14 +188,27 @@ function confirmRemove(line, from) {
 function renderMiniCart(cart) {
   const lines = el('div', 'mini-cart-lines');
   lines.append(...cart.lines.map((line) => {
-    const box = el('div', 'mini-cart-line');
-    const name = el('h3', 'mini-cart-name', line.name || line.product);
+    const pass = line.kind === 'pass';
+    const box = el('div', `mini-cart-line${pass ? ' mini-cart-line-pass' : ''}`);
+    // (a pass by its own name, as the source's; a lounge by the lounge's)
+    const title = pass ? line.product || line.name : line.name || line.product;
+    const name = el('h3', 'mini-cart-name', title);
     const remove = el('button', 'mini-cart-remove');
     remove.type = 'button';
     remove.setAttribute('aria-label', translate('cartRemoveItem', { name: line.product || line.name }));
     remove.addEventListener('click', () => confirmRemove(line, remove));
     name.append(remove);
     box.append(name);
+    if (pass) {
+      // the source's pass line: the quantity, and the line's price beside it
+      const row = el('p', 'mini-cart-quantity');
+      row.append(
+        el('span', '', `${translate('cartQuantity')} ${line.quantity}`),
+        el('span', 'mini-cart-line-amount', formatAmount(line.total, cart.currency)),
+      );
+      box.append(row);
+      return box;
+    }
     if (line.place) box.append(el('p', 'mini-cart-place', line.place));
     const details = el('dl', 'mini-cart-details');
     const time = line.start.slice(11, 16).replace(':', '');
@@ -226,13 +247,14 @@ function renderMiniCart(cart) {
   totalLabel.append(el('span', '', translate('cartTotal')), el('small', 'mini-cart-note', translate('cartTotalNote')));
   totalsBox.append(row('mini-cart-total', totalLabel, formatAmount(totals.total, currency)));
 
-  // Check Out and Edit: the hand-off to the booking steps comes later; they are announced
+  // Check Out, and Edit for a lounge (as the source's: passes have nothing to edit): the hand-off
+  // to the booking steps comes later; they are announced
   const announce = (name) => () => document.dispatchEvent(new CustomEvent(`cart:${name}`, { detail: { cart: getCart() } }));
   const actions = el('div', 'mini-cart-actions');
-  actions.append(
-    button(translate('cartCheckout'), 'primary', announce('checkout')),
-    button(translate('cartEdit'), 'secondary', announce('edit')),
-  );
+  actions.append(button(translate('cartCheckout'), 'primary', announce('checkout')));
+  if (cart.lines.some((line) => line.kind !== 'pass')) {
+    actions.append(button(translate('cartEdit'), 'secondary', announce('edit')));
+  }
   mini.fill(translate('cartTitle'), [lines, totalsBox, actions]);
 }
 
@@ -300,6 +322,10 @@ export async function addAndShow(item, trigger) {
     const view = button(translate('cartViewCart'), 'primary', () => openMiniCart(from));
     checkoutFirst.fill(translate('cartCheckoutFirstTitle'), [el('p', '', translate('cartCheckoutFirst')), view]);
     await checkoutFirst.open(from);
+  } else if (item.type === 'pass') {
+    // (the source's pass page: its notice)
+    // eslint-disable-next-line no-use-before-define
+    await showFailure('cartPassAddFailed', from, { title: 'cartNotice' });
   } else {
     // eslint-disable-next-line no-use-before-define
     await showFailure('cartAddFailed', from);
@@ -310,10 +336,11 @@ export async function addAndShow(item, trigger) {
  * A failure's message (the source's alert, in the site's dialog), e.g. "Unable to add to cart."
  * @param {string} key The text's key
  * @param {HTMLElement} [trigger]
- * @param {{stack?: boolean}} [options] Over the open dialog (e.g. the mini cart)
+ * @param {{stack?: boolean, title?: string}} [options] stack: over the open dialog (e.g. the mini
+ *   cart); title: the title's key (else the cart's)
  */
-async function showFailure(key, trigger, options) {
-  failure.fill(translate('cartTitle'), [el('p', '', translate(key))]);
+async function showFailure(key, trigger, { title = 'cartTitle', ...options } = {}) {
+  failure.fill(translate(title), [el('p', '', translate(key))]);
   await failure.open(trigger, options);
 }
 

@@ -223,6 +223,9 @@ export function decorateMain(main) {
 const CART_EVENTS = {
   // the homepage lounge card's Book Now
   'booking-widget:book': 'lounge',
+  // a pass's Add to Cart (or Add More): its card's or its Learn more pop-up's
+  'quick-buy:add-to-cart': 'pass',
+  'pass-finder:add-to-cart': 'pass',
 };
 
 /**

@@ -1,14 +1,17 @@
 /*
- * The cart, without UI (see mini-cart.js): products go in through their type's adapter (only
- * lounges for now; lounge passes and others get their own adapter), after the cart's rules, as
- * the source's cart. The booking system's cart API makes a cart with the products (POST), reads
- * it back (GET) and deletes it (DELETE); there is no call yet to add to a cart or take a single
- * item out, so the cart holds one booking, as the source's does for a lounge, and taking it out
- * deletes the cart. The cart's id and a summary are kept by cart-state.js.
+ * The cart, without UI (see mini-cart.js): products go in through their type's adapter (lounges
+ * and lounge passes; others get their own adapter), after the cart's rules, as the source's cart:
+ * a lounge only into an empty cart, passes together (the same pass again is one more of it). The
+ * booking system's cart API makes a cart with the products (POST), reads it back (GET), replaces
+ * its products (PUT: how a pass joins a cart, one more of it is counted, or a line goes) and
+ * deletes it (DELETE: taking out its last line). The cart's id and a summary are kept by
+ * cart-state.js.
  */
 import { getMetadata } from './aem.js';
 import apiUrl from './endpoints.js';
-import { chooseSlot, toStartDateTime } from './booking.js';
+import {
+  DAY_MINUTES, chooseSlot, nextDay, nowAt, toStartDateTime, toTime,
+} from './booking.js';
 import { DEFAULT_SITE, getSiteFolder } from './i18n.js';
 import {
   forgetCart, getCart, getCartId, saveCart,
@@ -16,8 +19,12 @@ import {
 
 // the service answers in about 1-3s
 const CART_TIMEOUT_MS = 20000;
-// what the source's site sends with every cart
-const ORDER = { pointOfPurchase: 'Online', channel: 'B2C', isThirdPartyFulfilment: false };
+// what the source's site sends with every cart (and an adapter's `order`, e.g. a lounge's)
+const ORDER = { pointOfPurchase: 'Online', channel: 'B2C' };
+// passes are sold from Hong Kong: their start is in its time (the service refuses a start that's
+// past there; the passes service gives no time zone), an hour ahead, as the source's
+const PASS_TIME_ZONE = 'Asia/Hong_Kong';
+const PASS_LEAD_MINUTES = 60;
 
 /**
  * The text a field holds, trimmed (without the service's zero-width spaces).
@@ -41,7 +48,8 @@ function apiLanguage() {
 }
 
 /**
- * Fetches the cart service's JSON (a POST with `body`; or `method`, e.g. DELETE), giving up after
+ * Fetches the cart service's JSON (a POST with `body`, or `method` with it: PUT; or `method`
+ * alone, e.g. DELETE), giving up after
  * the timeout. A failure (HTTP, network, not JSON, or the service's error object: `{ errorCode,
  * message }`, or nested as `{ error: { … } }`) rejects with an Error carrying `status` and the
  * service's error as `service`.
@@ -58,7 +66,7 @@ async function fetchJson(url, body, method) {
       signal: controller.signal,
       ...(method && { method }),
       ...(body && {
-        method: 'POST',
+        method: method || 'POST',
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       }),
@@ -79,10 +87,30 @@ async function fetchJson(url, body, method) {
 }
 
 /**
+ * A pass's start as the cart takes it: an hour from now, in Hong Kong ("2026-11-04 19:49:00").
+ * @returns {string}
+ */
+export function passStart() {
+  const { date, minutes } = nowAt(PASS_TIME_ZONE);
+  const later = minutes + PASS_LEAD_MINUTES;
+  return toStartDateTime(later >= DAY_MINUTES ? nextDay(date) : date, toTime(later % DAY_MINUTES));
+}
+
+/**
+ * A pass as the cart API takes it.
+ * @param {string} catalogueCode
+ * @param {number} quantity
+ * @returns {{catalogueCode: string, quantity: string, startDate: string}}
+ */
+function passProduct(catalogueCode, quantity) {
+  return { catalogueCode, quantity: String(quantity), startDate: passStart() };
+}
+
+/**
  * How each type of product goes into the cart. An adapter checks what it was given (`check`
  * answers why it can't be added, or ''), makes the cart API's product from it (`toProduct`) in
- * its currency (`currency`), and a cart line from it (`toLine`), shown when the cart was made
- * but couldn't be read back.
+ * its currency (`currency`), with what its cart takes besides (`order`), and a cart line from it
+ * (`toLine`), shown when the cart was made but couldn't be read back.
  */
 const ADAPTERS = {
   // a lounge booking from the homepage's lounge card (`booking-widget:book`): the product's
@@ -113,11 +141,14 @@ const ADAPTERS = {
       };
     },
     currency: (item) => text(item.currency).toUpperCase(),
+    order: { isThirdPartyFulfilment: false },
     toLine(item) {
       return {
         id: '',
         catalogueCode: item.catalogueCode,
+        productCode: '',
         type: 'lounge',
+        kind: 'lounge',
         name: text(item.propertyName),
         product: text(item.productName),
         place: text(item.place),
@@ -129,21 +160,51 @@ const ADAPTERS = {
       };
     },
   },
+  // a lounge pass (the quick buy and pass finder's Add to Cart, and their Learn more): its
+  // catalogue code (the regular rate's), one of it, from an hour from now (as the source's pass
+  // cart; the user's sample: no isThirdPartyFulfilment, the quantity as text)
+  pass: {
+    check: (item) => (text(item.catalogueCode) ? '' : 'invalid'),
+    toProduct: (item) => passProduct(item.catalogueCode, 1),
+    currency: (item) => text(item.currency).toUpperCase(),
+    order: {},
+    toLine(item) {
+      const name = text(item.name);
+      return {
+        id: '',
+        catalogueCode: item.catalogueCode,
+        productCode: text(item.productCode),
+        type: 'gftcrd',
+        kind: 'pass',
+        name,
+        product: name,
+        place: '',
+        start: passStart(),
+        adults: 0,
+        children: 0,
+        quantity: 1,
+        total: Number(item.price),
+      };
+    },
+  },
 };
 
 /**
- * The cart's rules, in turn: each answers why a product can't go in, or ''.
+ * The cart's rules, in turn: each answers why a product can't go in, or '' ("checkout-first":
+ * the source's "Please proceed to checkout before adding new item into cart.").
  */
 const RULES = [
-  // the source's: nothing goes into a cart that holds a booking ("Please proceed to checkout
-  // before adding new item into cart.")
-  ({ cart }) => (cart?.lines.length ? 'checkout-first' : ''),
+  // a lounge only goes into an empty cart (so a cart holds one lounge, and no passes with it)
+  ({ cart, item }) => (item.type !== 'pass' && cart?.lines.length ? 'checkout-first' : ''),
+  // a pass joins passes only, never a lounge
+  ({ cart, item }) => (item.type === 'pass' && cart?.lines.some((line) => line.kind !== 'pass') ? 'checkout-first' : ''),
 ];
 
 /**
- * Adds a type of product to the cart (e.g. lounge passes, when their cart call exists).
+ * Adds a type of product to the cart (see ADAPTERS).
  * @param {string} type
- * @param {{check: Function, toProduct: Function, currency: Function}} adapter
+ * @param {{check: Function, toProduct: Function, currency: Function, order?: Object,
+ *   toLine: Function}} adapter
  */
 export function registerAdapter(type, adapter) {
   ADAPTERS[type] = adapter;
@@ -156,11 +217,14 @@ export function registerAdapter(type, adapter) {
  */
 function readLine(p) {
   const price = p?.itemPriceDetails?.productTotalPrice || {};
+  const type = text(p?.propertyTypeCode).toLowerCase();
   return {
     id: text(p?.cartItemId),
     catalogueCode: text(p?.catalogueCode),
+    productCode: text(p?.productCode),
     // LOUNGE, GFTCRD (passes), …
-    type: text(p?.propertyTypeCode).toLowerCase(),
+    type,
+    kind: type === 'gftcrd' || text(p?.serviceType).toUpperCase() === 'PASS' ? 'pass' : 'lounge',
     name: text(p?.propertyDisplayName) || text(p?.propertyName),
     product: text(p?.productDisplayName) || text(p?.productName),
     place: [p?.shortLocation, p?.locationName].map(text).filter(Boolean).join(', '),
@@ -231,11 +295,46 @@ export async function refreshCart(cartId) {
   }
 }
 
+/**
+ * Replaces the cart's products in the booking system (PUT ?cartId=: the products given are the
+ * cart's from then on, in this currency).
+ * @param {string} cartId
+ * @param {string} currency
+ * @param {Object[]} products
+ * @param {Object} order
+ * @returns {Promise<Object>}
+ */
+function putProducts(cartId, currency, products, order) {
+  const url = apiUrl('cart');
+  url.searchParams.set('cartId', cartId);
+  return fetchJson(url, { currency, products, ...order }, 'PUT');
+}
+
+/**
+ * The cart's passes again as the cart API takes them (only passes share a cart).
+ * @param {Object[]} lines
+ * @returns {Object[]}
+ */
+function passProducts(lines) {
+  return lines.map((line) => passProduct(line.catalogueCode, line.quantity));
+}
+
+/**
+ * The cart's totals from its lines, when the booking system couldn't be read (no discounts).
+ * @param {Object[]} lines
+ * @returns {{base: number, discounts: Object[], total: number}}
+ */
+function sumLines(lines) {
+  const total = lines.reduce((sum, line) => sum + (Number(line.total) || 0), 0);
+  return { base: total, discounts: [], total };
+}
+
 let pending = null;
 
 /**
- * Adds a product to the cart. One at a time: while an add is under way, another click gets the
- * same answer.
+ * Adds a product to the cart. An empty cart is made with it (POST); a pass joins the cart's passes
+ * (PUT with them all), and the same pass again is one more of it. One at a time: while an add is
+ * under way, another click gets the same answer.
  * @param {{type: string}} item The product, as its type's adapter takes it
  * @returns {Promise<{status: 'added'|'refused'|'failed', reason?: string, cart?: Object,
  *   error?: Error}>} refused: a rule or the adapter's check said no (`reason`); failed: the
@@ -258,24 +357,35 @@ export function addToCart(item) {
     if (rule) return { status: 'refused', reason: rule };
     const check = adapter.check(item);
     if (check) return { status: 'refused', reason: check };
+    const currency = adapter.currency(item);
+    const order = { ...ORDER, ...adapter.order };
+    const known = cart?.lines.length ? cart.lines : [];
+    // what the cart holds after it, should the booking system not be read back
+    const unit = Number(item.price);
+    const lines = known.some((line) => line.catalogueCode === item.catalogueCode)
+      ? known.map((line) => (line.catalogueCode === item.catalogueCode
+        ? { ...line, quantity: line.quantity + 1, total: line.total + unit } : line))
+      : [...known, adapter.toLine(item)];
     try {
-      const answer = await fetchJson(apiUrl('cart'), {
-        currency: adapter.currency(item), products: [adapter.toProduct(item)], ...ORDER,
-      });
-      const cartId = text(answer?.cartId);
-      if (!cartId) throw new Error('no cartId');
+      let cartId = cart?.cartId;
+      if (known.length) {
+        // (the rules let only a pass join a cart: its passes, with this one or one more of it)
+        await putProducts(cartId, currency, passProducts(lines), order);
+      } else {
+        const answer = await fetchJson(apiUrl('cart'), {
+          currency, products: [adapter.toProduct(item)], ...order,
+        });
+        cartId = text(answer?.cartId);
+        if (!cartId) throw new Error('no cartId');
+      }
       try {
         return { status: 'added', cart: await refreshCart(cartId) };
       } catch (error) {
-        // the cart was made: keep it, with what the page knows of the product
+        // the product is in: keep the cart, with what the page knows of it
         // eslint-disable-next-line no-console
         console.warn('cart: the cart could not be read back', error);
-        const line = adapter.toLine(item);
         saveCart({
-          cartId,
-          currency: adapter.currency(item),
-          lines: [line],
-          totals: { base: line.total, discounts: [], total: line.total },
+          cartId, currency, lines, totals: sumLines(lines),
         });
         return { status: 'added', cart: getCart() };
       }
@@ -293,10 +403,9 @@ export function addToCart(item) {
  * here. A cart the system doesn't know (CRT_ERR_004, or BKNG001) is gone already: forgotten too.
  * Any other failure keeps it.
  * @param {string} [cartId]
- * @param {{quiet?: boolean}} [options] quiet: no `cart:change` (the page loads again next)
  * @returns {Promise<{status: 'removed'|'failed', error?: Error}>}
  */
-export async function deleteCart(cartId = getCartId(), { quiet = false } = {}) {
+export async function deleteCart(cartId = getCartId()) {
   if (!cartId) return { status: 'removed' };
   const url = apiUrl('cart');
   url.searchParams.set('cartId', cartId);
@@ -310,27 +419,52 @@ export async function deleteCart(cartId = getCartId(), { quiet = false } = {}) {
     }
   }
   // (unless it's another cart by now)
-  if (getCartId() === cartId) forgetCart(!quiet);
+  if (getCartId() === cartId) forgetCart();
+  return { status: 'removed' };
+}
+
+/**
+ * Takes a line out of a cart that keeps others (passes): the booking system gets the cart's
+ * other products (PUT), then the cart is read again.
+ * @param {Object} cart
+ * @param {Object[]} rest The lines that stay
+ * @returns {Promise<{status: 'removed'|'failed', error?: Error}>}
+ */
+async function keepLines(cart, rest) {
+  try {
+    await putProducts(cart.cartId, cart.currency, passProducts(rest), ORDER);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('cart: the line was not taken out', error);
+    return { status: 'failed', error };
+  }
+  try {
+    await refreshCart(cart.cartId);
+  } catch {
+    // (taken out: what the page knows of the rest stands)
+    if (getCartId() === cart.cartId) saveCart({ ...cart, lines: rest, totals: sumLines(rest) });
+  }
   return { status: 'removed' };
 }
 
 let removing = null;
 
 /**
- * Takes a product out of the cart. The cart holds one booking and the booking system deletes
- * carts (not single items yet), so the cart is deleted. One at a time: a second click while it's
- * under way gets the same answer.
+ * Takes a product (its whole line, as the source's ⊗) out of the cart: the cart's last line
+ * deletes the cart; otherwise the cart keeps its other lines. One at a time: a second click while
+ * it's under way gets the same answer.
  * @param {string} catalogueCode
- * @param {{quiet?: boolean}} [options] quiet: no `cart:change` (the page loads again next)
  * @returns {Promise<{status: 'removed'|'failed'|'absent', error?: Error}>} absent: it wasn't in
  *   the cart
  */
-export function removeFromCart(catalogueCode, { quiet = false } = {}) {
+export function removeFromCart(catalogueCode) {
   if (removing) return removing;
   const cart = getCart();
   if (!cart?.lines.some((line) => line.catalogueCode === catalogueCode)) {
     return Promise.resolve({ status: 'absent' });
   }
-  removing = deleteCart(cart.cartId, { quiet }).finally(() => { removing = null; });
+  const rest = cart.lines.filter((line) => line.catalogueCode !== catalogueCode);
+  removing = (rest.length ? keepLines(cart, rest) : deleteCart(cart.cartId))
+    .finally(() => { removing = null; });
   return removing;
 }

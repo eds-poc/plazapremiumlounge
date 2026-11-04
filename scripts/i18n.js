@@ -516,6 +516,10 @@ const TEXTS = {
   quickBuyAddToCart: {
     en: 'Add to Cart', zh: '加入购物车', 'zh-HK': '加入購物車', ja: 'カートに追加', pt: 'Adicionar ao carrinho',
   },
+  // (a pass's Add to Cart once it's in the cart: the source's pass pop-up's wording)
+  quickBuyAddMore: {
+    en: 'Add More', zh: '新增更多', 'zh-HK': '新增更多', ja: 'さらに追加', pt: 'Adicionar Mais',
+  },
   quickBuyLocation: {
     en: '{location} Plaza Premium Lounge', zh: '{location} 环亚机场贵宾室', 'zh-HK': '{location} 環亞機場貴賓室', ja: '{location} プラザプレミアムラウンジ', pt: '{location} Plaza Premium Lounge',
   },
@@ -541,6 +545,10 @@ const TEXTS = {
   },
   cartServices: {
     en: 'Services:', zh: '服务:', 'zh-HK': '服務:', ja: 'サービス:', pt: 'Serviços:',
+  },
+  // (a pass's line)
+  cartQuantity: {
+    en: 'Quantity:', zh: '数量:', 'zh-HK': '數量:', ja: '数量:', pt: 'Quantidade:',
   },
   cartServiceTotal: {
     en: 'Service Total', zh: '服务总额', 'zh-HK': '服務總額', ja: 'サービス合計', pt: 'Total do Serviço',
@@ -596,6 +604,13 @@ const TEXTS = {
   },
   cartAddFailed: {
     en: 'Unable to add to cart.', zh: '无法加入购物车。', 'zh-HK': '無法加入購物車。', ja: 'カートに追加できませんでした。', pt: 'Não foi possível adicionar ao carrinho.',
+  },
+  // a pass that wasn't added (the source's pass page: "Notice", its default message)
+  cartNotice: {
+    en: 'Notice', zh: '须知', 'zh-HK': '須知', ja: 'お知らせ', pt: 'Aviso',
+  },
+  cartPassAddFailed: {
+    en: 'An error occurred. Please try again later.', zh: '发生错误，请稍后再试。', 'zh-HK': '發生錯誤，請稍後再試。', ja: 'エラーが発生しました。しばらくしてからもう一度お試しください。', pt: 'Ocorreu um erro. Tente novamente mais tarde.',
   },
   // (the source's alert, English on every site)
   cartRemoveFailed: {

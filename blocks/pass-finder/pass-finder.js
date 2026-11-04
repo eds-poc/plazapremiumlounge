@@ -1,7 +1,7 @@
 import { translate } from '../../scripts/i18n.js';
 import {
-  PASSES_TIMEOUT_MS, addToCart, buildPoints, formatPrice, icon, locationName, openPassDetails,
-  readCurrency, readPass,
+  PASSES_TIMEOUT_MS, buildAddButton, buildPoints, formatPrice, icon, locationName, openPassDetails,
+  readCurrency, readPass, takeSelectedPass,
 } from '../../scripts/passes.js';
 import {
   el, fetchPassList, getApiContext, isPreview, readApiRow, readPassList,
@@ -219,11 +219,7 @@ function buildCard(pass, note, bestValue) {
   learn.setAttribute('aria-haspopup', 'dialog');
   learn.setAttribute('aria-label', `${translate('quickBuyLearnMore')}: ${pass.name}`);
   learn.addEventListener('click', () => openPassDetails(pass, learn, ADD_TO_CART));
-  const add = el('button', 'pass-finder-add', translate('quickBuyAddToCart'));
-  add.type = 'button';
-  add.setAttribute('aria-label', `${translate('quickBuyAddToCart')}: ${pass.name}`);
-  add.addEventListener('click', () => addToCart(add, pass, ADD_TO_CART));
-  actions.append(learn, add);
+  actions.append(learn, buildAddButton(pass, 'pass-finder-add', ADD_TO_CART));
   body.append(actions);
   card.append(media, body);
   return card;
@@ -561,6 +557,8 @@ export default function decorate(block) {
     fetchPassList(context, readCurrency(), PASSES_TIMEOUT_MS)
       .then((list) => {
         show(list);
+        // the promotional address's pass (?selectedPassID=) into the cart
+        takeSelectedPass(list, block, ADD_TO_CART);
         if (hints.length && isPreview()) {
           const note = el('div');
           showMessage(note, '', null, hints);

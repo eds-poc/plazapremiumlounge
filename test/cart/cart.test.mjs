@@ -218,14 +218,19 @@ async function addFlow(width) {
   check(`${width} Cancel: only the confirmation closes, still in the cart`, JSON.stringify((await state(page)).open) === '["mini-cart-modal"]' && (await state(page)).cookie === 'CRT_TEST1', JSON.stringify((await state(page)).open));
   await page.locator('dialog.mini-cart-modal[open] .mini-cart-remove').click();
   await page.waitForSelector('dialog.cart-confirm-modal[open]');
-  await page.evaluate(() => window.addEventListener('pagehide', () => sessionStorage.setItem('loaderAtUnload', String(!!document.getElementById('spinner-overlay')))));
-  const reloaded = page.waitForEvent('load', { timeout: 20000 });
+  let navigated = false;
+  page.on('framenavigated', (f) => { if (f === page.mainFrame()) navigated = true; });
   await page.locator('dialog.cart-confirm-modal[open] .cart-button', { hasText: 'Yes' }).click();
-  await reloaded;
-  await page.waitForTimeout(1500);
-  const loaderOnYes = await page.evaluate(() => sessionStorage.getItem('loaderAtUnload') === 'true');
+  await page.waitForSelector('#spinner-overlay', { state: 'attached', timeout: 3000 }).catch(() => {});
+  const loaderOnYes = await page.evaluate(() => !!document.querySelector('dialog.mini-cart-modal[open] #spinner-overlay'));
+  await page.waitForFunction(() => !document.querySelector('dialog.mini-cart-modal[open]'), null, { timeout: 10000 });
+  await page.waitForTimeout(600);
   const gone = await state(page);
-  check(`${width} Yes: the loader, one DELETE ?cartId, then the page loads again (as live), out of the cart`, loaderOnYes && page.api.deletes.length === 1 && /cart\?cartId=CRT_TEST1$/.test(page.api.deletes[0]) && !gone.cookie && !gone.stored && !gone.badge && gone.label === 'Cart' && !gone.open.length, JSON.stringify({ gone, deletes: page.api.deletes }));
+  const focus = await page.evaluate(() => document.activeElement?.className || document.activeElement?.tagName);
+  // (live reloads the page here; this site updates in place)
+  check(`${width} Yes: the loader over the mini cart, one DELETE ?cartId, no reload: out of the cart in place (count, card's Book Now, dialogs closed, focus back)`, loaderOnYes && page.api.deletes.length === 1 && /cart\?cartId=CRT_TEST1$/.test(page.api.deletes[0]) && !navigated && !gone.cookie && !gone.stored && !gone.badge && gone.label === 'Cart' && !gone.open.length && gone.book === 'Book Now' && focus !== 'BODY', JSON.stringify({
+    gone: { ...gone, stored: !!gone.stored }, deletes: page.api.deletes, navigated, focus,
+  }));
   check(`${width} no page errors`, !page.errors.length, page.errors.join(' | '));
   await page.close();
 }
@@ -330,9 +335,7 @@ const stored = (extra = {}) => `(() => {
   await page.locator('header a.header-utility:has(.icon-cart)').first().click();
   await page.waitForSelector('dialog.mini-cart-modal[open]', { timeout: 10000 });
   await page.locator('dialog.mini-cart-modal[open] .mini-cart-remove').click();
-  const reloaded = page.waitForEvent('load', { timeout: 20000 });
   await page.locator('dialog.cart-confirm-modal[open] .cart-button', { hasText: 'Yes' }).click();
-  await reloaded;
   await page.waitForTimeout(2500);
   const s = await state(page);
   check('removed while the cart is being read: stays removed', !s.cookie && !s.stored && !s.badge, JSON.stringify(s));

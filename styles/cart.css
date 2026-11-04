@@ -136,6 +136,17 @@ dialog.modal.mini-cart-modal .modal-body {
   font-weight: var(--font-weight-medium);
 }
 
+/* a pass's line: its quantity, and the line's price at the right (as the source's) */
+.mini-cart-quantity {
+  display: flex;
+  gap: var(--spacing-2);
+  justify-content: space-between;
+  margin: var(--spacing-4) 0 0;
+  color: var(--cart-label);
+  font-size: var(--font-size-md);
+  line-height: 1.4;
+}
+
 .mini-cart-hours {
   padding-left: var(--spacing-1);
 }
@@ -295,6 +306,11 @@ dialog.modal.cart-confirm-modal .modal-header {
 
   .mini-cart-detail dt {
     display: block;
+  }
+
+  .mini-cart-quantity {
+    margin-top: var(--spacing-9);
+    font-size: var(--font-size-sm);
   }
 }
 
