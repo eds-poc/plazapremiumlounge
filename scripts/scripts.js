@@ -305,6 +305,8 @@ function loadDelayed() {
   import('./consent-check.js');
   // the back to top button, on every page
   import('./back-to-top.js').then(({ default: initBackToTop }) => initBackToTop());
+  // analytics: the page view in the data layer, then the Launch script (metadata `launch-script`)
+  import('./datalayer.js').then(({ default: initDataLayer }) => initDataLayer());
   // load anything that can be postponed to the latest here
 }
 

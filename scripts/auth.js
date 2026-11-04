@@ -12,6 +12,7 @@
  */
 import { getMetadata } from './aem.js';
 import { DEFAULT_SITE, getSiteFolder } from './i18n.js';
+import { forgetMember } from './member.js';
 
 const TOKEN_KEY = 'token';
 // the address parameter with the members' page to go back to after logging in
@@ -122,7 +123,8 @@ export function setToken(token) {
 }
 
 /**
- * Removes the token (logout) and tells the page (`auth:change`).
+ * Removes the token (logout), and the member's details kept with it (scripts/member.js), and tells
+ * the page (`auth:change`).
  */
 export function clearToken() {
   try {
@@ -130,6 +132,7 @@ export function clearToken() {
   } catch {
     // nothing stored
   }
+  forgetMember();
   document.dispatchEvent(new CustomEvent('auth:change', { detail: { loggedIn: false } }));
 }
 
