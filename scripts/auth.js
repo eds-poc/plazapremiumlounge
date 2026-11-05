@@ -149,7 +149,7 @@ function homePath() {
  * @param {string} path
  * @returns {boolean}
  */
-function isHomePath(path) {
+export function isHomePath(path) {
   return /^\/(?:[a-z]{2}-[a-z]{2}\/?)?(?:index(?:\.html)?)?$/.test(path);
 }
 
