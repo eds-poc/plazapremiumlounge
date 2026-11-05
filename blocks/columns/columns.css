@@ -245,18 +245,28 @@
    (heading, text, the social links with their icons, the hashtags), centred, and a photo cell.
    Mobile first: the text, then the photo centred below it (250px wide, 300px from 576px); from
    768px the photo at the bottom left (360px wide, the band's height from 992px) and the text in
-   the rest, from 40% of the band */
+   the rest, from 40% of the band. The newsletter below sits right under the band: on the source
+   it covers the bottom of the photo (50px on phones, 30px from 768px), so that part is cut off */
 .columns.social {
-  /* one-off: the source band's heading plum, photo widths and text inset */
+  /* one-off: the source band's heading plum, photo widths, text inset and the newsletter's overlap */
   --columns-social-heading: #6e1e46;
   --columns-social-photo: 250px;
   --columns-social-inset: var(--spacing-9);
+  --columns-social-overlap: 50px;
 
   text-align: center;
 }
 
 .columns.social > div:has(> div:not(.columns-img-col)) {
   align-items: center;
+
+  /* the photo's bottom, under the newsletter on the source, is cut off */
+  overflow: hidden;
+}
+
+/* the band is the last thing above the newsletter: no section space below it */
+main > .section:has(> .columns-wrapper > .columns.social) {
+  padding-bottom: 0;
 }
 
 .columns.social > div > div:not(.columns-img-col) {
@@ -271,6 +281,7 @@
   display: flex;
   justify-content: center;
   order: 1;
+  margin-bottom: calc(-1 * var(--columns-social-overlap));
   padding: 0;
 }
 
@@ -329,6 +340,10 @@
 @media (width >= 768px) {
   .columns.social {
     --columns-social-photo: 360px;
+    --columns-social-overlap: 30px;
+
+    /* into the newsletter's own 20px space above its panel, so the panel sits right under the band */
+    margin-bottom: calc(-1 * var(--spacing-7));
   }
 
   .columns.social > div:has(> div:not(.columns-img-col)) {
@@ -344,7 +359,7 @@
     grid-auto-flow: row dense;
     grid-template-columns: 1fr minmax(0, 353px) minmax(0, 177px) 1fr;
     align-content: start;
-    padding: 80px calc(var(--columns-social-inset) + var(--grid-gutter) / 2) 100px calc(40% + var(--spacing-3));
+    padding: 80px calc(var(--columns-social-inset) + var(--grid-gutter) / 2) calc(100px - var(--columns-social-overlap)) calc(40% + var(--spacing-3));
   }
 
   .columns.social > div > div:not(.columns-img-col) > h2,
@@ -363,8 +378,9 @@
 
   .columns.social > div > .columns-img-col:is(:first-child, :last-child) {
     position: absolute;
-    bottom: 0;
+    bottom: calc(-1 * var(--columns-social-overlap));
     left: -2.5%;
+    margin-bottom: 0;
   }
 }
 
