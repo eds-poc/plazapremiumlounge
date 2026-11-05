@@ -29,6 +29,8 @@ export const PAGE_VIEW = 'web.webPageDetails.pageViews';
 const BRAND = 'plaza premium lounge';
 // the background read of a member's missing details, once a page
 let storing;
+// the page's name and site section set by a block (setPageDetails)
+let pageDetails = {};
 
 /**
  * A logged-in member's kept details; when there are none, they're read in the background (once a
@@ -44,8 +46,9 @@ function memberFor(token) {
 
 /**
  * The page's name and site section: the page metadata `page-name` and `site-section` when
- * authored, else from the path after the language folder: the home page is "homepage" in "home",
- * /en-uk/news/some-story is "news:some-story" in "news".
+ * authored, else the ones a block set (setPageDetails, e.g. the lounge listing), else from the path
+ * after the language folder: the home page is "homepage" in "home", /en-uk/news/some-story is
+ * "news:some-story" in "news".
  * @returns {{pageName: string, siteSection: string}}
  */
 function pageInfo() {
@@ -54,9 +57,24 @@ function pageInfo() {
     .map((s) => s.toLowerCase());
   if (folder && segments[0] === folder) segments.shift();
   if (segments.at(-1) === 'index') segments.pop();
-  const pageName = getMetadata('page-name').trim() || segments.join(':') || 'homepage';
-  const siteSection = getMetadata('site-section').trim() || segments[0] || 'home';
+  const pageName = getMetadata('page-name').trim() || pageDetails.pageName
+    || segments.join(':') || 'homepage';
+  const siteSection = getMetadata('site-section').trim() || pageDetails.siteSection
+    || segments[0] || 'home';
   return { pageName, siteSection };
+}
+
+/**
+ * Sets the page's name and site section for a page type a block knows (e.g. the lounge listing:
+ * "Beijing:listing" in "listing"), for every event after it; the page's own metadata `page-name`
+ * and `site-section` still win.
+ * @param {{pageName?: string, siteSection?: string}} details
+ */
+export function setPageDetails({ pageName, siteSection } = {}) {
+  pageDetails = {
+    pageName: (pageName || '').trim(),
+    siteSection: (siteSection || '').trim(),
+  };
 }
 
 /**
