@@ -385,6 +385,25 @@ function buildFilters(options, selected, onChange) {
 }
 
 /**
+ * The properties as the listing shows them: the location groups in order, each with its cards in
+ * order, then the passes.
+ * @param {Object[]} shown
+ * @returns {{heading: string, items: Object[]}[]}
+ */
+function groupProperties(shown) {
+  const groups = new Map();
+  shown.filter((p) => !p.pass).forEach((p) => {
+    if (!groups.has(p.location.key)) groups.set(p.location.key, { ...p.location, items: [] });
+    groups.get(p.location.key).items.push(p);
+  });
+  const ordered = [...groups.values()].sort((a, b) => a.seq - b.seq);
+  const passes = shown.filter((p) => p.pass);
+  if (passes.length) ordered.push({ heading: '', items: passes });
+  ordered.forEach((group) => group.items.sort((a, b) => a.seq - b.seq));
+  return ordered;
+}
+
+/**
  * Renders the listing: the location groups with their cards, then the passes; the result count
  * for screen readers; the empty message (with Clear when filters are on).
  * @param {HTMLElement} results
@@ -395,20 +414,13 @@ function buildFilters(options, selected, onChange) {
  */
 function renderResults(results, properties, selected, status, onClear, prefix, settings) {
   const shown = properties.filter((p) => matches(p, selected));
-  const groups = new Map();
-  shown.filter((p) => !p.pass).forEach((p) => {
-    if (!groups.has(p.location.key)) groups.set(p.location.key, { ...p.location, items: [] });
-    groups.get(p.location.key).items.push(p);
-  });
-  const ordered = [...groups.values()].sort((a, b) => a.seq - b.seq);
-  const passes = shown.filter((p) => p.pass);
-  if (passes.length) ordered.push({ heading: '', items: passes });
+  const ordered = groupProperties(shown);
   let n = 0;
   const sections = ordered.map((group) => {
     const section = el('section', 'property-list-location');
     if (group.heading) section.append(el('h2', 'property-list-heading', group.heading));
     const list = el('ul', 'property-list-cards');
-    group.items.sort((a, b) => a.seq - b.seq).forEach((p) => {
+    group.items.forEach((p) => {
       list.append(buildCard(p, `${prefix}-${n}`, n === 0, settings));
       n += 1;
     });
@@ -565,6 +577,8 @@ export default async function decorate(block) {
   block.append(dialog);
 
   let load;
+  // the Kwanko listing tag went out (once a page, not on a retry)
+  let tagged = false;
   const render = async () => {
     if (!city) {
       showMessage(results, translate('propertyEmpty'), null, 'Add a "city-code" row (e.g. city-code | HKHKG) in the block.');
@@ -616,6 +630,13 @@ export default async function decorate(block) {
     }
     layout.classList.toggle('no-filters', !form);
     renderResults(results, properties, selected, status, clearAll, prefix, settings);
+    // the Kwanko listing tag: all the city's property codes, in the listing's order (once a page;
+    // the tag waits for Kwanko UniJS, which loads with the other tags)
+    if (!tagged) {
+      tagged = true;
+      const codes = groupProperties(properties).flatMap((group) => group.items.map((p) => p.code));
+      import('../../scripts/kwanko.js').then(({ listingTag }) => listingTag(codes));
+    }
   };
   // the page's loader stays up until the lounges are shown (the first load is awaited, so the
   // page doesn't hide its loader before)
