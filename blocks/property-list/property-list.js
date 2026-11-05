@@ -1,5 +1,7 @@
 import { loadCSS } from '../../scripts/aem.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
+// eslint-disable-next-line import/no-cycle
+import { pushEvent } from '../../scripts/datalayer.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { getLanguage, translate } from '../../scripts/i18n.js';
 import {
@@ -216,6 +218,32 @@ function buildLoyalty(text, signup) {
  * @param {Object} settings The authored settings (e.g. the sign-up link)
  * @returns {HTMLElement}
  */
+/**
+ * The data layer's link click for a card's View now: the lounge, its airport or station, and a
+ * booking that isn't chosen yet (now, no guests).
+ * @param {Object} property
+ */
+function trackViewLounge(property) {
+  const eventName = 'view lounge';
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
+    _plazapremiumloungemanagementli: {
+      searchDetails: { searchClickRank: 1 },
+      bookingInfo: {
+        propertyCurrencyCode: property.currency,
+        // now, as ISO 8601 UTC without milliseconds (2026-11-05T11:20:30Z)
+        checkinDateTime: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+        daysToBooking: 0,
+        totalGuestCount: 0,
+        adultCount: 0,
+        childCount: 0,
+      },
+      locationDetails: { iataCode: property.iata, locationName: property.location.name },
+      outletDetails: { outletId: property.outletId, outletName: property.name },
+    },
+  });
+}
+
 function buildCard(property, id, eager, settings) {
   const card = el('li', 'property-card');
   if (property.first) card.classList.add('property-card-first');
@@ -284,7 +312,10 @@ function buildCard(property, id, eager, settings) {
       button.href = detail;
       button.setAttribute('aria-label', `${view.label} ${property.name}`);
       const wrap = el('p', 'property-card-view');
-      wrap.append(applyButtonAction(button));
+      const viewLink = applyButtonAction(button);
+      // pushed as the click happens, before the page moves on
+      viewLink.addEventListener('click', () => trackViewLounge(property));
+      wrap.append(viewLink);
       action.append(wrap);
     }
     bottom.append(action);
