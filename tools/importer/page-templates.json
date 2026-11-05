@@ -202,6 +202,67 @@
           ]
         }
       ]
+    },
+    {
+      "name": "landing-pages",
+      "urls": [
+        "https://www.plazapremiumlounge.com/en-uk/Landing-Pages/connected-to-wifi",
+        "https://www.plazapremiumlounge.com/en-uk/Landing-Pages/how-to-connect-to-wifi"
+      ],
+      "representativeUrl": "https://www.plazapremiumlounge.com/en-uk/Landing-Pages/how-to-connect-to-wifi",
+      "description": "Smart Traveller WiFi landing pages: banner (Image offer-banner, border-rounded), intro (lead-copy or default content), text and image rows (Columns text-image, halves-on-mobile, text-medium, row-spacing), Travel Smart band (Columns social); sections in fixed-width",
+      "blocks": [
+        {
+          "name": "image",
+          "variants": [
+            "offer-banner",
+            "border-rounded"
+          ],
+          "instances": [
+            ".container.xmas2019 > .pagebannerImg"
+          ]
+        },
+        {
+          "name": "columns",
+          "variants": [
+            "text-image",
+            "halves-on-mobile",
+            "text-medium",
+            "row-spacing"
+          ],
+          "instances": [
+            ".container.xmas2019 .giftCard .row",
+            ".container.xmas2019 .lounge .row"
+          ]
+        },
+        {
+          "name": "columns",
+          "variants": [
+            "social"
+          ],
+          "instances": [
+            ".container.xmas2019 > .social"
+          ]
+        }
+      ],
+      "urlPattern": "/en-uk/Landing-Pages/*",
+      "sections": [
+        {
+          "id": "section-1",
+          "name": "Landing page body",
+          "selector": [
+            ".container.xmas2019"
+          ],
+          "style": "fixed-width",
+          "blocks": [
+            "image",
+            "columns"
+          ],
+          "defaultContent": [
+            ".intro-wrapper"
+          ]
+        }
+      ]
     }
   ]
 }
