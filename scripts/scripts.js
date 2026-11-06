@@ -308,6 +308,15 @@ function loadDelayed() {
   import('./consent-check.js');
   // the back to top button, on every page
   import('./back-to-top.js').then(({ default: initBackToTop }) => initBackToTop());
+  // Kwanko UniJS (the affiliate tag)
+  import('./kwanko.js').then(({ default: initKwanko }) => { initKwanko(); });
+  // consenTag (metadata `consentag-id`)
+  import('./consentag.js').then(({ default: initConsenTag }) => initConsenTag());
+  // analytics: the page view in the data layer, then the Launch script (metadata
+  // `launch-script`)
+  import('./datalayer.js').then(({ default: initDataLayer }) => initDataLayer());
+  // Google Tag Manager (metadata `gtm-id`)
+  import('./gtm.js').then(({ default: initGtm }) => initGtm());
   // load anything that can be postponed to the latest here
 }
 

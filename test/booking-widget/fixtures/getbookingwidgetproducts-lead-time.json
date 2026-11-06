@@ -1,0 +1,28 @@
+{
+  "address": "Airside, International Terminal, Located on after second security check and second floor on the left side, Adnan Menderes International Airport, Izmir, Turkey",
+  "defaultCurrency": "USD",
+  "email": "turkey@plaza-network.com",
+  "factSheetUrls": [],
+  "isTecoEnabled": true,
+  "itemCount": 0,
+  "itemGroups": [],
+  "items": [],
+  "lmsOutletCode": "11132",
+  "locationDisplayName": "Nnamdi Azikiwe International Airport",
+  "locationName": "Adnan Menderes International Airport",
+  "loungeDescription": "<p>The Lounge at Izmir Adnan Menderes Airport offers 24/7 service, a rich buffet, fast Wi-Fi, and modern seating for a stylish and relaxing break.<br><br>This lounge is owned and managed by a third party operator.</p>",
+  "loungePropertyCount": 1,
+  "message": "OK",
+  "operatingHours": "24 Hours Daily",
+  "phone": "+852 (HK) 5700 5329",
+  "productApiError": {
+    "details": "Booking must be made at least 01:00 hours in advance.",
+    "errorCode": "DCPE060",
+    "message": "Property lead time is not met"
+  },
+  "propertyCode": "PRPRTY1343",
+  "propertyCurrencyCode": "USD",
+  "propertyDisplayName": "SDS Lounge",
+  "shortLocation": "International Departure",
+  "statusCode": "200"
+}

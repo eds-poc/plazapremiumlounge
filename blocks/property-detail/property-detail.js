@@ -3,12 +3,16 @@ import {
 } from '../../scripts/aem.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
 import apiUrl from '../../scripts/endpoints.js';
-import { getLanguage, translate } from '../../scripts/i18n.js';
+import { translate } from '../../scripts/i18n.js';
 import openGallery from '../../scripts/gallery.js';
 import { openModal } from '../../scripts/modal-dialog.js';
-import buildDatePicker from './date-picker.js';
 import {
-  buildBadge, buildSlider, el, fetchJson, getApiLanguage, isIsoDate, isPreview, readProperty,
+  DAY_MINUTES, MAX_GUESTS, SLOT_MINUTES, chooseSlot, fitGuests, formatDate,
+  readLeadTime, readTimeZone, toStartDateTime, toTime,
+} from '../../scripts/booking.js';
+import buildDatePicker from '../../scripts/date-picker.js';
+import {
+  buildBadge, buildSlider, el, fetchJson, getApiLanguage, isPreview, readProperty,
   safeHtml, setLoading, toKey, toUrl,
 } from '../../scripts/properties.js';
 
@@ -22,11 +26,6 @@ const SERVICES_DELAY_MS = 400;
 const MOBILE = '(width < 768px)';
 // desktop shows the first four photos, as the source
 const DESKTOP_PHOTOS = 4;
-const SLOT_MINUTES = 30;
-const DAY_MINUTES = 24 * 60;
-// the source's guest limits: 9 guests at most, and up to two children per adult
-const MAX_GUESTS = 9;
-const CHILDREN_PER_ADULT = 2;
 const DEFAULT_CURRENCY = 'USD';
 
 /**
@@ -57,123 +56,6 @@ function writeParams(values) {
     if (value) url.searchParams.set(key, value);
   });
   window.history.replaceState(window.history.state, '', url);
-}
-
-/**
- * The IANA time zone in the service's text (e.g. "(GMT+8:00) Asia/Hong_Kong, …"), if valid.
- * @param {string} text
- * @returns {string|undefined}
- */
-function readTimeZone(text) {
-  const zone = (text || '').match(/[A-Za-z]+\/[A-Za-z_]+(?:\/[A-Za-z_]+)?/)?.[0];
-  if (!zone) return undefined;
-  try {
-    Intl.DateTimeFormat('en', { timeZone: zone });
-    return zone;
-  } catch {
-    return undefined;
-  }
-}
-
-/**
- * Today's date (YYYY-MM-DD) and the minutes since midnight at the lounge.
- * @param {string} [timeZone]
- * @returns {{date: string, minutes: number}}
- */
-function nowAt(timeZone) {
-  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
-    timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
-  }).formatToParts(new Date()).map((p) => [p.type, p.value]));
-  return { date: `${parts.year}-${parts.month}-${parts.day}`, minutes: Number(parts.hour) * 60 + Number(parts.minute) };
-}
-
-/**
- * The day after a date (YYYY-MM-DD).
- * @param {string} date
- * @returns {string}
- */
-function nextDay(date) {
-  const d = new Date(`${date}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + 1);
-  return d.toISOString().slice(0, 10);
-}
-
-/**
- * A booking time as HHmm (e.g. 930 → "0930").
- * @param {number} minutes
- * @returns {string}
- */
-function toTime(minutes) {
-  return `${String(Math.floor(minutes / 60)).padStart(2, '0')}${String(minutes % 60).padStart(2, '0')}`;
-}
-
-/**
- * A start as the services call takes it: "2026-10-21 14:00:00" (the lounge's local time).
- * @param {string} date YYYY-MM-DD
- * @param {string} time HHmm
- * @returns {string}
- */
-function toStartDateTime(date, time) {
-  return `${date} ${time.slice(0, 2)}:${time.slice(2)}:00`;
-}
-
-/**
- * The booking date and time to show, as the source: the address's date and time when valid,
- * else the first bookable slot; an earlier date or time moves forward to it (the time onto the
- * half-hour grid). The first bookable slot is the half hour after now plus the lounge's lead time
- * at the lounge (e.g. 12:32 with 1 hour's lead → 14:00), which can be the next day.
- * @param {{date: string, time: string}} params
- * @param {string} [timeZone]
- * @param {number} [leadMinutes] How far ahead bookings must start
- * @returns {{date: string, time: string, firstDay: string, earliest: number}} `earliest` is the
- *   first bookable minute of `firstDay`
- */
-function chooseSlot(params, timeZone, leadMinutes = 0) {
-  const now = nowAt(timeZone);
-  let first = Math.ceil((now.minutes + leadMinutes + 1) / SLOT_MINUTES) * SLOT_MINUTES;
-  let firstDay = now.date;
-  while (first >= DAY_MINUTES) {
-    firstDay = nextDay(firstDay);
-    first -= DAY_MINUTES;
-  }
-  let date = isIsoDate(params.date) && params.date >= firstDay ? params.date : firstDay;
-  const asked = /^\d{4}$/.test(params.time) ? Number(params.time.slice(0, 2)) * 60 + Number(params.time.slice(2)) : NaN;
-  let minutes = asked >= 0 && asked < DAY_MINUTES
-    ? Math.ceil(asked / SLOT_MINUTES) * SLOT_MINUTES : first;
-  if (date === firstDay && minutes < first) minutes = first;
-  if (minutes >= DAY_MINUTES) {
-    date = nextDay(date);
-    minutes -= DAY_MINUTES;
-  }
-  return {
-    date, time: toTime(minutes), firstDay, earliest: first,
-  };
-}
-
-/**
- * The lounge's booking lead time in minutes, from the service's hours ("1.0", "01.00", "0.0").
- * @param {string|number} value
- * @returns {number}
- */
-function readLeadTime(value) {
-  const hours = Number.parseFloat(value);
-  return Number.isFinite(hours) && hours > 0 ? Math.round(hours * 60) : 0;
-}
-
-/**
- * A date as the source shows it in each language: "21 Oct 2026", "22 Out 2026", "2026年10月22日".
- * @param {string} date YYYY-MM-DD
- * @returns {string}
- */
-function formatDate(date) {
-  const lang = getLanguage();
-  const d = new Date(`${date}T00:00:00Z`);
-  if (/^(zh|ja)/.test(lang)) {
-    const [y, m, day] = date.split('-').map(Number);
-    return `${y}年${m}月${day}日`;
-  }
-  const month = new Intl.DateTimeFormat(lang, { month: 'short', timeZone: 'UTC' }).format(d).replace(/\.$/, '');
-  return `${String(d.getUTCDate()).padStart(2, '0')} ${month.charAt(0).toUpperCase()}${month.slice(1)} ${d.getUTCFullYear()}`;
 }
 
 /**
@@ -557,15 +439,13 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
    * @param {string} [changed] `adults` or `children`, the count the visitor changed
    */
   const fixGuests = (changed) => {
-    let a = Math.min(MAX_GUESTS, Math.max(1, count(adults, 1)));
-    let c = Math.max(0, count(children, 0));
-    if (changed === 'adults') a = Math.max(1, Math.min(a, MAX_GUESTS - c));
-    c = Math.min(c, CHILDREN_PER_ADULT * a, MAX_GUESTS - a);
-    a = Math.min(a, MAX_GUESTS - c);
+    const fit = fitGuests(count(adults, 1), count(children, 0), changed);
+    const a = fit.adults;
+    const c = fit.children;
     if (adults.value !== String(a)) adults.value = a;
     if (children.value !== String(c)) children.value = c;
-    adults.max = MAX_GUESTS - c;
-    children.max = Math.min(CHILDREN_PER_ADULT * a, MAX_GUESTS - a);
+    adults.max = fit.maxAdults;
+    children.max = fit.maxChildren;
     // (the buttons look the same at a limit, as the source's; they're marked for screen readers)
     [[adults, a], [children, c]].forEach(([input, value]) => {
       const wrap = input.closest('.property-detail-counter');

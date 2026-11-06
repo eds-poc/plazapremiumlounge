@@ -6,9 +6,9 @@ purchaser, the totals and the terms. Authors write the texts; the booking comes 
 **GetOrderDetail** API for the address's `bookingid`, with the member's login token.
 
 The page needs a login: a page with `members-only` true (the metadata sheet's column, e.g. a row
-`/**/view-booking`, or the page's own Metadata) sends a visitor without a valid token to the home
-page. If GetOrderDetail refuses the token (401), the visitor is logged
-out and sent home. A missing or unknown booking shows the `notFound` text; any other failure shows
+`/**/view-booking`, or the page's own Metadata) sends a guest to the home page with the page in
+`?redirectUrl=`; the login modal opens there, and after logging in the guest comes back to this
+booking. An expired login, or GetOrderDetail refusing the token (401), logs out and goes home. A missing or unknown booking shows the `notFound` text; any other failure shows
 the `error` text with Try again. The site's loader shows until the booking is in.
 
 ## Table: 2 columns (Key | Text)
