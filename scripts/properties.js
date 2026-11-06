@@ -406,6 +406,11 @@ export function readProperty(item) {
   return {
     code: item.propertyCode,
     name,
+    // for analytics (scripts/datalayer.js): the airport or station code, the LMS outlet code and
+    // the property's currency
+    iata,
+    outletId: item.lmsOutletCode ? String(item.lmsOutletCode).trim() : '',
+    currency: (item.defaultCurrency || '').trim().toUpperCase(),
     pass: type === PASS,
     seq: Number(item.propertySeq) || 0,
     location: {
