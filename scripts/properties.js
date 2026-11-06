@@ -8,6 +8,7 @@ import { applyButtonAction } from './button-actions.js';
 import apiUrl from './endpoints.js';
 import { DEFAULT_SITE, getSiteFolder, translate } from './i18n.js';
 import { hideLoader, showLoader } from './scripts.js';
+import { isIsoDate } from './booking.js';
 
 // property types shown, as the source pages: lounges, and passes (gift cards)
 export const LOUNGE = 'LOUNGE';
@@ -347,16 +348,8 @@ export function getApiLanguage() {
   return API_LANGUAGES[folder] || folder;
 }
 
-/**
- * Whether a value is a real calendar date as YYYY-MM-DD (not e.g. 2026-02-30).
- * @param {string} value
- * @returns {boolean}
- */
-export function isIsoDate(value) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return false;
-  const d = new Date(`${value}T00:00:00Z`);
-  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
-}
+// (a booking rule, kept in booking.js; offered here too)
+export { isIsoDate };
 
 /**
  * The lounge template page for the current site folder (e.g. /en-uk/find/lounge).

@@ -1,0 +1,171 @@
+{
+ "ageGroup": [
+  {
+   "description": "Adult(s)",
+   "group": "adult",
+   "primary": true,
+   "range": "2-null",
+   "status": true
+  },
+  {
+   "description": "Child(ren)",
+   "group": "child",
+   "primary": false,
+   "range": "0-2",
+   "status": true
+  }
+ ],
+ "agentCode": "PPL",
+ "agentType": "master",
+ "amountPayable": 0,
+ "cartId": "CRT_3bGmiubrMK",
+ "cartTotalPrice": {
+  "totalAdditionalPrice": 0,
+  "totalAdditionalWaiverAmount": 0,
+  "totalBasePrice": 85,
+  "totalDiscounts": 0,
+  "totalMarkupWaiverAmount": 0,
+  "totalPrice": 85,
+  "totalPriceUsd": 85,
+  "totalPromocodeAmount": 0,
+  "totalPromocodeAmountUsd": 0,
+  "totalTax": 0
+ },
+ "cityName": "Hong Kong SAR",
+ "countryCode": "HK",
+ "countryName": "Hong Kong SAR, China",
+ "createdTime": "2026-11-04 10:14:29",
+ "currency": "USD",
+ "customerCode": "PPL",
+ "products": [
+  {
+   "additionalAttributes": [],
+   "arrtureSku": "1041",
+   "basedOn": "Per Unit",
+   "cartItemId": "CRT_ITM_2fOMsMgODw",
+   "catalogueCode": "PRD3903-Regular-PRPRTY1235-GFTCRD-LCTN517-RTPLN3890",
+   "createdDate": "2026-11-04 10:14:29",
+   "disclaimer": "<p>PPL Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the PPL Pass will expire.</p>",
+   "images": [
+    {
+     "name": "Pass_Family Pass.jpg",
+     "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prd_images/Pass_Family Pass_product_3903.jpg"
+    }
+   ],
+   "isFlightNumberMandatory": false,
+   "isStLoginMandatory": false,
+   "itemPriceDetails": {
+    "additionalCharges": [],
+    "baseRate": [
+     {
+      "currency": "USD",
+      "price": 85,
+      "totalMarkUpCharge": 0
+     }
+    ],
+    "discounts": [],
+    "isSTRatePlan": false,
+    "priceCode": "RTPLN3890",
+    "priceName": "Global Family Pass​ Global Plaza Premium Lounge​",
+    "productTotalPrice": {
+     "totalAdditionalPrice": 0,
+     "totalBasePrice": 85,
+     "totalDiscounts": 0,
+     "totalMarkUpCharge": 0,
+     "totalPrice": 85,
+     "totalPriceUSD": 85,
+     "totalPromocodeAmount": 0,
+     "totalPromocodeAmountUSD": 0,
+     "totalTax": 0
+    },
+    "taxes": [],
+    "termsPolicies": [
+     {
+      "description": "<ul><li>The Adult Access Voucher and Child Access Voucher are separate entitlements and may be redeemed independently. They are not required to be redeemed at the same time, at the same Service Location or during the same journey.​</li><li>The Child Access Voucher grants lounge access to one (1) child aged eleven (11) or below. The child must be accompanied at all times by an adult aged at least eighteen (18) years old who holds valid and eligible lounge access to the same Service Location. The Child Access Voucher does not include lounge access for the accompanying adult.​</li></ul>",
+      "isAttachedToEmail": true,
+      "isDisplayOnWebsite": true,
+      "sequence": "0",
+      "termsCode": "SLSTRM3684",
+      "termsName": "GLOBAL FAMILY PASS TERMS & CONDITIONS"
+     },
+     {
+      "description": "<ul><li>PPL Pass grants visit(s) to <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://ppl2-preprod.plazapremiumlounge.com/en-uk/eligible-lounges\">designated location(s)</a> only.</li><li>PPL Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the PPL Pass will expire. Expired PPL Pass cannot be reissued or reinstated.</li><li>Smart Traveller members: Upon successful activation PPL Pass lounge access voucher(s) (“Voucher”) will be added to the Smart Traveller mobile app wallet. ST Points, if any, will be issued to the account of the Smart Traveller member who activated the PPL Pass.</li><li>Non-Smart Traveller members: Upon successful activation, Voucher will be emailed to the registered email address provided at the time of activation.&nbsp;</li><li>Unless otherwise specified, Voucher is valid for twelve (12) months upon PPL Pass activation.</li><li>PPL Pass purchase, Voucher and any applicable ST Points issuance are final, non-cancellable, non-refundable and non-replaceable. Plaza Premium Lounge shall not be responsible for any loss, theft, damage, or unauthorised use of the Voucher.</li><li>The Vouchers are transferable provided always that the transfer is not a part of any sale or exchange for value.</li><li>The Vouchers have no cash value and cannot be exchanged for cash, points, or any other services or products.</li><li>Unless otherwise specified, each Voucher grants the voucher holder up to 3-hour lounge access only per visit to <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://ppl2-preprod.plazapremiumlounge.com/en-uk/eligible-lounges\">eligible lounges</a> (“Service Locations”). Operating hours, services, and facilities may vary at each Service Location. This Voucher does not entitle the Voucher holder to any other services/products other than lounge access, and the Voucher holder agrees to pay for the use of any chargeable services/products offered at the relevant Service Location.</li><li>Access to Service Locations using Vouchers is not eligible for any rewards or loyalty points accrual.</li><li>The Voucher cannot be used in conjunction with any promotion or offer.</li><li>Read the full <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.plazapremiumlounge.com/gc-terms\">Terms and Conditions</a>.</li></ul>",
+      "isAttachedToEmail": true,
+      "isDisplayOnWebsite": true,
+      "sequence": "1",
+      "termsCode": "SLSTRM3676",
+      "termsName": "PPL PASS - GENERAL TERMS AND CONDITIONS"
+     }
+    ]
+   },
+   "locationCode": "LCTN517",
+   "locationName": "Hong Kong International Airport",
+   "maxNoOfProductsAllowed": 10,
+   "priceDetails": {
+    "additionalCharges": [],
+    "baseRate": [
+     {
+      "currency": "USD",
+      "price": 85
+     }
+    ],
+    "discounts": [],
+    "isSTRatePlan": false,
+    "priceCode": "RTPLN3890",
+    "priceName": "Global Family Pass​ Global Plaza Premium Lounge​",
+    "taxes": [],
+    "termsPolicies": [
+     {
+      "description": "<ul><li>The Adult Access Voucher and Child Access Voucher are separate entitlements and may be redeemed independently. They are not required to be redeemed at the same time, at the same Service Location or during the same journey.​</li><li>The Child Access Voucher grants lounge access to one (1) child aged eleven (11) or below. The child must be accompanied at all times by an adult aged at least eighteen (18) years old who holds valid and eligible lounge access to the same Service Location. The Child Access Voucher does not include lounge access for the accompanying adult.​</li></ul>",
+      "isAttachedToEmail": true,
+      "isDisplayOnWebsite": true,
+      "sequence": "0",
+      "termsCode": "SLSTRM3684",
+      "termsName": "GLOBAL FAMILY PASS TERMS & CONDITIONS"
+     },
+     {
+      "description": "<ul><li>PPL Pass grants visit(s) to <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://ppl2-preprod.plazapremiumlounge.com/en-uk/eligible-lounges\">designated location(s)</a> only.</li><li>PPL Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the PPL Pass will expire. Expired PPL Pass cannot be reissued or reinstated.</li><li>Smart Traveller members: Upon successful activation PPL Pass lounge access voucher(s) (“Voucher”) will be added to the Smart Traveller mobile app wallet. ST Points, if any, will be issued to the account of the Smart Traveller member who activated the PPL Pass.</li><li>Non-Smart Traveller members: Upon successful activation, Voucher will be emailed to the registered email address provided at the time of activation.&nbsp;</li><li>Unless otherwise specified, Voucher is valid for twelve (12) months upon PPL Pass activation.</li><li>PPL Pass purchase, Voucher and any applicable ST Points issuance are final, non-cancellable, non-refundable and non-replaceable. Plaza Premium Lounge shall not be responsible for any loss, theft, damage, or unauthorised use of the Voucher.</li><li>The Vouchers are transferable provided always that the transfer is not a part of any sale or exchange for value.</li><li>The Vouchers have no cash value and cannot be exchanged for cash, points, or any other services or products.</li><li>Unless otherwise specified, each Voucher grants the voucher holder up to 3-hour lounge access only per visit to <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://ppl2-preprod.plazapremiumlounge.com/en-uk/eligible-lounges\">eligible lounges</a> (“Service Locations”). Operating hours, services, and facilities may vary at each Service Location. This Voucher does not entitle the Voucher holder to any other services/products other than lounge access, and the Voucher holder agrees to pay for the use of any chargeable services/products offered at the relevant Service Location.</li><li>Access to Service Locations using Vouchers is not eligible for any rewards or loyalty points accrual.</li><li>The Voucher cannot be used in conjunction with any promotion or offer.</li><li>Read the full <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.plazapremiumlounge.com/gc-terms\">Terms and Conditions</a>.</li></ul>",
+      "isAttachedToEmail": true,
+      "isDisplayOnWebsite": true,
+      "sequence": "1",
+      "termsCode": "SLSTRM3676",
+      "termsName": "PPL PASS - GENERAL TERMS AND CONDITIONS"
+     }
+    ]
+   },
+   "productCode": "PRD3903",
+   "productDisplayName": "Global Family Pass​  Global Plaza Premium Lounge​",
+   "productId": 3903,
+   "productName": "Global Family Pass​  Global Plaza Premium Lounge​",
+   "productType": "Regular",
+   "productVarients": [],
+   "propertyCode": "PRPRTY1235",
+   "propertyDisplayName": "Plaza Premium Lounge Pass",
+   "propertyName": "Plaza Premium Lounge Pass",
+   "propertyTypeCode": "GFTCRD",
+   "propertyTypeId": 8,
+   "propertyTypeName": "Gift Card",
+   "quantity": 1,
+   "quantityText": "",
+   "serviceCode": "SRVC1622",
+   "serviceDisplayName": "Pass Service",
+   "serviceName": "Pass Service",
+   "serviceType": "PASS",
+   "shortLocation": "International Pass",
+   "startDate": "2026-11-22 20:00:00"
+  }
+ ],
+ "sortedTermsPolicies": [
+  {
+   "description": "<ul><li>The Adult Access Voucher and Child Access Voucher are separate entitlements and may be redeemed independently. They are not required to be redeemed at the same time, at the same Service Location or during the same journey.​</li><li>The Child Access Voucher grants lounge access to one (1) child aged eleven (11) or below. The child must be accompanied at all times by an adult aged at least eighteen (18) years old who holds valid and eligible lounge access to the same Service Location. The Child Access Voucher does not include lounge access for the accompanying adult.​</li></ul>",
+   "termsName": "GLOBAL FAMILY PASS TERMS & CONDITIONS"
+  },
+  {
+   "description": "<ul><li>PPL Pass grants visit(s) to <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://ppl2-preprod.plazapremiumlounge.com/en-uk/eligible-lounges\">designated location(s)</a> only.</li><li>PPL Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the PPL Pass will expire. Expired PPL Pass cannot be reissued or reinstated.</li><li>Smart Traveller members: Upon successful activation PPL Pass lounge access voucher(s) (“Voucher”) will be added to the Smart Traveller mobile app wallet. ST Points, if any, will be issued to the account of the Smart Traveller member who activated the PPL Pass.</li><li>Non-Smart Traveller members: Upon successful activation, Voucher will be emailed to the registered email address provided at the time of activation.&nbsp;</li><li>Unless otherwise specified, Voucher is valid for twelve (12) months upon PPL Pass activation.</li><li>PPL Pass purchase, Voucher and any applicable ST Points issuance are final, non-cancellable, non-refundable and non-replaceable. Plaza Premium Lounge shall not be responsible for any loss, theft, damage, or unauthorised use of the Voucher.</li><li>The Vouchers are transferable provided always that the transfer is not a part of any sale or exchange for value.</li><li>The Vouchers have no cash value and cannot be exchanged for cash, points, or any other services or products.</li><li>Unless otherwise specified, each Voucher grants the voucher holder up to 3-hour lounge access only per visit to <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://ppl2-preprod.plazapremiumlounge.com/en-uk/eligible-lounges\">eligible lounges</a> (“Service Locations”). Operating hours, services, and facilities may vary at each Service Location. This Voucher does not entitle the Voucher holder to any other services/products other than lounge access, and the Voucher holder agrees to pay for the use of any chargeable services/products offered at the relevant Service Location.</li><li>Access to Service Locations using Vouchers is not eligible for any rewards or loyalty points accrual.</li><li>The Voucher cannot be used in conjunction with any promotion or offer.</li><li>Read the full <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.plazapremiumlounge.com/gc-terms\">Terms and Conditions</a>.</li></ul>",
+   "termsName": "PPL PASS - GENERAL TERMS AND CONDITIONS"
+  }
+ ],
+ "totalAmendmentCharge": 0,
+ "totalCancellationCharge": 0,
+ "totalRefundAmount": 0
+}

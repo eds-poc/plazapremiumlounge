@@ -16,6 +16,10 @@ const BOOKING_ENDPOINTS = {
   // an airport's featured lounge for a start and guests: its details (name, location line,
   // photos, features) and its products with prices, grouped by service (POST, JSON body)
   bookingWidgetProducts: '/api/v1/web/ppg-app/getbookingwidgetproducts',
+  // the cart: POST (JSON: currency, products, pointOfPurchase, channel, isThirdPartyFulfilment)
+  // creates a cart with the products and answers its cartId; GET ?cartId=&locale= reads it;
+  // DELETE ?cartId= deletes (empties) it
+  cart: '/api/v1/web/ppg-app/cart',
 };
 
 // endpoint paths, joined to the API domain
