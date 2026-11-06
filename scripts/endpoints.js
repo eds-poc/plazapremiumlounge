@@ -29,6 +29,14 @@ const ENDPOINTS = {
   newsletter: '/api/v1/web/app_demo/Newsletter',
   // the Contact Form submit: a placeholder path until the contact API exists
   contact: '/api/v1/web/app_demo/Contact',
+  // the Booking Form (group-form) submit, and the areas of service of a location (POST, JSON:
+  // locationOfService, languageCode; answer: { items: [{ value, text }] }): placeholder paths until
+  // the group booking APIs exist
+  groupBooking: '/api/v1/web/app_demo/GroupBooking',
+  // the lounge booking request (the Booking Form): a placeholder path
+  // until its API exists; its areas come from groupBookingAreas with form: 'bookingRequest'
+  bookingRequest: '/api/v1/web/app_demo/BookingRequest',
+  groupBookingAreas: '/api/v1/web/app_demo/GetGroupBookingAreas',
   // the login modal's submit (POST, JSON: username, password); answers with a JWT
   login: '/api/v1/web/app_demo/Login',
   // the forgot password modal's submit (POST, JSON: lastName, email)
