@@ -82,8 +82,9 @@ export default function buildDatePicker({
       .format(new Date(Date.UTC(2000, month, 1)));
     return `${text.charAt(0).toUpperCase()}${text.slice(1)}`;
   };
-  const dayName = (day) => new Intl.DateTimeFormat(lang, { weekday: 'long', timeZone: 'UTC' })
-    .format(new Date(Date.UTC(2023, 0, 1 + day)));
+  // (made once: a date format is slow to make)
+  const weekdayName = new Intl.DateTimeFormat(lang, { weekday: 'long', timeZone: 'UTC' });
+  const dayName = (day) => weekdayName.format(new Date(Date.UTC(2023, 0, 1 + day)));
   const fullDate = new Intl.DateTimeFormat(lang, { dateStyle: 'full', timeZone: 'UTC' });
 
   const element = el('div', `${prefix}-date`);

@@ -22,6 +22,38 @@ export const DAY_MINUTES = 24 * 60;
 export const MAX_GUESTS = 9;
 export const CHILDREN_PER_ADULT = 2;
 
+// time zones already checked: the locations service repeats them (about 250 locations, 70 zones),
+// and making a date format to check one is slow (it loads the zone's data)
+const checkedZones = new Map();
+let supportedZones;
+
+/**
+ * Whether the browser knows a time zone: in its list of zones, else (an alias, e.g. Asia/Calcutta)
+ * when a date format takes it. Checked once per zone.
+ * @param {string} zone
+ * @returns {boolean}
+ */
+function isTimeZone(zone) {
+  if (!checkedZones.has(zone)) {
+    if (!supportedZones) {
+      try {
+        supportedZones = new Set(Intl.supportedValuesOf('timeZone'));
+      } catch {
+        supportedZones = new Set();
+      }
+    }
+    let known = supportedZones.has(zone);
+    if (!known) {
+      try {
+        Intl.DateTimeFormat('en', { timeZone: zone });
+        known = true;
+      } catch { /* not a zone */ }
+    }
+    checkedZones.set(zone, known);
+  }
+  return checkedZones.get(zone);
+}
+
 /**
  * The IANA time zone in the service's text (e.g. "(GMT+8:00) Asia/Hong_Kong, …"), if valid.
  * @param {string} text
@@ -29,14 +61,11 @@ export const CHILDREN_PER_ADULT = 2;
  */
 export function readTimeZone(text) {
   const zone = (text || '').match(/[A-Za-z]+\/[A-Za-z_]+(?:\/[A-Za-z_]+)?/)?.[0];
-  if (!zone) return undefined;
-  try {
-    Intl.DateTimeFormat('en', { timeZone: zone });
-    return zone;
-  } catch {
-    return undefined;
-  }
+  return zone && isTimeZone(zone) ? zone : undefined;
 }
+
+// the clock's date format per time zone, made once each
+const clocks = new Map();
 
 /**
  * Today's date (YYYY-MM-DD) and the minutes since midnight at the lounge.
@@ -44,9 +73,21 @@ export function readTimeZone(text) {
  * @returns {{date: string, minutes: number}}
  */
 export function nowAt(timeZone) {
-  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
-    timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
-  }).formatToParts(new Date()).map((p) => [p.type, p.value]));
+  // the visitor's own time: the same date and minutes without a date format (the first one made on
+  // a page is slow)
+  if (!timeZone) {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    return { date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, minutes: d.getHours() * 60 + d.getMinutes() };
+  }
+  const key = timeZone;
+  if (!clocks.has(key)) {
+    clocks.set(key, new Intl.DateTimeFormat('en-CA', {
+      timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+    }));
+  }
+  const parts = Object.fromEntries(clocks.get(key).formatToParts(new Date())
+    .map((p) => [p.type, p.value]));
   return { date: `${parts.year}-${parts.month}-${parts.day}`, minutes: Number(parts.hour) * 60 + Number(parts.minute) };
 }
 
