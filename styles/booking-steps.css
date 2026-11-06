@@ -2,8 +2,8 @@
    it (View Booking, at its top; a list of steps, .booking-steps-list, for the pages with steps):
    maroon across the page's whole width (painted past its container, so the page doesn't scroll
    sideways), the steps centred in white (faded but the current one), an arrow between them; 15px
-   above and below at least 22px of steps (52px tall, with or without steps). From 768px only, as
-   the source */
+   above and below at least 22px of steps (52px tall, with or without steps). From 768px, as the
+   source; below it only a band with steps, as the source's compact phone bar */
 .booking-steps {
   display: none;
   box-sizing: content-box;
@@ -45,6 +45,64 @@
   margin: 0 var(--spacing-6) 0 var(--spacing-7);
   background-color: currentcolor;
   mask: url('../icons/arrow-right-light.svg') center / contain no-repeat;
+}
+
+/* below 768px, a band with steps as the source's phone bar: 8px above and below, the numbers of
+   the steps done (faded) and the current one (white), the current step's name after them in 12px;
+   the steps to come and the arrows hidden */
+.booking-steps :is(.booking-steps-number, .booking-steps-short) {
+  display: none;
+}
+
+@media (width < 768px) {
+  .booking-steps:has(.booking-steps-list) {
+    display: block;
+    padding: var(--spacing-3) 0;
+    font-size: var(--font-size-xs);
+  }
+
+  .booking-steps .booking-steps-list {
+    justify-content: flex-start;
+    gap: var(--spacing-2);
+  }
+
+  .booking-steps .booking-steps-item:not(.is-done, .is-active) {
+    display: none;
+  }
+
+  .booking-steps .booking-steps-item.is-done {
+    opacity: 1;
+  }
+
+  .booking-steps .booking-steps-item:not(:last-child)::after {
+    content: none;
+  }
+
+  .booking-steps .booking-steps-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: var(--radius-circle);
+    background-color: var(--color-text-inverse);
+    color: var(--color-brand-primary);
+    font-size: var(--font-size-2xs);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .booking-steps .is-done .booking-steps-number {
+    opacity: 0.6;
+  }
+
+  .booking-steps .is-active :is(.booking-steps-name, .booking-steps-short) {
+    display: block;
+    margin-left: var(--spacing-4);
+  }
+
+  .booking-steps :is(.is-done .booking-steps-name, .booking-steps-name:has(+ .booking-steps-short)) {
+    display: none;
+  }
 }
 
 @media (width >= 768px) {

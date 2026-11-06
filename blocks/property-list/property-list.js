@@ -1,5 +1,7 @@
 import { loadCSS } from '../../scripts/aem.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
+// eslint-disable-next-line import/no-cycle
+import { pushEvent, setPageDetails } from '../../scripts/datalayer.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { getLanguage, translate } from '../../scripts/i18n.js';
 import {
@@ -208,15 +210,52 @@ function buildLoyalty(text, signup) {
 }
 
 /**
+ * The page's name and site section in the data layer, for every event on a lounge listing:
+ * "<city>:listing" in "listing".
+ * @param {string} city The API's `cityName` (e.g. Beijing), else the page's last path part
+ */
+function setListingPage(city) {
+  if (city) setPageDetails({ pageName: `${city}:listing`, siteSection: 'listing' });
+}
+
+/**
+ * The data layer's link click for a card's View now: the lounge, its position in the list, its
+ * airport or station, and a booking that isn't chosen yet (now, no guests).
+ * @param {Object} property
+ * @param {number} rank The card's position in the list as shown (1 for the first)
+ */
+function trackViewLounge(property, rank) {
+  const eventName = 'view lounge';
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
+    _plazapremiumloungemanagementli: {
+      searchDetails: { searchClickRank: rank },
+      bookingInfo: {
+        propertyCurrencyCode: property.currency,
+        // now, as ISO 8601 UTC without milliseconds (2026-11-05T11:20:30Z)
+        checkinDateTime: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+        daysToBooking: 0,
+        totalGuestCount: 0,
+        adultCount: 0,
+        childCount: 0,
+      },
+      locationDetails: { iataCode: property.iata, locationName: property.location.name },
+      outletDetails: { outletId: property.outletId, outletName: property.name },
+    },
+  });
+}
+
+/**
  * One property card: photos, then the details (badge, name, location, hours, icons, note,
  * features, price, View and the loyalty line). Parts without data are left out.
  * @param {Object} property
  * @param {string} id A unique prefix for ids in the card
  * @param {boolean} eager
  * @param {Object} settings The authored settings (e.g. the sign-up link)
+ * @param {number} rank The card's position in the list as shown (1 for the first)
  * @returns {HTMLElement}
  */
-function buildCard(property, id, eager, settings) {
+function buildCard(property, id, eager, settings, rank) {
   const card = el('li', 'property-card');
   if (property.first) card.classList.add('property-card-first');
   if (property.pass) card.classList.add('property-card-pass');
@@ -284,7 +323,10 @@ function buildCard(property, id, eager, settings) {
       button.href = detail;
       button.setAttribute('aria-label', `${view.label} ${property.name}`);
       const wrap = el('p', 'property-card-view');
-      wrap.append(applyButtonAction(button));
+      const viewLink = applyButtonAction(button);
+      // pushed as the click happens, before the page moves on
+      viewLink.addEventListener('click', () => trackViewLounge(property, rank));
+      wrap.append(viewLink);
       action.append(wrap);
     }
     bottom.append(action);
@@ -385,6 +427,25 @@ function buildFilters(options, selected, onChange) {
 }
 
 /**
+ * The properties as the listing shows them: the location groups in order, each with its cards in
+ * order, then the passes.
+ * @param {Object[]} shown
+ * @returns {{heading: string, items: Object[]}[]}
+ */
+function groupProperties(shown) {
+  const groups = new Map();
+  shown.filter((p) => !p.pass).forEach((p) => {
+    if (!groups.has(p.location.key)) groups.set(p.location.key, { ...p.location, items: [] });
+    groups.get(p.location.key).items.push(p);
+  });
+  const ordered = [...groups.values()].sort((a, b) => a.seq - b.seq);
+  const passes = shown.filter((p) => p.pass);
+  if (passes.length) ordered.push({ heading: '', items: passes });
+  ordered.forEach((group) => group.items.sort((a, b) => a.seq - b.seq));
+  return ordered;
+}
+
+/**
  * Renders the listing: the location groups with their cards, then the passes; the result count
  * for screen readers; the empty message (with Clear when filters are on).
  * @param {HTMLElement} results
@@ -395,21 +456,14 @@ function buildFilters(options, selected, onChange) {
  */
 function renderResults(results, properties, selected, status, onClear, prefix, settings) {
   const shown = properties.filter((p) => matches(p, selected));
-  const groups = new Map();
-  shown.filter((p) => !p.pass).forEach((p) => {
-    if (!groups.has(p.location.key)) groups.set(p.location.key, { ...p.location, items: [] });
-    groups.get(p.location.key).items.push(p);
-  });
-  const ordered = [...groups.values()].sort((a, b) => a.seq - b.seq);
-  const passes = shown.filter((p) => p.pass);
-  if (passes.length) ordered.push({ heading: '', items: passes });
+  const ordered = groupProperties(shown);
   let n = 0;
   const sections = ordered.map((group) => {
     const section = el('section', 'property-list-location');
     if (group.heading) section.append(el('h2', 'property-list-heading', group.heading));
     const list = el('ul', 'property-list-cards');
-    group.items.sort((a, b) => a.seq - b.seq).forEach((p) => {
-      list.append(buildCard(p, `${prefix}-${n}`, n === 0, settings));
+    group.items.forEach((p) => {
+      list.append(buildCard(p, `${prefix}-${n}`, n === 0, settings, n + 1));
       n += 1;
     });
     section.append(list);
@@ -544,6 +598,9 @@ export default async function decorate(block) {
   // the first list's breadcrumb (Home straight away, the country once the lounges arrive), above
   // the filters and cards; the phones' Filters button above it, as the source
   const crumb = useUrl ? el('div', 'breadcrumb') : null;
+  // the data layer's page name for the listing: the page's last path part until the API's city
+  // name arrives (the first list on the page)
+  if (useUrl) setListingPage(window.location.pathname.split('/').filter(Boolean).pop());
   if (crumb) {
     // (a missing stylesheet leaves the breadcrumb unstyled, never the lounges unloaded)
     await loadCSS(`${window.hlx.codeBasePath}/blocks/breadcrumb/breadcrumb.css`).catch((error) => {
@@ -565,6 +622,8 @@ export default async function decorate(block) {
   block.append(dialog);
 
   let load;
+  // the Kwanko listing tag went out (once a page, not on a retry)
+  let tagged = false;
   const render = async () => {
     if (!city) {
       showMessage(results, translate('propertyEmpty'), null, 'Add a "city-code" row (e.g. city-code | HKHKG) in the block.');
@@ -584,6 +643,7 @@ export default async function decorate(block) {
       return;
     }
     if (crumb) drawCrumb(crumb, items[0]?.countryName);
+    if (useUrl) setListingPage((items.find((item) => item.cityName)?.cityName || '').trim());
     const properties = items.map(readProperty).filter(Boolean);
     if (!properties.length) {
       showMessage(results, translate('propertyEmpty'), null, `City code "${city}" returned no lounges.`);
@@ -616,6 +676,13 @@ export default async function decorate(block) {
     }
     layout.classList.toggle('no-filters', !form);
     renderResults(results, properties, selected, status, clearAll, prefix, settings);
+    // the Kwanko listing tag: all the city's property codes, in the listing's order (once a page;
+    // the tag waits for Kwanko UniJS, which loads with the other tags)
+    if (!tagged) {
+      tagged = true;
+      const codes = groupProperties(properties).flatMap((group) => group.items.map((p) => p.code));
+      import('../../scripts/kwanko.js').then(({ listingTag }) => listingTag(codes));
+    }
   };
   // the page's loader stays up until the lounges are shown (the first load is awaited, so the
   // page doesn't hide its loader before)

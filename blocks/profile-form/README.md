@@ -5,10 +5,11 @@ and Optional Information, filled from the GetProfile API with the member's login
 newsletter checkbox and Save below. Authors write the texts; the block's code sets the fields, where
 each value comes from, and the layout. **Save is disabled until the update API exists.**
 
-The page needs a login: a visitor without a valid token on a members' page (`members-only` true in
-the metadata sheet, e.g. a row `/**/membership/**`) is sent to the home page. If GetProfile refuses
-the token (401), the visitor is logged out and sent home; any other failure shows "We couldn't load
-your profile." with Try again.
+The page needs a login: a guest on a members' page (`members-only` true in the metadata sheet, e.g.
+a row `/**/membership/**`) is sent to the home page with the page in `?redirectUrl=`; the login
+modal opens there, and after logging in the guest comes back here. An expired login, or GetProfile
+refusing the token (401), logs out and goes home; any other failure shows "We couldn't load your
+profile." with Try again.
 
 ## Table: 5 columns
 
@@ -42,7 +43,7 @@ your profile." with Try again.
 | firstName, lastName, email | `firstName`, `lastName`, `userName` | Read-only |
 | membershipNo | `membershipID` | |
 | points | `points`, `pointsExpiry` | "150 (valid until 12/31/2027 11:59:59 PM)", the date as given, no time zone change |
-| phone | `phone`, `countryPhoneCode` | Empty number when `phone` is null; the code +1 (US) unless given |
+| phone | `phone`, `countryPhoneCode` | Empty number when `phone` is null; the code +1 (US) unless given. The number: numbers only (anything else typed or pasted is left out), at most 12 |
 | birthday | `dob` | Disabled (shown, not editable or sent) |
 | ageRange | `ageRange` | |
 | countryOfResidence | `countryName` | Matched by name in the countries service (e.g. "United States" → "United States of America") |

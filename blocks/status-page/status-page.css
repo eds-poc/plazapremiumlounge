@@ -1,0 +1,83 @@
+main > .section.status-page-container {
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+.status-page {
+  /* one-off: the source's area height, column width and image size */
+  --status-page-height: 720px;
+  --status-page-width: 800px;
+  --status-page-image-size: 81px;
+
+  display: grid;
+  place-items: center;
+  min-height: var(--status-page-height);
+  text-align: center;
+}
+
+.status-page .status-page-notice {
+  width: 100%;
+  max-width: var(--status-page-width);
+}
+
+.status-page .status-page-image {
+  margin-bottom: var(--spacing-7);
+}
+
+.status-page .status-page-image picture {
+  display: contents;
+}
+
+.status-page .status-page-image img {
+  display: inline-block;
+  width: var(--status-page-image-size);
+  height: auto;
+  vertical-align: middle;
+}
+
+.status-page .status-page-title {
+  margin: 0 0 var(--spacing-3);
+  color: inherit;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+/* padding, not margin: the 20px adds to the title's 8px, as the source's spacer does */
+.status-page .status-page-text {
+  padding-top: var(--spacing-7);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+.status-page .status-page-text p {
+  margin: 0 0 var(--spacing-7);
+}
+
+.status-page .status-page-text a:any-link {
+  color: inherit;
+}
+
+/* a row of buttons (the code 404 page's Go home and Go back), centred, wrapping on small phones */
+.status-page .status-page-text .button-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-4);
+}
+
+.status-page .status-page-text a:focus-visible {
+  outline-color: currentcolor;
+}
+
+@media (width >= 768px) {
+  .status-page .status-page-text {
+    font-size: var(--font-size-xl);
+  }
+}
+
+@media (width >= 1200px) {
+  .status-page .status-page-title {
+    font-size: 60px;
+  }
+}
