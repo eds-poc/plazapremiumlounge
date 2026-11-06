@@ -33,6 +33,9 @@ const ENDPOINTS = {
   login: '/api/v1/web/app_demo/Login',
   // the forgot password modal's submit (POST, JSON: lastName, email)
   forgotPassword: '/api/v1/web/app_demo/ForgotPassword',
+  // a partner page's password (POST, JSON: partnername, password); answers with a token (a JWT),
+  // or 400 with a message (blocks/partner-password)
+  partnerLogin: '/api/v1/web/app_demo/PartnerLogin',
   // the logged-in member's profile (GET, Authorization: Bearer <jwt>)
   getProfile: '/api/v1/web/app_demo/GetProfile',
   // a booking (order) of the logged-in member (POST, JSON: orderId; Authorization: Bearer <jwt>)

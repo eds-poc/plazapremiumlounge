@@ -17,7 +17,7 @@ import { installModalLinks, registerModalSections } from './modal.js';
 import { decorateIcons } from './icons.js';
 import { getLanguage } from './i18n.js';
 import { installVideoLinks } from './video.js';
-import { checkSession, logout } from './auth.js';
+import { checkPartnerAccess, checkSession, logout } from './auth.js';
 
 if (window.trustedTypes && window.trustedTypes.createPolicy) {
   const innerTT = window.trustedTypes.createPolicy('tt-inner', {
@@ -250,6 +250,8 @@ async function loadEager(doc) {
   // a logged-in visitor's token: an expired or broken one logs out and goes home (nothing is
   // checked when nobody is logged in)
   checkSession();
+  // a partner page without its partner's login goes to the partner's password page (auth.js)
+  if (!checkPartnerAccess()) return false;
   // the header's account menu Logout (#logout): log out and go home
   document.addEventListener('header:action', (e) => {
     if (e.detail?.name === 'logout') logout();
@@ -275,6 +277,7 @@ async function loadEager(doc) {
   } catch (e) {
     // do nothing
   }
+  return true;
 }
 
 /**
@@ -319,7 +322,8 @@ function loadDelayed() {
 
 async function loadPage() {
   showLoader();
-  await loadEager(document);
+  // false: a partner page is going to its password page (the loader stays up until it does)
+  if (!await loadEager(document)) return;
   hideLoader();
   await loadLazy(document);
   installNavigationLoader();
