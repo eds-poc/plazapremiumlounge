@@ -13,8 +13,6 @@ import { DEFAULT_SITE, getSiteFolder } from './i18n.js';
 const TOKEN_KEY = 'token';
 // a JWT part: base64url characters only (letters, digits, - and _; no +, / or = padding)
 const PART = /^[A-Za-z0-9_-]+$/;
-// the members' pages (a language folder, then membership): only for a logged-in visitor
-const MEMBERS_PAGE = /^\/[a-z]{2}-[a-z]{2}\/membership\//;
 // partner pages: the metadata naming the page's partner, and the optional one for its password page
 const PARTNER_META = 'partner-member-name';
 const PARTNER_PAGE_META = 'partner-password-page';
