@@ -1,6 +1,10 @@
-import { buildForm, fieldElement, setFieldError } from '../../scripts/forms.js';
+import {
+  buildForm, datePickerOf, fieldElement, setFieldError,
+} from '../../scripts/forms.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { getApiLanguage } from '../../scripts/properties.js';
+import buildDatePicker from '../../scripts/date-picker.js';
+import { formatDate } from '../../scripts/booking.js';
 
 /*
  * The forms' fields: the keys sent and the source's rules. The authoring gives each field's label,
@@ -34,7 +38,7 @@ const PERSON = {
     type: 'select', key: 'noOfChildren', settings: { width: 'half', 'value type': 'number' },
   },
   serviceStartDate: {
-    type: 'date', key: 'serviceStartDate', required: true, settings: { 'min date': 'today' },
+    type: 'date', key: 'serviceStartDate', required: true, settings: { 'min date': 'today', picker: '' },
   },
   consent: {
     type: 'checkbox', key: 'consent', required: true, settings: { 'value type': 'boolean' },
@@ -89,7 +93,7 @@ const FORMS = {
       // from 10:00 AM and 11:00 AM
       serviceStartTime: timeAt('serviceStartTime', 600),
       serviceEndDate: {
-        type: 'date', key: 'serviceEndDate', required: true, settings: { 'min date': 'today' },
+        type: 'date', key: 'serviceEndDate', required: true, settings: { 'min date': 'today', picker: '' },
       },
       serviceEndTime: timeAt('serviceEndTime', 660),
       remarks: { type: 'textarea', key: 'remark', settings: { rows: 12 } },
@@ -128,6 +132,8 @@ export default function decorate(block) {
     fields: config.fields,
     action: config.action,
     captcha: true,
+    // the dates on the site's calendar, from today (as the Booking Widget's)
+    datePicker: { build: buildDatePicker, format: formatDate },
     submit: { classes: config.submit || ['secondary', 'full-width'] },
   });
 
@@ -185,7 +191,8 @@ export default function decorate(block) {
     }));
   }
 
-  // the booking request: the end date not before the start date (its picker starts there)
+  // the booking request: the end date not before the start date (its calendar starts there, and
+  // an end date before a new start moves up to it)
   const start = fieldElement(form, 'serviceStartDate')?.querySelector('input');
   const endField = fieldElement(form, 'serviceEndDate');
   const end = endField?.querySelector('input');
@@ -196,7 +203,10 @@ export default function decorate(block) {
       if (endTooEarly()) setFieldError(endField, endMessage);
     });
     start.addEventListener('change', () => {
-      end.min = start.value || end.min;
+      if (!start.value) return;
+      datePickerOf(endField)?.update({
+        min: start.value, value: end.value && end.value < start.value ? start.value : undefined,
+      });
       checkEnd();
     });
     end.addEventListener('change', checkEnd);

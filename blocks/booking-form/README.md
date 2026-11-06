@@ -50,8 +50,8 @@ second column, side by side when it has room (as the source).
 | `numberOfPrivateRestingAreas` ✱ | Dropdown (`N/A`, 1 to 10) |
 | `travelType` ✱ | Dropdown (Arrival, Departure, Transit) |
 | `noOfAdults` ✱ (**starts the second column**), `noOfChildren` | Dropdowns, side by side |
-| `serviceStartDate` ✱, `serviceStartTime` | Date from today (the browser's date picker); − and + by half an hour from 10:00 AM, sent as `10:00` |
-| `serviceEndDate` ✱, `serviceEndTime` | Date not before the start date (its picker starts there; its Error line 2 is the message); − and + by half an hour from 11:00 AM |
+| `serviceStartDate` ✱, `serviceStartTime` | Date on the site's calendar (as the Booking Widget's), starting today, days before today not pickable, sent as `2026-11-20`; − and + by half an hour from 10:00 AM, sent as `10:00` |
+| `serviceEndDate` ✱, `serviceEndTime` | Date on the same calendar, not before the start date: its first day follows the start, and an end before a new start moves up to it (its Error line 2 is the message); − and + by half an hour from 11:00 AM |
 | `remarks` | A 12-line text box, sent as `remark` |
 | `consent` ✱ | Privacy checkbox |
 
@@ -65,7 +65,7 @@ second column, side by side when it has room (as the source).
 | `locationOfService` ✱, `areaOfService` ✱ | As above |
 | `servicesRequired` ✱ | As above |
 | `noOfAdults` ✱ (**starts the second column**), `noOfChildren` | Dropdowns, side by side; together at least 10 (the `people` message) |
-| `serviceStartDate` ✱ | Date, from today; sent as `2026-11-20` |
+| `serviceStartDate` ✱ | Date on the site's calendar, starting today, days before today not pickable; sent as `2026-11-20` |
 | `serviceStartTime` | − and + by half an hour from 6:00 PM, round the clock; sent as `18:00` |
 | `lengthOfStay` | − and + by half an hour from 3.5, between 2 and 18; sent as a number |
 | `remarks` | An 18-line text box |
@@ -79,3 +79,11 @@ second column, side by side when it has room (as the source).
 - **groupBookingAreas** (POST, JSON `{ locationOfService, languageCode }`, plus
   `form: "bookingRequest"` from the Booking Form): answers `{ items: [{ value, text }] }`. Until it
   exists, Area of Service stays empty and optional.
+
+## The dates
+
+The calendar is the site's own (`scripts/date-picker.js`, the Booking Widget's and the lounge
+page's), styled by the shared `styles/date-picker.css`: the date in the form's pill as the site
+writes it ("06 Nov 2026", "2026年11月6日"), a calendar of one month that pops up under it (Date and
+close, previous and next, the days; the arrow keys, Page Up and Page Down, Enter and Escape work).
+A form reset goes back to today.

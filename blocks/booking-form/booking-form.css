@@ -1,6 +1,9 @@
 /* the shared form styles, loaded with the block's own (before the block shows) */
 @import url('../../styles/forms.css');
 
+/* the site's calendar for the dates (shared with other forms) */
+@import url('../../styles/date-picker.css');
+
 /* booking form: the source booking request forms (measured at 1440, 1100 and 375px). Two columns
    from 768px, the fields' labels 16px above; adults and children side by side at every width; the
    services' checkboxes in the body size; the checkboxes 20px under the remarks, 5px from the top of

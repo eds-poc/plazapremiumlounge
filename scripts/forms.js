@@ -8,7 +8,8 @@
  * buildForm() builds a whole form from a block's authored rows (Field | Label | Placeholder |
  * Required | Error) and the block's own definition (the fields' types, keys and rules, the action,
  * the redirect), and sends it.
- * A form can have a captcha before its button (`captcha: true`, scripts/captcha.js).
+ * A form can have a captcha before its button (`captcha: true`, scripts/captcha.js), and its date
+ * fields the site's calendar (`picker`, with the block's `datePicker`: scripts/date-picker.js).
  * Styles: styles/forms.css (the form element gets the class `form-fields`), imported by each form
  * block's CSS so it's loaded before the block shows.
  */
@@ -262,7 +263,7 @@ function setControlAttributes(control, def) {
  * @param {boolean} invalid
  */
 function describe(state, invalid) {
-  [...state.controls, state.code].filter(Boolean).forEach((control) => {
+  [...state.controls, state.code, state.picker?.trigger].filter(Boolean).forEach((control) => {
     if (invalid) {
       control.setAttribute('aria-describedby', state.error.id);
       control.setAttribute('aria-invalid', 'true');
@@ -274,6 +275,15 @@ function describe(state, invalid) {
 }
 
 /**
+ * A date setting as YYYY-MM-DD (`today` allowed).
+ * @param {string} value
+ * @returns {string}
+ */
+function dateSetting(value) {
+  return value === 'today' ? new Date().toISOString().slice(0, 10) : value;
+}
+
+/**
  * Builds one field from its definition.
  * @param {{label: string, labelNodes?: Node[], type: string, settings: Map<string, string>}} input
  *   The authored label (text, and its nodes for rich checkbox labels), type and settings
@@ -282,7 +292,7 @@ function describe(state, invalid) {
  */
 export function buildField({
   label, labelNodes, type: authoredType, settings,
-}, { defaultWidth = 'full' } = {}) {
+}, { defaultWidth = 'full', datePicker } = {}) {
   count += 1;
   const type = FIELD_TYPES.includes(authoredType) ? authoredType : 'text';
   const key = settings.get('key') || toKey(label) || `field${count}`;
@@ -328,6 +338,26 @@ export function buildField({
       return input;
     });
     wrap.append(name, group);
+  } else if (type === 'date' && settings.has('picker') && datePicker) {
+    // the site's calendar (scripts/date-picker.js, given by the block): the date as the source
+    // writes it in the form's pill, from the first day that can be chosen (`min date`, today by
+    // default); its hidden input holds the value (YYYY-MM-DD), so the checks and the data are as
+    // for any date
+    const start = dateSetting(settings.get('min date') || 'today');
+    const picker = datePicker.build({
+      name: key, value: start, min: start, format: datePicker.format, prefix: 'date-picker',
+    });
+    picker.input.id = def.id;
+    picker.trigger.classList.add('form-input');
+    const name = buildLabel(def);
+    name.htmlFor = picker.trigger.id;
+    const box = el('div', 'form-control-wrap');
+    box.append(picker.element);
+    wrap.append(name, box);
+    state.controls = [picker.input];
+    state.picker = picker;
+    // a form reset goes back to the first day
+    wrap.addEventListener('reset', () => picker.update({ value: start, min: start }));
   } else if (type === 'stepper') {
     // − and + around the value, from `default` by `step` between `min` and `max` (a time goes
     // round the clock)
@@ -470,15 +500,6 @@ function ageOn(date) {
   let age = now.getFullYear() - born.getFullYear();
   if (now < new Date(now.getFullYear(), born.getMonth(), born.getDate())) age -= 1;
   return age;
-}
-
-/**
- * A date setting as YYYY-MM-DD (`today` allowed).
- * @param {string} value
- * @returns {string}
- */
-function dateSetting(value) {
-  return value === 'today' ? new Date().toISOString().slice(0, 10) : value;
 }
 
 /**
@@ -692,7 +713,8 @@ export function validateForm(form) {
   });
   if (invalid.length) {
     const state = fields.get(invalid[0]);
-    const target = state.def.type === 'phone' && !state.code.value ? state.code : state.controls[0];
+    const target = (state.def.type === 'phone' && !state.code.value ? state.code : null)
+      || state.picker?.trigger || state.controls[0];
     target?.focus();
   }
   return invalid;
@@ -747,6 +769,15 @@ export function collectValues(form) {
     }
   });
   return values;
+}
+
+/**
+ * A date field's calendar (a field with `picker`), e.g. to move its first day.
+ * @param {HTMLElement} wrap The field
+ * @returns {{update: Function, input: HTMLInputElement, trigger: HTMLButtonElement}|undefined}
+ */
+export function datePickerOf(wrap) {
+  return fields.get(wrap)?.picker;
 }
 
 /**
@@ -885,7 +916,9 @@ function fieldSettings(field, cells) {
  *   language site, or a path), `method`, `defaultWidth` ('full' or 'half'), `intro` (true: text
  *   rows before the first field go beside the form), `submit` (`{ classes, fullWidthMobile }`; its
  *   text is the authored `submit` row, else "Submit" in the visitor's language), `captcha` (true,
- *   or `{ key }` for the token's key in the data; default `h-captcha-response`)
+ *   or `{ key }` for the token's key in the data; default `h-captcha-response`), `datePicker`
+ *   (`{ build, format }`: scripts/date-picker.js and the date's format, for date fields with
+ *   `picker`)
  * @returns {{form: HTMLFormElement, intro: HTMLElement|null}}
  */
 export function buildForm(block, definition) {
@@ -920,7 +953,7 @@ export function buildForm(block, definition) {
       labelNodes: field.type === 'checkbox' ? labelNodesOf(cells[1]) : undefined,
       type: field.type,
       settings: fieldSettings(field, cells),
-    }, { defaultWidth: definition.defaultWidth || 'full' });
+    }, { defaultWidth: definition.defaultWidth || 'full', datePicker: definition.datePicker });
     if (!built) return;
     if (field.newColumn) built.classList.add('new-column');
     form.append(built);
