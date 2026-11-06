@@ -83,7 +83,7 @@ second column, side by side when it has room (as the source).
 ## The dates
 
 The calendar is the site's own (`scripts/date-picker.js`, the Booking Widget's and the lounge
-page's), styled by the shared `styles/date-picker.css`: the date in the form's pill as the site
-writes it ("06 Nov 2026", "2026年11月6日"), a calendar of one month that pops up under it (Date and
-close, previous and next, the days; the arrow keys, Page Up and Page Down, Enter and Escape work).
+page's), styled in this block's CSS: the date in the form's pill as the site writes it
+("06 Nov 2026", "2026年11月6日"), a calendar of one month that pops up under it (Date and close,
+previous and next, the days; the arrow keys, Page Up and Page Down, Enter and Escape work).
 A form reset goes back to today.
