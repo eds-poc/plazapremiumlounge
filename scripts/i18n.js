@@ -514,7 +514,7 @@ const TEXTS = {
     en: 'Learn more', zh: '了解更多', 'zh-HK': '了解更多', ja: '詳細を見る', pt: 'Saiba mais',
   },
   quickBuyAddToCart: {
-    en: 'Add to Cart', zh: '加入购物车', 'zh-HK': '加入購物車', ja: 'カートに追加', pt: 'Adicionar ao carrinho',
+    en: 'Add to Cart', zh: '加入购物车', 'zh-HK': '加入購物車', ja: 'カートに入れる', pt: 'Adicionar ao Carrinho',
   },
   // (a pass's Add to Cart once it's in the cart: the source's pass pop-up's wording)
   quickBuyAddMore: {

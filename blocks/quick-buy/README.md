@@ -59,7 +59,7 @@ so it's always current.
 | What | From |
 | --- | --- |
 | The service | `scripts/endpoints.js` (`productPasses`, a GET with the property code, airport code, currency and product code) |
-| Currency | The page address's `currencyCode` (e.g. `?currencyCode=HKD`), else USD |
+| Currency | The visitor's currency, as on the rest of the site (the address's `currencyCode` or `currency`, e.g. `?currencyCode=HKD`, then the one applied this session, then the one for their location; else USD) |
 | Names, descriptions | The service's, in English (it has no translations) |
 
 ## Messages

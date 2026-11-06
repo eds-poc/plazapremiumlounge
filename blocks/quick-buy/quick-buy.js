@@ -155,7 +155,7 @@ function showMessage(at, text, retry, hints = []) {
  * passes page's quick buy. The page authors the product codes, each pass's tag and its Best for
  * lines (and an optional heading and intro), and the property and airport codes the service asks
  * for (see getApiContext); the name, image, price, points and details come from the service, in
- * the page address's currency (`currencyCode`, else USD).
+ * the visitor's currency (passes.js `readCurrency`).
  * @param {Element} block
  */
 export default function decorate(block) {

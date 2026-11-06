@@ -85,7 +85,7 @@ async function run(code, query, { width = 1440, answer, extraRoute } = {}) {
 }
 
 if (!only || only === 'real') {
-  const abv = await run('ABV', 'abuja');
+  const abv = await run('ABV', 'nnamdi');
   const { calls } = abv;
   let { page, s } = abv;
   console.log('  ABV', JSON.stringify(s));
@@ -132,7 +132,7 @@ if (!only || only === 'real') {
   const opts = await page.locator('.booking-widget-card-product option').allTextContents();
   check('DXB: the SHOWER tab shows its products', opts.some((o) => /shower/i.test(o)), opts.join(' / '));
   await page.close();
-  ({ page, s } = await run('ABV', 'abuja', { width: 375 }));
+  ({ page, s } = await run('ABV', 'nnamdi', { width: 375 }));
   check('ABV phone: card', s.card && s.title === 'SDS Lounge', s.title);
   await page.close();
 }
@@ -168,7 +168,7 @@ if (!only || only === 'routed') {
   ];
   for (const [name, answer, ok] of cases) {
     // eslint-disable-next-line no-await-in-loop
-    const { page, s } = await run('ABV', 'abuja', { answer });
+    const { page, s } = await run('ABV', 'nnamdi', { answer });
     check(name, ok(s), JSON.stringify({
       card: s.card, title: s.title, place: s.place, now: s.now, was: s.was, photos: s.photos.length, features: s.features.length, status: s.status, off: s.off, more: s.more,
     }));
@@ -211,7 +211,7 @@ if (!only || only === 'flow') {
   check('two quick guest changes → one request', mid === n && calls.length === n + 1 && calls.at(-1).adult === 3, `${calls.length - n} request(s), adult ${calls.at(-1)?.adult}`);
   await pick(page, 'dubai int', 'DXB');
   await page.waitForTimeout(100);
-  await pick(page, 'abuja', 'ABV');
+  await pick(page, 'nnamdi', 'ABV');
   await waitDone(page);
   await page.waitForTimeout(800);
   s = await state(page);

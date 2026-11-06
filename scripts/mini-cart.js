@@ -10,7 +10,10 @@
 import { loadCSS } from './aem.js';
 import { translate, getLanguage } from './i18n.js';
 import { getCart, onCartChange } from './cart-state.js';
-import { addToCart, refreshCart, removeFromCart } from './cart.js';
+import {
+  addToCart, convertCart, refreshCart, removeFromCart,
+} from './cart.js';
+import { getCurrency } from './currency.js';
 import { hideLoader, showLoader } from './loader.js';
 
 const styles = loadCSS(`${window.hlx.codeBasePath}/styles/cart.css`);
@@ -260,18 +263,32 @@ function renderMiniCart(cart) {
 
 /**
  * Opens the mini cart (when the cart holds something), then reads the cart again in the
- * background, so it shows at once and stays right.
+ * background, so it shows at once and stays right. A cart of passes in another currency than the
+ * visitor's is priced in theirs first, behind the loader (the source shows its cart in the page's
+ * currency); a lounge's cart stays in the lounge's currency.
  * @param {HTMLElement} [trigger]
  * @param {{fresh?: boolean}} [options] fresh: the cart was just read (no second read)
  * @returns {Promise<HTMLDialogElement|null>}
  */
 export async function openMiniCart(trigger, { fresh = false } = {}) {
-  const cart = getCart();
+  let cart = getCart();
   if (!cart) return null;
+  const currency = getCurrency();
+  const convert = !fresh && cart.currency !== currency && cart.lines.every((line) => line.kind === 'pass');
+  if (convert) {
+    showLoader();
+    try {
+      await convertCart(currency);
+    } finally {
+      hideLoader();
+    }
+    cart = getCart();
+    if (!cart) return null;
+  }
   renderMiniCart(cart);
   const dialog = await mini.open(trigger);
-  // (not when the cart was just read: after an add)
-  if (!fresh) refreshCart().catch(() => {});
+  // (not when the cart was just read: after an add or a conversion)
+  if (!fresh && !convert) refreshCart().catch(() => {});
   return dialog;
 }
 

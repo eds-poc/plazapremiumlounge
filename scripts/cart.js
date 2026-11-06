@@ -330,6 +330,8 @@ function sumLines(lines) {
 }
 
 let pending = null;
+// a cart being priced in another currency (see convertCart)
+let converting = null;
 
 /**
  * Adds a product to the cart. An empty cart is made with it (POST); a pass joins the cart's passes
@@ -343,6 +345,8 @@ let pending = null;
 export function addToCart(item) {
   if (pending) return pending;
   pending = (async () => {
+    // (after a conversion under way: it rewrites the cart's products)
+    if (converting) await converting;
     const adapter = ADAPTERS[item?.type];
     if (!adapter) return { status: 'refused', reason: 'invalid' };
     let cart = getCart();
@@ -467,4 +471,36 @@ export function removeFromCart(catalogueCode) {
   removing = (rest.length ? keepLines(cart, rest) : deleteCart(cart.cartId))
     .finally(() => { removing = null; });
   return removing;
+}
+
+/**
+ * Prices a cart of passes in another currency, as the source shows its cart in the page's
+ * currency: the same passes again (PUT, which converts the cart), then the cart is read again. A
+ * cart with a lounge stays in the lounge's currency (converting one isn't known to work). Not while
+ * an add or a removal is under way.
+ * @param {string} currency
+ * @returns {Promise<{status: 'converted'|'unchanged'|'failed', error?: Error}>}
+ */
+export function convertCart(currency) {
+  if (converting) return converting;
+  const cart = getCart();
+  const code = text(currency).toUpperCase();
+  const passesOnly = !!cart?.lines.length && cart.lines.every((line) => line.kind === 'pass');
+  if (pending || removing || !passesOnly || !/^[A-Z]{3}$/.test(code) || cart.currency === code) {
+    return Promise.resolve({ status: 'unchanged' });
+  }
+  converting = (async () => {
+    try {
+      await putProducts(cart.cartId, code, passProducts(cart.lines), ORDER);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('cart: the cart was not priced in', code, error);
+      return { status: 'failed', error };
+    }
+    try {
+      await refreshCart(cart.cartId);
+    } catch { /* (converted: read again next time) */ }
+    return { status: 'converted' };
+  })().finally(() => { converting = null; });
+  return converting;
 }

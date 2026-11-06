@@ -55,6 +55,15 @@ the page after ⊗ → Yes, and that reload adds the promotional address's pass 
     Add to Cart. Clicking adds the pass again (Quantity +1).
   - The labels follow the cart: an add, a removal, emptying, expiry, another tab, and the stored
     cart when the page loads (no request).
+- **The currency:** the passes are priced in the visitor's currency, as on the rest of the site
+  (the address's `currencyCode` or `currency`, then the one applied this session, then the one for
+  their location; else USD). A pass added in that currency puts the cart's passes in it (PUT
+  converts the cart).
+  - When the mini cart opens on a page in another currency, a cart of passes is first converted to
+    the visitor's currency, behind the loader (PUT with the same passes, then a GET). The source also
+    shows its cart in the page's currency.
+  - A lounge's cart stays in the lounge's currency, because converting a lounge through PUT hasn't
+    been verified.
 - **The promotional address** `…/airport-lounge-passes?selectedPassID=PRD2884` (any case):
   - Once the passes are in, the pass with that product code goes into the cart as its Add to Cart
     would: the loader, then the mini cart (the source adds it while the page is built, then opens
@@ -92,7 +101,7 @@ code** field, Check Out's add-ons step and the checkout itself.
 | File | What it does |
 | --- | --- |
 | `scripts/cart-state.js` | The cart on this site (small: the header loads it on every page): the cart id in the cookie `cartid` (a day, as the source's) and a summary of the cart's last answer in localStorage `ppl-cart` (lines, totals, currency), so the count and the mini cart show without a request. `getCart`, `cartCount`, `isInCart`, `saveCart`, `forgetCart`, `onCartChange` (`cart:change` on document, other tabs too). A summary without its cookie, past its day, or whose bookings are over is forgotten. |
-| `scripts/cart.js` | The cart without UI. `addToCart(item)`: the type's adapter (`lounge`, `pass`), the cart's rules (`RULES`), then POST for an empty cart, or PUT for a pass joining passes. Also `refreshCart()`, `deleteCart(cartId)`, `removeFromCart(catalogueCode)` (PUT with the other lines, or DELETE for the last), `passStart()`, `registerAdapter(type, adapter)`. One add, and one removal, at a time. |
+| `scripts/cart.js` | The cart without UI. `addToCart(item)`: the type's adapter (`lounge`, `pass`), the cart's rules (`RULES`), then POST for an empty cart, or PUT for a pass joining passes. Also `refreshCart()`, `convertCart(currency)` (a cart of passes, PUT), `deleteCart(cartId)`, `removeFromCart(catalogueCode)` (PUT with the other lines, or DELETE for the last), `passStart()`, `registerAdapter(type, adapter)`. One add, and one removal, at a time. |
 | `scripts/mini-cart.js` + `styles/cart.css` | The UI in the site's dialog (`modal-dialog.js`, with its `static` content and `stack` options): the mini cart, Checkout Cart, the remove confirmation (stacked over the mini cart), the failure message; the site's loader (`scripts/loader.js`) while the booking system answers. `addAndShow(item, trigger)`, `openMiniCart(trigger)`. |
 | `scripts/scripts.js` | `installCart()`: what the blocks announce → the cart (`CART_EVENTS`: `booking-widget:book` is a `lounge`; `quick-buy:add-to-cart` and `pass-finder:add-to-cart` are a `pass`), and `cart:remove` (`detail.catalogueCode`). The button off and the loader at once; the cart's code loads on the first product or removal. |
 | `scripts/passes.js` | `buildAddButton`: a pass's Add to Cart (cards and Learn more), labelled from the cart (Add More), all of them relabelled on `cart:change`. `takeSelectedPass`: the promotional address's pass, called by Quick Buy and Pass Finder once their passes are in (the first that lists it takes it). |
@@ -131,10 +140,15 @@ code** field, Check Out's add-ons step and the checkout itself.
   start). The service takes 0 adults and any currency: the lounge adapter checks the guests and
   sends the product's own currency.
 - Taking one item out: `DELETE ?cartItemId=` empties the whole cart, so a line goes through PUT.
-- Two passes on the **same rate plan** (e.g. Global 2-Visit and Global 5-Visit, both RTPLN3518 on
-  stage) are refused together: a 200 with `PRDCT_ERR_001` "No products found for the given location
-  LCTN517", even in one POST. The Notice shows and the cart stays as it was. Passes on different
-  rate plans combine.
+- **A pass the cart service won't sell:** on stage, Global 5-Visit (PRD3696) is refused on every rate
+  plan, alone or with others, even though the passes service lists it with inventory. The answer is
+  a 200 `PRDCT_ERR_001` "No products found for the given location LCTN517" (checked 2026-11-06).
+  The Notice shows and the cart stays as it was. Other passes combine in one cart.
+- **Inventory:** a quantity beyond the rate's `availableInventory` (the passes service) is refused:
+  a 200 `CRT_ERR_002` "No inventory available" ("The selected product(s) PRD3705 unavailable in
+  the chosen time…"). The Notice shows and the quantity stays.
+- **The 10-per-product limit isn't enforced:** a POST with 11 is accepted, and GET answers quantity
+  11 with `maxNoOfProductsAllowed: 10`.
 - The service checks no lounge/pass rule (it takes both in one cart): the rules are this site's.
 - Not in the API yet, so not done: promo codes, add-ons, the checkout hand-off.
 
@@ -200,4 +214,7 @@ them with the booking widget tests' settings: `BW_HOST`, `PLAYWRIGHT`.
   - both refusals, the failures (Notice; a removal's)
   - `?selectedPassID=`: an empty cart, the address cleaned, a reload, lower case, the pass already
     in the cart, a lounge in the cart, an unknown code
+  - the currency: the session's, a cart of passes converted when the mini cart opens, a lounge's not
   - the other four languages, axe
+- **`test/cart/e2e/`**: both journeys end to end on stage (real carts), on the local preview or a
+  branch preview (see its README).

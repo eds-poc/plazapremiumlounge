@@ -9,6 +9,7 @@ import { translate } from './i18n.js';
 import { openModal } from './modal-dialog.js';
 import { el, safeHtml } from './properties.js';
 import { isInCart, onCartChange } from './cart-state.js';
+import { getCurrency } from './currency.js';
 
 export const DEFAULT_CURRENCY = 'USD';
 // the passes service answers in about 5-7s
@@ -19,18 +20,13 @@ const OTHER_RATES = /\b(?:st\s*member|member'?s?\s*rate|partner)\b/i;
 const GLOBAL = 'global';
 
 /**
- * The currency for the prices: the page address's `currencyCode` (the passes service's own name)
- * when it's a 3-letter code, else USD.
+ * The currency for the prices: the visitor's, as on the rest of the site (scripts/currency.js: the
+ * page address's `currencyCode` or `currency`, else the one applied this session, else the one for
+ * their location), else USD. The cart's passes follow it too (see mini-cart.js).
  * @returns {string}
  */
 export function readCurrency() {
-  const params = new URLSearchParams(window.location.search);
-
-  const value = ([...params.entries()]
-    .find(([key]) => key.toLowerCase() === 'currencycode')?.[1] || '')
-    .trim()
-    .toUpperCase();
-
+  const value = getCurrency();
   return /^[A-Z]{3}$/.test(value) ? value : DEFAULT_CURRENCY;
 }
 

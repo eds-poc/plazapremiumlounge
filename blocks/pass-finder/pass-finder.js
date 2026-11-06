@@ -427,7 +427,7 @@ function buildControls(state, onChange) {
  * Lounge Passes page's search, region and sort (kept in the page address), cards and pages of
  * nine. Every pass the service lists is shown as it gives it; the page authors only the heading and
  * intro, and the property and airport codes the service asks for (see getApiContext). The
- * currency is the page address's `currencyCode` (else USD). The passes list is the same as the
+ * currency is the visitor's (passes.js `readCurrency`). The passes list is the same as the
  * quick buy's (one call, kept for the session).
  * @param {Element} block
  */

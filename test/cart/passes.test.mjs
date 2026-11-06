@@ -394,6 +394,51 @@ for (const [label, fail, before] of [
   await page.close();
 }
 
+// the currency: the passes in the visitor's currency (the address, then the session); a cart of
+// passes in another currency is priced in theirs when the mini cart opens (PUT); a lounge's isn't
+{
+  const service = cartService();
+  const asked = [];
+  const page = await openPasses({ service });
+  page.on('request', (r) => { if (/GetProductPasses/.test(r.url())) asked.push(new URL(r.url()).searchParams.get('currencyCode')); });
+  const { 'Global 2-Visit Pass': A } = await codes(page);
+  await page.locator(`.quick-buy button[data-pass-add][data-catalogue-code="${A}"]`).click();
+  await page.waitForSelector('dialog.mini-cart-modal[open]', { timeout: 15000 });
+  await closeMini(page);
+  await page.goto(`${page.url().split('?')[0]}?currencyCode=HKD`, { waitUntil: 'load' });
+  await page.waitForFunction(() => document.querySelectorAll('.pass-finder button[data-pass-add]').length >= 5, null, { timeout: 30000 });
+  check('?currencyCode=HKD: the passes asked for in HKD', asked.includes('HKD') && !asked.includes('USD'), JSON.stringify(asked));
+  // the next page without it keeps the session's currency
+  asked.length = 0;
+  await page.goto(page.url().split('?')[0], { waitUntil: 'load' });
+  await page.waitForFunction(() => document.querySelectorAll('.pass-finder button[data-pass-add]').length >= 5, null, { timeout: 30000 });
+  check('the next page: still HKD (the session\'s currency)', asked.length && asked.every((c) => c === 'HKD'), JSON.stringify(asked));
+  const puts = service.api.puts.length;
+  await page.locator('header a.header-utility:has(.icon-cart)').first().click();
+  await page.waitForSelector('#spinner-overlay', { state: 'attached', timeout: 3000 }).catch(() => {});
+  const loader = await page.evaluate(() => !!document.getElementById('spinner-overlay'));
+  await page.waitForSelector('dialog.mini-cart-modal[open]', { timeout: 15000 });
+  await page.waitForTimeout(400);
+  const put = service.api.puts[puts];
+  const m = await mini(page);
+  check('the USD cart of passes, opened in HKD: the loader, PUT with the same passes in HKD, the mini cart in HKD', loader && service.api.puts.length === puts + 1 && put.currency === 'HKD' && put.products.length === 1 && put.products[0].catalogueCode === A && /^HKD /.test(m?.total || ''), JSON.stringify({ put, total: m?.total }));
+  await closeMini(page);
+  await page.locator('header a.header-utility:has(.icon-cart)').first().click();
+  await page.waitForSelector('dialog.mini-cart-modal[open]', { timeout: 15000 });
+  await page.waitForTimeout(400);
+  check('opened again in HKD: no second conversion', service.api.puts.length === puts + 1, `${service.api.puts.length - puts}`);
+  await page.close();
+}
+{
+  const service = cartService({ carts: new Map([['CRT_LOUNGE', 'lounge']]) });
+  const page = await openPasses({ service, init: storedLounge, path: `${PATH}?currencyCode=USD` });
+  await page.locator('header a.header-utility:has(.icon-cart)').first().click();
+  await page.waitForSelector('dialog.mini-cart-modal[open]', { timeout: 15000 });
+  await page.waitForTimeout(400);
+  check('a lounge\'s cart (HKD) on a USD page: not converted (no PUT)', !service.api.puts.length && /^HKD /.test((await mini(page))?.total || ''), JSON.stringify(service.api.puts));
+  await page.close();
+}
+
 // another tab's add relabels this one
 {
   // (two tabs of one browser profile: the harness opens each page in its own otherwise)
@@ -411,11 +456,12 @@ for (const [label, fail, before] of [
 }
 
 // the texts in the other languages (the source's: Add More, Quantity, Notice)
-for (const [lang, addMore, quantity] of [
-  ['zh-cn', '新增更多', '数量:'], ['zh-hk', '新增更多', '數量:'], ['ja-jp', 'さらに追加', '数量:'], ['pt-br', 'Adicionar Mais', 'Quantidade:'],
+for (const [lang, addToCart, addMore, quantity] of [
+  ['zh-cn', '加入购物车', '新增更多', '数量:'], ['zh-hk', '加入購物車', '新增更多', '數量:'], ['ja-jp', 'カートに入れる', 'さらに追加', '数量:'], ['pt-br', 'Adicionar ao Carrinho', 'Adicionar Mais', 'Quantidade:'],
 ]) {
   const page = await openPasses({ path: `/${lang}/airport-lounge-passes`, lang });
   const { 'Global 2-Visit Pass': A } = await codes(page);
+  check(`${lang}: Add to Cart "${addToCart}" (live's)`, (await labels(page, A)).every((l) => l === addToCart), JSON.stringify(await labels(page, A)));
   await page.locator(`.quick-buy button[data-pass-add][data-catalogue-code="${A}"]`).click();
   await page.waitForSelector('dialog.mini-cart-modal[open]', { timeout: 15000 });
   await page.waitForTimeout(400);

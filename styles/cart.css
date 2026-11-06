@@ -308,9 +308,20 @@ dialog.modal.cart-confirm-modal .modal-header {
     display: block;
   }
 
+  /* (the source's phone pass line: more room above the quantity, the price larger) */
+  .mini-cart-line-pass {
+    margin-bottom: var(--spacing-5);
+    padding-bottom: var(--spacing-5);
+  }
+
   .mini-cart-quantity {
-    margin-top: var(--spacing-9);
+    margin-top: var(--spacing-10);
     font-size: var(--font-size-sm);
+  }
+
+  .mini-cart-line-amount {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
   }
 }
 
