@@ -64,6 +64,30 @@ Add any of them after `text-image`, e.g. `Columns (text-image, vertical-center, 
 
 For the source landing pages' narrower page width, use Section Metadata `style` = `fixed-width`.
 
+**Gold accent:** in a text-image heading, italic words show in the source landing pages' gold,
+upright (e.g. "Elevate your Travels with *Smart Traveller*").
+
+## Option: social
+
+The source landing pages' "Travel Smart, Travel Better" band (WiFi pages): centred text beside a
+photo of a person. One row of two cells: the text, then the photo.
+
+| Columns (social) |                 |
+|------------------|-----------------|
+| ## Travel Smart, Travel Better<br>Tag us when you travel…<br>[:facebook: Plaza Premium Lounge](https://www.facebook.com/plazapremiumlounge)<br>[:instagram: PlazaPremiumLounge](https://www.instagram.com/plazapremiumlounge/)<br>#ppgsmarttraveller<br>#travelsmarttravelbetter | *photo* |
+
+- **Text cell:** the heading (Heading 2, plum, 26px), a paragraph of text, then one line per
+  social link (start the link text with the network's icon, e.g. `:facebook:`, 30px) and one line
+  per hashtag.
+- **Mobile first:** on phones the text comes first, the photo centred below it (250px wide, 300px
+  from 576px). From 768px the photo sits at the bottom left (360px wide; the band's full height
+  from 992px) and the text starts at 40% of the band; the links and the hashtags sit side by side
+  in a centred 530px row (links on the left, lines without a link on the right).
+- **Last on the page:** the band ends the page content, with the Newsletter right under it and no
+  space between them. As on the source, the bottom of the photo is under the Newsletter, so 50px
+  (30px from 768px) of it is cut off: use a photo whose subject stands at least that high.
+- Use Section Metadata `style` = `fixed-width`, as the rest of the landing page.
+
 ## Media-image variation
 
 A centred grid of evenly sized image cards, for partner or brand logos, airlines, awards or any
