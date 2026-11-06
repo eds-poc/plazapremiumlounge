@@ -1,5 +1,5 @@
 /* the shared form styles, loaded with the block's own (before the block shows) */
-@import url('../../styles/forms.css');
+@import url('/styles/forms.css');
 
 /* booking form: the source booking request forms (measured at 1440, 1100 and 375px). Two columns
    from 768px, the fields' labels 16px above; adults and children side by side at every width; the
@@ -204,7 +204,7 @@
   width: 100%;
   height: 100%;
   background-color: currentcolor;
-  mask: url('../../icons/close-light.svg') center / contain no-repeat;
+  mask: url('/icons/close-light.svg') center / contain no-repeat;
 }
 
 .booking-form .date-picker-calendar-header {
@@ -232,11 +232,11 @@
   width: 14px;
   height: 16px;
   margin: auto;
-  mask-image: url('../../icons/arrow-left-light.svg');
+  mask-image: url('/icons/arrow-left-light.svg');
 }
 
 .booking-form .date-picker-calendar-next::before {
-  mask-image: url('../../icons/arrow-right-light.svg');
+  mask-image: url('/icons/arrow-right-light.svg');
 }
 
 .booking-form .date-picker-calendar-nav:hover {
