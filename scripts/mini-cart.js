@@ -1,17 +1,20 @@
 /*
  * The cart's UI, as the source's (#cart-popup and its dialogs), in the site's dialog
  * (modal-dialog.js): the mini cart (a lounge booking with its date, time, guests and service, or
- * passes with their quantity; the totals, Check Out, and Edit for a lounge), "Checkout Cart" when
- * the cart's rules refuse a product, the remove confirmation and the failure messages. Loaded when
- * a product is added or the header's cart opens with something in it; the cart itself is cart.js,
- * its state cart-state.js. Everything follows the cart in place (no page reload, unlike the
- * source's after a removal).
+ * passes with their quantity; the totals, the promo code, Check Out, and Edit for a lounge),
+ * "Checkout Cart" when the cart's rules refuse a product, the remove confirmations and the failure
+ * messages. Check Out and Edit go to the pages the page metadata names (`cart-checkout-url`,
+ * `cart-edit-url`). Loaded when a product is added or the header's cart opens with something in
+ * it; the cart itself is cart.js, its state cart-state.js. Everything follows the cart in place
+ * (no page reload, unlike the source's after a removal).
  */
-import { loadCSS } from './aem.js';
-import { translate, getLanguage } from './i18n.js';
+import { getMetadata, loadCSS } from './aem.js';
+import {
+  DEFAULT_SITE, getLanguage, getSiteFolder, translate,
+} from './i18n.js';
 import { getCart, onCartChange } from './cart-state.js';
 import {
-  addToCart, convertCart, refreshCart, removeFromCart,
+  addToCart, applyPromo, convertCart, refreshCart, removeFromCart, removePromo,
 } from './cart.js';
 import { getCurrency } from './currency.js';
 import { hideLoader, showLoader } from './loader.js';
@@ -145,6 +148,58 @@ const checkoutFirst = new CartDialog('cart-checkout-first', 'cart-message-modal'
 const failure = new CartDialog('cart-failure', 'cart-message-modal');
 // (the source's remove confirmation has no title)
 const confirm = new CartDialog('cart-remove', 'cart-confirm-modal', false);
+const promoConfirm = new CartDialog('cart-promo-remove', 'cart-confirm-modal');
+
+// this site's preview hosts: there, a cart link that isn't set up says so (for authors)
+const PREVIEW_HOST = /\.aem\.page$|^localhost$/;
+
+/**
+ * A cart link from the page metadata, e.g. `cart-checkout-url` (set per language folder in the
+ * bulk metadata sheet, e.g. https://www.plazapremiumlounge.com/en-uk/guest-checkout), with its
+ * placeholders filled: {cartId}, {lang} (the site folder, e.g. en-uk) and, from the cart's lounge,
+ * {date} (YYYY-MM-DD), {time} (HHmm), {adults}, {children}, {catalogueCode}.
+ * @param {'checkout'|'edit'} name
+ * @param {Object} cart
+ * @returns {string} The address, or '' without one (or when it isn't a web address or a path)
+ */
+export function cartLink(name, cart) {
+  const template = getMetadata(`cart-${name}-url`).trim();
+  if (!template) return '';
+  const lounge = cart?.lines.find((line) => line.kind !== 'pass');
+  const values = {
+    cartId: cart?.cartId || '',
+    lang: getSiteFolder() || DEFAULT_SITE,
+    date: lounge?.start.slice(0, 10) || '',
+    time: lounge ? lounge.start.slice(11, 16).replace(':', '') : '',
+    adults: lounge ? String(lounge.adults) : '',
+    children: lounge ? String(lounge.children) : '',
+    catalogueCode: lounge?.catalogueCode || '',
+  };
+  const filled = template.replace(/\{(\w+)\}/g, (all, key) => (Object.hasOwn(values, key) ? encodeURIComponent(values[key]) : all));
+  try {
+    const url = new URL(filled, window.location.href);
+    return /^https?:$/.test(url.protocol) ? url.href : '';
+  } catch {
+    return '';
+  }
+}
+
+// a lounge's add-ons (the source's View more options), once their source is registered: the
+// add-ons API isn't there yet, so no link shows
+let addons = null;
+
+/**
+ * Registers where a lounge's add-ons come from: `available(line)` says whether the lounge has any,
+ * `open(line, trigger)` shows them (the source's "Enhance Your Lounge Experience").
+ * @param {{available: Function, open: Function}} source available(line): boolean;
+ *   open(line, trigger)
+ */
+export function registerAddons(source) {
+  addons = source;
+}
+
+// what the visitor typed in the promo field and its message, kept while the mini cart redraws
+const promo = { draft: '', message: '', error: false };
 
 /**
  * The remove confirmation (the source's ⊗), over the mini cart: Cancel closes it (the mini cart
@@ -182,6 +237,125 @@ function confirmRemove(line, from) {
   );
   confirm.fill('', [message, actions]);
   confirm.open(from, { stack: true });
+}
+
+/**
+ * The promo code's field, as the source's: "Promo Code", the field and its arrow; Enter applies
+ * too, an empty code says so without asking the booking system, and typing clears the message.
+ * An applied code shows in the field (read only) with a button to take it off, after the source's
+ * confirmation. Nothing reloads: the mini cart redraws from the cart.
+ * @param {Object} cart
+ * @returns {HTMLElement}
+ */
+function buildPromo(cart) {
+  const id = 'mini-cart-promo-code';
+  const box = el('div', 'mini-cart-promo');
+  const label = el('label', 'mini-cart-promo-label', translate('cartPromoCode'));
+  label.htmlFor = id;
+  const field = el('div', 'mini-cart-promo-field');
+  const input = el('input', 'mini-cart-promo-input');
+  input.id = id;
+  input.type = 'text';
+  input.autocomplete = 'off';
+  input.placeholder = translate('cartPromoPlaceholder');
+  const message = el('p', 'mini-cart-promo-message', promo.message);
+  message.id = `${id}-message`;
+  message.setAttribute('aria-live', 'polite');
+  input.setAttribute('aria-describedby', message.id);
+  const show = () => {
+    message.textContent = promo.message;
+    message.classList.toggle('is-error', promo.error);
+    if (promo.error) input.setAttribute('aria-invalid', 'true');
+    else input.removeAttribute('aria-invalid');
+  };
+  show();
+  const applied = cart.totals?.promo > 0 ? cart.promoCode || '' : '';
+  const action = el('button', `mini-cart-promo-${applied ? 'remove' : 'apply'}`);
+  action.type = 'button';
+  action.setAttribute('aria-label', translate(applied ? 'cartPromoRemove' : 'cartPromoApply'));
+  field.append(input, action);
+  box.append(label, field, message);
+  // (after the booking system answered: the mini cart has redrawn, so the new field takes focus)
+  const refocus = () => {
+    const now = getCart();
+    // eslint-disable-next-line no-use-before-define
+    if (mini.dialog?.open && now) renderMiniCart(now);
+    mini.dialog?.querySelector('.mini-cart-promo-input')?.focus();
+  };
+  if (applied) {
+    input.value = applied;
+    input.readOnly = true;
+    action.addEventListener('click', () => {
+      const actions = el('div', 'cart-confirm-actions');
+      actions.append(
+        button(translate('cartCancel'), 'primary', () => promoConfirm.dialog?.close()),
+        button(translate('cartConfirm'), 'soft', async () => {
+          promoConfirm.dialog?.close();
+          showLoader();
+          let result;
+          try {
+            result = await removePromo();
+          } finally {
+            hideLoader();
+          }
+          promo.message = result.status === 'failed' ? translate('cartPromoFailed') : '';
+          promo.error = result.status === 'failed';
+          refocus();
+        }),
+      );
+      promoConfirm.fill(translate('cartPromoRemoveTitle'), [el('p', 'cart-confirm-message', translate('cartPromoRemoveConfirm')), actions]);
+      promoConfirm.open(action, { stack: true });
+    });
+    return box;
+  }
+  input.value = promo.draft;
+  let busy = false;
+  const apply = async () => {
+    if (busy) return;
+    const code = input.value.trim();
+    if (!code) {
+      promo.message = translate('cartPromoEmpty');
+      promo.error = true;
+      show();
+      input.focus();
+      return;
+    }
+    promo.message = '';
+    promo.error = false;
+    show();
+    busy = true;
+    action.disabled = true;
+    action.setAttribute('aria-busy', 'true');
+    input.readOnly = true;
+    let result;
+    try {
+      result = await applyPromo(code);
+    } finally {
+      busy = false;
+      action.disabled = false;
+      action.removeAttribute('aria-busy');
+      input.readOnly = false;
+    }
+    const ok = result.status === 'applied';
+    promo.draft = ok ? '' : code;
+    promo.message = ok ? '' : translate(result.status === 'failed' ? 'cartPromoFailed' : 'cartPromoInvalid');
+    promo.error = !ok;
+    refocus();
+  };
+  input.addEventListener('input', () => {
+    promo.draft = input.value;
+    if (!promo.message) return;
+    promo.message = '';
+    promo.error = false;
+    show();
+  });
+  input.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    apply();
+  });
+  action.addEventListener('click', apply);
+  return box;
 }
 
 /**
@@ -228,7 +402,22 @@ function renderMiniCart(cart) {
       row.append(el('dt', '', label), dd);
       details.append(row);
     });
+    // the lounge's add-ons, when the cart has them (the source's "Additional Services: 2x …")
+    if (line.addons?.length) {
+      const row = el('div', 'mini-cart-detail mini-cart-addons');
+      const dd = el('dd');
+      line.addons.forEach((a) => dd.append(el('span', 'mini-cart-addon', `${a.quantity}x ${a.name}`)));
+      row.append(el('dt', '', translate('cartAdditionalServices')), dd);
+      details.append(row);
+    }
     box.append(details);
+    if (addons?.available(line)) {
+      const more = el('button', 'mini-cart-more', translate('cartViewMoreOptions'));
+      more.type = 'button';
+      more.setAttribute('aria-haspopup', 'dialog');
+      more.addEventListener('click', () => addons.open(line, more));
+      box.append(more);
+    }
     return box;
   }));
 
@@ -239,26 +428,48 @@ function renderMiniCart(cart) {
     return r;
   };
   const totalsBox = el('div', 'mini-cart-totals');
-  // the base and the discounts, when there are discounts (as the source's)
-  if (totals.discounts?.length) {
+  // the base and the discounts, when there are discounts (as the source's), and a promo code's
+  if (totals.discounts?.length || totals.promo > 0) {
     totalsBox.append(row('mini-cart-service-total', el('span', 'mini-cart-label', translate('cartServiceTotal')), formatAmount(totals.base, currency)));
-    totals.discounts.forEach((d) => {
+    (totals.discounts || []).forEach((d) => {
       totalsBox.append(row('mini-cart-discount', el('span', 'mini-cart-label', `${d.name}:`), `- ${formatAmount(d.value, currency)}`));
     });
+    if (totals.promo > 0) {
+      totalsBox.append(row('mini-cart-discount mini-cart-promo-discount', el('span', 'mini-cart-label', translate('cartPromoDiscount', { code: cart.promoCode || '' })), `- ${formatAmount(totals.promo, currency)}`));
+    }
   }
+  // the promo code, then the total (the source's order)
+  totalsBox.append(buildPromo(cart));
   const totalLabel = el('span', 'mini-cart-label');
   totalLabel.append(el('span', '', translate('cartTotal')), el('small', 'mini-cart-note', translate('cartTotalNote')));
   totalsBox.append(row('mini-cart-total', totalLabel, formatAmount(totals.total, currency)));
 
-  // Check Out, and Edit for a lounge (as the source's: passes have nothing to edit): the hand-off
-  // to the booking steps comes later; they are announced
+  // Check Out, and Edit for a lounge (as the source's: passes have nothing to edit): links to the
+  // pages the metadata names (see cartLink), announced too (`cart:checkout`, `cart:edit`); without
+  // one, only announced (and on the preview site, a note for authors)
   const announce = (name) => () => document.dispatchEvent(new CustomEvent(`cart:${name}`, { detail: { cart: getCart() } }));
   const actions = el('div', 'mini-cart-actions');
-  actions.append(button(translate('cartCheckout'), 'primary', announce('checkout')));
+  const missing = [];
+  const link = (name, label, kind) => {
+    const href = cartLink(name, cart);
+    if (!href) {
+      missing.push(`cart-${name}-url`);
+      return button(label, kind, announce(name));
+    }
+    const a = el('a', `cart-button cart-button-${kind}`, label);
+    a.href = href;
+    a.addEventListener('click', announce(name));
+    return a;
+  };
+  actions.append(link('checkout', translate('cartCheckout'), 'primary'));
   if (cart.lines.some((line) => line.kind !== 'pass')) {
-    actions.append(button(translate('cartEdit'), 'secondary', announce('edit')));
+    actions.append(link('edit', translate('cartEdit'), 'secondary'));
   }
-  mini.fill(translate('cartTitle'), [lines, totalsBox, actions]);
+  const nodes = [lines, totalsBox, actions];
+  if (missing.length && PREVIEW_HOST.test(window.location.hostname)) {
+    nodes.push(el('p', 'mini-cart-hint', `Set ${missing.join(' and ')} in the metadata sheet for this link (preview only).`));
+  }
+  mini.fill(translate('cartTitle'), nodes);
 }
 
 /**
@@ -273,6 +484,9 @@ function renderMiniCart(cart) {
 export async function openMiniCart(trigger, { fresh = false } = {}) {
   let cart = getCart();
   if (!cart) return null;
+  // (a new opening: the promo field's last message is gone, what was typed stays)
+  promo.message = '';
+  promo.error = false;
   const currency = getCurrency();
   const convert = !fresh && cart.currency !== currency && cart.lines.every((line) => line.kind === 'pass');
   if (convert) {

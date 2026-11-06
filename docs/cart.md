@@ -31,10 +31,13 @@ the page after ⊗ → Yes, and that reload adds the promotional address's pass 
   - the lounge's name with a ⊗ (remove), its location
   - Date (`02-Nov-2026`, `2026年11月02日`), Time (`1800hrs`), Guests (`2 Adult(s) 1 Child(ren)`),
     Services (the product); on phones each label is over its value, in 14px text
-  - Service Total and the discounts when there are discounts, then Total (Includes applicable
-    taxes and fees); amounts as the source's (`HKD 1,755.00`)
-  - **Check Out** and **Edit**: not wired yet (they announce `cart:checkout` / `cart:edit`, for
-    the booking steps to come)
+  - Service Total and the discounts when there are discounts (and a promo code's), then the
+    **promo code** field, then Total (Includes applicable taxes and fees); amounts as the source's
+    (`HKD 1,755.00`)
+  - **Check Out** and **Edit** (Edit only with a lounge): links to the pages the page metadata
+    names (see [Check Out and Edit](#check-out-and-edit-for-authors)), announced too
+    (`cart:checkout` / `cart:edit`). Without the metadata they only announce, and on the preview
+    site a note under them names the missing row.
 - **⊗**: "Would you like to remove this order from the shopping cart?" with the product, over the
   mini cart (both show).
   - **Cancel** (maroon) closes only the question.
@@ -93,8 +96,47 @@ the page after ⊗ → Yes, and that reload adds the promotional address's pass 
   as before.
 - Texts in the five languages, as the source's (see `cart*` in `scripts/i18n.js`).
 
-Not there yet (no API for them): the source's **View more options** (add-ons) and the **promo
-code** field, Check Out's add-ons step and the checkout itself.
+- **The promo code** (the source's field: "PROMO CODE", "Enter Code", the arrow; Enter applies too):
+  - An empty code: "Please enter promo code." in red, with no request. Typing clears the message.
+  - Applying: the arrow is off (busy) while the booking system answers (no full-page loader, as
+    the source's), then the cart is read again.
+    - **Applied:** the cart has a promo discount (`totalPromocodeAmount` above 0). A "Promo Code
+      (CODE):" row shows under the discounts, and the total is the booking system's. The code shows
+      in the field (read only) with an ✕ to take it off.
+    - **Taking it off:** the source's confirmation ("Are you sure. Do you want to Delete Promo
+      Code?", Cancel / Confirm) over the mini cart, then the same call with an empty code.
+    - **Refused:** "No record found for the provided promotional code." in red; the code stays in
+      the field and the cart is unchanged.
+    - **No answer:** "Error", as the source's.
+  - No reload: the source reloads only its cart pop-up; here the mini cart redraws from the cart.
+  - **Not finished:** stage has no valid code, so the applied state is built from a modelled answer
+    (see [The promo code API](#the-promo-code-api-cart-validate-promocode)).
+- **View more options** (a lounge's add-ons): the hook is there (`registerAddons` in
+  `scripts/mini-cart.js`), and the line's "Additional Services: 2x …" shows when the cart has
+  add-ons. No link shows until the add-ons API exists (see [Add-ons](#add-ons-view-more-options)).
+
+Not there yet: the add-ons modal itself, and the checkout (the pages Check Out and Edit link to).
+
+### Check Out and Edit (for authors)
+
+The pages come from the **bulk metadata sheet** (`/metadata` in Document Authoring), one row per
+language folder, so authors change them without a code change:
+
+| URL | cart-checkout-url | cart-edit-url |
+| --- | --- | --- |
+| `/en-uk/**` | `https://www.plazapremiumlounge.com/{lang}/guest-checkout` | `https://www.plazapremiumlounge.com/{lang}/book-your-visit` |
+
+(One `/**` row with `{lang}` also covers every folder.)
+
+- **Placeholders:** `{cartId}`, `{lang}` (the site folder, e.g. `zh-cn`), and from the cart's
+  lounge `{date}` (YYYY-MM-DD), `{time}` (HHmm), `{adults}`, `{children}`, `{catalogueCode}`. Each
+  is URL-encoded. A path (`/en-uk/checkout`) is on this site.
+- **Ignored values:** anything that isn't a web address or a path (e.g. `javascript:`).
+- **The source's own pages** are `/{lang}/guest-checkout` and `/{lang}/book-your-visit`.
+  - Its Check Out goes straight there (after a Netcore call); its add-ons step is on that page.
+  - Its Edit is a plain link; that page pre-fills the date, time, guests and product from the
+    source's server-side cart.
+  - Neither reads this site's cart (see the open points below).
 
 ## How it works
 
@@ -151,6 +193,69 @@ code** field, Check Out's add-ons step and the checkout itself.
   11 with `maxNoOfProductsAllowed: 10`.
 - The service checks no lounge/pass rule (it takes both in one cart): the rules are this site's.
 - Not in the API yet, so not done: promo codes, add-ons, the checkout hand-off.
+
+### The promo code API (`cart-validate-promocode`)
+
+`apiUrl('cartPromo')`: `PUT …/ppg-app/cart-validate-promocode` with `{ cartId, promocode }` (as
+given), and an empty `promocode` to take a code off (as the source's remove).
+
+**Observed on stage (2026-11-06; no valid code available):**
+- `{ cartId, promocode }` → **400** VALIDATION_ERROR "Request body is required for update cart" for
+  any code and cart, including an unknown cart. Without a cartId: "cartId is required".
+- The cart body (`currency`, `channel`, `pointOfPurchase`, `products`) plus `promocode` → 200
+  `{ cartId }` for any code, valid or not. Nothing changes in the cart (`totalPromocodeAmount`
+  stays 0, no promo field).
+- POST → BKNG004 "Missing mandatory inputs". CORS allows PUT.
+
+So this site sends the documented shape. A refusal shows the source's "No record found…" message,
+and a code counts as applied only when the cart then has a promo amount.
+
+**Open (to finish with a valid code):**
+1. The success answer, and the request shape that validates (the documented one is refused).
+2. How the cart shows a code: a `promoCode` field? Is the promo a `discounts[]` entry or
+   `totalPromocodeAmount`? Per line?
+3. Taking a code off, and whether PUT (Add More, removals, currency) and DELETE keep it.
+4. Error codes, and customer-facing, translated messages.
+
+**The source's** (for comparison): `POST /bookingcart/applypromocode` `{ cartid, promocode }`.
+- A refusal is `{ isPromoCodeValid: false, statusCode: 400, message }`.
+- A success answers HTML, and it refreshes its cart pop-up (no page reload).
+- A remove applies an empty code after its confirmation.
+
+### Add-ons (View more options)
+
+**The source's** (HKG lounges, captured 2026-11-06):
+- **Where it shows:** a lounge line shows "View more options ›" when
+  `POST /bookingcart/getcheckoutaddonupsell` answers `hasAddonsOrUpsell`. Never for passes.
+- **What that answer holds:**
+  - `addons[]`: `productCode`, `productDisplayName`, `serviceName`, `imagePath`, `catalogueCode`
+    (`…-Add-On-…`), `descriptionHtml`, `basedOn` ("Per Unit" or per guest), `unitPrice` (or
+    `adultUnitPrice` / `childUnitPrice`), `maxQty`
+  - `cartContext` (the lounge, date, time, guests, currency)
+  - `summaryText`
+- **The modal "Enhance Your Lounge Experience":**
+  - the summary line, then "Add to your booking": a carousel of cards with arrows and dots
+  - each card: the image, the name, Learn more (a stacked description pop-up), and Quantity −/+
+    (per unit; or Adult(s) / Child(ren) up to the booking's guests, with All Guests)
+  - "Service total: HKD 108.00", and **Add**
+  - Add → `POST /loungebookvisit/addrelatedservice` (startdate, starttime, quantity, servicename,
+    catalogueCode, adult, children, promocode, currency) → "Add-on added to your booking.", and
+    the button reads **Added**
+  - **Close** (when opened from View more options)
+  - upgrades ("Upgrade to a premium lounge", `upgradeproduct`) when there are any
+- **In the cart:**
+  - the add-on shows under its lounge as "Additional Services: 2x …"
+  - Service Total includes it; the online discount stays on the lounge
+  - the header count adds its quantity
+  - no ⊗ of its own: removing the lounge removes it
+- **Texts in five languages:** in the project notes (`data-bw-addon-upsell-*`: the title, the
+  sections, Next / Checkout / Close, Learn more, Upgrade, Add / Added, the success messages,
+  Service total, Quantity, Adult(s), Child(ren), All Guests).
+
+**This site:** waiting for the add-ons API.
+- Wire it with `registerAddons({ available(line), open(line, trigger) })` from
+  `scripts/mini-cart.js`.
+- The cart's lines need `addons: [{ name, quantity }]` from the GET (the shape isn't known).
 
 ### The mini cart from the GET answer
 
@@ -216,5 +321,14 @@ them with the booking widget tests' settings: `BW_HOST`, `PLAYWRIGHT`.
     in the cart, a lounge in the cart, an unknown code
   - the currency: the session's, a cart of passes converted when the mini cart opens, a lounge's not
   - the other four languages, axe
+- **`test/cart/mini-cart.test.mjs`** (39 checks):
+  - Check Out / Edit from the metadata: placeholders, zh-cn, the link styles, the announcement
+    then the page, no metadata (a button and the preview note), an unsafe value
+  - the promo code: the field, an empty code, typing, Enter, the request's shape, the busy
+    button; stage's 400, a 200 that applies nothing, the service's error, the network, a 500; a
+    modelled success (the row, the total, the read-only code), the remove confirmation (Cancel,
+    Confirm)
+  - the add-ons hook (no link without it; with one, the link and Additional Services)
+  - no reloads; axe on the promo field and its confirmation
 - **`test/cart/e2e/`**: both journeys end to end on stage (real carts), on the local preview or a
   branch preview (see its README).

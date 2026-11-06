@@ -24,6 +24,13 @@ line, DELETE. It covers:
 - `?selectedPassID=`, the currency (the session's, a cart of passes converted, a lounge's not), the
   other languages (live's Add to Cart and Add More), axe
 
+`node mini-cart.test.mjs [width]` — the mini cart (39 checks).
+- Check Out / Edit from the page metadata (`cart-checkout-url`, `cart-edit-url`, injected) and the
+  promo code.
+- The promo call is answered as stage does today (400 for `{cartId, promocode}`), plus a modelled
+  success (a promo amount in the GET), since no valid code exists yet.
+- The add-ons hook, and axe.
+
 **End to end** (`e2e/`, nothing routed: the real stage passes and cart APIs, so they make and delete
 real stage carts). Set `HOST` to the local preview or a branch preview, plus `WIDTH` and
 `PLAYWRIGHT`.

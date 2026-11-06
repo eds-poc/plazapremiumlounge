@@ -257,8 +257,12 @@ function readCart(json) {
     totals: {
       base: Number(totals.totalBasePrice),
       discounts,
+      // a promo code's discount (none known yet: no valid code on stage)
+      promo: Number(totals.totalPromocodeAmount) || 0,
       total: Number(totals.totalPrice),
     },
+    // (the cart's promo code, if its answer names one: not seen yet)
+    promoCode: text(json?.promoCode || json?.promocode),
   };
 }
 
@@ -284,7 +288,11 @@ export async function refreshCart(cartId) {
       forgetCart();
       return null;
     }
-    saveCart({ ...cart, cartId: id });
+    // a promo code applied here stays known while the cart has its discount (the answer may not
+    // name it)
+    const kept = getCart();
+    const promoCode = cart.promoCode || (cart.totals.promo > 0 && kept?.cartId === id ? kept.promoCode || '' : '');
+    saveCart({ ...cart, cartId: id, promoCode });
     return getCart();
   } catch (error) {
     if (error.service?.errorCode === 'BKNG001' && current()) {
@@ -503,4 +511,71 @@ export function convertCart(currency) {
     return { status: 'converted' };
   })().finally(() => { converting = null; });
   return converting;
+}
+
+let promoting = null;
+
+/**
+ * Applies a promo code to the cart (PUT cart-validate-promocode with the cart's id and the code),
+ * then reads the cart again: the booking system prices it. A code counts as applied when the cart
+ * then has a promo discount. One at a time, after an add, a removal or a conversion under way.
+ * @param {string} code
+ * @returns {Promise<{status: 'applied'|'invalid'|'failed', message?: string, error?: Error}>}
+ *   invalid: the booking system refused the code (or didn't apply it); failed: it didn't answer
+ */
+export function applyPromo(code) {
+  if (promoting) return promoting;
+  promoting = (async () => {
+    await Promise.allSettled([pending, removing, converting].filter(Boolean));
+    const cart = getCart();
+    const promocode = text(code);
+    if (!cart || !promocode) return { status: 'invalid' };
+    try {
+      await fetchJson(apiUrl('cartPromo'), { cartId: cart.cartId, promocode }, 'PUT');
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('cart: the promo code was not applied', error);
+      // (a refusal: a 4xx or the service's error; else the service didn't answer)
+      const refused = !!error.service || (error.status >= 400 && error.status < 500);
+      return { status: refused ? 'invalid' : 'failed', message: text(error.service?.message), error };
+    }
+    let now = null;
+    try {
+      now = await refreshCart(cart.cartId);
+    } catch { /* (read again next time) */ }
+    if (!(now?.totals?.promo > 0)) return { status: 'invalid' };
+    if (!now.promoCode) saveCart({ ...now, promoCode: promocode });
+    return { status: 'applied' };
+  })().finally(() => { promoting = null; });
+  return promoting;
+}
+
+/**
+ * Takes the cart's promo code off (the same call with an empty code, as the source's), then reads
+ * the cart again. One at a time, as applyPromo.
+ * @returns {Promise<{status: 'removed'|'failed', error?: Error}>}
+ */
+export function removePromo() {
+  if (promoting) return promoting;
+  promoting = (async () => {
+    await Promise.allSettled([pending, removing, converting].filter(Boolean));
+    const cart = getCart();
+    if (!cart) return { status: 'removed' };
+    try {
+      await fetchJson(apiUrl('cartPromo'), { cartId: cart.cartId, promocode: '' }, 'PUT');
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('cart: the promo code was not taken off', error);
+      return { status: 'failed', error };
+    }
+    try {
+      const now = await refreshCart(cart.cartId);
+      if (now?.promoCode && !(now.totals?.promo > 0)) saveCart({ ...now, promoCode: '' });
+    } catch {
+      const known = getCart();
+      if (known?.cartId === cart.cartId) saveCart({ ...known, promoCode: '' });
+    }
+    return { status: 'removed' };
+  })().finally(() => { promoting = null; });
+  return promoting;
 }
