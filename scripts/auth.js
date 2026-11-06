@@ -5,7 +5,6 @@
  * every logged-in call. The token is checked against its expiry on login and on every page load
  * (checkSession(), only when a token is stored): an expired or broken one logs the visitor out and
  * sends them to the home page; logout() (the header's account menu) does the same.
- * feature/travelwise
  * Partner pages have their own login, a partner token per partner (see checkPartnerAccess()).
  * A guest on a members' page goes to the home page with the page in `?redirectUrl=`; there the
  * login modal opens, and once logged in (scripts/account-forms.js) the visitor goes back to it.
@@ -14,6 +13,7 @@
 import { getMetadata } from './aem.js';
 import { DEFAULT_SITE, getSiteFolder } from './i18n.js';
 import { forgetMember } from './member.js';
+
 const TOKEN_KEY = 'token';
 // the address parameter with the members' page to go back to after logging in
 const REDIRECT_PARAM = 'redirectUrl';
