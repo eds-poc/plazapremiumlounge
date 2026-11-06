@@ -23,6 +23,11 @@ dialog.modal:is(.mini-cart-modal, .cart-message-modal, .cart-confirm-modal) {
   --cart-footer-button-padding: 8px 10px;
   --cart-soft: rgb(104 18 53 / 10%);
   --cart-soft-hover-border: rgb(86 94 100);
+  --cart-promo-height: 44px;
+  --cart-promo-padding: 0 50px 0 25px;
+  --cart-promo-surface: rgb(235 233 228);
+  --cart-promo-radius: 25px;
+  --cart-promo-icon: 16px;
 
   font-family: var(--font-family-primary);
 }
@@ -231,6 +236,144 @@ dialog.modal.mini-cart-modal .modal-body {
   border-color: var(--color-background);
   background-color: var(--color-brand-primary);
   color: var(--color-text-inverse);
+}
+
+/* Check Out and Edit as links (the pages the metadata names): the same pills (the site's link
+   colours would win otherwise) */
+a.cart-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-regular);
+  text-decoration: none;
+}
+
+a.cart-button-primary:any-link {
+  color: var(--color-text-inverse);
+}
+
+a.cart-button-primary:hover {
+  color: var(--color-brand-primary);
+  text-decoration: none;
+}
+
+a.cart-button-secondary:any-link {
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+a.cart-button-secondary:hover {
+  color: var(--color-text-inverse);
+  text-decoration: none;
+}
+
+/* the promo code, as the source's: an uppercase label, a warm grey pill with the arrow inside, the
+   message under it (red for a refusal) */
+.mini-cart-promo {
+  margin: var(--spacing-4) 0 var(--spacing-7);
+}
+
+.mini-cart-promo-label {
+  display: block;
+  margin-bottom: var(--spacing-3);
+  color: var(--color-text);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.mini-cart-promo-field {
+  position: relative;
+}
+
+.mini-cart-promo-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--cart-promo-height);
+  border: 0;
+  border-radius: var(--cart-promo-radius);
+  padding: var(--cart-promo-padding);
+  background-color: var(--cart-promo-surface);
+  color: var(--color-text-control);
+  font: inherit;
+  font-size: var(--font-size-sm);
+}
+
+.mini-cart-promo-input[readonly] {
+  font-weight: var(--font-weight-medium);
+}
+
+.mini-cart-promo-apply,
+.mini-cart-promo-remove {
+  position: absolute;
+  top: 50%;
+  right: var(--spacing-7);
+  width: var(--cart-promo-icon);
+  height: var(--cart-promo-icon);
+  border: 0;
+  padding: 0;
+  background-color: var(--color-text-strong);
+  cursor: pointer;
+  transform: translateY(-50%);
+  mask: url('../icons/arrow-right.svg') center / contain no-repeat;
+}
+
+.mini-cart-promo-remove {
+  mask-image: url('../icons/close-thin.svg');
+}
+
+.mini-cart-promo-apply:disabled {
+  cursor: progress;
+  opacity: 0.5;
+}
+
+.mini-cart-promo-message {
+  margin: var(--spacing-2) 0 0;
+  font-size: var(--font-size-sm);
+}
+
+.mini-cart-promo-message:empty {
+  display: none;
+}
+
+.mini-cart-promo-message.is-error {
+  color: var(--color-error);
+}
+
+/* a lounge's add-ons (Additional Services, one per line) and the source's View more options */
+.mini-cart-addon {
+  display: block;
+}
+
+.mini-cart-more {
+  display: flex;
+  gap: var(--spacing-2);
+  align-items: center;
+  margin: var(--spacing-2) 0 0 auto;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--cart-value);
+  font: inherit;
+  font-size: var(--cart-detail-size);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.mini-cart-more::after {
+  content: '';
+  width: var(--cart-detail-size);
+  height: var(--cart-detail-size);
+  background-color: currentcolor;
+  mask: url('../icons/nav-arrow-right.svg') center / contain no-repeat;
+}
+
+/* (preview only) a cart link the metadata doesn't set */
+.mini-cart-hint {
+  margin: var(--spacing-3) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
 }
 
 /* Checkout Cart and the failure message: centred, the site dialog's maroon title, the message,
