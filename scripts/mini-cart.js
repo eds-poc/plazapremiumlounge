@@ -198,8 +198,23 @@ export function registerAddons(source) {
   addons = source;
 }
 
-// what the visitor typed in the promo field and its message, kept while the mini cart redraws
-const promo = { draft: '', message: '', error: false };
+// what the visitor typed in the promo field and its message, kept while the mini cart redraws,
+// for one cart: another cart (a new one after a removal, another tab's) or none starts afresh
+const promo = {
+  cartId: '', draft: '', message: '', error: false,
+};
+
+/**
+ * Forgets the promo field's text and message when the cart isn't the one they were for.
+ * @param {Object|null} cart
+ */
+function promoFor(cart) {
+  const cartId = cart?.cartId || '';
+  if (promo.cartId === cartId) return;
+  Object.assign(promo, {
+    cartId, draft: '', message: '', error: false,
+  });
+}
 
 /**
  * The remove confirmation (the source's ⊗), over the mini cart: Cancel closes it (the mini cart
@@ -248,6 +263,7 @@ function confirmRemove(line, from) {
  * @returns {HTMLElement}
  */
 function buildPromo(cart) {
+  promoFor(cart);
   const id = 'mini-cart-promo-code';
   const box = el('div', 'mini-cart-promo');
   const label = el('label', 'mini-cart-promo-label', translate('cartPromoCode'));
@@ -336,6 +352,8 @@ function buildPromo(cart) {
       action.removeAttribute('aria-busy');
       input.readOnly = false;
     }
+    // (the cart went or changed while it answered: nothing of this code stays)
+    if (result.status === 'stale' || promo.cartId !== cart.cartId) return;
     const ok = result.status === 'applied';
     promo.draft = ok ? '' : code;
     promo.message = ok ? '' : translate(result.status === 'failed' ? 'cartPromoFailed' : 'cartPromoInvalid');
@@ -506,8 +524,10 @@ export async function openMiniCart(trigger, { fresh = false } = {}) {
   return dialog;
 }
 
-// the open mini cart follows the cart (a refresh, another tab); an emptied cart closes it
+// the open mini cart follows the cart (a refresh, another tab); an emptied cart closes it, and the
+// promo field's text and message go with it
 onCartChange((cart) => {
+  promoFor(cart);
   if (!mini.dialog?.open) return;
   if (cart) renderMiniCart(cart);
   else mini.dialog.close();

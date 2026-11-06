@@ -56,8 +56,11 @@ const stored = (kind = 'lounge') => `(() => {
 async function openWithCart({
   width = 1440, path = '/en-uk/', promo = () => STAGE_PROMO, meta = {}, kind = 'lounge',
 } = {}) {
-  const api = { promos: [], gets: 0 };
-  const state = { applied: '' };
+  const api = {
+    promos: [], gets: 0, posts: [], deletes: [],
+  };
+  // the promo is applied to one cart (its id); a new cart (POST) is CRT_MC2, CRT_MC3…
+  const state = { applied: '', appliedTo: '', made: 1 };
   const page = await open(browser, {
     width,
     path,
@@ -89,10 +92,23 @@ async function openWithCart({
       });
       await p.route(/ppg-app\/cart(\?|$)/, async (r) => {
         if (r.request().method() === 'OPTIONS') return r.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': '*' } });
+        const method = r.request().method();
+        const id = new URL(r.request().url()).searchParams.get('cartId');
+        if (method === 'DELETE') {
+          api.deletes.push(id);
+          await wait(300);
+          return r.fulfill(json({ code: '200', description: 'Success' }));
+        }
+        if (method === 'POST') {
+          state.made += 1;
+          api.posts.push(JSON.parse(r.request().postData() || '{}'));
+          await wait(300);
+          return r.fulfill(json({ cartId: `CRT_MC${state.made}` }));
+        }
         api.gets += 1;
         const cart = structuredClone(kind === 'pass' ? PASS_CART : CART);
-        cart.cartId = 'CRT_MC';
-        if (state.applied) {
+        cart.cartId = id || 'CRT_MC';
+        if (state.applied && state.appliedTo === cart.cartId) {
           cart.cartTotalPrice.totalPromocodeAmount = 50;
           cart.cartTotalPrice.totalPrice -= 50;
         }
@@ -229,7 +245,7 @@ for (const [label, promo, message] of [
 }
 {
   // applied (modelled: the cart then has a promo discount), then taken off
-  const page = await openWithCart({ promo: (body, state) => { state.applied = body.promocode; return json({ cartId: 'CRT_MC' }); } });
+  const page = await openWithCart({ promo: (body, state) => { state.applied = body.promocode; state.appliedTo = body.cartId; return json({ cartId: body.cartId }); } });
   const nav = watchNav(page);
   await openCart(page);
   await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').fill('SAVE10');
@@ -256,6 +272,83 @@ for (const [label, promo, message] of [
   await page.waitForTimeout(300);
   m = await mini(page);
   check('remove, Confirm: PUT with an empty code, the row gone, the field empty and editable, no reload', JSON.stringify(page.api.promos[1]?.body) === '{"cartId":"CRT_MC","promocode":""}' && !m.rows.some((r) => /Promo Code/.test(r)) && m.rows.at(-1).endsWith('HKD 787.50') && m.value === '' && !m.readOnly && nav.count === 0, JSON.stringify({ promos: page.api.promos, rows: m.rows, value: m.value }));
+  await page.close();
+}
+
+// a promo code belongs to its cart: after the lounge is removed, the next lounge's cart starts
+// afresh (no typed code, no message, no promo row or discount)
+const removeLine = async (page) => {
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-remove').click();
+  await page.waitForSelector('dialog.cart-confirm-modal[open]');
+  await page.locator('dialog.cart-confirm-modal[open] .cart-button', { hasText: 'Yes' }).click();
+  await page.waitForFunction(() => !document.querySelector('dialog.mini-cart-modal[open]') && !document.getElementById('spinner-overlay'), null, { timeout: 10000 });
+  await page.waitForTimeout(300);
+};
+// another lounge, as the homepage card announces it
+const bookAnother = async (page) => {
+  await page.evaluate((code) => document.body.dispatchEvent(new CustomEvent('booking-widget:book', {
+    bubbles: true,
+    detail: {
+      catalogueCode: code, date: '2099-11-28', time: '1500', adult: '1', children: '0', currency: 'HKD', propertyName: 'Plaza Premium Lounge', productName: 'Lounge Use - 3 Hours', price: 500, location: {},
+    },
+  })), LINE.catalogueCode);
+  await page.waitForSelector('dialog.mini-cart-modal[open]', { timeout: 15000 });
+  await page.waitForTimeout(500);
+};
+const stateOf = (page) => page.evaluate(() => ({ cookie: document.cookie.match(/cartid=([^;]+)/)?.[1] || null, stored: JSON.parse(localStorage.getItem('ppl-cart') || 'null') }));
+const hasPromoRow = (m) => m.rows.some((r) => r.startsWith('Promo Code'));
+for (const [label, promo, applied] of [
+  ['a refused code typed', () => STAGE_PROMO, false],
+  ['an applied code (modelled)', (body, state) => { state.applied = body.promocode; state.appliedTo = body.cartId; return json({ cartId: body.cartId }); }, true],
+]) {
+  const page = await openWithCart({ promo });
+  await openCart(page);
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').fill('SAVE10');
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-apply').click();
+  if (applied) await page.waitForSelector('dialog.mini-cart-modal[open] .mini-cart-promo-remove', { timeout: 10000 });
+  else await page.waitForFunction(() => document.querySelector('dialog.mini-cart-modal[open] .mini-cart-promo-message')?.textContent, null, { timeout: 10000 });
+  await page.waitForTimeout(300);
+  const before = await mini(page);
+  await removeLine(page);
+  const gone = await stateOf(page);
+  await bookAnother(page);
+  const m = await mini(page);
+  const now = await stateOf(page);
+  check(`${label}, then the lounge removed: the cart forgotten (DELETE)`, (applied ? before.readOnly : before.error) && page.api.deletes.length === 1 && !gone.cookie && !gone.stored, JSON.stringify({ before: { value: before.value, readOnly: before.readOnly }, deletes: page.api.deletes, gone }));
+  check(`${label}, then another lounge: a new cart, the promo field empty and editable, no message, no promo row, no promo in the summary`, now.cookie === 'CRT_MC2' && m.value === '' && !m.readOnly && /mini-cart-promo-apply/.test(m.action) && !m.msgShown && !m.invalid && !hasPromoRow(m) && !now.stored?.promoCode && !(now.stored?.totals?.promo > 0) && page.api.promos.length === 1, JSON.stringify({
+    cookie: now.cookie, value: m.value, readOnly: m.readOnly, message: m.message, rows: m.rows, promoCode: now.stored?.promoCode, promo: now.stored?.totals?.promo, promos: page.api.promos.length,
+  }));
+  await page.close();
+}
+{
+  // the lounge removed while a code is being applied: the removed cart doesn't come back with it
+  const page = await openWithCart({ promo: async (body, state) => { await wait(2500); state.applied = body.promocode; state.appliedTo = body.cartId; return json({ cartId: body.cartId }); } });
+  await openCart(page);
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').fill('SAVE10');
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-apply').click();
+  await page.waitForTimeout(200);
+  await removeLine(page);
+  await page.waitForTimeout(3500);
+  const s = await stateOf(page);
+  const open1 = await page.evaluate(() => !!document.querySelector('dialog.mini-cart-modal[open]'));
+  check('the lounge removed while a code is applied: the cart stays gone (no cookie, no summary), the mini cart closed', !s.cookie && !s.stored && !open1, JSON.stringify({ s, open: open1 }));
+  await bookAnother(page);
+  const m = await mini(page);
+  check('…then another lounge: the field empty, no promo row', m.value === '' && !m.readOnly && !hasPromoRow(m), JSON.stringify({ value: m.value, rows: m.rows }));
+  await page.close();
+}
+{
+  // the same cart keeps what was typed while it redraws (a refresh, another tab's change)
+  const page = await openWithCart();
+  await openCart(page);
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').fill('KEEPME');
+  await page.evaluate(async () => {
+    // eslint-disable-next-line import/no-absolute-path
+    const { saveCart, getCart } = await import('/scripts/cart-state.js');
+    saveCart({ ...getCart() });
+  });
+  await page.waitForTimeout(300);
+  check('the same cart redrawn: what was typed stays', (await mini(page)).value === 'KEEPME');
   await page.close();
 }
 
@@ -286,7 +379,7 @@ for (const [label, promo, message] of [
 if (process.env.AXE_CORE) {
   const AXE = readFileSync(process.env.AXE_CORE, 'utf8');
   for (const width of WIDTHS) {
-    const page = await openWithCart({ width, meta: { 'cart-checkout-url': CHECKOUT, 'cart-edit-url': EDIT }, promo: (body, state) => { state.applied = body.promocode; return json({ cartId: 'CRT_MC' }); } });
+    const page = await openWithCart({ width, meta: { 'cart-checkout-url': CHECKOUT, 'cart-edit-url': EDIT }, promo: (body, state) => { state.applied = body.promocode; state.appliedTo = body.cartId; return json({ cartId: body.cartId }); } });
     await openCart(page);
     await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-apply').click();
     await page.addScriptTag({ content: AXE });

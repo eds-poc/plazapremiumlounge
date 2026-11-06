@@ -109,6 +109,13 @@ the page after ⊗ → Yes, and that reload adds the promotional address's pass 
       the field and the cart is unchanged.
     - **No answer:** "Error", as the source's.
   - No reload: the source reloads only its cart pop-up; here the mini cart redraws from the cart.
+  - **The code belongs to its cart:**
+    - When the cart is removed (⊗ → Yes, Remove From Cart, expiry, another tab) or replaced, the
+      field's text, its message and the promo discount go with it. The next lounge's cart starts
+      with an empty field.
+    - The same cart keeps what was typed while it redraws.
+    - A removal while a code is being applied wins: the answer for the old cart is dropped, and
+      the removed cart isn't read back.
   - **Not finished:** stage has no valid code, so the applied state is built from a modelled answer
     (see [The promo code API](#the-promo-code-api-cart-validate-promocode)).
 - **View more options** (a lounge's add-ons): the hook is there (`registerAddons` in
@@ -321,13 +328,16 @@ them with the booking widget tests' settings: `BW_HOST`, `PLAYWRIGHT`.
     in the cart, a lounge in the cart, an unknown code
   - the currency: the session's, a cart of passes converted when the mini cart opens, a lounge's not
   - the other four languages, axe
-- **`test/cart/mini-cart.test.mjs`** (39 checks):
+- **`test/cart/mini-cart.test.mjs`** (46 checks):
   - Check Out / Edit from the metadata: placeholders, zh-cn, the link styles, the announcement
     then the page, no metadata (a button and the preview note), an unsafe value
   - the promo code: the field, an empty code, typing, Enter, the request's shape, the busy
     button; stage's 400, a 200 that applies nothing, the service's error, the network, a 500; a
     modelled success (the row, the total, the read-only code), the remove confirmation (Cancel,
     Confirm)
+  - the code and its cart: a refused or applied code, the lounge removed, another lounge (an
+    empty field, no promo row); a removal while a code is applied (the cart stays gone); the
+    same cart's redraw keeps the text
   - the add-ons hook (no link without it; with one, the link and Additional Services)
   - no reloads; axe on the promo field and its confirmation
 - **`test/cart/e2e/`**: both journeys end to end on stage (real carts), on the local preview or a

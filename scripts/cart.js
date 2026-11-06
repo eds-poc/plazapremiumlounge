@@ -506,7 +506,8 @@ export function convertCart(currency) {
       return { status: 'failed', error };
     }
     try {
-      await refreshCart(cart.cartId);
+      // (only while it's still this site's cart: not one taken out meanwhile)
+      if (getCartId() === cart.cartId) await refreshCart();
     } catch { /* (converted: read again next time) */ }
     return { status: 'converted' };
   })().finally(() => { converting = null; });
@@ -520,8 +521,9 @@ let promoting = null;
  * then reads the cart again: the booking system prices it. A code counts as applied when the cart
  * then has a promo discount. One at a time, after an add, a removal or a conversion under way.
  * @param {string} code
- * @returns {Promise<{status: 'applied'|'invalid'|'failed', message?: string, error?: Error}>}
- *   invalid: the booking system refused the code (or didn't apply it); failed: it didn't answer
+ * @returns {Promise<{status: 'applied'|'invalid'|'failed'|'stale', message?: string,
+ *   error?: Error}>} invalid: the booking system refused the code (or didn't apply it); failed:
+ *   it didn't answer; stale: the cart was taken out or replaced while it answered (nothing kept)
  */
 export function applyPromo(code) {
   if (promoting) return promoting;
@@ -539,10 +541,13 @@ export function applyPromo(code) {
       const refused = !!error.service || (error.status >= 400 && error.status < 500);
       return { status: refused ? 'invalid' : 'failed', message: text(error.service?.message), error };
     }
+    // a cart taken out (or replaced) meanwhile keeps nothing of this code
+    if (getCartId() !== cart.cartId) return { status: 'stale' };
     let now = null;
     try {
-      now = await refreshCart(cart.cartId);
+      now = await refreshCart();
     } catch { /* (read again next time) */ }
+    if (getCartId() !== cart.cartId) return { status: 'stale' };
     if (!(now?.totals?.promo > 0)) return { status: 'invalid' };
     if (!now.promoCode) saveCart({ ...now, promoCode: promocode });
     return { status: 'applied' };
@@ -568,9 +573,13 @@ export function removePromo() {
       console.error('cart: the promo code was not taken off', error);
       return { status: 'failed', error };
     }
+    // (only while it's still this site's cart: not one taken out meanwhile)
+    if (getCartId() !== cart.cartId) return { status: 'removed' };
     try {
-      const now = await refreshCart(cart.cartId);
-      if (now?.promoCode && !(now.totals?.promo > 0)) saveCart({ ...now, promoCode: '' });
+      const now = await refreshCart();
+      if (now?.cartId === cart.cartId && now.promoCode && !(now.totals?.promo > 0)) {
+        saveCart({ ...now, promoCode: '' });
+      }
     } catch {
       const known = getCart();
       if (known?.cartId === cart.cartId) saveCart({ ...known, promoCode: '' });
