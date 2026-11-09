@@ -317,6 +317,8 @@ function loadDelayed() {
   import('./datalayer.js').then(({ default: initDataLayer }) => initDataLayer());
   // Google Tag Manager (metadata `gtm-id`)
   import('./gtm.js').then(({ default: initGtm }) => initGtm());
+  // GA4 ecommerce: how the visitor comes to a listing (a mega menu or search widget link click)
+  import('./ecommerce.js').then(({ trackViewSource }) => trackViewSource());
   // load anything that can be postponed to the latest here
 }
 
