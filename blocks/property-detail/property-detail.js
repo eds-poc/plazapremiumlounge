@@ -3,7 +3,7 @@ import {
 } from '../../scripts/aem.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
 // eslint-disable-next-line import/no-cycle
-import { pushEvent } from '../../scripts/datalayer.js';
+import { pushEvent, setPageDetails } from '../../scripts/datalayer.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { translate } from '../../scripts/i18n.js';
 import openGallery from '../../scripts/gallery.js';
@@ -154,6 +154,10 @@ function readDetail(json) {
   const place = /^[A-Z]{3}$/.test(iata) && locationName ? `${locationName} (${iata})` : locationName;
   return {
     ...base,
+    // for analytics: the city and the airport or station with its code
+    // ("Hong Kong International Airport (HKG)")
+    city: (detail.cityName || '').trim(),
+    airport: place,
     fullName: (detail.propertyName || base.name).trim(),
     place: [shortLocation, place].filter((part, i, all) => part && (i === 0 || !all[0].includes(part))).join(', '),
     crumb: [translate('propertyLoungeIn', { city: (detail.cityName || '').trim() }), place].filter(Boolean).join(' | '),
@@ -361,6 +365,16 @@ function counter(name, group, value, min) {
 }
 
 /**
+ * The data layer's page name for a lounge: "<cityName>:<locationName (iataCode)>:<lounge>", e.g.
+ * "Hong Kong SAR:Hong Kong International Airport (HKG):Plaza Premium First".
+ * @param {Object} lounge
+ * @returns {string}
+ */
+function loungePageName(lounge) {
+  return [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':');
+}
+
+/**
  * The data layer's link click for Get Price, once the price service has answered: the booking
  * (the chosen date and time in UTC, the guests, the lounge's currency), the lounge and its
  * airport or station, the product with its price and the promo code. Without a price (none for
@@ -389,7 +403,10 @@ function trackGetPrice(lounge, request, picked, price) {
   const promoAccepted = Boolean(request.promocode && price && !price.promoRejected);
   const { adult, child } = request.guests;
   pushEvent('web.webInteraction.linkClicks', eventName, {
-    web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
+    web: {
+      webPageDetails: { name: loungePageName(lounge) },
+      webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } },
+    },
     _plazapremiumloungemanagementli: {
       bookingInfo: {
         // the form's date and time at the lounge, in UTC (1400 in Hong Kong: 06:00:00Z)
@@ -972,6 +989,8 @@ export default async function decorate(block) {
       showMessage(block, translate('propertyNotFound'), null, `Property "${params.code}" isn't active or isn't a lounge or pass.`);
       return;
     }
+    // the lounge's page name for every event from now on (pageDetails.pageName)
+    setPageDetails({ pageName: loungePageName(lounge) });
     const mobile = window.matchMedia(MOBILE);
     const slot = chooseSlot(params, lounge.timeZone, lounge.leadMinutes);
     writeParams({ date: slot.date, time: slot.time });
