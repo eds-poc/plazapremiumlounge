@@ -1,4 +1,5 @@
 import { loadCSS } from '../../scripts/aem.js';
+import { toUtcDateTime } from '../../scripts/booking.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
 // eslint-disable-next-line import/no-cycle
 import { pushEvent, setPageDetails } from '../../scripts/datalayer.js';
@@ -8,7 +9,7 @@ import {
 import apiUrl from '../../scripts/endpoints.js';
 import { getLanguage, translate } from '../../scripts/i18n.js';
 import {
-  buildBadge, buildSlider, el, fetchJson, getApiLanguage, isPreview, propertyDetailPath,
+  buildBadge, buildSlider, el, fetchJson, getApiLanguage, isIsoDate, isPreview, propertyDetailPath,
   propertyDetailUrl, readProperty, safeNote, setLoading, toKey, toUrl,
 } from '../../scripts/properties.js';
 
@@ -222,6 +223,43 @@ function setListingPage(city) {
 }
 
 /**
+ * A start at the place as ISO 8601 UTC without milliseconds (1700 in Beijing is 09:00:00Z).
+ * @param {string} date YYYY-MM-DD
+ * @param {string} time HHmm
+ * @param {string} timeZone The place's time zone ('' for the browser's)
+ * @returns {string}
+ */
+function toUtc(date, time, timeZone) {
+  try {
+    return toUtcDateTime(date, time, timeZone || undefined);
+  } catch {
+    // an unknown time zone: the browser's
+    return toUtcDateTime(date, time);
+  }
+}
+
+/**
+ * The booking chosen in the page address (the home page search sends
+ * ?date=2026-11-10&time=1700&adult=1&children=0): the start at the place in UTC
+ * ("2026-11-10T09:00:00Z" in Beijing), else now; the adults, else 1; the children, else 0.
+ * @param {string} timeZone The place's time zone ('' for the browser's)
+ * @returns {{checkin: string, adults: number, children: number}} checkin as YYYY-MM-DDTHH:MM:SSZ
+ */
+function chosenBooking(timeZone) {
+  const params = new URLSearchParams(window.location.search);
+  const read = (name) => (params.get(name) || '').trim();
+  const count = (name, fallback) => (/^\d+$/.test(read(name)) ? Number(read(name)) : fallback);
+  const date = read('date');
+  const time = read('time');
+  const chosen = isIsoDate(date) && /^([01]\d|2[0-3])[0-5]\d$/.test(time);
+  return {
+    checkin: chosen ? toUtc(date, time, timeZone) : new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+    adults: count('adult', 1),
+    children: count('children', 0),
+  };
+}
+
+/**
  * The GA4 `view_item_list` for the listing (window.dataLayer, scripts/ecommerce.js): the lounges
  * shown (not the passes), in their order. The list is named after the city ("Mega Menu - Beijing",
  * "Other - Beijing"); from the home page search widget, after its airport ("HP Search Widget - JFK"
@@ -296,6 +334,48 @@ function trackViewLounge(property, rank) {
       },
       locationDetails: { iataCode: property.iata, locationName: property.location.name },
       outletDetails: { outletId: property.outletId, outletName: property.name },
+    },
+  });
+}
+
+/**
+ * The data layer's link click for a filter ticked in the filter form ("apply filter"): every
+ * filter now on, each with its group's title (`.property-list-group-title`) and its option's
+ * label (Service Type's All, which is no filter, left out); the results now shown; the booking
+ * chosen in the page address; and the airport filtered on (only one), else the first lounge
+ * shown: its `iataCode` and `locationName`.
+ * @param {HTMLFormElement} form The filter form (`.property-list-filters`)
+ * @param {Object[]} properties
+ * @param {Object<string, Set<string>>} selected The filters now on
+ */
+function trackFilters(form, properties, selected) {
+  const shown = properties.filter((p) => matches(p, selected));
+  const lounges = properties.filter((p) => !p.pass);
+  const chosen = selected.airport.size === 1
+    && lounges.find((p) => selected.airport.has(p.location.key));
+  const place = chosen || shown.find((p) => !p.pass) || lounges[0] || properties[0];
+  const { checkin, adults, children } = chosenBooking(place.timeZone);
+  const filters = [...form.querySelectorAll('input[data-group]:checked')]
+    .filter((input) => input.value)
+    .map((input) => ({
+      filterType: input.closest('.property-list-group')
+        ?.querySelector('.property-list-group-title > span')?.textContent.trim() || '',
+      filterValue: input.closest('.property-list-option')?.textContent.trim() || '',
+    }));
+  const eventName = 'apply filter';
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
+    _plazapremiumloungemanagementli: {
+      searchDetails: { searchResultsCount: shown.length },
+      filters,
+      bookingInfo: {
+        checkinDateTime: checkin,
+        daysToBooking: 0,
+        totalGuestCount: adults + children,
+        adultCount: adults,
+        childCount: children,
+      },
+      locationDetails: { iataCode: place.iata, locationName: place.location.name },
     },
   });
 }
@@ -714,6 +794,12 @@ export default async function decorate(block) {
       renderResults(results, properties, selected, status, clearAll, prefix, settings);
     };
     form = buildFilters(options, selected, update);
+    // the data layer's "apply filter" as a filter is ticked (the listing has redrawn by then)
+    form?.addEventListener('change', (e) => {
+      if (e.target.matches('input[data-group]') && e.target.checked) {
+        trackFilters(form, properties, selected);
+      }
+    });
     sidebar.replaceChildren();
     if (form) {
       // the form sits in the sidebar, or in the Filters dialog on phones
