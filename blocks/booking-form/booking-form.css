@@ -32,6 +32,12 @@
   font-size: var(--body-font-size);
 }
 
+/* phones: the services 5px apart, so each checkbox has a 24px tap target (from 768px, the
+   source's spacing) */
+.booking-form .form-fields .form-checks {
+  gap: var(--spacing-2);
+}
+
 .booking-form .form-fields .form-column > .form-field-textarea + .form-field-checkbox {
   margin-top: calc(var(--spacing-7) - var(--form-row-gap));
 }
@@ -40,12 +46,8 @@
   margin-top: calc(var(--spacing-stack) - var(--form-row-gap));
 }
 
-/* option group-form: the services one under the other with no gap; the captcha 24px under the
-   last field (only the row gap from 768px), the button 20px under it */
-.booking-form.group-form .form-fields .form-checks {
-  gap: 0;
-}
-
+/* option group-form: the services one under the other with no gap from 768px; the captcha 24px
+   under the last field (only the row gap from 768px), the button 20px under it */
 .booking-form.group-form .form-fields > .form-captcha {
   margin-top: var(--spacing-stack);
 }
@@ -55,7 +57,7 @@
 }
 
 /* the lounge booking request: 41px fields; the services on the source's 25px lines (22px of
-   text, 3px apart); the captcha 58px under the Privacy Policy checkbox and the button 16px under
+   text, 3px apart from 768px); the captcha 58px under the Privacy Policy checkbox and the button 16px under
    it, side by side when the column has room for both (the source's col-xl-6) */
 .booking-form:not(.group-form) .form-fields {
   --form-input-height: 41px;
@@ -63,11 +65,6 @@
 
 .booking-form:not(.group-form) .form-fields .form-column {
   container-type: inline-size;
-}
-
-.booking-form:not(.group-form) .form-fields .form-checks {
-  /* one-off: the source's 3px */
-  gap: 3px;
 }
 
 .booking-form:not(.group-form) .form-fields .form-column > .form-captcha {
@@ -89,12 +86,21 @@
 }
 
 /* breakpoint-exception: the source's col-md-6 and col-sm-6 (768px): the two columns side by side
-   (the lounge booking request's 64px apart); the group booking's captcha and button side by side,
-   and its steppers */
+   (the lounge booking request's 64px apart); the services at the source's spacing; the group
+   booking's captcha and button side by side, and its steppers */
 @media (width >= 768px) {
   .booking-form:not(.group-form) .form-fields.has-columns {
     /* one-off: the source's 64px between its columns */
     column-gap: 64px;
+  }
+
+  .booking-form:not(.group-form) .form-fields .form-checks {
+    /* one-off: the source's 3px */
+    gap: 3px;
+  }
+
+  .booking-form.group-form .form-fields .form-checks {
+    gap: 0;
   }
 
   .booking-form.group-form .form-fields > :is(.form-captcha, .form-submit),
