@@ -3,7 +3,7 @@ import {
 } from '../../scripts/aem.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
 // eslint-disable-next-line import/no-cycle
-import { pushEvent } from '../../scripts/datalayer.js';
+import { holdPageView, pushEvent, setPageDetails } from '../../scripts/datalayer.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { translate } from '../../scripts/i18n.js';
 import openGallery from '../../scripts/gallery.js';
@@ -154,6 +154,10 @@ function readDetail(json) {
   const place = /^[A-Z]{3}$/.test(iata) && locationName ? `${locationName} (${iata})` : locationName;
   return {
     ...base,
+    // for analytics: the city and the airport or station with its code
+    // ("Hong Kong International Airport (HKG)")
+    city: (detail.cityName || '').trim(),
+    airport: place,
     fullName: (detail.propertyName || base.name).trim(),
     place: [shortLocation, place].filter((part, i, all) => part && (i === 0 || !all[0].includes(part))).join(', '),
     crumb: [translate('propertyLoungeIn', { city: (detail.cityName || '').trim() }), place].filter(Boolean).join(' | '),
@@ -410,6 +414,54 @@ function trackGetPrice(lounge, request, picked, price) {
       },
     },
   });
+}
+
+/**
+ * The data layer's page view for a lounge ("page load", see holdPageView), once the booking form
+ * has its first services: the page name "<city>:<airport (code)>:<lounge>" (for every event after
+ * it too), the booking as the form has it (the date and time in UTC, the guests), the lounge and
+ * its airport or station, and the chosen product (its code as the SKU; none without services).
+ * @param {Object} lounge
+ * @param {HTMLFormElement} form The booking form
+ * @returns {{eventName: string, extra: Object}}
+ */
+function readPageView(lounge, form) {
+  const pageName = [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':');
+  setPageDetails({ pageName });
+  const data = new FormData(form);
+  const count = (name, least) => Math.max(least, Number.parseInt(data.get(name), 10) || least);
+  const adult = count('adults', 1);
+  const child = count('children', 0);
+  const picked = (name) => form.querySelector(`select[name="${name}"]`)?.selectedOptions[0];
+  const service = picked('service');
+  const product = picked('product');
+  const details = {
+    bookingInfo: {
+      // the form's date and time at the lounge, in UTC (1830 in Hong Kong: 10:30:00Z)
+      checkinDateTime: toUtcDateTime(String(data.get('date') || ''), String(data.get('time') || ''), lounge.timeZone),
+      daysToBooking: 0,
+      totalGuestCount: adult + child,
+      adultCount: adult,
+      childCount: child,
+    },
+    locationDetails: { iataCode: lounge.iata, locationName: lounge.airport },
+    outletDetails: { outletId: lounge.outletId, outletName: lounge.name },
+  };
+  // (the price's catalogueCode comes with Get Price only: the product's code instead)
+  if (product?.value) {
+    details.productList = [{
+      sku: product.value,
+      name: product.textContent.trim(),
+      category: service?.value ? service.textContent.trim() : '',
+    }];
+  }
+  return {
+    eventName: 'page load',
+    extra: {
+      web: { webPageDetails: { name: pageName } },
+      _plazapremiumloungemanagementli: details,
+    },
+  };
 }
 
 /**
@@ -940,11 +992,16 @@ function buildBar(lounge, booking, settings) {
  * @param {HTMLElement} block The property detail block element
  */
 export default async function decorate(block) {
+  // the page's page view is the lounge's own (readPageView), once the lounge and its services have
+  // come; the generic one (null) when there's no lounge to show. The first answer counts
+  let sendPageView;
+  holdPageView(new Promise((resolve) => { sendPageView = resolve; }));
   const settings = readSettings(block);
   const params = readParams();
   block.replaceChildren();
   if (!/^[A-Z0-9]+$/.test(params.code)) {
     showMessage(block, translate('propertyNotFound'), null, 'Open this page with a lounge in the address, e.g. ?propertycode=PRPRTY814&currency=HKD.');
+    sendPageView(null);
     return;
   }
   // the detail service needs the code and the language (the currency doesn't change its answer)
@@ -961,15 +1018,18 @@ export default async function decorate(block) {
     } catch (error) {
       if (error.status === 404) {
         showMessage(block, translate('propertyNotFound'), null, `Property code "${params.code}" isn't in the service.`);
+        sendPageView(null);
         return;
       }
       // eslint-disable-next-line no-console
       console.error('property-detail: could not load', url.href, error);
       showMessage(block, translate('propertyDetailError'), () => load());
+      sendPageView(null);
       return;
     }
     if (!lounge) {
       showMessage(block, translate('propertyNotFound'), null, `Property "${params.code}" isn't active or isn't a lounge or pass.`);
+      sendPageView(null);
       return;
     }
     const mobile = window.matchMedia(MOBILE);
@@ -1071,15 +1131,24 @@ export default async function decorate(block) {
     place();
     setHead(lounge, safeHtml(lounge.description, { blocks: true }));
 
+    // the page view, with the form as it is once its first services are shown (or none came)
+    let viewed = false;
+    const pageViewReady = () => {
+      if (viewed) return;
+      viewed = true;
+      sendPageView(readPageView(lounge, booking.form));
+    };
     // the services' answer into the booking form (an answer replaced by a newer request is dropped)
     const showServices = ({ controller, request }) => request.then((json) => {
       if (controller.signal.aborted) return;
       booking.setServices(readServices(json, lounge.serviceNames));
+      pageViewReady();
     }).catch((error) => {
       if (controller.signal.aborted) return;
       // eslint-disable-next-line no-console
       console.error('property-detail: could not load the services', error);
       booking.setServices([], () => requestServices(false));
+      pageViewReady();
     });
     // asked for again, after a short pause, when the date or time changes (and on Try again)
     let timer;
@@ -1088,6 +1157,7 @@ export default async function decorate(block) {
       pending?.abort();
       if (!lounge.iata) {
         booking.setServices([]);
+        pageViewReady();
         return;
       }
       booking.setServices(null);
@@ -1095,12 +1165,19 @@ export default async function decorate(block) {
       timer = setTimeout(ask, delayed ? SERVICES_DELAY_MS : 0);
     };
     if (early) showServices(early);
-    else booking.setServices([]);
+    else {
+      booking.setServices([]);
+      pageViewReady();
+    }
   };
   load = async () => {
     setLoading(true);
     try {
       await render();
+    } catch (error) {
+      // (a page that broke still counts its page view: the generic one)
+      sendPageView(null);
+      throw error;
     } finally {
       setLoading(false);
     }
