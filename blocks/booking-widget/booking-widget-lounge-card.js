@@ -12,6 +12,7 @@
  * Search sends the data layer's link click "search" as it is clicked (see trackSearch).
  */
 import { loadCSS } from '../../scripts/aem.js';
+import { toUtcDateTime } from '../../scripts/booking.js';
 // eslint-disable-next-line import/no-cycle
 import { pushEvent } from '../../scripts/datalayer.js';
 import apiUrl from '../../scripts/endpoints.js';
@@ -390,9 +391,9 @@ async function fetchProducts(body, signal, fresh = false) {
 }
 
 /**
- * The data layer's link click for Search: the guests chosen and the airport (its code from the
- * locations service's `iata`, its name from getbookingwidgetproducts' `locationDisplayName`), with
- * a booking time of now. Before the airport has an answer (or for a railway station, which gets
+ * The data layer's link click for Search: the date, time and guests chosen and the airport (its
+ * code from the locations service's `iata`, its name from getbookingwidgetproducts'
+ * `locationDisplayName`). Before the airport has an answer (or for a railway station, which gets
  * none), its name is the locations service's.
  * @param {Object} choice The widget's choices (see current in booking-widget.js)
  */
@@ -404,8 +405,8 @@ function trackSearch(choice) {
     web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
     _plazapremiumloungemanagementli: {
       bookingInfo: {
-        // now, as ISO 8601 UTC without milliseconds (2026-11-05T11:20:30Z)
-        checkinDateTime: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+        // the Date and Time fields (the airport's local time) in UTC: 2026-11-20T08:00:00Z
+        checkinDateTime: toUtcDateTime(choice.date, choice.time, choice.location.timeZone),
         daysToBooking: 0,
         totalGuestCount: adultCount + childCount,
         adultCount,
