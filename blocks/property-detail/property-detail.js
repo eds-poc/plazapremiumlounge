@@ -3,7 +3,7 @@ import {
 } from '../../scripts/aem.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
 // eslint-disable-next-line import/no-cycle
-import { pushEvent } from '../../scripts/datalayer.js';
+import { pushEvent, setPageDetails } from '../../scripts/datalayer.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { translate } from '../../scripts/i18n.js';
 import openGallery from '../../scripts/gallery.js';
@@ -29,6 +29,8 @@ const MOBILE = '(width < 768px)';
 // desktop shows the first four photos, as the source
 const DESKTOP_PHOTOS = 4;
 const DEFAULT_CURRENCY = 'USD';
+// the data layer's site section for every event on the page (pageDetails.siteSection)
+const SITE_SECTION = 'lounge detail';
 
 /**
  * The page address's lounge and booking choices, as the source detail pages use them
@@ -156,6 +158,10 @@ function readDetail(json) {
   const place = /^[A-Z]{3}$/.test(iata) && locationName ? `${locationName} (${iata})` : locationName;
   return {
     ...base,
+    // for analytics: the city and the airport or station with its code
+    // ("Hong Kong International Airport (HKG)")
+    city: (detail.cityName || '').trim(),
+    airport: place,
     fullName: (detail.propertyName || base.name).trim(),
     place: [shortLocation, place].filter((part, i, all) => part && (i === 0 || !all[0].includes(part))).join(', '),
     crumb: [translate('propertyLoungeIn', { city: (detail.cityName || '').trim() }), place].filter(Boolean).join(' | '),
@@ -360,6 +366,16 @@ function counter(name, group, value, min) {
     step(1, translate('propertyMoreOf', { group }), 'property-detail-step property-detail-step-plus', '+'),
   );
   return wrap;
+}
+
+/**
+ * The data layer's page name for a lounge: "<cityName>:<locationName (iataCode)>:<lounge>", e.g.
+ * "Hong Kong SAR:Hong Kong International Airport (HKG):Plaza Premium First".
+ * @param {Object} lounge
+ * @returns {string}
+ */
+function loungePageName(lounge) {
+  return [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':');
 }
 
 /**
@@ -933,6 +949,8 @@ function buildBar(lounge, booking, settings) {
  * @param {HTMLElement} block The property detail block element
  */
 export default async function decorate(block) {
+  // "lounge detail" from the start (the page name from the path until the lounge has come)
+  setPageDetails({ siteSection: SITE_SECTION });
   const settings = readSettings(block);
   const params = readParams();
   block.replaceChildren();
@@ -965,6 +983,8 @@ export default async function decorate(block) {
       showMessage(block, translate('propertyNotFound'), null, `Property "${params.code}" isn't active or isn't a lounge or pass.`);
       return;
     }
+    // the lounge's page name for every event from now on (pageDetails.pageName)
+    setPageDetails({ pageName: loungePageName(lounge), siteSection: SITE_SECTION });
     const mobile = window.matchMedia(MOBILE);
     const slot = chooseSlot(params, lounge.timeZone, lounge.leadMinutes);
     writeParams({ date: slot.date, time: slot.time });
