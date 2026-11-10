@@ -109,12 +109,12 @@ function readPromoRejection(json) {
 
 /**
  * The price in a price response (the first product's first price): the total, the price before
- * discounts, the price after them (before taxes and charges) and the currency. Null when there's
- * none (not available for that start or guests).
+ * discounts, the price after them (before taxes and charges), the first discount's amount (0
+ * without one) and the currency. Null when there's none (not available for that start or guests).
  * @param {Object} json
  * @param {string} currency The currency asked for
- * @returns {{total: number, base: number, discounted: number, currency: string,
- *   catalogueCode: string}|null}
+ * @returns {{total: number, base: number, discounted: number, discountValue: number,
+ *   currency: string, catalogueCode: string}|null}
  */
 function readPrice(json, currency) {
   const item = Array.isArray(json?.items) ? json.items[0] : null;
@@ -124,10 +124,14 @@ function readPrice(json, currency) {
     || !Number.isFinite(total)) return null;
   const base = Number.isFinite(Number(price.basePrice)) ? Number(price.basePrice) : total;
   const discounted = Number(price.basePriceWithDiscount);
+  // e.g. { "name": "10% Discount", "discountValue": 110.5 }
+  const first = Array.isArray(price.discounts) ? price.discounts[0] : null;
+  const discountValue = Number(first?.discountValue ?? 0);
   return {
     total,
     base,
     discounted: Number.isFinite(discounted) ? discounted : base,
+    discountValue: Number.isFinite(discountValue) ? discountValue : 0,
     currency: price.baseRate?.[0]?.currency || currency,
     catalogueCode: price.catalogueCode || '',
   };
@@ -364,19 +368,20 @@ function counter(name, group, value, min) {
  * @param {Object} lounge
  * @param {Object} request The price request (see buildBooking)
  * @param {{service: string, product: string}} names The chosen service's and product's names
- * @param {{total: number, base: number, discounted: number, catalogueCode: string,
- *   promoRejected: string}|null} price
+ * @param {{total: number, base: number, discounted: number, discountValue: number,
+ *   catalogueCode: string, promoRejected: string}|null} price
  */
 function trackGetPrice(lounge, request, names, price) {
   const eventName = 'get price';
   const cents = (amount) => Math.round(amount * 100) / 100;
-  // the discount: the price before discounts less the price after them
-  const discount = price ? cents(Math.max(0, price.base - price.discounted)) : 0;
+  // the promo code's value: the price before discounts less the price after them
+  const saved = price ? cents(Math.max(0, price.base - price.discounted)) : 0;
   const product = price ? {
     sku: price.catalogueCode,
     name: names.product,
     actualPricePayCurr: price.base,
-    discount,
+    // the first discount's amount (discounts[0].discountValue), 0 without one
+    discount: cents(price.discountValue),
     sellPricePayCurr: price.total,
     category: names.service,
   } : { name: names.product, category: names.service };
@@ -397,10 +402,10 @@ function trackGetPrice(lounge, request, names, price) {
       locationDetails: { iataCode: lounge.iata, locationName: lounge.location.name },
       outletDetails: { outletId: lounge.outletId, outletName: lounge.name },
       productList: [product],
-      // the promo code's value: the price's discount when the code was accepted
+      // the promo code's value when the code was accepted (basePrice - basePriceWithDiscount)
       offerDetails: {
         promoCode: request.promocode,
-        promocodeValuePayCurr: promoAccepted ? discount : 0,
+        promocodeValuePayCurr: promoAccepted ? saved : 0,
       },
     },
   });
