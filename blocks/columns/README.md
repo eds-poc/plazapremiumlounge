@@ -86,6 +86,11 @@ photo of a person. One row of two cells: the text, then the photo.
 - **Last on the page:** the band ends the page content, with the Newsletter right under it and no
   space between them. As on the source, the bottom of the photo is under the Newsletter, so 50px
   (30px from 768px) of it is cut off: use a photo whose subject stands at least that high.
+- **Space above:** the band starts 20px below the content of the section above, at every width
+  (as the source How to Connect to WiFi page). Add `space-above`, i.e. `Columns (social,
+  space-above)`, for 40px (the source Connected to WiFi page).
+- **Links:** maroon, light grey on hover and keyboard focus, without an underline (the icons stay
+  as they are).
 - Use Section Metadata `style` = `fixed-width`, as the rest of the landing page.
 
 ## Media-image variation
