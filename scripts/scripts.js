@@ -17,7 +17,7 @@ import { installModalLinks, registerModalSections } from './modal.js';
 import { decorateIcons } from './icons.js';
 import { getLanguage } from './i18n.js';
 import { installVideoLinks } from './video.js';
-import { checkSession, logout } from './auth.js';
+import { checkPartnerAccess, checkSession, logout } from './auth.js';
 
 if (window.trustedTypes && window.trustedTypes.createPolicy) {
   const innerTT = window.trustedTypes.createPolicy('tt-inner', {
@@ -250,6 +250,8 @@ async function loadEager(doc) {
   // a logged-in visitor's token: an expired or broken one logs out and goes home (nothing is
   // checked when nobody is logged in)
   checkSession();
+  // a partner page without its partner's login goes to the partner's password page (auth.js)
+  if (!checkPartnerAccess()) return false;
   // the header's account menu Logout (#logout): log out and go home
   document.addEventListener('header:action', (e) => {
     if (e.detail?.name === 'logout') logout();
@@ -275,6 +277,7 @@ async function loadEager(doc) {
   } catch (e) {
     // do nothing
   }
+  return true;
 }
 
 /**
@@ -305,12 +308,24 @@ function loadDelayed() {
   import('./consent-check.js');
   // the back to top button, on every page
   import('./back-to-top.js').then(({ default: initBackToTop }) => initBackToTop());
+  // Kwanko UniJS (the affiliate tag)
+  import('./kwanko.js').then(({ default: initKwanko }) => { initKwanko(); });
+  // consenTag (metadata `consentag-id`)
+  import('./consentag.js').then(({ default: initConsenTag }) => initConsenTag());
+  // analytics: the page view in the data layer, then the Launch script (metadata
+  // `launch-script`)
+  import('./datalayer.js').then(({ default: initDataLayer }) => initDataLayer());
+  // Google Tag Manager (metadata `gtm-id`)
+  import('./gtm.js').then(({ default: initGtm }) => initGtm());
+  // GA4 ecommerce: how the visitor comes to a listing (a mega menu or search widget link click)
+  import('./ecommerce.js').then(({ trackViewSource }) => trackViewSource());
   // load anything that can be postponed to the latest here
 }
 
 async function loadPage() {
   showLoader();
-  await loadEager(document);
+  // false: a partner page is going to its password page (the loader stays up until it does)
+  if (!await loadEager(document)) return;
   hideLoader();
   await loadLazy(document);
   installNavigationLoader();

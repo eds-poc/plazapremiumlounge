@@ -253,6 +253,18 @@ function setControlAttributes(control, def) {
       const digits = control.value.replace(/\D/g, '');
       if (digits !== control.value) control.value = digits;
     });
+    // a pasted number keeps its digits up to the limit ("(852) 9876-5432" → 85298765432): only
+    // the digits go in, so the brackets, spaces and dashes don't use up the maximum length
+    control.addEventListener('paste', (e) => {
+      const pasted = e.clipboardData?.getData('text') ?? '';
+      if (!/\D/.test(pasted)) return;
+      e.preventDefault();
+      control.setRangeText(pasted.replace(/\D/g, ''), control.selectionStart, control.selectionEnd, 'end');
+      if (control.maxLength > 0 && control.value.length > control.maxLength) {
+        control.value = control.value.slice(0, control.maxLength);
+      }
+      control.dispatchEvent(new Event('input', { bubbles: true }));
+    });
   }
   if (settings.has('required')) control.required = true;
 }

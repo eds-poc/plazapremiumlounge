@@ -5,21 +5,33 @@
  * every logged-in call. The token is checked against its expiry on login and on every page load
  * (checkSession(), only when a token is stored): an expired or broken one logs the visitor out and
  * sends them to the home page; logout() (the header's account menu) does the same.
+ * Partner pages have their own login, a partner token per partner (see checkPartnerAccess()).
+ * A guest on a members' page goes to the home page with the page in `?redirectUrl=`; there the
+ * login modal opens, and once logged in (scripts/account-forms.js) the visitor goes back to it.
+ * Only this site's own pages are followed (safeRedirect), so it can't send anyone elsewhere.
  */
 import { getMetadata } from './aem.js';
 import { DEFAULT_SITE, getSiteFolder } from './i18n.js';
+import { forgetMember } from './member.js';
 
 const TOKEN_KEY = 'token';
+// the address parameter with the members' page to go back to after logging in
+const REDIRECT_PARAM = 'redirectUrl';
 // a JWT part: base64url characters only (letters, digits, - and _; no +, / or = padding)
 const PART = /^[A-Za-z0-9_-]+$/;
-
+// partner pages: the metadata naming the page's partner, and the optional one for its password page
+const PARTNER_META = 'partner-member-name';
+const PARTNER_PAGE_META = 'partner-password-page';
+// a partner's stored login: this prefix and the partner name, `{ token, expiresAt }`
+const PARTNER_TOKEN_KEY = 'partner-token-';
+// the password page's block: a page with it is never sent to the password page
+const PARTNER_PASSWORD_BLOCK = 'partner-password';
 // a members' page, only for a logged-in visitor: `members-only` true in the site's metadata sheet
 // (a row per URL or pattern, e.g. /**/membership/** and /**/view-booking) or in the page's own
 // Metadata
 function isMembersPage() {
   return /^(true|yes)$/i.test(getMetadata('members-only').trim());
 }
-
 /**
  * One base64url part of a JWT, as JSON.
  * @param {string} part
@@ -116,7 +128,8 @@ export function setToken(token) {
 }
 
 /**
- * Removes the token (logout) and tells the page (`auth:change`).
+ * Removes the token (logout), and the member's details kept with it (scripts/member.js), and tells
+ * the page (`auth:change`).
  */
 export function clearToken() {
   try {
@@ -124,6 +137,7 @@ export function clearToken() {
   } catch {
     // nothing stored
   }
+  forgetMember();
   document.dispatchEvent(new CustomEvent('auth:change', { detail: { loggedIn: false } }));
 }
 
@@ -133,6 +147,64 @@ export function clearToken() {
  */
 function homePath() {
   return `/${getSiteFolder() || DEFAULT_SITE}/`;
+}
+
+/**
+ * Whether a path is a home page (/en-uk/, /en-uk, /).
+ * @param {string} path
+ * @returns {boolean}
+ */
+export function isHomePath(path) {
+  return /^\/(?:[a-z]{2}-[a-z]{2}\/?)?(?:index(?:\.html)?)?$/.test(path);
+}
+
+/**
+ * A page to go back to after logging in, or '' when it isn't one of this site's pages: at most
+ * 2,000 characters, on this site's address (not another site, `//other.site` or `javascript:`),
+ * not a `/modals/` page or a home page. The result is the path, query and hash only.
+ * @param {string} value
+ * @returns {string}
+ */
+export function safeRedirect(value) {
+  if (typeof value !== 'string' || !value || value.length > 2000) return '';
+  let url;
+  try {
+    url = new URL(value, window.location.origin);
+  } catch {
+    return '';
+  }
+  if (url.origin !== window.location.origin) return '';
+  if (url.pathname.split('/').includes('modals') || isHomePath(url.pathname)) return '';
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
+/**
+ * The page to go back to after logging in (the address's `redirectUrl`, when safe), or ''.
+ * @returns {string}
+ */
+export function redirectTarget() {
+  return safeRedirect(new URLSearchParams(window.location.search).get(REDIRECT_PARAM) || '');
+}
+
+/**
+ * Opens the login modal of the page's language once the page has loaded (so it doesn't hold up the
+ * page); closed without logging in, `redirectUrl` leaves the address, so a refresh doesn't open it
+ * again (another modal opened from it, e.g. Forgot password, keeps it).
+ */
+function openLogin() {
+  // (loaded only here: modal.js reaches this script through the page's own scripts)
+  // eslint-disable-next-line import/no-cycle
+  const open = () => import('./modal.js')
+    .then(({ openPageModal }) => openPageModal(new URL(`${homePath()}modals/login`, window.location.origin)));
+  if (document.readyState === 'complete') open();
+  else window.addEventListener('load', open, { once: true });
+  // a dialog's close doesn't bubble: caught on the way down
+  document.addEventListener('close', (e) => {
+    if (!e.target.matches?.('dialog.modal') || document.querySelector('dialog.modal[open]') || getToken()) return;
+    const url = new URL(window.location.href);
+    url.searchParams.delete(REDIRECT_PARAM);
+    window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+  }, true);
 }
 
 /**
@@ -162,17 +234,31 @@ export function logout() {
 }
 
 /**
- * Checks the stored token against its expiry on page load; nothing to check when nobody is logged
- * in, except on a members' page (isMembersPage), which needs a valid token. An expired or broken
- * token, or none on a members' page, logs out and goes home (it replaces the history entry, so
- * Back doesn't return to the page). A page left open past the expiry is checked on the next page
- * load.
+ * Checks the stored token against its expiry on page load. An expired or broken token logs out and
+ * goes home (replacing the history entry, so Back doesn't return to the page). A guest on a
+ * members' page (isMembersPage) goes home with the page in `?redirectUrl=`, to come back after
+ * logging in. A page with a safe `redirectUrl` opens the login modal for a guest, and goes straight
+ * there when the visitor is already logged in. A page left open past the expiry is checked on the
+ * next page load.
  */
 export function checkSession() {
   const token = getToken();
-  if (token ? !isTokenValid(token) : isMembersPage()) {
+  if (token && !isTokenValid(token)) {
     endSession({ replace: true });
+    return;
   }
+  const { pathname, search, hash } = window.location;
+  if (!token && isMembersPage() && !isHomePath(pathname)) {
+    const home = new URL(homePath(), window.location.origin);
+    const back = safeRedirect(`${pathname}${search}${hash}`);
+    if (back) home.searchParams.set(REDIRECT_PARAM, back);
+    window.location.replace(`${home.pathname}${home.search}`);
+    return;
+  }
+  const target = redirectTarget();
+  if (!target) return;
+  if (token) window.location.replace(target);
+  else openLogin();
 }
 
 /**
@@ -181,4 +267,107 @@ export function checkSession() {
  */
 export function authHeaders() {
   return { Accept: 'application/json', Authorization: `Bearer ${getToken()}` };
+}
+
+/**
+ * A partner name as compared everywhere: trimmed, lower case.
+ * @param {*} value
+ * @returns {string}
+ */
+export function toPartnerName(value) {
+  return String(value ?? '').trim().toLowerCase();
+}
+
+/**
+ * Whether a token can be used for a partner: a signed, unexpired JWT (isTokenValid) that names the
+ * partner in its partner claim (`partnerName`, else `partnername` or `partner`). The API checks
+ * the signature itself.
+ * @param {*} token
+ * @param {string} partner
+ * @returns {boolean}
+ */
+export function isPartnerTokenValid(token, partner) {
+  if (typeof token !== 'string' || !token || !partner || !isTokenValid(token)) return false;
+  const { payload } = decodeJwt(token);
+  return toPartnerName(payload.partnerName ?? payload.partnername ?? payload.partner) === partner;
+}
+
+/**
+ * Stores a partner's login (checked first by the caller) for the partner's pages.
+ * @param {string} partner
+ * @param {string} token
+ * @param {number} expiresAt When the login ends (milliseconds)
+ */
+export function setPartnerToken(partner, token, expiresAt) {
+  try {
+    localStorage.setItem(`${PARTNER_TOKEN_KEY}${partner}`, JSON.stringify({ token, expiresAt }));
+  } catch {
+    // no storage (e.g. blocked): the partner's pages will ask for the password again
+  }
+}
+
+/**
+ * When a stored partner login expires (milliseconds), or 0 when there's none or it can't be read.
+ * @param {string|null} stored The stored record (JSON)
+ * @returns {number}
+ */
+function partnerTokenExpiry(stored) {
+  try {
+    const login = JSON.parse(stored);
+    const usable = typeof login?.token === 'string' && login.token && Number.isFinite(login.expiresAt);
+    return usable ? login.expiresAt : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * The partner's password page: the page's `partner-password-page` metadata (a path or link on this
+ * site), else /{site}/{partner}.
+ * @param {string} partner
+ * @returns {URL}
+ */
+function partnerPasswordPage(partner) {
+  const authored = getMetadata(PARTNER_PAGE_META).trim();
+  const fallback = `/${getSiteFolder() || DEFAULT_SITE}/${partner}`;
+  try {
+    const url = new URL(authored || fallback, window.location.origin);
+    return url.origin === window.location.origin ? url : new URL(fallback, window.location.origin);
+  } catch {
+    return new URL(fallback, window.location.origin);
+  }
+}
+
+/**
+ * Partner pages: a page with `partner-member-name` metadata (e.g. set for the page in the bulk
+ * metadata sheet) shows only while an unexpired login for that partner is stored (its password
+ * page stores it). Otherwise the record is removed and the visitor goes to the password page with
+ * `?partner=<partner>&returnUrl=<page>` (and `&reason=expired` when a login had been stored),
+ * replacing the history entry. Checked on page load only: a page already open (or restored with
+ * Back) stays until the next page load. The content is still public (Edge Delivery serves it to
+ * anyone): this keeps visitors to the partner's flow.
+ * @returns {boolean} Whether the page can show
+ */
+export function checkPartnerAccess() {
+  const partner = toPartnerName(getMetadata(PARTNER_META));
+  if (!partner || document.querySelector(`main .${PARTNER_PASSWORD_BLOCK}`)) return true;
+  const key = `${PARTNER_TOKEN_KEY}${partner}`;
+  let stored = null;
+  try {
+    stored = localStorage.getItem(key);
+  } catch {
+    stored = null;
+  }
+  if (partnerTokenExpiry(stored) > Date.now()) return true;
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // nothing stored
+  }
+  const login = partnerPasswordPage(partner);
+  login.searchParams.set('partner', partner);
+  login.searchParams.set('returnUrl', window.location.href);
+  if (stored) login.searchParams.set('reason', 'expired');
+  window.location.replace(login.href);
+  return false;
 }

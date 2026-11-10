@@ -290,6 +290,9 @@ function slimPass(item) {
     productSeq: item.productSeq,
     images: (item.images || []).slice(0, 1).map((image) => ({ path: image?.path })),
     numberOfVisits: item.numberOfVisits,
+    // for analytics (scripts/ecommerce.js): the service and the pass's category codes
+    serviceDisplayName: item.serviceDisplayName,
+    passCategory: (item.passCategory || []).map((c) => ({ categoryCode: c?.categoryCode })),
     accuralPoints: item.accuralPoints,
     productDescription: item.productDescription,
     eligibleLocations: item.eligibleLocations,
@@ -413,6 +416,16 @@ export function readProperty(item) {
   return {
     code: item.propertyCode,
     name,
+    // for analytics (scripts/datalayer.js, scripts/ecommerce.js): the airport or station code, the
+    // LMS outlet code, the property's currency, its short location, city and country code
+    iata,
+    outletId: item.lmsOutletCode ? String(item.lmsOutletCode).trim() : '',
+    currency: (item.defaultCurrency || '').trim().toUpperCase(),
+    shortLocation,
+    city: (item.cityName || '').trim(),
+    country: (item.countryCode || '').trim().toUpperCase(),
+    // the zone name in the API's time zone, e.g. "(GMT+8:00) Asia/Shanghai, China Standard Time"
+    timeZone: String(item.timeZone || '').match(/[A-Za-z]+\/[A-Za-z0-9_+-]+(?:\/[A-Za-z0-9_+-]+)?/)?.[0] || '',
     pass: type === PASS,
     seq: Number(item.propertySeq) || 0,
     location: {

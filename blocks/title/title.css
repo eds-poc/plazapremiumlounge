@@ -292,6 +292,14 @@
   margin-bottom: 0;
 }
 
+/* option lead: a news article's lead paragraph (source `.news-content p`) as the intro: across the
+   full width (at most 80% from 992px), 16px and 20px above 600px, 25px under the heading (55px
+   above 600px, 65px from 1200px; the heading's own gap is smaller, so this one shows) */
+.title.lead .title-intro {
+  max-width: none;
+  margin-top: var(--spacing-8);
+}
+
 /* breakpoint-exception: the source campaign headings change above 480px and 768px */
 @media (width > 480px) {
   .title.headline {
@@ -305,10 +313,15 @@
   }
 }
 
-/* breakpoint-exception: the source lead-in's space changes above 600px */
+/* breakpoint-exception: the source lead-in's space and news lead change above 600px */
 @media (width > 600px) {
   .title.tagline {
     padding-block: calc(var(--spacing-1) * 2) 0;
+  }
+
+  .title.lead .title-intro {
+    margin-top: calc(var(--spacing-11) + var(--spacing-2));
+    font-size: var(--font-size-xl);
   }
 }
 
@@ -353,11 +366,20 @@
     /* one-off: the source's 600px compact title width */
     max-width: 600px;
   }
+
+  .title.lead .title-intro {
+    /* one-off: the source news lead's 80% width */
+    max-width: 80%;
+  }
 }
 
 @media (width >=1200px) {
   .title h1.title-heading {
     font-size: var(--heading-page-size);
+  }
+
+  .title.lead .title-intro {
+    margin-top: calc(var(--spacing-11) + var(--spacing-6));
   }
 }
 
