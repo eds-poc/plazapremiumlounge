@@ -367,6 +367,16 @@ function counter(name, group, value, min) {
 }
 
 /**
+ * The data layer's page name for a lounge: "<cityName>:<locationName (iataCode)>:<lounge>", e.g.
+ * "Hong Kong SAR:Hong Kong International Airport (HKG):Plaza Premium First".
+ * @param {Object} lounge
+ * @returns {string}
+ */
+function loungePageName(lounge) {
+  return [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':');
+}
+
+/**
  * The data layer's link click for Get Price, once the price service has answered: the booking
  * (the chosen date and time in UTC, the guests, the lounge's currency), the lounge and its
  * airport or station, the product with its price and the promo code. Without a price (none for
@@ -420,16 +430,15 @@ function trackGetPrice(lounge, request, picked, price) {
 
 /**
  * The data layer's page view for a lounge ("page load", see holdPageView), once the booking form
- * has its first services: the page name "<city>:<airport (code)>:<lounge>" (for every event after
- * it too), the booking as the form has it (the date and time in UTC, the guests), the lounge and
- * its airport or station, and the chosen product (its code as the SKU; none without services).
+ * has its first services: the page name (see loungePageName), the booking as the form has it (the
+ * date and time in UTC, the guests), the lounge and its airport or station, and the chosen
+ * product (its code as the SKU; none without services).
  * @param {Object} lounge
  * @param {HTMLFormElement} form The booking form
  * @returns {{eventName: string, extra: Object}}
  */
 function readPageView(lounge, form) {
-  const pageName = [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':');
-  setPageDetails({ pageName, siteSection: SITE_SECTION });
+  const pageName = loungePageName(lounge);
   const data = new FormData(form);
   const count = (name, least) => Math.max(least, Number.parseInt(data.get(name), 10) || least);
   const adult = count('adults', 1);
@@ -1036,6 +1045,8 @@ export default async function decorate(block) {
       sendPageView(null);
       return;
     }
+    // the lounge's page name for every event from now on (pageDetails.pageName)
+    setPageDetails({ pageName: loungePageName(lounge), siteSection: SITE_SECTION });
     const mobile = window.matchMedia(MOBILE);
     const slot = chooseSlot(params, lounge.timeZone, lounge.leadMinutes);
     writeParams({ date: slot.date, time: slot.time });
