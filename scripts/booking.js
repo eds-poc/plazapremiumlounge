@@ -71,6 +71,47 @@ export function toStartDateTime(date, time) {
 }
 
 /**
+ * How far a time zone is ahead of UTC at an instant, in milliseconds (e.g. Asia/Hong_Kong: 8 h).
+ * @param {number} instant Milliseconds since the epoch
+ * @param {string} [timeZone] The visitor's own without one
+ * @returns {number}
+ */
+function zoneOffset(instant, timeZone) {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+    timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+  }).formatToParts(new Date(instant)).map((p) => [p.type, Number(p.value)]));
+  const local = Date.UTC(
+    parts.year,
+    parts.month - 1,
+    parts.day,
+    parts.hour,
+    parts.minute,
+    parts.second,
+  );
+  return local - Math.floor(instant / 1000) * 1000;
+}
+
+/**
+ * A start at the lounge in UTC, as ISO 8601 without milliseconds: 2026-11-10 at 1400 in
+ * Asia/Hong_Kong is "2026-11-10T06:00:00Z" (the lounge's own offset that day, summer time too).
+ * @param {string} date YYYY-MM-DD
+ * @param {string} time HHmm
+ * @param {string} [timeZone] The lounge's (see readTimeZone); the visitor's own without one
+ * @returns {string} '' for a date or time that can't be read
+ */
+export function toUtcDateTime(date, time, timeZone) {
+  const [year, month, day] = (date || '').split('-').map(Number);
+  const hour = Number((time || '').slice(0, 2));
+  const minute = Number((time || '').slice(2, 4));
+  const wall = Date.UTC(year, month - 1, day, hour, minute);
+  if (!Number.isFinite(wall)) return '';
+  // the offset at the wall time, then again at the instant found (a summer time change between)
+  let instant = wall - zoneOffset(wall, timeZone);
+  instant = wall - zoneOffset(instant, timeZone);
+  return new Date(instant).toISOString().replace(/\.\d{3}Z$/, 'Z');
+}
+
+/**
  * The booking date and time to show, as the source: the address's date and time when valid,
  * else the first bookable slot; an earlier date or time moves forward to it (the time onto the
  * half-hour grid). The first bookable slot is the half hour after now plus the lounge's lead time

@@ -10,7 +10,7 @@ import openGallery from '../../scripts/gallery.js';
 import { openModal } from '../../scripts/modal-dialog.js';
 import {
   DAY_MINUTES, MAX_GUESTS, SLOT_MINUTES, chooseSlot, fitGuests, formatDate,
-  readLeadTime, readTimeZone, toStartDateTime, toTime,
+  readLeadTime, readTimeZone, toStartDateTime, toTime, toUtcDateTime,
 } from '../../scripts/booking.js';
 import buildDatePicker from '../../scripts/date-picker.js';
 import {
@@ -362,37 +362,38 @@ function counter(name, group, value, min) {
 
 /**
  * The data layer's link click for Get Price, once the price service has answered: the booking
- * (now, the guests, the lounge's currency), the lounge and its airport or station, the product
- * with its price and the promo code. Without a price (none for the choices, an error, or a newer
- * request), the product goes without its SKU and prices.
+ * (the chosen date and time in UTC, the guests, the lounge's currency), the lounge and its
+ * airport or station, the product with its price and the promo code. Without a price (none for
+ * the choices, an error, or a newer request), the product goes without its SKU and prices.
  * @param {Object} lounge
  * @param {Object} request The price request (see buildBooking)
- * @param {{service: string, product: string}} names The chosen service's and product's names
+ * @param {{service: string, product: string, date: string, time: string}} picked The chosen
+ *   service's and product's names, and the form's date (YYYY-MM-DD) and time (HHmm)
  * @param {{total: number, base: number, discounted: number, discountValue: number,
  *   catalogueCode: string, promoRejected: string}|null} price
  */
-function trackGetPrice(lounge, request, names, price) {
+function trackGetPrice(lounge, request, picked, price) {
   const eventName = 'get price';
   const cents = (amount) => Math.round(amount * 100) / 100;
   // the promo code's value: the price before discounts less the price after them
   const saved = price ? cents(Math.max(0, price.base - price.discounted)) : 0;
   const product = price ? {
     sku: price.catalogueCode,
-    name: names.product,
+    name: picked.product,
     actualPricePayCurr: price.base,
     // the first discount's amount (discounts[0].discountValue), 0 without one
     discount: cents(price.discountValue),
     sellPricePayCurr: price.total,
-    category: names.service,
-  } : { name: names.product, category: names.service };
+    category: picked.service,
+  } : { name: picked.product, category: picked.service };
   const promoAccepted = Boolean(request.promocode && price && !price.promoRejected);
   const { adult, child } = request.guests;
   pushEvent('web.webInteraction.linkClicks', eventName, {
     web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
     _plazapremiumloungemanagementli: {
       bookingInfo: {
-        // now, as ISO 8601 UTC without milliseconds (2026-11-05T11:20:30Z)
-        checkinDateTime: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+        // the form's date and time at the lounge, in UTC (1400 in Hong Kong: 06:00:00Z)
+        checkinDateTime: toUtcDateTime(picked.date, picked.time, lounge.timeZone),
         daysToBooking: 0,
         totalGuestCount: adult + child,
         adultCount: adult,
@@ -707,10 +708,12 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
       promocode: promo.value.trim(),
     };
     form.dispatchEvent(new CustomEvent('property-detail:get-price', { bubbles: true, detail: request }));
-    // the names as chosen now, for the data layer once the price comes
-    const names = {
+    // the visit and names as chosen now, for the data layer once the price comes
+    const picked = {
       service: service.selectedOptions[0]?.textContent.trim() || '',
       product: product.selectedOptions[0]?.textContent.trim() || '',
+      date: String(data.get('date') || ''),
+      time: String(data.get('time') || ''),
     };
     let answer = null;
     clearPrice();
@@ -737,7 +740,7 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
       setLoading(false);
       if (pricing === controller) form.removeAttribute('aria-busy');
       // the data layer's Get Price click, with the price service's answer (one push a click)
-      trackGetPrice(lounge, request, names, answer);
+      trackGetPrice(lounge, request, picked, answer);
     }
   });
   panel.append(header, form);
