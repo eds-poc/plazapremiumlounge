@@ -31,6 +31,8 @@ const BRAND = 'plaza premium lounge';
 let storing;
 // the page's name and site section set by a block (setPageDetails)
 let pageDetails = {};
+// the page view's own properties set by a block (setPageView)
+let pageView = null;
 
 /**
  * A logged-in member's kept details; when there are none, they're read in the background (once a
@@ -75,6 +77,16 @@ export function setPageDetails({ pageName, siteSection } = {}) {
     pageName: (pageName || '').trim(),
     siteSection: (siteSection || '').trim(),
   };
+}
+
+/**
+ * Sets the page view's own properties for a page type a block knows (e.g. the lounge listing's
+ * search results, booking and location), merged into its payload. The page view goes once the
+ * page's blocks are in (scripts.js loadDelayed), so a block sets them as it's decorated.
+ * @param {object} extra e.g. `{ _plazapremiumloungemanagementli: { searchDetails: {...} } }`
+ */
+export function setPageView(extra) {
+  pageView = extra;
 }
 
 /**
@@ -173,12 +185,13 @@ export function pushEvent(event, eventName, extra) {
 }
 
 /**
- * Starts analytics on a page: the page view, then the Launch script from the metadata
+ * Starts analytics on a page: the page view (with a block's own properties, see setPageView),
+ * then the Launch script from the metadata
  * `launch-script` (an https address; without one, the data layer is still filled).
  */
 export default function initDataLayer() {
   window.adobeDataLayer = window.adobeDataLayer || [];
-  pushEvent(PAGE_VIEW, 'page view');
+  pushEvent(PAGE_VIEW, 'page view', pageView);
 
   const src = getMetadata('launch-script').trim();
   if (!src) return;

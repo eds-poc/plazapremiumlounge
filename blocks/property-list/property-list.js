@@ -1,14 +1,15 @@
 import { loadCSS } from '../../scripts/aem.js';
+import { toUtcDateTime } from '../../scripts/booking.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
 // eslint-disable-next-line import/no-cycle
-import { pushEvent, setPageDetails } from '../../scripts/datalayer.js';
+import { pushEvent, setPageDetails, setPageView } from '../../scripts/datalayer.js';
 import {
   BRAND, chosenVisit, listLabel, pushEcommerce, viewSource,
 } from '../../scripts/ecommerce.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { getLanguage, translate } from '../../scripts/i18n.js';
 import {
-  buildBadge, buildSlider, el, fetchJson, getApiLanguage, isPreview, propertyDetailPath,
+  buildBadge, buildSlider, el, fetchJson, getApiLanguage, isIsoDate, isPreview, propertyDetailPath,
   propertyDetailUrl, readProperty, safeNote, setLoading, toKey, toUrl,
 } from '../../scripts/properties.js';
 
@@ -219,6 +220,57 @@ function buildLoyalty(text, signup) {
  */
 function setListingPage(city) {
   if (city) setPageDetails({ pageName: `${city}:listing`, siteSection: 'listing' });
+}
+
+/**
+ * A start chosen in the page address as ISO 8601 UTC without milliseconds, from the place's local
+ * time (the home page search sends ?date=2026-11-10&time=1700), else now.
+ * @param {string} timeZone The place's time zone ('' for the browser's)
+ * @returns {string}
+ */
+function chosenCheckin(timeZone) {
+  const params = new URLSearchParams(window.location.search);
+  const date = (params.get('date') || '').trim();
+  const time = (params.get('time') || '').trim();
+  if (isIsoDate(date) && /^([01]\d|2[0-3])[0-5]\d$/.test(time)) {
+    try {
+      return toUtcDateTime(date, time, timeZone || undefined);
+    } catch {
+      // an unknown time zone: the browser's
+      return toUtcDateTime(date, time);
+    }
+  }
+  return new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
+}
+
+/**
+ * The data layer's page view for the listing (scripts/datalayer.js setPageView): the results
+ * shown for the filters in the page address (the page's "N results"); the booking chosen there
+ * (the date and time at the airport, else now; the guests, else 1 adult and no children); and the
+ * airport chosen there (?airport=PKX), else the first lounge's: its `iataCode` and `locationName`.
+ * @param {Object[]} properties
+ * @param {Object<string, Set<string>>} selected The filters from the page address
+ */
+function setListingView(properties, selected) {
+  const count = properties.filter((p) => matches(p, selected)).length;
+  const lounges = properties.filter((p) => !p.pass);
+  const chosen = selected.airport.size === 1
+    && lounges.find((p) => selected.airport.has(p.location.key));
+  const place = chosen || lounges[0] || properties[0];
+  const { adults, children } = chosenVisit(place.timeZone);
+  setPageView({
+    _plazapremiumloungemanagementli: {
+      searchDetails: { searchResultsCount: count },
+      bookingInfo: {
+        checkinDateTime: chosenCheckin(place.timeZone),
+        daysToBooking: 0,
+        totalGuestCount: adults + children,
+        adultCount: adults,
+        childCount: children,
+      },
+      locationDetails: { iataCode: place.iata, locationName: place.location.name },
+    },
+  });
 }
 
 /**
@@ -738,8 +790,11 @@ export default async function decorate(block) {
       tagged = true;
       const codes = groupProperties(properties).flatMap((group) => group.items.map((p) => p.code));
       import('../../scripts/kwanko.js').then(({ listingTag }) => listingTag(codes));
-      // the GA4 view_item_list, for the first list on the page
-      if (useUrl) trackItemList(properties, selected);
+      // the GA4 view_item_list and the data layer's page view, for the first list on the page
+      if (useUrl) {
+        trackItemList(properties, selected);
+        setListingView(properties, selected);
+      }
     }
   };
   // the page's loader stays up until the lounges are shown (the first load is awaited, so the
