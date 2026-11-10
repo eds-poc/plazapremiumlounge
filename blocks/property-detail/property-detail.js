@@ -29,6 +29,8 @@ const MOBILE = '(width < 768px)';
 // desktop shows the first four photos, as the source
 const DESKTOP_PHOTOS = 4;
 const DEFAULT_CURRENCY = 'USD';
+// the data layer's site section for every event on the page (pageDetails.siteSection)
+const SITE_SECTION = 'lounge detail';
 
 /**
  * The page address's lounge and booking choices, as the source detail pages use them
@@ -427,7 +429,7 @@ function trackGetPrice(lounge, request, picked, price) {
  */
 function readPageView(lounge, form) {
   const pageName = [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':');
-  setPageDetails({ pageName });
+  setPageDetails({ pageName, siteSection: SITE_SECTION });
   const data = new FormData(form);
   const count = (name, least) => Math.max(least, Number.parseInt(data.get(name), 10) || least);
   const adult = count('adults', 1);
@@ -996,6 +998,8 @@ export default async function decorate(block) {
   // come; the generic one (null) when there's no lounge to show. The first answer counts
   let sendPageView;
   holdPageView(new Promise((resolve) => { sendPageView = resolve; }));
+  // "lounge detail" from the start (the page name from the path until the lounge has come)
+  setPageDetails({ siteSection: SITE_SECTION });
   const settings = readSettings(block);
   const params = readParams();
   block.replaceChildren();
