@@ -30,8 +30,8 @@ page.on('response', async (r) => {
 });
 const serverCart = async (id) => (await fetch(`${PPG}/cart?cartId=${id}&locale=en`)).json();
 const state = (p) => p.evaluate(() => ({
-  cookie: document.cookie.match(/cartid=([^;]+)/)?.[1] || null,
-  stored: !!localStorage.getItem('ppl-cart'),
+  id: JSON.parse(localStorage.getItem('ppl-cart-id') || 'null')?.id || null,
+  stored: !!sessionStorage.getItem('ppl-cart'),
   count: document.querySelector('header .header-cart-count:not([hidden])')?.textContent || null,
   label: document.querySelector('header a.header-utility .icon-cart')?.closest('a')?.getAttribute('aria-label'),
   book: document.querySelector('.booking-widget-card-book')?.textContent || null,
@@ -63,7 +63,7 @@ const post = calls.find((c) => c.method === 'POST');
 const get = calls.find((c) => c.method === 'GET');
 const id = post?.body?.cartId;
 let s = await state(page);
-check('1 add: POST → cartId; cookie, summary, count 1, Remove From Cart', !!id && s.cookie === id && s.stored && s.count === '1' && s.book === 'Remove From Cart', JSON.stringify({ id, ...s }));
+check('1 add: POST → cartId; cookie, summary, count 1, Remove From Cart', !!id && s.id === id && s.stored && s.count === '1' && s.book === 'Remove From Cart', JSON.stringify({ id, ...s }));
 
 // 2. the modal against the GET answer, field by field
 const p = get.body.products[0];
@@ -122,7 +122,7 @@ const del3 = calls.slice(n3).find((c) => c.method === 'DELETE');
 s = await state(page);
 const server3 = await serverCart(id);
 check('3 Remove From Cart: loader, DELETE ?cartId → Success', loader3 && del3?.url === `/cart?cartId=${id}` && del3.body?.code === '200', JSON.stringify(del3));
-check('3 after: cookie and summary gone, no count, Book Now, no reload, no dialog', !s.cookie && !s.stored && !s.count && s.label === 'Cart' && s.book === 'Book Now' && !s.open.length, JSON.stringify(s));
+check('3 after: cookie and summary gone, no count, Book Now, no reload, no dialog', !s.id && !s.stored && !s.count && s.label === 'Cart' && s.book === 'Book Now' && !s.open.length, JSON.stringify(s));
 check('3 the server\'s cart is empty', Array.isArray(server3.products) && server3.products.length === 0 && server3.cartTotalPrice?.totalPrice === 0, JSON.stringify({ products: server3.products?.length, total: server3.cartTotalPrice?.totalPrice }));
 await other.waitForTimeout(800);
 check('3 another tab: no count', !(await state(other)).count);
@@ -136,7 +136,7 @@ const n4 = calls.length;
 await page.locator('dialog.cart-confirm-modal[open] .cart-button', { hasText: 'Cancel' }).click();
 await page.waitForTimeout(600);
 s = await state(page);
-check('4 Cancel: no request, the mini cart and the cart stay', calls.length === n4 && JSON.stringify(s.open) === '["mini-cart-modal"]' && s.cookie === id4 && s.count === '1', JSON.stringify(s));
+check('4 Cancel: no request, the mini cart and the cart stay', calls.length === n4 && JSON.stringify(s.open) === '["mini-cart-modal"]' && s.id === id4 && s.count === '1', JSON.stringify(s));
 await page.locator('dialog.mini-cart-modal[open] .mini-cart-remove').click();
 await page.waitForSelector('dialog.cart-confirm-modal[open]');
 let navigated4 = false;
@@ -148,7 +148,7 @@ const del4 = calls.slice(n4).find((c) => c.method === 'DELETE');
 s = await state(page);
 const server4 = await serverCart(id4);
 check('4 Yes: DELETE ?cartId → Success, no reload', del4?.url === `/cart?cartId=${id4}` && del4.body?.code === '200' && !navigated4, JSON.stringify(del4));
-check('4 in place: no cart, no count, no dialog, Book Now', !s.cookie && !s.stored && !s.count && !s.open.length && s.book === 'Book Now', JSON.stringify(s));
+check('4 in place: no cart, no count, no dialog, Book Now', !s.id && !s.stored && !s.count && !s.open.length && s.book === 'Book Now', JSON.stringify(s));
 check('4 the server\'s cart is empty', server4.products?.length === 0, `${server4.products?.length}`);
 await other.waitForTimeout(800);
 check('4 another tab: no count', !(await state(other)).count);

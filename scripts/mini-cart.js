@@ -9,12 +9,13 @@
  */
 import { loadCSS } from './aem.js';
 import { translate, getLanguage } from './i18n.js';
-import { getCart, onCartChange } from './cart-state.js';
+import { getCart, getCartId, onCartChange } from './cart-state.js';
 import {
   addToCart, convertCart, refreshCart, removeFromCart,
 } from './cart.js';
 import { getCurrency } from './currency.js';
-import { hideLoader, showLoader } from './loader.js';
+// eslint-disable-next-line import/no-cycle
+import { hideLoader, showLoader } from './scripts.js';
 
 const styles = loadCSS(`${window.hlx.codeBasePath}/styles/cart.css`);
 
@@ -272,6 +273,18 @@ function renderMiniCart(cart) {
  */
 export async function openMiniCart(trigger, { fresh = false } = {}) {
   let cart = getCart();
+  let read = fresh;
+  // a cart this tab hasn't read (a new tab, its data past its 2 hours, another tab's change): read
+  // behind the loader first, so its prices are the booking system's
+  if (!cart && getCartId()) {
+    showLoader();
+    try {
+      cart = await refreshCart();
+    } catch { /* (unreachable: nothing to show) */ } finally {
+      hideLoader();
+    }
+    read = true;
+  }
   if (!cart) return null;
   const currency = getCurrency();
   const convert = !fresh && cart.currency !== currency && cart.lines.every((line) => line.kind === 'pass');
@@ -287,16 +300,17 @@ export async function openMiniCart(trigger, { fresh = false } = {}) {
   }
   renderMiniCart(cart);
   const dialog = await mini.open(trigger);
-  // (not when the cart was just read: after an add or a conversion)
-  if (!fresh && !convert) refreshCart().catch(() => {});
+  // (not when the cart was just read: after an add, a first read or a conversion)
+  if (!read && !convert) refreshCart().catch(() => {});
   return dialog;
 }
 
-// the open mini cart follows the cart (a refresh, another tab); an emptied cart closes it
+// the open mini cart follows the cart (a refresh, another tab); an emptied cart closes it (one that
+// another tab changed stays open until this tab has read it again)
 onCartChange((cart) => {
   if (!mini.dialog?.open) return;
   if (cart) renderMiniCart(cart);
-  else mini.dialog.close();
+  else if (!getCartId()) mini.dialog.close();
 });
 
 /**

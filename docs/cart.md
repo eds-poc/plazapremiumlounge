@@ -100,13 +100,47 @@ code** field, Check Out's add-ons step and the checkout itself.
 
 | File | What it does |
 | --- | --- |
-| `scripts/cart-state.js` | The cart on this site (small: the header loads it on every page): the cart id in the cookie `cartid` (a day, as the source's) and a summary of the cart's last answer in localStorage `ppl-cart` (lines, totals, currency), so the count and the mini cart show without a request. `getCart`, `cartCount`, `isInCart`, `saveCart`, `forgetCart`, `onCartChange` (`cart:change` on document, other tabs too). A summary without its cookie, past its day, or whose bookings are over is forgotten. |
+| `scripts/cart-state.js` | The cart on this site (small: the header loads it on every page), see [Where the cart is kept](#where-the-cart-is-kept). `getCartId`, `getCart`, `needsRead`, `cartCount`, `isInCart`, `saveCart`, `forgetCart`, `onCartChange` (`cart:change` on document, other tabs too), `cart:stale`. |
 | `scripts/cart.js` | The cart without UI. `addToCart(item)`: the type's adapter (`lounge`, `pass`), the cart's rules (`RULES`), then POST for an empty cart, or PUT for a pass joining passes. Also `refreshCart()`, `convertCart(currency)` (a cart of passes, PUT), `deleteCart(cartId)`, `removeFromCart(catalogueCode)` (PUT with the other lines, or DELETE for the last), `passStart()`, `registerAdapter(type, adapter)`. One add, and one removal, at a time. |
-| `scripts/mini-cart.js` + `styles/cart.css` | The UI in the site's dialog (`modal-dialog.js`, with its `static` content and `stack` options): the mini cart, Checkout Cart, the remove confirmation (stacked over the mini cart), the failure message; the site's loader (`scripts/loader.js`) while the booking system answers. `addAndShow(item, trigger)`, `openMiniCart(trigger)`. |
-| `scripts/scripts.js` | `installCart()`: what the blocks announce → the cart (`CART_EVENTS`: `booking-widget:book` is a `lounge`; `quick-buy:add-to-cart` and `pass-finder:add-to-cart` are a `pass`), and `cart:remove` (`detail.catalogueCode`). The button off and the loader at once; the cart's code loads on the first product or removal. |
+| `scripts/mini-cart.js` + `styles/cart.css` | The UI in the site's dialog (`modal-dialog.js`, with its `static` content and `stack` options): the mini cart, Checkout Cart, the remove confirmation (stacked over the mini cart), the failure message; the site's loader (`showLoader` / `hideLoader` from `scripts.js`) while the booking system answers. `addAndShow(item, trigger)`, `openMiniCart(trigger)`: a cart this tab hasn't read is read behind the loader first. |
+| `scripts/scripts.js` | `installCart()`: what the blocks announce → the cart (`CART_EVENTS`: `booking-widget:book` is a `lounge`; `quick-buy:add-to-cart` and `pass-finder:add-to-cart` are a `pass`), and `cart:remove` (`detail.catalogueCode`). The button off and the loader at once; the cart's code loads on the first product or removal. It reads a cart this tab hasn't got (a new tab, data past its 2 hours, another tab's change) after the load, when the tab is shown again, and on `cart:stale`. Also the site's full-page loader (`showLoader`, `hideLoader`). |
 | `scripts/passes.js` | `buildAddButton`: a pass's Add to Cart (cards and Learn more), labelled from the cart (Add More), all of them relabelled on `cart:change`. `takeSelectedPass`: the promotional address's pass, called by Quick Buy and Pass Finder once their passes are in (the first that lists it takes it). |
 | `blocks/header` | The count on the cart icon; the icon opens the mini cart when the cart holds something. |
 | `blocks/booking-widget` (lounge card) | Book Now announces `booking-widget:book` (the choice, `catalogueCode`, `currency`, the names and price); Remove From Cart announces `cart:remove`. |
+
+### Where the cart is kept
+
+| What | Where | For how long |
+| --- | --- | --- |
+| The cart's id, its count and its products' catalogue codes (no prices), and a change stamp | localStorage `ppl-cart-id`: `{ id, expires, changed, count, codes, sig }` (every tab's) | 24 hours from when the cart was made, as the source's cart cookie |
+| The cart's data: the booking system's last answer (lines, prices, totals, currency, promo) | sessionStorage `ppl-cart` (this tab's), with `fetchedAt` and `expires` | 2 hours from that answer; every read starts the 2 hours again |
+
+- **Prices come from the booking system.** The tab's data is only there so the mini cart shows at
+  once.
+  - Past its 2 hours, it's dropped and the cart is read again.
+  - Opening the mini cart without it shows the loader, then the booking system's prices (an old
+    price is never shown).
+  - With it, the mini cart opens at once and reads again in the background; a changed price updates
+    in place.
+  - Adds, removals, the promo code and Check Out read the cart first.
+- **A new tab** (or a new session: typing the address, a bookmark, Ctrl/middle-click, Open in new
+  tab):
+  - It has the id but no data: the header count and the buttons' labels (Remove From Cart, Add
+    More) show at once from the id's count and codes.
+  - The cart is read once in the background after the load.
+  - An add or a removal before that reads the cart first, so it joins the same cart and the rules
+    apply. A second cart is never made.
+- **Other tabs:**
+  - A change (lines, quantities, amounts, currency, promo) updates the id's `changed` stamp. Other
+    tabs then drop their data, show the new count and labels, and read the cart.
+  - A read that finds the same cart keeps the entry as it was, so the tabs don't keep signalling
+    each other.
+  - An emptied cart is forgotten everywhere, and an open mini cart closes.
+- **Blocked storage** (private modes, settings): the cart is kept for the page.
+- **Earlier versions** kept the id in the cookie `cartid` and the data in localStorage. They're
+  moved once (the id with its day, the count and codes), then deleted, and the cart is read again.
+- **No cookie** is set: nothing on this site needs one, and the source's checkout reads its own
+  server cart.
 
 ### The API (`apiUrl('cart')`, the booking system)
 
@@ -197,7 +231,7 @@ Both suites are dev only (not served), with routed answers (the stage service's 
 them with the booking widget tests' settings: `BW_HOST`, `PLAYWRIGHT`.
 
 - **`test/cart/cart.test.mjs`** (lounges):
-  - the add (the POST and GET, the cookie and summary, the count, the mini cart, the card's
+  - the add (the POST and GET, the stored id and data, the count, the mini cart, the card's
     button), Checkout Cart, a double click
   - removing: ⊗ Cancel/Yes (in place, no reload), Remove From Cart, through DELETE (failures,
     CRT_ERR_004), removal during a read
@@ -216,5 +250,13 @@ them with the booking widget tests' settings: `BW_HOST`, `PLAYWRIGHT`.
     in the cart, a lounge in the cart, an unknown code
   - the currency: the session's, a cart of passes converted when the mini cart opens, a lounge's not
   - the other four languages, axe
+- **`test/cart/storage.test.mjs`** (15 checks), on the passes page:
+  - where the cart is kept: the id in localStorage, the data in sessionStorage for 2 hours, no cookie
+  - a new tab: the count and Add More at once, then one read; opening the cart before it (the
+    loader); adding (the same cart, PUT) and refusing (a lounge) and removing before it
+  - data past its 2 hours (only the booking system's new price shows), and within them (shown at
+    once, then the new price)
+  - the tab shown again; two tabs (they follow, settle, and forget an emptied cart)
+  - the earlier cookie moved; blocked storage; no cart, so no cart code or request
 - **`test/cart/e2e/`**: both journeys end to end on stage (real carts), on the local preview or a
   branch preview (see its README).
