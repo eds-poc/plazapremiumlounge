@@ -2,6 +2,9 @@ import { loadCSS } from '../../scripts/aem.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
 // eslint-disable-next-line import/no-cycle
 import { pushEvent, setPageDetails } from '../../scripts/datalayer.js';
+import {
+  BRAND, chosenVisit, listLabel, pushEcommerce, viewSource,
+} from '../../scripts/ecommerce.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { getLanguage, translate } from '../../scripts/i18n.js';
 import {
@@ -219,6 +222,58 @@ function setListingPage(city) {
 }
 
 /**
+ * The GA4 `view_item_list` for the listing (window.dataLayer, scripts/ecommerce.js): the lounges
+ * shown (not the passes), in their order. The list is named after the city ("Mega Menu - Beijing",
+ * "Other - Beijing"); from the home page search widget, after its airport ("HP Search Widget - JFK"
+ * as the id, "HP Search Widget - John F. Kennedy International Airport" as the name).
+ * @param {Object[]} properties
+ * @param {Object<string, Set<string>>} selected The filters from the page address
+ */
+function trackItemList(properties, selected) {
+  // eslint-disable-next-line no-use-before-define
+  const shown = groupProperties(properties.filter((p) => !p.pass && matches(p, selected)))
+    .flatMap((group) => group.items);
+  if (!shown.length) return;
+  const source = viewSource();
+  const airport = source === 'hp_search_widget_click' && selected.airport.size === 1
+    ? shown.find((p) => selected.airport.has(p.location.key)) : null;
+  const city = shown.find((p) => p.city)?.city || '';
+  const listId = listLabel(source, airport ? airport.iata : city);
+  const listName = listLabel(source, airport ? airport.location.name : city);
+  pushEcommerce('view_item_list', {
+    // the first lounge's own currency
+    currency: shown[0].currency,
+    item_list_id: listId,
+    item_list_name: listName,
+    view_source: source,
+    items: shown.map((p, i) => {
+      const visit = chosenVisit(p.timeZone);
+      return {
+        item_id: p.code,
+        item_name: p.shortLocation ? `${p.name} (${p.shortLocation})` : p.name,
+        coupon: '',
+        discount: '',
+        index: i + 1,
+        item_brand: BRAND,
+        // the product's display name: the listing has none
+        item_category: '',
+        // the airport or station with its code, e.g. Beijing Daxing International Airport (PKX)
+        item_category2: p.iata ? `${p.location.name} (${p.iata})` : p.location.name,
+        item_category3: p.name,
+        item_category4: p.city,
+        item_category5: p.country,
+        item_list_id: listId,
+        item_list_name: listName,
+        // the lowest price, "" without one
+        price: p.price ? p.price.amount : '',
+        quantity: visit.total_guest_count,
+        ...visit,
+      };
+    }),
+  });
+}
+
+/**
  * The data layer's link click for a card's View now: the lounge, its position in the list, its
  * airport or station, and a booking that isn't chosen yet (now, no guests).
  * @param {Object} property
@@ -347,7 +402,8 @@ function readSelection(options, useUrl) {
   const params = new URLSearchParams(useUrl ? window.location.search : '');
   return Object.fromEntries(GROUPS.map((group) => {
     const known = new Set(options[group].map((o) => o.key));
-    const keys = (params.get(group) || '').split(',').map((k) => k.trim()).filter((k) => known.has(k));
+    // any case, as the keys are made (the home page search widget's links say ?airport=JFK)
+    const keys = (params.get(group) || '').split(',').map(toKey).filter((k) => known.has(k));
     return [group, new Set(keys)];
   }));
 }
@@ -682,6 +738,8 @@ export default async function decorate(block) {
       tagged = true;
       const codes = groupProperties(properties).flatMap((group) => group.items.map((p) => p.code));
       import('../../scripts/kwanko.js').then(({ listingTag }) => listingTag(codes));
+      // the GA4 view_item_list, for the first list on the page
+      if (useUrl) trackItemList(properties, selected);
     }
   };
   // the page's loader stays up until the lounges are shown (the first load is awaited, so the

@@ -1,3 +1,6 @@
+import {
+  BRAND, listLabel, pushEcommerce, viewSource,
+} from '../../scripts/ecommerce.js';
 import { translate } from '../../scripts/i18n.js';
 import {
   PASSES_TIMEOUT_MS, addToCart, buildPoints, formatPrice, icon, locationName, openPassDetails,
@@ -8,6 +11,8 @@ import {
 } from '../../scripts/properties.js';
 
 const PAGE_SIZE = 9;
+// the passes list's name in the GA4 events ("Other - Airport Lounge Passes")
+const LIST_NAME = 'Airport Lounge Passes';
 const MAX_TAGS = 4;
 const MAX_PLACES = 4;
 const ADD_TO_CART = 'pass-finder:add-to-cart';
@@ -131,6 +136,47 @@ function choose(passes, { region, search, sort }) {
     'price-desc': (a, b) => b.total - a.total || a.index - b.index,
   }[sort];
   return chosen.sort((a, b) => (a.isGlobal - b.isGlobal) || order(a, b));
+}
+
+/**
+ * The GA4 `view_item_list` for the passes (window.dataLayer, scripts/ecommerce.js): every pass the
+ * finder lists, in its order (all its pages), as "Other - Airport Lounge Passes", in the visitor's
+ * currency. A pass has no airport, city or visit, so those parameters are blank.
+ * @param {Object[]} list The passes, as chosen (see choose)
+ */
+function trackPassList(list) {
+  if (!list.length) return;
+  const source = viewSource();
+  const label = listLabel(source, LIST_NAME);
+  pushEcommerce('view_item_list', {
+    currency: readCurrency(),
+    item_list_id: label,
+    item_list_name: label,
+    view_source: source,
+    items: list.map((pass, i) => ({
+      item_id: pass.catalogueCode,
+      item_name: pass.displayName,
+      coupon: '',
+      discount: '',
+      index: i + 1,
+      item_brand: BRAND,
+      // the number of visits
+      item_category: pass.visits ? String(pass.visits) : '',
+      item_category2: pass.category,
+      item_category3: pass.service,
+      item_category4: '',
+      item_category5: '',
+      item_list_id: label,
+      item_list_name: label,
+      price: pass.total,
+      quantity: 1,
+      checkInDate: '',
+      checkInTime: '',
+      adults: '',
+      children: '',
+      total_guest_count: '',
+    })),
+  });
 }
 
 /**
@@ -460,6 +506,8 @@ export default function decorate(block) {
   const state = { ...readState(), page: 1 };
   let passes = [];
   let shown = '';
+  // the GA4 view_item_list went out (once a page, when the passes first show)
+  let listed = false;
   const grid = el('ul', 'pass-finder-grid');
   const empty = el('div', 'pass-finder-empty');
   empty.hidden = true;
@@ -547,6 +595,10 @@ export default function decorate(block) {
     controls.setRegions(readRegions(passes));
     results.classList.remove('is-loading');
     render();
+    if (!listed && passes.length) {
+      listed = true;
+      trackPassList(choose(passes, state));
+    }
   };
 
   const load = () => {
