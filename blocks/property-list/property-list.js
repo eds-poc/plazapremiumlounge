@@ -223,31 +223,48 @@ function setListingPage(city) {
 }
 
 /**
- * A start chosen in the page address as ISO 8601 UTC without milliseconds, from the place's local
- * time (the home page search sends ?date=2026-11-10&time=1700), else now.
+ * A start at the place as ISO 8601 UTC without milliseconds (1700 in Beijing is 09:00:00Z).
+ * @param {string} date YYYY-MM-DD
+ * @param {string} time HHmm
  * @param {string} timeZone The place's time zone ('' for the browser's)
  * @returns {string}
  */
-function chosenCheckin(timeZone) {
-  const params = new URLSearchParams(window.location.search);
-  const date = (params.get('date') || '').trim();
-  const time = (params.get('time') || '').trim();
-  if (isIsoDate(date) && /^([01]\d|2[0-3])[0-5]\d$/.test(time)) {
-    try {
-      return toUtcDateTime(date, time, timeZone || undefined);
-    } catch {
-      // an unknown time zone: the browser's
-      return toUtcDateTime(date, time);
-    }
+function toUtc(date, time, timeZone) {
+  try {
+    return toUtcDateTime(date, time, timeZone || undefined);
+  } catch {
+    // an unknown time zone: the browser's
+    return toUtcDateTime(date, time);
   }
-  return new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
+}
+
+/**
+ * The booking chosen in the page address (the home page search sends
+ * ?date=2026-11-10&time=1700&adult=1&children=0): the start at the place in UTC
+ * ("2026-11-10T09:00:00Z" in Beijing), else now; the adults, else 1; the children, else 0.
+ * @param {string} timeZone The place's time zone ('' for the browser's)
+ * @returns {{checkin: string, adults: number, children: number}} checkin as YYYY-MM-DDTHH:MM:SSZ
+ */
+function chosenBooking(timeZone) {
+  const params = new URLSearchParams(window.location.search);
+  const read = (name) => (params.get(name) || '').trim();
+  const count = (name, fallback) => (/^\d+$/.test(read(name)) ? Number(read(name)) : fallback);
+  const date = read('date');
+  const time = read('time');
+  const chosen = isIsoDate(date) && /^([01]\d|2[0-3])[0-5]\d$/.test(time);
+  return {
+    checkin: chosen ? toUtc(date, time, timeZone) : new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+    adults: count('adult', 1),
+    children: count('children', 0),
+  };
 }
 
 /**
  * The data layer's page view for the listing (scripts/datalayer.js setPageView): the results
  * shown for the filters in the page address (the page's "N results"); the booking chosen there
- * (the date and time at the airport, else now; the guests, else 1 adult and no children); and the
- * airport chosen there (?airport=PKX), else the first lounge's: its `iataCode` and `locationName`.
+ * (`date` and `time` at the airport in UTC, else now; `adult` and `children`, else 1 and 0); and
+ * the airport chosen there (?airport=PKX), else the first lounge's: its `iataCode` and
+ * `locationName`.
  * @param {Object[]} properties
  * @param {Object<string, Set<string>>} selected The filters from the page address
  */
@@ -257,12 +274,12 @@ function setListingView(properties, selected) {
   const chosen = selected.airport.size === 1
     && lounges.find((p) => selected.airport.has(p.location.key));
   const place = chosen || lounges[0] || properties[0];
-  const { adults, children } = chosenVisit(place.timeZone);
+  const { checkin, adults, children } = chosenBooking(place.timeZone);
   setPageView({
     _plazapremiumloungemanagementli: {
       searchDetails: { searchResultsCount: count },
       bookingInfo: {
-        checkinDateTime: chosenCheckin(place.timeZone),
+        checkinDateTime: checkin,
         daysToBooking: 0,
         totalGuestCount: adults + children,
         adultCount: adults,
