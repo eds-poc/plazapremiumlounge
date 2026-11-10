@@ -43,21 +43,21 @@ const go = async (path, p = page) => {
   await ready(p);
 };
 const button = (product, p = page) => p.locator(`button[data-pass-add][data-catalogue-code^="${product}-"]`).first();
-const cartId = (p = page) => p.evaluate(() => document.cookie.match(/cartid=([^;]+)/)?.[1] || null);
+const cartId = (p = page) => p.evaluate(() => JSON.parse(localStorage.getItem('ppl-cart-id') || 'null')?.id || null);
 const getCart = async (id) => (await fetch(`${PPG}/cart?cartId=${id}&locale=en`)).json();
 const compare = async (label, p = page) => {
   const s = await p.evaluate(() => ({
-    stored: JSON.parse(localStorage.getItem('ppl-cart') || 'null'),
-    cookie: document.cookie.match(/cartid=([^;]+)/)?.[1] || null,
+    stored: JSON.parse(sessionStorage.getItem('ppl-cart') || 'null'),
+    id: JSON.parse(localStorage.getItem('ppl-cart-id') || 'null')?.id || null,
     badge: document.querySelector('header .header-cart-count:not([hidden])')?.textContent || null,
     labels: Object.fromEntries([...document.querySelectorAll('button[data-pass-add]')].map((b) => [b.dataset.catalogueCode, b.textContent])),
   }));
-  if (!s.cookie) {
+  if (!s.id) {
     check(`${label}: no cart on the page`, !s.stored && !s.badge && Object.values(s.labels).every((l) => l === 'Add to Cart'));
     return null;
   }
-  made.add(s.cookie);
-  const fresh = await getCart(s.cookie);
+  made.add(s.id);
+  const fresh = await getCart(s.id);
   const want = (fresh.products || []).map((x) => `${x.catalogueCode}×${x.quantity}`).sort().join(',');
   const have = (s.stored?.lines || []).map((l) => `${l.catalogueCode}×${l.quantity}`).sort().join(',');
   const count = (fresh.products || []).reduce((n, x) => n + Number(x.quantity), 0);
@@ -101,7 +101,7 @@ const yes = async (index = 0) => {
 const empty = async () => {
   const id = await cartId();
   if (id) await fetch(`${PPG}/cart?cartId=${id}`, { method: 'DELETE' });
-  await page.evaluate(() => { document.cookie = 'cartid=; path=/; max-age=0'; localStorage.removeItem('ppl-cart'); sessionStorage.clear(); });
+  await page.evaluate(() => { localStorage.removeItem('ppl-cart-id'); sessionStorage.clear(); });
 };
 
 // 1. a pass, Add More, a refused pass, another pass, the inventory limit
@@ -211,8 +211,12 @@ const lounge = await (await fetch(`${PPG}/cart`, {
 if (lounge.cartId) {
   made.add(lounge.cartId);
   await page.evaluate((id) => {
-    document.cookie = `cartid=${id}; path=/`;
-    localStorage.setItem('ppl-cart', JSON.stringify({
+    const seed = (c) => {
+      localStorage.setItem('ppl-cart-id', JSON.stringify({
+        id: c.cartId, expires: c.expires, changed: Date.now(), count: c.lines.reduce((n, l) => n + (Number(l.quantity) || 1), 0), codes: c.lines.map((l) => l.catalogueCode),
+      })); sessionStorage.setItem('ppl-cart', JSON.stringify({ ...c, fetchedAt: Date.now(), expires: Date.now() + 2 * 3600e3 }));
+    };
+    seed({
       cartId: id,
       currency: 'HKD',
       expires: Date.now() + 3600e3,
@@ -220,7 +224,7 @@ if (lounge.cartId) {
       lines: [{
         catalogueCode: 'PRD3341-Regular-PRPRTY816-LOUNGE-LCTN517-RTPLN3480', type: 'lounge', kind: 'lounge', name: 'Lounge', product: '', place: '', start: '2026-11-22 20:00:00', adults: 1, children: 0, quantity: 1,
       }],
-    }));
+    });
   }, lounge.cartId);
   await go(PATH);
   const n6 = calls.length;

@@ -125,8 +125,8 @@ const otherLabels = (page, code) => page.evaluate((c) => [...new Set([...documen
 const state = (page) => page.evaluate(() => ({
   badge: document.querySelector('header .header-cart-count:not([hidden])')?.textContent || null,
   open: [...document.querySelectorAll('dialog.modal[open]')].map((d) => [...d.classList].find((c) => /^((mini-)?cart-|pass-modal)/.test(c))),
-  cookie: document.cookie.match(/cartid=([^;]+)/)?.[1] || null,
-  stored: JSON.parse(localStorage.getItem('ppl-cart') || 'null'),
+  id: JSON.parse(localStorage.getItem('ppl-cart-id') || 'null')?.id || null,
+  stored: JSON.parse(sessionStorage.getItem('ppl-cart') || 'null'),
   url: `${window.location.pathname}${window.location.search}`,
 }));
 const mini = (page) => page.evaluate(() => {
@@ -150,11 +150,11 @@ const name = (code) => PRICES.get(code).item.productDisplayName.replace(/[\u200b
 const storedLounge = `(() => {
   if (sessionStorage.getItem('cart-seeded')) return;
   sessionStorage.setItem('cart-seeded', '1');
-  document.cookie = 'cartid=CRT_LOUNGE; path=/';
-  localStorage.setItem('ppl-cart', JSON.stringify({
+  const seed = (c) => { localStorage.setItem('ppl-cart-id', JSON.stringify({ id: c.cartId, expires: c.expires, changed: Date.now(), count: c.lines.reduce((n, l) => n + (Number(l.quantity) || 1), 0), codes: c.lines.map((l) => l.catalogueCode) })); sessionStorage.setItem('ppl-cart', JSON.stringify({ ...c, fetchedAt: Date.now(), expires: Date.now() + 2 * 3600e3 })); };
+  seed({
     cartId: 'CRT_LOUNGE', currency: 'HKD', expires: Date.now() + 3600e3, totals: { base: 650.36, discounts: [], total: 650.36 },
     lines: [{ catalogueCode: '${LOUNGE_CART.products[0].catalogueCode}', type: 'lounge', kind: 'lounge', name: 'Plaza Premium Lounge', product: 'Lounge Use - 5 Hours', place: '', start: '2099-11-04 15:00:00', adults: 1, children: 0, quantity: 1 }],
-  }));
+  });
 })()`;
 
 async function passFlow(width) {
@@ -181,7 +181,7 @@ async function passFlow(width) {
   let m = await mini(page);
   check(`${width} the mini cart: the pass's line (its name, Quantity: 1, its price), no Edit (as live)`, JSON.stringify(m?.lines) === JSON.stringify([`${name(A)} | Quantity: 1 | USD 99.00`]) && m.pass && m.total === 'USD 99.00' && JSON.stringify(m.buttons) === '["Check Out"]', JSON.stringify(m));
   let s = await state(page);
-  check(`${width} the count and the stored cart`, s.badge === '1' && s.cookie === 'CRT_P1' && s.stored?.lines?.[0]?.kind === 'pass', JSON.stringify({ badge: s.badge, cookie: s.cookie }));
+  check(`${width} the count and the stored cart`, s.badge === '1' && s.id === 'CRT_P1' && s.stored?.lines?.[0]?.kind === 'pass', JSON.stringify({ badge: s.badge, cookie: s.id }));
   check(`${width} every button for the pass reads Add More (Quick Buy, Pass Finder), the others Add to Cart`, JSON.stringify(await labels(page, A)) === '["Add More","Add More"]' && JSON.stringify(await otherLabels(page, A)) === '["Add to Cart"]', JSON.stringify([await labels(page, A), await otherLabels(page, A)]));
   check(`${width} Add More's name for screen readers`, await page.evaluate((c) => document.querySelector(`.pass-finder button[data-catalogue-code="${c}"]`).getAttribute('aria-label'), A) === 'Add More: Global 2-Visit Pass');
   await closeMini(page);
@@ -254,7 +254,7 @@ async function passFlow(width) {
     await page.waitForTimeout(600);
   }
   s = await state(page);
-  check(`${width} the last line: DELETE ?cartId, the mini cart closed, no count, no reload`, page.api.deletes.length === 1 && /cartId=CRT_P1$/.test(page.api.deletes[0]) && !s.open.length && !s.badge && !s.cookie && !s.stored && !navigated, JSON.stringify({ deletes: page.api.deletes, s }));
+  check(`${width} the last line: DELETE ?cartId, the mini cart closed, no count, no reload`, page.api.deletes.length === 1 && /cartId=CRT_P1$/.test(page.api.deletes[0]) && !s.open.length && !s.badge && !s.id && !s.stored && !navigated, JSON.stringify({ deletes: page.api.deletes, s }));
   check(`${width} an empty cart: every pass reads Add to Cart`, JSON.stringify(await otherLabels(page, '')) === '["Add to Cart"]', JSON.stringify(await otherLabels(page, '')));
   check(`${width} no page errors`, !page.errors.length, page.errors.join(' | '));
   await page.close();
@@ -320,7 +320,7 @@ for (const [label, fail, before] of [
   await page.waitForSelector('dialog.cart-message-modal[open]', { timeout: 15000 });
   const text = await page.evaluate(() => document.querySelector('dialog.cart-message-modal[open]').textContent.replace(/\s+/g, ' ').trim());
   const s = await state(page);
-  check(`a failed add, ${label}: "Notice", "An error occurred. Please try again later." (as live), the cart as it was`, text === 'NoticeAn error occurred. Please try again later.' && (before ? s.stored?.lines?.[0]?.quantity === 1 && s.badge === '1' : !s.stored && !s.cookie), `${text} | ${JSON.stringify({ badge: s.badge, cookie: s.cookie })}`);
+  check(`a failed add, ${label}: "Notice", "An error occurred. Please try again later." (as live), the cart as it was`, text === 'NoticeAn error occurred. Please try again later.' && (before ? s.stored?.lines?.[0]?.quantity === 1 && s.badge === '1' : !s.stored && !s.id), `${text} | ${JSON.stringify({ badge: s.badge, cookie: s.id })}`);
   check(`a failed add, ${label}: the button's label unchanged, usable again`, JSON.stringify(await labels(page, A)) === (before ? '["Add More","Add More"]' : '["Add to Cart","Add to Cart"]') && await button.isEnabled(), JSON.stringify(await labels(page, A)));
   await page.close();
 }
@@ -368,11 +368,9 @@ for (const [label, fail, before] of [
   const { 'Global 5-Visit Pass': B } = await codes(first);
   await first.locator(`.quick-buy button[data-pass-add][data-catalogue-code="${B}"]`).click();
   await first.waitForSelector('dialog.mini-cart-modal[open]', { timeout: 15000 });
-  const context = first.context();
-  const cookies = await context.cookies();
-  const kept = await first.evaluate(() => localStorage.getItem('ppl-cart'));
+  const kept = await first.evaluate(() => localStorage.getItem('ppl-cart-id'));
   await first.close();
-  const page = await openPasses({ service, path: `${PATH}?selectedpassid=prd3696`, init: `(() => { if (!localStorage.getItem('ppl-cart')) { document.cookie = 'cartid=${cookies.find((c) => c.name === 'cartid')?.value}; path=/'; localStorage.setItem('ppl-cart', ${JSON.stringify(kept)}); } })()` });
+  const page = await openPasses({ service, path: `${PATH}?selectedpassid=prd3696`, init: `(() => { if (!localStorage.getItem('ppl-cart-id')) localStorage.setItem('ppl-cart-id', ${JSON.stringify(kept)}); })()` });
   await page.waitForSelector('dialog.mini-cart-modal[open]', { timeout: 20000 });
   await page.waitForTimeout(400);
   const m = await mini(page);
@@ -383,7 +381,7 @@ for (const [label, fail, before] of [
   const page = await openPasses({ path: `${PATH}?selectedPassID=PRD3696`, init: storedLounge, service: cartService({ carts: new Map([['CRT_LOUNGE', 'lounge']]) }) });
   await page.waitForSelector('dialog.cart-message-modal[open]', { timeout: 20000 });
   const s = await state(page);
-  check('?selectedPassID with a lounge in the cart: Checkout Cart, nothing added (live adds it), the parameter gone', !page.api.posts.length && !page.api.puts.length && s.cookie === 'CRT_LOUNGE' && s.url === PATH, JSON.stringify({ posts: page.api.posts.length, puts: page.api.puts.length, s: { ...s, stored: !!s.stored } }));
+  check('?selectedPassID with a lounge in the cart: Checkout Cart, nothing added (live adds it), the parameter gone', !page.api.posts.length && !page.api.puts.length && s.id === 'CRT_LOUNGE' && s.url === PATH, JSON.stringify({ posts: page.api.posts.length, puts: page.api.puts.length, s: { ...s, stored: !!s.stored } }));
   await page.close();
 }
 {

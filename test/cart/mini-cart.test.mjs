@@ -23,21 +23,20 @@ const STAGE_PROMO = json({ error: { code: 'VALIDATION_ERROR', details: {}, messa
 const CHECKOUT = 'https://www.plazapremiumlounge.com/{lang}/guest-checkout?cart={cartId}';
 const EDIT = 'https://www.plazapremiumlounge.com/{lang}/book-your-visit?date={date}&time={time}&adults={adults}&children={children}&product={catalogueCode}';
 
-/** A stored cart (the cookie and the summary), once per tab. */
+/** A stored cart (the id in localStorage, the tab's data in sessionStorage), once per tab. */
 const stored = (kind = 'lounge') => `(() => {
   if (sessionStorage.getItem('cart-seeded')) return;
   sessionStorage.setItem('cart-seeded', '1');
-  document.cookie = 'cartid=CRT_MC; path=/';
-  localStorage.setItem('ppl-cart', JSON.stringify(${JSON.stringify({
+  const cart = ${JSON.stringify({
     cartId: 'CRT_MC',
     currency: 'HKD',
     totals: {
       base: 875, discounts: [{ name: '10% Online Discount [Lounge Booking]', value: 87.5 }], promo: 0, total: 787.5,
     },
     promoCode: '',
-  })}, (k, v) => v));
-  const cart = JSON.parse(localStorage.getItem('ppl-cart'));
-  cart.expires = Date.now() + 3600e3;
+  })};
+  cart.expires = Date.now() + 2 * 3600e3;
+  cart.fetchedAt = Date.now();
   cart.lines = ${JSON.stringify([{
     catalogueCode: LINE.catalogueCode, productCode: 'PRD3341', type: 'lounge', kind: 'lounge', name: 'Plaza Premium Lounge', product: 'Lounge Use - 5 Hours', place: 'Near Gate 1, Departures, Hong Kong International Airport', start: LINE.startDate, adults: 1, children: 0, quantity: 1, total: 787.5,
   }])};
@@ -46,7 +45,8 @@ const stored = (kind = 'lounge') => `(() => {
     cart.lines = [{ catalogueCode: '${PASS_CART.products[0].catalogueCode}', type: 'gftcrd', kind: 'pass', name: 'Global Family Pass', product: 'Global Family Pass', place: '', start: '2099-01-01 10:00:00', adults: 0, children: 0, quantity: 1, total: 85 }];
     cart.totals = { base: 85, discounts: [], promo: 0, total: 85 };
   }
-  localStorage.setItem('ppl-cart', JSON.stringify(cart));
+  sessionStorage.setItem('ppl-cart', JSON.stringify(cart));
+  localStorage.setItem('ppl-cart-id', JSON.stringify({ id: cart.cartId, expires: Date.now() + 20 * 3600e3, changed: Date.now(), count: 1, codes: cart.lines.map((l) => l.catalogueCode) }));
 })()`;
 
 /**
@@ -253,7 +253,7 @@ for (const [label, promo, message] of [
   await page.waitForSelector('dialog.mini-cart-modal[open] .mini-cart-promo-remove', { timeout: 10000 });
   await page.waitForTimeout(300);
   let m = await mini(page);
-  const storedPromo = await page.evaluate(() => JSON.parse(localStorage.getItem('ppl-cart')).promoCode);
+  const storedPromo = await page.evaluate(() => JSON.parse(sessionStorage.getItem('ppl-cart')).promoCode);
   check('promo applied (modelled): the GET\'s promo amount as a row, the total from the GET, the code read only with its remove button, kept in the summary', m.rows.some((r) => r === 'Promo Code (SAVE10):- HKD 50.00') && m.rows.at(-1).endsWith('HKD 737.50') && m.value === 'SAVE10' && m.readOnly && /mini-cart-promo-remove/.test(m.action) && m.actionLabel === 'Remove promo code' && !m.msgShown && storedPromo === 'SAVE10' && nav.count === 0, JSON.stringify({
     rows: m.rows, value: m.value, action: m.action, storedPromo,
   }));
@@ -295,7 +295,7 @@ const bookAnother = async (page) => {
   await page.waitForSelector('dialog.mini-cart-modal[open]', { timeout: 15000 });
   await page.waitForTimeout(500);
 };
-const stateOf = (page) => page.evaluate(() => ({ cookie: document.cookie.match(/cartid=([^;]+)/)?.[1] || null, stored: JSON.parse(localStorage.getItem('ppl-cart') || 'null') }));
+const stateOf = (page) => page.evaluate(() => ({ id: JSON.parse(localStorage.getItem('ppl-cart-id') || 'null')?.id || null, stored: JSON.parse(sessionStorage.getItem('ppl-cart') || 'null') }));
 const hasPromoRow = (m) => m.rows.some((r) => r.startsWith('Promo Code'));
 for (const [label, promo, applied] of [
   ['a refused code typed', () => STAGE_PROMO, false],
@@ -314,9 +314,9 @@ for (const [label, promo, applied] of [
   await bookAnother(page);
   const m = await mini(page);
   const now = await stateOf(page);
-  check(`${label}, then the lounge removed: the cart forgotten (DELETE)`, (applied ? before.readOnly : before.error) && page.api.deletes.length === 1 && !gone.cookie && !gone.stored, JSON.stringify({ before: { value: before.value, readOnly: before.readOnly }, deletes: page.api.deletes, gone }));
-  check(`${label}, then another lounge: a new cart, the promo field empty and editable, no message, no promo row, no promo in the summary`, now.cookie === 'CRT_MC2' && m.value === '' && !m.readOnly && /mini-cart-promo-apply/.test(m.action) && !m.msgShown && !m.invalid && !hasPromoRow(m) && !now.stored?.promoCode && !(now.stored?.totals?.promo > 0) && page.api.promos.length === 1, JSON.stringify({
-    cookie: now.cookie, value: m.value, readOnly: m.readOnly, message: m.message, rows: m.rows, promoCode: now.stored?.promoCode, promo: now.stored?.totals?.promo, promos: page.api.promos.length,
+  check(`${label}, then the lounge removed: the cart forgotten (DELETE)`, (applied ? before.readOnly : before.error) && page.api.deletes.length === 1 && !gone.id && !gone.stored, JSON.stringify({ before: { value: before.value, readOnly: before.readOnly }, deletes: page.api.deletes, gone }));
+  check(`${label}, then another lounge: a new cart, the promo field empty and editable, no message, no promo row, no promo in the summary`, now.id === 'CRT_MC2' && m.value === '' && !m.readOnly && /mini-cart-promo-apply/.test(m.action) && !m.msgShown && !m.invalid && !hasPromoRow(m) && !now.stored?.promoCode && !(now.stored?.totals?.promo > 0) && page.api.promos.length === 1, JSON.stringify({
+    id: now.id, value: m.value, readOnly: m.readOnly, message: m.message, rows: m.rows, promoCode: now.stored?.promoCode, promo: now.stored?.totals?.promo, promos: page.api.promos.length,
   }));
   await page.close();
 }
@@ -331,7 +331,7 @@ for (const [label, promo, applied] of [
   await page.waitForTimeout(3500);
   const s = await stateOf(page);
   const open1 = await page.evaluate(() => !!document.querySelector('dialog.mini-cart-modal[open]'));
-  check('the lounge removed while a code is applied: the cart stays gone (no cookie, no summary), the mini cart closed', !s.cookie && !s.stored && !open1, JSON.stringify({ s, open: open1 }));
+  check('the lounge removed while a code is applied: the cart stays gone (no cookie, no summary), the mini cart closed', !s.id && !s.stored && !open1, JSON.stringify({ s, open: open1 }));
   await bookAnother(page);
   const m = await mini(page);
   check('…then another lounge: the field empty, no promo row', m.value === '' && !m.readOnly && !hasPromoRow(m), JSON.stringify({ value: m.value, rows: m.rows }));
@@ -362,9 +362,9 @@ for (const [label, promo, applied] of [
     // eslint-disable-next-line import/no-absolute-path
     const { registerAddons } = await import('/scripts/mini-cart.js');
     registerAddons({ available: (line) => line.kind === 'lounge', open: (line) => { window.addonsOpened = line.catalogueCode; } });
-    const cart = JSON.parse(localStorage.getItem('ppl-cart'));
+    const cart = JSON.parse(sessionStorage.getItem('ppl-cart'));
     cart.lines[0].addons = [{ name: 'Plaza Premium Lounge Sakura Shrimp Spice (50g)', quantity: 2 }];
-    localStorage.setItem('ppl-cart', JSON.stringify(cart));
+    sessionStorage.setItem('ppl-cart', JSON.stringify(cart));
   });
   await page.route(/ppg-app\/cart(\?|$)/, (r) => r.fulfill({ status: 503, body: '' }));
   await openCart(page);

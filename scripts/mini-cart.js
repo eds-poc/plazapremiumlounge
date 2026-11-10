@@ -12,12 +12,13 @@ import { getMetadata, loadCSS } from './aem.js';
 import {
   DEFAULT_SITE, getLanguage, getSiteFolder, translate,
 } from './i18n.js';
-import { getCart, onCartChange } from './cart-state.js';
+import { getCart, getCartId, onCartChange } from './cart-state.js';
 import {
   addToCart, applyPromo, convertCart, refreshCart, removeFromCart, removePromo,
 } from './cart.js';
 import { getCurrency } from './currency.js';
-import { hideLoader, showLoader } from './loader.js';
+// eslint-disable-next-line import/no-cycle
+import { hideLoader, showLoader } from './scripts.js';
 
 const styles = loadCSS(`${window.hlx.codeBasePath}/styles/cart.css`);
 
@@ -209,7 +210,8 @@ const promo = {
  * @param {Object|null} cart
  */
 function promoFor(cart) {
-  const cartId = cart?.cartId || '';
+  // (the same cart while this tab reads it again after another tab's change: kept)
+  const cartId = cart?.cartId || getCartId();
   if (promo.cartId === cartId) return;
   Object.assign(promo, {
     cartId, draft: '', message: '', error: false,
@@ -501,6 +503,18 @@ function renderMiniCart(cart) {
  */
 export async function openMiniCart(trigger, { fresh = false } = {}) {
   let cart = getCart();
+  let read = fresh;
+  // a cart this tab hasn't read (a new tab, its data past its 2 hours, another tab's change): read
+  // behind the loader first, so its prices are the booking system's
+  if (!cart && getCartId()) {
+    showLoader();
+    try {
+      cart = await refreshCart();
+    } catch { /* (unreachable: nothing to show) */ } finally {
+      hideLoader();
+    }
+    read = true;
+  }
   if (!cart) return null;
   // (a new opening: the promo field's last message is gone, what was typed stays)
   promo.message = '';
@@ -519,18 +533,19 @@ export async function openMiniCart(trigger, { fresh = false } = {}) {
   }
   renderMiniCart(cart);
   const dialog = await mini.open(trigger);
-  // (not when the cart was just read: after an add or a conversion)
-  if (!fresh && !convert) refreshCart().catch(() => {});
+  // (not when the cart was just read: after an add, a first read or a conversion)
+  if (!read && !convert) refreshCart().catch(() => {});
   return dialog;
 }
 
-// the open mini cart follows the cart (a refresh, another tab); an emptied cart closes it, and the
-// promo field's text and message go with it
+// the open mini cart follows the cart (a refresh, another tab); an emptied cart closes it (one that
+// another tab changed stays open until this tab has read it again), and the promo field's text and
+// message go with it
 onCartChange((cart) => {
   promoFor(cart);
   if (!mini.dialog?.open) return;
   if (cart) renderMiniCart(cart);
-  else mini.dialog.close();
+  else if (!getCartId()) mini.dialog.close();
 });
 
 /**

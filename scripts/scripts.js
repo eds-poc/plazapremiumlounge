@@ -18,7 +18,7 @@ import { decorateIcons } from './icons.js';
 import { getLanguage } from './i18n.js';
 import { installVideoLinks } from './video.js';
 import { checkPartnerAccess, checkSession, logout } from './auth.js';
-import { hideLoader, showLoader } from './loader.js';
+import { STALE_EVENT, needsRead } from './cart-state.js';
 
 if (window.trustedTypes && window.trustedTypes.createPolicy) {
   const innerTT = window.trustedTypes.createPolicy('tt-inner', {
@@ -45,8 +45,34 @@ if (window.trustedTypes && window.trustedTypes.createPolicy) {
   });
 }
 
-// the full-page loader (scripts/loader.js), offered here too, as before
-export { showLoader, hideLoader };
+const LOADER_ID = 'spinner-overlay';
+let loader;
+
+/**
+ * Shows the full-page loader (the source's #spinner-overlay, styled in styles.css), creating it on
+ * first use, for the page's first load, links that leave the page, and blocks and scripts that wait
+ * for a service (e.g. the cart). With a modal dialog open, the loader goes inside it: a modal
+ * dialog sits in the browser's top layer, above anything in the page.
+ */
+export function showLoader() {
+  if (!loader) {
+    loader = document.getElementById(LOADER_ID);
+    if (!loader) {
+      loader = document.createElement('div');
+      loader.id = LOADER_ID;
+      loader.innerHTML = '<div id="global-spinner"><img src="/icons/PPL-loading-v2.webp" width="320" height="auto" alt="Loading..."></div>';
+    }
+  }
+  const host = [...document.querySelectorAll('dialog[open]')].pop() || document.body;
+  if (loader.parentElement !== host) host.prepend(loader);
+}
+
+/**
+ * Hides the full-page loader.
+ */
+export function hideLoader() {
+  loader?.remove();
+}
 
 /**
  * Shows the loader as soon as a link click leaves the page, and hides it again when the
@@ -228,11 +254,34 @@ const CART_EVENTS = {
   'pass-finder:add-to-cart': 'pass',
 };
 
+let reading = null;
+
+/**
+ * Reads the cart from the booking system in the background when this tab hasn't its data (a new
+ * tab, its data past its 2 hours, another tab's change): the count, the buttons' labels and the
+ * mini cart then follow (`cart:change`). The cart's code loads only then; one read at a time.
+ */
+function readCartIfNeeded() {
+  if (reading || !needsRead()) return;
+  reading = import('./cart.js')
+    .then(({ refreshCart }) => refreshCart())
+    .catch(() => { /* (read again when it's needed) */ })
+    .finally(() => { reading = null; });
+}
+
 /**
  * Puts announced products into the cart (`CART_EVENTS`), and takes them out on `cart:remove`
- * (`detail.catalogueCode`, e.g. the lounge card's Remove From Cart).
+ * (`detail.catalogueCode`, e.g. the lounge card's Remove From Cart). A cart this tab hasn't read is
+ * read once the page has loaded, when the tab is shown again, and when another tab changed it.
  */
 function installCart() {
+  window.addEventListener('load', () => setTimeout(readCartIfNeeded, 0), { once: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') readCartIfNeeded();
+  });
+  document.addEventListener(STALE_EVENT, () => {
+    if (document.visibilityState === 'visible') readCartIfNeeded();
+  });
   Object.entries(CART_EVENTS).forEach(([name, type]) => {
     document.addEventListener(name, (e) => {
       // (as the source's, at once: the button off and the site's loader, while the cart's code
@@ -243,6 +292,8 @@ function installCart() {
         from.setAttribute('aria-disabled', 'true');
       }
       showLoader();
+      // (the cart's UI takes the loader from here: loaded only after this script has run)
+      // eslint-disable-next-line import/no-cycle
       import('./mini-cart.js')
         .then(({ addAndShow }) => addAndShow({ ...e.detail, type }, e.target))
         .finally(() => {
@@ -261,6 +312,7 @@ function installCart() {
       from.setAttribute('aria-disabled', 'true');
     }
     showLoader();
+    // eslint-disable-next-line import/no-cycle
     import('./mini-cart.js')
       .then(({ removeAndShow }) => removeAndShow(e.detail?.catalogueCode, e.target))
       .finally(() => {

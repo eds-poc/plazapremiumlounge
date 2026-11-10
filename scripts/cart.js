@@ -364,6 +364,16 @@ export function addToCart(item) {
       try {
         cart = await refreshCart();
       } catch { /* (unreachable: what this site knows stands) */ }
+    } else if (getCartId()) {
+      // a cart this tab hasn't read yet (a new tab, its data past its 2 hours, another tab's
+      // change): read it first, or the add would make a second cart; unreachable, no add
+      try {
+        cart = await refreshCart();
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('cart: the cart could not be read before the add', error);
+        return { status: 'failed', error };
+      }
     }
     const rule = RULES.map((r) => r({ cart, item })).find(Boolean);
     if (rule) return { status: 'refused', reason: rule };
@@ -471,13 +481,22 @@ let removing = null;
  */
 export function removeFromCart(catalogueCode) {
   if (removing) return removing;
-  const cart = getCart();
-  if (!cart?.lines.some((line) => line.catalogueCode === catalogueCode)) {
-    return Promise.resolve({ status: 'absent' });
-  }
-  const rest = cart.lines.filter((line) => line.catalogueCode !== catalogueCode);
-  removing = (rest.length ? keepLines(cart, rest) : deleteCart(cart.cartId))
-    .finally(() => { removing = null; });
+  removing = (async () => {
+    let cart = getCart();
+    // a cart this tab hasn't read yet (e.g. a new tab, from the id's codes): read it first
+    if (!cart && getCartId()) {
+      try {
+        cart = await refreshCart();
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('cart: the cart could not be read before the removal', error);
+        return { status: 'failed', error };
+      }
+    }
+    if (!cart?.lines.some((line) => line.catalogueCode === catalogueCode)) return { status: 'absent' };
+    const rest = cart.lines.filter((line) => line.catalogueCode !== catalogueCode);
+    return rest.length ? keepLines(cart, rest) : deleteCart(cart.cartId);
+  })().finally(() => { removing = null; });
   return removing;
 }
 

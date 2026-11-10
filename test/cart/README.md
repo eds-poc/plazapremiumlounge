@@ -31,6 +31,12 @@ line, DELETE. It covers:
   success (a promo amount in the GET), since no valid code exists yet.
 - The add-ons hook, and axe.
 
+`node storage.test.mjs` — where the cart is kept and when it's read again (15 checks).
+- The id in localStorage (24 hours, with the count and codes); the data in sessionStorage (2 hours).
+- A new tab (shown at once, read once; adds and removals read first); data past its 2 hours (the
+  booking system's new price only); the tab shown again.
+- Two tabs (they follow and settle); the earlier cookie moved; blocked storage.
+
 **End to end** (`e2e/`, nothing routed: the real stage passes and cart APIs, so they make and delete
 real stage carts). Set `HOST` to the local preview or a branch preview, plus `WIDTH` and
 `PLAYWRIGHT`.
