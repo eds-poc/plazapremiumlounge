@@ -31,6 +31,8 @@ const BRAND = 'plaza premium lounge';
 let storing;
 // the page's name and site section set by a block (setPageDetails)
 let pageDetails = {};
+// a block's own page view, in place of the generic one (holdPageView)
+let heldPageView;
 
 /**
  * A logged-in member's kept details; when there are none, they're read in the background (once a
@@ -75,6 +77,18 @@ export function setPageDetails({ pageName, siteSection } = {}) {
     pageName: (pageName || '').trim(),
     siteSection: (siteSection || '').trim(),
   };
+}
+
+/**
+ * Holds the page view for a block that sends its own once its data has come (e.g. the lounge
+ * detail: "page load" with the lounge and the booking form), so a page counts one page view.
+ * Call it as the block starts (before the page view goes, in the delayed phase). `ready` resolves
+ * to the block's event name and properties, or to null for the generic page view (e.g. a lounge
+ * that couldn't be loaded).
+ * @param {Promise<{eventName: string, extra?: object}|null>} ready
+ */
+export function holdPageView(ready) {
+  heldPageView = ready;
 }
 
 /**
@@ -173,12 +187,17 @@ export function pushEvent(event, eventName, extra) {
 }
 
 /**
- * Starts analytics on a page: the page view, then the Launch script from the metadata
- * `launch-script` (an https address; without one, the data layer is still filled).
+ * Starts analytics on a page: the page view (a block's own when it holds it, see holdPageView),
+ * then the Launch script from the metadata `launch-script` (an https address; without one, the
+ * data layer is still filled). Launch doesn't wait for a held page view.
  */
 export default function initDataLayer() {
   window.adobeDataLayer = window.adobeDataLayer || [];
-  pushEvent(PAGE_VIEW, 'page view');
+  if (heldPageView) {
+    heldPageView
+      .catch(() => null)
+      .then((own) => pushEvent(PAGE_VIEW, own?.eventName || 'page view', own?.extra));
+  } else pushEvent(PAGE_VIEW, 'page view');
 
   const src = getMetadata('launch-script').trim();
   if (!src) return;
