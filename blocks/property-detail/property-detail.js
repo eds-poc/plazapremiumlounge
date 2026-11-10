@@ -29,6 +29,8 @@ const MOBILE = '(width < 768px)';
 // desktop shows the first four photos, as the source
 const DESKTOP_PHOTOS = 4;
 const DEFAULT_CURRENCY = 'USD';
+// the data layer's site section for every event on the page (pageDetails.siteSection)
+const SITE_SECTION = 'lounge detail';
 
 /**
  * The page address's lounge and booking choices, as the source detail pages use them
@@ -403,10 +405,7 @@ function trackGetPrice(lounge, request, picked, price) {
   const promoAccepted = Boolean(request.promocode && price && !price.promoRejected);
   const { adult, child } = request.guests;
   pushEvent('web.webInteraction.linkClicks', eventName, {
-    web: {
-      webPageDetails: { name: loungePageName(lounge) },
-      webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } },
-    },
+    web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
     _plazapremiumloungemanagementli: {
       bookingInfo: {
         // the form's date and time at the lounge, in UTC (1400 in Hong Kong: 06:00:00Z)
@@ -957,6 +956,8 @@ function buildBar(lounge, booking, settings) {
  * @param {HTMLElement} block The property detail block element
  */
 export default async function decorate(block) {
+  // "lounge detail" from the start (the page name from the path until the lounge has come)
+  setPageDetails({ siteSection: SITE_SECTION });
   const settings = readSettings(block);
   const params = readParams();
   block.replaceChildren();
@@ -990,7 +991,7 @@ export default async function decorate(block) {
       return;
     }
     // the lounge's page name for every event from now on (pageDetails.pageName)
-    setPageDetails({ pageName: loungePageName(lounge) });
+    setPageDetails({ pageName: loungePageName(lounge), siteSection: SITE_SECTION });
     const mobile = window.matchMedia(MOBILE);
     const slot = chooseSlot(params, lounge.timeZone, lounge.leadMinutes);
     writeParams({ date: slot.date, time: slot.time });
