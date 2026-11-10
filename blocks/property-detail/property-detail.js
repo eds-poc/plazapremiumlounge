@@ -2,13 +2,15 @@ import {
   buildBlock, decorateBlock, getMetadata, loadBlock,
 } from '../../scripts/aem.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
+// eslint-disable-next-line import/no-cycle
+import { pushEvent } from '../../scripts/datalayer.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { translate } from '../../scripts/i18n.js';
 import openGallery from '../../scripts/gallery.js';
 import { openModal } from '../../scripts/modal-dialog.js';
 import {
   DAY_MINUTES, MAX_GUESTS, SLOT_MINUTES, chooseSlot, fitGuests, formatDate,
-  readLeadTime, readTimeZone, toStartDateTime, toTime,
+  readLeadTime, readTimeZone, toStartDateTime, toTime, toUtcDateTime,
 } from '../../scripts/booking.js';
 import buildDatePicker from '../../scripts/date-picker.js';
 import {
@@ -107,10 +109,13 @@ function readPromoRejection(json) {
 
 /**
  * The price in a price response (the first product's first price): the total, the price before
- * discounts and the currency. Null when there's none (not available for that start or guests).
+ * discounts, the first discount's amount (0 without one), the currency, and the product's and
+ * service's names as the service has them. Null when there's none (not available for that start
+ * or guests).
  * @param {Object} json
  * @param {string} currency The currency asked for
- * @returns {{total: number, base: number, currency: string, catalogueCode: string}|null}
+ * @returns {{total: number, base: number, discountValue: number, currency: string,
+ *   catalogueCode: string, productName: string, serviceName: string}|null}
  */
 function readPrice(json, currency) {
   const item = Array.isArray(json?.items) ? json.items[0] : null;
@@ -119,11 +124,18 @@ function readPrice(json, currency) {
   if (!price || item.availability === false || price.isInventoryAvailable === false
     || !Number.isFinite(total)) return null;
   const base = Number(price.basePrice);
+  // e.g. { "name": "10% Discount", "discountValue": 110.5 }
+  const first = Array.isArray(price.discounts) ? price.discounts[0] : null;
+  const discountValue = Number(first?.discountValue ?? 0);
   return {
     total,
     base: Number.isFinite(base) ? base : total,
+    discountValue: Number.isFinite(discountValue) ? discountValue : 0,
     currency: price.baseRate?.[0]?.currency || currency,
     catalogueCode: price.catalogueCode || '',
+    // for analytics (Reserve Now): e.g. "Lounge Use - 2 Hours" of "Lounge"
+    productName: String(item.productDisplayName || '').trim(),
+    serviceName: String(item.serviceDisplayName || '').trim(),
   };
 }
 
@@ -351,6 +363,57 @@ function counter(name, group, value, min) {
 }
 
 /**
+ * The data layer's link click for Reserve Now (shown once Get Price has a price): the booking as
+ * the form has it (the date and time in UTC, the guests, the lounge's currency), the lounge and
+ * its airport or station, the promo code, the priced product (the price service's names, the
+ * prices, the guests as the quantity) and the booking form's step.
+ * @param {Object} lounge
+ * @param {HTMLFormElement} form The booking form (unchanged since the price: a change clears it)
+ * @param {{request: Object, price: Object}} priced The price request and its price (see
+ *   readPrice)
+ */
+function trackReserve(lounge, form, { request, price }) {
+  const eventName = 'reserve now';
+  const cents = (amount) => Math.round(amount * 100) / 100;
+  const data = new FormData(form);
+  const count = (name, least) => Math.max(least, Number.parseInt(data.get(name), 10) || least);
+  const adult = count('adults', 1);
+  const child = count('children', 0);
+  // the service's names, else the form's (the chosen service and service details)
+  const picked = (name) => form.querySelector(`select[name="${name}"]`)?.selectedOptions[0]?.textContent.trim() || '';
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
+    _plazapremiumloungemanagementli: {
+      bookingInfo: {
+        // the form's date and time at the lounge, in UTC (1400 in Hong Kong: 06:00:00Z)
+        checkinDateTime: toUtcDateTime(String(data.get('date') || ''), String(data.get('time') || ''), lounge.timeZone),
+        daysToBooking: 0,
+        totalGuestCount: adult + child,
+        adultCount: adult,
+        childCount: child,
+        propertyCurrencyCode: lounge.defaultCurrency,
+      },
+      locationDetails: { iataCode: lounge.iata, locationName: lounge.location.name },
+      outletDetails: { outletId: lounge.outletId, outletName: lounge.name },
+      // (the promo code's value is to be decided: 0 for now)
+      offerDetails: { promoCode: request.promocode, promocodeValuePayCurr: 0 },
+      productList: [{
+        sku: price.catalogueCode,
+        name: price.productName || picked('product'),
+        category: price.serviceName || picked('service'),
+        // the prices are for all the guests already (basePrice, totalPrice)
+        actualPricePayCurr: price.base,
+        // the first discount's amount (discounts[0].discountValue), 0 without one
+        discountPayCurr: cents(price.discountValue),
+        sellPricePayCurr: price.total,
+        quantity: adult + child,
+      }],
+      formDetails: { formName: 'ppl lounge booking', formStepName: 'add to cart' },
+    },
+  });
+}
+
+/**
  * The booking panel (desktop) / form (in the phone's Book Your Visit dialog), as the source:
  * date, time, adults, children, service, service details, promo code and Get Price. Changing the
  * date or time updates the page address and calls `onSlotChange` (the services depend on the
@@ -551,7 +614,10 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
   form.addEventListener('change', clearPrice);
   form.addEventListener('input', (e) => { if (e.target.name === 'promo') clearPrice(); });
   reserve.addEventListener('click', () => {
-    if (priced) form.dispatchEvent(new CustomEvent('property-detail:reserve', { bubbles: true, detail: priced }));
+    if (!priced) return;
+    // the data layer's Reserve Now click, with the price shown
+    trackReserve(lounge, form, priced);
+    form.dispatchEvent(new CustomEvent('property-detail:reserve', { bubbles: true, detail: priced }));
   });
 
   let services = [];
