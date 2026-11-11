@@ -95,6 +95,7 @@
   /* border colors */
   --color-border: #d8d8d8;
   --color-border-subtle: #dee2e6;
+  --color-border-card: #e5e7eb;
   --color-border-strong: var(--color-brand-primary);
   --color-divider-inverse: rgb(0 0 0 / 13%);
 
@@ -107,6 +108,9 @@
   --color-disabled-bg: #ccc;
   --color-disabled-text: #666;
   --color-focus-ring: rgb(13 110 253 / 25%);
+
+  /* (a loading skeleton's, or a missing photo's, grey) */
+  --color-placeholder: #e5e5e5;
 
   /* other colors */
   --color-yellow-400: #f5ca45;
@@ -219,6 +223,9 @@
   --modal-margin-top: 28px;
   --z-header: 99;
   --z-megamenu: 1000;
+
+  /* a property's photos (cards, sliders) */
+  --ratio-property-photo: 13 / 9;
 
   /* radius */
   --radius-xs: 6px;

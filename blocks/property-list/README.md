@@ -45,6 +45,7 @@ A city's lounges, loaded live from the Plaza Premium properties service, as the 
 | The service address | Code, not content: `scripts/endpoints.js` keeps the API domain (the same for preview and live) and the `properties` endpoint path |
 | The language of the data | The page's language folder: `/en-uk/` → `en`; `/zh-cn/`, `/zh-hk/`, `/pt-br/`, `/ja-jp/` → the same code. Pages outside a language folder: `en`. Page metadata `language-code` overrides it |
 | Interface text ("Filters", "+5 more", messages) | The site's translations, by page language |
+| The cards (their parts and look) | Code: `scripts/property-card.js` and `styles/property-card.css` |
 | Which properties show | Active lounges, grouped by location, then passes (gift cards) at the end. Other kinds (e.g. airport dining, external partners) aren't shown |
 | Green look | Plaza Premium First lounges (by the brand in the lounge's name, in each language: Plaza Premium First, 环亚优逸庭, 環亞優逸庭, プラザプレミアムファースト); every other card is maroon |
 
