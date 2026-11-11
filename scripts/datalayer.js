@@ -45,29 +45,6 @@ function memberFor(token) {
 }
 
 /**
- * The page's path after the language folder, in lower case and without a closing `index`:
- * /en-uk/news/some-story is ["news", "some-story"]; the home page (/, /en-uk/, /en-uk/index) is [].
- * @returns {string[]}
- */
-function pathSegments() {
-  const folder = getSiteFolder();
-  const segments = window.location.pathname.replace(/\.html$/, '').split('/').filter(Boolean)
-    .map((s) => s.toLowerCase());
-  if (folder && segments[0] === folder) segments.shift();
-  if (segments.at(-1) === 'index') segments.pop();
-  return segments;
-}
-
-/**
- * Whether the page is the home page: the site's root or a language folder's (/, /en-uk/,
- * /en-uk/index).
- * @returns {boolean}
- */
-function isHomePage() {
-  return !pathSegments().length;
-}
-
-/**
  * The page's name and site section: the page metadata `page-name` and `site-section` when
  * authored, else the ones a block set (setPageDetails, e.g. the lounge listing), else from the path
  * after the language folder: the home page is "homepage" in "home", /en-uk/news/some-story is
@@ -75,7 +52,11 @@ function isHomePage() {
  * @returns {{pageName: string, siteSection: string}}
  */
 function pageInfo() {
-  const segments = pathSegments();
+  const folder = getSiteFolder();
+  const segments = window.location.pathname.replace(/\.html$/, '').split('/').filter(Boolean)
+    .map((s) => s.toLowerCase());
+  if (folder && segments[0] === folder) segments.shift();
+  if (segments.at(-1) === 'index') segments.pop();
   const pageName = getMetadata('page-name').trim() || pageDetails.pageName
     || segments.join(':') || 'homepage';
   const siteSection = getMetadata('site-section').trim() || pageDetails.siteSection
@@ -193,13 +174,12 @@ export function pushEvent(event, eventName, extra) {
 
 /**
  * Starts analytics on a page: the page view, then the Launch script from the metadata
- * `launch-script` (an https address; without one, the data layer is still filled). The generic
- * page view is the home page's only: other pages' blocks send their own (e.g. the lounge detail's
- * "page load", blocks/property-detail).
+ * `launch-script` (an https address; without one, the data layer is still filled).
  */
 export default function initDataLayer() {
   window.adobeDataLayer = window.adobeDataLayer || [];
-  if (isHomePage()) pushEvent(PAGE_VIEW, 'page view');
+  // the lounge detail page sends its own page view ("page load", blocks/property-detail)
+  if (!document.querySelector('.property-detail')) pushEvent(PAGE_VIEW, 'page view');
 
   const src = getMetadata('launch-script').trim();
   if (!src) return;
