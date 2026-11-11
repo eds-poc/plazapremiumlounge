@@ -110,12 +110,12 @@ function readPromoRejection(json) {
 
 /**
  * The price in a price response (the first product's first price): the total, the price before
- * discounts, the price after them (before taxes and charges), the first discount's amount (0
- * without one) and the currency. Null when there's none (not available for that start or guests).
+ * discounts, the first discount's amount (0 without one) and the currency. Null when there's
+ * none (not available for that start or guests).
  * @param {Object} json
  * @param {string} currency The currency asked for
- * @returns {{total: number, base: number, discounted: number, discountValue: number,
- *   currency: string, catalogueCode: string}|null}
+ * @returns {{total: number, base: number, discountValue: number, currency: string,
+ *   catalogueCode: string}|null}
  */
 function readPrice(json, currency) {
   const item = Array.isArray(json?.items) ? json.items[0] : null;
@@ -123,16 +123,14 @@ function readPrice(json, currency) {
   const total = Number(price?.totalPrice);
   if (!price || item.availability === false || price.isInventoryAvailable === false
     || !Number.isFinite(total)) return null;
-  const base = Number.isFinite(Number(price.basePrice)) ? Number(price.basePrice) : total;
-  const discounted = Number(price.basePriceWithDiscount);
-  // e.g. { "name": "10% Discount", "discountValue": 110.5 }
-  const first = Array.isArray(price.discounts) ? price.discounts[0] : null;
-  const discountValue = Number(first?.discountValue ?? 0);
+  const base = Number(price.basePrice);
+  // e.g. discounts: [{ "name": "10% Discount", "discountValue": 110.5 }]
+  const firstDiscount = price.discounts?.[0];
   return {
     total,
-    base,
-    discounted: Number.isFinite(discounted) ? discounted : base,
-    discountValue: Number.isFinite(discountValue) ? discountValue : 0,
+    base: Number.isFinite(base) ? base : total,
+    // the first discount's amount; 0 without one
+    discountValue: Number(firstDiscount?.discountValue) || 0,
     currency: price.baseRate?.[0]?.currency || currency,
     catalogueCode: price.catalogueCode || '',
   };
@@ -366,49 +364,37 @@ function counter(name, group, value, min) {
 }
 
 /**
- * The page's name and site section in the data layer, for every event on a lounge detail page:
- * "<cityName>:<locationName (iataCode)>:<lounge>" in "lounge detail", e.g. "Hong Kong SAR:Hong
- * Kong International Airport (HKG):Plaza Premium First". Without the lounge (until it has come,
- * or when it can't be shown), the site section only: the page name stays the path's.
- * @param {Object} [lounge] The lounge (see readDetail)
- */
-function setLoungePage(lounge) {
-  const pageName = lounge ? [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':') : '';
-  setPageDetails({ pageName, siteSection: 'lounge detail' });
-}
-
-/**
- * The data layer's link click for Get Price, once the price service has answered: the booking
- * (the chosen date and time in UTC, the guests, the lounge's currency), the lounge and its
- * airport or station, the product with its price and the promo code. Without a price (none for
- * the choices, an error, or a newer request), the product goes without its SKU and prices.
+ * The data layer's link click for Get Price, once the price service has answered: the page's name
+ * and site section, the booking (the chosen date and time in UTC, the guests, the lounge's
+ * currency), the lounge and its airport or station, the product with its price and the promo
+ * code. Without a price (none for the choices, an error, or a newer request), the product goes
+ * without its SKU and prices.
  * @param {Object} lounge
  * @param {Object} request The price request (see buildBooking)
- * @param {{service: string, product: string, date: string, time: string}} picked The chosen
- *   service's and product's names, and the form's date (YYYY-MM-DD) and time (HHmm)
- * @param {{total: number, base: number, discounted: number, discountValue: number,
- *   catalogueCode: string, promoRejected: string}|null} price
+ * @param {{service: string, product: string, date: string, time: string}} formFieldsData The
+ *   chosen service's and product's names, and the form's date (YYYY-MM-DD) and time (HHmm)
+ * @param {{total: number, base: number, discountValue: number, catalogueCode: string}|null} price
  */
-function trackGetPrice(lounge, request, picked, price) {
+function trackGetPrice(lounge, request, formFieldsData, price) {
   const eventName = 'get price';
-  // the promo code's value: the price before discounts less the price after them
-  // (to the cent: subtracting prices can leave float noise, e.g. 110.50999999999999)
-  const saved = price
-    ? Math.round(Math.max(0, price.base - price.discounted) * 100) / 100
-    : 0;
-  let product = { name: picked.product, category: picked.service };
+  // the page's name and site section, for this event and every one after it:
+  // "<cityName>:<locationName (iataCode)>:<lounge>" in "lounge detail"
+  setPageDetails({
+    pageName: [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':'),
+    siteSection: 'lounge detail',
+  });
+  let product = { name: formFieldsData.product, category: formFieldsData.service };
   if (price) {
     product = {
       sku: price.catalogueCode,
-      name: picked.product,
+      name: formFieldsData.product,
       actualPricePayCurr: price.base,
       // the first discount's amount (discounts[0].discountValue), 0 without one
       discount: price.discountValue,
       sellPricePayCurr: price.total,
-      category: picked.service,
+      category: formFieldsData.service,
     };
   }
-  const promoAccepted = Boolean(request.promocode && price && !price.promoRejected);
   const { adult, child } = request.guests;
   pushEvent('web.webInteraction.linkClicks', eventName, {
     web: {
@@ -421,7 +407,7 @@ function trackGetPrice(lounge, request, picked, price) {
     _plazapremiumloungemanagementli: {
       bookingInfo: {
         // the form's date and time at the lounge, in UTC (1400 in Hong Kong: 06:00:00Z)
-        checkinDateTime: toUtcDateTime(picked.date, picked.time, lounge.timeZone),
+        checkinDateTime: toUtcDateTime(formFieldsData.date, formFieldsData.time, lounge.timeZone),
         daysToBooking: 0,
         totalGuestCount: adult + child,
         adultCount: adult,
@@ -431,10 +417,10 @@ function trackGetPrice(lounge, request, picked, price) {
       locationDetails: { iataCode: lounge.iata, locationName: lounge.location.name },
       outletDetails: { outletId: lounge.outletId, outletName: lounge.name },
       productList: [product],
-      // the promo code's value when the code was accepted (basePrice - basePriceWithDiscount)
+      // (the promo code's value is to be decided: 0 for now)
       offerDetails: {
         promoCode: request.promocode,
-        promocodeValuePayCurr: promoAccepted ? saved : 0,
+        promocodeValuePayCurr: 0,
       },
     },
   });
@@ -736,8 +722,8 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
       promocode: promo.value.trim(),
     };
     form.dispatchEvent(new CustomEvent('property-detail:get-price', { bubbles: true, detail: request }));
-    // the visit and names as chosen now, for the data layer once the price comes
-    const picked = {
+    // the form's fields as chosen now (names, date, time), for the data layer once the price comes
+    const formFieldsData = {
       service: service.selectedOptions[0]?.textContent.trim() || '',
       product: product.selectedOptions[0]?.textContent.trim() || '',
       date: String(data.get('date') || ''),
@@ -768,7 +754,7 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
       setLoading(false);
       if (pricing === controller) form.removeAttribute('aria-busy');
       // the data layer's Get Price click, with the price (one push a click)
-      trackGetPrice(lounge, request, picked, price);
+      trackGetPrice(lounge, request, formFieldsData, price);
     }
   });
   panel.append(header, form);
@@ -968,9 +954,6 @@ function buildBar(lounge, booking, settings) {
  * @param {HTMLElement} block The property detail block element
  */
 export default async function decorate(block) {
-  // the data layer's site section from the start, so the page's events have it even when no lounge
-  // can be shown (a bad code, not found, an error: those return before the lounge has come)
-  setLoungePage();
   const settings = readSettings(block);
   const params = readParams();
   block.replaceChildren();
@@ -1003,8 +986,6 @@ export default async function decorate(block) {
       showMessage(block, translate('propertyNotFound'), null, `Property "${params.code}" isn't active or isn't a lounge or pass.`);
       return;
     }
-    // the data layer's page name for the lounge, for every event from now on
-    setLoungePage(lounge);
     const mobile = window.matchMedia(MOBILE);
     const slot = chooseSlot(params, lounge.timeZone, lounge.leadMinutes);
     writeParams({ date: slot.date, time: slot.time });
