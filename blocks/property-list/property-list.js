@@ -262,7 +262,7 @@ function chosenBooking(timeZone) {
 }
 
 /**
- * The data layer's page view for the listing ("pageLoad", sent here instead of by
+ * The data layer's page view for the listing ("page load", sent here instead of by
  * scripts/datalayer.js, see skipPageView): the results shown for the filters in the page address
  * (the page's "N results"); the booking chosen there (`date` and `time` at the airport in UTC,
  * else now; `adult` and `children`, else 1 and 0); and the airport chosen there (?airport=PKX),
@@ -272,7 +272,7 @@ function chosenBooking(timeZone) {
  * @param {Object<string, Set<string>>} [selected] The filters from the page address
  */
 function trackListingView(properties = [], selected = null) {
-  const eventName = 'pageLoad';
+  const eventName = 'page load';
   if (!properties.length) {
     pushEvent(PAGE_VIEW, eventName);
     return;
