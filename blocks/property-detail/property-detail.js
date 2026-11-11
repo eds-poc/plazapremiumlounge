@@ -10,13 +10,14 @@ import openGallery from '../../scripts/gallery.js';
 import { openModal } from '../../scripts/modal-dialog.js';
 import {
   DAY_MINUTES, MAX_GUESTS, SLOT_MINUTES, chooseSlot, fitGuests, formatDate,
-  readLeadTime, readTimeZone, toStartDateTime, toTime, toUtcDateTime,
+  readLeadTime, readTimeZone, toStartDateTime, toTime,
 } from '../../scripts/booking.js';
 import buildDatePicker from '../../scripts/date-picker.js';
 import {
   buildBadge, buildSlider, el, fetchJson, getApiLanguage, isPreview, readProperty,
   safeHtml, setLoading, toKey, toUrl,
 } from '../../scripts/properties.js';
+import { toUtcDateTime } from '../../scripts/utility.js';
 
 // the detail service answers in about 0.2-2s; the services one in 3-7s (at times far longer)
 const DETAIL_TIMEOUT_MS = 15000;
