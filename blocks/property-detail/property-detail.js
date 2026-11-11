@@ -358,59 +358,75 @@ function counter(name, group, value, min) {
 }
 
 /**
- * The page's name and site section in the data layer, for every event on a lounge detail page:
- * "<cityName>:<locationName (iataCode)>:<lounge>" in "lounge detail", e.g. "Hong Kong SAR:Hong
- * Kong International Airport (HKG):Plaza Premium First". Without the lounge (until it has come,
- * or when it can't be shown), the site section only: the page name stays the path's.
- * @param {Object} [lounge] The lounge (see readDetail)
- */
-function setLoungePage(lounge) {
-  const pageName = lounge ? [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':') : '';
-  setPageDetails({ pageName, siteSection: 'lounge detail' });
-}
-
-/**
  * The data layer's "page load" page view (in place of the generic one, see scripts/datalayer.js),
- * once the booking form has its first services: the page name (as setLoungePage), the booking
- * as the form has it (the date and time in UTC, the guests), the lounge and its airport or
- * station, and the chosen product (its code as the SKU; none without services).
+ * once the booking form has its first services: the page's name and site section, the booking as
+ * the form has it (the date and time in UTC, the guests), the lounge and its airport or station,
+ * and the chosen product (its code as the SKU; none without services).
  * @param {Object} lounge
  * @param {HTMLFormElement} form The booking form
  */
 function trackPageLoad(lounge, form) {
   // the lounge detail page's only (template lounge-detail); elsewhere the page's generic one goes
   if (getMetadata('template') !== 'lounge-detail') return;
-  // web.webPageDetails.name: the page name setLoungePage sets
+  // the page's name and site section, for this event and every one after it:
+  // "<cityName>:<locationName (iataCode)>:<lounge>" in "lounge detail"
   const pageName = [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':');
-  const data = new FormData(form);
-  const count = (name, least) => Math.max(least, Number.parseInt(data.get(name), 10) || least);
-  const adult = count('adults', 1);
-  const child = count('children', 0);
-  const picked = (name) => form.querySelector(`select[name="${name}"]`)?.selectedOptions[0];
-  const service = picked('service');
-  const product = picked('product');
+  setPageDetails({
+    pageName,
+    siteSection: 'lounge detail',
+  });
+  const formData = new FormData(form);
+  // the guests as the form has them: the adults (at least 1) and the children (0 when none)
+  const adultCount = Number.parseInt(formData.get('adults'), 10) || 1;
+  const childCount = Number.parseInt(formData.get('children'), 10) || 0;
+  // the chosen service and service details (the product), as the form shows them
+  const serviceOption = form.querySelector('select[name="service"]')?.selectedOptions[0];
+  const productOption = form.querySelector('select[name="product"]')?.selectedOptions[0];
+  const formFieldsData = {
+    service: serviceOption?.value ? serviceOption.textContent.trim() : '',
+    product: productOption?.value ? productOption.textContent.trim() : '',
+    productCode: productOption?.value || '',
+    date: String(formData.get('date') || ''),
+    time: String(formData.get('time') || ''),
+  };
   const details = {
     bookingInfo: {
       // the form's date and time at the lounge, in UTC (1830 in Hong Kong: 10:30:00Z)
-      checkinDateTime: toUtcDateTime(String(data.get('date') || ''), String(data.get('time') || ''), lounge.timeZone),
+      checkinDateTime: toUtcDateTime(
+        formFieldsData.date,
+        formFieldsData.time,
+        lounge.timeZone,
+      ),
       daysToBooking: 0,
-      totalGuestCount: adult + child,
-      adultCount: adult,
-      childCount: child,
+      totalGuestCount: adultCount + childCount,
+      adultCount,
+      childCount,
     },
-    locationDetails: { iataCode: lounge.iata, locationName: lounge.airport },
-    outletDetails: { outletId: lounge.outletId, outletName: lounge.name },
+    locationDetails: {
+      iataCode: lounge.iata,
+      locationName: lounge.airport,
+    },
+    outletDetails: {
+      outletId: lounge.outletId,
+      outletName: lounge.name,
+    },
   };
   // (the price's catalogueCode comes with Get Price only: the product's code instead)
-  if (product?.value) {
-    details.productList = [{
-      sku: product.value,
-      name: product.textContent.trim(),
-      category: service?.value ? service.textContent.trim() : '',
-    }];
+  if (formFieldsData.productCode) {
+    details.productList = [
+      {
+        sku: formFieldsData.productCode,
+        name: formFieldsData.product,
+        category: formFieldsData.service,
+      },
+    ];
   }
   pushEvent(PAGE_VIEW, 'page load', {
-    web: { webPageDetails: { name: pageName } },
+    web: {
+      webPageDetails: {
+        name: pageName,
+      },
+    },
     _plazapremiumloungemanagementli: details,
   });
 }
@@ -932,9 +948,6 @@ function buildBar(lounge, booking, settings) {
  * @param {HTMLElement} block The property detail block element
  */
 export default async function decorate(block) {
-  // the data layer's site section from the start, so the page's events have it even when no lounge
-  // can be shown (a bad code, not found, an error: those return before the lounge has come)
-  setLoungePage();
   const settings = readSettings(block);
   const params = readParams();
   block.replaceChildren();
@@ -967,8 +980,6 @@ export default async function decorate(block) {
       showMessage(block, translate('propertyNotFound'), null, `Property "${params.code}" isn't active or isn't a lounge or pass.`);
       return;
     }
-    // the data layer's page name for the lounge, for every event from now on
-    setLoungePage(lounge);
     const mobile = window.matchMedia(MOBILE);
     const slot = chooseSlot(params, lounge.timeZone, lounge.leadMinutes);
     writeParams({ date: slot.date, time: slot.time });
