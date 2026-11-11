@@ -1,0 +1,387 @@
+/* the shared form styles (the guest's details), loaded with the block's own */
+@import url('../../styles/forms.css');
+
+/* the booking pages' maroon band at the top, with the steps (shared styles) */
+@import url('../../styles/booking-steps.css');
+
+/* checkout: the source guest checkout (/en-uk/guest-checkout). The steps band, the title after a
+   back arrow, the banner (the Smart Traveller box), then the guest form (two thirds) beside the
+   Booking Summary card (a third) from 992px; below it the summary first, then the form, and a bar
+   with the total and Payment fixed at the bottom of the screen */
+.checkout {
+  --checkout-label: rgb(0 0 0 / 60%);
+  --checkout-value: var(--color-brand-primary-action);
+  --checkout-terms-text: var(--color-text-secondary);
+
+  /* one-off: the phone bar's height, kept free at the end of the page so it covers nothing */
+  --checkout-bar-space: 150px;
+  --checkout-bar-shadow: 0 -2px 10px rgb(0 0 0 / 10%);
+
+  /* the source's back arrow: 14 x 16px on phones, 21 x 24px from 768px */
+  --checkout-back-width: 14px;
+  --checkout-back-height: 16px;
+  --checkout-toggle-icon: 16px;
+
+  padding-block: 0 var(--spacing-9);
+  color: var(--color-text);
+}
+
+/* the band right under the header (the section's top spacing is the block's own) */
+main > .section:has(> .checkout-wrapper) {
+  padding-top: 0;
+}
+
+.checkout .booking-steps {
+  margin-bottom: var(--spacing-9);
+}
+
+/* the title: 18px on phones (32px from 992px), the maroon arrow 15px before it */
+.checkout .checkout-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-6);
+  margin: 0 0 var(--spacing-8);
+  font-size: var(--heading-section-size);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.checkout .checkout-back {
+  display: block;
+  flex: none;
+  width: var(--checkout-back-width);
+  height: var(--checkout-back-height);
+  background-color: var(--color-brand-primary);
+  mask: url('../../icons/arrow-left-regular.svg') center / contain no-repeat;
+}
+
+.checkout .checkout-back:hover {
+  background-color: var(--color-text-subtle);
+}
+
+.checkout .checkout-banner:not(:empty) {
+  margin-bottom: var(--spacing-7);
+}
+
+/* the banner fragment's sections without their own spacing */
+.checkout .checkout-banner .section {
+  padding: 0;
+}
+
+.checkout .checkout-layout {
+  display: grid;
+  gap: var(--spacing-stack) var(--grid-gutter);
+}
+
+.checkout .checkout-details {
+  min-width: 0;
+}
+
+/* the form: its intro (16px), the fields (styles/forms.css), the boxes and the terms */
+
+/* the intro: 16px regular, as the source's (the form's text rows are 14px/500 elsewhere) */
+.checkout .checkout-form .form-content {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-regular);
+}
+
+.checkout .checkout-form .form-content p {
+  margin: 0;
+}
+
+.checkout .checkout-form .form-field[hidden] {
+  display: none;
+}
+
+.checkout .checkout-form .form-field-checkbox + .form-field-checkbox {
+  margin-top: calc(var(--spacing-5) - var(--form-row-gap));
+}
+
+.checkout .checkout-form .form-check-label a:any-link {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* the cart's terms: 14px grey, each policy's name in capitals */
+.checkout .checkout-terms {
+  color: var(--checkout-terms-text);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-body);
+}
+
+.checkout .checkout-terms-heading,
+.checkout .checkout-terms-name {
+  margin: 0 0 var(--spacing-2);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+}
+
+.checkout .checkout-terms-name {
+  margin-top: var(--spacing-4);
+  text-transform: uppercase;
+}
+
+.checkout .checkout-terms-text :is(p, ul, ol) {
+  margin: 0 0 var(--spacing-7);
+}
+
+.checkout .checkout-terms-text :is(ul, ol) {
+  padding-left: var(--spacing-7);
+}
+
+.checkout .checkout-terms-text li {
+  margin-bottom: var(--spacing-3);
+}
+
+.checkout .checkout-terms .checkout-terms-text a:any-link {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* the summary card: warm grey, 20px round; the title 20px, each line (its name 16px, the location
+   and labels grey, the values maroon), the totals, Payment. Below 992px it comes first, as the
+   source's */
+.checkout .checkout-summary {
+  order: -1;
+  align-self: start;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-7);
+  background-color: var(--color-surface-warm);
+  color: var(--checkout-label);
+}
+
+.checkout .checkout-summary-title {
+  margin: 0 0 var(--spacing-7);
+  padding-bottom: var(--spacing-6);
+  color: var(--color-text);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.checkout .checkout-summary-empty {
+  margin: 0 0 var(--spacing-7);
+}
+
+.checkout .checkout-summary-line {
+  padding-bottom: var(--spacing-4);
+}
+
+.checkout .checkout-summary-line-head {
+  position: relative;
+}
+
+.checkout .checkout-summary-name {
+  margin: 0 0 var(--spacing-1);
+  color: var(--color-text-strong);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.checkout .checkout-summary-place {
+  margin: 0;
+}
+
+.checkout .checkout-summary-toggle {
+  display: none;
+}
+
+.checkout .checkout-summary-details {
+  margin: 0;
+  padding-top: var(--spacing-7);
+}
+
+.checkout .checkout-summary-detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.3em;
+  padding-bottom: var(--spacing-1);
+}
+
+.checkout .checkout-summary-detail dd {
+  margin: 0;
+  color: var(--checkout-value);
+  font-weight: var(--font-weight-medium);
+}
+
+.checkout .checkout-summary-unit {
+  margin-left: var(--spacing-1);
+}
+
+.checkout .checkout-summary-quantity {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  margin: var(--spacing-4) 0 0;
+}
+
+.checkout .checkout-summary-totals {
+  padding-top: var(--spacing-4);
+}
+
+.checkout .checkout-summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  padding-bottom: var(--spacing-4);
+}
+
+.checkout .checkout-summary-row .checkout-summary-amount {
+  flex: none;
+  color: var(--color-text-strong);
+}
+
+/* Total: 18px/500, its note under it */
+.checkout .checkout-summary-total {
+  align-items: flex-start;
+  margin-top: var(--spacing-4);
+  color: var(--checkout-label);
+}
+
+.checkout .checkout-summary-total .checkout-summary-amount {
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+}
+
+.checkout .checkout-summary-note {
+  display: block;
+  margin-top: var(--spacing-1);
+  font-size: var(--font-size-xs);
+}
+
+/* Payment: a full-width 47px pill; grey and dimmed until the boxes are ticked */
+.checkout .checkout-payment {
+  width: 100%;
+  margin-top: var(--spacing-7);
+  padding: var(--spacing-5) var(--spacing-11);
+  font-size: var(--font-size-sm);
+  text-transform: capitalize;
+}
+
+.checkout .checkout-payment:disabled {
+  border-color: transparent;
+  background-color: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+  font-weight: var(--font-weight-light);
+  cursor: not-allowed;
+}
+
+/* the phone bar: white, fixed at the bottom of the screen, the total over Payment */
+.checkout .checkout-bar {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: var(--z-megamenu);
+  padding: var(--spacing-6) var(--container-padding);
+  background-color: var(--color-background);
+  box-shadow: var(--checkout-bar-shadow);
+}
+
+.checkout .checkout-bar-total {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--spacing-4);
+  margin: 0 0 var(--spacing-3);
+  font-size: var(--font-size-sm);
+}
+
+.checkout .checkout-bar-amount {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+}
+
+.checkout .checkout-bar-note {
+  flex-basis: 100%;
+  font-size: var(--font-size-xs);
+}
+
+.checkout .checkout-bar .checkout-payment {
+  margin-top: 0;
+}
+
+/* (the end of the page clear of the phone bar) */
+@media (width < 992px) {
+  .checkout {
+    padding-bottom: var(--checkout-bar-space);
+  }
+
+  .checkout .checkout-payment-summary {
+    display: none;
+  }
+}
+
+/* phones: the lounge's details fold away under its arrow (open to start with), 14px text */
+@media (width < 768px) {
+  .checkout .checkout-summary {
+    font-size: var(--font-size-sm);
+  }
+
+  .checkout .checkout-summary-line-head {
+    padding-right: var(--spacing-9);
+  }
+
+  .checkout .checkout-summary-toggle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: block;
+    width: var(--spacing-8);
+    height: var(--spacing-8);
+    border: 0;
+    padding: 0;
+    background-color: var(--color-brand-primary);
+    mask: url('../../icons/arrow-right-light.svg') center / var(--checkout-toggle-icon) no-repeat;
+    cursor: pointer;
+    transform: rotate(90deg);
+    transition: transform var(--duration-normal) var(--ease-standard);
+  }
+
+  .checkout .checkout-summary-toggle[aria-expanded='false'] {
+    transform: none;
+  }
+
+  .checkout .is-folded .checkout-summary-details {
+    display: none;
+  }
+}
+
+@media (width >= 768px) {
+  .checkout .booking-steps {
+    margin-bottom: var(--spacing-11);
+  }
+
+  .checkout {
+    --checkout-back-width: 21px;
+    --checkout-back-height: 24px;
+  }
+}
+
+/* from 992px (the source's desktop): the form beside the summary (a third of the row), no bar */
+@media (width >= 992px) {
+  .checkout .checkout-title {
+    margin-bottom: var(--spacing-10);
+    font-size: var(--font-size-3xl);
+  }
+
+  .checkout .checkout-layout {
+    grid-template-columns: calc((100% + var(--grid-gutter)) * 2 / 3 - var(--grid-gutter)) minmax(0, 1fr);
+  }
+
+  .checkout .checkout-summary {
+    order: 0;
+  }
+
+  .checkout .checkout-bar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkout .checkout-summary-toggle {
+    transition: none;
+  }
+}

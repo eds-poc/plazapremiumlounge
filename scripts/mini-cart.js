@@ -8,7 +8,8 @@
  * source's after a removal).
  */
 import { loadCSS } from './aem.js';
-import { translate, getLanguage } from './i18n.js';
+import { translate } from './i18n.js';
+import { formatAmount, loungeDetails } from './cart-summary.js';
 import { getCart, getCartId, onCartChange } from './cart-state.js';
 import {
   addToCart, convertCart, refreshCart, removeFromCart,
@@ -45,45 +46,6 @@ function button(label, kind, onClick) {
   b.type = 'button';
   b.addEventListener('click', onClick);
   return b;
-}
-
-// the source's amounts, in every language: "HKD 1,755.00"
-const AMOUNT = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-/**
- * An amount as the source shows it: "GBP 44.10", "HKD 1,755.00".
- * @param {number} amount
- * @param {string} currency
- * @returns {string}
- */
-function formatAmount(amount, currency) {
-  return Number.isFinite(amount) ? `${currency ? `${currency} ` : ''}${AMOUNT.format(amount)}` : '—';
-}
-
-/**
- * A booking date as the source's cart shows it: "02-Nov-2026", "02-nov-2026", "2026年11月02日".
- * @param {string} start "YYYY-MM-DD HH:mm:ss"
- * @returns {string}
- */
-function formatCartDate(start) {
-  const [y, m, d] = start.slice(0, 10).split('-');
-  if (!d) return '';
-  const lang = getLanguage();
-  if (/^(zh|ja)/.test(lang)) return `${y}年${m}月${d}日`;
-  const month = new Intl.DateTimeFormat(lang, { month: 'short', timeZone: 'UTC' })
-    .format(new Date(`${y}-${m}-${d}T00:00:00Z`)).replace(/\.$/, '');
-  return `${d}-${/^pt/.test(lang) ? month.toLowerCase() : month}-${y}`;
-}
-
-/**
- * The guests as the source's cart: "2 Adult(s) 1 Child(ren)" (its two values side by side).
- * @param {{adults: number, children: number}} line
- * @returns {string}
- */
-function formatGuests(line) {
-  const parts = [`${line.adults} ${translate('propertyAdults')}`];
-  if (line.children > 0) parts.push(`${line.children} ${translate('propertyChildren')}`);
-  return parts.join(' ');
 }
 
 /**
@@ -215,17 +177,10 @@ function renderMiniCart(cart) {
     }
     if (line.place) box.append(el('p', 'mini-cart-place', line.place));
     const details = el('dl', 'mini-cart-details');
-    const time = line.start.slice(11, 16).replace(':', '');
-    [
-      [translate('cartDate'), formatCartDate(line.start)],
-      [translate('cartTime'), time, el('span', 'mini-cart-hours', translate('cartHours'))],
-      [translate('cartGuests'), formatGuests(line)],
-      [translate('cartServices'), line.product],
-    ].forEach(([label, value, after]) => {
-      if (!value) return;
+    loungeDetails(line).forEach(({ label, value, unit }) => {
       const row = el('div', 'mini-cart-detail');
       const dd = el('dd', '', value);
-      if (after) dd.append(after);
+      if (unit) dd.append(el('span', 'mini-cart-hours', unit));
       row.append(el('dt', '', label), dd);
       details.append(row);
     });

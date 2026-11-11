@@ -277,6 +277,9 @@ const TEXTS = {
   formPhone: {
     en: 'Please fill in valid contact number', zh: '请填写有效的联系电话', 'zh-HK': '請填寫有效的聯絡電話', ja: '有効な電話番号を入力してください', pt: 'Preencha um número de contato válido',
   },
+  formFlightNumber: {
+    en: 'Flight number must be a maximum of 4 digits.', zh: '航班编号最多为 4 位数字.', 'zh-HK': '航班編號最多為 4 位數字。', ja: '便名は最大4桁である必要があります。', pt: 'O número do voo deve ter no máximo 4 dígitos.',
+  },
   formUrl: {
     en: 'Please enter a valid web address.', zh: '请输入有效的网址。', 'zh-HK': '請輸入有效的網址。', ja: '有効な URL を入力してください。', pt: 'Insira um endereço web válido.',
   },

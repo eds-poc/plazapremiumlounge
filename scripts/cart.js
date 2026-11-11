@@ -233,12 +233,28 @@ function readLine(p) {
     children: Number.parseInt(p?.guestsCount?.child, 10) || 0,
     quantity: Number.parseInt(p?.quantity, 10) || 1,
     total: Number(price.totalPrice),
+    // what the checkout asks for (the flight number; a Smart Traveller login)
+    flightRequired: p?.isFlightNumberMandatory === true,
+    loginRequired: p?.isStLoginMandatory === true,
   };
 }
 
 /**
+ * The cart's terms and conditions, as the checkout shows them: each policy's name and its text
+ * (the service's HTML, made safe where it's shown).
+ * @param {Object} json
+ * @returns {{name: string, html: string}[]}
+ */
+function readTerms(json) {
+  const policies = Array.isArray(json?.sortedTermsPolicies) ? json.sortedTermsPolicies : [];
+  return policies
+    .map((t) => ({ name: text(t?.termsName), html: String(t?.description ?? '').trim() }))
+    .filter((t) => t.name || t.html);
+}
+
+/**
  * The cart's summary from the service's cart: its lines, its currency and totals (the base,
- * each discount, the total).
+ * each discount, the total), and its terms.
  * @param {Object} json
  * @returns {Object}
  */
@@ -259,6 +275,7 @@ function readCart(json) {
       discounts,
       total: Number(totals.totalPrice),
     },
+    terms: readTerms(json),
   };
 }
 

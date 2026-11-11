@@ -203,8 +203,10 @@ code** field, Check Out's add-ons step and the checkout itself.
 | The header's count | the sum of `products[].quantity` | |
 | Remove From Cart on the card, Add More | `products[].catalogueCode` | the passes service's catalogue code (the regular rate's) matches the cart line's |
 | (kept) | `cartId` (and `products[].cartItemId`) | |
+| The checkout's terms (blocks/checkout) | `sortedTermsPolicies[]` `termsName`, `description` | kept as the cart's `terms` (name, HTML) |
+| The checkout's flight and login rules | `products[].isFlightNumberMandatory`, `isStLoginMandatory` | kept as each line's `flightRequired`, `loginRequired` |
 
-Not shown (the source's mini cart doesn't either): `images`, `disclaimer`, the terms, `productVarients`, `basedOn`, `maxNoOfProductsAllowed`, `isFlightNumberMandatory`, `isStLoginMandatory`, `ageGroup`, `amountPayable`, `totalTax`; `totalPromocodeAmount` waits for the promo code.
+Not shown in the mini cart (the source's doesn't either): `images`, `disclaimer`, the terms (the checkout shows them), `productVarients`, `basedOn`, `maxNoOfProductsAllowed`, `isFlightNumberMandatory`, `isStLoginMandatory`, `ageGroup`, `amountPayable`, `totalTax`; `totalPromocodeAmount` waits for the promo code.
 
 ### Adding a product type
 

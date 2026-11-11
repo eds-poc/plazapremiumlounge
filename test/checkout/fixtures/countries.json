@@ -1,0 +1,56 @@
+[
+ {
+  "countryCode": "CA",
+  "countryId": 38,
+  "countryName": "Canada",
+  "phoneCode": "+1",
+  "phoneCodeCountryCode": "+1 (CA)",
+  "pplSubregionId": null,
+  "subRegionId": 15
+ },
+ {
+  "countryCode": "GB",
+  "countryId": 41,
+  "countryName": "United Kingdom",
+  "phoneCode": "+44",
+  "phoneCodeCountryCode": "+44 (GB)",
+  "pplSubregionId": null,
+  "subRegionId": 9
+ },
+ {
+  "countryCode": "HK",
+  "countryId": 33,
+  "countryName": "Hong Kong SAR, China",
+  "phoneCode": "+852",
+  "phoneCodeCountryCode": "+852 (HK)",
+  "pplSubregionId": 38,
+  "subRegionId": 2
+ },
+ {
+  "countryCode": "JP",
+  "countryId": 69,
+  "countryName": "Japan",
+  "phoneCode": "+81",
+  "phoneCodeCountryCode": "+81 (JP)",
+  "pplSubregionId": null,
+  "subRegionId": 2
+ },
+ {
+  "countryCode": "SG",
+  "countryId": 49,
+  "countryName": "Singapore",
+  "phoneCode": "+65",
+  "phoneCodeCountryCode": "+65 (SG)",
+  "pplSubregionId": null,
+  "subRegionId": 4
+ },
+ {
+  "countryCode": "US",
+  "countryId": 14,
+  "countryName": "United States of America",
+  "phoneCode": "+1",
+  "phoneCodeCountryCode": "+1 (US)",
+  "pplSubregionId": null,
+  "subRegionId": 15
+ }
+]
