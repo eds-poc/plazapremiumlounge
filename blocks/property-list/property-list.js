@@ -378,8 +378,9 @@ function trackViewLounge(property, rank) {
 }
 
 /**
- * The data layer's link click for a filter ticked in the filter form ("apply filter"): every
- * filter now on, each with its group's title (`.property-list-group-title`) and its option's
+ * The data layer's link click for a filter ticked or unticked in the filter form, or for its
+ * Clear ("apply filter"): every filter now on ([] when none), each with its group's title
+ * (`.property-list-group-title`) and its option's
  * label (Service Type's All, which is no filter, left out); the results now shown; the booking
  * chosen in the page address; and the airport filtered on (only one), else the first lounge
  * shown: its `iataCode` and `locationName`.
@@ -845,12 +846,13 @@ export default async function decorate(block) {
       renderResults(results, properties, selected, status, clearAll, prefix, settings);
     };
     form = buildFilters(options, selected, update);
-    // the data layer's "apply filter" as a filter is ticked (the listing has redrawn by then)
+    // the data layer's "apply filter" as a filter is ticked or unticked, or Clear removes them all
+    // (the listing has redrawn by then: the form's own listeners run first)
     form?.addEventListener('change', (e) => {
-      if (e.target.matches('input[data-group]') && e.target.checked) {
-        trackFilters(form, properties, selected);
-      }
+      if (e.target.matches('input[data-group]')) trackFilters(form, properties, selected);
     });
+    form?.querySelector('.property-list-clear')
+      ?.addEventListener('click', () => trackFilters(form, properties, selected));
     sidebar.replaceChildren();
     if (form) {
       // the form sits in the sidebar, or in the Filters dialog on phones
