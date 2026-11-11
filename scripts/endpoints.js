@@ -25,6 +25,8 @@ const ENDPOINTS = {
   // creates a cart with the products and answers its cartId; GET ?cartId=&locale= reads it;
   // DELETE ?cartId= deletes (empties) it
   cart: '/api/v1/web/ppg-app/cart',
+  // a city's lounges (GET ?cityCode=&languageCode=), for the Property List
+  properties: '/api/v1/web/ppg-app/GetAllProperties',
   // countries with their phone codes, for the forms' country and phone fields
   countries: '/api/v1/web/ppg-app/GetCountries',
   // a lounge's bookable services and their products for a start time (POST, JSON body)
@@ -35,8 +37,6 @@ const ENDPOINTS = {
 
 // endpoint paths on the previous base URL (not moved yet)
 const OLD_ENDPOINTS = {
-  // on the standard base URL it doesn't filter by cityCode (every lounge, ~500, for any city)
-  properties: '/api/v1/web/app_demo/GetAllProperties',
   // the Signup Form submit (account registration). On the standard base URL it asks for a
   // different body (a userName field), so the form's fields need mapping first
   signUp: '/api/v1/web/app_demo/Register',
@@ -87,7 +87,7 @@ const OLD_ENDPOINTS = {
 
 /**
  * The full address of an API endpoint.
- * @param {string} name An ENDPOINTS or OLD_ENDPOINTS key, e.g. 'properties'
+ * @param {string} name An ENDPOINTS or OLD_ENDPOINTS key, e.g. 'countries'
  * @returns {URL} a new URL each call, so callers can add search parameters
  */
 export default function apiUrl(name) {
