@@ -174,13 +174,13 @@ export function pushEvent(event, eventName, extra) {
 
 /**
  * Starts analytics on a page: the page view, then the Launch script from the metadata
- * `launch-script` (an https address; without one, the data layer is still filled). The lounge
- * detail page sends its own page view ("page load", blocks/property-detail) once the lounge has
- * come.
+ * `launch-script` (an https address; without one, the data layer is still filled). A lounge
+ * detail page showing a lounge (its booking panel) sends its own page view instead ("page load",
+ * blocks/property-detail).
  */
 export default function initDataLayer() {
   window.adobeDataLayer = window.adobeDataLayer || [];
-  if (!document.querySelector('.property-detail')) pushEvent(PAGE_VIEW, 'page view');
+  if (!document.querySelector('.property-detail-booking')) pushEvent(PAGE_VIEW, 'page view');
 
   const src = getMetadata('launch-script').trim();
   if (!src) return;
