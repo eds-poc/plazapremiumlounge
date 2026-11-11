@@ -1,0 +1,217 @@
+{
+  "ageGroup": [
+    {
+      "description": "Adult(s)",
+      "group": "adult",
+      "primary": true,
+      "range": "2-NaN",
+      "status": true
+    },
+    {
+      "description": "Child(ren)",
+      "group": "child",
+      "primary": false,
+      "range": "0-2",
+      "status": true
+    },
+    {
+      "description": "Infant",
+      "group": "infant",
+      "primary": false,
+      "range": "0-1",
+      "status": true
+    }
+  ],
+  "agentCode": "PPL",
+  "agentType": "master",
+  "amountPayable": 0,
+  "cartId": "CRT_yF1FHTCwlU",
+  "cartTotalPrice": {
+    "totalAdditionalPrice": 0,
+    "totalAdditionalWaiverAmount": 0,
+    "totalBasePrice": 875,
+    "totalDiscounts": 87.5,
+    "totalMarkupWaiverAmount": 0,
+    "totalPrice": 787.5,
+    "totalPriceUsd": 100.74,
+    "totalPromocodeAmount": 0,
+    "totalPromocodeAmountUsd": 0,
+    "totalTax": 0
+  },
+  "cityName": "Hong Kong SAR",
+  "countryCode": "HK",
+  "countryName": "Hong Kong SAR, China",
+  "createdTime": "2026-11-03 11:24:32",
+  "currency": "HKD",
+  "customerCode": "PPL",
+  "products": [
+    {
+      "additionalAttributes": [],
+      "arrtureSku": "",
+      "basedOn": "Per Person",
+      "cartItemId": "CRT_ITM_N6gEgNyDY2",
+      "catalogueCode": "PRD3341-Regular-PRPRTY816-LOUNGE-LCTN517-RTPLN3480",
+      "createdDate": "2026-11-03 11:24:32",
+      "disclaimer": "The lounge is located in the restricted area of the Departures Level near Gate 1. To access, you must have already checked in for your onward flight and be in possession of a valid boarding pass. Please contact your respective airline if you require more...",
+      "guestsCount": {
+        "adult": "1",
+        "child": "0"
+      },
+      "images": [
+        {
+          "name": "lounge-1280x1024.jpg",
+          "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prd_images/lounge-1280x1024_product_3341.jpg"
+        }
+      ],
+      "isFlightNumberMandatory": false,
+      "isStLoginMandatory": false,
+      "itemPriceDetails": {
+        "additionalCharges": [],
+        "baseRate": [
+          {
+            "count": 1,
+            "currency": "HKD",
+            "groups": "adult",
+            "price": 875,
+            "totalMarkUpCharge": 0
+          },
+          {
+            "count": 0,
+            "currency": "HKD",
+            "groups": "child",
+            "price": 0,
+            "totalMarkUpCharge": 0
+          },
+          {
+            "count": 0,
+            "currency": "HKD",
+            "groups": "infant",
+            "price": 0,
+            "totalMarkUpCharge": 0
+          }
+        ],
+        "discounts": [
+          {
+            "code": "DSCNT1128",
+            "currency": "HKD",
+            "deltaType": "Discount [-]",
+            "discountValue": 10,
+            "isSTDiscount": false,
+            "name": "10% Online Discount [Lounge Booking]",
+            "type": "Percentage %",
+            "value": 87.5
+          }
+        ],
+        "isSTRatePlan": false,
+        "priceCode": "RTPLN3480",
+        "priceName": "Standard Lounge (2026)",
+        "productTotalPrice": {
+          "totalAdditionalPrice": 0,
+          "totalBasePrice": 875,
+          "totalDiscounts": 87.5,
+          "totalMarkUpCharge": 0,
+          "totalPrice": 787.5,
+          "totalPriceUSD": 100.74,
+          "totalPromocodeAmount": 0,
+          "totalPromocodeAmountUSD": 0,
+          "totalTax": 0
+        },
+        "taxes": [],
+        "termsPolicies": [
+          {
+            "description": "<p>Private Relaxation Area: Cancellation/ amendments may be made up to 24 hours before the indicated check-in time. A fee of USD10 per person or 25% of the total booking amount, whichever is higher, is payable.</p>\n<p>All other services: Cancellation/ amendments may be made up to 6 hours before the indicated arrival time. A fee of USD10 per person is payable.</p>\n<p>Late cancellation and/ or failure to arrive at the facility will be considered as No Show and the booking will not be refunded. Please refer to our full <a href=\"\"https://www.plazapremiumlounge.com/terms\"\">Terms & Conditions</a>.</p>\n</p> The baggage wrapping service is only available from 5:00 - 00:00 daily at departure hall in Hong Kong International Airport. Please ensure you approach to the designated baggage wrap counter to wrap your bags for checking them in during this operation hours even your flight may depart after mid night time.</p>\n</p> No baggage wrapping service e.g. cabin baggage is provided at restricted area when you are accessing our lounges in Airside after passing through the security and passport control. </p>\n</p> This service covers wrapping for regular sized baggage with total dimension not exceeding 199cm (Length + Width + Height) for one piece. </p>\n<hr>",
+            "isAttachedToEmail": true,
+            "isDisplayOnWebsite": true,
+            "sequence": "0",
+            "termsCode": "SLSTRM1627",
+            "termsName": "CANCELLATIONS AND AMENDMENTS"
+          }
+        ]
+      },
+      "locationCode": "LCTN517",
+      "locationName": "Hong Kong International Airport",
+      "maxNoOfProductsAllowed": 10,
+      "priceDetails": {
+        "additionalCharges": [],
+        "baseRate": [
+          {
+            "currency": "HKD",
+            "groups": "adult",
+            "price": 875
+          },
+          {
+            "currency": "HKD",
+            "groups": "child",
+            "price": 0
+          },
+          {
+            "currency": "HKD",
+            "groups": "infant",
+            "price": 0
+          }
+        ],
+        "discounts": [
+          {
+            "code": "DSCNT1128",
+            "currency": "HKD",
+            "deltaType": "Discount [-]",
+            "isSTDiscount": false,
+            "name": "10% Online Discount [Lounge Booking]",
+            "type": "Percentage %",
+            "value": 10
+          }
+        ],
+        "isSTRatePlan": false,
+        "priceCode": "RTPLN3480",
+        "priceName": "Standard Lounge (2026)",
+        "taxes": [],
+        "termsPolicies": [
+          {
+            "description": "<p>Private Relaxation Area: Cancellation/ amendments may be made up to 24 hours before the indicated check-in time. A fee of USD10 per person or 25% of the total booking amount, whichever is higher, is payable.</p>\n<p>All other services: Cancellation/ amendments may be made up to 6 hours before the indicated arrival time. A fee of USD10 per person is payable.</p>\n<p>Late cancellation and/ or failure to arrive at the facility will be considered as No Show and the booking will not be refunded. Please refer to our full <a href=\"\"https://www.plazapremiumlounge.com/terms\"\">Terms & Conditions</a>.</p>\n</p> The baggage wrapping service is only available from 5:00 - 00:00 daily at departure hall in Hong Kong International Airport. Please ensure you approach to the designated baggage wrap counter to wrap your bags for checking them in during this operation hours even your flight may depart after mid night time.</p>\n</p> No baggage wrapping service e.g. cabin baggage is provided at restricted area when you are accessing our lounges in Airside after passing through the security and passport control. </p>\n</p> This service covers wrapping for regular sized baggage with total dimension not exceeding 199cm (Length + Width + Height) for one piece. </p>\n<hr>",
+            "isAttachedToEmail": true,
+            "isDisplayOnWebsite": true,
+            "sequence": "0",
+            "termsCode": "SLSTRM1627",
+            "termsName": "CANCELLATIONS AND AMENDMENTS"
+          }
+        ]
+      },
+      "productCode": "PRD3341",
+      "productDisplayName": "Lounge Use - 5 Hours",
+      "productId": 3341,
+      "productName": "Lounge Use - 5 Hours",
+      "productType": "Regular",
+      "productVarients": [
+        {
+          "attributeKey": "Duration",
+          "mandatory": false,
+          "name": "Duration",
+          "value": "5 hours"
+        }
+      ],
+      "propertyCode": "PRPRTY816",
+      "propertyDisplayName": "Plaza Premium Lounge",
+      "propertyName": "Plaza Premium Lounge  (Near Gate 1, Departures)",
+      "propertyTypeCode": "LOUNGE",
+      "propertyTypeId": 6,
+      "propertyTypeName": "Lounge",
+      "quantity": 1,
+      "quantityText": "",
+      "serviceCode": "SRVC1619",
+      "serviceDisplayName": "Lounge",
+      "serviceName": "Lounge",
+      "serviceType": "LOUNGE",
+      "shortLocation": "Near Gate 1, Departures",
+      "startDate": "2026-11-28 15:00:00"
+    }
+  ],
+  "sortedTermsPolicies": [
+    {
+      "description": "<p>Private Relaxation Area: Cancellation/ amendments may be made up to 24 hours before the indicated check-in time. A fee of USD10 per person or 25% of the total booking amount, whichever is higher, is payable.</p>\n<p>All other services: Cancellation/ amendments may be made up to 6 hours before the indicated arrival time. A fee of USD10 per person is payable.</p>\n<p>Late cancellation and/ or failure to arrive at the facility will be considered as No Show and the booking will not be refunded. Please refer to our full <a href=\"\"https://www.plazapremiumlounge.com/terms\"\">Terms & Conditions</a>.</p>\n</p> The baggage wrapping service is only available from 5:00 - 00:00 daily at departure hall in Hong Kong International Airport. Please ensure you approach to the designated baggage wrap counter to wrap your bags for checking them in during this operation hours even your flight may depart after mid night time.</p>\n</p> No baggage wrapping service e.g. cabin baggage is provided at restricted area when you are accessing our lounges in Airside after passing through the security and passport control. </p>\n</p> This service covers wrapping for regular sized baggage with total dimension not exceeding 199cm (Length + Width + Height) for one piece. </p>\n<hr>",
+      "termsName": "CANCELLATIONS AND AMENDMENTS"
+    }
+  ],
+  "totalAmendmentCharge": 0,
+  "totalCancellationCharge": 0,
+  "totalRefundAmount": 0
+}

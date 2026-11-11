@@ -8,6 +8,7 @@ import { applyButtonAction } from './button-actions.js';
 import apiUrl from './endpoints.js';
 import { DEFAULT_SITE, getSiteFolder, translate } from './i18n.js';
 import { hideLoader, showLoader } from './scripts.js';
+import { isIsoDate } from './booking.js';
 
 // property types shown, as the source pages: lounges, and passes (gift cards)
 export const LOUNGE = 'LOUNGE';
@@ -290,6 +291,9 @@ function slimPass(item) {
     productSeq: item.productSeq,
     images: (item.images || []).slice(0, 1).map((image) => ({ path: image?.path })),
     numberOfVisits: item.numberOfVisits,
+    // for analytics (scripts/ecommerce.js): the service and the pass's category codes
+    serviceDisplayName: item.serviceDisplayName,
+    passCategory: (item.passCategory || []).map((c) => ({ categoryCode: c?.categoryCode })),
     accuralPoints: item.accuralPoints,
     productDescription: item.productDescription,
     eligibleLocations: item.eligibleLocations,
@@ -347,16 +351,8 @@ export function getApiLanguage() {
   return API_LANGUAGES[folder] || folder;
 }
 
-/**
- * Whether a value is a real calendar date as YYYY-MM-DD (not e.g. 2026-02-30).
- * @param {string} value
- * @returns {boolean}
- */
-export function isIsoDate(value) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return false;
-  const d = new Date(`${value}T00:00:00Z`);
-  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
-}
+// (a booking rule, kept in booking.js; offered here too)
+export { isIsoDate };
 
 /**
  * The lounge template page for the current site folder (e.g. /en-uk/find/lounge).
@@ -413,11 +409,16 @@ export function readProperty(item) {
   return {
     code: item.propertyCode,
     name,
-    // for analytics (scripts/datalayer.js): the airport or station code, the LMS outlet code and
-    // the property's currency
+    // for analytics (scripts/datalayer.js, scripts/ecommerce.js): the airport or station code, the
+    // LMS outlet code, the property's currency, its short location, city and country code
     iata,
     outletId: item.lmsOutletCode ? String(item.lmsOutletCode).trim() : '',
     currency: (item.defaultCurrency || '').trim().toUpperCase(),
+    shortLocation,
+    city: (item.cityName || '').trim(),
+    country: (item.countryCode || '').trim().toUpperCase(),
+    // the zone name in the API's time zone, e.g. "(GMT+8:00) Asia/Shanghai, China Standard Time"
+    timeZone: String(item.timeZone || '').match(/[A-Za-z]+\/[A-Za-z0-9_+-]+(?:\/[A-Za-z0-9_+-]+)?/)?.[0] || '',
     pass: type === PASS,
     seq: Number(item.propertySeq) || 0,
     location: {

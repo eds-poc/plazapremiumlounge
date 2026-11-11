@@ -16,6 +16,10 @@ const BOOKING_ENDPOINTS = {
   // an airport's featured lounge for a start and guests: its details (name, location line,
   // photos, features) and its products with prices, grouped by service (POST, JSON body)
   bookingWidgetProducts: '/api/v1/web/ppg-app/getbookingwidgetproducts',
+  // the cart: POST (JSON: currency, products, pointOfPurchase, channel, isThirdPartyFulfilment)
+  // creates a cart with the products and answers its cartId; GET ?cartId=&locale= reads it;
+  // DELETE ?cartId= deletes (empties) it
+  cart: '/api/v1/web/ppg-app/cart',
 };
 
 // endpoint paths, joined to the API domain
@@ -29,10 +33,21 @@ const ENDPOINTS = {
   newsletter: '/api/v1/web/app_demo/Newsletter',
   // the Contact Form submit: a placeholder path until the contact API exists
   contact: '/api/v1/web/app_demo/Contact',
+  // the Booking Form (group-form) submit, and the areas of service of a location (POST, JSON:
+  // locationOfService, languageCode; answer: { items: [{ value, text }] }): placeholder paths until
+  // the group booking APIs exist
+  groupBooking: '/api/v1/web/app_demo/GroupBooking',
+  // the lounge booking request (the Booking Form): a placeholder path
+  // until its API exists; its areas come from groupBookingAreas with form: 'bookingRequest'
+  bookingRequest: '/api/v1/web/app_demo/BookingRequest',
+  groupBookingAreas: '/api/v1/web/app_demo/GetGroupBookingAreas',
   // the login modal's submit (POST, JSON: username, password); answers with a JWT
   login: '/api/v1/web/app_demo/Login',
   // the forgot password modal's submit (POST, JSON: lastName, email)
   forgotPassword: '/api/v1/web/app_demo/ForgotPassword',
+  // a partner page's password (POST, JSON: partnername, password); answers with a token (a JWT),
+  // or 400 with a message (blocks/partner-password)
+  partnerLogin: '/api/v1/web/app_demo/PartnerLogin',
   // the logged-in member's profile (GET, Authorization: Bearer <jwt>)
   getProfile: '/api/v1/web/app_demo/GetProfile',
   // a booking (order) of the logged-in member (POST, JSON: orderId; Authorization: Bearer <jwt>)

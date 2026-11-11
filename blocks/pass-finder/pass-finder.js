@@ -1,13 +1,18 @@
+import {
+  BRAND, listLabel, pushEcommerce, viewSource,
+} from '../../scripts/ecommerce.js';
 import { translate } from '../../scripts/i18n.js';
 import {
-  PASSES_TIMEOUT_MS, addToCart, buildPoints, formatPrice, icon, locationName, openPassDetails,
-  readCurrency, readPass,
+  PASSES_TIMEOUT_MS, buildAddButton, buildPoints, formatPrice, icon, locationName, openPassDetails,
+  readCurrency, readPass, takeSelectedPass,
 } from '../../scripts/passes.js';
 import {
   el, fetchPassList, getApiContext, isPreview, readApiRow, readPassList,
 } from '../../scripts/properties.js';
 
 const PAGE_SIZE = 9;
+// the passes list's name in the GA4 events ("Other - Airport Lounge Passes")
+const LIST_NAME = 'Airport Lounge Passes';
 const MAX_TAGS = 4;
 const MAX_PLACES = 4;
 const ADD_TO_CART = 'pass-finder:add-to-cart';
@@ -134,6 +139,47 @@ function choose(passes, { region, search, sort }) {
 }
 
 /**
+ * The GA4 `view_item_list` for the passes (window.dataLayer, scripts/ecommerce.js): every pass the
+ * finder lists, in its order (all its pages), as "Other - Airport Lounge Passes", in the visitor's
+ * currency. A pass has no airport, city or visit, so those parameters are blank.
+ * @param {Object[]} list The passes, as chosen (see choose)
+ */
+function trackPassList(list) {
+  if (!list.length) return;
+  const source = viewSource();
+  const label = listLabel(source, LIST_NAME);
+  pushEcommerce('view_item_list', {
+    currency: readCurrency(),
+    item_list_id: label,
+    item_list_name: label,
+    view_source: source,
+    items: list.map((pass, i) => ({
+      item_id: pass.catalogueCode,
+      item_name: pass.displayName,
+      coupon: '',
+      discount: '',
+      index: i + 1,
+      item_brand: BRAND,
+      // the number of visits
+      item_category: pass.visits ? String(pass.visits) : '',
+      item_category2: pass.category,
+      item_category3: pass.service,
+      item_category4: '',
+      item_category5: '',
+      item_list_id: label,
+      item_list_name: label,
+      price: pass.total,
+      quantity: 1,
+      checkInDate: '',
+      checkInTime: '',
+      adults: '',
+      children: '',
+      total_guest_count: '',
+    })),
+  });
+}
+
+/**
  * The regions to choose from, by the name passes show (the service writes "Global" and "Global
  * Plaza Premium Lounge" for the same): All, Multi Cities, "Global Plaza Premium Lounge", then every
  * other location A-Z.
@@ -219,11 +265,7 @@ function buildCard(pass, note, bestValue) {
   learn.setAttribute('aria-haspopup', 'dialog');
   learn.setAttribute('aria-label', `${translate('quickBuyLearnMore')}: ${pass.name}`);
   learn.addEventListener('click', () => openPassDetails(pass, learn, ADD_TO_CART));
-  const add = el('button', 'pass-finder-add', translate('quickBuyAddToCart'));
-  add.type = 'button';
-  add.setAttribute('aria-label', `${translate('quickBuyAddToCart')}: ${pass.name}`);
-  add.addEventListener('click', () => addToCart(add, pass, ADD_TO_CART));
-  actions.append(learn, add);
+  actions.append(learn, buildAddButton(pass, 'pass-finder-add', ADD_TO_CART));
   body.append(actions);
   card.append(media, body);
   return card;
@@ -431,7 +473,7 @@ function buildControls(state, onChange) {
  * Lounge Passes page's search, region and sort (kept in the page address), cards and pages of
  * nine. Every pass the service lists is shown as it gives it; the page authors only the heading and
  * intro, and the property and airport codes the service asks for (see getApiContext). The
- * currency is the page address's `currencyCode` (else USD). The passes list is the same as the
+ * currency is the visitor's (passes.js `readCurrency`). The passes list is the same as the
  * quick buy's (one call, kept for the session).
  * @param {Element} block
  */
@@ -460,6 +502,8 @@ export default function decorate(block) {
   const state = { ...readState(), page: 1 };
   let passes = [];
   let shown = '';
+  // the GA4 view_item_list went out (once a page, when the passes first show)
+  let listed = false;
   const grid = el('ul', 'pass-finder-grid');
   const empty = el('div', 'pass-finder-empty');
   empty.hidden = true;
@@ -547,6 +591,10 @@ export default function decorate(block) {
     controls.setRegions(readRegions(passes));
     results.classList.remove('is-loading');
     render();
+    if (!listed && passes.length) {
+      listed = true;
+      trackPassList(choose(passes, state));
+    }
   };
 
   const load = () => {
@@ -561,6 +609,8 @@ export default function decorate(block) {
     fetchPassList(context, readCurrency(), PASSES_TIMEOUT_MS)
       .then((list) => {
         show(list);
+        // the promotional address's pass (?selectedPassID=) into the cart
+        takeSelectedPass(list, block, ADD_TO_CART);
         if (hints.length && isPreview()) {
           const note = el('div');
           showMessage(note, '', null, hints);

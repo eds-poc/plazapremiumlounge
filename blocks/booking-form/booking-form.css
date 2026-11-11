@@ -1,0 +1,314 @@
+/* the shared form styles, loaded with the block's own (before the block shows) */
+@import url('/styles/forms.css');
+
+/* booking form: the source booking request forms (measured at 1440, 1100 and 375px). Two columns
+   from 768px, the fields' labels 16px above; adults and children side by side at every width; the
+   services' checkboxes in the body size; the checkboxes 20px under the remarks, 5px from the top of
+   their text. The lounge booking request (/en-uk/makeabooking), as the Contact Us form: 41px
+   fields, the columns 64px apart, the captcha and the button in the second column. Option
+   group-form, the group booking (/en-uk/group-booking): 45px fields 24px apart, start time and
+   length of stay side by side from 768px, the captcha (left) and the button (right) under the
+   columns */
+
+/* the source's space from the line above (its 16px and a 50px spacer) */
+.booking-form {
+  /* one-off: the source's 66px */
+  margin-top: 66px;
+}
+
+.booking-form .form-fields .form-label {
+  margin-bottom: var(--spacing-bootstrap-3);
+}
+
+.booking-form .form-fields .form-column > .width-half:not(.form-field-stepper) {
+  grid-column: span 3;
+}
+
+.booking-form .form-fields .form-check-input {
+  margin-top: var(--spacing-2);
+}
+
+.booking-form .form-fields .form-checks .form-check-label {
+  font-size: var(--body-font-size);
+}
+
+/* phones: the services 5px apart, so each checkbox has a 24px tap target (from 768px, the
+   source's spacing) */
+.booking-form .form-fields .form-checks {
+  gap: var(--spacing-2);
+}
+
+.booking-form .form-fields .form-column > .form-field-textarea + .form-field-checkbox {
+  margin-top: calc(var(--spacing-7) - var(--form-row-gap));
+}
+
+.booking-form .form-fields .form-column > .form-field-checkbox + .form-field-checkbox {
+  margin-top: calc(var(--spacing-stack) - var(--form-row-gap));
+}
+
+/* option group-form: the services one under the other with no gap from 768px; the captcha 24px
+   under the last field (only the row gap from 768px), the button 20px under it */
+.booking-form.group-form .form-fields > .form-captcha {
+  margin-top: var(--spacing-stack);
+}
+
+.booking-form.group-form .form-fields > .form-submit {
+  margin-top: var(--spacing-7);
+}
+
+/* the lounge booking request: 41px fields; the services on the source's 25px lines (22px of
+   text, 3px apart from 768px); the captcha 58px under the Privacy Policy checkbox and the button 16px under
+   it, side by side when the column has room for both (the source's col-xl-6) */
+.booking-form:not(.group-form) .form-fields {
+  --form-input-height: 41px;
+}
+
+.booking-form:not(.group-form) .form-fields .form-column {
+  container-type: inline-size;
+}
+
+.booking-form:not(.group-form) .form-fields .form-column > .form-captcha {
+  margin-top: calc(58px - var(--form-row-gap));
+}
+
+.booking-form:not(.group-form) .form-fields .form-captcha + .form-submit {
+  margin-top: calc(var(--spacing-bootstrap-3) - var(--form-row-gap));
+}
+
+@container (width >= 600px) {
+  .booking-form:not(.group-form) .form-fields .form-column > :is(.form-captcha, .form-submit) {
+    grid-column: span 3;
+  }
+
+  .booking-form:not(.group-form) .form-fields .form-captcha + .form-submit {
+    margin-top: calc(58px - var(--form-row-gap));
+  }
+}
+
+/* breakpoint-exception: the source's col-md-6 and col-sm-6 (768px): the two columns side by side
+   (the lounge booking request's 64px apart); the services at the source's spacing; the group
+   booking's captcha and button side by side, and its steppers */
+@media (width >= 768px) {
+  .booking-form:not(.group-form) .form-fields.has-columns {
+    /* one-off: the source's 64px between its columns */
+    column-gap: 64px;
+  }
+
+  .booking-form:not(.group-form) .form-fields .form-checks {
+    /* one-off: the source's 3px */
+    gap: 3px;
+  }
+
+  .booking-form.group-form .form-fields .form-checks {
+    gap: 0;
+  }
+
+  .booking-form.group-form .form-fields > :is(.form-captcha, .form-submit),
+  .booking-form.group-form .form-fields .form-column > .form-field-stepper.width-half {
+    grid-column: span 3;
+  }
+
+  .booking-form.group-form .form-fields > .form-captcha {
+    margin-top: 0;
+  }
+}
+
+/* the dates: the site's calendar (scripts/date-picker.js, prefix `date-picker`), as the Booking
+   Widget's (the source's jQuery UI datepicker): a warm grey calendar of one month that pops up
+   under its date (a "Date" title and close, the month and year between previous and next, the
+   days as round 32px buttons, the chosen one maroon, the days before the first one faded); the
+   date itself is the form's pill (`form-input`) */
+.booking-form .date-picker-date {
+  /* one-off: the source calendar's width, shadow, navigation size, day size and colour, close */
+  --date-picker-width: 350px;
+  --date-picker-shadow: 0 4px 8px rgb(10 10 10 / 10%);
+  --date-picker-nav: 1.8em;
+  --date-picker-day-size: 32px;
+  --date-picker-day: #454545;
+  --date-picker-close: 19px;
+
+  position: relative;
+}
+
+/* the date button: the pill's text from the left, as the form's other fields */
+.booking-form .date-picker-date-text {
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.booking-form .form-fields .date-picker-date-text.form-input {
+  font-size: var(--font-size-sm);
+}
+
+.booking-form .date-picker-date-text:focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+}
+
+.booking-form .date-picker-date-value {
+  display: none;
+}
+
+.booking-form .date-picker-calendar {
+  position: absolute;
+  top: calc(100% + var(--spacing-4));
+  left: 0;
+  z-index: 3;
+  display: none;
+  box-sizing: border-box;
+  width: min(var(--date-picker-width), calc(100vw - 2 * var(--spacing-6)));
+  padding: var(--spacing-7);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-warm);
+  box-shadow: var(--date-picker-shadow);
+  color: var(--color-text);
+  font-family: var(--font-family-campaign);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+  text-align: start;
+}
+
+.booking-form .date-picker-date.is-open .date-picker-calendar {
+  display: block;
+}
+
+/* "Date" and close at the top right */
+.booking-form .date-picker-calendar-top {
+  position: relative;
+  height: 13px;
+}
+
+.booking-form .date-picker-calendar-heading {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+}
+
+.booking-form .date-picker-calendar-close,
+.booking-form .date-picker-calendar-nav {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.booking-form .date-picker-calendar-close {
+  position: absolute;
+  top: 0;
+  right: var(--spacing-5);
+  width: var(--date-picker-close);
+  height: 30px;
+}
+
+.booking-form .date-picker-calendar-close::before,
+.booking-form .date-picker-calendar-nav::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: currentcolor;
+  mask: url('/icons/close-light.svg') center / contain no-repeat;
+}
+
+.booking-form .date-picker-calendar-header {
+  display: grid;
+  grid-template-columns: var(--date-picker-nav) 1fr var(--date-picker-nav);
+  align-items: center;
+  padding: 1.65em var(--spacing-6) 0.75em;
+}
+
+.booking-form .date-picker-calendar-title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-campaign-bold);
+  line-height: 1.8;
+  text-align: center;
+}
+
+.booking-form .date-picker-calendar-nav {
+  width: var(--date-picker-nav);
+  height: var(--date-picker-nav);
+  border-radius: var(--radius-xs);
+}
+
+.booking-form .date-picker-calendar-nav::before {
+  width: 14px;
+  height: 16px;
+  margin: auto;
+  mask-image: url('/icons/arrow-left-light.svg');
+}
+
+.booking-form .date-picker-calendar-next::before {
+  mask-image: url('/icons/arrow-right-light.svg');
+}
+
+.booking-form .date-picker-calendar-nav:hover {
+  color: var(--color-text-subtle);
+}
+
+.booking-form .date-picker-calendar-nav:disabled {
+  color: inherit;
+  opacity: 0.35;
+  cursor: default;
+}
+
+.booking-form .date-picker-calendar-close:focus-visible,
+.booking-form .date-picker-calendar-nav:focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+}
+
+.booking-form .date-picker-calendar-grid {
+  width: 100%;
+  margin: 0 0 0.4em;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+
+.booking-form .date-picker-calendar-grid th {
+  padding: 0.7em 0.3em;
+  font-weight: var(--font-weight-campaign-bold);
+  text-align: center;
+}
+
+.booking-form .date-picker-calendar-grid td {
+  padding: calc(var(--spacing-1) / 2);
+  text-align: center;
+  cursor: pointer;
+}
+
+.booking-form .date-picker-calendar-grid td:not([data-date]),
+.booking-form .date-picker-calendar-grid td[aria-disabled='true'] {
+  cursor: default;
+}
+
+.booking-form .date-picker-calendar-grid td[aria-disabled='true'] {
+  opacity: 0.35;
+}
+
+.booking-form .date-picker-calendar-day {
+  display: inline-block;
+  width: var(--date-picker-day-size);
+  height: var(--date-picker-day-size);
+  border-radius: var(--radius-circle);
+  color: var(--date-picker-day);
+  font-size: var(--font-size-sm);
+  line-height: 2.2;
+  vertical-align: middle;
+}
+
+.booking-form .date-picker-calendar-grid td[aria-selected='true'] .date-picker-calendar-day {
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+.booking-form .date-picker-calendar-grid td:focus-visible {
+  outline: 0;
+}
+
+.booking-form .date-picker-calendar-grid td:focus-visible .date-picker-calendar-day {
+  box-shadow: var(--shadow-focus);
+}
