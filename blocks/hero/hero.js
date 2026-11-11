@@ -14,6 +14,7 @@ const BOOKING_MODULES = [
   'scripts/date-picker.js',
   'scripts/properties.js',
   'scripts/button-actions.js',
+  'scripts/utility.js',
 ];
 const BUTTONS_HEADER = /^buttons?\s*(?:\(([^)]*)\))?$/i;
 

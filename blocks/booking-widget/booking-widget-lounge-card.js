@@ -8,13 +8,19 @@
  * One call, getbookingwidgetproducts (the source's own widget call): the booking system picks
  * the airport's lounge (or keeps the one shown, when only the date, time or guests changed) and
  * answers with its details and its products grouped by service. Railway stations get no card.
+ *
+ * Search sends the data layer's link click "search" as it is clicked (see trackSearch).
  */
 import { loadCSS } from '../../scripts/aem.js';
+// eslint-disable-next-line import/no-cycle
+import { pushEvent } from '../../scripts/datalayer.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { translate } from '../../scripts/i18n.js';
+import { isInCart, onCartChange } from '../../scripts/cart-state.js';
 import {
   buildSlider, el, fetchJson, getApiLanguage, toUrl,
 } from '../../scripts/properties.js';
+import { toUtcDateTime } from '../../scripts/utility.js';
 
 // the service answers in about 1.5-4.5s
 const PRODUCTS_TIMEOUT_MS = 20000;
@@ -31,6 +37,8 @@ const PASS = /pass/i;
 let count = 0;
 // the service's answers for this page, by request (the same choices again show at once)
 const answers = new Map();
+// the latest answer's locationDisplayName, by airport code (for the data layer's Search)
+const locationNames = new Map();
 
 /**
  * Text from an API value, trimmed ('' for anything that isn't text).
@@ -252,6 +260,16 @@ function buildPhotos(images, name, place) {
 }
 
 /**
+ * Book Now, or Remove From Cart while its product (`data-catalogue-code`) is in the cart.
+ * @param {HTMLButtonElement} book
+ */
+function showInCart(book) {
+  const inCart = isInCart(book.dataset.catalogueCode);
+  book.classList.toggle('is-in-cart', inCart);
+  book.textContent = translate(inCart ? 'cartRemoveFromCart' : 'bookingBookNow');
+}
+
+/**
  * The lounge card, as the source's: photos (the chosen product's, else the lounge's), the name
  * and location line, the service tabs (two or more), the product, its "Filling Up" status, the
  * features, the price, Book Now and More at {airport}. With online booking off: the lounge, its
@@ -315,7 +333,8 @@ function buildCard(data, choice, id) {
   const now = el('span', 'booking-widget-card-price-now');
   price.append(was, now);
   left.append(choiceRow, features, price);
-  // Book Now: the booking step comes later; the choice is announced meanwhile
+  // Book Now: the product goes into the cart (announced; see scripts/cart.js); while it's there,
+  // the button takes it out (Remove From Cart, as the source's)
   const book = el('button', 'booking-widget-card-book', translate('bookingBookNow'));
   book.type = 'button';
   actions.append(book, more);
@@ -332,6 +351,8 @@ function buildCard(data, choice, id) {
     now.textContent = p.price ? formatPrice(p.price.now, p.price.currency) : '—';
     status.hidden = p.available;
     setPhotos(p.images.length ? p.images : data.images);
+    book.dataset.catalogueCode = p.catalogueCode;
+    showInCart(book);
   };
   const showGroup = (g) => {
     group = g;
@@ -352,14 +373,23 @@ function buildCard(data, choice, id) {
   select.addEventListener('change', showProduct);
   book.addEventListener('click', () => {
     const p = product();
-    card.dispatchEvent(new CustomEvent('booking-widget:book', {
+    if (isInCart(p.catalogueCode)) {
+      book.dispatchEvent(new CustomEvent('cart:remove', { bubbles: true, detail: { catalogueCode: p.catalogueCode } }));
+      return;
+    }
+    book.dispatchEvent(new CustomEvent('booking-widget:book', {
       bubbles: true,
       detail: {
         ...choice,
         propertyCode: data.propertyCode,
+        propertyName: data.name,
+        place: data.place,
         serviceCode: p.service,
         productCode: p.code,
+        productName: p.name,
         catalogueCode: p.catalogueCode,
+        price: p.price?.now,
+        currency: p.price?.currency,
       },
     }));
   });
@@ -384,6 +414,36 @@ async function fetchProducts(body, signal, fresh = false) {
 }
 
 /**
+ * The data layer's link click for Search: the date, time and guests chosen and the airport (its
+ * code from the locations service's `iata`, its name from getbookingwidgetproducts'
+ * `locationDisplayName`). Before the airport has an answer (or for a railway station, which gets
+ * none), its name is the locations service's.
+ * @param {Object} choice The widget's choices (see current in booking-widget.js)
+ */
+function trackSearch(choice) {
+  const eventName = 'search';
+  const adultCount = Number.parseInt(choice.adult, 10) || 0;
+  const childCount = Number.parseInt(choice.children, 10) || 0;
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
+    _plazapremiumloungemanagementli: {
+      bookingInfo: {
+        // the Date and Time fields (the airport's local time) in UTC: 2026-11-20T08:00:00Z
+        checkinDateTime: toUtcDateTime(choice.date, choice.time, choice.location.timeZone),
+        daysToBooking: 0,
+        totalGuestCount: adultCount + childCount,
+        adultCount,
+        childCount,
+      },
+      locationDetails: {
+        iataCode: choice.airport,
+        locationName: locationNames.get(choice.airport) || choice.location.name,
+      },
+    },
+  });
+}
+
+/**
  * Adds the lounge card: in its host's place for it (`data-booking-products` inside an element
  * marked `data-booking-products-host`, e.g. the hero's), else after the widget's place. It shows
  * once an airport is chosen: its loading skeleton has the usual card's height, so the card
@@ -394,6 +454,8 @@ async function fetchProducts(body, signal, fresh = false) {
 export default async function decorateLoungeCard(block, { current }) {
   count += 1;
   const id = `booking-widget-card-${count}`;
+  // (once for every card: Book Now or Remove From Cart as the cart changes, in other tabs too)
+  if (count === 1) onCartChange(() => document.querySelectorAll('.booking-widget-card-book').forEach(showInCart));
   // (its look, before it shows)
   await loadCSS(`${window.hlx.codeBasePath}/blocks/booking-widget/booking-widget-lounge-card.css`);
   const section = el('div', 'booking-widget-products');
@@ -471,7 +533,11 @@ export default async function decorateLoungeCard(block, { current }) {
       languageCode: getApiLanguage(),
     };
     try {
-      const data = readCard(await fetchProducts(body, request.signal, fresh));
+      const json = await fetchProducts(body, request.signal, fresh);
+      // (kept even when there's no card to show, e.g. no bookable products)
+      const locationName = text(json?.locationDisplayName);
+      if (locationName) locationNames.set(choice.airport, locationName);
+      const data = readCard(json);
       if (stale()) return;
       if (data.state === 'none') {
         // eslint-disable-next-line no-console
@@ -502,6 +568,9 @@ export default async function decorateLoungeCard(block, { current }) {
   let searchTimer;
   block.addEventListener('booking-widget:search', (e) => {
     e.preventDefault();
+    // (a Search without a chosen airport shows Where's message instead, and isn't sent)
+    const choice = current();
+    if (choice) trackSearch(choice);
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => show({ fresh: true }), SEARCH_DELAY_MS);
   });

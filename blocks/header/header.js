@@ -8,6 +8,7 @@ import { CURRENCY_EVENT, getCurrency } from '../../scripts/currency.js';
 import { getLoggedInUser } from '../../scripts/logged-in-user.js';
 import { getDefaultSharedPagePath, getSharedPagePath, translate } from '../../scripts/i18n.js';
 import { setIconSources } from '../../scripts/icons.js';
+import { cartCount, onCartChange } from '../../scripts/cart-state.js';
 
 // desktop layout from 1200px, as the source (webslidemenu breakpoint)
 const desktop = window.matchMedia('(width >= 1200px)');
@@ -426,6 +427,15 @@ function wireAction(link, header) {
   link.addEventListener('click', async (e) => {
     if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     e.preventDefault();
+    // a cart with something in it opens the mini cart, on every screen (as the source's); an
+    // empty one shows the `cart` section (a dropdown on desktop)
+    if (name === 'cart' && cartCount() > 0) {
+      header.closeDropdowns();
+      header.closeMenu(false);
+      const { openMiniCart } = await import('../../scripts/mini-cart.js');
+      openMiniCart(link);
+      return;
+    }
     if (name === 'cart' && desktop.matches && await toggleCartDropdown(link, header)) return;
     header.closeMenu();
     const section = await whenModal(name);
@@ -644,6 +654,28 @@ export default async function decorate(block) {
       wrap.append(u);
     });
     actions.append(wrap);
+  }
+
+  // the cart icon shows how many products the cart holds (as the source's), kept up to date
+  const cartLinks = utilities.filter((u) => u.querySelector('.icon-cart'));
+  const showCartCount = () => {
+    const count = cartCount();
+    cartLinks.forEach((link) => {
+      let badge = link.querySelector('.header-cart-count');
+      if (!badge) {
+        badge = el('span', 'header-cart-count');
+        badge.setAttribute('aria-hidden', 'true');
+        link.append(badge);
+        link.dataset.label = link.getAttribute('aria-label') || '';
+      }
+      badge.textContent = count ? String(count) : '';
+      badge.hidden = !count;
+      link.setAttribute('aria-label', count ? `${link.dataset.label}, ${translate('cartItemCount', { count })}` : link.dataset.label);
+    });
+  };
+  if (cartLinks.length) {
+    showCartCount();
+    onCartChange(showCartCount);
   }
 
   // a menu footer link to the currency (authored as a code, e.g. USD) shows the visitor's currency
