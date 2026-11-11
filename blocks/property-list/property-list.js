@@ -2,7 +2,9 @@ import { loadCSS } from '../../scripts/aem.js';
 import { toUtcDateTime } from '../../scripts/booking.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
 // eslint-disable-next-line import/no-cycle
-import { pushEvent, setPageDetails, setPageView } from '../../scripts/datalayer.js';
+import {
+  PAGE_VIEW, pushEvent, setPageDetails, skipPageView,
+} from '../../scripts/datalayer.js';
 import {
   BRAND, chosenVisit, listLabel, pushEcommerce, viewSource,
 } from '../../scripts/ecommerce.js';
@@ -260,22 +262,28 @@ function chosenBooking(timeZone) {
 }
 
 /**
- * The data layer's page view for the listing (scripts/datalayer.js setPageView): the results
- * shown for the filters in the page address (the page's "N results"); the booking chosen there
- * (`date` and `time` at the airport in UTC, else now; `adult` and `children`, else 1 and 0); and
- * the airport chosen there (?airport=PKX), else the first lounge's: its `iataCode` and
- * `locationName`.
- * @param {Object[]} properties
- * @param {Object<string, Set<string>>} selected The filters from the page address
+ * The data layer's page view for the listing ("pageLoad", sent here instead of by
+ * scripts/datalayer.js, see skipPageView): the results shown for the filters in the page address
+ * (the page's "N results"); the booking chosen there (`date` and `time` at the airport in UTC,
+ * else now; `adult` and `children`, else 1 and 0); and the airport chosen there (?airport=PKX),
+ * else the first lounge's: its `iataCode` and `locationName`. Without lounges (they didn't load),
+ * the page view without them.
+ * @param {Object[]} [properties]
+ * @param {Object<string, Set<string>>} [selected] The filters from the page address
  */
-function setListingView(properties, selected) {
+function trackListingView(properties = [], selected = null) {
+  const eventName = 'pageLoad';
+  if (!properties.length) {
+    pushEvent(PAGE_VIEW, eventName);
+    return;
+  }
   const count = properties.filter((p) => matches(p, selected)).length;
   const lounges = properties.filter((p) => !p.pass);
   const chosen = selected.airport.size === 1
     && lounges.find((p) => selected.airport.has(p.location.key));
   const place = chosen || lounges[0] || properties[0];
   const { checkin, adults, children } = chosenBooking(place.timeZone);
-  setPageView({
+  pushEvent(PAGE_VIEW, eventName, {
     _plazapremiumloungemanagementli: {
       searchDetails: { searchResultsCount: count },
       bookingInfo: {
@@ -726,6 +734,15 @@ export default async function decorate(block) {
   // the data layer's page name for the listing: the page's last path part until the API's city
   // name arrives (the first list on the page)
   if (useUrl) setListingPage(window.location.pathname.split('/').filter(Boolean).pop());
+  // the listing's page view (the first list on the page) is sent here, once: with the lounges, or
+  // without them when they don't load (a retry sends no other)
+  let viewed = !useUrl;
+  if (useUrl) skipPageView();
+  const sendView = (properties, selected) => {
+    if (viewed) return;
+    viewed = true;
+    trackListingView(properties, selected);
+  };
   if (crumb) {
     // (a missing stylesheet leaves the breadcrumb unstyled, never the lounges unloaded)
     await loadCSS(`${window.hlx.codeBasePath}/blocks/breadcrumb/breadcrumb.css`).catch((error) => {
@@ -752,6 +769,7 @@ export default async function decorate(block) {
   const render = async () => {
     if (!city) {
       showMessage(results, translate('propertyEmpty'), null, 'Add a "city-code" row (e.g. city-code | HKHKG) in the block.');
+      sendView();
       return;
     }
     const url = apiUrl('properties');
@@ -765,6 +783,7 @@ export default async function decorate(block) {
       console.error('property-list: could not load', url.href, error);
       if (crumb) drawCrumb(crumb);
       showMessage(results, translate('propertyError'), () => load());
+      sendView();
       return;
     }
     if (crumb) drawCrumb(crumb, items[0]?.countryName);
@@ -772,6 +791,7 @@ export default async function decorate(block) {
     const properties = items.map(readProperty).filter(Boolean);
     if (!properties.length) {
       showMessage(results, translate('propertyEmpty'), null, `City code "${city}" returned no lounges.`);
+      sendView();
       return;
     }
     const options = readOptions(properties);
@@ -807,12 +827,10 @@ export default async function decorate(block) {
       tagged = true;
       const codes = groupProperties(properties).flatMap((group) => group.items.map((p) => p.code));
       import('../../scripts/kwanko.js').then(({ listingTag }) => listingTag(codes));
-      // the GA4 view_item_list and the data layer's page view, for the first list on the page
-      if (useUrl) {
-        trackItemList(properties, selected);
-        setListingView(properties, selected);
-      }
+      // the GA4 view_item_list, for the first list on the page
+      if (useUrl) trackItemList(properties, selected);
     }
+    sendView(properties, selected);
   };
   // the page's loader stays up until the lounges are shown (the first load is awaited, so the
   // page doesn't hide its loader before)
