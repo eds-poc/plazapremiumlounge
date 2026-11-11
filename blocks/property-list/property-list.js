@@ -1,5 +1,4 @@
 import { loadCSS } from '../../scripts/aem.js';
-import { toUtcDateTime } from '../../scripts/booking.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
 // eslint-disable-next-line import/no-cycle
 import {
@@ -14,6 +13,7 @@ import {
   buildBadge, buildSlider, el, fetchJson, getApiLanguage, isIsoDate, isPreview, propertyDetailPath,
   propertyDetailUrl, readProperty, safeNote, setLoading, toKey, toUrl,
 } from '../../scripts/properties.js';
+import { toUtcDateTime } from '../../scripts/utility.js';
 
 const TIMEOUT_MS = 8000;
 const VISIBLE_TAGS = 5;
