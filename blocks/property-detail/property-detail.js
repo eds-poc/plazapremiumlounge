@@ -125,12 +125,12 @@ function readPrice(json, currency) {
     || !Number.isFinite(total)) return null;
   const base = Number(price.basePrice);
   // e.g. discounts: [{ "name": "10% Discount", "discountValue": 110.5 }]
-  const firstDiscount = price.discounts?.[0];
+  const discountData = price.discounts?.[0];
   return {
     total,
     base: Number.isFinite(base) ? base : total,
     // the first discount's amount; 0 without one
-    discountValue: Number(firstDiscount?.discountValue) || 0,
+    discountValue: Number(discountData?.discountValue) || 0,
     currency: price.baseRate?.[0]?.currency || currency,
     catalogueCode: price.catalogueCode || '',
   };
@@ -379,11 +379,15 @@ function trackGetPrice(lounge, request, formFieldsData, price) {
   const eventName = 'get price';
   // the page's name and site section, for this event and every one after it:
   // "<cityName>:<locationName (iataCode)>:<lounge>" in "lounge detail"
+  const pageName = [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':');
   setPageDetails({
-    pageName: [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':'),
+    pageName,
     siteSection: 'lounge detail',
   });
-  let product = { name: formFieldsData.product, category: formFieldsData.service };
+  let product = {
+    name: formFieldsData.product,
+    category: formFieldsData.service,
+  };
   if (price) {
     product = {
       sku: price.catalogueCode,
@@ -407,15 +411,25 @@ function trackGetPrice(lounge, request, formFieldsData, price) {
     _plazapremiumloungemanagementli: {
       bookingInfo: {
         // the form's date and time at the lounge, in UTC (1400 in Hong Kong: 06:00:00Z)
-        checkinDateTime: toUtcDateTime(formFieldsData.date, formFieldsData.time, lounge.timeZone),
+        checkinDateTime: toUtcDateTime(
+          formFieldsData.date,
+          formFieldsData.time,
+          lounge.timeZone,
+        ),
         daysToBooking: 0,
         totalGuestCount: adult + child,
         adultCount: adult,
         childCount: child,
         propertyCurrencyCode: lounge.defaultCurrency,
       },
-      locationDetails: { iataCode: lounge.iata, locationName: lounge.location.name },
-      outletDetails: { outletId: lounge.outletId, outletName: lounge.name },
+      locationDetails: {
+        iataCode: lounge.iata,
+        locationName: lounge.location.name,
+      },
+      outletDetails: {
+        outletId: lounge.outletId,
+        outletName: lounge.name,
+      },
       productList: [product],
       // (the promo code's value is to be decided: 0 for now)
       offerDetails: {
@@ -722,7 +736,7 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
       promocode: promo.value.trim(),
     };
     form.dispatchEvent(new CustomEvent('property-detail:get-price', { bubbles: true, detail: request }));
-    // the form's fields as chosen now (names, date, time), for the data layer once the price comes
+    // the form's fields as chosen now, for the data layer once the price comes
     const formFieldsData = {
       service: service.selectedOptions[0]?.textContent.trim() || '',
       product: product.selectedOptions[0]?.textContent.trim() || '',
