@@ -405,7 +405,9 @@ function trackGetPrice(lounge, request, formFieldsData, price) {
       webInteraction: {
         name: eventName,
         type: 'other',
-        linkClicks: { value: 1 },
+        linkClicks: {
+          value: 1,
+        },
       },
     },
     _plazapremiumloungemanagementli: {
