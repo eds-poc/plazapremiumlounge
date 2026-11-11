@@ -376,9 +376,9 @@ function trackPageLoad(lounge, form) {
     siteSection: 'lounge detail',
   });
   const formData = new FormData(form);
-  // the guests as the form has them: the adults (at least 1) and the children (0 when none)
-  const adultCount = Number.parseInt(formData.get('adults'), 10) || 1;
-  const childCount = Number.parseInt(formData.get('children'), 10) || 0;
+  // the guests as the form has them (at least 1 adult)
+  const adultCount = Number(formData.get('adults')) || 1;
+  const childCount = Number(formData.get('children')) || 0;
   // the chosen service and service details (the product), as the form shows them
   const serviceOption = form.querySelector('select[name="service"]')?.selectedOptions[0];
   const productOption = form.querySelector('select[name="product"]')?.selectedOptions[0];
