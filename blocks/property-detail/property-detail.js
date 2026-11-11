@@ -378,6 +378,8 @@ function setLoungePage(lounge) {
  * @param {HTMLFormElement} form The booking form
  */
 function trackPageLoad(lounge, form) {
+  // the lounge detail page's only (template lounge-detail); elsewhere the page's generic one goes
+  if (getMetadata('template') !== 'lounge-detail') return;
   // web.webPageDetails.name: the page name setLoungePage sets
   const pageName = [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':');
   const data = new FormData(form);

@@ -178,8 +178,8 @@ export function pushEvent(event, eventName, extra) {
  */
 export default function initDataLayer() {
   window.adobeDataLayer = window.adobeDataLayer || [];
-  // the lounge detail page sends its own page view ("page load", blocks/property-detail)
-  if (!document.querySelector('.property-detail')) pushEvent(PAGE_VIEW, 'page view');
+  // the lounge detail page (template lounge-detail) sends its own ("page load", property-detail)
+  if (getMetadata('template') !== 'lounge-detail') pushEvent(PAGE_VIEW, 'page view');
 
   const src = getMetadata('launch-script').trim();
   if (!src) return;
