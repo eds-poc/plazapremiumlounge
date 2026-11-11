@@ -380,12 +380,12 @@ function trackPageLoad(lounge, form) {
   const adultCount = Number(formData.get('adults')) || 1;
   const childCount = Number(formData.get('children')) || 0;
   // the chosen service and service details (the product), as the form shows them
-  const serviceOption = form.querySelector('select[name="service"]')?.selectedOptions[0];
-  const productOption = form.querySelector('select[name="product"]')?.selectedOptions[0];
+  const serviceData = form.querySelector('select[name="service"]')?.selectedOptions[0];
+  const productData = form.querySelector('select[name="product"]')?.selectedOptions[0];
   const formFieldsData = {
-    service: serviceOption?.value ? serviceOption.textContent.trim() : '',
-    product: productOption?.value ? productOption.textContent.trim() : '',
-    productCode: productOption?.value || '',
+    service: serviceData?.value ? serviceData.textContent.trim() : '',
+    product: productData?.value ? productData.textContent.trim() : '',
+    productCode: productData?.value || '',
     date: String(formData.get('date') || ''),
     time: String(formData.get('time') || ''),
   };
