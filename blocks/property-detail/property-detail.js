@@ -743,7 +743,8 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
       date: String(data.get('date') || ''),
       time: String(data.get('time') || ''),
     };
-    let answer = null;
+    // the price for these choices; null until (and unless) the price service gives one
+    let price = null;
     clearPrice();
     const controller = new AbortController();
     pricing = controller;
@@ -751,8 +752,7 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
     setLoading(true);
     form.setAttribute('aria-busy', 'true');
     try {
-      const price = await requestPrice(request, controller.signal);
-      answer = price;
+      price = await requestPrice(request, controller.signal);
       if (controller.signal.aborted) return;
       // a rejected promo code: only its message; no price, and Get Price stays
       if (price.promoRejected) rejectPromo(price.promoRejected);
@@ -767,8 +767,8 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
     } finally {
       setLoading(false);
       if (pricing === controller) form.removeAttribute('aria-busy');
-      // the data layer's Get Price click, with the price service's answer (one push a click)
-      trackGetPrice(lounge, request, picked, answer);
+      // the data layer's Get Price click, with the price (one push a click)
+      trackGetPrice(lounge, request, picked, price);
     }
   });
   panel.append(header, form);
@@ -968,7 +968,8 @@ function buildBar(lounge, booking, settings) {
  * @param {HTMLElement} block The property detail block element
  */
 export default async function decorate(block) {
-  // "lounge detail" from the start (the page name from the path until the lounge has come)
+  // the site section first, so the page's events have it even when no lounge can be shown (a bad
+  // code, not found, an error: those return before the lounge's page name is set below)
   setPageDetails({ siteSection: SITE_SECTION });
   const settings = readSettings(block);
   const params = readParams();
