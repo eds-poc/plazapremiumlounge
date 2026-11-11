@@ -71,30 +71,6 @@ export function toStartDateTime(date, time) {
 }
 
 /**
- * A start at the lounge as ISO 8601 UTC without milliseconds: 2026-11-20 at 1600 in Hong Kong is
- * "2026-11-20T08:00:00Z". Without a time zone, the browser's (as chooseSlot).
- * @param {string} date YYYY-MM-DD
- * @param {string} time HHmm
- * @param {string} [timeZone] The lounge's IANA time zone
- * @returns {string}
- */
-export function toUtcDateTime(date, time, timeZone) {
-  const [year, month, day] = date.split('-').map(Number);
-  const wanted = Date.UTC(year, month - 1, day, Number(time.slice(0, 2)), Number(time.slice(2)));
-  // the zone's offset from UTC at an instant (ms), from the time it shows then
-  const offset = (at) => {
-    const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
-      timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
-    }).formatToParts(new Date(at)).map((p) => [p.type, p.value]));
-    const shown = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute);
-    return shown - at;
-  };
-  // (twice: the first guess can be on the other side of a daylight saving change)
-  const guess = wanted - offset(wanted);
-  return new Date(wanted - offset(guess)).toISOString().replace(/\.\d{3}Z$/, 'Z');
-}
-
-/**
  * The booking date and time to show, as the source: the address's date and time when valid,
  * else the first bookable slot; an earlier date or time moves forward to it (the time onto the
  * half-hour grid). The first bookable slot is the half hour after now plus the lounge's lead time

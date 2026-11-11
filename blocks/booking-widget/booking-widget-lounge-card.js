@@ -12,7 +12,6 @@
  * Search sends the data layer's link click "search" as it is clicked (see trackSearch).
  */
 import { loadCSS } from '../../scripts/aem.js';
-import { toUtcDateTime } from '../../scripts/booking.js';
 // eslint-disable-next-line import/no-cycle
 import { pushEvent } from '../../scripts/datalayer.js';
 import apiUrl from '../../scripts/endpoints.js';
@@ -20,6 +19,7 @@ import { translate } from '../../scripts/i18n.js';
 import {
   buildSlider, el, fetchJson, getApiLanguage, toUrl,
 } from '../../scripts/properties.js';
+import { toUtcDateTime } from '../../scripts/utility.js';
 
 // the service answers in about 1.5-4.5s
 const PRODUCTS_TIMEOUT_MS = 20000;
