@@ -3,20 +3,21 @@ import {
 } from '../../scripts/aem.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
 // eslint-disable-next-line import/no-cycle
-import { holdPageView, setPageDetails } from '../../scripts/datalayer.js';
+import { PAGE_VIEW, pushEvent, setPageDetails } from '../../scripts/datalayer.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { translate } from '../../scripts/i18n.js';
 import openGallery from '../../scripts/gallery.js';
 import { openModal } from '../../scripts/modal-dialog.js';
 import {
   DAY_MINUTES, MAX_GUESTS, SLOT_MINUTES, chooseSlot, fitGuests, formatDate,
-  readLeadTime, readTimeZone, toStartDateTime, toTime, toUtcDateTime,
+  readLeadTime, readTimeZone, toStartDateTime, toTime,
 } from '../../scripts/booking.js';
 import buildDatePicker from '../../scripts/date-picker.js';
 import {
   buildBadge, buildSlider, el, fetchJson, getApiLanguage, isPreview, readProperty,
   safeHtml, setLoading, toKey, toUrl,
 } from '../../scripts/properties.js';
+import { toUtcDateTime } from '../../scripts/utility.js';
 
 // the detail service answers in about 0.2-2s; the services one in 3-7s (at times far longer)
 const DETAIL_TIMEOUT_MS = 15000;
@@ -369,13 +370,14 @@ function loungePageName(lounge) {
 }
 
 /**
- * The data layer's page view for a lounge ("page load", see holdPageView), once the booking form
- * has its first services: the page name (see loungePageName), the booking as the form has it (the
- * date and time in UTC, the guests), the lounge and its airport or station, and the chosen
- * product (its code as the SKU; none without services).
+ * The data layer's "page load" page view's own properties (the page sends it in place of the
+ * generic one, see scripts/datalayer.js), once the booking form has its first services: the page
+ * name (see loungePageName), the booking as the form has it (the date and time in UTC, the
+ * guests), the lounge and its airport or station, and the chosen product (its code as the SKU;
+ * none without services).
  * @param {Object} lounge
  * @param {HTMLFormElement} form The booking form
- * @returns {{eventName: string, extra: Object}}
+ * @returns {Object}
  */
 function readPageView(lounge, form) {
   const pageName = loungePageName(lounge);
@@ -407,11 +409,8 @@ function readPageView(lounge, form) {
     }];
   }
   return {
-    eventName: 'page load',
-    extra: {
-      web: { webPageDetails: { name: pageName } },
-      _plazapremiumloungemanagementli: details,
-    },
+    web: { webPageDetails: { name: pageName } },
+    _plazapremiumloungemanagementli: details,
   };
 }
 
@@ -932,10 +931,15 @@ function buildBar(lounge, booking, settings) {
  * @param {HTMLElement} block The property detail block element
  */
 export default async function decorate(block) {
-  // the page's page view is the lounge's own (readPageView), once the lounge and its services have
-  // come; the generic one (null) when there's no lounge to show. The first answer counts
-  let sendPageView;
-  holdPageView(new Promise((resolve) => { sendPageView = resolve; }));
+  // the page's one page view (scripts/datalayer.js doesn't send the generic one here): "page load"
+  // once the lounge's first services are shown, else the generic one (no lounge to show). Once a
+  // page: Try again or a new date or time doesn't send another
+  let viewed = false;
+  const sendPageView = (eventName, extra) => {
+    if (viewed) return;
+    viewed = true;
+    pushEvent(PAGE_VIEW, eventName, extra);
+  };
   // "lounge detail" from the start (the page name from the path until the lounge has come)
   setPageDetails({ siteSection: SITE_SECTION });
   const settings = readSettings(block);
@@ -943,7 +947,7 @@ export default async function decorate(block) {
   block.replaceChildren();
   if (!/^[A-Z0-9]+$/.test(params.code)) {
     showMessage(block, translate('propertyNotFound'), null, 'Open this page with a lounge in the address, e.g. ?propertycode=PRPRTY814&currency=HKD.');
-    sendPageView(null);
+    sendPageView('page view');
     return;
   }
   // the detail service needs the code and the language (the currency doesn't change its answer)
@@ -960,18 +964,18 @@ export default async function decorate(block) {
     } catch (error) {
       if (error.status === 404) {
         showMessage(block, translate('propertyNotFound'), null, `Property code "${params.code}" isn't in the service.`);
-        sendPageView(null);
+        sendPageView('page view');
         return;
       }
       // eslint-disable-next-line no-console
       console.error('property-detail: could not load', url.href, error);
       showMessage(block, translate('propertyDetailError'), () => load());
-      sendPageView(null);
+      sendPageView('page view');
       return;
     }
     if (!lounge) {
       showMessage(block, translate('propertyNotFound'), null, `Property "${params.code}" isn't active or isn't a lounge or pass.`);
-      sendPageView(null);
+      sendPageView('page view');
       return;
     }
     // the lounge's page name for every event from now on (pageDetails.pageName)
@@ -1075,13 +1079,8 @@ export default async function decorate(block) {
     place();
     setHead(lounge, safeHtml(lounge.description, { blocks: true }));
 
-    // the page view, with the form as it is once its first services are shown (or none came)
-    let viewed = false;
-    const pageViewReady = () => {
-      if (viewed) return;
-      viewed = true;
-      sendPageView(readPageView(lounge, booking.form));
-    };
+    // "page load", with the form as it is once its first services are shown (or none came)
+    const pageViewReady = () => sendPageView('page load', readPageView(lounge, booking.form));
     // the services' answer into the booking form (an answer replaced by a newer request is dropped)
     const showServices = ({ controller, request }) => request.then((json) => {
       if (controller.signal.aborted) return;
@@ -1118,10 +1117,6 @@ export default async function decorate(block) {
     setLoading(true);
     try {
       await render();
-    } catch (error) {
-      // (a page that broke still counts its page view: the generic one)
-      sendPageView(null);
-      throw error;
     } finally {
       setLoading(false);
     }
