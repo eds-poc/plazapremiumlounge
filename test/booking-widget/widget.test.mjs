@@ -10,7 +10,7 @@ const page = await open(browser, { width: 1440 });
 const input = page.locator(`${W} .booking-widget-where-input`);
 await input.click();
 await page.waitForFunction((w) => document.querySelectorAll(`${w} .booking-widget-option`).length > 100, W, { timeout: 20000 });
-for (const [q, expect] of [['HKG', ['HKG']], ['abuja', ['ABV']], ['nigeria', ['ABV', 'LOS']], ['zhong', ['LHW']]]) {
+for (const [q, expect] of [['HKG', ['HKG']], ['nnamdi', ['ABV']], ['nigeria', ['ABV', 'LOS']], ['zhong', ['LHW']]]) {
   // eslint-disable-next-line no-await-in-loop
   await input.fill(q);
   // eslint-disable-next-line no-await-in-loop

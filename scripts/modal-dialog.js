@@ -11,7 +11,8 @@ let count = 0;
  * modal), so typed values aren't lost; it gives a small bounce instead.
  * @param {string} key Unique key for this modal, so it is built once and reused
  * @param {Node[]} content Nodes to show in the modal body; `content.styles` are extra classes
- *   for the dialog (a modal page's section style, e.g. `square`)
+ *   for the dialog (a modal page's section style, e.g. `square`); `content.static` keeps it open
+ *   on a backdrop click and on Esc (only its own controls close it)
  * @returns {HTMLDialogElement}
  */
 function buildModal(key, content) {
@@ -48,8 +49,23 @@ function buildModal(key, content) {
   panel.append(header, body);
   dialog.append(panel);
 
-  const isStatic = !!body.querySelector('form');
+  // static: a backdrop click only bounces it; with `content.static` (the source's
+  // data-bs-backdrop="static" data-bs-keyboard="false", e.g. the cart's dialogs), Esc too
+  const isStatic = !!body.querySelector('form') || !!content.static;
   if (isStatic) dialog.classList.add('is-static');
+  const bounce = () => {
+    dialog.classList.remove('is-bouncing');
+    // restart the animation
+    // eslint-disable-next-line no-unused-expressions
+    dialog.offsetWidth;
+    dialog.classList.add('is-bouncing');
+  };
+  if (content.static) {
+    dialog.addEventListener('cancel', (e) => {
+      e.preventDefault();
+      bounce();
+    });
+  }
   // a click outside the panel lands on the dialog itself, which is the backdrop area
   dialog.addEventListener('click', (e) => {
     if (e.target !== dialog) {
@@ -65,11 +81,7 @@ function buildModal(key, content) {
       dialog.close();
       return;
     }
-    dialog.classList.remove('is-bouncing');
-    // restart the animation
-    // eslint-disable-next-line no-unused-expressions
-    dialog.offsetWidth;
-    dialog.classList.add('is-bouncing');
+    bounce();
   });
   dialog.addEventListener('animationend', () => dialog.classList.remove('is-bouncing'));
   dialog.addEventListener('close', () => {
@@ -90,23 +102,27 @@ function buildModal(key, content) {
  * @param {string} options.key Unique key for the modal (a section name or page path)
  * @param {() => Promise<Node[]>|Node[]} options.content Returns the modal content on first open
  * @param {HTMLElement} [options.trigger] The element that opened it; focus returns here
+ * @param {boolean} [options.stack] Open over the open modal, which stays (e.g. a confirmation
+ *   over the cart), instead of replacing it
  * @returns {Promise<HTMLDialogElement|null>}
  */
 // eslint-disable-next-line import/prefer-default-export
-export async function openModal({ key, content, trigger }) {
+export async function openModal({
+  key, content, trigger, stack = false,
+}) {
   await loadCSS(`${window.hlx.codeBasePath}/styles/modal.css`);
   // opened from inside another modal (e.g. Forgot Password? in the login modal): when this one
-  // closes, focus goes back to what opened the first modal
+  // closes, focus goes back to what opened the first modal (over it: to the trigger in it)
   const host = trigger?.closest('dialog.modal');
-  const returnTo = host?.trigger || trigger;
+  const returnTo = stack ? trigger : host?.trigger || trigger;
   let dialog = modals.get(key);
   if (!dialog) {
     const nodes = await content();
     if (!nodes || !nodes.length) return null;
     dialog = buildModal(key, nodes);
   }
-  // one modal at a time: opening another closes the current one
-  document.querySelectorAll('dialog.modal[open]').forEach((d) => { if (d !== dialog) d.close(); });
+  // one modal at a time: opening another closes the current one (unless it opens over it)
+  if (!stack) document.querySelectorAll('dialog.modal[open]').forEach((d) => { if (d !== dialog) d.close(); });
   if (dialog.open) return dialog;
   dialog.trigger = returnTo;
   if (trigger) trigger.setAttribute('aria-controls', dialog.id);

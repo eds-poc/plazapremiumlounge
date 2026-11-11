@@ -47,16 +47,19 @@ so it's always current.
   then replaces the kept one. If that refresh fails, the kept passes stay.
 - **Learn more** opens the pass's details in a pop-up, as the source: the image, name, where it's
   valid, the price and points, the description from the service, and Add to Cart.
-- **Add to Cart** has no cart to add to yet: it announces the choice (a `quick-buy:add-to-cart`
-  event with the product code, the catalogue code the source's cart uses, the name and the price)
-  for the cart to come.
+- **Add to Cart** announces the choice (a `quick-buy:add-to-cart` event with the product code, the
+  catalogue code the source's cart uses, the name and the price). The cart takes it as a pass (see
+  [docs/cart.md](../../docs/cart.md)). While the pass is in the cart, its buttons read **Add More**
+  (adding one more).
+- **`?selectedPassID=<product code>`** in the page address puts that pass into the cart once the
+  passes are in (see docs/cart.md).
 
 ## Not authored here
 
 | What | From |
 | --- | --- |
 | The service | `scripts/endpoints.js` (`productPasses`, a GET with the property code, airport code, currency and product code) |
-| Currency | The page address's `currencyCode` (e.g. `?currencyCode=HKD`), else USD |
+| Currency | The visitor's currency, as on the rest of the site (the address's `currencyCode` or `currency`, e.g. `?currencyCode=HKD`, then the one applied this session, then the one for their location; else USD) |
 | Names, descriptions | The service's, in English (it has no translations) |
 
 ## Messages

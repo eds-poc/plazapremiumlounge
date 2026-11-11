@@ -8,3 +8,4 @@ test/*
 sync-block-collection.sh
 design-system/*
 tools/*
+catalog/

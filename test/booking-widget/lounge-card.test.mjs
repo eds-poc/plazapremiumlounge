@@ -85,7 +85,7 @@ async function run(code, query, { width = 1440, answer, extraRoute } = {}) {
 }
 
 if (!only || only === 'real') {
-  const abv = await run('ABV', 'abuja');
+  const abv = await run('ABV', 'nnamdi');
   const { calls } = abv;
   let { page, s } = abv;
   console.log('  ABV', JSON.stringify(s));
@@ -117,7 +117,8 @@ if (!only || only === 'real') {
   check('airport change: propertyCode empty', b3.selectedAirport === 'HKG' && b3.propertyCode === '', JSON.stringify({ a: b3.selectedAirport, p: b3.propertyCode }));
   check('HKG: card, View more properties (7 lounges)', s.card && /View more properties in Hong Kong International Airport \(HKG\)/.test(s.more || ''), `${s.title} | ${s.more}`);
   check('HKG: discount struck (995 → 895.50)', /HKD \d+\.\d\d/.test(s.was || '') && /HKD \d+\.\d\d/.test(s.now || ''), `${s.was} | ${s.now}`);
-  // Book Now: the event, no navigation
+  // Book Now: the event, no navigation (the cart it goes into answers here, not the stage service)
+  await page.route(/ppg-app\/cart(\?|$)/, (r) => r.fulfill(json(r.request().method() === 'POST' ? { cartId: 'CRT_TEST' } : { errorCode: 'BKNG001', message: 'Cart not found' })));
   const booked = page.evaluate(() => new Promise((resolve) => { document.addEventListener('booking-widget:book', (e) => resolve(e.detail), { once: true }); }));
   const url = page.url();
   await page.locator('.booking-widget-card-book').click();
@@ -131,7 +132,7 @@ if (!only || only === 'real') {
   const opts = await page.locator('.booking-widget-card-product option').allTextContents();
   check('DXB: the SHOWER tab shows its products', opts.some((o) => /shower/i.test(o)), opts.join(' / '));
   await page.close();
-  ({ page, s } = await run('ABV', 'abuja', { width: 375 }));
+  ({ page, s } = await run('ABV', 'nnamdi', { width: 375 }));
   check('ABV phone: card', s.card && s.title === 'SDS Lounge', s.title);
   await page.close();
 }
@@ -167,7 +168,7 @@ if (!only || only === 'routed') {
   ];
   for (const [name, answer, ok] of cases) {
     // eslint-disable-next-line no-await-in-loop
-    const { page, s } = await run('ABV', 'abuja', { answer });
+    const { page, s } = await run('ABV', 'nnamdi', { answer });
     check(name, ok(s), JSON.stringify({
       card: s.card, title: s.title, place: s.place, now: s.now, was: s.was, photos: s.photos.length, features: s.features.length, status: s.status, off: s.off, more: s.more,
     }));
@@ -210,7 +211,7 @@ if (!only || only === 'flow') {
   check('two quick guest changes → one request', mid === n && calls.length === n + 1 && calls.at(-1).adult === 3, `${calls.length - n} request(s), adult ${calls.at(-1)?.adult}`);
   await pick(page, 'dubai int', 'DXB');
   await page.waitForTimeout(100);
-  await pick(page, 'abuja', 'ABV');
+  await pick(page, 'nnamdi', 'ABV');
   await waitDone(page);
   await page.waitForTimeout(800);
   s = await state(page);

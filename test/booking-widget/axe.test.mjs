@@ -1,4 +1,5 @@
-// axe on the hero with the ABV card, the online-booking-off card and the Filling Up state.
+// axe on the hero with a lounge card, the online-booking-off card and the Filling Up state (all
+// from the fixture: the stage service's ABV answer changes, e.g. passes only on 2026-11-06).
 import { readFileSync } from 'node:fs';
 import { open, PW } from './harness.mjs';
 
@@ -8,7 +9,7 @@ const SUCCESS = JSON.parse(readFileSync(new URL('./fixtures/getbookingwidgetprod
 const filling = JSON.parse(JSON.stringify(SUCCESS));
 filling.itemGroups[0].items[0].availability = false;
 const browser = await chromium.launch();
-const runs = [['card', 1440], ['card', 375], ['unavailable', 1440, { ...SUCCESS, isTecoEnabled: false }], ['filling up', 1440, filling]];
+const runs = [['card', 1440, SUCCESS], ['card', 375, SUCCESS], ['unavailable', 1440, { ...SUCCESS, isTecoEnabled: false }], ['filling up', 1440, filling]];
 for (const [label, width, answer] of runs) {
   // eslint-disable-next-line no-await-in-loop
   const page = await open(browser, {
