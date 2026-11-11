@@ -514,13 +514,107 @@ const TEXTS = {
     en: 'Learn more', zh: '了解更多', 'zh-HK': '了解更多', ja: '詳細を見る', pt: 'Saiba mais',
   },
   quickBuyAddToCart: {
-    en: 'Add to Cart', zh: '加入购物车', 'zh-HK': '加入購物車', ja: 'カートに追加', pt: 'Adicionar ao carrinho',
+    en: 'Add to Cart', zh: '加入购物车', 'zh-HK': '加入購物車', ja: 'カートに入れる', pt: 'Adicionar ao Carrinho',
+  },
+  // (a pass's Add to Cart once it's in the cart: the source's pass pop-up's wording)
+  quickBuyAddMore: {
+    en: 'Add More', zh: '新增更多', 'zh-HK': '新增更多', ja: 'さらに追加', pt: 'Adicionar Mais',
   },
   quickBuyLocation: {
     en: '{location} Plaza Premium Lounge', zh: '{location} 环亚机场贵宾室', 'zh-HK': '{location} 環亞機場貴賓室', ja: '{location} プラザプレミアムラウンジ', pt: '{location} Plaza Premium Lounge',
   },
   quickBuyError: {
     en: 'We couldn’t load the passes.', zh: '无法加载贵宾室通行证。', 'zh-HK': '無法載入貴賓室通行證。', ja: 'パスを読み込めませんでした。', pt: 'Não foi possível carregar os passes.',
+  },
+  // the cart (the source's mini cart and its dialogs, in each language; the source shows
+  // "時間:" on its zh-cn site, a slip written here as 时间)
+  cartTitle: {
+    en: 'Cart', zh: '购物车', 'zh-HK': '購物車', ja: 'カート', pt: 'Carrinho',
+  },
+  cartDate: {
+    en: 'Date:', zh: '日期:', 'zh-HK': '日期:', ja: '日付:', pt: 'Data:',
+  },
+  cartTime: {
+    en: 'Time:', zh: '时间:', 'zh-HK': '時間:', ja: '時間:', pt: 'Hora:',
+  },
+  cartHours: {
+    en: 'hrs', zh: 'hrs', 'zh-HK': 'hrs', ja: 'hrs', pt: 'hrs',
+  },
+  cartGuests: {
+    en: 'Guests:', zh: '宾客:', 'zh-HK': '賓客:', ja: 'ゲスト:', pt: 'Passageiros:',
+  },
+  cartServices: {
+    en: 'Services:', zh: '服务:', 'zh-HK': '服務:', ja: 'サービス:', pt: 'Serviços:',
+  },
+  // (a pass's line)
+  cartQuantity: {
+    en: 'Quantity:', zh: '数量:', 'zh-HK': '數量:', ja: '数量:', pt: 'Quantidade:',
+  },
+  cartServiceTotal: {
+    en: 'Service Total', zh: '服务总额', 'zh-HK': '服務總額', ja: 'サービス合計', pt: 'Total do Serviço',
+  },
+  cartTotal: {
+    en: 'Total', zh: '总额', 'zh-HK': '總額', ja: '合計', pt: 'Total',
+  },
+  cartTotalNote: {
+    en: '(Includes applicable taxes and fees)', zh: '(包含相关税项及费用)', 'zh-HK': '(包含相關稅項及費用)', ja: '(税込、手数料込)', pt: '(Inclui taxas e impostos aplicáveis)',
+  },
+  cartCheckout: {
+    en: 'Check Out', zh: '结账', 'zh-HK': '結帳', ja: 'チェックアウト', pt: 'Finalizar Compra',
+  },
+  cartEdit: {
+    en: 'Edit', zh: '编辑', 'zh-HK': '編輯', ja: '編集', pt: 'Editar',
+  },
+  cartRemoveFromCart: {
+    en: 'Remove From Cart', zh: '从购物车移除', 'zh-HK': '從購物車移除', ja: 'カートから削除', pt: 'Remover do Carrinho',
+  },
+  // (the cart line's ⊗, for screen readers)
+  cartRemoveItem: {
+    en: 'Remove {name}', zh: '移除{name}', 'zh-HK': '移除{name}', ja: '{name}を削除', pt: 'Remover {name}',
+  },
+  // (the header's cart, for screen readers)
+  cartItemCount: {
+    en: '{count} item(s)', zh: '{count} 件商品', 'zh-HK': '{count} 件商品', ja: '{count} 点', pt: '{count} item(ns)',
+  },
+  cartCheckoutFirstTitle: {
+    en: 'Checkout Cart', zh: '结账购物车', 'zh-HK': '結帳購物車', ja: 'カートをチェックアウト', pt: 'Carrinho de Checkout',
+  },
+  cartCheckoutFirst: {
+    en: 'Please proceed to checkout before adding new item into cart.',
+    zh: '在将新项目加入购物车之前，请先进行结账。',
+    'zh-HK': '在將新項目加入購物車之前，請先進行結帳。',
+    ja: '新しい商品をカートに追加する前に、チェックアウトに進んでください。',
+    pt: 'Por favor, prossiga para o checkout antes de adicionar um novo item ao carrinho.',
+  },
+  cartViewCart: {
+    en: 'View Cart', zh: '查看购物车', 'zh-HK': '查看購物車', ja: 'カートを確認', pt: 'Ver Carrinho',
+  },
+  cartRemoveConfirm: {
+    en: 'Would you like to remove this order from the shopping cart?',
+    zh: '您想从购物车中移除此订单吗？',
+    'zh-HK': '您想從購物車中移除此訂單嗎？',
+    ja: 'この注文をカートから削除しますか？',
+    pt: 'Deseja remover este pedido do carrinho de compras?',
+  },
+  cartCancel: {
+    en: 'Cancel', zh: '取消', 'zh-HK': '取消', ja: 'キャンセル', pt: 'Cancelar',
+  },
+  cartYes: {
+    en: 'Yes', zh: '是', 'zh-HK': '是', ja: 'はい', pt: 'Sim',
+  },
+  cartAddFailed: {
+    en: 'Unable to add to cart.', zh: '无法加入购物车。', 'zh-HK': '無法加入購物車。', ja: 'カートに追加できませんでした。', pt: 'Não foi possível adicionar ao carrinho.',
+  },
+  // a pass that wasn't added (the source's pass page: "Notice", its default message)
+  cartNotice: {
+    en: 'Notice', zh: '须知', 'zh-HK': '須知', ja: 'お知らせ', pt: 'Aviso',
+  },
+  cartPassAddFailed: {
+    en: 'An error occurred. Please try again later.', zh: '发生错误，请稍后再试。', 'zh-HK': '發生錯誤，請稍後再試。', ja: 'エラーが発生しました。しばらくしてからもう一度お試しください。', pt: 'Ocorreu um erro. Tente novamente mais tarde.',
+  },
+  // (the source's alert, English on every site)
+  cartRemoveFailed: {
+    en: 'Unable to remove from cart.', zh: '无法从购物车移除。', 'zh-HK': '無法從購物車移除。', ja: 'カートから削除できませんでした。', pt: 'Não foi possível remover do carrinho.',
   },
   // the pass finder (the source's wording in English)
   passFinderSearch: {

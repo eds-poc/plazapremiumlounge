@@ -47,13 +47,15 @@ page adds only the heading and the codes the service is asked with.
   to the service, and the list is kept for the visitor's session (see the Quick Buy guide).
 - **Price:** each pass's regular rate (not a member or partner rate), as Quick Buy.
 - **Add to Cart** announces the choice (a `pass-finder:add-to-cart` event with the product code,
-  catalogue code, name and price) for the cart to come.
+  catalogue code, name and price). The cart takes it as a pass (see
+  [docs/cart.md](../../docs/cart.md)). While the pass is in the cart, its buttons read **Add More**.
+  `?selectedPassID=` adds a pass from the address.
 
 ## Not authored here
 
 | What | From |
 | --- | --- |
-| The service, currency | As Quick Buy: `scripts/endpoints.js`, and the address's `currencyCode` (e.g. `?currencyCode=HKD`; else USD) |
+| The service, currency | As Quick Buy: `scripts/endpoints.js`, and the visitor's currency, as on the rest of the site (the address's `currencyCode` or `currency`, e.g. `?currencyCode=HKD`, then the one applied this session, then the one for their location; else USD) |
 | Names, locations, descriptions | The service's, in English |
 | The card parts and the pop-up | `scripts/passes.js` and `styles/passes.css`, shared with Quick Buy |
 

@@ -1,0 +1,756 @@
+{
+ "count": 5,
+ "entity": "products",
+ "items": [
+  {
+   "accuralPoints": "+150 ST Points",
+   "arrtureSku": "862",
+   "availability": true,
+   "basedOn": "Per Unit",
+   "createdDate": "2026-01-21 00:00:00",
+   "eligibleLocations": [
+    "Global"
+   ],
+   "fulfillmentType": "Arture",
+   "giftCardName": "0130 ",
+   "images": [
+    {
+     "name": "ppl_pass_global_2-visit.png",
+     "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prd_images/ppl_pass_global_2-visit.png"
+    }
+   ],
+   "isFlightNumberMandatory": false,
+   "isStLoginMandatory": false,
+   "isThirdPartyFulfilment": false,
+   "journeyTypes": [],
+   "lastModifiedDate": "2026-07-20 03:33:08",
+   "locations": [],
+   "masNoOfProductsAllowed": 10,
+   "numberOfVisits": 2,
+   "packages": [],
+   "passCategory": [
+    {
+     "category": "All",
+     "categoryCode": "All",
+     "categorySeq": 1
+    },
+    {
+     "category": "Global",
+     "categoryCode": "Global",
+     "categorySeq": 2
+    },
+    {
+     "category": "Dubai",
+     "categoryCode": "Dubai",
+     "categorySeq": 19
+    }
+   ],
+   "prices": [
+    {
+     "additionalCharges": [],
+     "availableInventory": 25,
+     "basePrice": 99,
+     "basePriceWithDiscount": 99,
+     "baseRate": [
+      {
+       "currency": "USD",
+       "price": 99
+      }
+     ],
+     "catalogueCode": "PRD3705-Regular-PRPRTY1235-GFTCRD-LCTN517-RTPLN3532",
+     "discounts": [],
+     "isInventoryAvailable": true,
+     "isMinimumAmountMet": true,
+     "isSTRatePlan": false,
+     "lastModifiedDate": 1792040430000,
+     "priceCode": "RTPLN3532",
+     "priceName": "Plaza Premium Lounge Pass - ST Member's Rates",
+     "taxes": [],
+     "termsPolicies": [
+      {
+       "description": "<li>Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the Pass will expire. Expired Pass cannot be reissued or reinstated. </li>\n<li>Upon successful activation, vouchers will be added to the Smart Traveller mobile app wallet. Arrture points, if any, will be issued to the account of the Smart Traveller member who activated the Pass. </li>\n<li>The Buggy service is exclusively provided at the Hong Kong International Airport, whereas access to <a href=\"\"https://www.plazapremiumlounge.com/en-uk/gc-lounges#ppl\"\" target=\"\"_blank\"\">designated lounges</a> is available. </li>\n<li>This pass grants the voucher holder up to 3-hour lounge access to the respective Service Locations.  Services/facilities may vary at each Service Location. </li>\n<li>This Pass is valid for 12 months from the date of activation. </li>\n<li>The Buggy & Lounge Pass and its benefits may be subject to change or discontinuation at any time without prior notice. </li>\n<li>Pass purchase is final, non-cancellable, non-refundable and non-replaceable. </li>",
+       "termsCode": "SLSTRM2979",
+       "termsName": "Terms and Conditions (Buggy & Lounge Pass)"
+      }
+     ],
+     "totalPrice": 99
+    },
+    {
+     "additionalCharges": [],
+     "availableInventory": 5,
+     "basePrice": 99,
+     "basePriceWithDiscount": 99,
+     "baseRate": [
+      {
+       "currency": "USD",
+       "price": 99
+      }
+     ],
+     "catalogueCode": "PRD3705-Regular-PRPRTY1235-GFTCRD-LCTN517-RTPLN3518",
+     "discounts": [],
+     "isInventoryAvailable": true,
+     "isMinimumAmountMet": true,
+     "isSTRatePlan": false,
+     "lastModifiedDate": 1773285923000,
+     "priceCode": "RTPLN3518",
+     "priceName": "Plaza Premium Lounge passes",
+     "taxes": [],
+     "termsPolicies": [
+      {
+       "description": "<ul><li>The Canada Pass (“PPL Pass”) grants visits to <a href=\"\\&quot;https://www.plazapremiumlounge.com/en-uk/gc-lounges#americas\\&quot;\">designated lounges</a> in Canada &amp; Americas only.</li><li>PPL Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the PPL Pass will expire. Expired PPL Pass cannot be reissued or reinstated.</li><li>Smart Traveller members: Upon successful activation PPL Pass lounge access voucher(s) (“Voucher”) will be added to the Smart Traveller mobile app wallet. Arrture points, if any, will be issued to the account of the Smart Traveller member who activated the PPL Pass.</li><li>Non-Smart Traveller members: Upon successful activation, Voucher will be emailed to the registered email address provided at the time of activation.</li><li>Unless otherwise specified, Voucher is valid for twelve (12) months upon PPL Pass activation.</li><li>PPL Pass purchase, Voucher and any applicable Arrture points issuance are final, non-cancellable, non-refundable and non-replaceable. Plaza Premium Lounge shall not be responsible for any loss, theft, damage, or unauthorised use of the Voucher.</li><li>The Vouchers are transferable provided always that the transfer is not a part of any sale or exchange for value.</li><li>The Vouchers have no cash value and cannot be exchanged for cash, points, or any other services or products.</li><li>Unless otherwise specified, each Voucher grants the voucher holder up to 3-hour lounge access only per visit to <a href=\"\\&quot;https://www.plazapremiumlounge.com/gc-lounges\\&quot;\">eligible lounges</a> (“Service Locations”). Operating hours, services, and facilities may vary at each Service Location. This Voucher does not entitle the Voucher holder to any other services/products other than lounge access, and the Voucher holder agrees to pay for the use of any chargeable services/products offered at the relevant Service Location.</li><li>Access to Service Locations using Vouchers is not eligible for any rewards or loyalty points accrual.</li><li>The Voucher cannot be used in conjunction with any promotion or offer.\\n</li><li>Read the full <a href=\"\\&quot;https://www.plazapremiumlounge.com/gc-terms\\&quot;\">Terms and Conditions</a>.</li><li>PPL Pass Canada 5-/10-Visit\\n<ul><li>Includes 2 complimentary Lounge-to-Go vouchers</li><li>Available only at <a href=\"\\&quot;https://www.plazapremiumlounge.com/en-uk/gc-lounges#canada\\&quot;\">Plaza Premium Lounge locations in Canada</a></li><li>Menu options may vary by location and availability</li></ul></li><li>PPL Pass America 2-Visit\\n<ul><li>Includes 1 complimentary food &amp; beverage item from the paid menu</li><li>Available at eligible <a href=\"\\&quot;https://www.plazapremiumlounge.com/en-uk/gc-lounges#americas\\&quot;\">Plaza Premium Lounge locations</a></li><li>Menu options may vary by location and availability</li></ul></li></ul>",
+       "termsCode": "SLSTRM2977",
+       "termsName": "Terms and Conditions (Canada Pass) - KM3"
+      },
+      {
+       "description": "<p>KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1&nbsp;</p>",
+       "termsCode": "SLSTRM2973",
+       "termsName": "Terms and Conditions - KM - 1"
+      }
+     ],
+     "totalPrice": 99
+    },
+    {
+     "additionalCharges": [],
+     "availableInventory": 25,
+     "basePrice": 99,
+     "basePriceWithDiscount": 99,
+     "baseRate": [
+      {
+       "currency": "USD",
+       "price": 99
+      }
+     ],
+     "catalogueCode": "PRD3705-Regular-PRPRTY1235-GFTCRD-LCTN517-RTPLN3737",
+     "discounts": [],
+     "isInventoryAvailable": true,
+     "isMinimumAmountMet": true,
+     "isSTRatePlan": false,
+     "lastModifiedDate": 1769653508000,
+     "priceCode": "RTPLN3737",
+     "priceName": "Plaza Premium Lounge Pass",
+     "taxes": [],
+     "termsPolicies": [
+      {
+       "description": "<ul><li>PPL Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the PPL Pass will expire. Expired PPL Pass cannot be reissued or reinstated.</li><li>Smart Traveller members: Upon successful activation PPL Pass lounge access voucher(s) (“Voucher”) will be added to the Smart Traveller mobile app wallet. Arrture points, if any, will be issued to the account of the Smart Traveller member who activated the PPL Pass.</li><li>Non-Smart Traveller members: Upon successful activation, Voucher will be emailed to the registered email address provided at the time of activation.</li><li>Unless otherwise specified, Voucher is valid for twelve (12) months upon PPL Pass activation.</li><li>PPL Pass purchase, Voucher and any applicable Arrture points issuance are final, non-cancellable, non-refundable and non-replaceable. Plaza Premium Lounge shall not be responsible for any loss, theft, damage, or unauthorised use of the Voucher.</li><li>The Vouchers are transferable provided always that the transfer is not a part of any sale or exchange for value.</li><li>The Vouchers have no cash value and cannot be exchanged for cash, points, or any other services or products.</li><li><strong>Access to </strong><a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.plazapremiumlounge.com/gc-lounges\"><strong>eligible lounges</strong></a><strong> (“Service Locations”) are subject to the type of PPL Pass purchased.</strong> Unless otherwise specified, each Voucher grants the voucher holder up to 3-hour lounge access only per visit to the respective Service Locations. Operating hours, services, and facilities may vary at each Service Location. This Voucher does not entitle the Voucher holder to any other services/products other than lounge access, and the Voucher holder agrees to pay for the use of any chargeable services/products offered at the relevant Service Location.</li><li>Access to Service Locations using Vouchers is not eligible for any rewards or loyalty points accrual.</li><li>The Voucher cannot be used in conjunction with any promotion or offer.</li><li>Read the full <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.plazapremiumlounge.com/gc-terms\">Terms and Conditions</a>.</li></ul>",
+       "termsCode": "SLSTRM2974",
+       "termsName": "Terms and Conditions"
+      }
+     ],
+     "totalPrice": 99
+    }
+   ],
+   "productCategory": "Visit Based",
+   "productCode": "PRD3705",
+   "productDescription": "<ul><li>Fit for round-trip indulgence or couple travel.</li><li>PPL Pass is valid for 12 months upon activation.</li><li>Up to 3 hours per visit.</li><li>To be eligible for ST Points reward, Smart Traveller members must log in to their account before making a purchase (adding to cart) and successfully make payment during the offer period. Any applicable points will be credited into their Smart Traveller account within 14 days of PPL Pass activation.</li><li>Conditions apply.</li></ul>",
+   "productDisplayName": "Global 2-Visit Pass",
+   "productDurationInMinutes": 0,
+   "productName": "Global 2-Visit Pass",
+   "productSeq": 11,
+   "productType": "Regular",
+   "productVarients": [],
+   "quantityLabel": "",
+   "serviceCode": "SRVC1622",
+   "serviceDescription": "<p>This service created for pass service</p>",
+   "serviceDisplayName": "Pass Service",
+   "serviceName": "Pass Service",
+   "serviceSequence": 9995,
+   "serviceType": "Per Unit",
+   "shortProductDescription": "<strong><font color=\"#8c0d42\">Smart Traveller Members</font></strong> get 150 ST Points. Login to enjoy offer*"
+  },
+  {
+   "accuralPoints": "+450 ST Points",
+   "arrtureSku": "25",
+   "availability": true,
+   "basedOn": "Per Unit",
+   "createdDate": "2026-01-21 00:00:00",
+   "eligibleLocations": [
+    "Global"
+   ],
+   "fulfillmentType": "Arture",
+   "giftCardName": "",
+   "images": [
+    {
+     "name": "ppl_pass_global_5-visit.png",
+     "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prd_images/ppl_pass_global_5-visit.png"
+    }
+   ],
+   "isFlightNumberMandatory": false,
+   "isStLoginMandatory": false,
+   "isThirdPartyFulfilment": false,
+   "journeyTypes": [],
+   "lastModifiedDate": "2026-04-29 03:35:45",
+   "locations": [],
+   "masNoOfProductsAllowed": 10,
+   "numberOfVisits": 5,
+   "packages": [],
+   "passCategory": [
+    {
+     "category": "All",
+     "categoryCode": "All",
+     "categorySeq": 1
+    },
+    {
+     "category": "Global",
+     "categoryCode": "Global",
+     "categorySeq": 2
+    }
+   ],
+   "prices": [
+    {
+     "additionalCharges": [],
+     "availableInventory": 25,
+     "basePrice": 199,
+     "basePriceWithDiscount": 199,
+     "baseRate": [
+      {
+       "currency": "USD",
+       "price": 199
+      }
+     ],
+     "catalogueCode": "PRD3696-Regular-PRPRTY1235-GFTCRD-LCTN517-RTPLN3532",
+     "discounts": [],
+     "isInventoryAvailable": true,
+     "isMinimumAmountMet": true,
+     "isSTRatePlan": false,
+     "lastModifiedDate": 1792040430000,
+     "priceCode": "RTPLN3532",
+     "priceName": "Plaza Premium Lounge Pass - ST Member's Rates",
+     "taxes": [],
+     "termsPolicies": [
+      {
+       "description": "<li>Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the Pass will expire. Expired Pass cannot be reissued or reinstated. </li>\n<li>Upon successful activation, vouchers will be added to the Smart Traveller mobile app wallet. Arrture points, if any, will be issued to the account of the Smart Traveller member who activated the Pass. </li>\n<li>The Buggy service is exclusively provided at the Hong Kong International Airport, whereas access to <a href=\"\"https://www.plazapremiumlounge.com/en-uk/gc-lounges#ppl\"\" target=\"\"_blank\"\">designated lounges</a> is available. </li>\n<li>This pass grants the voucher holder up to 3-hour lounge access to the respective Service Locations.  Services/facilities may vary at each Service Location. </li>\n<li>This Pass is valid for 12 months from the date of activation. </li>\n<li>The Buggy & Lounge Pass and its benefits may be subject to change or discontinuation at any time without prior notice. </li>\n<li>Pass purchase is final, non-cancellable, non-refundable and non-replaceable. </li>",
+       "termsCode": "SLSTRM2979",
+       "termsName": "Terms and Conditions (Buggy & Lounge Pass)"
+      }
+     ],
+     "totalPrice": 199
+    },
+    {
+     "additionalCharges": [],
+     "availableInventory": 5,
+     "basePrice": 199,
+     "basePriceWithDiscount": 199,
+     "baseRate": [
+      {
+       "currency": "USD",
+       "price": 199
+      }
+     ],
+     "catalogueCode": "PRD3696-Regular-PRPRTY1235-GFTCRD-LCTN517-RTPLN3518",
+     "discounts": [],
+     "isInventoryAvailable": true,
+     "isMinimumAmountMet": true,
+     "isSTRatePlan": false,
+     "lastModifiedDate": 1773285923000,
+     "priceCode": "RTPLN3518",
+     "priceName": "Plaza Premium Lounge passes",
+     "taxes": [],
+     "termsPolicies": [
+      {
+       "description": "<p>KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1&nbsp;</p>",
+       "termsCode": "SLSTRM2973",
+       "termsName": "Terms and Conditions - KM - 1"
+      },
+      {
+       "description": "<ul><li>The Canada Pass (“PPL Pass”) grants visits to <a href=\"\\&quot;https://www.plazapremiumlounge.com/en-uk/gc-lounges#americas\\&quot;\">designated lounges</a> in Canada &amp; Americas only.</li><li>PPL Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the PPL Pass will expire. Expired PPL Pass cannot be reissued or reinstated.</li><li>Smart Traveller members: Upon successful activation PPL Pass lounge access voucher(s) (“Voucher”) will be added to the Smart Traveller mobile app wallet. Arrture points, if any, will be issued to the account of the Smart Traveller member who activated the PPL Pass.</li><li>Non-Smart Traveller members: Upon successful activation, Voucher will be emailed to the registered email address provided at the time of activation.</li><li>Unless otherwise specified, Voucher is valid for twelve (12) months upon PPL Pass activation.</li><li>PPL Pass purchase, Voucher and any applicable Arrture points issuance are final, non-cancellable, non-refundable and non-replaceable. Plaza Premium Lounge shall not be responsible for any loss, theft, damage, or unauthorised use of the Voucher.</li><li>The Vouchers are transferable provided always that the transfer is not a part of any sale or exchange for value.</li><li>The Vouchers have no cash value and cannot be exchanged for cash, points, or any other services or products.</li><li>Unless otherwise specified, each Voucher grants the voucher holder up to 3-hour lounge access only per visit to <a href=\"\\&quot;https://www.plazapremiumlounge.com/gc-lounges\\&quot;\">eligible lounges</a> (“Service Locations”). Operating hours, services, and facilities may vary at each Service Location. This Voucher does not entitle the Voucher holder to any other services/products other than lounge access, and the Voucher holder agrees to pay for the use of any chargeable services/products offered at the relevant Service Location.</li><li>Access to Service Locations using Vouchers is not eligible for any rewards or loyalty points accrual.</li><li>The Voucher cannot be used in conjunction with any promotion or offer.\\n</li><li>Read the full <a href=\"\\&quot;https://www.plazapremiumlounge.com/gc-terms\\&quot;\">Terms and Conditions</a>.</li><li>PPL Pass Canada 5-/10-Visit\\n<ul><li>Includes 2 complimentary Lounge-to-Go vouchers</li><li>Available only at <a href=\"\\&quot;https://www.plazapremiumlounge.com/en-uk/gc-lounges#canada\\&quot;\">Plaza Premium Lounge locations in Canada</a></li><li>Menu options may vary by location and availability</li></ul></li><li>PPL Pass America 2-Visit\\n<ul><li>Includes 1 complimentary food &amp; beverage item from the paid menu</li><li>Available at eligible <a href=\"\\&quot;https://www.plazapremiumlounge.com/en-uk/gc-lounges#americas\\&quot;\">Plaza Premium Lounge locations</a></li><li>Menu options may vary by location and availability</li></ul></li></ul>",
+       "termsCode": "SLSTRM2977",
+       "termsName": "Terms and Conditions (Canada Pass) - KM3"
+      }
+     ],
+     "totalPrice": 199
+    },
+    {
+     "additionalCharges": [],
+     "availableInventory": 25,
+     "basePrice": 199,
+     "basePriceWithDiscount": 199,
+     "baseRate": [
+      {
+       "currency": "USD",
+       "price": 199
+      }
+     ],
+     "catalogueCode": "PRD3696-Regular-PRPRTY1235-GFTCRD-LCTN517-RTPLN3737",
+     "discounts": [],
+     "isInventoryAvailable": true,
+     "isMinimumAmountMet": true,
+     "isSTRatePlan": false,
+     "lastModifiedDate": 1769653508000,
+     "priceCode": "RTPLN3737",
+     "priceName": "Plaza Premium Lounge Pass",
+     "taxes": [],
+     "termsPolicies": [
+      {
+       "description": "<ul><li>PPL Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the PPL Pass will expire. Expired PPL Pass cannot be reissued or reinstated.</li><li>Smart Traveller members: Upon successful activation PPL Pass lounge access voucher(s) (“Voucher”) will be added to the Smart Traveller mobile app wallet. Arrture points, if any, will be issued to the account of the Smart Traveller member who activated the PPL Pass.</li><li>Non-Smart Traveller members: Upon successful activation, Voucher will be emailed to the registered email address provided at the time of activation.</li><li>Unless otherwise specified, Voucher is valid for twelve (12) months upon PPL Pass activation.</li><li>PPL Pass purchase, Voucher and any applicable Arrture points issuance are final, non-cancellable, non-refundable and non-replaceable. Plaza Premium Lounge shall not be responsible for any loss, theft, damage, or unauthorised use of the Voucher.</li><li>The Vouchers are transferable provided always that the transfer is not a part of any sale or exchange for value.</li><li>The Vouchers have no cash value and cannot be exchanged for cash, points, or any other services or products.</li><li><strong>Access to </strong><a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.plazapremiumlounge.com/gc-lounges\"><strong>eligible lounges</strong></a><strong> (“Service Locations”) are subject to the type of PPL Pass purchased.</strong> Unless otherwise specified, each Voucher grants the voucher holder up to 3-hour lounge access only per visit to the respective Service Locations. Operating hours, services, and facilities may vary at each Service Location. This Voucher does not entitle the Voucher holder to any other services/products other than lounge access, and the Voucher holder agrees to pay for the use of any chargeable services/products offered at the relevant Service Location.</li><li>Access to Service Locations using Vouchers is not eligible for any rewards or loyalty points accrual.</li><li>The Voucher cannot be used in conjunction with any promotion or offer.</li><li>Read the full <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.plazapremiumlounge.com/gc-terms\">Terms and Conditions</a>.</li></ul>",
+       "termsCode": "SLSTRM2974",
+       "termsName": "Terms and Conditions"
+      }
+     ],
+     "totalPrice": 199
+    }
+   ],
+   "productCategory": "Visit Based",
+   "productCode": "PRD3696",
+   "productDescription": "<ul><li>Perfect for group and family travels.</li><li>Flexible for sharing among travellers.</li><li>PPL Pass is valid for 12 months upon activation.</li><li>Up to 3 hours per visit.</li><li>To be eligible for ST Points reward, Smart Traveller members must log in to their account before making a purchase (adding to cart) and successfully make payment during the offer period. Any applicable points will be credited into their Smart Traveller account within 14 days of PPL Pass activation.</li><li>Conditions apply.</li></ul><p>&nbsp;</p>",
+   "productDisplayName": "Global 5-Visit Pass",
+   "productDurationInMinutes": 0,
+   "productName": "Global 5-Visit Pass",
+   "productSeq": 12,
+   "productType": "Regular",
+   "productVarients": [],
+   "quantityLabel": "",
+   "serviceCode": "SRVC1622",
+   "serviceDescription": "<p>This service created for pass service</p>",
+   "serviceDisplayName": "Pass Service",
+   "serviceName": "Pass Service",
+   "serviceSequence": 9995,
+   "serviceType": "Per Unit",
+   "shortProductDescription": "<strong><font color=\"#8c0d42\">Smart Traveller Members</font></strong> get 450 ST Points. Login to enjoy offer*"
+  },
+  {
+   "accuralPoints": "+1000 ST Points",
+   "arrtureSku": "26",
+   "availability": true,
+   "basedOn": "Per Unit",
+   "createdDate": "2026-01-21 00:00:00",
+   "eligibleLocations": [
+    "Global"
+   ],
+   "fulfillmentType": "Arture",
+   "giftCardName": "",
+   "images": [
+    {
+     "name": "ppl_pass_global_10-visit.png",
+     "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prd_images/ppl_pass_global_10-visit.png"
+    }
+   ],
+   "isFlightNumberMandatory": false,
+   "isStLoginMandatory": false,
+   "isThirdPartyFulfilment": false,
+   "journeyTypes": [],
+   "lastModifiedDate": "2026-04-29 03:36:41",
+   "locations": [],
+   "masNoOfProductsAllowed": 10,
+   "numberOfVisits": 10,
+   "packages": [],
+   "passCategory": [
+    {
+     "category": "All",
+     "categoryCode": "All",
+     "categorySeq": 1
+    },
+    {
+     "category": "Global",
+     "categoryCode": "Global",
+     "categorySeq": 2
+    }
+   ],
+   "prices": [
+    {
+     "additionalCharges": [],
+     "availableInventory": 8,
+     "basePrice": 379,
+     "basePriceWithDiscount": 379,
+     "baseRate": [
+      {
+       "currency": "USD",
+       "price": 379
+      }
+     ],
+     "catalogueCode": "PRD3695-Regular-PRPRTY1235-GFTCRD-LCTN517-RTPLN3532",
+     "discounts": [],
+     "isInventoryAvailable": true,
+     "isMinimumAmountMet": true,
+     "isSTRatePlan": false,
+     "lastModifiedDate": 1792040430000,
+     "priceCode": "RTPLN3532",
+     "priceName": "Plaza Premium Lounge Pass - ST Member's Rates",
+     "taxes": [],
+     "termsPolicies": [
+      {
+       "description": "<li>Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the Pass will expire. Expired Pass cannot be reissued or reinstated. </li>\n<li>Upon successful activation, vouchers will be added to the Smart Traveller mobile app wallet. Arrture points, if any, will be issued to the account of the Smart Traveller member who activated the Pass. </li>\n<li>The Buggy service is exclusively provided at the Hong Kong International Airport, whereas access to <a href=\"\"https://www.plazapremiumlounge.com/en-uk/gc-lounges#ppl\"\" target=\"\"_blank\"\">designated lounges</a> is available. </li>\n<li>This pass grants the voucher holder up to 3-hour lounge access to the respective Service Locations.  Services/facilities may vary at each Service Location. </li>\n<li>This Pass is valid for 12 months from the date of activation. </li>\n<li>The Buggy & Lounge Pass and its benefits may be subject to change or discontinuation at any time without prior notice. </li>\n<li>Pass purchase is final, non-cancellable, non-refundable and non-replaceable. </li>",
+       "termsCode": "SLSTRM2979",
+       "termsName": "Terms and Conditions (Buggy & Lounge Pass)"
+      }
+     ],
+     "totalPrice": 379
+    },
+    {
+     "additionalCharges": [],
+     "availableInventory": 8,
+     "basePrice": 379,
+     "basePriceWithDiscount": 379,
+     "baseRate": [
+      {
+       "currency": "USD",
+       "price": 379
+      }
+     ],
+     "catalogueCode": "PRD3695-Regular-PRPRTY1235-GFTCRD-LCTN517-RTPLN3518",
+     "discounts": [],
+     "isInventoryAvailable": true,
+     "isMinimumAmountMet": true,
+     "isSTRatePlan": false,
+     "lastModifiedDate": 1773285923000,
+     "priceCode": "RTPLN3518",
+     "priceName": "Plaza Premium Lounge passes",
+     "taxes": [],
+     "termsPolicies": [
+      {
+       "description": "<ul><li>The Canada Pass (“PPL Pass”) grants visits to <a href=\"\\&quot;https://www.plazapremiumlounge.com/en-uk/gc-lounges#americas\\&quot;\">designated lounges</a> in Canada &amp; Americas only.</li><li>PPL Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the PPL Pass will expire. Expired PPL Pass cannot be reissued or reinstated.</li><li>Smart Traveller members: Upon successful activation PPL Pass lounge access voucher(s) (“Voucher”) will be added to the Smart Traveller mobile app wallet. Arrture points, if any, will be issued to the account of the Smart Traveller member who activated the PPL Pass.</li><li>Non-Smart Traveller members: Upon successful activation, Voucher will be emailed to the registered email address provided at the time of activation.</li><li>Unless otherwise specified, Voucher is valid for twelve (12) months upon PPL Pass activation.</li><li>PPL Pass purchase, Voucher and any applicable Arrture points issuance are final, non-cancellable, non-refundable and non-replaceable. Plaza Premium Lounge shall not be responsible for any loss, theft, damage, or unauthorised use of the Voucher.</li><li>The Vouchers are transferable provided always that the transfer is not a part of any sale or exchange for value.</li><li>The Vouchers have no cash value and cannot be exchanged for cash, points, or any other services or products.</li><li>Unless otherwise specified, each Voucher grants the voucher holder up to 3-hour lounge access only per visit to <a href=\"\\&quot;https://www.plazapremiumlounge.com/gc-lounges\\&quot;\">eligible lounges</a> (“Service Locations”). Operating hours, services, and facilities may vary at each Service Location. This Voucher does not entitle the Voucher holder to any other services/products other than lounge access, and the Voucher holder agrees to pay for the use of any chargeable services/products offered at the relevant Service Location.</li><li>Access to Service Locations using Vouchers is not eligible for any rewards or loyalty points accrual.</li><li>The Voucher cannot be used in conjunction with any promotion or offer.\\n</li><li>Read the full <a href=\"\\&quot;https://www.plazapremiumlounge.com/gc-terms\\&quot;\">Terms and Conditions</a>.</li><li>PPL Pass Canada 5-/10-Visit\\n<ul><li>Includes 2 complimentary Lounge-to-Go vouchers</li><li>Available only at <a href=\"\\&quot;https://www.plazapremiumlounge.com/en-uk/gc-lounges#canada\\&quot;\">Plaza Premium Lounge locations in Canada</a></li><li>Menu options may vary by location and availability</li></ul></li><li>PPL Pass America 2-Visit\\n<ul><li>Includes 1 complimentary food &amp; beverage item from the paid menu</li><li>Available at eligible <a href=\"\\&quot;https://www.plazapremiumlounge.com/en-uk/gc-lounges#americas\\&quot;\">Plaza Premium Lounge locations</a></li><li>Menu options may vary by location and availability</li></ul></li></ul>",
+       "termsCode": "SLSTRM2977",
+       "termsName": "Terms and Conditions (Canada Pass) - KM3"
+      },
+      {
+       "description": "<p>KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1&nbsp;</p>",
+       "termsCode": "SLSTRM2973",
+       "termsName": "Terms and Conditions - KM - 1"
+      }
+     ],
+     "totalPrice": 379
+    },
+    {
+     "additionalCharges": [],
+     "availableInventory": 8,
+     "basePrice": 379,
+     "basePriceWithDiscount": 379,
+     "baseRate": [
+      {
+       "currency": "USD",
+       "price": 379
+      }
+     ],
+     "catalogueCode": "PRD3695-Regular-PRPRTY1235-GFTCRD-LCTN517-RTPLN3737",
+     "discounts": [],
+     "isInventoryAvailable": true,
+     "isMinimumAmountMet": true,
+     "isSTRatePlan": false,
+     "lastModifiedDate": 1769653508000,
+     "priceCode": "RTPLN3737",
+     "priceName": "Plaza Premium Lounge Pass",
+     "taxes": [],
+     "termsPolicies": [
+      {
+       "description": "<ul><li>PPL Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the PPL Pass will expire. Expired PPL Pass cannot be reissued or reinstated.</li><li>Smart Traveller members: Upon successful activation PPL Pass lounge access voucher(s) (“Voucher”) will be added to the Smart Traveller mobile app wallet. Arrture points, if any, will be issued to the account of the Smart Traveller member who activated the PPL Pass.</li><li>Non-Smart Traveller members: Upon successful activation, Voucher will be emailed to the registered email address provided at the time of activation.</li><li>Unless otherwise specified, Voucher is valid for twelve (12) months upon PPL Pass activation.</li><li>PPL Pass purchase, Voucher and any applicable Arrture points issuance are final, non-cancellable, non-refundable and non-replaceable. Plaza Premium Lounge shall not be responsible for any loss, theft, damage, or unauthorised use of the Voucher.</li><li>The Vouchers are transferable provided always that the transfer is not a part of any sale or exchange for value.</li><li>The Vouchers have no cash value and cannot be exchanged for cash, points, or any other services or products.</li><li><strong>Access to </strong><a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.plazapremiumlounge.com/gc-lounges\"><strong>eligible lounges</strong></a><strong> (“Service Locations”) are subject to the type of PPL Pass purchased.</strong> Unless otherwise specified, each Voucher grants the voucher holder up to 3-hour lounge access only per visit to the respective Service Locations. Operating hours, services, and facilities may vary at each Service Location. This Voucher does not entitle the Voucher holder to any other services/products other than lounge access, and the Voucher holder agrees to pay for the use of any chargeable services/products offered at the relevant Service Location.</li><li>Access to Service Locations using Vouchers is not eligible for any rewards or loyalty points accrual.</li><li>The Voucher cannot be used in conjunction with any promotion or offer.</li><li>Read the full <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.plazapremiumlounge.com/gc-terms\">Terms and Conditions</a>.</li></ul>",
+       "termsCode": "SLSTRM2974",
+       "termsName": "Terms and Conditions"
+      }
+     ],
+     "totalPrice": 379
+    }
+   ],
+   "productCategory": "Visit Based",
+   "productCode": "PRD3695",
+   "productDescription": "'<li>Designed for frequent or business travellers.</li>\n<li>Save up to 50% off walk-in rates.</li>\n<li>PPL Pass is valid for 12 months upon activation.</li>\n<li>Up to 3 hours per visit.</li>\n<li>To be eligible for ST Points reward, Smart Traveller members must log in to their account before making a purchase (adding to cart) and successfully make payment during the offer period. Any applicable points will be credited into their Smart Traveller account within 14 days of PPL Pass activation.</li>\nConditions apply.'",
+   "productDisplayName": "Global 10-Visit Pass",
+   "productDurationInMinutes": 0,
+   "productName": "Global 10-Visit Pass",
+   "productSeq": 13,
+   "productType": "Regular",
+   "productVarients": [],
+   "quantityLabel": "",
+   "serviceCode": "SRVC1622",
+   "serviceDescription": "<p>This service created for pass service</p>",
+   "serviceDisplayName": "Pass Service",
+   "serviceName": "Pass Service",
+   "serviceSequence": 9995,
+   "serviceType": "Per Unit",
+   "shortProductDescription": "<strong><font color=\"#8c0d42\">Smart Traveller Members</font></strong> get 1,000 ST Points. Login to enjoy offer*"
+  },
+  {
+   "accuralPoints": "+450 ST Points",
+   "arrtureSku": "259",
+   "availability": true,
+   "basedOn": "Per Unit",
+   "createdDate": "2026-01-21 00:00:00",
+   "eligibleLocations": [
+    "Canada"
+   ],
+   "fulfillmentType": "Arture",
+   "giftCardName": "",
+   "images": [
+    {
+     "name": "PPL_Pass_YORKDALE_CARDS_P2_FA.jpg",
+     "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prd_images/PPL_Pass_YORKDALE_CARDS_P2_FA_product_3693.jpg"
+    }
+   ],
+   "isFlightNumberMandatory": false,
+   "isStLoginMandatory": false,
+   "isThirdPartyFulfilment": false,
+   "journeyTypes": [],
+   "lastModifiedDate": "2026-05-14 08:44:37",
+   "locations": [],
+   "masNoOfProductsAllowed": 10,
+   "numberOfVisits": 5,
+   "packages": [],
+   "passCategory": [
+    {
+     "category": "All",
+     "categoryCode": "All",
+     "categorySeq": 1
+    },
+    {
+     "category": "Americas",
+     "categoryCode": "Americas",
+     "categorySeq": 4
+    },
+    {
+     "category": "Canada",
+     "categoryCode": "Canada",
+     "categorySeq": 6
+    }
+   ],
+   "prices": [
+    {
+     "additionalCharges": [],
+     "availableInventory": 16,
+     "basePrice": 155,
+     "basePriceWithDiscount": 155,
+     "baseRate": [
+      {
+       "currency": "USD",
+       "price": 155
+      }
+     ],
+     "catalogueCode": "PRD3693-Regular-PRPRTY1235-GFTCRD-LCTN517-RTPLN3520",
+     "discounts": [],
+     "isInventoryAvailable": true,
+     "isMinimumAmountMet": true,
+     "isSTRatePlan": false,
+     "lastModifiedDate": 1769654309000,
+     "priceCode": "RTPLN3520",
+     "priceName": "PPL Pass Canada",
+     "taxes": [],
+     "termsPolicies": [
+      {
+       "description": "<ul><li>The Canada Pass (“PPL Pass”) grants visits to <a href=\"\\&quot;https://www.plazapremiumlounge.com/en-uk/gc-lounges#americas\\&quot;\">designated lounges</a> in Canada &amp; Americas only.</li><li>PPL Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the PPL Pass will expire. Expired PPL Pass cannot be reissued or reinstated.</li><li>Smart Traveller members: Upon successful activation PPL Pass lounge access voucher(s) (“Voucher”) will be added to the Smart Traveller mobile app wallet. Arrture points, if any, will be issued to the account of the Smart Traveller member who activated the PPL Pass.</li><li>Non-Smart Traveller members: Upon successful activation, Voucher will be emailed to the registered email address provided at the time of activation.</li><li>Unless otherwise specified, Voucher is valid for twelve (12) months upon PPL Pass activation.</li><li>PPL Pass purchase, Voucher and any applicable Arrture points issuance are final, non-cancellable, non-refundable and non-replaceable. Plaza Premium Lounge shall not be responsible for any loss, theft, damage, or unauthorised use of the Voucher.</li><li>The Vouchers are transferable provided always that the transfer is not a part of any sale or exchange for value.</li><li>The Vouchers have no cash value and cannot be exchanged for cash, points, or any other services or products.</li><li>Unless otherwise specified, each Voucher grants the voucher holder up to 3-hour lounge access only per visit to <a href=\"\\&quot;https://www.plazapremiumlounge.com/gc-lounges\\&quot;\">eligible lounges</a> (“Service Locations”). Operating hours, services, and facilities may vary at each Service Location. This Voucher does not entitle the Voucher holder to any other services/products other than lounge access, and the Voucher holder agrees to pay for the use of any chargeable services/products offered at the relevant Service Location.</li><li>Access to Service Locations using Vouchers is not eligible for any rewards or loyalty points accrual.</li><li>The Voucher cannot be used in conjunction with any promotion or offer.\\n</li><li>Read the full <a href=\"\\&quot;https://www.plazapremiumlounge.com/gc-terms\\&quot;\">Terms and Conditions</a>.</li><li>PPL Pass Canada 5-/10-Visit\\n<ul><li>Includes 2 complimentary Lounge-to-Go vouchers</li><li>Available only at <a href=\"\\&quot;https://www.plazapremiumlounge.com/en-uk/gc-lounges#canada\\&quot;\">Plaza Premium Lounge locations in Canada</a></li><li>Menu options may vary by location and availability</li></ul></li><li>PPL Pass America 2-Visit\\n<ul><li>Includes 1 complimentary food &amp; beverage item from the paid menu</li><li>Available at eligible <a href=\"\\&quot;https://www.plazapremiumlounge.com/en-uk/gc-lounges#americas\\&quot;\">Plaza Premium Lounge locations</a></li><li>Menu options may vary by location and availability</li></ul></li></ul>",
+       "termsCode": "SLSTRM2977",
+       "termsName": "Terms and Conditions (Canada Pass) - KM3"
+      },
+      {
+       "description": "<ul><li>The Canada Pass (“PPL Pass”) grants visits to <a href=\"\\&quot;https://www.plazapremiumlounge.com/en-uk/gc-lounges#americas\\&quot;\">designated lounges</a> in Canada &amp; Americas only.</li><li>PPL Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the PPL Pass will expire. Expired PPL Pass cannot be reissued or reinstated.</li><li>Smart Traveller members: Upon successful activation PPL Pass lounge access voucher(s) (“Voucher”) will be added to the Smart Traveller mobile app wallet. Arrture points, if any, will be issued to the account of the Smart Traveller member who activated the PPL Pass.</li><li>Non-Smart Traveller members: Upon successful activation, Voucher will be emailed to the registered email address provided at the time of activation.</li><li>Unless otherwise specified, Voucher is valid for twelve (12) months upon PPL Pass activation.</li><li>PPL Pass purchase, Voucher and any applicable Arrture points issuance are final, non-cancellable, non-refundable and non-replaceable. Plaza Premium Lounge shall not be responsible for any loss, theft, damage, or unauthorised use of the Voucher.</li><li>The Vouchers are transferable provided always that the transfer is not a part of any sale or exchange for value.</li><li>The Vouchers have no cash value and cannot be exchanged for cash, points, or any other services or products.</li><li>Unless otherwise specified, each Voucher grants the voucher holder up to 3-hour lounge access only per visit to <a href=\"\\&quot;https://www.plazapremiumlounge.com/gc-lounges\\&quot;\">eligible lounges</a> (“Service Locations”). Operating hours, services, and facilities may vary at each Service Location. This Voucher does not entitle the Voucher holder to any other services/products other than lounge access, and the Voucher holder agrees to pay for the use of any chargeable services/products offered at the relevant Service Location.</li><li>Access to Service Locations using Vouchers is not eligible for any rewards or loyalty points accrual.</li><li>The Voucher cannot be used in conjunction with any promotion or offer.\\n</li><li>Read the full <a href=\"\\&quot;https://www.plazapremiumlounge.com/gc-terms\\&quot;\">Terms and Conditions</a>.</li><li>PPL Pass Canada 5-/10-Visit\\n<ul><li>Includes 2 complimentary Lounge-to-Go vouchers</li><li>Available only at <a href=\"\\&quot;https://www.plazapremiumlounge.com/en-uk/gc-lounges#canada\\&quot;\">Plaza Premium Lounge locations in Canada</a></li><li>Menu options may vary by location and availability</li></ul></li><li>PPL Pass America 2-Visit\\n<ul><li>Includes 1 complimentary food &amp; beverage item from the paid menu</li><li>Available at eligible <a href=\"\\&quot;https://www.plazapremiumlounge.com/en-uk/gc-lounges#americas\\&quot;\">Plaza Premium Lounge locations</a></li><li>Menu options may vary by location and availability</li></ul></li></ul>",
+       "termsCode": "SLSTRM2977",
+       "termsName": "Terms and Conditions (Canada Pass) - KM3"
+      }
+     ],
+     "totalPrice": 155
+    },
+    {
+     "additionalCharges": [],
+     "availableInventory": 0,
+     "basePrice": 155,
+     "basePriceWithDiscount": 155,
+     "baseRate": [
+      {
+       "currency": "USD",
+       "price": 155
+      }
+     ],
+     "catalogueCode": "PRD3693-Regular-PRPRTY1235-GFTCRD-LCTN517-RTPLN3519",
+     "discounts": [],
+     "isInventoryAvailable": false,
+     "isMinimumAmountMet": true,
+     "isSTRatePlan": false,
+     "lastModifiedDate": 1769653714000,
+     "priceCode": "RTPLN3519",
+     "priceName": "Canada Pass - ST Member's Rates",
+     "taxes": [],
+     "termsPolicies": [
+      {
+       "description": "<ul><li>PPL Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the PPL Pass will expire. Expired PPL Pass cannot be reissued or reinstated.</li><li>Smart Traveller members: Upon successful activation PPL Pass lounge access voucher(s) (“Voucher”) will be added to the Smart Traveller mobile app wallet. Arrture points, if any, will be issued to the account of the Smart Traveller member who activated the PPL Pass.</li><li>Non-Smart Traveller members: Upon successful activation, Voucher will be emailed to the registered email address provided at the time of activation.</li><li>Unless otherwise specified, Voucher is valid for twelve (12) months upon PPL Pass activation.</li><li>PPL Pass purchase, Voucher and any applicable Arrture points issuance are final, non-cancellable, non-refundable and non-replaceable. Plaza Premium Lounge shall not be responsible for any loss, theft, damage, or unauthorised use of the Voucher.</li><li>The Vouchers are transferable provided always that the transfer is not a part of any sale or exchange for value.</li><li>The Vouchers have no cash value and cannot be exchanged for cash, points, or any other services or products.</li><li><strong>Access to </strong><a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.plazapremiumlounge.com/gc-lounges\"><strong>eligible lounges</strong></a><strong> (“Service Locations”) are subject to the type of PPL Pass purchased.</strong> Unless otherwise specified, each Voucher grants the voucher holder up to 3-hour lounge access only per visit to the respective Service Locations. Operating hours, services, and facilities may vary at each Service Location. This Voucher does not entitle the Voucher holder to any other services/products other than lounge access, and the Voucher holder agrees to pay for the use of any chargeable services/products offered at the relevant Service Location.</li><li>Access to Service Locations using Vouchers is not eligible for any rewards or loyalty points accrual.</li><li>The Voucher cannot be used in conjunction with any promotion or offer.</li><li>Read the full <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.plazapremiumlounge.com/gc-terms\">Terms and Conditions</a>.</li></ul>",
+       "termsCode": "SLSTRM2974",
+       "termsName": "Terms and Conditions"
+      },
+      {
+       "description": "<ul><li>PPL Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the PPL Pass will expire. Expired PPL Pass cannot be reissued or reinstated.</li><li>Smart Traveller members: Upon successful activation PPL Pass lounge access voucher(s) (“Voucher”) will be added to the Smart Traveller mobile app wallet. Arrture points, if any, will be issued to the account of the Smart Traveller member who activated the PPL Pass.</li><li>Non-Smart Traveller members: Upon successful activation, Voucher will be emailed to the registered email address provided at the time of activation.</li><li>Unless otherwise specified, Voucher is valid for twelve (12) months upon PPL Pass activation.</li><li>PPL Pass purchase, Voucher and any applicable Arrture points issuance are final, non-cancellable, non-refundable and non-replaceable. Plaza Premium Lounge shall not be responsible for any loss, theft, damage, or unauthorised use of the Voucher.</li><li>The Vouchers are transferable provided always that the transfer is not a part of any sale or exchange for value.</li><li>The Vouchers have no cash value and cannot be exchanged for cash, points, or any other services or products.</li><li><strong>Access to </strong><a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.plazapremiumlounge.com/gc-lounges\"><strong>eligible lounges</strong></a><strong> (“Service Locations”) are subject to the type of PPL Pass purchased.</strong> Unless otherwise specified, each Voucher grants the voucher holder up to 3-hour lounge access only per visit to the respective Service Locations. Operating hours, services, and facilities may vary at each Service Location. This Voucher does not entitle the Voucher holder to any other services/products other than lounge access, and the Voucher holder agrees to pay for the use of any chargeable services/products offered at the relevant Service Location.</li><li>Access to Service Locations using Vouchers is not eligible for any rewards or loyalty points accrual.</li><li>The Voucher cannot be used in conjunction with any promotion or offer.</li><li>Read the full <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.plazapremiumlounge.com/gc-terms\">Terms and Conditions</a>.</li></ul>",
+       "termsCode": "SLSTRM2974",
+       "termsName": "Terms and Conditions"
+      },
+      {
+       "description": "<ul><li>PPL Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the PPL Pass will expire. Expired PPL Pass cannot be reissued or reinstated.</li><li>Smart Traveller members: Upon successful activation PPL Pass lounge access voucher(s) (“Voucher”) will be added to the Smart Traveller mobile app wallet. Arrture points, if any, will be issued to the account of the Smart Traveller member who activated the PPL Pass.</li><li>Non-Smart Traveller members: Upon successful activation, Voucher will be emailed to the registered email address provided at the time of activation.</li><li>Unless otherwise specified, Voucher is valid for twelve (12) months upon PPL Pass activation.</li><li>PPL Pass purchase, Voucher and any applicable Arrture points issuance are final, non-cancellable, non-refundable and non-replaceable. Plaza Premium Lounge shall not be responsible for any loss, theft, damage, or unauthorised use of the Voucher.</li><li>The Vouchers are transferable provided always that the transfer is not a part of any sale or exchange for value.</li><li>The Vouchers have no cash value and cannot be exchanged for cash, points, or any other services or products.</li><li><strong>Access to </strong><a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.plazapremiumlounge.com/gc-lounges\"><strong>eligible lounges</strong></a><strong> (“Service Locations”) are subject to the type of PPL Pass purchased.</strong> Unless otherwise specified, each Voucher grants the voucher holder up to 3-hour lounge access only per visit to the respective Service Locations. Operating hours, services, and facilities may vary at each Service Location. This Voucher does not entitle the Voucher holder to any other services/products other than lounge access, and the Voucher holder agrees to pay for the use of any chargeable services/products offered at the relevant Service Location.</li><li>Access to Service Locations using Vouchers is not eligible for any rewards or loyalty points accrual.</li><li>The Voucher cannot be used in conjunction with any promotion or offer.</li><li>Read the full <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.plazapremiumlounge.com/gc-terms\">Terms and Conditions</a>.</li></ul>",
+       "termsCode": "SLSTRM2974",
+       "termsName": "Terms and Conditions"
+      }
+     ],
+     "totalPrice": 155
+    },
+    {
+     "additionalCharges": [],
+     "availableInventory": 0,
+     "basePrice": 155,
+     "basePriceWithDiscount": 155,
+     "baseRate": [
+      {
+       "currency": "USD",
+       "price": 155
+      }
+     ],
+     "catalogueCode": "PRD3693-Regular-PRPRTY1235-GFTCRD-LCTN517-RTPLN3541",
+     "discounts": [],
+     "isInventoryAvailable": false,
+     "isMinimumAmountMet": true,
+     "isSTRatePlan": false,
+     "lastModifiedDate": 1769653516000,
+     "priceCode": "RTPLN3541",
+     "priceName": "Canada Pass - Partner Rate",
+     "taxes": [],
+     "termsPolicies": [
+      {
+       "description": "<p>KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1&nbsp;</p>",
+       "termsCode": "SLSTRM2973",
+       "termsName": "Terms and Conditions - KM - 1"
+      }
+     ],
+     "totalPrice": 155
+    }
+   ],
+   "productCategory": "Visit Based",
+   "productCode": "PRD3693",
+   "productDescription": "<ul><li>This Canada Pass (“PPL Pass”) grants a maximum of 5 visits to <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.plazapremiumlounge.com/en-uk/gc-lounges#canada\">designated lounges</a> in Canada only.</li><li>PPL Pass is valid for 12 months upon activation.</li><li>Up to 3 hours per visit.</li><li>To be eligible for ST Points reward, Smart Traveller members must log in to their account before making a purchase (adding to cart) and successfully make payment during the offer period. Any applicable points will be credited into their Smart Traveller account within 14 days of PPL Pass activation.</li><li>Conditions apply.</li></ul>",
+   "productDisplayName": "Canada 5-Visit Pass",
+   "productDurationInMinutes": 0,
+   "productName": "Canada 5-Visit Pass",
+   "productSeq": 16,
+   "productType": "Regular",
+   "productVarients": [],
+   "quantityLabel": "",
+   "serviceCode": "SRVC1622",
+   "serviceDescription": "<p>This service created for pass service</p>",
+   "serviceDisplayName": "Pass Service",
+   "serviceName": "Pass Service",
+   "serviceSequence": 9995,
+   "serviceType": "Per Unit",
+   "shortProductDescription": "<strong><font color=\"#8c0d42\">Smart Traveller Members</font></strong> get 450 ST Points. Login to enjoy offer*"
+  },
+  {
+   "accuralPoints": "+150 ST Points",
+   "arrtureSku": "836",
+   "availability": true,
+   "basedOn": "Per Unit",
+   "createdDate": "2026-01-21 00:00:00",
+   "eligibleLocations": [
+    "Hong Kong",
+    "Shanghai"
+   ],
+   "fulfillmentType": "Arture",
+   "giftCardName": "PPL Pass (HKG-SHA) 2-Visits",
+   "images": [
+    {
+     "name": "PPL_Pass_HK_SH.png",
+     "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prd_images/PPL_Pass_HK_SH.png"
+    }
+   ],
+   "isFlightNumberMandatory": false,
+   "isStLoginMandatory": false,
+   "isThirdPartyFulfilment": false,
+   "journeyTypes": [],
+   "lastModifiedDate": "2026-08-24 09:17:36",
+   "locations": [],
+   "masNoOfProductsAllowed": 10,
+   "numberOfVisits": 2,
+   "packages": [],
+   "passCategory": [
+    {
+     "category": "MULTICITIES"
+    },
+    {
+     "category": "All",
+     "categoryCode": "All",
+     "categorySeq": 1
+    },
+    {
+     "category": "Hong Kong",
+     "categoryCode": "HongKong",
+     "categorySeq": 3
+    }
+   ],
+   "prices": [
+    {
+     "additionalCharges": [],
+     "availableInventory": 15,
+     "basePrice": 75,
+     "basePriceWithDiscount": 75,
+     "baseRate": [
+      {
+       "currency": "USD",
+       "price": 75
+      }
+     ],
+     "catalogueCode": "PRD3676-Regular-PRPRTY1235-GFTCRD-LCTN517-RTPLN3548",
+     "discounts": [],
+     "isInventoryAvailable": true,
+     "isMinimumAmountMet": true,
+     "isSTRatePlan": false,
+     "lastModifiedDate": 1783997738000,
+     "priceCode": "RTPLN3548",
+     "priceName": "Hong Kong and Shanghai Pass",
+     "taxes": [],
+     "termsPolicies": [
+      {
+       "description": "<p>KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1&nbsp;</p>",
+       "termsCode": "SLSTRM2973",
+       "termsName": "Terms and Conditions - KM - 1"
+      },
+      {
+       "description": "<strong>Hong Kong and Shanghai Pass (“PPL Pass”) Terms & Conditions</strong>\n<li>The Hong Kong and Shanghai Pass (“PPL Pass”) grants visits to any <a href=\"https://www.plazapremiumlounge.com/en-uk/gc-lounges#hongkongshanghai\" target=\"_blank\">designated lounges</a> in Hong Kong and Shanghai.</li>\n<br>\n<strong>General Terms & Conditions</strong>\n<li>PPL Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the PPL Pass will expire. Expired PPL Pass cannot be reissued or reinstated.</li>\n<li>Smart Traveller members: Upon successful activation PPL Pass lounge access voucher(s) (“Voucher”) will be added to the Smart Traveller mobile app wallet. ST Points, if any, will be issued to the account of the Smart Traveller member who activated the PPL Pass.</li>\n<li>Non-Smart Traveller members: Upon successful activation, Voucher will be emailed to the registered email address provided at the time of activation. </li>\n<li>Unless otherwise specified, Voucher is valid for twelve (12) months upon PPL Pass activation.</li>\n<li>PPL Pass purchase, Voucher and any applicable ST Points issuance are final, non-cancellable, non-refundable and non-replaceable. Plaza Premium Lounge shall not be responsible for any loss, theft, damage, or unauthorised use of the Voucher.</li>\n<li>The Vouchers are transferable provided always that the transfer is not a part of any sale or exchange for value.</li>\n<li>The Vouchers have no cash value and cannot be exchanged for cash, points, or any other services or products.</li>\n<li>Unless otherwise specified, each Voucher grants the voucher holder up to 3-hour lounge access only per visit to <a href=\"https://www.plazapremiumlounge.com/gc-lounges\" target=\"_blank\">eligible lounges</a> (“Service Locations”). Operating hours, services, and facilities may vary at each Service Location. This Voucher does not entitle the Voucher holder to any other services/products other than lounge access, and the Voucher holder agrees to pay for the use of any chargeable services/products offered at the relevant Service Location.</li>\n<li>Access to Service Locations using Vouchers is not eligible for any rewards or loyalty points accrual.</li>\n<li>The Voucher cannot be used in conjunction with any promotion or offer.\n<li>Read the full <a href=\"https://www.plazapremiumlounge.com/gc-terms\" target=\"_blank\">Terms and Conditions</a>.</li>",
+       "termsCode": "SLSTRM2983",
+       "termsName": "Terms and Conditions (Hong Kong & Shanghai)"
+      }
+     ],
+     "totalPrice": 75
+    },
+    {
+     "additionalCharges": [],
+     "availableInventory": 15,
+     "basePrice": 75,
+     "basePriceWithDiscount": 75,
+     "baseRate": [
+      {
+       "currency": "USD",
+       "price": 75
+      }
+     ],
+     "catalogueCode": "PRD3676-Regular-PRPRTY1235-GFTCRD-LCTN517-RTPLN3549",
+     "discounts": [],
+     "isInventoryAvailable": true,
+     "isMinimumAmountMet": true,
+     "isSTRatePlan": false,
+     "lastModifiedDate": 1769653944000,
+     "priceCode": "RTPLN3549",
+     "priceName": "Hong Kong and Shanghai Pass - ST Member's Rate",
+     "taxes": [],
+     "termsPolicies": [
+      {
+       "description": "<strong>Hong Kong and Shanghai Pass (“PPL Pass”) Terms & Conditions</strong>\n<li>The Hong Kong and Shanghai Pass (“PPL Pass”) grants visits to any <a href=\"https://www.plazapremiumlounge.com/en-uk/gc-lounges#hongkongshanghai\" target=\"_blank\">designated lounges</a> in Hong Kong and Shanghai.</li>\n<br>\n<strong>General Terms & Conditions</strong>\n<li>PPL Pass must be activated (unlocked) before it can be used. Activation must be performed within the date and time specified on the activation email or the PPL Pass will expire. Expired PPL Pass cannot be reissued or reinstated.</li>\n<li>Smart Traveller members: Upon successful activation PPL Pass lounge access voucher(s) (“Voucher”) will be added to the Smart Traveller mobile app wallet. ST Points, if any, will be issued to the account of the Smart Traveller member who activated the PPL Pass.</li>\n<li>Non-Smart Traveller members: Upon successful activation, Voucher will be emailed to the registered email address provided at the time of activation. </li>\n<li>Unless otherwise specified, Voucher is valid for twelve (12) months upon PPL Pass activation.</li>\n<li>PPL Pass purchase, Voucher and any applicable ST Points issuance are final, non-cancellable, non-refundable and non-replaceable. Plaza Premium Lounge shall not be responsible for any loss, theft, damage, or unauthorised use of the Voucher.</li>\n<li>The Vouchers are transferable provided always that the transfer is not a part of any sale or exchange for value.</li>\n<li>The Vouchers have no cash value and cannot be exchanged for cash, points, or any other services or products.</li>\n<li>Unless otherwise specified, each Voucher grants the voucher holder up to 3-hour lounge access only per visit to <a href=\"https://www.plazapremiumlounge.com/gc-lounges\" target=\"_blank\">eligible lounges</a> (“Service Locations”). Operating hours, services, and facilities may vary at each Service Location. This Voucher does not entitle the Voucher holder to any other services/products other than lounge access, and the Voucher holder agrees to pay for the use of any chargeable services/products offered at the relevant Service Location.</li>\n<li>Access to Service Locations using Vouchers is not eligible for any rewards or loyalty points accrual.</li>\n<li>The Voucher cannot be used in conjunction with any promotion or offer.\n<li>Read the full <a href=\"https://www.plazapremiumlounge.com/gc-terms\" target=\"_blank\">Terms and Conditions</a>.</li>",
+       "termsCode": "SLSTRM2983",
+       "termsName": "Terms and Conditions (Hong Kong & Shanghai)"
+      },
+      {
+       "description": "<p>KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1 KM1&nbsp;</p>",
+       "termsCode": "SLSTRM2973",
+       "termsName": "Terms and Conditions - KM - 1"
+      }
+     ],
+     "totalPrice": 75
+    }
+   ],
+   "productCategory": "Visit Based",
+   "productCode": "PRD3676",
+   "productDescription": "<p>This Hong Kong and Shanghai Pass (“PPL Pass”) grants one lounge visit at each city pair of <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.plazapremiumlounge.com/en-uk/gc-lounges#hongkongshanghai\">designated lounges</a> in Hong Kong and Shanghai.</p><ul><li>PPL Pass is valid for 12 months upon activation.</li><li>Up to 3 hours per visit.</li><li>To be eligible for ST Points reward, Smart Traveller members must log in to their account before making a purchase (adding to cart) and successfu'</li></ul>",
+   "productDisplayName": "Hong Kong and Shanghai 2-Visit Pass",
+   "productDurationInMinutes": 0,
+   "productName": "Hong Kong and Shanghai 2-Visit Pass",
+   "productSeq": 7,
+   "productType": "Regular",
+   "productVarients": [],
+   "quantityLabel": "",
+   "serviceCode": "SRVC1622",
+   "serviceDescription": "<p>This service created for pass service</p>",
+   "serviceDisplayName": "Pass Service",
+   "serviceName": "Pass Service",
+   "serviceSequence": 9995,
+   "serviceType": "Per Unit",
+   "shortProductDescription": "<strong><font color=\"#8c0d42\">Smart Traveller Members</font></strong> get 150 ST Points. Login to enjoy offer*"
+  }
+ ]
+}
