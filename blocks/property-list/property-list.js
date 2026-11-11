@@ -378,6 +378,48 @@ function trackViewLounge(property, rank) {
 }
 
 /**
+ * The data layer's link click for a filter ticked in the filter form ("apply filter"): every
+ * filter now on, each with its group's title (`.property-list-group-title`) and its option's
+ * label (Service Type's All, which is no filter, left out); the results now shown; the booking
+ * chosen in the page address; and the airport filtered on (only one), else the first lounge
+ * shown: its `iataCode` and `locationName`.
+ * @param {HTMLFormElement} form The filter form (`.property-list-filters`)
+ * @param {Object[]} properties
+ * @param {Object<string, Set<string>>} selected The filters now on
+ */
+function trackFilters(form, properties, selected) {
+  const shown = properties.filter((p) => matches(p, selected));
+  const lounges = properties.filter((p) => !p.pass);
+  const chosen = selected.airport.size === 1
+    && lounges.find((p) => selected.airport.has(p.location.key));
+  const place = chosen || shown.find((p) => !p.pass) || lounges[0] || properties[0];
+  const { checkin, adults, children } = chosenBooking(place.timeZone);
+  const filters = [...form.querySelectorAll('input[data-group]:checked')]
+    .filter((input) => input.value)
+    .map((input) => ({
+      filterType: input.closest('.property-list-group')
+        ?.querySelector('.property-list-group-title > span')?.textContent.trim() || '',
+      filterValue: input.closest('.property-list-option')?.textContent.trim() || '',
+    }));
+  const eventName = 'apply filter';
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
+    _plazapremiumloungemanagementli: {
+      searchDetails: { searchResultsCount: shown.length },
+      filters,
+      bookingInfo: {
+        checkinDateTime: checkin,
+        daysToBooking: 0,
+        totalGuestCount: adults + children,
+        adultCount: adults,
+        childCount: children,
+      },
+      locationDetails: { iataCode: place.iata, locationName: place.location.name },
+    },
+  });
+}
+
+/**
  * One property card: photos, then the details (badge, name, location, hours, icons, note,
  * features, price, View and the loyalty line). Parts without data are left out.
  * @param {Object} property
@@ -803,6 +845,12 @@ export default async function decorate(block) {
       renderResults(results, properties, selected, status, clearAll, prefix, settings);
     };
     form = buildFilters(options, selected, update);
+    // the data layer's "apply filter" as a filter is ticked (the listing has redrawn by then)
+    form?.addEventListener('change', (e) => {
+      if (e.target.matches('input[data-group]') && e.target.checked) {
+        trackFilters(form, properties, selected);
+      }
+    });
     sidebar.replaceChildren();
     if (form) {
       // the form sits in the sidebar, or in the Filters dialog on phones
