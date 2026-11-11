@@ -390,22 +390,33 @@ function loungePageName(lounge) {
  */
 function trackGetPrice(lounge, request, picked, price) {
   const eventName = 'get price';
-  const cents = (amount) => Math.round(amount * 100) / 100;
   // the promo code's value: the price before discounts less the price after them
-  const saved = price ? cents(Math.max(0, price.base - price.discounted)) : 0;
-  const product = price ? {
-    sku: price.catalogueCode,
-    name: picked.product,
-    actualPricePayCurr: price.base,
-    // the first discount's amount (discounts[0].discountValue), 0 without one
-    discount: cents(price.discountValue),
-    sellPricePayCurr: price.total,
-    category: picked.service,
-  } : { name: picked.product, category: picked.service };
+  // (to the cent: subtracting prices can leave float noise, e.g. 110.50999999999999)
+  const saved = price
+    ? Math.round(Math.max(0, price.base - price.discounted) * 100) / 100
+    : 0;
+  let product = { name: picked.product, category: picked.service };
+  if (price) {
+    product = {
+      sku: price.catalogueCode,
+      name: picked.product,
+      actualPricePayCurr: price.base,
+      // the first discount's amount (discounts[0].discountValue), 0 without one
+      discount: price.discountValue,
+      sellPricePayCurr: price.total,
+      category: picked.service,
+    };
+  }
   const promoAccepted = Boolean(request.promocode && price && !price.promoRejected);
   const { adult, child } = request.guests;
   pushEvent('web.webInteraction.linkClicks', eventName, {
-    web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
+    web: {
+      webInteraction: {
+        name: eventName,
+        type: 'other',
+        linkClicks: { value: 1 },
+      },
+    },
     _plazapremiumloungemanagementli: {
       bookingInfo: {
         // the form's date and time at the lounge, in UTC (1400 in Hong Kong: 06:00:00Z)
