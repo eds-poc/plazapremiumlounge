@@ -30,8 +30,6 @@ const MOBILE = '(width < 768px)';
 // desktop shows the first four photos, as the source
 const DESKTOP_PHOTOS = 4;
 const DEFAULT_CURRENCY = 'USD';
-// the data layer's site section for every event on the page (pageDetails.siteSection)
-const SITE_SECTION = 'lounge detail';
 
 /**
  * The page address's lounge and booking choices, as the source detail pages use them
@@ -368,13 +366,15 @@ function counter(name, group, value, min) {
 }
 
 /**
- * The data layer's page name for a lounge: "<cityName>:<locationName (iataCode)>:<lounge>", e.g.
- * "Hong Kong SAR:Hong Kong International Airport (HKG):Plaza Premium First".
- * @param {Object} lounge
- * @returns {string}
+ * The page's name and site section in the data layer, for every event on a lounge detail page:
+ * "<cityName>:<locationName (iataCode)>:<lounge>" in "lounge detail", e.g. "Hong Kong SAR:Hong
+ * Kong International Airport (HKG):Plaza Premium First". Without the lounge (until it has come,
+ * or when it can't be shown), the site section only: the page name stays the path's.
+ * @param {Object} [lounge] The lounge (see readDetail)
  */
-function loungePageName(lounge) {
-  return [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':');
+function setLoungePage(lounge) {
+  const pageName = lounge ? [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':') : '';
+  setPageDetails({ pageName, siteSection: 'lounge detail' });
 }
 
 /**
@@ -968,9 +968,9 @@ function buildBar(lounge, booking, settings) {
  * @param {HTMLElement} block The property detail block element
  */
 export default async function decorate(block) {
-  // the site section first, so the page's events have it even when no lounge can be shown (a bad
-  // code, not found, an error: those return before the lounge's page name is set below)
-  setPageDetails({ siteSection: SITE_SECTION });
+  // the data layer's site section from the start, so the page's events have it even when no lounge
+  // can be shown (a bad code, not found, an error: those return before the lounge has come)
+  setLoungePage();
   const settings = readSettings(block);
   const params = readParams();
   block.replaceChildren();
@@ -1003,8 +1003,8 @@ export default async function decorate(block) {
       showMessage(block, translate('propertyNotFound'), null, `Property "${params.code}" isn't active or isn't a lounge or pass.`);
       return;
     }
-    // the lounge's page name for every event from now on (pageDetails.pageName)
-    setPageDetails({ pageName: loungePageName(lounge), siteSection: SITE_SECTION });
+    // the data layer's page name for the lounge, for every event from now on
+    setLoungePage(lounge);
     const mobile = window.matchMedia(MOBILE);
     const slot = chooseSlot(params, lounge.timeZone, lounge.leadMinutes);
     writeParams({ date: slot.date, time: slot.time });
