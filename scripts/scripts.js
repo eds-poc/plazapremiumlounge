@@ -412,7 +412,9 @@ async function loadPage() {
   hideLoader();
   await loadLazy(document);
   installNavigationLoader();
-  loadDelayed();
+  // the tags and the rest 3 seconds after the page shows (as the boilerplate), so they don't
+  // compete with it
+  window.setTimeout(loadDelayed, 3000);
 }
 
 loadPage();

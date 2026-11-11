@@ -8,7 +8,8 @@
  * buildForm() builds a whole form from a block's authored rows (Field | Label | Placeholder |
  * Required | Error) and the block's own definition (the fields' types, keys and rules, the action,
  * the redirect), and sends it.
- * A form can have a captcha before its button (`captcha: true`, scripts/captcha.js).
+ * A form can have a captcha before its button (`captcha: true`, scripts/captcha.js), and its date
+ * fields the site's calendar (`picker`, with the block's `datePicker`: scripts/date-picker.js).
  * Styles: styles/forms.css (the form element gets the class `form-fields`), imported by each form
  * block's CSS so it's loaded before the block shows.
  */
@@ -17,7 +18,7 @@ import apiUrl from './endpoints.js';
 import { addCaptcha, CAPTCHA_KEY } from './captcha.js';
 
 const INPUT_TYPES = ['text', 'email', 'password', 'tel', 'number', 'date', 'url'];
-const FIELD_TYPES = [...INPUT_TYPES, 'textarea', 'select', 'checkbox', 'country', 'phone'];
+const FIELD_TYPES = [...INPUT_TYPES, 'textarea', 'select', 'checkbox', 'checkboxes', 'country', 'phone', 'stepper'];
 const CHOICE_TYPES = ['select', 'country'];
 // autofill hints by key (sign up and contact forms), else by type
 const AUTOCOMPLETE = {
@@ -201,6 +202,32 @@ function buildLabel(def) {
 }
 
 /**
+ * A stepper's value as shown: a time of day in minutes ("6:00 PM"), or a number with its unit
+ * ("3.5 hours").
+ * @param {number} value
+ * @param {Map<string, string>} settings `format: time`, else `unit`
+ * @returns {string}
+ */
+function stepperText(value, settings) {
+  if (settings.get('format') === 'time') {
+    const date = new Date(Date.UTC(2000, 0, 1, Math.floor(value / 60), value % 60));
+    return new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'UTC' }).format(date);
+  }
+  return [value, settings.get('unit')].filter(Boolean).join(' ');
+}
+
+/**
+ * A stepper's value as sent: a time as "18:00", else the number.
+ * @param {number} value
+ * @param {Map<string, string>} settings
+ * @returns {string}
+ */
+function stepperValue(value, settings) {
+  if (settings.get('format') !== 'time') return String(value);
+  return `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
+}
+
+/**
  * Sets the attributes every text-like control shares: name, id, placeholder, autofill, limits.
  * @param {HTMLElement} control
  * @param {object} def
@@ -248,7 +275,7 @@ function setControlAttributes(control, def) {
  * @param {boolean} invalid
  */
 function describe(state, invalid) {
-  [...state.controls, state.code].filter(Boolean).forEach((control) => {
+  [...state.controls, state.code, state.picker?.trigger].filter(Boolean).forEach((control) => {
     if (invalid) {
       control.setAttribute('aria-describedby', state.error.id);
       control.setAttribute('aria-invalid', 'true');
@@ -260,6 +287,15 @@ function describe(state, invalid) {
 }
 
 /**
+ * A date setting as YYYY-MM-DD (`today` allowed).
+ * @param {string} value
+ * @returns {string}
+ */
+function dateSetting(value) {
+  return value === 'today' ? new Date().toISOString().slice(0, 10) : value;
+}
+
+/**
  * Builds one field from its definition.
  * @param {{label: string, labelNodes?: Node[], type: string, settings: Map<string, string>}} input
  *   The authored label (text, and its nodes for rich checkbox labels), type and settings
@@ -268,7 +304,7 @@ function describe(state, invalid) {
  */
 export function buildField({
   label, labelNodes, type: authoredType, settings,
-}, { defaultWidth = 'full' } = {}) {
+}, { defaultWidth = 'full', datePicker } = {}) {
   count += 1;
   const type = FIELD_TYPES.includes(authoredType) ? authoredType : 'text';
   const key = settings.get('key') || toKey(label) || `field${count}`;
@@ -277,7 +313,7 @@ export function buildField({
   };
   const wrap = el('div', `form-field form-field-${type}`);
   wrap.dataset.key = key;
-  const fullByDefault = ['checkbox', 'textarea'].includes(type);
+  const fullByDefault = ['checkbox', 'checkboxes', 'textarea'].includes(type);
   wrap.classList.add(`width-${settings.get('width') || (fullByDefault ? 'full' : defaultWidth)}`);
   if (settings.has('new row')) wrap.classList.add('new-row');
   const state = { def, wrap, controls: [] };
@@ -291,6 +327,88 @@ export function buildField({
     text.className = 'form-check-label';
     wrap.append(input, text);
     state.controls = [input];
+  } else if (type === 'checkboxes') {
+    // a group: its label, then one checkbox per option (authored one per line), one per line
+    const group = el('div', 'form-checks');
+    group.setAttribute('role', 'group');
+    const name = buildLabel(def);
+    name.removeAttribute('for');
+    name.id = `${def.id}-label`;
+    group.setAttribute('aria-labelledby', name.id);
+    state.controls = readOptions(settings.get('options')).map((option, i) => {
+      const line = el('div', 'form-check');
+      const input = el('input', 'form-check-input');
+      input.type = 'checkbox';
+      input.id = `${def.id}-${i}`;
+      input.name = key;
+      input.value = option.value;
+      const text = el('label', 'form-check-label');
+      text.htmlFor = input.id;
+      text.textContent = option.text;
+      line.append(input, text);
+      group.append(line);
+      return input;
+    });
+    wrap.append(name, group);
+  } else if (type === 'date' && settings.has('picker') && datePicker) {
+    // the site's calendar (scripts/date-picker.js, given by the block): the date as the source
+    // writes it in the form's pill, from the first day that can be chosen (`min date`, today by
+    // default); its hidden input holds the value (YYYY-MM-DD), so the checks and the data are as
+    // for any date
+    const start = dateSetting(settings.get('min date') || 'today');
+    const picker = datePicker.build({
+      name: key, value: start, min: start, format: datePicker.format, prefix: 'date-picker',
+    });
+    picker.input.id = def.id;
+    picker.trigger.classList.add('form-input');
+    const name = buildLabel(def);
+    name.htmlFor = picker.trigger.id;
+    const box = el('div', 'form-control-wrap');
+    box.append(picker.element);
+    wrap.append(name, box);
+    state.controls = [picker.input];
+    state.picker = picker;
+    // a form reset goes back to the first day
+    wrap.addEventListener('reset', () => picker.update({ value: start, min: start }));
+  } else if (type === 'stepper') {
+    // − and + around the value, from `default` by `step` between `min` and `max` (a time goes
+    // round the clock)
+    const min = Number(settings.get('min') || 0);
+    const max = Number(settings.get('max') || (settings.get('format') === 'time' ? 1439 : 99));
+    const step = Number(settings.get('step') || 1);
+    const start = Number(settings.get('default') || min);
+    const box = el('div', 'form-input form-stepper');
+    const shown = el('input', 'form-stepper-value');
+    shown.id = def.id;
+    shown.readOnly = true;
+    shown.setAttribute('aria-live', 'polite');
+    const minus = el('button', 'form-stepper-step');
+    const plus = el('button', 'form-stepper-step');
+    minus.type = 'button';
+    plus.type = 'button';
+    minus.textContent = '-';
+    plus.textContent = '+';
+    minus.setAttribute('aria-label', `${label} −`);
+    plus.setAttribute('aria-label', `${label} +`);
+    const set = (value) => {
+      state.value = value;
+      shown.value = stepperText(value, settings);
+    };
+    const move = (by) => {
+      let next = state.value + by;
+      if (settings.get('format') === 'time') next = (next + 1440) % 1440;
+      else next = Math.min(max, Math.max(min, next));
+      set(next);
+      shown.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+    minus.addEventListener('click', () => move(-step));
+    plus.addEventListener('click', () => move(step));
+    // a form reset goes back to the start value
+    wrap.addEventListener('reset', () => set(start));
+    set(start);
+    box.append(minus, shown, plus);
+    wrap.append(buildLabel(def), box);
+    state.controls = [shown];
   } else if (type === 'phone') {
     const box = el('div', 'form-phone');
     const code = el('select', 'form-input form-select form-phone-code');
@@ -363,6 +481,9 @@ export function buildField({
  */
 function valueOf(state) {
   if (state.def.type === 'checkbox') return state.controls[0].checked;
+  // the checked options, each followed by ";" (as the source sends them: "LoungeUse;Massage;")
+  if (state.def.type === 'checkboxes') return state.controls.filter((c) => c.checked).map((c) => `${c.value};`).join('');
+  if (state.def.type === 'stepper') return stepperValue(state.value, state.def.settings);
   return state.controls[0]?.value.trim() ?? '';
 }
 
@@ -391,15 +512,6 @@ function ageOn(date) {
   let age = now.getFullYear() - born.getFullYear();
   if (now < new Date(now.getFullYear(), born.getMonth(), born.getDate())) age -= 1;
   return age;
-}
-
-/**
- * A date setting as YYYY-MM-DD (`today` allowed).
- * @param {string} value
- * @returns {string}
- */
-function dateSetting(value) {
-  return value === 'today' ? new Date().toISOString().slice(0, 10) : value;
 }
 
 /**
@@ -448,11 +560,11 @@ function check(state) {
     if (empty) {
       if (settings.get('required')) return settings.get('required');
       if (type === 'checkbox') return translate('formRequiredCheck');
-      const key = CHOICE_TYPES.includes(type) ? 'formRequiredChoice' : 'formRequired';
+      const key = [...CHOICE_TYPES, 'checkboxes'].includes(type) ? 'formRequiredChoice' : 'formRequired';
       return translate(key, { label: def.label.toLowerCase() });
     }
   }
-  if (empty || typeof value !== 'string') return '';
+  if (empty || typeof value !== 'string' || ['checkboxes', 'stepper'].includes(type)) return '';
 
   const presetName = settings.get('rule') || (RULES[type] ? type : '');
   const preset = RULES[presetName];
@@ -595,6 +707,7 @@ export function linkFields(form) {
 export function resetForm(form) {
   form.reset();
   form.querySelectorAll('.form-field').forEach((wrap) => {
+    wrap.dispatchEvent(new Event('reset'));
     wrap.classList.remove('is-touched');
     setFieldError(wrap, '');
   });
@@ -612,7 +725,8 @@ export function validateForm(form) {
   });
   if (invalid.length) {
     const state = fields.get(invalid[0]);
-    const target = state.def.type === 'phone' && !state.code.value ? state.code : state.controls[0];
+    const target = (state.def.type === 'phone' && !state.code.value ? state.code : null)
+      || state.picker?.trigger || state.controls[0];
     target?.focus();
   }
   return invalid;
@@ -667,6 +781,15 @@ export function collectValues(form) {
     }
   });
   return values;
+}
+
+/**
+ * A date field's calendar (a field with `picker`), e.g. to move its first day.
+ * @param {HTMLElement} wrap The field
+ * @returns {{update: Function, input: HTMLInputElement, trigger: HTMLButtonElement}|undefined}
+ */
+export function datePickerOf(wrap) {
+  return fields.get(wrap)?.picker;
 }
 
 /**
@@ -774,6 +897,12 @@ function fieldSettings(field, cells) {
     // dropdowns: the empty choice, then one option per line
     if (placeholder.length) settings.set('placeholder', placeholder[0]);
     if (placeholder.length > 1) settings.set('options', placeholder.slice(1));
+  } else if (field.type === 'checkboxes') {
+    // a group: one option per line
+    settings.set('options', placeholder);
+  } else if (field.type === 'stepper') {
+    // a stepper: the unit after its number ("hours")
+    if (placeholder.length) settings.set('unit', placeholder[0]);
   } else if (placeholder.length) {
     settings.set('placeholder', placeholder[0]);
   }
@@ -799,7 +928,9 @@ function fieldSettings(field, cells) {
  *   language site, or a path), `method`, `defaultWidth` ('full' or 'half'), `intro` (true: text
  *   rows before the first field go beside the form), `submit` (`{ classes, fullWidthMobile }`; its
  *   text is the authored `submit` row, else "Submit" in the visitor's language), `captcha` (true,
- *   or `{ key }` for the token's key in the data; default `h-captcha-response`)
+ *   or `{ key }` for the token's key in the data; default `h-captcha-response`), `datePicker`
+ *   (`{ build, format }`: scripts/date-picker.js and the date's format, for date fields with
+ *   `picker`)
  * @returns {{form: HTMLFormElement, intro: HTMLElement|null}}
  */
 export function buildForm(block, definition) {
@@ -834,7 +965,7 @@ export function buildForm(block, definition) {
       labelNodes: field.type === 'checkbox' ? labelNodesOf(cells[1]) : undefined,
       type: field.type,
       settings: fieldSettings(field, cells),
-    }, { defaultWidth: definition.defaultWidth || 'full' });
+    }, { defaultWidth: definition.defaultWidth || 'full', datePicker: definition.datePicker });
     if (!built) return;
     if (field.newColumn) built.classList.add('new-column');
     form.append(built);

@@ -458,3 +458,20 @@
 .title.center-all.fluid .title-heading {
   margin-inline: auto;
 }
+
+/* option intro-wide: the intro in the body size, centred and at most 800px wide at every width
+   (source group booking `.width800.text-center`) */
+.title.intro-wide .title-intro {
+  /* one-off: the source's 800px intro width */
+  max-width: 800px;
+  margin-inline: auto;
+  font-size: var(--body-font-size);
+  text-align: center;
+}
+
+/* with the source's space under it, to the line that follows (its 20px, a 40px spacer and the
+   line's 16px) */
+.title.intro-wide {
+  /* one-off: the source's 76px */
+  margin-bottom: 76px;
+}
