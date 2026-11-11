@@ -4,13 +4,55 @@
  * slot, the date as the source writes it, and the guest limits.
  */
 import { getLanguage } from './i18n.js';
-import { isIsoDate } from './properties.js';
+
+/**
+ * Whether a value is a real calendar date as YYYY-MM-DD (not e.g. 2026-02-30).
+ * @param {string} value
+ * @returns {boolean}
+ */
+export function isIsoDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return false;
+  const d = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
+}
 
 export const SLOT_MINUTES = 30;
 export const DAY_MINUTES = 24 * 60;
 // the source's guest limits: 9 guests at most, and up to two children per adult
 export const MAX_GUESTS = 9;
 export const CHILDREN_PER_ADULT = 2;
+
+// time zones already checked: the locations service repeats them (about 250 locations, 70 zones),
+// and making a date format to check one is slow (it loads the zone's data)
+const checkedZones = new Map();
+let supportedZones;
+
+/**
+ * Whether the browser knows a time zone: in its list of zones, else (an alias, e.g. Asia/Calcutta)
+ * when a date format takes it. Checked once per zone.
+ * @param {string} zone
+ * @returns {boolean}
+ */
+function isTimeZone(zone) {
+  if (!checkedZones.has(zone)) {
+    if (!supportedZones) {
+      try {
+        supportedZones = new Set(Intl.supportedValuesOf('timeZone'));
+      } catch {
+        supportedZones = new Set();
+      }
+    }
+    let known = supportedZones.has(zone);
+    if (!known) {
+      try {
+        Intl.DateTimeFormat('en', { timeZone: zone });
+        known = true;
+      } catch { /* not a zone */ }
+    }
+    checkedZones.set(zone, known);
+  }
+  return checkedZones.get(zone);
+}
 
 /**
  * The IANA time zone in the service's text (e.g. "(GMT+8:00) Asia/Hong_Kong, …"), if valid.
@@ -19,14 +61,11 @@ export const CHILDREN_PER_ADULT = 2;
  */
 export function readTimeZone(text) {
   const zone = (text || '').match(/[A-Za-z]+\/[A-Za-z_]+(?:\/[A-Za-z_]+)?/)?.[0];
-  if (!zone) return undefined;
-  try {
-    Intl.DateTimeFormat('en', { timeZone: zone });
-    return zone;
-  } catch {
-    return undefined;
-  }
+  return zone && isTimeZone(zone) ? zone : undefined;
 }
+
+// the clock's date format per time zone, made once each
+const clocks = new Map();
 
 /**
  * Today's date (YYYY-MM-DD) and the minutes since midnight at the lounge.
@@ -34,9 +73,21 @@ export function readTimeZone(text) {
  * @returns {{date: string, minutes: number}}
  */
 export function nowAt(timeZone) {
-  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
-    timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
-  }).formatToParts(new Date()).map((p) => [p.type, p.value]));
+  // the visitor's own time: the same date and minutes without a date format (the first one made on
+  // a page is slow)
+  if (!timeZone) {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    return { date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, minutes: d.getHours() * 60 + d.getMinutes() };
+  }
+  const key = timeZone;
+  if (!clocks.has(key)) {
+    clocks.set(key, new Intl.DateTimeFormat('en-CA', {
+      timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+    }));
+  }
+  const parts = Object.fromEntries(clocks.get(key).formatToParts(new Date())
+    .map((p) => [p.type, p.value]));
   return { date: `${parts.year}-${parts.month}-${parts.day}`, minutes: Number(parts.hour) * 60 + Number(parts.minute) };
 }
 
@@ -68,47 +119,6 @@ export function toTime(minutes) {
  */
 export function toStartDateTime(date, time) {
   return `${date} ${time.slice(0, 2)}:${time.slice(2)}:00`;
-}
-
-/**
- * How far a time zone is ahead of UTC at an instant, in milliseconds (e.g. Asia/Hong_Kong: 8 h).
- * @param {number} instant Milliseconds since the epoch
- * @param {string} [timeZone] The visitor's own without one
- * @returns {number}
- */
-function zoneOffset(instant, timeZone) {
-  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
-    timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
-  }).formatToParts(new Date(instant)).map((p) => [p.type, Number(p.value)]));
-  const local = Date.UTC(
-    parts.year,
-    parts.month - 1,
-    parts.day,
-    parts.hour,
-    parts.minute,
-    parts.second,
-  );
-  return local - Math.floor(instant / 1000) * 1000;
-}
-
-/**
- * A start at the lounge in UTC, as ISO 8601 without milliseconds: 2026-11-10 at 1400 in
- * Asia/Hong_Kong is "2026-11-10T06:00:00Z" (the lounge's own offset that day, summer time too).
- * @param {string} date YYYY-MM-DD
- * @param {string} time HHmm
- * @param {string} [timeZone] The lounge's (see readTimeZone); the visitor's own without one
- * @returns {string} '' for a date or time that can't be read
- */
-export function toUtcDateTime(date, time, timeZone) {
-  const [year, month, day] = (date || '').split('-').map(Number);
-  const hour = Number((time || '').slice(0, 2));
-  const minute = Number((time || '').slice(2, 4));
-  const wall = Date.UTC(year, month - 1, day, hour, minute);
-  if (!Number.isFinite(wall)) return '';
-  // the offset at the wall time, then again at the instant found (a summer time change between)
-  let instant = wall - zoneOffset(wall, timeZone);
-  instant = wall - zoneOffset(instant, timeZone);
-  return new Date(instant).toISOString().replace(/\.\d{3}Z$/, 'Z');
 }
 
 /**

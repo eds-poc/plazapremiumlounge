@@ -233,6 +233,204 @@
   }
 }
 
+/* text-image headings: italic words are the source's gold accent (`span.yellow`, e.g. "Smart
+   Traveller" in "Elevate your Travels with Smart Traveller"), upright */
+.columns.text-image :is(h2, h3) em {
+  /* one-off: the source landing pages' gold */
+  color: #ffb54a;
+  font-style: normal;
+}
+
+/* option social: the source landing pages' Travel Smart band (`.social`): one row, a text cell
+   (heading, text, the social links with their icons, the hashtags), centred, and a photo cell.
+   Mobile first: the text, then the photo centred below it (250px wide, 300px from 576px); from
+   768px the photo at the bottom left (360px wide, the band's height from 992px) and the text in
+   the rest, from 40% of the band. The newsletter below sits right under the band: on the source
+   it covers the bottom of the photo (50px on phones, 30px from 768px), so that part is cut off.
+   The band starts 20px below the section above (`space-above`: 40px, the source's extra spacer on
+   the Connected to WiFi page); its links turn light grey on hover, as the source */
+.columns.social {
+  /* one-off: the source band's heading plum, photo widths, text inset, the newsletter's overlap and
+     the links' hover grey */
+  --columns-social-heading: #6e1e46;
+  --columns-social-photo: 250px;
+  --columns-social-inset: var(--spacing-9);
+  --columns-social-overlap: 50px;
+  --columns-social-link-hover: #cdcdcd;
+
+  text-align: center;
+}
+
+.columns.social > div:has(> div:not(.columns-img-col)) {
+  align-items: center;
+
+  /* the photo's bottom, under the newsletter on the source, is cut off */
+  overflow: hidden;
+}
+
+/* the band is the last thing above the newsletter: no section space below it. Above it, the
+   source's 20px from the section above (that section's bottom space included): the band's section
+   moves up by both sections' padding, less those 20px */
+main > .section:has(> .columns-wrapper > .columns.social) {
+  --columns-social-space-above: 20px;
+
+  margin-top: calc(var(--columns-social-space-above) - 2 * var(--section-padding-block));
+  padding-bottom: 0;
+}
+
+/* option space-above: 20px more above the band (the source's spacer on Connected to WiFi) */
+main > .section:has(> .columns-wrapper > .columns.social.space-above) {
+  --columns-social-space-above: 40px;
+}
+
+.columns.social > div > div:not(.columns-img-col) {
+  box-sizing: border-box;
+  width: 100%;
+  order: 0;
+  padding: var(--spacing-11) var(--columns-social-inset) 0;
+}
+
+/* the photo after the text, at the bottom (the source draws it as the band's background) */
+.columns.social > div > .columns-img-col:is(:first-child, :last-child) {
+  display: flex;
+  justify-content: center;
+  order: 1;
+  margin-bottom: calc(-1 * var(--columns-social-overlap));
+  padding: 0;
+}
+
+.columns.social .columns-img-col img {
+  width: var(--columns-social-photo);
+  max-width: 100%;
+  height: auto;
+}
+
+.columns.social > div > div:not(.columns-img-col) > h2 {
+  margin: 0 0 var(--spacing-3);
+  color: var(--columns-social-heading);
+  font-size: 26px;
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.columns.social > div > div:not(.columns-img-col) > p:not(.button-wrapper) {
+  margin: 0 0 var(--spacing-7);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+/* the social links and the hashtags: a line each, 10px apart */
+.columns.social > div > div:not(.columns-img-col) > h2 + p ~ p:not(.button-wrapper) {
+  margin-bottom: var(--spacing-4);
+}
+
+.columns.social a:any-link {
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  transition: color 0.25s ease-in-out;
+}
+
+/* hover and keyboard focus: the text light grey, no underline, the icons as they are (the source) */
+.columns.social a:any-link:is(:hover, :focus-visible) {
+  color: var(--columns-social-link-hover);
+  text-decoration: none;
+}
+
+/* the network icons, 30px, as the source */
+.columns.social a .icon {
+  width: 30px;
+  height: 30px;
+  vertical-align: middle;
+}
+
+@media (width >= 576px) {
+  .columns.social {
+    --columns-social-photo: 300px;
+  }
+
+  .columns.social > div > div:not(.columns-img-col) {
+    padding-top: 0;
+  }
+
+  .columns.social > div > div:not(.columns-img-col) > p:not(.button-wrapper) {
+    font-size: var(--font-size-lg);
+  }
+}
+
+@media (width >= 768px) {
+  .columns.social {
+    --columns-social-photo: 360px;
+    --columns-social-overlap: 30px;
+
+    /* into the newsletter's own 20px space above its panel, so the panel sits right under the band */
+    margin-bottom: calc(-1 * var(--spacing-7));
+  }
+
+  .columns.social > div:has(> div:not(.columns-img-col)) {
+    position: relative;
+    display: block;
+  }
+
+  /* the text from 40% of the band (the source's offset text wrapper), 80px above and 100px below;
+     the social links and the hashtags side by side in a centred 530px row (2/3 and 1/3), as the
+     source. The text sits above the photo (the source's background), so the photo never covers
+     the links */
+  .columns.social > div > div:not(.columns-img-col) {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-auto-flow: row dense;
+    grid-template-columns: 1fr minmax(0, 353px) minmax(0, 177px) 1fr;
+    align-content: start;
+    padding: 80px calc(var(--columns-social-inset) + var(--grid-gutter) / 2) calc(100px - var(--columns-social-overlap)) calc(40% + var(--spacing-3));
+  }
+
+  .columns.social > div > div:not(.columns-img-col) > h2,
+  .columns.social > div > div:not(.columns-img-col) > h2 + p:not(.button-wrapper) {
+    grid-column: 1 / -1;
+  }
+
+  /* the hashtags (lines without a link) on the right, the links on the left */
+  .columns.social > div > div:not(.columns-img-col) > h2 + p ~ p:not(.button-wrapper, :has(a)) {
+    grid-column: 3;
+  }
+
+  .columns.social > div > div:not(.columns-img-col) > h2 + p ~ p:not(.button-wrapper):has(a) {
+    grid-column: 2;
+  }
+
+  .columns.social > div > .columns-img-col:is(:first-child, :last-child) {
+    position: absolute;
+    bottom: calc(-1 * var(--columns-social-overlap));
+    left: -2.5%;
+    margin-bottom: 0;
+  }
+}
+
+@media (width >= 992px) {
+  /* the photo is the band's height, as the source's background (contain) */
+  .columns.social > div > div:not(.columns-img-col) {
+    padding-top: 160px;
+  }
+
+  .columns.social > div > .columns-img-col:is(:first-child, :last-child) {
+    top: 0;
+    left: 3%;
+  }
+
+  .columns.social .columns-img-col img {
+    width: auto;
+    height: 100%;
+  }
+}
+
+@media (width >= 1400px) {
+  .columns.social > div > .columns-img-col:is(:first-child, :last-child) {
+    left: 14%;
+  }
+}
+
 /* media-image variation: evenly sized image cards (e.g. logos) in a centred, wrapping grid, as the source partners
    cards (up to 850px wide; 1 per row, 2 from 576px, 3 from 768px; a short last row is centred) */
 .columns.media-image {

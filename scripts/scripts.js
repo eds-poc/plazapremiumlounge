@@ -18,6 +18,7 @@ import { decorateIcons } from './icons.js';
 import { getLanguage } from './i18n.js';
 import { installVideoLinks } from './video.js';
 import { checkPartnerAccess, checkSession, logout } from './auth.js';
+import { STALE_EVENT, needsRead } from './cart-state.js';
 
 if (window.trustedTypes && window.trustedTypes.createPolicy) {
   const innerTT = window.trustedTypes.createPolicy('tt-inner', {
@@ -48,9 +49,10 @@ const LOADER_ID = 'spinner-overlay';
 let loader;
 
 /**
- * Shows the full-page loader (styled in styles.css), creating it on first use. With a modal
- * dialog open, the loader goes inside it: a modal dialog sits in the browser's top layer, above
- * anything in the page.
+ * Shows the full-page loader (the source's #spinner-overlay, styled in styles.css), creating it on
+ * first use, for the page's first load, links that leave the page, and blocks and scripts that wait
+ * for a service (e.g. the cart). With a modal dialog open, the loader goes inside it: a modal
+ * dialog sits in the browser's top layer, above anything in the page.
  */
 export function showLoader() {
   if (!loader) {
@@ -242,6 +244,86 @@ export function decorateMain(main) {
   decorateButtons(main);
 }
 
+// the cart: what the blocks that sell announce, and the cart type each product is (the cart's code
+// loads on the first one; see scripts/cart.js and scripts/mini-cart.js)
+const CART_EVENTS = {
+  // the homepage lounge card's Book Now
+  'booking-widget:book': 'lounge',
+  // a pass's Add to Cart (or Add More): its card's or its Learn more pop-up's
+  'quick-buy:add-to-cart': 'pass',
+  'pass-finder:add-to-cart': 'pass',
+};
+
+let reading = null;
+
+/**
+ * Reads the cart from the booking system in the background when this tab hasn't its data (a new
+ * tab, its data past its 2 hours, another tab's change): the count, the buttons' labels and the
+ * mini cart then follow (`cart:change`). The cart's code loads only then; one read at a time.
+ */
+function readCartIfNeeded() {
+  if (reading || !needsRead()) return;
+  reading = import('./cart.js')
+    .then(({ refreshCart }) => refreshCart())
+    .catch(() => { /* (read again when it's needed) */ })
+    .finally(() => { reading = null; });
+}
+
+/**
+ * Puts announced products into the cart (`CART_EVENTS`), and takes them out on `cart:remove`
+ * (`detail.catalogueCode`, e.g. the lounge card's Remove From Cart). A cart this tab hasn't read is
+ * read once the page has loaded, when the tab is shown again, and when another tab changed it.
+ */
+function installCart() {
+  window.addEventListener('load', () => setTimeout(readCartIfNeeded, 0), { once: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') readCartIfNeeded();
+  });
+  document.addEventListener(STALE_EVENT, () => {
+    if (document.visibilityState === 'visible') readCartIfNeeded();
+  });
+  Object.entries(CART_EVENTS).forEach(([name, type]) => {
+    document.addEventListener(name, (e) => {
+      // (as the source's, at once: the button off and the site's loader, while the cart's code
+      // loads; the cart keeps them until the booking system has answered)
+      const from = e.target.closest?.('button');
+      if (from) {
+        from.disabled = true;
+        from.setAttribute('aria-disabled', 'true');
+      }
+      showLoader();
+      // (the cart's UI takes the loader from here: loaded only after this script has run)
+      // eslint-disable-next-line import/no-cycle
+      import('./mini-cart.js')
+        .then(({ addAndShow }) => addAndShow({ ...e.detail, type }, e.target))
+        .finally(() => {
+          hideLoader();
+          if (!from) return;
+          from.disabled = false;
+          from.removeAttribute('aria-disabled');
+        });
+    });
+  });
+  document.addEventListener('cart:remove', (e) => {
+    // (as adding: the button off and the loader at once)
+    const from = e.target.closest?.('button');
+    if (from) {
+      from.disabled = true;
+      from.setAttribute('aria-disabled', 'true');
+    }
+    showLoader();
+    // eslint-disable-next-line import/no-cycle
+    import('./mini-cart.js')
+      .then(({ removeAndShow }) => removeAndShow(e.detail?.catalogueCode, e.target))
+      .finally(() => {
+        hideLoader();
+        if (!from) return;
+        from.disabled = false;
+        from.removeAttribute('aria-disabled');
+      });
+  });
+}
+
 /**
  * Loads everything needed to get to LCP.
  * @param {Element} doc The container element
@@ -262,6 +344,7 @@ async function loadEager(doc) {
   installModalLinks();
   // YouTube, Vimeo and video file links play in the video popup, wherever they are authored
   installVideoLinks();
+  installCart();
   const main = doc.querySelector('main');
   if (main) {
     decorateMain(main);
@@ -329,7 +412,9 @@ async function loadPage() {
   hideLoader();
   await loadLazy(document);
   installNavigationLoader();
-  loadDelayed();
+  // the tags and the rest 3 seconds after the page shows (as the boilerplate), so they don't
+  // compete with it
+  window.setTimeout(loadDelayed, 3000);
 }
 
 loadPage();

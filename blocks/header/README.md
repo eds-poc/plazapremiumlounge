@@ -56,7 +56,9 @@ names, the sections are read in this order:
 - A link to a `modals` folder page (e.g. `/en-uk/modals/login`) opens that page as a modal; the menu or any
   dropdown closes first, and focus returns to the link when the modal closes.
 - `#name` opens the modal section named `name` from the nav page (or the current page). The cart
-  shows its `cart` section as a dropdown on desktop and as a modal on mobile.
+  shows its `cart` section as a dropdown on desktop and as a modal on mobile while it's empty;
+  with something in it, the icon shows the count and opens the mini cart (see
+  [docs/cart.md](../../docs/cart.md)).
 - `#name` with no modal of that name fires a `header:action` event on `document`
   (`event.detail.name`, `event.detail.trigger`) for other scripts to handle, e.g. a future cart.
 
