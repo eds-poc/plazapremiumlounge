@@ -117,7 +117,8 @@ const miniText = (page) => page.evaluate(() => {
     // (each part's own text: labels and values are spaced by the styles)
     details: [...d.querySelectorAll('.mini-cart-detail')].map((r) => [...r.children].map((c) => c.textContent.trim()).join(' ')),
     rows: [...d.querySelectorAll('.mini-cart-row')].map((r) => [...r.querySelectorAll(':scope > .mini-cart-label > *, :scope > .mini-cart-label:not(:has(*)), :scope > .mini-cart-amount')].map((c) => c.textContent.trim()).join(' ')),
-    buttons: [...d.querySelectorAll('.mini-cart-actions button')].map((b) => b.textContent),
+    // (Check Out a link to this site's checkout page, Edit a button)
+    buttons: [...d.querySelectorAll('.mini-cart-actions > a, .mini-cart-actions > button')].map((b) => b.textContent),
     removeLabel: d.querySelector('.mini-cart-remove')?.getAttribute('aria-label'),
   };
 });
@@ -162,7 +163,9 @@ async function addFlow(width) {
   const announced = await page.evaluate(() => new Promise((resolve) => {
     const got = [];
     ['cart:checkout', 'cart:edit'].forEach((n) => document.addEventListener(n, (e) => got.push(`${n}:${e.detail.cart?.cartId}`)));
-    document.querySelectorAll('dialog.mini-cart-modal .mini-cart-actions button').forEach((b) => b.click());
+    // (Check Out is a link: its announcement is checked, its navigation kept off)
+    document.addEventListener('click', (e) => { if (e.target.closest?.('.mini-cart-actions a')) e.preventDefault(); }, true);
+    document.querySelectorAll('dialog.mini-cart-modal .mini-cart-actions > a, dialog.mini-cart-modal .mini-cart-actions > button').forEach((b) => b.click());
     setTimeout(() => resolve(got), 200);
   }));
   check(`${width} Check Out and Edit announce cart:checkout / cart:edit`, JSON.stringify(announced) === '["cart:checkout:CRT_TEST1","cart:edit:CRT_TEST1"]' && new URL(page.url()).pathname === '/en-uk/', JSON.stringify(announced));

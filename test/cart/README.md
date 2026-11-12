@@ -24,7 +24,7 @@ line, DELETE. It covers:
 - `?selectedPassID=`, the currency (the session's, a cart of passes converted, a lounge's not), the
   other languages (live's Add to Cart and Add More), axe
 
-`node mini-cart.test.mjs [width]` — the mini cart (62 checks).
+`node mini-cart.test.mjs [width]` — the mini cart (73 checks).
 - Check Out / Edit from the page metadata (`cart-checkout-url`, `cart-edit-url`, injected) and the
   promo code.
 - The promo service is emulated as stage answers it (see docs/cart.md): Success, then the lines
@@ -34,6 +34,8 @@ line, DELETE. It covers:
   - Add More, another pass, a pass taken out, another currency: the code sent again; a refusal
     then (the field offers the code again with why)
   - taking it off (the cart's products sent again), a new cart afterwards, BKNG001
+- The source's look: the panel's place at 414, 575, 700, 767 and 1440, the header at 375 and
+  1440, the promo message's amber callout with its icon, focus after Enter and after a click.
 - The add-ons hook, and axe (the field's message, the applied code, the confirmation).
 
 `node storage.test.mjs` — where the cart is kept and when it's read again (15 checks).

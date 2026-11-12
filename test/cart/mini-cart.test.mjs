@@ -101,7 +101,10 @@ async function openWithCart({
         await p.route(new RegExp(`localhost:\\d+${path.replace(/\//g, '\\/')}(\\?.*)?$`), async (r) => {
           const resp = await r.fetch();
           const tags = Object.entries(meta).map(([k, v]) => `<meta name="${k}" content="${v.replace(/&/g, '&amp;')}">`).join('');
-          const body = (await resp.text()).replace('</head>', `${tags}</head>`);
+          // (instead of the page's own, e.g. the sheet's cart-checkout-url)
+          let body = await resp.text();
+          Object.keys(meta).forEach((k) => { body = body.replace(new RegExp(`<meta name="${k}"[^>]*>`, 'g'), ''); });
+          body = body.replace('</head>', `${tags}</head>`);
           return r.fulfill({ response: resp, body, headers: { ...resp.headers(), 'content-type': 'text/html' } });
         });
       }
@@ -533,6 +536,71 @@ const passItem = (code) => ({
   const s = await stateOf(page);
   const open1 = await page.evaluate(() => !!document.querySelector('dialog.mini-cart-modal[open]'));
   check('a cart the service no longer has (BKNG001): forgotten, the mini cart closed', !s.id && !s.stored && !open1, JSON.stringify({ s, open: open1 }));
+  await page.close();
+}
+
+// the source's look (its own CSS, 2026-11-12 audit): the panel's place at each width, the header,
+// the promo message's amber callout with its icon, and focus back where the visitor was
+for (const [width, x, y, w] of [[414, 0, 8, 414], [575, 78, 8, 420], [700, 140, 28, 420], [767, 174, 28, 420], [1440, null, 28, 420]]) {
+  const page = await openWithCart({ width });
+  await openCart(page);
+  const box = await page.evaluate(() => { const r = document.querySelector('dialog.mini-cart-modal[open] .modal-content').getBoundingClientRect(); return [r.x, r.y, r.width].map(Math.round); });
+  const expectX = x ?? width - 28 - 420;
+  check(`${width} the panel as the source's: x ${expectX}, y ${y}, ${w} wide`, Math.abs(box[0] - expectX) <= 1 && Math.abs(box[1] - y) <= 1 && Math.abs(box[2] - w) <= 1, JSON.stringify(box));
+  await page.close();
+}
+for (const [width, size, gap, padding, after] of [[375, '18px', '5px', '12px', '12px'], [1440, '20px', '8px', '15px', '20px']]) {
+  const page = await openWithCart({ width });
+  await openCart(page);
+  const h = await page.evaluate(() => {
+    const d = document.querySelector('dialog.mini-cart-modal[open]');
+    const t = getComputedStyle(d.querySelector('.modal-title'));
+    return {
+      size: t.fontSize, gap: t.marginBottom, padding: getComputedStyle(d.querySelector('.modal-header')).paddingBottom, after: getComputedStyle(d.querySelector('.modal-body')).paddingTop,
+    };
+  });
+  check(`${width} the header as the source's: the title ${size} with ${gap} under it, ${padding} above the line, ${after} after it`, h.size === size && h.gap === gap && h.padding === padding && h.after === after, JSON.stringify(h));
+  await page.close();
+}
+{
+  const callout = (page) => page.evaluate(() => {
+    const m = document.querySelector('dialog.mini-cart-modal[open] .mini-cart-promo-message');
+    const cs = getComputedStyle(m);
+    const icon = getComputedStyle(m, '::before');
+    return {
+      text: m.textContent, color: cs.color, bg: cs.backgroundColor, border: cs.borderTop, radius: cs.borderRadius, padding: cs.padding, margin: cs.margin, size: cs.fontSize, icon: icon.maskImage.includes('circle-exclamation') && icon.width === '13px' && icon.marginRight === '6px',
+    };
+  });
+  const LOOK = (c) => c.color === 'rgb(146, 64, 14)' && c.bg === 'rgb(255, 251, 235)' && c.border === '1px solid rgb(245, 202, 69)' && c.radius === '5px' && c.padding === '2px 10px' && c.margin === '5px 0px' && c.size === '13px' && c.icon;
+  const page = await openWithCart({ promo: (body, state) => (body.promocode === 'DOWN' ? 'abort' : stagePromo(body, state)) });
+  await openCart(page);
+  // an empty code, by a click: the callout, focus stays on the arrow
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-apply').click();
+  let c = await callout(page);
+  const focusOf = () => page.evaluate(() => document.activeElement?.className || '');
+  check('the empty code\'s message as the source\'s amber callout with its icon; focus stays on the arrow', c.text === 'Please enter promo code.' && LOOK(c) && /mini-cart-promo-apply/.test(await focusOf()), JSON.stringify(c));
+  // a refused code by a click: the callout, focus back on the arrow (no ring on the field)
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').fill('SAVE10');
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-apply').click();
+  await page.waitForFunction(() => /No record/.test(document.querySelector('dialog.mini-cart-modal[open] .mini-cart-promo-message')?.textContent || ''), null, { timeout: 10000 });
+  c = await callout(page);
+  check('a refused code by a click: the callout; focus back on the arrow', LOOK(c) && /mini-cart-promo-apply/.test(await focusOf()), JSON.stringify({ c, focus: await focusOf() }));
+  // by Enter: focus back in the field, shown as the source's (white, the light blue glow, no outline)
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').fill('SAVE11');
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').press('Enter');
+  await page.waitForTimeout(1200);
+  const field = await page.evaluate(() => {
+    const i = document.querySelector('dialog.mini-cart-modal[open] .mini-cart-promo-input'); const cs = getComputedStyle(i); return {
+      focused: document.activeElement === i, bg: cs.backgroundColor, outline: cs.outlineStyle, shadow: cs.boxShadow,
+    };
+  });
+  check('a refused code by Enter: focus back in the field, white with the light blue glow, no outline', field.focused && field.bg === 'rgb(255, 255, 255)' && field.outline === 'none' && /rgba\(13, 110, 253, 0\.25\)/.test(field.shadow), JSON.stringify(field));
+  // no answer: "Error" in the same callout
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').fill('DOWN');
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-apply').click();
+  await page.waitForFunction(() => document.querySelector('dialog.mini-cart-modal[open] .mini-cart-promo-message')?.textContent === 'Error', null, { timeout: 10000 });
+  c = await callout(page);
+  check('no answer: "Error" in the same callout', LOOK(c), JSON.stringify(c));
   await page.close();
 }
 

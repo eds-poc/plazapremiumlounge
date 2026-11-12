@@ -135,7 +135,8 @@ const mini = (page) => page.evaluate(() => {
     lines: [...d.querySelectorAll('.mini-cart-line')].map((l) => `${l.querySelector('.mini-cart-name').textContent.trim()} | ${[...(l.querySelector('.mini-cart-quantity')?.children || [])].map((c) => c.textContent).join(' | ')}`),
     pass: [...d.querySelectorAll('.mini-cart-line')].every((l) => l.classList.contains('mini-cart-line-pass') && !l.querySelector('.mini-cart-details, .mini-cart-place')),
     total: d.querySelector('.mini-cart-total .mini-cart-amount')?.textContent,
-    buttons: [...d.querySelectorAll('.mini-cart-actions button')].map((b) => b.textContent),
+    // (Check Out a link to this site's checkout page, Edit a button)
+    buttons: [...d.querySelectorAll('.mini-cart-actions > a, .mini-cart-actions > button')].map((b) => b.textContent),
   };
 });
 const closeMini = async (page) => {

@@ -27,7 +27,8 @@ the page after ⊗ → Yes, and that reload adds the promotional address's pass 
   booking system deletes the cart, then **Book Now** again and no count (no reload).
 - **The cart's dialogs stay open on Esc and a click beside them** (they bounce), as the source's
   (`data-bs-backdrop="static" data-bs-keyboard="false"`): only their own controls close them.
-- **The mini cart** (a 420px panel at the top right from 768px, the screen's width on phones):
+- **The mini cart** (as the source's: a 420px panel at the top right from 768px; below it the
+  screen's width up to 420px, then a centred 420px panel, 28px from the top from 576px):
   - the lounge's name with a ⊗ (remove), its location
   - Date (`02-Nov-2026`, `2026年11月02日`), Time (`1800hrs`), Guests (`2 Adult(s) 1 Child(ren)`),
     Services (the product); on phones each label is over its value, in 14px text
@@ -99,7 +100,10 @@ the page after ⊗ → Yes, and that reload adds the promotional address's pass 
 
 - **The promo code** (the source's field: "PROMO CODE", "Enter Code", the arrow; Enter applies too),
   for lounges and passes:
-  - An empty code: "Please enter promo code." in red, with no request. Typing clears the message.
+  - An empty code: "Please enter promo code.", with no request. Typing clears the message.
+  - Every message (an empty code, a refusal, no answer) is the source's amber callout with its "!"
+    icon (its `.error-message`). Focus goes back where the visitor was: the field after Enter, the
+    arrow after a click; the field focused is white with a light blue glow, as the source's.
   - Applying: the arrow is off (busy) while the booking system answers (no full-page loader, as
     the source's), then the cart is read again.
     - **Applied:** the cart's lines carry the code (see the API below). A "Promo Code (CODE):" row

@@ -310,12 +310,14 @@ function buildPromo(cart) {
   action.setAttribute('aria-label', translate(applied ? 'cartPromoRemove' : 'cartPromoApply'));
   field.append(input, action);
   box.append(label, field, message);
-  // (after the booking system answered: the mini cart has redrawn, so the new field takes focus)
-  const refocus = () => {
+  // (after the booking system answered: the mini cart has redrawn, so focus goes back where the
+  // visitor was in the new one: the field, or its button: the arrow, or the cross once applied)
+  const refocus = (target = 'field') => {
     const now = getCart();
     // eslint-disable-next-line no-use-before-define
     if (mini.dialog?.open && now) renderMiniCart(now);
-    mini.dialog?.querySelector('.mini-cart-promo-input')?.focus();
+    const selector = target === 'button' ? '.mini-cart-promo-apply, .mini-cart-promo-remove' : '.mini-cart-promo-input';
+    mini.dialog?.querySelector(selector)?.focus();
   };
   if (applied) {
     input.value = applied;
@@ -345,14 +347,14 @@ function buildPromo(cart) {
   }
   input.value = promo.draft;
   let busy = false;
-  const apply = async () => {
+  // from: where the visitor asked (the field by Enter, the arrow by a click), where focus goes back
+  const apply = async (from) => {
     if (busy) return;
     const code = input.value.trim();
     if (!code) {
       promo.message = translate('cartPromoEmpty');
       promo.error = true;
       show();
-      input.focus();
       return;
     }
     promo.message = '';
@@ -378,7 +380,7 @@ function buildPromo(cart) {
     promo.draft = ok ? '' : code;
     promo.message = ok ? '' : promoMessage(result);
     promo.error = !ok;
-    refocus();
+    refocus(from);
   };
   input.addEventListener('input', () => {
     promo.draft = input.value;
@@ -390,9 +392,9 @@ function buildPromo(cart) {
   input.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;
     e.preventDefault();
-    apply();
+    apply('field');
   });
-  action.addEventListener('click', apply);
+  action.addEventListener('click', () => apply('button'));
   return box;
 }
 
