@@ -347,7 +347,7 @@ for (const width of [1440, 375]) {
 
 // Booking Steps without its phone name: the bold step's own text; old Checkout rows left out
 {
-  const phone = await open({ width: 375, height: 812, html: (h) => h.replace(/(<div class="booking-steps">[\s\S]*?<\/ul><\/div><\/div>)<div><div><p>[^<]*<\/p><\/div><\/div>/, '$1') });
+  const phone = await open({ width: 375, height: 812, html: (h) => h.replace(/(<div class="booking-steps">[\s\S]*?<\/ul>\s*<\/div>\s*<\/div>)\s*<div>\s*<div>\s*(?:<p>)?[^<]*(?:<\/p>)?\s*<\/div>\s*<\/div>/, '$1') });
   const short = await phone.evaluate(() => [document.querySelector('main .booking-steps .is-active .booking-steps-short'), document.querySelector('main .booking-steps .is-active .booking-steps-name')?.offsetParent !== null]);
   check('Booking Steps without row 2: the bold step\'s name on phones', short[0] === null && short[1], JSON.stringify(short));
   await phone.close();
