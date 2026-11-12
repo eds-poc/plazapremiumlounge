@@ -387,8 +387,8 @@ function trackPageLoad(lounge, form) {
   const serviceData = form.querySelector('select[name="service"]')?.selectedOptions[0];
   const productData = form.querySelector('select[name="product"]')?.selectedOptions[0];
   const formFieldsData = {
-    service: serviceData?.value ? serviceData.textContent.trim() : '',
-    product: productData?.value ? productData.textContent.trim() : '',
+    service: serviceData?.value ? serviceData.textContent : '',
+    product: productData?.value ? productData.textContent : '',
     productCode: productData?.value || '',
     date: String(formData.get('date') || ''),
     time: String(formData.get('time') || ''),
