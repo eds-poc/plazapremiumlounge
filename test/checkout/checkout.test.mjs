@@ -8,7 +8,11 @@
 // - the valid form announced as checkout:payment (the guest and the cart), the preview's note
 // - no cart, a cart that can't be read, a cart emptied meanwhile
 // - the phone layout (summary first, the bar, the fold) and the desktop one
-// - the banner's Promo card buttons, axe (with AXE_CORE)
+// - the page's other blocks: Booking Steps (with and without its phone name), Title (back), the
+//   banner's Promo card buttons; old Checkout rows (steps, back, banner) left out; five languages
+// - axe (with AXE_CORE)
+// The page is the split one (Booking Steps, Title (back), Promo (card), Checkout): serve the local
+// content (aem up --html-folder content --html-mount / --prefer-plain-html) until it's in DA.
 // Usage: BW_HOST=http://localhost:3000 PLAYWRIGHT=… [AXE_CORE=…] node checkout.test.mjs
 import { readFileSync } from 'node:fs';
 
@@ -34,7 +38,7 @@ const json = (body, status = 200) => ({
  * answers 500), `stored` keeps the cart's data in the tab already.
  */
 async function open({
-  cart = LOUNGE_CART, width = 1440, height = 900, stored = false,
+  cart = LOUNGE_CART, width = 1440, height = 900, stored = false, path = PATH, html,
 } = {}) {
   const page = await browser.newPage({ viewport: { width, height }, userAgent: UA });
   page.setDefaultTimeout(15000);
@@ -42,6 +46,13 @@ async function open({
   page.gets = 0;
   page.on('pageerror', (e) => page.errors.push(e.message));
   await page.route(THIRD, (r) => r.abort());
+  // the page's markup changed on its way (html: a function of it)
+  if (html) {
+    await page.route(new RegExp(`${path.replace(/\//g, '\\/')}$`), async (r) => {
+      const resp = await r.fetch();
+      await r.fulfill({ response: resp, body: html(await resp.text()) });
+    });
+  }
   await page.route(/\/GetCountries/, (r) => r.fulfill(json(COUNTRIES)));
   await page.route(/ppg-app\/cart/, (r) => {
     page.gets += 1;
@@ -56,7 +67,7 @@ ${stored ? 'sessionStorage.setItem(\'ppl-cart\', JSON.stringify({ cartId: \'CRT_
     window.payments = [];
     document.addEventListener('checkout:payment', (e) => window.payments.push(JSON.parse(JSON.stringify(e.detail))));
   });
-  await page.goto(`${HOST}${PATH}`, { waitUntil: 'load', timeout: 60000 });
+  await page.goto(`${HOST}${path}`, { waitUntil: 'load', timeout: 60000 });
   await page.waitForFunction(() => document.querySelector('.checkout')?.dataset.blockStatus === 'loaded', null, { timeout: 30000 });
   // the countries in, the cart read
   await page.waitForFunction(() => document.querySelector('.checkout .form-field-country select')?.options.length > 2, null, { timeout: 15000 }).catch(() => {});
@@ -75,9 +86,9 @@ const tick = (page, key, on = true) => page.locator(`${field(key)} input`).setCh
   const info = await page.evaluate(() => {
     const b = document.querySelector('.checkout');
     return {
-      title: b.querySelector('.checkout-title')?.textContent,
-      back: b.querySelector('.checkout-back')?.getAttribute('href'),
-      active: b.querySelector('.booking-steps-item.is-active .booking-steps-name')?.textContent,
+      title: document.querySelector('main .title.back .title-heading')?.textContent,
+      back: document.querySelector('main .title.back .title-back')?.getAttribute('href'),
+      active: document.querySelector('main .booking-steps-item.is-active .booking-steps-name')?.textContent,
       summary: b.querySelector('.checkout-summary')?.innerText.replace(/\s+/g, ' '),
       terms: [...b.querySelectorAll('.checkout-terms-name')].map((h) => h.textContent),
       termsAfterBox: b.querySelector('.form-field[data-key="termsAgreed"] + .checkout-terms-slot .checkout-terms') !== null,
@@ -203,7 +214,7 @@ const tick = (page, key, on = true) => page.locator(`${field(key)} input`).setCh
   const text = await none.locator('.checkout .checkout-summary').innerText();
   check('no cart: "Please add item", Payment off', /Please add item/.test(text) && await paymentDisabled(none), text.replace(/\s+/g, ' '));
   check('no cart: no cart request', none.gets === 0, `${none.gets}`);
-  check('no cart: one checkout, its banner', await none.evaluate(() => document.querySelectorAll('.checkout').length === 1 && document.querySelectorAll('.checkout-banner .promo.card').length === 1));
+  check('no cart: one checkout, one banner, one band', await none.evaluate(() => document.querySelectorAll('main .checkout').length === 1 && document.querySelectorAll('main .promo.card').length === 1 && document.querySelectorAll('main .booking-steps').length === 1));
   await none.close();
 
   const down = await open({ cart: 'fail' });
@@ -240,7 +251,7 @@ const tick = (page, key, on = true) => page.locator(`${field(key)} input`).setCh
       bar: getComputedStyle(bar).position === 'fixed' && getComputedStyle(bar).display !== 'none' && Math.abs(bar.getBoundingClientRect().bottom - window.innerHeight) <= 1,
       barText: bar.innerText.replace(/\s+/g, ' '),
       summaryPayment: !!b.querySelector('.checkout-payment-summary').offsetParent,
-      band: getComputedStyle(b.querySelector('.booking-steps')).display,
+      band: getComputedStyle(document.querySelector('main .booking-steps')).display,
     };
   });
   check('phone: the summary above the form', layout.summaryFirst);
@@ -257,34 +268,112 @@ const tick = (page, key, on = true) => page.locator(`${field(key)} input`).setCh
     const b = document.querySelector('.checkout');
     const summary = b.querySelector('.checkout-summary').getBoundingClientRect();
     const form = b.querySelector('.checkout-form').getBoundingClientRect();
-    const solid = document.querySelector('.checkout-banner .promo.card .is-solid .promo-button');
-    const outline = document.querySelector('.checkout-banner .promo.card .is-outline .promo-button');
+    const solid = document.querySelector('main .promo.card .is-solid .promo-button');
+    const outline = document.querySelector('main .promo.card .is-outline .promo-button');
     return {
       beside: summary.left > form.right && Math.abs(summary.top - form.top) < 80,
       bar: getComputedStyle(b.querySelector('.checkout-bar')).display,
       ratio: Math.round((form.width / (summary.right - form.left)) * 100),
       banner: [outline?.textContent, outline?.getAttribute('href'), solid?.textContent, solid && getComputedStyle(solid).backgroundColor],
-      blocks: document.querySelectorAll('.checkout').length,
-      cards: document.querySelectorAll('.checkout-banner .promo.card').length,
+      blocks: document.querySelectorAll('main .checkout').length,
+      cards: document.querySelectorAll('main .promo.card').length,
+      // the banner between the title and the checkout
+      order: [...document.querySelectorAll('main .block')].map((n) => n.classList[0]).filter((n) => ['booking-steps', 'title', 'promo', 'checkout'].includes(n)).join(' '),
     };
   });
   check('desktop: the summary beside the form', d.beside, JSON.stringify(d));
   check('desktop: no bar', d.bar === 'none');
-  check('banner: the fragment once (not the page itself)', d.blocks === 1 && d.cards === 1, `${d.blocks} checkout, ${d.cards} cards`);
+  check('the page: Booking Steps, Title (back), the banner, Checkout, once each', d.blocks === 1 && d.cards === 1 && d.order === 'booking-steps title promo checkout', `${d.order}; ${d.blocks} checkout, ${d.cards} cards`);
   check('banner: Log In outlined (#login), Sign up now filled', d.banner[0] === 'Log In' && d.banner[1] === '#login' && d.banner[2] === 'Sign up now' && d.banner[3] === 'rgb(104, 18, 53)', JSON.stringify(d.banner));
 
   if (process.env.AXE_CORE) {
     await desk.addScriptTag({ path: process.env.AXE_CORE });
     const violations = await desk.evaluate(async () => {
-      // (the shared booking steps band is left out: its faded steps are the source's, as on Edit
-      // Booking: styles/booking-steps.css)
+      // (the booking steps band is left out: its faded steps are the source's, as on Edit Booking:
+      // styles/booking-steps.css)
       // eslint-disable-next-line no-undef
-      const result = await axe.run({ include: [['.checkout']], exclude: [['.checkout .booking-steps']] }, { runOnly: ['wcag2a', 'wcag2aa'] });
+      const result = await axe.run({ include: [['main .checkout'], ['main .title.back'], ['main .promo.card']] }, { runOnly: ['wcag2a', 'wcag2aa'] });
       return result.violations.map((v) => `${v.id}: ${v.nodes.map((n) => `${n.target.join(' ')} (${n.any[0]?.message || ''})`).join('; ')}`);
     });
     check('axe: no violations', !violations.length, violations.join(', '));
   }
   await desk.close();
+}
+
+// the page's other blocks: Booking Steps and Title (back), desktop and phone
+for (const width of [1440, 375]) {
+  const page = await open({ width, height: width < 768 ? 812 : 900 });
+  const m = await page.evaluate(() => {
+    const band = document.querySelector('main .booking-steps');
+    const items = [...band.querySelectorAll('.booking-steps-item')];
+    const head = document.querySelector('main .title.back .title-heading');
+    const link = head.querySelector('a.title-back');
+    const arrow = link.querySelector('.title-back-arrow');
+    const a = arrow.getBoundingClientRect();
+    const section = band.closest('.section');
+    return {
+      // the block is the band (no band inside a band), first in its section, right under the header
+      own: band.classList.contains('block') && !band.querySelector('.booking-steps'),
+      top: getComputedStyle(section).paddingTop,
+      steps: items.map((i) => i.querySelector('.booking-steps-name').textContent).join(' › '),
+      done: items.filter((i) => i.classList.contains('is-done')).length,
+      current: items.findIndex((i) => i.getAttribute('aria-current') === 'step'),
+      nav: band.querySelector('nav')?.getAttribute('aria-label'),
+      short: band.querySelector('.is-active .booking-steps-short')?.textContent,
+      shortShown: !!band.querySelector('.is-active .booking-steps-short')?.offsetParent,
+      after: getComputedStyle(band).marginBottom,
+      tag: head.tagName,
+      size: getComputedStyle(head).fontSize,
+      weight: getComputedStyle(head).fontWeight,
+      linkText: link.textContent.trim(),
+      href: link.getAttribute('href'),
+      arrow: [Math.round(a.width), Math.round(a.height), arrow.getAttribute('aria-hidden'), getComputedStyle(arrow).backgroundColor],
+      decoration: getComputedStyle(link).textDecorationLine,
+    };
+  });
+  const phone = width < 768;
+  check(`${width} Booking Steps: the band itself, first in its section with no space above`, m.own && m.top === '0px', JSON.stringify([m.own, m.top]));
+  check(`${width} Booking Steps: four steps, Details current (two done), named after the page's heading`, m.steps === 'Lounges › Book › Details › Confirm & Pay' && m.done === 2 && m.current === 2 && m.nav === 'Back to Edit Booking', JSON.stringify(m));
+  check(`${width} Booking Steps: ${phone ? 'the phone name shown' : 'no phone name'}, ${phone ? 30 : 50}px to the title`, m.short === 'Details' && m.shortShown === phone && m.after === (phone ? '30px' : '50px'), JSON.stringify([m.short, m.shortShown, m.after]));
+  check(`${width} Title (back): a heading 1 link with the arrow before it, ${phone ? '18px' : '32px'}/500`, m.tag === 'H1' && m.linkText === 'Back to Edit Booking' && /makeabooking$/.test(m.href) && m.size === (phone ? '18px' : '32px') && m.weight === '500' && m.decoration === 'none', JSON.stringify(m));
+  check(`${width} Title (back): the maroon arrow ${phone ? '14 x 16' : '21 x 24'}, hidden from screen readers`, JSON.stringify(m.arrow) === JSON.stringify([phone ? 14 : 21, phone ? 16 : 24, 'true', 'rgb(83, 14, 42)']), JSON.stringify(m.arrow));
+  if (!phone) {
+    await page.locator('main .title-back').hover();
+    const hover = await page.locator('main .title-back-arrow').evaluate((n) => getComputedStyle(n).backgroundColor);
+    check('Title (back): the arrow grey on hover', hover === 'rgb(153, 153, 153)', hover);
+  }
+  await page.close();
+}
+
+// Booking Steps without its phone name: the bold step's own text; old Checkout rows left out
+{
+  const phone = await open({ width: 375, height: 812, html: (h) => h.replace(/(<div class="booking-steps">[\s\S]*?<\/ul><\/div><\/div>)<div><div><p>[^<]*<\/p><\/div><\/div>/, '$1') });
+  const short = await phone.evaluate(() => [document.querySelector('main .booking-steps .is-active .booking-steps-short'), document.querySelector('main .booking-steps .is-active .booking-steps-name')?.offsetParent !== null]);
+  check('Booking Steps without row 2: the bold step\'s name on phones', short[0] === null && short[1], JSON.stringify(short));
+  await phone.close();
+
+  const old = await open({ html: (h) => h.replace('<div class="checkout">', '<div class="checkout"><div><div><p>steps</p></div><div><ul><li>Old</li><li><strong>Row</strong></li></ul></div></div><div><div><p>back</p></div><div><p><a href="/x">Old back</a></p></div></div><div><div><p>banner</p></div><div><p><a href="/en-uk/fragments/checkout-banner">/en-uk/fragments/checkout-banner</a></p></div></div>') });
+  const o = await old.evaluate(() => ({
+    band: document.querySelector('main .checkout .booking-steps'),
+    text: /Old back|Old|fragments/.test(document.querySelector('main .checkout').textContent),
+    cards: document.querySelectorAll('main .promo.card').length,
+  }));
+  check('old steps / back / banner rows: left out of the checkout', o.band === null && !o.text && o.cards === 1, JSON.stringify(o));
+  await old.close();
+}
+
+// the other languages: each page's band, title, banner and checkout
+for (const lang of ['zh-cn', 'zh-hk', 'ja-jp', 'pt-br']) {
+  const page = await open({ path: `/${lang}/guest-checkout` });
+  const m = await page.evaluate(() => ({
+    order: [...document.querySelectorAll('main .block')].map((n) => n.classList[0]).filter((n) => ['booking-steps', 'title', 'promo', 'checkout'].includes(n)).join(' '),
+    active: document.querySelector('main .booking-steps .is-active .booking-steps-name')?.textContent,
+    back: document.querySelector('main .title-back')?.getAttribute('href'),
+    fields: document.querySelectorAll('main .checkout .form-field').length,
+    summary: !!document.querySelector('main .checkout .checkout-summary-line'),
+  }));
+  check(`${lang}: Booking Steps, Title (back), the banner, Checkout; its current step, back link, fields, summary`, m.order === 'booking-steps title promo checkout' && !!m.active && m.back === `/${lang}/makeabooking` && m.fields >= 14 && m.summary && !page.errors.length, JSON.stringify({ ...m, errors: page.errors }));
+  await page.close();
 }
 
 await browser.close();

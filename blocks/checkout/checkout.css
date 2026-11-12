@@ -1,13 +1,10 @@
 /* the shared form styles (the guest's details), loaded with the block's own */
 @import url('../../styles/forms.css');
 
-/* the booking pages' maroon band at the top, with the steps (shared styles) */
-@import url('../../styles/booking-steps.css');
-
-/* checkout: the source guest checkout (/en-uk/guest-checkout). The steps band, the title after a
-   back arrow, the banner (the Smart Traveller box), then the guest form (two thirds) beside the
-   Booking Summary card (a third) from 992px; below it the summary first, then the form, and a bar
-   with the total and Payment fixed at the bottom of the screen */
+/* checkout: the source guest checkout (/en-uk/guest-checkout), after the page's Booking Steps,
+   Title (back) and Promo (card) blocks: the guest form (two thirds) beside the Booking Summary card
+   (a third) from 992px; below it the summary first, then the form, and a bar with the total and
+   Payment fixed at the bottom of the screen */
 .checkout {
   --checkout-label: rgb(0 0 0 / 60%);
   --checkout-value: var(--color-brand-primary-action);
@@ -16,56 +13,15 @@
   /* one-off: the phone bar's height, kept free at the end of the page so it covers nothing */
   --checkout-bar-space: 150px;
   --checkout-bar-shadow: 0 -2px 10px rgb(0 0 0 / 10%);
-
-  /* the source's back arrow: 14 x 16px on phones, 21 x 24px from 768px */
-  --checkout-back-width: 14px;
-  --checkout-back-height: 16px;
   --checkout-toggle-icon: 16px;
 
   padding-block: 0 var(--spacing-9);
   color: var(--color-text);
 }
 
-/* the band right under the header (the section's top spacing is the block's own) */
-main > .section:has(> .checkout-wrapper) {
-  padding-top: 0;
-}
-
-.checkout .booking-steps {
-  margin-bottom: var(--spacing-9);
-}
-
-/* the title: 18px on phones (32px from 992px), the maroon arrow 15px before it */
-.checkout .checkout-title {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-6);
-  margin: 0 0 var(--spacing-8);
-  font-size: var(--heading-section-size);
-  font-weight: var(--font-weight-medium);
-  line-height: var(--line-height-heading);
-}
-
-.checkout .checkout-back {
-  display: block;
-  flex: none;
-  width: var(--checkout-back-width);
-  height: var(--checkout-back-height);
-  background-color: var(--color-brand-primary);
-  mask: url('../../icons/arrow-left-regular.svg') center / contain no-repeat;
-}
-
-.checkout .checkout-back:hover {
-  background-color: var(--color-text-subtle);
-}
-
-.checkout .checkout-banner:not(:empty) {
-  margin-bottom: var(--spacing-7);
-}
-
-/* the banner fragment's sections without their own spacing */
-.checkout .checkout-banner .section {
-  padding: 0;
+/* after the page's banner (a Promo card before it): 20px, as the source's */
+.promo-wrapper + .checkout-wrapper {
+  margin-top: var(--spacing-7);
 }
 
 .checkout .checkout-layout {
@@ -349,24 +305,8 @@ main > .section:has(> .checkout-wrapper) {
   }
 }
 
-@media (width >= 768px) {
-  .checkout .booking-steps {
-    margin-bottom: var(--spacing-11);
-  }
-
-  .checkout {
-    --checkout-back-width: 21px;
-    --checkout-back-height: 24px;
-  }
-}
-
 /* from 992px (the source's desktop): the form beside the summary (a third of the row), no bar */
 @media (width >= 992px) {
-  .checkout .checkout-title {
-    margin-bottom: var(--spacing-10);
-    font-size: var(--font-size-3xl);
-  }
-
   .checkout .checkout-layout {
     grid-template-columns: calc((100% + var(--grid-gutter)) * 2 / 3 - var(--grid-gutter)) minmax(0, 1fr);
   }

@@ -383,6 +383,62 @@
   }
 }
 
+/* option back: a "← Back to …" page title, as the source's booking pages (guest checkout): the
+   heading 18px/500 (32px from 992px) with the maroon arrow 15px before its text (14 x 16px, 21 x
+   24px from 768px; grey on hover), the whole line the link; 25px (35px from 992px) to what follows */
+.title.back {
+  --title-back-arrow-width: 14px;
+  --title-back-arrow-height: 16px;
+
+  margin-bottom: 0;
+}
+
+.title.back .title-heading {
+  margin: 0 0 var(--spacing-8);
+  font-size: var(--heading-section-size);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.title.back .title-back {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-6);
+  color: inherit;
+  text-decoration: none;
+}
+
+.title.back .title-back-arrow {
+  display: block;
+  flex: none;
+  width: var(--title-back-arrow-width);
+  height: var(--title-back-arrow-height);
+  background-color: var(--color-brand-primary);
+  mask: url('../../icons/arrow-left-regular.svg') center / contain no-repeat;
+}
+
+.title.back .title-back:hover .title-back-arrow {
+  background-color: var(--color-text-subtle);
+}
+
+@media (width >= 768px) {
+  .title.back {
+    --title-back-arrow-width: 21px;
+    --title-back-arrow-height: 24px;
+  }
+}
+
+@media (width >= 992px) {
+  .title.back {
+    margin-bottom: 0;
+  }
+
+  .title.back .title-heading {
+    margin-bottom: var(--spacing-10);
+    font-size: var(--font-size-3xl);
+  }
+}
+
 /* option fluid: a campaign page title (source lounge passes `h1.title`, as its trial restyles
    it): a maroon heading growing with the screen, 26px on phones up to 38px (6% of the width
    between), at most 840px wide, 14px below. The same at every heading level. Use with center-all */
@@ -475,3 +531,4 @@
   /* one-off: the source's 76px */
   margin-bottom: 76px;
 }
+

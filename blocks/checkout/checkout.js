@@ -1,6 +1,4 @@
 import { buildForm, fieldElement } from '../../scripts/forms.js';
-import { loadFragment } from '../fragment/fragment.js';
-import buildBookingSteps from '../../scripts/booking-steps.js';
 import safeDescription from '../../scripts/safe-description.js';
 import { formatAmount, loungeDetails } from '../../scripts/cart-summary.js';
 import { getCart, getCartId, onCartChange } from '../../scripts/cart-state.js';
@@ -61,7 +59,10 @@ const LOUNGE_KEYS = ['arrivalDepartureFlight', 'flightNumber'];
 // the boxes Payment waits for (the source's: Privacy Policy and Terms & Conditions)
 const AGREE_KEYS = ['consent', 'termsAgreed'];
 // the block's texts (Key | Text rows; the field rows are the form's)
-const TEXT_KEYS = ['steps', 'phonestep', 'back', 'banner', 'termsheading', 'summary', 'payment', 'empty', 'error', 'pending'];
+const TEXT_KEYS = ['termsheading', 'summary', 'payment', 'empty', 'error', 'pending'];
+// rows the page now has as blocks of their own (Booking Steps, Title (back), Promo (card)): left
+// out if a page still has them
+const RETIRED_KEYS = ['steps', 'phonestep', 'back', 'banner'];
 
 let count = 0;
 
@@ -92,6 +93,8 @@ function takeTexts(block) {
     const key = keyCell?.textContent.trim().toLowerCase().replace(/\s+/g, '');
     if (row.children.length === 2 && TEXT_KEYS.includes(key)) {
       texts.set(key, valueCell);
+      row.remove();
+    } else if (RETIRED_KEYS.includes(key)) {
       row.remove();
     }
   });
@@ -192,14 +195,14 @@ function buildTerms(terms, heading) {
 
 /**
  * Decorates the Checkout block: the guest checkout (the source /{lang}/guest-checkout) for the
- * cart this site holds (cart-state.js, read again from the booking system). The booking steps band,
- * the way back to the booking, a banner fragment (the Smart Traveller box), the guest's details
+ * cart this site holds (cart-state.js, read again from the booking system): the guest's details
  * (the authored form rows: Field | Label | Placeholder | Required | Error, see README), the Privacy
  * Policy, newsletter and Terms & Conditions boxes and the cart's own terms; beside it (above it
  * below 992px) the Booking Summary with Payment, and on phones a bar with the total and Payment at
  * the bottom of the screen. A lounge's checkout asks for the flight, a pass's doesn't. Payment
  * waits for the Privacy Policy and the Terms & Conditions; a valid form is announced as
- * `checkout:payment` (the guest details and the cart) until the payment API is in.
+ * `checkout:payment` (the guest details and the cart) until the payment API is in. The page's steps
+ * band, back title and banner are blocks of their own (Booking Steps, Title (back), Promo (card)).
  * @param {Element} block The Checkout block element
  */
 export default async function decorate(block) {
@@ -228,18 +231,6 @@ export default async function decorate(block) {
   // the form's own button gives way to Payment (in the summary and the phone bar)
   form.querySelector('.form-submit')?.remove();
 
-  // the way back: an arrow before the title (the link's text)
-  const back = texts.get('back')?.querySelector('a[href]');
-  const heading = el('h1', 'checkout-title');
-  if (back) {
-    const arrow = el('a', 'checkout-back');
-    arrow.href = back.href;
-    arrow.setAttribute('aria-label', back.textContent.trim());
-    heading.append(arrow);
-  }
-  heading.append(back?.textContent.trim() || '');
-
-  const banner = el('div', 'checkout-banner');
   const summary = el('aside', 'checkout-summary');
   summary.setAttribute('aria-labelledby', `${formId}-summary`);
   const bar = el('div', 'checkout-bar');
@@ -247,32 +238,7 @@ export default async function decorate(block) {
   details.append(form);
   const layout = el('div', 'checkout-layout');
   layout.append(details, summary);
-  block.replaceChildren(
-    buildBookingSteps(texts.get('steps'), { label: heading.textContent, phoneStep: text('phonestep') }),
-    heading,
-    banner,
-    layout,
-    bar,
-  );
-
-  // the banner (e.g. the Smart Traveller box): a fragment page. The site loads `/fragments/` links
-  // by itself (scripts.js auto blocks): its content when it's already in, else the page loaded here
-  // (never this page itself)
-  const bannerCell = texts.get('banner');
-  if (bannerCell?.querySelector('.section')) {
-    banner.append(...bannerCell.childNodes);
-  } else if (bannerCell) {
-    const href = bannerCell.querySelector('a[href]')?.getAttribute('href') || bannerCell.textContent.trim();
-    let path = '';
-    try {
-      path = href ? new URL(href, window.location.href).pathname : '';
-    } catch { /* not an address */ }
-    if (path && path !== window.location.pathname) {
-      loadFragment(path).then((fragment) => {
-        if (fragment) banner.append(...fragment.childNodes);
-      }).catch(() => {});
-    }
-  }
+  block.replaceChildren(layout, bar);
 
   // Payment waits for the two boxes (and the cart); disabled meanwhile, as the source's
   const agreed = () => AGREE_KEYS.every((key) => fieldElement(form, key)?.querySelector('input')?.checked !== false);

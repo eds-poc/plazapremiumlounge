@@ -3,11 +3,10 @@
 The guest checkout (the source's `/en-uk/guest-checkout`, its **Details** step) for the cart this
 site holds.
 
-**Page layout:**
-- the booking steps band
-- "← Back to Edit Booking"
-- a banner (the Smart Traveller box, from a fragment)
-- the guest's details form, beside the **Booking Summary** card (a third of the row) from 992px
+The block is the part of the page that comes from the cart: the guest's details form, the boxes,
+the cart's terms, and beside them (a third of the row, from 992px) the **Booking Summary** card with
+**Payment**. The steps band, the way back and the banner above it are blocks of their own (see
+[The guest-checkout page](#the-guest-checkout-page)).
 
 **Below 992px:**
 - The summary comes first, then the form.
@@ -38,14 +37,11 @@ Field rows have 5 columns: **Field | Label | Placeholder | Required | Error**, a
 - **Placeholder:** Title's cell holds the empty choice ("Select"), then one option per line.
 - **Error:** its first line is the message when the field is empty; its second line, when the value is wrong.
 
-Text rows have 2 columns: **Key | Text**. A one-cell row is text in the form, e.g. the intro.
+Text rows have 2 columns: **Key | Text**. A one-cell row is text in the form, e.g. the intro (it
+stays in the form's column, beside the summary).
 
 | Checkout | | | | |
 | --- | --- | --- | --- | --- |
-| steps | - Lounges<br>- Book<br>- **Details**<br>- Confirm & Pay | | | |
-| phoneStep | Details | | | |
-| back | [Back to Edit Booking](/en-uk/makeabooking) | | | |
-| banner | [/en-uk/fragments/checkout-banner](/en-uk/fragments/checkout-banner) | | | |
 | Please fill in the information of the customer who will be enjoying our facilities. | | | | |
 | title | Title | Select<br>Mr.<br>Mrs.<br>Ms.<br>Miss | yes | Please select title |
 | firstName | First Name | | yes | Please fill in first name. |
@@ -78,16 +74,51 @@ Text rows have 2 columns: **Key | Text**. A one-cell row is text in the form, e.
   - **Country code:** +1 (US) to start with. It follows the country of residence.
   - **Emails:** the confirmation must match.
   - **Flight number:** digits only, at most 4; "7" becomes "007" when the visitor leaves it.
-- **back:** the arrow before the title links to this page, and the link's text is the title. Point it at the booking page (the mini cart's Edit).
-- **banner:** a fragment page shown between the title and the form, e.g. a Promo (card) block with the Smart Traveller box:
-
-  | Promo (card) |
-  | --- |
-  | **Book your visit with Smart Traveller**<br>**Smart Traveller** members get up to **20% off** and up to **150 ST points** per eligible visit. Register now and unlock a world of exciting benefits! Already a member? Login now!<br>[Log In](#login)<br>**[Sign up now](/en-uk/join-smart-traveller)** |
-
-  `#login` opens the login pop-up. Leave the row out for no banner.
+- **Retired rows:** `steps`, `phoneStep`, `back` and `banner` are now the Booking Steps, Title
+  (back) and Promo (card) blocks. A page that still has them shows the checkout without them.
 - **empty, error:** the summary's text without a cart, and when the cart can't be read.
 - **The summary's own labels** come from the site's cart texts in each language: Date:, Time:, hrs, Guests:, Services:, Service Total, Quantity:, Total, (Includes applicable taxes and fees). They're the same as the mini cart's.
+
+## The guest-checkout page
+
+`/{lang}/guest-checkout`, one section, in this order. The texts are each language's own.
+
+| Booking Steps |
+| --- |
+| - Lounges<br>- Book<br>- **Details**<br>- Confirm & Pay |
+| Details |
+
+- The steps band (see the Booking Steps guide): the **bold** step is the current one; row 2 is its
+  name on phones (optional). First in the section, so it sits right under the header.
+
+| Title (back) |
+| --- |
+| # [Back to Edit Booking](/en-uk/makeabooking) |
+
+- The way back: a heading 1 written as a link, shown with the maroon arrow before it. Point it at
+  the booking page (the mini cart's Edit).
+
+| Promo (card) |
+| --- |
+| **Book your visit with Smart Traveller**<br>**Smart Traveller** members get up to **20% off** and up to **150 ST points** per eligible visit. Register now and unlock a world of exciting benefits! Already a member? Login now!<br>[Log In](#login)<br>**[Sign up now](/en-uk/join-smart-traveller)** |
+
+- The Smart Traveller banner: the first link is the outline button, a **bold** link the filled one;
+  `#login` opens the login pop-up. Leave the block out for no banner.
+
+| Checkout | | | | |
+| --- | --- | --- | --- | --- |
+| Please fill in the information of the customer who will be enjoying our facilities. | | | | |
+| title | Title | Select<br>Mr.<br>Mrs.<br>Ms.<br>Miss | yes | Please select title |
+| … | | | | |
+
+- The rest of the page, as in the table above.
+
+| Metadata | |
+| --- | --- |
+| Title | Guest Checkout \| Plaza Premium Lounge |
+| robots | noindex, nofollow |
+
+- Last, inside the same section.
 
 ## Payment (no API yet)
 

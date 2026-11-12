@@ -42,6 +42,7 @@ Add them in brackets after the block name, e.g. `Title (center, compact)`.
 | `highlight` | A lead-in with a highlighted offer: a maroon heading that grows with the screen (16px on phones up to 22px), where the words you make **bold** sit in a cream highlight with rounded corners, a little larger and bolder; then grey 15.5px text. At most 820px wide, 8px above what follows. The same at every heading level. Use with `center-all` | Lounge Passes "Save up to 50% off" |
 | `headline` | A partner campaign section header: a bold navy heading (22px on mobile, 24px from 481px, 28px from 769px) 15px above grey 16px Arial text at most 800px wide, with 30px to what follows (e.g. Cards). The same at every heading level. Use with `center-all`, in a `medium-width` section | CTBC Reward offer "How It Works", "Travel Benefits" |
 | `page-title` | A page title band: 50px above and below the heading at every width, and no space under the heading. Use alone in a section with `background` = `grey` | Legal pages (`section.pageTitle`) |
+| `back` | A "← Back to …" title: the heading written as a link shows with a maroon arrow before its text (the whole line is the link; the arrow turns grey on hover). 18px/500 on phones, 32px from 992px, with 25px (35px from 992px) to what follows. The heading level is kept | Guest checkout "Back to Edit Booking" |
 
 ### Example: editorial
 
@@ -112,6 +113,15 @@ followed by `Image (fixed-height)` and `Cards (icon-list)`.
 | ## How It Works<br>Follow these simple steps to convert points and unlock travel benefits |
 
 On an offer page, put it with the cards it introduces in a section with `Style` = `inset, medium-width`.
+
+### Example: back
+
+| Title (back) |
+| --- |
+| # [Back to Edit Booking](/en-uk/makeabooking) |
+
+On the guest checkout it follows the Booking Steps band and comes before the Smart Traveller
+banner (see the Checkout guide).
 
 ## Spacing
 

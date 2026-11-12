@@ -12,14 +12,23 @@ It covers:
 - the `checkout:payment` announcement and the preview's note
 - no cart, a cart that can't be read, a cart emptied meanwhile, a tab's stored data
 - the phone layout (the summary first, the bar, the fold) and the desktop one
-- the banner's Promo card, and axe (with `AXE_CORE`; the shared steps band is left out, see below)
+- the page's other blocks: Booking Steps (the band itself, its steps, done and current, its phone
+  name with and without row 2, 30px / 50px after it), Title (back) (the heading 1 link, its arrow's
+  size, colour and hover, 18px / 32px), the banner's Promo card; the order of the four blocks
+- old Checkout rows (`steps`, `back`, `banner`) left out of the checkout
+- the other four languages' pages
+- axe on the checkout, the title and the banner (with `AXE_CORE`; the steps band is left out, see
+  below)
+
+66 checks.
 
 ```sh
 BW_HOST=http://localhost:3000 PLAYWRIGHT=/path/to/playwright/index.mjs AXE_CORE=/path/to/axe.min.js node test/checkout/checkout.test.mjs
 ```
 
-The page must exist on the preview being tested (or in a local `content/` folder served with
-`aem up --html-folder content --html-mount / --prefer-plain-html`).
+The pages must be the split ones (Booking Steps, Title (back), Promo (card), Checkout) on the
+preview being tested, or in a local `content/` folder served with
+`aem up --html-folder content --html-mount / --prefer-plain-html`.
 
 The shared steps band (styles/booking-steps.css, as on Edit Booking) fades the steps that aren't
 current, as the source does (2.84:1 contrast), so axe leaves it out here.
