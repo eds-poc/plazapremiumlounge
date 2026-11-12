@@ -217,24 +217,28 @@ export function getApiContext(codes = {}) {
 const passes = new Map();
 
 /**
- * Fetches a passes service answer once per page (a failure isn't kept, so it can be asked again).
+ * Fetches a passes service answer once per page (a failure isn't kept, so it can be asked again):
+ * a POST of the query as JSON.
  * @param {Object<string, string>} query
  * @param {number} timeout ms
  * @returns {Promise<Object[]>} the answer's items
  */
 function fetchPassItems(query, timeout) {
-  const url = apiUrl('productPasses');
-  Object.entries(query).forEach(([name, value]) => url.searchParams.set(name, value));
-  if (!passes.has(url.href)) {
-    const request = fetchJson(url.href, timeout)
+  // the same query in any key order is the same answer
+  const body = Object.fromEntries(Object.entries(query)
+    .filter(([, value]) => value !== undefined && value !== '')
+    .sort(([a], [b]) => a.localeCompare(b)));
+  const key = JSON.stringify(body);
+  if (!passes.has(key)) {
+    const request = fetchJson(apiUrl('productPasses').href, timeout, { body })
       .then((json) => (Array.isArray(json?.items) ? json.items : []))
       .catch((error) => {
-        passes.delete(url.href);
+        passes.delete(key);
         throw error;
       });
-    passes.set(url.href, request);
+    passes.set(key, request);
   }
-  return passes.get(url.href);
+  return passes.get(key);
 }
 
 /**

@@ -96,7 +96,7 @@ async function openPasses({
     extraRoute: async (p) => {
       if (init) await p.addInitScript(init);
       if (noThird) await p.route(THIRD, (r) => r.abort());
-      await p.route(/app_demo\/GetProductPasses/, (r) => r.fulfill(json(PASSES)));
+      await p.route(/ppg-app\/GetProductPasses/, (r) => r.fulfill(json(PASSES)));
       await p.route(/ppg-app\/cart(\?|$)/, service.route);
     },
   });
