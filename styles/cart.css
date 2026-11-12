@@ -7,7 +7,7 @@ dialog.modal:is(.mini-cart-modal, .cart-message-modal, .cart-confirm-modal) {
   --cart-panel-width: 420px;
   --cart-panel-gap: 28px;
   --cart-panel-radius: 18px;
-  --cart-rule: 1px solid var(--color-text-strong);
+  --cart-rule: 0.6px solid var(--color-text-strong);
   --cart-label: rgb(0 0 0 / 60%);
   --cart-value: var(--color-brand-primary-action);
   --cart-detail-size: 13px;
@@ -68,6 +68,14 @@ dialog.modal:is(.mini-cart-modal, .cart-message-modal, .cart-confirm-modal) {
   --cart-title-gap: 8px;
   --cart-header-padding: var(--spacing-6);
   --cart-header-after: var(--spacing-7);
+
+  /* the source's fine type: "PROMO CODE"'s 1px spacing, "hrs" (Bootstrap's px-1, a 1.5 line),
+     the ⊗ (14px below 768px), the guests' divider (from 768px), the note at 992-1200px */
+  --cart-promo-label-spacing: 1px;
+  --cart-hours-pad: 4px;
+  --cart-remove-icon: var(--font-size-md);
+  --cart-guests-rule: 1px solid var(--color-text-strong);
+  --cart-note-narrow: 11px;
 
   font-family: var(--font-family-primary);
 }
@@ -150,8 +158,8 @@ dialog.modal.mini-cart-modal .modal-body {
 /* the source's ⊗ after the lounge's name */
 .mini-cart-remove {
   flex: none;
-  width: var(--font-size-md);
-  height: var(--font-size-md);
+  width: var(--cart-remove-icon);
+  height: var(--cart-remove-icon);
   border: 0;
   padding: 0;
   background-color: var(--color-brand-primary);
@@ -212,7 +220,8 @@ dialog.modal.mini-cart-modal .modal-body {
 }
 
 .mini-cart-hours {
-  padding-left: var(--spacing-1);
+  padding: 0 var(--cart-hours-pad);
+  line-height: 1.5;
 }
 
 .mini-cart-row {
@@ -226,6 +235,10 @@ dialog.modal.mini-cart-modal .modal-body {
 .mini-cart-label {
   color: var(--cart-label);
   font-weight: var(--font-weight-light);
+}
+
+.mini-cart-row .mini-cart-amount {
+  white-space: nowrap;
 }
 
 .mini-cart-discount {
@@ -350,7 +363,7 @@ a.cart-button-secondary:hover {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--cart-promo-label-spacing);
 }
 
 .mini-cart-promo-field {
@@ -549,6 +562,7 @@ dialog.modal.cart-confirm-modal .modal-header {
     --cart-close-top: 15px;
     --cart-line-gap: var(--spacing-5);
     --cart-promo-button-top: 11px;
+    --cart-remove-icon: var(--font-size-sm);
 
     font-size: var(--font-size-sm);
   }
@@ -615,5 +629,22 @@ dialog.modal.cart-confirm-modal .modal-header {
   dialog.modal.mini-cart-modal {
     width: var(--cart-panel-width);
     margin: var(--cart-panel-gap) var(--cart-panel-gap) auto auto;
+  }
+
+  /* the source's .summary-attribute b+b: a line before the children */
+  .mini-cart-children {
+    border-left: var(--cart-guests-rule);
+    padding-left: var(--spacing-2);
+  }
+}
+
+/* the source's total at 992-1200px: its note smaller, room after the label */
+@media (992px <= width <= 1200px) {
+  .mini-cart-total .mini-cart-label {
+    padding-right: var(--spacing-4);
+  }
+
+  .mini-cart-note {
+    font-size: var(--cart-note-narrow);
   }
 }

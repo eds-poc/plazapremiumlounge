@@ -80,14 +80,18 @@ function formatCartDate(start) {
 }
 
 /**
- * The guests as the source's cart: "2 Adult(s) 1 Child(ren)" (its two values side by side).
+ * The guests as the source's cart: "2 Adult(s) 1 Child(ren)", its two values side by side (from
+ * 768px a line between them, as the source's b+b).
  * @param {{adults: number, children: number}} line
- * @returns {string}
+ * @returns {DocumentFragment}
  */
 function formatGuests(line) {
-  const parts = [`${line.adults} ${translate('propertyAdults')}`];
-  if (line.children > 0) parts.push(`${line.children} ${translate('propertyChildren')}`);
-  return parts.join(' ');
+  const guests = document.createDocumentFragment();
+  guests.append(el('span', 'mini-cart-adults', `${line.adults} ${translate('propertyAdults')}`));
+  if (line.children > 0) {
+    guests.append(' ', el('span', 'mini-cart-children', `${line.children} ${translate('propertyChildren')}`));
+  }
+  return guests;
 }
 
 /**
@@ -437,7 +441,8 @@ function renderMiniCart(cart) {
     ].forEach(([label, value, after]) => {
       if (!value) return;
       const row = el('div', 'mini-cart-detail');
-      const dd = el('dd', '', value);
+      const dd = el('dd', '', typeof value === 'string' ? value : undefined);
+      if (typeof value !== 'string') dd.append(value);
       if (after) dd.append(after);
       row.append(el('dt', '', label), dd);
       details.append(row);

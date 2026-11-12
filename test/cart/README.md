@@ -24,9 +24,10 @@ line, DELETE. It covers:
 - `?selectedPassID=`, the currency (the session's, a cart of passes converted, a lounge's not), the
   other languages (live's Add to Cart and Add More), axe
 
-`node mini-cart.test.mjs [width]` — the mini cart (85 checks).
+`node mini-cart.test.mjs [width]` — the mini cart (97 checks).
 - The source's look (the 2026-11-12 audit's high and medium items) at 375 and 1440: the panel,
-  header, promo callout and field, the cross, the arrow, the spacing, the amounts, the lines.
+  header, promo callout and field, the cross, the arrow, the spacing, the amounts, the lines; the
+  low items (with a child booking) at 375, 1100 and 1440.
 - Check Out / Edit from the page metadata (`cart-checkout-url`, `cart-edit-url`, injected) and the
   promo code.
 - The promo service is emulated as stage answers it (see docs/cart.md): Success, then the lines

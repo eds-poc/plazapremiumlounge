@@ -52,7 +52,7 @@ const CHECKOUT = 'https://www.plazapremiumlounge.com/{lang}/guest-checkout?cart=
 const EDIT = 'https://www.plazapremiumlounge.com/{lang}/book-your-visit?date={date}&time={time}&adults={adults}&children={children}&product={catalogueCode}';
 
 /** A stored cart (the id in localStorage, the tab's data in sessionStorage), once per tab. */
-const stored = (kind = 'lounge') => `(() => {
+const stored = (kind = 'lounge', children = 0) => `(() => {
   if (sessionStorage.getItem('cart-seeded')) return;
   sessionStorage.setItem('cart-seeded', '1');
   const cart = ${JSON.stringify({
@@ -68,6 +68,7 @@ const stored = (kind = 'lounge') => `(() => {
   cart.lines = ${JSON.stringify([{
     catalogueCode: LINE.catalogueCode, productCode: 'PRD3341', type: 'lounge', kind: 'lounge', name: 'Plaza Premium Lounge', product: 'Lounge Use - 5 Hours', place: 'Near Gate 1, Departures, Hong Kong International Airport', start: LINE.startDate, adults: 1, children: 0, quantity: 1, total: 787.5,
   }])};
+  cart.lines[0].children = ${children};
   if ('${kind}' === 'pass') {
     cart.currency = 'USD';
     cart.lines = [{ catalogueCode: '${PASS_CART.products[0].catalogueCode}', type: 'gftcrd', kind: 'pass', name: 'Global Family Pass', product: 'Global Family Pass', place: '', start: '2099-01-01 10:00:00', adults: 0, children: 0, quantity: 1, total: 85 }];
@@ -82,7 +83,7 @@ const stored = (kind = 'lounge') => `(() => {
  * one is applied), and the promo call answered by `promo(body, state)`; `meta` adds metadata.
  */
 async function openWithCart({
-  width = 1440, path = '/en-uk/', promo = stagePromo, meta = {}, kind = 'lounge',
+  width = 1440, path = '/en-uk/', promo = stagePromo, meta = {}, kind = 'lounge', children = 0,
 } = {}) {
   const api = {
     promos: [], gets: 0, posts: [], deletes: [], puts: [],
@@ -96,7 +97,7 @@ async function openWithCart({
     width,
     path,
     extraRoute: async (p) => {
-      await p.addInitScript(stored(kind));
+      await p.addInitScript(stored(kind, children));
       if (Object.keys(meta).length) {
         await p.route(new RegExp(`localhost:\\d+${path.replace(/\//g, '\\/')}(\\?.*)?$`), async (r) => {
           const resp = await r.fetch();
@@ -154,6 +155,7 @@ async function openWithCart({
         api.gets += 1;
         const cart = structuredClone(state.kind === 'pass' ? PASS_CART : CART);
         cart.cartId = id || 'CRT_MC';
+        if (state.kind === 'lounge' && children) cart.products[0].guestsCount = { ...cart.products[0].guestsCount, child: String(children) };
         const applied = state.applied && state.appliedTo === cart.cartId ? state.applied : '';
         const promoOn = (product, value) => {
           const t = product.itemPriceDetails.productTotalPrice;
@@ -658,6 +660,38 @@ for (const width of [375, 1440]) {
   await page.close();
 }
 
+// the source's fine type (the 2026-11-12 audit's low items): "PROMO CODE"'s 1px spacing, "hrs"
+// (4px each side, a 1.5 line), the guests' line before the children from 768px (b+b), the 0.6px
+// rules, the ⊗ (14px below 768px), the amounts on one line, the note at 11px from 992 to 1200px
+for (const width of [375, 1100, 1440]) {
+  const page = await openWithCart({ width, children: 1 });
+  await openCart(page);
+  const m = await page.evaluate(() => {
+    const d = document.querySelector('dialog.mini-cart-modal[open]');
+    const cs = (sel) => getComputedStyle(d.querySelector(sel));
+    const adults = d.querySelector('.mini-cart-adults').getBoundingClientRect();
+    const child = d.querySelector('.mini-cart-children').getBoundingClientRect();
+    const amount = d.querySelector('.mini-cart-discount .mini-cart-amount');
+    return {
+      spacing: cs('.mini-cart-promo-label').letterSpacing,
+      hours: [cs('.mini-cart-hours').paddingLeft, cs('.mini-cart-hours').paddingRight, cs('.mini-cart-hours').lineHeight],
+      guests: d.querySelector('.mini-cart-children').closest('dd').textContent,
+      child: [cs('.mini-cart-children').borderLeftWidth, cs('.mini-cart-children').borderLeftStyle, cs('.mini-cart-children').borderLeftColor, cs('.mini-cart-children').paddingLeft, Math.round(child.x - adults.right), Math.round(child.y) === Math.round(adults.y)],
+      rule: getComputedStyle(d).getPropertyValue('--cart-rule').trim(),
+      remove: Math.round(d.querySelector('.mini-cart-remove').getBoundingClientRect().width),
+      amountLines: Math.round(amount.getBoundingClientRect().height / parseFloat(getComputedStyle(amount).lineHeight)),
+      note: cs('.mini-cart-note').fontSize,
+      labelPad: cs('.mini-cart-total .mini-cart-label').paddingRight,
+    };
+  });
+  const wide = width >= 768;
+  const narrow = width >= 992 && width <= 1200;
+  check(`${width} "PROMO CODE" 1px apart; "hrs" 4px each side on a 1.5 line, as the source's`, m.spacing === '1px' && JSON.stringify(m.hours) === '["4px","4px","19.5px"]', JSON.stringify([m.spacing, m.hours]));
+  check(`${width} the guests "1 Adult(s) 1 Child(ren)" on one line, ${wide ? 'a 1px black line and 5px before the children' : 'a space only'} (the source's b+b)`, m.guests === '1 Adult(s) 1 Child(ren)' && JSON.stringify(m.child) === JSON.stringify(wide ? ['1px', 'solid', 'rgb(0, 0, 0)', '5px', 4, true] : ['0px', 'none', m.child[2], '0px', 4, true]), JSON.stringify(m));
+  check(`${width} the source's 0.6px rules, the ⊗ ${wide ? 16 : 14}px, the discount on one line`, m.rule.startsWith('0.6px solid') && m.remove === (wide ? 16 : 14) && m.amountLines === 1, JSON.stringify([m.rule, m.remove, m.amountLines]));
+  check(`${width} the Total's note ${narrow ? '11px and 10px after the label (992-1200px)' : 'as before'}`, narrow ? m.note === '11px' && m.labelPad === '10px' : m.note !== '11px' && m.labelPad === '0px', JSON.stringify([m.note, m.labelPad]));
+  await page.close();
+}
 // the add-ons hook: no View more options without an add-ons source; with one, the link and its call
 {
   const page = await openWithCart();
