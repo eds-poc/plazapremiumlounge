@@ -2,6 +2,8 @@ import {
   buildBlock, decorateBlock, getMetadata, loadBlock,
 } from '../../scripts/aem.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
+// eslint-disable-next-line import/no-cycle
+import { pushEvent, setPageDetails } from '../../scripts/datalayer.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { translate } from '../../scripts/i18n.js';
 import openGallery from '../../scripts/gallery.js';
@@ -15,6 +17,7 @@ import {
   buildBadge, buildSlider, el, fetchJson, getApiLanguage, isPreview, readProperty,
   safeHtml, setLoading, toKey, toUrl,
 } from '../../scripts/properties.js';
+import { toUtcDateTime } from '../../scripts/utility.js';
 
 // the detail service answers in about 0.2-2s; the services one in 3-7s (at times far longer)
 const DETAIL_TIMEOUT_MS = 15000;
@@ -107,10 +110,12 @@ function readPromoRejection(json) {
 
 /**
  * The price in a price response (the first product's first price): the total, the price before
- * discounts and the currency. Null when there's none (not available for that start or guests).
+ * discounts, the first discount's amount (0 without one) and the currency. Null when there's
+ * none (not available for that start or guests).
  * @param {Object} json
  * @param {string} currency The currency asked for
- * @returns {{total: number, base: number, currency: string, catalogueCode: string}|null}
+ * @returns {{total: number, base: number, discountValue: number, currency: string,
+ *   catalogueCode: string}|null}
  */
 function readPrice(json, currency) {
   const item = Array.isArray(json?.items) ? json.items[0] : null;
@@ -119,9 +124,13 @@ function readPrice(json, currency) {
   if (!price || item.availability === false || price.isInventoryAvailable === false
     || !Number.isFinite(total)) return null;
   const base = Number(price.basePrice);
+  // e.g. discounts: [{ "name": "10% Discount", "discountValue": 110.5 }]
+  const discountData = price.discounts?.[0];
   return {
     total,
     base: Number.isFinite(base) ? base : total,
+    // the first discount's amount; 0 without one
+    discountValue: Number(discountData?.discountValue) || 0,
     currency: price.baseRate?.[0]?.currency || currency,
     catalogueCode: price.catalogueCode || '',
   };
@@ -144,6 +153,10 @@ function readDetail(json) {
   const place = /^[A-Z]{3}$/.test(iata) && locationName ? `${locationName} (${iata})` : locationName;
   return {
     ...base,
+    // for analytics: the city and the airport or station with its code
+    // ("Hong Kong International Airport (HKG)")
+    city: (detail.cityName || '').trim(),
+    airport: place,
     fullName: (detail.propertyName || base.name).trim(),
     place: [shortLocation, place].filter((part, i, all) => part && (i === 0 || !all[0].includes(part))).join(', '),
     crumb: [translate('propertyLoungeIn', { city: (detail.cityName || '').trim() }), place].filter(Boolean).join(' | '),
@@ -348,6 +361,85 @@ function counter(name, group, value, min) {
     step(1, translate('propertyMoreOf', { group }), 'property-detail-step property-detail-step-plus', '+'),
   );
   return wrap;
+}
+
+/**
+ * The data layer's link click for Get Price, once the price service has answered: the page's name
+ * and site section, the booking (the chosen date and time in UTC, the guests, the lounge's
+ * currency), the lounge and its airport or station, the product with its price and the promo
+ * code. Without a price (none for the choices, an error, or a newer request), the product goes
+ * without its SKU and prices.
+ * @param {Object} lounge
+ * @param {Object} request The price request (see buildBooking)
+ * @param {{service: string, product: string, date: string, time: string}} formFieldsData The
+ *   chosen service's and product's names, and the form's date (YYYY-MM-DD) and time (HHmm)
+ * @param {{total: number, base: number, discountValue: number, catalogueCode: string}|null} price
+ */
+function trackGetPrice(lounge, request, formFieldsData, price) {
+  const eventName = 'get price';
+  // the page's name and site section, for this event and every one after it:
+  // "<cityName>:<locationName (iataCode)>:<lounge>" in "lounge detail"
+  const pageName = [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':');
+  setPageDetails({
+    pageName,
+    siteSection: 'lounge detail',
+  });
+  let product = {
+    name: formFieldsData.product,
+    category: formFieldsData.service,
+  };
+  if (price) {
+    product = {
+      sku: price.catalogueCode,
+      name: formFieldsData.product,
+      actualPricePayCurr: price.base,
+      // the first discount's amount (discounts[0].discountValue), 0 without one
+      discount: price.discountValue,
+      sellPricePayCurr: price.total,
+      category: formFieldsData.service,
+    };
+  }
+  const { adult, child } = request.guests;
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: {
+      webInteraction: {
+        name: eventName,
+        type: 'other',
+        linkClicks: {
+          value: 1,
+        },
+      },
+    },
+    _plazapremiumloungemanagementli: {
+      bookingInfo: {
+        // the form's date and time at the lounge, in UTC (1400 in Hong Kong: 06:00:00Z)
+        checkinDateTime: toUtcDateTime(
+          formFieldsData.date,
+          formFieldsData.time,
+          lounge.timeZone,
+        ),
+        daysToBooking: 0,
+        totalGuestCount: adult + child,
+        adultCount: adult,
+        childCount: child,
+        propertyCurrencyCode: lounge.defaultCurrency,
+      },
+      locationDetails: {
+        iataCode: lounge.iata,
+        locationName: lounge.location.name,
+      },
+      outletDetails: {
+        outletId: lounge.outletId,
+        outletName: lounge.name,
+      },
+      productList: [product],
+      // (the promo code's value is to be decided: 0 for now)
+      offerDetails: {
+        promoCode: request.promocode,
+        promocodeValuePayCurr: 0,
+      },
+    },
+  });
 }
 
 /**
@@ -646,6 +738,15 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
       promocode: promo.value.trim(),
     };
     form.dispatchEvent(new CustomEvent('property-detail:get-price', { bubbles: true, detail: request }));
+    // the form's fields as chosen now, for the data layer once the price comes
+    const formFieldsData = {
+      service: service.selectedOptions[0]?.textContent.trim() || '',
+      product: product.selectedOptions[0]?.textContent.trim() || '',
+      date: String(data.get('date') || ''),
+      time: String(data.get('time') || ''),
+    };
+    // the price for these choices; null until (and unless) the price service gives one
+    let price = null;
     clearPrice();
     const controller = new AbortController();
     pricing = controller;
@@ -653,7 +754,7 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
     setLoading(true);
     form.setAttribute('aria-busy', 'true');
     try {
-      const price = await requestPrice(request, controller.signal);
+      price = await requestPrice(request, controller.signal);
       if (controller.signal.aborted) return;
       // a rejected promo code: only its message; no price, and Get Price stays
       if (price.promoRejected) rejectPromo(price.promoRejected);
@@ -668,6 +769,8 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
     } finally {
       setLoading(false);
       if (pricing === controller) form.removeAttribute('aria-busy');
+      // the data layer's Get Price click, with the price (one push a click)
+      trackGetPrice(lounge, request, formFieldsData, price);
     }
   });
   panel.append(header, form);
