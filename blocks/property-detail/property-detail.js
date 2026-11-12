@@ -110,9 +110,9 @@ function readPromoRejection(json) {
 
 /**
  * The price in a price response (the first product's first price): the total, the price before
- * discounts, the first discount's amount (0 without one), the applied promo code and its amount
- * ('' and 0 without one), the currency, and the product's and service's names. Null when there's
- * none (not available for that start or guests).
+ * discounts, the discount (the price before discounts less the total), the applied promo code
+ * and its amount ('' and 0 without one), the currency, and the product's and service's names.
+ * Null when there's none (not available for that start or guests).
  * @param {Object} json
  * @param {string} currency The currency asked for
  * @returns {{total: number, base: number, discountValue: number, promoCode: string,
@@ -126,15 +126,13 @@ function readPrice(json, currency) {
   if (!price || item.availability === false || price.isInventoryAvailable === false
     || !Number.isFinite(total)) return null;
   const base = Number(price.basePrice);
-  // e.g. discounts: [{ "name": "10% Discount", "discountValue": 110.5 }]
-  const discountData = price.discounts?.[0];
   // only with an applied promo code, e.g. promocode: [{ "code": "ACG20", "discountValue": 217.6 }]
   const promoData = Array.isArray(price.promocode) ? price.promocode[0] : null;
   return {
     total,
     base: Number.isFinite(base) ? base : total,
-    // the first discount's amount; 0 without one
-    discountValue: Number(discountData?.discountValue) || 0,
+    // basePrice less totalPrice, to the cent (1088 - 870.4: 217.6); 0 without a basePrice
+    discountValue: Math.round((base - total) * 100) / 100 || 0,
     // the applied promo code and its amount; '' and 0 without one
     promoCode: (promoData?.code || '').trim(),
     promoValue: Number(promoData?.discountValue) || 0,
@@ -404,7 +402,7 @@ function trackGetPrice(lounge, request, formFieldsData, price) {
       sku: price.catalogueCode,
       name: formFieldsData.product,
       actualPricePayCurr: price.base,
-      // the first discount's amount (discounts[0].discountValue), 0 without one
+      // basePrice less totalPrice
       discount: price.discountValue,
       sellPricePayCurr: price.total,
       category: formFieldsData.service,
@@ -522,7 +520,7 @@ function trackReserve(lounge, form, { price }) {
           category: price.serviceName,
           // the prices are for all the guests already (basePrice, totalPrice)
           actualPricePayCurr: price.base,
-          // the first discount's amount (discounts[0].discountValue), 0 without one
+          // basePrice less totalPrice
           discountPayCurr: price.discountValue,
           sellPricePayCurr: price.total,
           quantity: totalGuestCount,
@@ -530,7 +528,7 @@ function trackReserve(lounge, form, { price }) {
       ],
       formDetails: {
         formName: 'ppl lounge booking',
-        formStepName: 'add to cart',
+        formStepName: 'lounge detail',
       },
     },
   });
