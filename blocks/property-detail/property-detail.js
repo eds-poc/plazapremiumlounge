@@ -110,12 +110,14 @@ function readPromoRejection(json) {
 
 /**
  * The price in a price response (the first product's first price): the total, the price before
- * discounts, the first discount's amount (0 without one), the currency, and the product's and
- * service's names. Null when there's none (not available for that start or guests).
+ * discounts, the first discount's amount (0 without one), the applied promo code and its amount
+ * ('' and 0 without one), the currency, and the product's and service's names. Null when there's
+ * none (not available for that start or guests).
  * @param {Object} json
  * @param {string} currency The currency asked for
- * @returns {{total: number, base: number, discountValue: number, currency: string,
- *   catalogueCode: string, productName: string, serviceName: string}|null}
+ * @returns {{total: number, base: number, discountValue: number, promoCode: string,
+ *   promoValue: number, currency: string, catalogueCode: string, productName: string,
+ *   serviceName: string}|null}
  */
 function readPrice(json, currency) {
   const item = Array.isArray(json?.items) ? json.items[0] : null;
@@ -126,11 +128,16 @@ function readPrice(json, currency) {
   const base = Number(price.basePrice);
   // e.g. discounts: [{ "name": "10% Discount", "discountValue": 110.5 }]
   const discountData = price.discounts?.[0];
+  // only with an applied promo code, e.g. promocode: [{ "code": "ACG20", "discountValue": 217.6 }]
+  const promoData = Array.isArray(price.promocode) ? price.promocode[0] : null;
   return {
     total,
     base: Number.isFinite(base) ? base : total,
     // the first discount's amount; 0 without one
     discountValue: Number(discountData?.discountValue) || 0,
+    // the applied promo code and its amount; '' and 0 without one
+    promoCode: (promoData?.code || '').trim(),
+    promoValue: Number(promoData?.discountValue) || 0,
     currency: price.baseRate?.[0]?.currency || currency,
     catalogueCode: price.catalogueCode || '',
     // e.g. "Lounge Use - 2 Hours" of the service "Lounge"
@@ -452,10 +459,9 @@ function trackGetPrice(lounge, request, formFieldsData, price) {
  * (the guests as the quantity) and the booking form's step.
  * @param {Object} lounge
  * @param {HTMLFormElement} form The booking form (unchanged since the price: a change clears it)
- * @param {{request: Object, price: Object}} priced The price request and its price (see
- *   readPrice)
+ * @param {{price: Object}} priced The priced choices: their price (see readPrice)
  */
-function trackReserve(lounge, form, { request, price }) {
+function trackReserve(lounge, form, { price }) {
   const eventName = 'reserve now';
   // the page's name and site section, for this event and every one after it:
   // "<cityName>:<locationName (iataCode)>:<lounge>" in "lounge detail"
@@ -501,10 +507,10 @@ function trackReserve(lounge, form, { request, price }) {
         outletId: lounge.outletId,
         outletName: lounge.name,
       },
-      // (the promo code's value is to be decided: 0 for now)
+      // the applied promo code (promocode[0].code) and its amount (promocode[0].discountValue)
       offerDetails: {
-        promoCode: request.promocode,
-        promocodeValuePayCurr: 0,
+        promoCode: price.promoCode,
+        promocodeValuePayCurr: price.promoValue,
       },
       productList: [
         {
