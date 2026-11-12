@@ -17,7 +17,7 @@ import {
   buildBadge, buildSlider, el, fetchJson, getApiLanguage, isPreview, readProperty,
   safeHtml, setLoading, toKey, toUrl,
 } from '../../scripts/properties.js';
-import { toUtcDateTime } from '../../scripts/utility.js';
+import { daysUntil, toUtcDateTime } from '../../scripts/utility.js';
 
 // the detail service answers in about 0.2-2s; the services one in 3-7s (at times far longer)
 const DETAIL_TIMEOUT_MS = 15000;
@@ -493,7 +493,8 @@ function trackReserve(lounge, form, { price }) {
           formData.get('time') || '',
           lounge.timeZone,
         ),
-        daysToBooking: 0,
+        // the days from today (at the lounge) to the form's date: 0 for today
+        daysToBooking: daysUntil(formData.get('date') || '', lounge.timeZone),
         totalGuestCount,
         adultCount,
         childCount,
