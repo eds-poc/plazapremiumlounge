@@ -42,5 +42,6 @@ The copyright text, with inline links. These links open in a new tab.
   website first shows the source's "See you again soon" popup, then opens in the same tab after 5
   seconds. "Cancel Redirect" or × stays on the page. A new social icon link gets this
   automatically. The WeChat QR image link and the other columns, brands and legal links are
-  unchanged.
+  unchanged. The popup is the site's shared one: see [docs/leave-site.md](../../docs/leave-site.md)
+  (page sections can use it too).
 - **Adding or removing** a column, brand group or logo only needs a content edit, never code.

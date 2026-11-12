@@ -368,6 +368,9 @@ async function loadEager(doc) {
  * @param {Element} doc The container element
  */
 async function loadLazy(doc) {
+  // the leave-site popup before links to other websites in `leave-site` sections (and the
+  // footer's Social column)
+  import('./leave-site.js').then(({ installLeaveSitePrompt }) => installLeaveSitePrompt());
   loadHeader(doc.querySelector('body > header'));
 
   const main = doc.querySelector('main');

@@ -42,8 +42,8 @@ const TEXTS = {
   openMenu: {
     en: 'Open menu', zh: '打开菜单', 'zh-HK': '開啟選單', ja: 'メニューを開く', pt: 'Abrir menu',
   },
-  // the leave-site popup before a footer social link to another site (the source's wording in
-  // English)
+  // the leave-site popup before a link to another website (scripts/leave-site.js; the source's
+  // wording in English)
   leaveSiteTitle: {
     en: 'See you again soon',
     zh: '期待与您再次相见',
