@@ -365,11 +365,20 @@ async function confirmLeaveSite(url, trigger) {
   // one redirect at a time: the latest link's, stopped as soon as the popup closes
   clearTimeout(dialog.leaveTimer);
   dialog.leaveTimer = setTimeout(() => {
-    if (dialog.open) window.location.href = url;
+    if (!dialog.open) return;
+    // closed first, so the page the Back button brings back has no popup (or scroll lock) left
+    dialog.close();
+    window.location.href = url;
   }, LEAVE_SITE_DELAY);
   if (!dialog.leaveWired) {
     dialog.leaveWired = true;
     dialog.addEventListener('close', () => clearTimeout(dialog.leaveTimer));
+    // a page restored from the back/forward cache: no popup and no redirect left over
+    window.addEventListener('pageshow', (e) => {
+      if (!e.persisted) return;
+      clearTimeout(dialog.leaveTimer);
+      if (dialog.open) dialog.close();
+    });
   }
   dialog.querySelector('.footer-leave-site-actions button')?.focus();
 }
