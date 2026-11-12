@@ -605,6 +605,55 @@ const TEXTS = {
   cartAddFailed: {
     en: 'Unable to add to cart.', zh: '无法加入购物车。', 'zh-HK': '無法加入購物車。', ja: 'カートに追加できませんでした。', pt: 'Não foi possível adicionar ao carrinho.',
   },
+  // the mini cart's promo code (the source's texts; its apply button's label is English on every
+  // site, and its failure without an answer is "Error")
+  cartPromoCode: {
+    en: 'Promo Code', zh: '促销代码', 'zh-HK': '促銷代碼', ja: 'プロモーションコード', pt: 'Código Promocional',
+  },
+  cartPromoPlaceholder: {
+    en: 'Enter Code', zh: '输入代码', 'zh-HK': '輸入代碼', ja: 'コードを入力', pt: 'Digite o Código',
+  },
+  cartPromoApply: {
+    en: 'Apply promo code', zh: 'Apply promo code', 'zh-HK': 'Apply promo code', ja: 'Apply promo code', pt: 'Apply promo code',
+  },
+  // (written here: the source shows no remove button's label)
+  cartPromoRemove: {
+    en: 'Remove promo code', zh: '删除促销代码', 'zh-HK': '刪除促銷代碼', ja: 'プロモーションコードを削除', pt: 'Excluir código promocional',
+  },
+  cartPromoEmpty: {
+    en: 'Please enter promo code.', zh: '请输入促销代码。', 'zh-HK': '請輸入促銷代碼。', ja: 'プロモーションコードを入力してください。', pt: 'Por favor, insira o código promocional.',
+  },
+  cartPromoInvalid: {
+    en: 'No record found for the provided promotional code.', zh: '找不到所提供优惠码的记录。', 'zh-HK': '找不到所提供優惠碼的記錄。', ja: '提供されたプロモーションコードの記録が見つかりません。', pt: 'Nenhum registro encontrado para o código promocional fornecido.',
+  },
+  // the booking system's refusal of a code no line of the cart can take (BKNG043; translated here)
+  cartPromoNotEligible: {
+    en: 'No item in the cart is eligible for the applied promo code.', zh: '购物车中没有适用于此优惠码的商品。', 'zh-HK': '購物車中沒有適用於此優惠碼的商品。', ja: 'カート内にこのプロモーションコードの対象となる商品がありません。', pt: 'Nenhum item do carrinho é elegível para o código promocional aplicado.',
+  },
+  cartPromoFailed: {
+    en: 'Error', zh: 'Error', 'zh-HK': 'Error', ja: 'Error', pt: 'Error',
+  },
+  // the promo code's discount row (written here: no valid code to see the source's)
+  cartPromoDiscount: {
+    en: 'Promo Code ({code}):', zh: '促销代码（{code}）:', 'zh-HK': '促銷代碼（{code}）:', ja: 'プロモーションコード（{code}）:', pt: 'Código Promocional ({code}):',
+  },
+  // the source's "Delete Promo Code" confirmation
+  cartPromoRemoveTitle: {
+    en: 'Confirmation', zh: '确认', 'zh-HK': '確認', ja: '確認', pt: 'Confirmação',
+  },
+  cartPromoRemoveConfirm: {
+    en: 'Are you sure. Do you want to Delete Promo Code?', zh: '您确定要删除促销代码吗？', 'zh-HK': '您確定要刪除優惠嗎？', ja: 'プロモーションコードを削除してもよろしいですか？', pt: 'Tem certeza? Deseja excluir o código promocional?',
+  },
+  cartConfirm: {
+    en: 'Confirm', zh: '确认', 'zh-HK': '確認', ja: '確認', pt: 'Confirmar',
+  },
+  // a lounge's add-ons (the source's View more options; waiting for the add-ons API)
+  cartViewMoreOptions: {
+    en: 'View more options', zh: '查看更多选项', 'zh-HK': '查看更多選項', ja: 'その他のオプションを見る', pt: 'Ver mais opções',
+  },
+  cartAdditionalServices: {
+    en: 'Additional Services:', zh: '额外服务:', 'zh-HK': '額外服務:', ja: '追加サービス:', pt: 'Serviços Adicionais:',
+  },
   // a pass that wasn't added (the source's pass page: "Notice", its default message)
   cartNotice: {
     en: 'Notice', zh: '须知', 'zh-HK': '須知', ja: 'お知らせ', pt: 'Aviso',

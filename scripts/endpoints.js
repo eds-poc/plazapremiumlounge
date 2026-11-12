@@ -23,6 +23,9 @@ const BOOKING_ENDPOINTS = {
   // properties for lists of regions, countries, airports and property codes (POST, JSON body;
   // languageCode in the address): every property of the regions asked for
   filteredProperties: '/api/v1/web/ppg-app/getFilteredProperties',
+  // a promo code for the cart (PUT, JSON: cartId, promocode; an empty code takes it off). Its
+  // answers aren't known yet: no valid code to try on stage (see docs/cart.md)
+  cartPromo: '/api/v1/web/ppg-app/cart-validate-promocode',
 };
 
 // endpoint paths, joined to the API domain
