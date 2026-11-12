@@ -409,7 +409,9 @@ dialog.modal.mini-cart-modal .mini-cart-promo-input:focus {
   padding: 0;
   background-color: var(--color-text-strong);
   cursor: pointer;
-  mask: url('../icons/arrow-right.svg') center / var(--cart-promo-arrow-width) var(--cart-promo-arrow-height) no-repeat;
+
+  /* (the source's promo-arrow.png, drawn at its size and weight: the site's arrow at 11px is too thin) */
+  mask: url('../icons/promo-arrow.svg') center / var(--cart-promo-arrow-width) var(--cart-promo-arrow-height) no-repeat;
 }
 
 .mini-cart-promo-remove {
