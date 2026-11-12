@@ -383,7 +383,8 @@ function counter(name, group, value, min) {
  * @param {Object} request The price request (see buildBooking)
  * @param {{service: string, product: string, date: string, time: string}} formFieldsData The
  *   chosen service's and product's names, and the form's date (YYYY-MM-DD) and time (HHmm)
- * @param {{total: number, base: number, discountValue: number, catalogueCode: string}|null} price
+ * @param {{total: number, base: number, discountValue: number, promoCode: string,
+ *   promoValue: number, catalogueCode: string}|null} price
  */
 function trackGetPrice(lounge, request, formFieldsData, price) {
   const eventName = 'get price';
@@ -443,10 +444,11 @@ function trackGetPrice(lounge, request, formFieldsData, price) {
         outletName: lounge.name,
       },
       productList: [product],
-      // (the promo code's value is to be decided: 0 for now)
+      // the applied promo code (promocode[0].code) and its amount (promocode[0].discountValue);
+      // '' and 0 without one or without a price
       offerDetails: {
-        promoCode: request.promocode,
-        promocodeValuePayCurr: 0,
+        promoCode: price?.promoCode || '',
+        promocodeValuePayCurr: price?.promoValue || 0,
       },
     },
   });
