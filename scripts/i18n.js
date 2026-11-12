@@ -16,7 +16,7 @@ const SITES = {
   'ja-jp': 'ja-JP',
   'pt-br': 'pt-BR',
 };
-const DEFAULT_LANGUAGE = 'en';
+export const DEFAULT_LANGUAGE = 'en';
 export const DEFAULT_SITE = 'en-uk';
 
 // texts by language tag, or by its base language (zh-HK, then zh, then en)
