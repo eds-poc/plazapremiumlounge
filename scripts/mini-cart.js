@@ -3,10 +3,11 @@
  * (modal-dialog.js): the mini cart (a lounge booking with its date, time, guests and service, or
  * passes with their quantity; the totals, the promo code, Check Out, and Edit for a lounge),
  * "Checkout Cart" when the cart's rules refuse a product, the remove confirmations and the failure
- * messages. Check Out and Edit go to the pages the page metadata names (`cart-checkout-url`,
- * `cart-edit-url`). Loaded when a product is added or the header's cart opens with something in
- * it; the cart itself is cart.js, its state cart-state.js. Everything follows the cart in place
- * (no page reload, unlike the source's after a removal).
+ * messages. Check Out goes to this site's checkout page (/{lang}/guest-checkout) unless the page
+ * metadata names another (`cart-checkout-url`); Edit to the page `cart-edit-url` names. Loaded
+ * when a product is added or the header's cart opens with something in it; the cart itself is
+ * cart.js, its state cart-state.js. Everything follows the cart in place (no page reload, unlike
+ * the source's after a removal).
  */
 import { getMetadata, loadCSS } from './aem.js';
 import {
@@ -154,9 +155,13 @@ const promoConfirm = new CartDialog('cart-promo-remove', 'cart-confirm-modal');
 // this site's preview hosts: there, a cart link that isn't set up says so (for authors)
 const PREVIEW_HOST = /\.aem\.page$|^localhost$/;
 
+// the cart links without a metadata row: Check Out goes to this site's checkout page (the
+// Checkout block) in the visitor's language folder; Edit has no page of this site's yet
+const DEFAULT_LINKS = { checkout: '/{lang}/guest-checkout' };
+
 /**
  * A cart link from the page metadata, e.g. `cart-checkout-url` (set per language folder in the
- * bulk metadata sheet, e.g. https://www.plazapremiumlounge.com/en-uk/guest-checkout), with its
+ * bulk metadata sheet), else its default (Check Out: this site's /{lang}/guest-checkout), with its
  * placeholders filled: {cartId}, {lang} (the site folder, e.g. en-uk) and, from the cart's lounge,
  * {date} (YYYY-MM-DD), {time} (HHmm), {adults}, {children}, {catalogueCode}.
  * @param {'checkout'|'edit'} name
@@ -164,7 +169,7 @@ const PREVIEW_HOST = /\.aem\.page$|^localhost$/;
  * @returns {string} The address, or '' without one (or when it isn't a web address or a path)
  */
 export function cartLink(name, cart) {
-  const template = getMetadata(`cart-${name}-url`).trim();
+  const template = getMetadata(`cart-${name}-url`).trim() || DEFAULT_LINKS[name] || '';
   if (!template) return '';
   const lounge = cart?.lines.find((line) => line.kind !== 'pass');
   const values = {

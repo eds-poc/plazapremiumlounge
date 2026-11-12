@@ -240,15 +240,25 @@ for (const width of WIDTHS) {
   await page.close();
 }
 {
-  // a pass cart: Check Out only; no metadata: buttons that only announce, and a hint on the preview
+  // a pass cart without metadata: Check Out to this site's checkout page (no Edit for passes, no
+  // hint)
   const page = await openWithCart({ kind: 'pass' });
-  const nav = watchNav(page);
+  await page.route(/\/en-uk\/guest-checkout$/, (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<title>checkout</title>' }));
   await openCart(page);
   const m = await mini(page);
-  check('no metadata: Check Out a button (no Edit for passes), the preview hint names the row', m.actions.length === 1 && m.actions[0].tag === 'BUTTON' && /cart-checkout-url/.test(m.hint || '') && !/cart-edit-url/.test(m.hint || ''), JSON.stringify(m.actions) + m.hint);
+  check('no metadata: Check Out a link to this site\'s /en-uk/guest-checkout (no Edit for passes), no hint', m.actions.length === 1 && m.actions[0].tag === 'A' && new URL(m.actions[0].href, 'http://x').pathname === '/en-uk/guest-checkout' && m.actions[0].href.startsWith(await page.evaluate(() => window.location.origin)) && !m.hint, JSON.stringify(m.actions) + m.hint);
   const announced = page.evaluate(() => new Promise((resolve) => { document.addEventListener('cart:checkout', () => resolve(true), { once: true }); }));
-  await page.locator('dialog.mini-cart-modal[open] .mini-cart-actions button').click();
-  check('no metadata: Check Out only announces, no navigation', await announced && nav.count === 0);
+  await Promise.all([page.waitForURL(/\/en-uk\/guest-checkout$/, { timeout: 15000 }), page.locator('dialog.mini-cart-modal[open] .mini-cart-actions a', { hasText: 'Check Out' }).click()]);
+  check('no metadata: Check Out announced, then this site\'s checkout page', await announced && /\/en-uk\/guest-checkout$/.test(page.url()), page.url());
+  await page.close();
+}
+{
+  // a lounge cart without metadata: Check Out to this site's checkout; Edit a button, the hint
+  // names its row only; zh-cn's Check Out in its own folder
+  const page = await openWithCart({ path: '/zh-cn/' });
+  await openCart(page);
+  const m = await mini(page);
+  check('no metadata, a lounge (zh-cn): Check Out to /zh-cn/guest-checkout, Edit a button, the hint names cart-edit-url only', m.actions[0]?.tag === 'A' && new URL(m.actions[0].href).pathname === '/zh-cn/guest-checkout' && m.actions[1]?.tag === 'BUTTON' && /cart-edit-url/.test(m.hint || '') && !/cart-checkout-url/.test(m.hint || ''), JSON.stringify(m.actions) + m.hint);
   await page.close();
 }
 {
@@ -264,6 +274,7 @@ for (const width of WIDTHS) {
   await openCart(page);
   const m = await mini(page);
   check('a metadata value that isn\'t a web address: not a link (a button, the hint)', m.actions[0]?.tag === 'BUTTON' && /cart-checkout-url/.test(m.hint || ''), JSON.stringify(m.actions));
+  check('…and not the default either (an author\'s value wins, even a wrong one)', !m.actions.some((a) => /guest-checkout/.test(a.href || '')), JSON.stringify(m.actions));
   await page.close();
 }
 

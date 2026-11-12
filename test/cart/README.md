@@ -24,7 +24,7 @@ line, DELETE. It covers:
 - `?selectedPassID=`, the currency (the session's, a cart of passes converted, a lounge's not), the
   other languages (live's Add to Cart and Add More), axe
 
-`node mini-cart.test.mjs [width]` — the mini cart (60 checks).
+`node mini-cart.test.mjs [width]` — the mini cart (62 checks).
 - Check Out / Edit from the page metadata (`cart-checkout-url`, `cart-edit-url`, injected) and the
   promo code.
 - The promo service is emulated as stage answers it (see docs/cart.md): Success, then the lines
