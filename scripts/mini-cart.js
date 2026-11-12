@@ -10,9 +10,8 @@
  * the source's after a removal).
  */
 import { getMetadata, loadCSS } from './aem.js';
-import {
-  DEFAULT_SITE, getLanguage, getSiteFolder, translate,
-} from './i18n.js';
+import { DEFAULT_SITE, getSiteFolder, translate } from './i18n.js';
+import { formatAmount, loungeDetails } from './cart-summary.js';
 import { getCart, getCartId, onCartChange } from './cart-state.js';
 import {
   PROMO_DROPPED_EVENT, addToCart, applyPromo, convertCart, refreshCart, removeFromCart, removePromo,
@@ -49,49 +48,6 @@ function button(label, kind, onClick) {
   b.type = 'button';
   b.addEventListener('click', onClick);
   return b;
-}
-
-// the source's amounts, in every language: "HKD 1,755.00"
-const AMOUNT = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-/**
- * An amount as the source shows it: "GBP 44.10", "HKD 1,755.00".
- * @param {number} amount
- * @param {string} currency
- * @returns {string}
- */
-function formatAmount(amount, currency) {
-  return Number.isFinite(amount) ? `${currency ? `${currency} ` : ''}${AMOUNT.format(amount)}` : '—';
-}
-
-/**
- * A booking date as the source's cart shows it: "02-Nov-2026", "02-nov-2026", "2026年11月02日".
- * @param {string} start "YYYY-MM-DD HH:mm:ss"
- * @returns {string}
- */
-function formatCartDate(start) {
-  const [y, m, d] = start.slice(0, 10).split('-');
-  if (!d) return '';
-  const lang = getLanguage();
-  if (/^(zh|ja)/.test(lang)) return `${y}年${m}月${d}日`;
-  const month = new Intl.DateTimeFormat(lang, { month: 'short', timeZone: 'UTC' })
-    .format(new Date(`${y}-${m}-${d}T00:00:00Z`)).replace(/\.$/, '');
-  return `${d}-${/^pt/.test(lang) ? month.toLowerCase() : month}-${y}`;
-}
-
-/**
- * The guests as the source's cart: "2 Adult(s) 1 Child(ren)", its two values side by side (from
- * 768px a line between them, as the source's b+b).
- * @param {{adults: number, children: number}} line
- * @returns {DocumentFragment}
- */
-function formatGuests(line) {
-  const guests = document.createDocumentFragment();
-  guests.append(el('span', 'mini-cart-adults', `${line.adults} ${translate('propertyAdults')}`));
-  if (line.children > 0) {
-    guests.append(' ', el('span', 'mini-cart-children', `${line.children} ${translate('propertyChildren')}`));
-  }
-  return guests;
 }
 
 /**
@@ -432,18 +388,18 @@ function renderMiniCart(cart) {
     }
     if (line.place) box.append(el('p', 'mini-cart-place', line.place));
     const details = el('dl', 'mini-cart-details');
-    const time = line.start.slice(11, 16).replace(':', '');
-    [
-      [translate('cartDate'), formatCartDate(line.start)],
-      [translate('cartTime'), time, el('span', 'mini-cart-hours', translate('cartHours'))],
-      [translate('cartGuests'), formatGuests(line)],
-      [translate('cartServices'), line.product],
-    ].forEach(([label, value, after]) => {
-      if (!value) return;
+    loungeDetails(line).forEach(({
+      label, value, unit, parts,
+    }) => {
       const row = el('div', 'mini-cart-detail');
-      const dd = el('dd', '', typeof value === 'string' ? value : undefined);
-      if (typeof value !== 'string') dd.append(value);
-      if (after) dd.append(after);
+      const dd = el('dd', '', parts ? undefined : value);
+      if (parts) {
+        parts.forEach((part, n) => {
+          if (n) dd.append(' ');
+          dd.append(el('span', n ? 'mini-cart-children' : 'mini-cart-adults', part));
+        });
+      }
+      if (unit) dd.append(el('span', 'mini-cart-hours', unit));
       row.append(el('dt', '', label), dd);
       details.append(row);
     });

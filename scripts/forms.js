@@ -46,6 +46,8 @@ const RULES = {
   phone: { pattern: /^[0-9+\-/\s]+$/, maxLength: 20, message: 'formPhone' },
   // numbers only (e.g. a contact number without its country code)
   digits: { pattern: /^\d+$/, message: 'formPhone' },
+  // source guest checkout: a flight number's digits, at most 4 (padded to 3 with `pad: 3`)
+  flight: { pattern: /^\d{1,4}$/, maxLength: 4, message: 'formFlightNumber' },
   url: { pattern: /^https?:\/\/[^\s.]+\.\S+$/i, message: 'formUrl' },
   postcode: { pattern: /^[A-Za-z0-9][A-Za-z0-9 -]{1,9}$/, message: 'formPostcode' },
 };
@@ -247,7 +249,7 @@ function setControlAttributes(control, def) {
   const max = settings.get('max length') || rule?.maxLength;
   if (max && control.matches('input:not([type="date"]):not([type="number"]), textarea')) control.maxLength = Number(max);
   // numbers only: the number keypad, and anything else typed or pasted is left out
-  if (settings.get('rule') === 'digits') {
+  if (['digits', 'flight'].includes(settings.get('rule'))) {
     control.inputMode = 'numeric';
     control.addEventListener('input', () => {
       const digits = control.value.replace(/\D/g, '');
@@ -264,6 +266,15 @@ function setControlAttributes(control, def) {
         control.value = control.value.slice(0, control.maxLength);
       }
       control.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+  }
+  // zeros before a shorter value when the visitor leaves the field (`pad: 3`: "7" → "007"), as the
+  // source's flight number
+  const pad = Number(settings.get('pad'));
+  if (pad > 0) {
+    control.addEventListener('change', () => {
+      const value = control.value.trim();
+      if (value && value.length < pad && /^\d+$/.test(value)) control.value = value.padStart(pad, '0');
     });
   }
   if (settings.has('required')) control.required = true;
@@ -596,6 +607,13 @@ function check(state) {
     if (maxDate && value > maxDate) return message(def, 'max date', 'formMaxDate', { n: maxDate });
     const minAge = Number(settings.get('min age'));
     if (minAge && ageOn(value) < minAge) return message(def, 'min age', 'formMinAge', { n: minAge });
+  }
+  // a phone number with its country code: their digits together in a range (`total length: 7-15`,
+  // as the source's guest checkout)
+  const total = type === 'phone' && settings.get('total length')?.match(/^(\d+)\s*-\s*(\d+)$/);
+  if (total && state.code) {
+    const digits = state.code.value.replace(/\D/g, '').length + value.replace(/\D/g, '').length;
+    if (digits < Number(total[1]) || digits > Number(total[2])) return message(def, 'total length', 'formPhone');
   }
   if (settings.has('match')) {
     const other = fieldByKey(state.wrap.closest('form'), settings.get('match'));
@@ -930,7 +948,8 @@ function fieldSettings(field, cells) {
  *   text is the authored `submit` row, else "Submit" in the visitor's language), `captcha` (true,
  *   or `{ key }` for the token's key in the data; default `h-captcha-response`), `datePicker`
  *   (`{ build, format }`: scripts/date-picker.js and the date's format, for date fields with
- *   `picker`)
+ *   `picker`), `onSubmit` (a function given the valid form's values and the form, instead of the
+ *   action: it may answer a message to show, or a Promise of one)
  * @returns {{form: HTMLFormElement, intro: HTMLElement|null}}
  */
 export function buildForm(block, definition) {
@@ -1062,6 +1081,23 @@ export function buildForm(block, definition) {
       values[definition.captcha.key || CAPTCHA_KEY] = token;
     }
     const before = new CustomEvent('forms:submit', { bubbles: true, cancelable: true, detail: { values, form } });
+    // a block that takes the valid form itself (e.g. Checkout): its handler, nothing posted here;
+    // a message it answers shows at the top of the form
+    if (definition.onSubmit) {
+      if (!form.dispatchEvent(before)) {
+        setBusy(false);
+        return;
+      }
+      setBusy(true, true);
+      try {
+        showStatus(await definition.onSubmit(values, form) || '');
+      } catch {
+        showStatus(texts.error || translate('formError'));
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
     const url = actionUrl(definition.action);
     if (!form.dispatchEvent(before) || !url) {
       setBusy(false);

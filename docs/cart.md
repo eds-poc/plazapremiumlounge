@@ -358,8 +358,10 @@ Observed on stage on 2026-11-12, with PASS10PW and test pass and lounge carts:
 | The header's count | the sum of `products[].quantity` | |
 | Remove From Cart on the card, Add More | `products[].catalogueCode` | the passes service's catalogue code (the regular rate's) matches the cart line's |
 | (kept) | `cartId` (and `products[].cartItemId`) | |
+| The checkout's terms (blocks/checkout) | `sortedTermsPolicies[]` `termsName`, `description` | kept as the cart's `terms` (name, HTML) |
+| The checkout's flight and login rules | `products[].isFlightNumberMandatory`, `isStLoginMandatory` | kept as each line's `flightRequired`, `loginRequired` |
 
-Not shown (the source's mini cart doesn't either): `images`, `disclaimer`, the terms, `productVarients`, `basedOn`, `maxNoOfProductsAllowed`, `isFlightNumberMandatory`, `isStLoginMandatory`, `ageGroup`, `amountPayable`, `totalTax`. The promo code: `cartTotalPrice.totalPromocodeAmount` (the promo row) and each line's `itemPriceDetails.promocode[]` (the code; see the promo code API).
+Not shown in the mini cart (the source's doesn't either): `images`, `disclaimer`, the terms (the checkout shows them), `productVarients`, `basedOn`, `maxNoOfProductsAllowed`, `isFlightNumberMandatory`, `isStLoginMandatory` (the checkout reads them), `ageGroup`, `amountPayable`, `totalTax`. The promo code: `cartTotalPrice.totalPromocodeAmount` (the promo row) and each line's `itemPriceDetails.promocode[]` (the code; see the promo code API).
 
 ### Adding a product type
 

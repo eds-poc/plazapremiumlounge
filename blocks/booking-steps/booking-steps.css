@@ -1,0 +1,18 @@
+/* the booking pages' maroon band with the steps (shared styles: Edit Booking uses them too) */
+@import url('../../styles/booking-steps.css');
+
+/* booking steps: the band right under the header (its section starts with no space above), then
+   30px (50px from 768px) to what follows, as the source's booking pages */
+main > .section:has(> .booking-steps-wrapper:first-child) {
+  padding-top: 0;
+}
+
+.booking-steps-wrapper .booking-steps {
+  margin-bottom: var(--spacing-9);
+}
+
+@media (width >= 768px) {
+  .booking-steps-wrapper .booking-steps {
+    margin-bottom: var(--spacing-11);
+  }
+}

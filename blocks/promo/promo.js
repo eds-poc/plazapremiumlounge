@@ -54,12 +54,27 @@ function buildButton(link) {
  * @param {Element} block The promo block element
  */
 export default function decorate(block) {
+  const card = block.classList.contains('card');
   const content = lines(block).map((line) => {
     const link = line.querySelector('a[href]');
-    if (link && line.textContent.trim() === link.textContent.trim()) return buildButton(link);
+    if (link && line.textContent.trim() === link.textContent.trim()) {
+      // option card: a bold link is the filled button, a plain one the outlined button
+      // (the site's buttons have already made a bold link a primary button)
+      const solid = card && (!!link.closest('strong, b') || link.classList.contains('primary'));
+      const action = buildButton(link);
+      if (card) action.classList.add(solid ? 'is-solid' : 'is-outline');
+      return action;
+    }
     if (line.matches(HEADINGS)) line.classList.add('promo-heading');
     else line.className = 'promo-text';
     return line;
   });
+  if (card) {
+    // the buttons side by side (stacked on phones), after the text
+    const actions = el('div', 'promo-actions');
+    actions.append(...content.filter((node) => node.classList.contains('promo-action')));
+    block.replaceChildren(...content.filter((node) => !node.classList.contains('promo-action')), ...(actions.children.length ? [actions] : []));
+    return;
+  }
   block.replaceChildren(...content);
 }

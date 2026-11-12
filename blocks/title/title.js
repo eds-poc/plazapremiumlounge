@@ -58,6 +58,15 @@ export default function decorate(block) {
     heading.classList.add('title-heading');
     content.push(heading);
   }
+  // option back: the heading's link with the source's maroon arrow before its text ("← Back to
+  // Edit Booking"); the whole line is the link
+  const back = block.classList.contains('back') && index >= 0 ? lines[index].querySelector('a[href]') : null;
+  if (back) {
+    back.classList.add('title-back');
+    const arrow = el('span', 'title-back-arrow');
+    arrow.setAttribute('aria-hidden', 'true');
+    back.prepend(arrow);
+  }
   const rest = lines.slice(index + 1);
   if (rest.length) {
     const intro = el('div', 'title-intro');

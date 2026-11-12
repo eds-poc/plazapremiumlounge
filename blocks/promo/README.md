@@ -33,6 +33,17 @@ arrow.
 | *(none)* | The maroon-to-plum gradient box above: light heading, pink text, gold button with an arrow | Rogers Bank "Apply Now" |
 | `light` | A partner campaign call to action: a cool grey box with 10px corners, 40px below what's above it; a bold navy heading (24px, 28px above 768px), grey 16px text at most 700px wide, 40px above an orange pill button (bold 16px, 18px above 768px) without an arrow, which lifts slightly on hover (not with reduced motion) | CTBC Reward "Ready to Upgrade Your Travel?" |
 
+| `card` | A white card with a light border and 15px corners, left-aligned 16px text (14px on phones), then pill buttons side by side (stacked at full width on phones): a **bold** link is the filled maroon button, a plain link the outlined one | Guest checkout "Book your visit with Smart Traveller" |
+
+### Example: card
+
+| Promo (card) |
+| --- |
+| **Book your visit with Smart Traveller**<br>**Smart Traveller** members get up to **20% off** and up to **150 ST points** per eligible visit. Register now and unlock a world of exciting benefits! Already a member? Login now!<br>[Log In](#login)<br>**[Sign up now](/en-uk/join-smart-traveller)** |
+
+- Each line is its own paragraph. A line holding only a link is a button; `#login` opens the
+  login pop-up.
+
 ### Example: light
 
 | Promo (light) |
