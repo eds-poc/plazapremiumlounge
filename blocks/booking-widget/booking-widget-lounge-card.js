@@ -20,7 +20,7 @@ import { isInCart, onCartChange } from '../../scripts/cart-state.js';
 import {
   buildSlider, el, fetchJson, getApiLanguage, toUrl,
 } from '../../scripts/properties.js';
-import { toUtcDateTime } from '../../scripts/utility.js';
+import { daysUntil, toUtcDateTime } from '../../scripts/utility.js';
 
 // the service answers in about 1.5-4.5s
 const PRODUCTS_TIMEOUT_MS = 20000;
@@ -110,6 +110,9 @@ export function readCard(json) {
     price: readPrice(item, currency),
     available: item?.availability !== false,
     catalogueCode: text(item?.prices?.[0]?.catalogueCode),
+    // for the data layer's Book Now: the price as the API gives it (basePrice, discounts,
+    // totalPrice, promocode, totalPromocodeAmount)
+    priceData: item?.prices?.[0] || {},
   });
   const bookable = (item) => item.code && item.name && !PASS.test(`${item.serviceName} ${item.service}`);
   const card = {
@@ -120,6 +123,10 @@ export function readCard(json) {
       .filter(Boolean)
       .join(', '),
     propertyCode: text(json.propertyCode),
+    // for the data layer's Book Now: the outlet, the airport's name and the lounge's currency
+    outletId: text(json.lmsOutletCode),
+    locationName: text(json.locationDisplayName) || text(json.locationName),
+    defaultCurrency: text(json.defaultCurrency),
     total: Number.parseInt(json.loungePropertyCount, 10) || 0,
     images: (Array.isArray(json.images) ? json.images : [])
       .map((i) => toUrl(i?.path))
@@ -270,6 +277,76 @@ function showInCart(book) {
 }
 
 /**
+ * The data layer's link click for Book Now, as it is clicked: the booking as the hero has it (the
+ * date and time in UTC, the guests, the lounge's currency), the airport and the lounge, the promo
+ * code, the product with its price (as getbookingwidgetproducts gives it, for all the guests) and
+ * the booking form's step.
+ * @param {Object} data The card's data (see readCard)
+ * @param {Object} choice The widget's choices (see current in booking-widget.js)
+ * @param {Object} product The chosen product (see readCard)
+ */
+function trackBookNow(data, choice, product) {
+  const eventName = 'book now';
+  const { priceData } = product;
+  // the guests as the hero has them (at least 1 adult)
+  const adultCount = Number(choice.adult) || 1;
+  const childCount = Number(choice.children) || 0;
+  const totalGuestCount = adultCount + childCount;
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: {
+      webInteraction: {
+        name: eventName,
+        type: 'other',
+        linkClicks: {
+          value: 1,
+        },
+      },
+    },
+    _plazapremiumloungemanagementli: {
+      bookingInfo: {
+        // the Date and Time fields (the airport's local time) in UTC: 2026-11-20T08:00:00Z
+        checkinDateTime: toUtcDateTime(choice.date, choice.time, choice.location.timeZone),
+        // the days from today (at the airport) to the Date field: 0 for today
+        daysToBooking: daysUntil(choice.date, choice.location.timeZone),
+        totalGuestCount,
+        adultCount,
+        childCount,
+        propertyCurrencyCode: data.defaultCurrency,
+      },
+      locationDetails: {
+        // the Where field's airport code (the locations service's iata, e.g. HKG)
+        iataCode: choice.airport,
+        locationName: data.locationName,
+      },
+      outletDetails: {
+        outletId: data.outletId,
+        outletName: data.name,
+      },
+      offerDetails: {
+        promoCode: text(priceData.promocode),
+        promocodeValuePayCurr: Number(priceData.totalPromocodeAmount) || 0,
+      },
+      productList: [
+        {
+          sku: product.catalogueCode,
+          name: product.name,
+          category: product.serviceName,
+          actualPricePayCurr: Number(priceData.basePrice) || 0,
+          // the first discount's amount (discounts[0].discountValue), 0 without one
+          discountPayCurr: Number(priceData.discounts?.[0]?.discountValue) || 0,
+          sellPricePayCurr: Number(priceData.totalPrice) || 0,
+          quantity: totalGuestCount,
+        },
+      ],
+      formDetails: {
+        formName: 'ppl lounge booking',
+        formStepName: 'add to cart',
+      },
+    },
+  });
+}
+
+/**
  * The lounge card, as the source's: photos (the chosen product's, else the lounge's), the name
  * and location line, the service tabs (two or more), the product, its "Filling Up" status, the
  * features, the price, Book Now and More at {airport}. With online booking off: the lounge, its
@@ -377,6 +454,8 @@ function buildCard(data, choice, id) {
       book.dispatchEvent(new CustomEvent('cart:remove', { bubbles: true, detail: { catalogueCode: p.catalogueCode } }));
       return;
     }
+    // the data layer's Book Now, as it is clicked
+    trackBookNow(data, choice, p);
     book.dispatchEvent(new CustomEvent('booking-widget:book', {
       bubbles: true,
       detail: {
