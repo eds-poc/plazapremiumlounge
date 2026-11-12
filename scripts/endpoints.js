@@ -20,6 +20,9 @@ const BOOKING_ENDPOINTS = {
   // creates a cart with the products and answers its cartId; GET ?cartId=&locale= reads it;
   // DELETE ?cartId= deletes (empties) it
   cart: '/api/v1/web/ppg-app/cart',
+  // properties for lists of regions, countries, airports and property codes (POST, JSON body;
+  // languageCode in the address): every property of the regions asked for
+  filteredProperties: '/api/v1/web/ppg-app/getFilteredProperties',
 };
 
 // endpoint paths, joined to the API domain

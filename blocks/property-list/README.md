@@ -24,9 +24,9 @@ A city's lounges, loaded live from the Plaza Premium properties service, as the 
     own lounge to the address (see Lounge page links below).
   - **Plain text** (e.g. `View now`): the label; the button opens the lounge page in the page's
     language folder.
-  - The link must be a page on this site (a path, or this site's preview or live address).
-    Another website's address is replaced by the language folder's lounge page (on the preview
-    site, the browser console says so).
+  - The button opens the link's page on the current site (its path), whatever address the link
+    is written with. A link to just the home page (`/`) is replaced by the language folder's
+    lounge page (on the preview site, the browser console says so).
   - **Leave the row out** for no button; the lounge names are then not links either.
 - **signup-button** (optional): a link. Its text and address are shown at the end of each card's
   Smart Traveller line (e.g. "… 20% off … per eligible visit. **Join here**"). Leave the row out for
@@ -45,6 +45,7 @@ A city's lounges, loaded live from the Plaza Premium properties service, as the 
 | The service address | Code, not content: `scripts/endpoints.js` keeps the API domain (the same for preview and live) and the `properties` endpoint path |
 | The language of the data | The page's language folder: `/en-uk/` → `en`; `/zh-cn/`, `/zh-hk/`, `/pt-br/`, `/ja-jp/` → the same code. Pages outside a language folder: `en`. Page metadata `language-code` overrides it |
 | Interface text ("Filters", "+5 more", messages) | The site's translations, by page language |
+| The cards (their parts and look) | Code: `scripts/property-card.js` and `styles/property-card.css` |
 | Which properties show | Active lounges, grouped by location, then passes (gift cards) at the end. Other kinds (e.g. airport dining, external partners) aren't shown |
 | Green look | Plaza Premium First lounges (by the brand in the lounge's name, in each language: Plaza Premium First, 环亚优逸庭, 環亞優逸庭, プラザプレミアムファースト); every other card is maroon |
 

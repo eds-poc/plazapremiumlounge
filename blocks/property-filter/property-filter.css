@@ -1,0 +1,439 @@
+/* property filter: lounges by Region, Country and City, as the source offer pages' lounge widget
+   (#offerLoungeBookingWidgetForm): region tabs, then Country and City selects with Search below
+   992px, or from 992px a list of countries (opening to their cities) beside the lounges: per
+   airport its title, its service tabs and its cards (styles/property-card.css) */
+.property-filter {
+  --property-filter-divider: #dddacf;
+  --property-filter-service-bg: #9b9b9b;
+  --property-filter-service-shadow: 0 0 5px rgb(0 0 0 / 20%);
+  --property-filter-service-width: 120px;
+  --property-filter-service-line: 24px;
+  --property-filter-city-padding-bottom: 6px;
+  --property-filter-toggle-padding: 6px;
+  --property-filter-toggle-radius: 4px;
+  --property-filter-chevron: 14px;
+  --property-filter-search-icon: 16px;
+  --property-filter-select-arrow: 12px;
+  --property-filter-bone-bg: var(--color-placeholder);
+  --property-filter-bone-shine: rgb(255 255 255 / 60%);
+  --property-filter-bone-speed: 1.4s;
+  --property-filter-bone-region: 60px;
+  --property-filter-bone-region-long: 160px;
+
+  /* a Bootstrap column of n twelfths: its share of the row and a gutter, less the gutter */
+  --property-filter-col-5: calc(5 / 12 * (100% + var(--grid-gutter)) - var(--grid-gutter));
+  --property-filter-col-4: calc(4 / 12 * (100% + var(--grid-gutter)) - var(--grid-gutter));
+  --property-filter-col-3: calc(3 / 12 * (100% + var(--grid-gutter)) - var(--grid-gutter));
+}
+
+/* the buttons below are the source's links: no button look of their own */
+.property-filter-region,
+.property-filter-country-toggle,
+.property-filter-city-link {
+  margin: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  text-align: start;
+  cursor: pointer;
+}
+
+/* ---------- region tabs ---------- */
+.property-filter-regions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0 0 var(--spacing-8) calc(-1 * var(--spacing-2));
+}
+
+.property-filter-region {
+  min-height: var(--spacing-stack);
+  padding: 0 var(--spacing-2);
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+}
+
+.property-filter-region:hover,
+.property-filter-region[aria-selected='true'] {
+  text-decoration: underline;
+}
+
+/* ---------- below 992px: Country, City and Search ---------- */
+.property-filter-selects {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: var(--spacing-bootstrap-3);
+}
+
+.property-filter-select {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0 0 var(--spacing-bootstrap-3);
+  border: 0;
+  border-radius: var(--radius-input);
+  padding: var(--spacing-5) calc(var(--spacing-8) + var(--spacing-stack)) var(--spacing-5)
+    var(--spacing-8);
+  background: var(--color-surface-warm) url('../../icons/arrow-down.svg') no-repeat right
+    var(--spacing-8) center / var(--property-filter-select-arrow);
+  color: var(--color-text-control);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-relaxed);
+  appearance: none;
+  cursor: pointer;
+}
+
+.property-filter-search {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: start;
+  width: 100%;
+  margin: 0 0 var(--spacing-6);
+  border: var(--base-border-width) solid transparent;
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-2) var(--spacing-7);
+  background-color: var(--color-brand-plum);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-relaxed);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.property-filter-search:hover {
+  background-color: var(--color-brand-primary);
+}
+
+/* (a box of the text's height, so the button is as tall as with a label) */
+.property-filter-search::before {
+  content: '';
+  height: 1lh;
+}
+
+.property-filter-search-icon {
+  width: var(--property-filter-search-icon);
+  height: var(--property-filter-search-icon);
+  background-color: currentcolor;
+  mask: url('../../icons/search.svg') center / contain no-repeat;
+}
+
+/* ---------- from 992px: countries and their cities ---------- */
+.property-filter-countries {
+  display: none;
+  padding-top: var(--spacing-3);
+}
+
+.property-filter-country {
+  border-bottom: var(--base-border-width) solid var(--property-filter-divider);
+}
+
+.property-filter-country-title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.property-filter-country-toggle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border-radius: var(--property-filter-toggle-radius);
+  padding: var(--property-filter-toggle-padding);
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading);
+}
+
+.property-filter-country-toggle[aria-expanded='true'] {
+  background-color: var(--color-brand-plum);
+  color: var(--color-text-inverse);
+}
+
+/* the source's light arrow, turning down when open */
+.property-filter-country-toggle::after {
+  content: '';
+  flex: none;
+  width: var(--property-filter-chevron);
+  height: var(--property-filter-chevron);
+  margin: 0 var(--spacing-6) 0 auto;
+  padding-inline-start: var(--spacing-2);
+  background-color: currentcolor;
+  mask: url('../../icons/arrow-right-light.svg') center / contain no-repeat;
+  transition: transform var(--duration-short) var(--ease-standard);
+}
+
+.property-filter-country-toggle[aria-expanded='true']::after {
+  transform: rotate(90deg);
+}
+
+.property-filter-cities {
+  margin: 0;
+  padding: var(--spacing-4) 0 var(--spacing-7);
+  color: var(--color-text-secondary);
+  list-style: none;
+}
+
+.property-filter-cities[hidden] {
+  display: none;
+}
+
+.property-filter-cities li {
+  padding: var(--spacing-1) var(--spacing-2) var(--property-filter-city-padding-bottom);
+}
+
+.property-filter-city-link {
+  display: block;
+  width: 100%;
+  margin-bottom: var(--spacing-2);
+  padding-inline-start: var(--spacing-6);
+  color: var(--color-text-strong);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-body);
+}
+
+.property-filter-city-link:hover,
+.property-filter-city-link[aria-current='true'] {
+  color: var(--color-brand-primary);
+}
+
+/* ---------- the lounges, per airport ---------- */
+.property-filter-airport {
+  margin-bottom: var(--spacing-10);
+}
+
+.property-filter-airport-title {
+  margin: 0 0 var(--spacing-6);
+  padding-bottom: var(--spacing-6);
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+/* service tabs: grey pills, the chosen one plum and underlined */
+.property-filter-services {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 0 0 calc(-1 * var(--spacing-2));
+  padding: 0 var(--spacing-6);
+}
+
+.property-filter-service {
+  min-width: var(--property-filter-service-width);
+  margin: 0 var(--spacing-2) var(--spacing-6);
+  border: var(--base-border-width) solid var(--property-filter-service-bg);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-3) var(--spacing-7);
+  background-color: var(--property-filter-service-bg);
+  box-shadow: var(--property-filter-service-shadow);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--property-filter-service-line);
+  text-transform: capitalize;
+  cursor: pointer;
+  transition: background-color var(--duration-medium), border-color var(--duration-medium);
+}
+
+.property-filter-service[aria-pressed='true'] {
+  border-color: var(--color-brand-plum);
+  background-color: var(--color-brand-plum);
+  text-decoration: underline;
+}
+
+.property-filter-cards {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* (a card the service tab leaves out; the card's own display would show it) */
+.property-filter-cards .property-card[hidden] {
+  display: none;
+}
+
+/* ---------- while the lounges load: the skeleton ---------- */
+
+/* the filters' and cards' outline in their own layout, each bone the size of what it stands for
+   (as the Booking Widget's loading card: grey, a light sweeping across) */
+.property-filter-bone {
+  display: block;
+  border-radius: var(--radius-xs);
+  background:
+    linear-gradient(90deg, transparent, var(--property-filter-bone-shine), transparent) 0 0 / 200% 100%,
+    var(--property-filter-bone-bg);
+  animation: property-filter-shimmer var(--property-filter-bone-speed) linear infinite;
+}
+
+.property-filter-skeleton .property-filter-regions {
+  min-height: var(--spacing-stack);
+}
+
+.property-filter-bone-region {
+  width: var(--property-filter-bone-region);
+  height: var(--font-size-sm);
+  margin: 0 var(--spacing-2);
+}
+
+.property-filter-bone-region + .property-filter-bone-region {
+  width: var(--property-filter-bone-region-long);
+}
+
+/* (a select's height: its padding and line) */
+.property-filter-bone-select {
+  height: calc(2 * var(--spacing-5) + var(--line-height-relaxed) * var(--font-size-sm));
+  margin-bottom: var(--spacing-bootstrap-3);
+  border-radius: var(--radius-input);
+}
+
+.property-filter-bone-search {
+  align-self: start;
+  height: calc(2 * (var(--spacing-2) + var(--base-border-width)) + var(--line-height-relaxed) * var(--font-size-md));
+  margin-bottom: var(--spacing-6);
+  border-radius: var(--radius-xl);
+}
+
+.property-filter-bone-country {
+  height: calc(2 * var(--property-filter-toggle-padding) + var(--line-height-heading) * var(--font-size-lg));
+  margin-bottom: var(--spacing-3);
+  border-radius: var(--property-filter-toggle-radius);
+}
+
+.property-filter-bone-title {
+  width: 60%;
+  height: calc(var(--line-height-heading) * var(--font-size-lg));
+  margin-bottom: calc(2 * var(--spacing-6));
+}
+
+.property-filter-bone-service {
+  width: var(--property-filter-service-width);
+  height: calc(var(--property-filter-service-line) + 2 * (var(--spacing-3) + var(--base-border-width)));
+  margin: 0 var(--spacing-2) var(--spacing-6);
+  border-radius: var(--radius-lg);
+}
+
+/* a card's outline: the photo, then (beside it from 768px) the badge, name, lines, features and
+   price, as styles/property-card.css lays a card out */
+.property-filter-skeleton-card {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-6);
+  margin: 0 0 var(--spacing-9);
+  padding: var(--spacing-5);
+  border: var(--base-border-width) solid var(--color-border-card);
+  border-radius: var(--radius-lg);
+}
+
+.property-filter-bone-photo {
+  aspect-ratio: var(--ratio-property-photo);
+  border-radius: var(--radius-sm);
+}
+
+.property-filter-skeleton-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+}
+
+.property-filter-bone-badge {
+  width: 40%;
+  height: var(--spacing-stack);
+}
+
+.property-filter-bone-name {
+  width: 70%;
+  height: var(--spacing-stack);
+}
+
+.property-filter-bone-line {
+  width: 90%;
+  height: var(--font-size-sm);
+}
+
+.property-filter-bone-tags {
+  width: 80%;
+  height: var(--spacing-9);
+}
+
+.property-filter-bone-price {
+  width: 40%;
+  height: var(--spacing-9);
+  margin-top: auto;
+}
+
+@keyframes property-filter-shimmer {
+  from {
+    background-position: 100% 0, 0 0;
+  }
+
+  to {
+    background-position: -100% 0, 0 0;
+  }
+}
+
+/* ---------- nothing to show, or the lounges didn't load ---------- */
+.property-filter-message {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  align-items: center;
+  padding: var(--spacing-9) 0;
+  text-align: center;
+}
+
+.property-filter-message p {
+  margin: 0;
+}
+
+@media (width >=576px) {
+  /* the source's col-sm-5 / col-sm-5 / col-sm-2 */
+  .property-filter-selects {
+    grid-template-columns: var(--property-filter-col-5) var(--property-filter-col-5) minmax(0, 1fr);
+    column-gap: var(--grid-gutter);
+  }
+}
+
+@media (width >=768px) {
+  .property-filter-skeleton-card {
+    grid-template-columns: var(--property-filter-col-4) 1fr;
+    gap: var(--grid-gutter);
+  }
+}
+
+@media (width >=992px) {
+  .property-filter-selects {
+    display: none;
+  }
+
+  /* the source's col-lg-3 / col-lg-9 */
+  .property-filter-layout {
+    display: grid;
+    grid-template-columns: var(--property-filter-col-3) minmax(0, 1fr);
+    gap: var(--grid-gutter);
+  }
+
+  .property-filter-countries {
+    display: block;
+  }
+
+  .property-filter-skeleton-card {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .property-filter-bone {
+    animation: none;
+  }
+
+  .property-filter-country-toggle::after,
+  .property-filter-service,
+  .property-filter-search {
+    transition: none;
+  }
+}

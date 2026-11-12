@@ -4,7 +4,7 @@
    declares its own values */
 .booking-widget-products {
   --booking-widget-card-media: 38%;
-  --booking-widget-card-media-bg: #e5e5e5;
+  --booking-widget-card-media-bg: var(--color-placeholder);
   --booking-widget-card-select-border: #d0d0d0;
   --booking-widget-card-feature: #5c5c5c;
   --booking-widget-card-price: #6e0f2d;
