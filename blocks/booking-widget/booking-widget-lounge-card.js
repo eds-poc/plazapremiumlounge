@@ -454,8 +454,6 @@ function buildCard(data, choice, id) {
       book.dispatchEvent(new CustomEvent('cart:remove', { bubbles: true, detail: { catalogueCode: p.catalogueCode } }));
       return;
     }
-    // the data layer's Book Now, as it is clicked
-    trackBookNow(data, choice, p);
     book.dispatchEvent(new CustomEvent('booking-widget:book', {
       bubbles: true,
       detail: {
@@ -471,6 +469,8 @@ function buildCard(data, choice, id) {
         currency: p.price?.currency,
       },
     }));
+    // the data layer's Book Now, as it is clicked
+    trackBookNow(data, choice, p);
   });
   showGroup(group);
   return card;

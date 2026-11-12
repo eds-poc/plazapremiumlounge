@@ -736,9 +736,9 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
   form.addEventListener('input', (e) => { if (e.target.name === 'promo') clearPrice(); });
   reserve.addEventListener('click', () => {
     if (!priced) return;
+    form.dispatchEvent(new CustomEvent('property-detail:reserve', { bubbles: true, detail: priced }));
     // the data layer's Reserve Now click, with the price shown
     trackReserve(lounge, form, priced);
-    form.dispatchEvent(new CustomEvent('property-detail:reserve', { bubbles: true, detail: priced }));
   });
 
   let services = [];
