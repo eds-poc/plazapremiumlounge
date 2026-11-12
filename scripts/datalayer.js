@@ -31,9 +31,9 @@ const BRAND = 'plaza premium lounge';
 let storing;
 // the page's name and site section set by a block (setPageDetails)
 let pageDetails = {};
-// a lounge listing's address: /en-uk/find/<region>/<country>/<city> (not /en-uk/find/lounge),
-// whose page view the property-list block sends
-const LISTING_PATH = /^\/[^/]+\/find\/[^/]+\/[^/]+\/[^/]+\/?$/;
+// the home page's address: / or a site folder's (/en-uk/, /zh-cn/ …), the only page whose page
+// view initDataLayer sends
+const HOMEPAGE_PATH = /^\/([a-z]{2}-[a-z]{2}\/?)?$/;
 
 /**
  * A logged-in member's kept details; when there are none, they're read in the background (once a
@@ -176,13 +176,13 @@ export function pushEvent(event, eventName, extra) {
 }
 
 /**
- * Starts analytics on a page: the page view (not on a lounge listing, where the property-list
- * block sends it), then the Launch script from the metadata `launch-script` (an https address;
- * without one, the data layer is still filled).
+ * Starts analytics on a page: the page view (on the home page only; the lounge listing's is the
+ * property-list block's), then the Launch script from the metadata `launch-script` (an https
+ * address; without one, the data layer is still filled).
  */
 export default function initDataLayer() {
   window.adobeDataLayer = window.adobeDataLayer || [];
-  if (!LISTING_PATH.test(window.location.pathname)) pushEvent(PAGE_VIEW, 'page view');
+  if (HOMEPAGE_PATH.test(window.location.pathname)) pushEvent(PAGE_VIEW, 'page view');
 
   const src = getMetadata('launch-script').trim();
   if (!src) return;
