@@ -604,6 +604,60 @@ for (const [width, size, gap, padding, after] of [[375, '18px', '5px', '12px', '
   await page.close();
 }
 
+// the source's measures (the 2026-11-12 audit's medium items, from its own CSS): the cross, the
+// promo field and its arrow, the space above "PROMO CODE", the amounts, the phone pass line
+for (const width of [375, 1440]) {
+  const phone = width < 768;
+  const page = await openWithCart({ width });
+  await openCart(page);
+  const m = await page.evaluate(() => {
+    const d = document.querySelector('dialog.mini-cart-modal[open]');
+    const panel = d.querySelector('.modal-content').getBoundingClientRect();
+    const box = (sel) => { const r = d.querySelector(sel).getBoundingClientRect(); return [r.x - panel.x, r.y - panel.y, r.width, r.height].map(Math.round); };
+    const cs = (sel) => getComputedStyle(d.querySelector(sel));
+    const input = d.querySelector('.mini-cart-promo-input').getBoundingClientRect();
+    const arrow = d.querySelector('.mini-cart-promo-apply').getBoundingClientRect();
+    return {
+      panelWidth: Math.round(panel.width),
+      close: box('.modal-close'),
+      closeIcon: cs('.modal-close').maskSize,
+      input: Math.round(input.height),
+      inputPlaceholder: getComputedStyle(d.querySelector('.mini-cart-promo-input'), '::placeholder').color,
+      arrow: [arrow.width, arrow.height, Math.round(input.right - arrow.right), Math.round(arrow.top - input.top)],
+      arrowIcon: cs('.mini-cart-promo-apply').maskSize,
+      promoTop: cs('.mini-cart-promo').paddingTop,
+      promoMargin: cs('.mini-cart-promo').marginTop,
+      discountAfter: cs('.mini-cart-discount').paddingBottom,
+      service: [cs('.mini-cart-service-total .mini-cart-amount').fontSize, cs('.mini-cart-service-total .mini-cart-amount').fontWeight, cs('.mini-cart-service-total .mini-cart-amount').color],
+      discount: [cs('.mini-cart-discount .mini-cart-amount').fontSize, cs('.mini-cart-discount .mini-cart-amount').fontWeight],
+      total: cs('.mini-cart-total .mini-cart-amount').fontSize,
+      note: cs('.mini-cart-note').fontSize,
+      line: [cs('.mini-cart-line').paddingBottom, cs('.mini-cart-line').marginBottom],
+      details: cs('.mini-cart-details').marginBottom,
+      afterName: cs('.mini-cart-name + *').paddingTop,
+    };
+  });
+  const closeAt = phone ? [m.panelWidth - 20 - 21, 15, 21, 21] : [m.panelWidth - 20 - 24, 22, 24, 24];
+  check(`${width} the cross as the source's: ${closeAt[2]}px, ${closeAt[1]}px from the top and 20px from the right, its icon ${phone ? 14 : 16}px`, m.close.every((n, i) => Math.abs(n - closeAt[i]) <= 1) && m.closeIcon === `${phone ? 14 : 16}px`, JSON.stringify({ close: m.close, closeAt, icon: m.closeIcon }));
+  check(`${width} the promo field 47px, its placeholder as the source's; the arrow 11 x 10 in a 24px button, 10px from the right, ${phone ? 11 : 14}px from the top`, m.input === 47 && m.inputPlaceholder === 'rgba(33, 37, 41, 0.75)' && JSON.stringify(m.arrow) === JSON.stringify([24, 24, 10, phone ? 11 : 14]) && m.arrowIcon === '11px 10px', JSON.stringify(m));
+  check(`${width} 15px above "PROMO CODE" (no margin), the discount row 8px`, m.promoTop === '15px' && m.promoMargin === '0px' && m.discountAfter === '8px', JSON.stringify([m.promoTop, m.promoMargin, m.discountAfter]));
+  check(`${width} the amounts as the source's: Service Total 16px/300 black, the discount 16px/${phone ? 500 : 400}, Total ${phone ? 16 : 18}px, the note ${phone ? '12.25' : 14}px`, JSON.stringify(m.service) === '["16px","300","rgb(0, 0, 0)"]' && JSON.stringify(m.discount) === JSON.stringify(['16px', phone ? '500' : '400']) && m.total === `${phone ? 16 : 18}px` && m.note === `${phone ? 12.25 : 14}px`, JSON.stringify(m));
+  check(`${width} the lounge line: ${phone ? 12 : 10}px padding and margin, 10px under the details${phone ? ', 20px above the location' : ''}`, JSON.stringify(m.line) === JSON.stringify(phone ? ['12px', '12px'] : ['10px', '10px']) && m.details === '10px' && m.afterName === (phone ? '20px' : '0px'), JSON.stringify([m.line, m.details, m.afterName]));
+  await page.close();
+}
+// the phone pass line: "Quantity" 52px below the line's top, as the source's (29px from 768px)
+for (const width of [375, 1440]) {
+  const page = await openWithCart({ width, kind: 'pass' });
+  await openCart(page);
+  const gap = await page.evaluate(() => {
+    const d = document.querySelector('dialog.mini-cart-modal[open]');
+    return Math.round(d.querySelector('.mini-cart-quantity').getBoundingClientRect().y - d.querySelector('.mini-cart-line').getBoundingClientRect().y);
+  });
+  const want = width < 768 ? 52 : 29;
+  check(`${width} the pass line: "Quantity" ${want}px below the line's top, as the source's`, Math.abs(gap - want) <= 1, `${gap}`);
+  await page.close();
+}
+
 // the add-ons hook: no View more options without an add-ons source; with one, the link and its call
 {
   const page = await openWithCart();
