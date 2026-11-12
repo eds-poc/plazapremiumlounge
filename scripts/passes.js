@@ -105,6 +105,11 @@ export function readPass(item) {
     isGlobal: locations.length === 1 && locations[0].toLowerCase() === GLOBAL,
     sequence: Number.isFinite(Number(item.productSeq)) ? Number(item.productSeq) : Infinity,
     catalogueCode: price.catalogueCode || '',
+    // for analytics (scripts/ecommerce.js), as the service gives them: the display name, the
+    // service's name and the first category code ("All" is Global)
+    displayName: item.productDisplayName ?? '',
+    service: item.serviceDisplayName ?? '',
+    category: ((code) => (code === 'All' ? 'Global' : code))(item.passCategory?.[0]?.categoryCode ?? ''),
   };
 }
 
