@@ -27,8 +27,8 @@ const BOOKING_ENDPOINTS = {
   // answers aren't known yet: no valid code to try on stage (see docs/cart.md)
   cartPromo: '/api/v1/web/ppg-app/cart-validate-promocode',
   // the passes (products) with their prices (POST, JSON: propertyCode, iataCode, currencyCode,
-  // optionally productCode for one pass and startDateTime "YYYY-MM-DD HH:mm:ss"; every pass
-  // without productCode)
+  // optionally productCode, one code or a list, and startDateTime "YYYY-MM-DD HH:mm:ss"; every
+  // pass without productCode)
   productPasses: '/api/v1/web/ppg-app/GetProductPasses',
 };
 
