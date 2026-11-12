@@ -38,4 +38,9 @@ The copyright text, with inline links. These links open in a new tab.
 - **Desktop (768px and up):** 4 columns, then the brand band, then the legal row. From 992px the brand band is full width: the group logo at the left, then the captioned groups in two rows with dividers. From 768px to 991px the group logo sits above the groups, without dividers.
 - **Mobile:** the column titles become accordions (several can be open at once), and the brand band stacks, one group per row with an underlined caption (320px wide from 576px, 220px below).
 - **Hover:** links and logos fade to 80% opacity.
+- **Social links to other sites:** in the column made only of icon links (Social), a link to another
+  website first shows the source's "See you again soon" popup, then opens in the same tab after 5
+  seconds. "Cancel Redirect" or × stays on the page. A new social icon link gets this
+  automatically. The WeChat QR image link and the other columns, brands and legal links are
+  unchanged.
 - **Adding or removing** a column, brand group or logo only needs a content edit, never code.

@@ -1,8 +1,10 @@
 import { loadFragment } from '../fragment/fragment.js';
-import { getDefaultSharedPagePath, getSharedPagePath } from '../../scripts/i18n.js';
+import { getDefaultSharedPagePath, getSharedPagePath, translate } from '../../scripts/i18n.js';
 
 const HEADINGS = 'h1, h2, h3, h4, h5, h6';
 const IMAGE_LINK = /\.(jpe?g|png|webp|gif|avif)(\?|#|$)/i;
+// the source's leave-site popup redirects on its own after 5 seconds
+const LEAVE_SITE_DELAY = 5000;
 
 /**
  * Drops images whose source failed to upload (e.g. about:error) so they don't render broken.
@@ -216,6 +218,11 @@ function buildColumns(section) {
     panel.id = `footer-column-panel-${i + 1}`;
     const panelInner = el('div', 'footer-column-panel-inner');
     panelInner.append(...buildColumnBody(entries));
+    // the social column: only icon links (no text, no text links), whatever its title or language
+    const body = [...panelInner.children];
+    if (body.length && body.every((n) => n.matches('.footer-media-list'))) {
+      col.classList.add('footer-column-social');
+    }
     panel.append(panelInner);
     if (title) {
       const h = el('h3', 'footer-column-title');
@@ -330,6 +337,69 @@ function enableImageLightbox(block) {
 }
 
 /**
+ * The source's leave-site popup ("See you again soon"): it goes to the URL in this tab after
+ * 5 seconds, unless the visitor cancels (Cancel Redirect or ×; not Esc, not a click beside it).
+ * @param {string} url
+ * @param {HTMLAnchorElement} trigger Focus returns there when it closes
+ */
+async function confirmLeaveSite(url, trigger) {
+  const { openModal } = await import('../../scripts/modal-dialog.js');
+  const dialog = await openModal({
+    key: 'footer-leave-site',
+    trigger,
+    content: () => {
+      const title = el('h2');
+      title.textContent = translate('leaveSiteTitle');
+      const text = el('p');
+      text.textContent = translate('leaveSiteText');
+      const actions = el('p', 'footer-leave-site-actions');
+      const cancel = el('button', 'button primary');
+      cancel.type = 'button';
+      cancel.textContent = translate('leaveSiteCancel');
+      cancel.addEventListener('click', () => cancel.closest('dialog').close());
+      actions.append(cancel);
+      return Object.assign([title, text, actions], { styles: ['footer-leave-site'], static: true });
+    },
+  });
+  if (!dialog) return;
+  // one redirect at a time: the latest link's, stopped as soon as the popup closes
+  clearTimeout(dialog.leaveTimer);
+  dialog.leaveTimer = setTimeout(() => {
+    if (dialog.open) window.location.href = url;
+  }, LEAVE_SITE_DELAY);
+  if (!dialog.leaveWired) {
+    dialog.leaveWired = true;
+    dialog.addEventListener('close', () => clearTimeout(dialog.leaveTimer));
+  }
+  dialog.querySelector('.footer-leave-site-actions button')?.focus();
+}
+
+/**
+ * Links in the social column to another site ask first (the source's leave-site popup) and then
+ * open in this tab, as the source. Image links (the WeChat QR lightbox) and links on this site
+ * are left as they are.
+ * @param {HTMLElement} block
+ */
+function enableLeaveSitePrompt(block) {
+  block.querySelectorAll('.footer-column-social a[href]').forEach((a) => {
+    const href = a.getAttribute('href');
+    if (IMAGE_LINK.test(href)) return;
+    let url;
+    try {
+      url = new URL(href, window.location.href);
+    } catch {
+      return;
+    }
+    if (!/^https?:$/.test(url.protocol) || url.origin === window.location.origin) return;
+    a.removeAttribute('target');
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      confirmLeaveSite(url.href, a);
+    });
+  });
+}
+
+/**
  * loads and decorates the footer
  * @param {Element} block The footer block element
  */
@@ -359,4 +429,5 @@ export default async function decorate(block) {
 
   block.append(inner);
   enableImageLightbox(block);
+  enableLeaveSitePrompt(block);
 }

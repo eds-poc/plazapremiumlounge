@@ -524,3 +524,10 @@
     align-items: flex-start;
   }
 }
+
+/* the leave-site popup before a social link to another site (opened in the site's modal, outside
+   the footer): its Cancel Redirect button centred below the text, as the source */
+dialog.modal.footer-leave-site .footer-leave-site-actions {
+  margin-top: var(--spacing-7);
+  text-align: center;
+}
