@@ -45,6 +45,10 @@ dialog.modal:is(.mini-cart-modal, .cart-message-modal, .cart-confirm-modal) {
   --cart-close-top: 22px;
   --cart-close-right: 20px;
 
+  /* Bootstrap's close: black at half opacity, 0.75 on hover, with no fade */
+  --cart-close-opacity: 0.5;
+  --cart-close-hover-opacity: 0.75;
+
   /* the lines' padding and margin under them (12px below 768px), the discount row's (8px) */
   --cart-line-gap: var(--spacing-4);
   --cart-discount-after: 8px;
@@ -121,12 +125,16 @@ dialog.modal.mini-cart-modal .modal-close {
   height: var(--cart-close-box);
   margin: 0;
   color: var(--color-text-strong);
-  opacity: 0.5;
+  opacity: var(--cart-close-opacity);
   mask: url('../icons/close-thin.svg') center / var(--cart-close-icon) no-repeat;
+
+  /* (not the site dialog's grey hover, which faded the cross lighter than at rest) */
+  transition: none;
 }
 
 dialog.modal.mini-cart-modal .modal-close:hover {
-  opacity: 1;
+  color: var(--color-text-strong);
+  opacity: var(--cart-close-hover-opacity);
 }
 
 dialog.modal.mini-cart-modal .modal-close:focus-visible {

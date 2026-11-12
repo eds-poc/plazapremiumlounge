@@ -405,7 +405,7 @@ them with the booking widget tests' settings: `BW_HOST`, `PLAYWRIGHT`.
     in the cart, a lounge in the cart, an unknown code
   - the currency: the session's, a cart of passes converted when the mini cart opens, a lounge's not
   - the other four languages, axe
-- **`test/cart/mini-cart.test.mjs`** (97 checks):
+- **`test/cart/mini-cart.test.mjs`** (99 checks):
   - the source's look (the 2026-11-12 audit's high and medium items): the panel's width and
     place, the header, the promo callout and field focus, the cross, the promo field and its
     arrow, the spacing above "PROMO CODE", the amounts, the lounge and pass lines (375, 1440); the

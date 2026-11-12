@@ -692,6 +692,24 @@ for (const width of [375, 1100, 1440]) {
   check(`${width} the Total's note ${narrow ? '11px and 10px after the label (992-1200px)' : 'as before'}`, narrow ? m.note === '11px' && m.labelPad === '10px' : m.note !== '11px' && m.labelPad === '0px', JSON.stringify([m.note, m.labelPad]));
   await page.close();
 }
+// the cross's hover as the source's (Bootstrap's .btn-close): black at 0.5, 0.75 while the pointer is
+// on it, with no fade (the site dialog's grey hover once faded it lighter than at rest)
+for (const width of [375, 1440]) {
+  const page = await openWithCart({ width });
+  await openCart(page);
+  const close = page.locator('dialog.mini-cart-modal[open] .modal-close');
+  const look = () => close.evaluate((c) => { const st = getComputedStyle(c); return `${st.opacity} ${st.backgroundColor}`; });
+  const rest = await look();
+  const box = await close.boundingBox();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  const hover = [await look()];
+  for (const ms of [100, 300, 1000]) {
+    await page.waitForTimeout(ms);
+    hover.push(await look());
+  }
+  check(`${width} the cross: 0.5 at rest, a steady 0.75 on hover, black (as the source's)`, rest === '0.5 rgb(0, 0, 0)' && hover.every((h) => h === '0.75 rgb(0, 0, 0)'), JSON.stringify({ rest, hover }));
+  await page.close();
+}
 // the add-ons hook: no View more options without an add-ons source; with one, the link and its call
 {
   const page = await openWithCart();
