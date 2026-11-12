@@ -358,16 +358,14 @@ function counter(name, group, value, min) {
 }
 
 /**
- * The data layer's "page load" page view (in place of the generic one, see scripts/datalayer.js),
- * once the booking form has its first services: the page's name and site section, the booking as
- * the form has it (the date and time in UTC, the guests), the lounge and its airport or station,
- * and the chosen product (its code as the SKU; none without services).
+ * The data layer's "page load" page view, once the booking form has its first services: the
+ * page's name and site section, the booking as the form has it (the date and time in UTC, the
+ * guests), the lounge and its airport or station, and the chosen product (its code as the SKU;
+ * none without services).
  * @param {Object} lounge
  * @param {HTMLFormElement} form The booking form
  */
 function trackPageLoad(lounge, form) {
-  // the lounge detail page's only (template lounge-detail); elsewhere the page's generic one goes
-  if (getMetadata('template') !== 'lounge-detail') return;
   // the page's name and site section, for this event and every one after it:
   // "<cityName>:<locationName (iataCode)>:<lounge>" in "lounge detail"
   const pageName = [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':');
