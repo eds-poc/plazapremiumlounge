@@ -2,11 +2,12 @@
  * The Property Filter block: lounges by Region, Country and City, as the source offer pages'
  * lounge widget (#offerLoungeBookingWidgetForm). The authored table: rows of name | codes,
  * `Region`, `Country`, `IATA` and `Property` (codes comma-separated), the property filter
- * service's payload (scripts/property-filter.js). The region tabs, then Country
- * and City (two selects and Search below 992px; a list of countries opening to their cities from
- * 992px), offer every region, country and city of the service's answer (region names from the
- * site's translations), and the chosen city's lounges are shown; the first region,
- * country and city are chosen when the page opens, and the choice is kept in the page address
+ * service's payload (scripts/property-filter.js); the cards' `View button` and `Signup button`;
+ * and the block's texts, a row each (see TEXTS; a text left out isn't shown). The region tabs,
+ * then Country and City (two selects and Search below 992px; a list of countries opening to their
+ * cities from 992px), offer every region, country and city of the service's answer (region names
+ * from scripts/regions.js), and the chosen city's lounges are shown; the first region, country
+ * and city are chosen when the page opens, and the choice is kept in the page address
  * (?region=ep&country=it&city=fco).
  */
 import { translate } from '../../scripts/i18n.js';
@@ -14,16 +15,34 @@ import {
   buildPropertyCard, loadPropertyCardStyles, readSignupButton, readViewButton,
 } from '../../scripts/property-card.js';
 import { fetchFilteredProperties, hasFilters, readFilters } from '../../scripts/property-filter.js';
-import {
-  el, isPreview, propertyDetailPath, toKey,
-} from '../../scripts/properties.js';
+import { el, isPreview, toKey } from '../../scripts/properties.js';
+import regionName from '../../scripts/regions.js';
 
 // the address's parameters for the choice
 const PARAMS = ['region', 'country', 'city'];
 
-// the cards' button rows (as the Property List's): View, and the sign-up link on the loyalty line
-const VIEW_ROW = 'view-button';
-const SIGNUP_ROW = 'signup-button';
+// the rows of codes: the payload's list each fills, and its row's name (names ignore capitals and
+// spaces)
+const CODE_ROWS = {
+  region: 'Region',
+  country: 'Country',
+  iataCode: 'IATA',
+  propertyCode: 'Property',
+};
+
+// the authored texts: the block's name for each, and its row's name (names ignore capitals and
+// spaces). In `Status`, `{n}` is the number of lounges and `{city}` the city.
+const TEXTS = {
+  regions: 'Regions label',
+  country: 'Country placeholder',
+  city: 'City placeholder',
+  search: 'Search label',
+  countries: 'Countries label',
+  services: 'Services label',
+  status: 'Status',
+};
+// the settings rows (not texts): the cards' View button and the sign-up link on their loyalty line
+const SETTINGS = { view: 'View button', signup: 'Signup button' };
 
 // the loading skeleton: how many of each part it outlines, and a card's lines, top to bottom
 const SKELETON = {
@@ -31,23 +50,26 @@ const SKELETON = {
 };
 const SKELETON_CARD = ['badge', 'name', 'line', 'line', 'tags', 'price'];
 
-// the rows' names (any of them; capitals, spaces and hyphens don't matter) and the payload's lists
-const ROWS = {
-  region: ['region', 'regions', 'region-code', 'region-codes'],
-  country: ['country', 'countries', 'country-code', 'country-codes'],
-  iataCode: ['iata', 'iata-code', 'iata-codes', 'airport', 'airports'],
-  propertyCode: ['property', 'properties', 'property-code', 'property-codes'],
-};
 // what a code looks like, per list (the others are left out, with a note on preview pages), and
 // the list's name in the notes
 const CODE = {
   region: [/^[A-Z]{2}$/, 'a region'],
   country: [/^[A-Z]{2}$/, 'a country'],
+  // (airports have 3 letters, railway stations 4: HKKW)
   iataCode: [/^[A-Z0-9]{3,4}$/, 'an IATA'],
   propertyCode: [/^[A-Z0-9_-]+$/, 'a property'],
 };
 
 let blockCount = 0;
+
+/**
+ * Authored text, trimmed, its runs of spaces made one.
+ * @param {*} value
+ * @returns {string}
+ */
+function clean(value) {
+  return String(value ?? '').replace(/\s+/g, ' ').trim();
+}
 
 /**
  * A cell's text with its lines (paragraphs, list items, line breaks) as commas.
@@ -62,53 +84,68 @@ function cellText(cell) {
 }
 
 /**
- * The authored settings, rows of name | value:
+ * Names an element for screen readers, when the text is authored.
+ * @param {HTMLElement} element
+ * @param {string} text
+ */
+function setLabel(element, text) {
+  if (text) element.setAttribute('aria-label', text);
+}
+
+/**
+ * The authored settings, rows of name | value (names ignore capitals and spaces):
  * - `filters`: the property filter service's payload (see scripts/property-filter.js
- *   readFilters): `region`, `country`, `iataCode` and `propertyCode`, each a list of codes;
- * - `view`: the cards' View button (`view-button`: a link to the lounge page, its text the label,
- *   or plain text for the language folder's lounge page), else View to that page;
- * - `signup`: the sign-up link at the end of the cards' loyalty line (`signup-button`), or null;
- * - `notes`: what couldn't be used (unknown rows, codes that don't look like codes), for preview.
+ *   readFilters), from the rows of codes (CODE_ROWS): a list of codes each;
+ * - `view`: the cards' View button (`View button`: a link to the lounge page, its text the label,
+ *   or plain text for the language folder's lounge page), or null for none;
+ * - `signup`: the sign-up link at the end of the cards' loyalty line (`Signup button`), or null;
+ * - `text`: an authored text by its TEXTS key, `{placeholders}` filled in; '' when not authored;
+ * - `notes`: what couldn't be used (codes that don't look like codes, rows not found or not
+ *   known), for preview pages.
  * @param {HTMLElement} block
- * @returns {{filters: Object<string, string[]>, view: Object, signup: Object|null,
- *   notes: string[]}}
+ * @returns {{filters: Object<string, string[]>, view: Object|null, signup: Object|null,
+ *   text: function(string, Object=): string, notes: string[]}}
  */
 export function readSettings(block) {
+  const rows = [...block.children].map((row) => [...row.children]);
+  const cell = (name) => rows.find((cells) => cells.length >= 2
+    && toKey(cells[0].textContent) === toKey(name))?.[1];
   const notes = [];
-  const lists = {};
-  let view = null;
-  let signup = null;
-  [...block.children].forEach((row) => {
-    const [name, value] = [...row.children];
-    if (!name || !value) return;
-    const key = toKey(name.textContent);
-    if (!key) return;
-    if (key === VIEW_ROW) {
-      view = readViewButton(value, 'property-filter');
-      return;
-    }
-    if (key === SIGNUP_ROW) {
-      signup = readSignupButton(value);
-      return;
-    }
-    const list = Object.keys(ROWS).find((l) => ROWS[l].includes(key));
-    if (!list) {
-      notes.push(`row "${name.textContent.trim()}" isn't one the block knows (Region, Country, IATA, Property, View button, Signup button)`);
-      return;
-    }
+
+  const lists = Object.fromEntries(Object.entries(CODE_ROWS).map(([list, name]) => {
+    const value = cell(name);
+    if (!value) return [list, []];
     // codes separated by commas, semicolons, spaces or lines
     const codes = readFilters({ [list]: cellText(value).split(/[,;\s]+/) })[list];
     const [pattern, what] = CODE[list];
     const wrong = codes.filter((code) => !pattern.test(code));
-    if (wrong.length) notes.push(`${name.textContent.trim()}: "${wrong.join('", "')}" left out (not ${what} code)`);
-    lists[list] = [...(lists[list] || []), ...codes.filter((code) => pattern.test(code))];
-  });
+    if (wrong.length) notes.push(`${name}: "${wrong.join('", "')}" left out (not ${what} code)`);
+    return [list, codes.filter((code) => pattern.test(code))];
+  }));
   const filters = readFilters(lists);
-  if (!hasFilters(filters)) notes.push('no Region, Country, IATA or Property codes: at least one row is needed');
+  if (!hasFilters(filters)) notes.push(`no ${Object.values(CODE_ROWS).join(', ')} codes: at least one row is needed`);
+
+  const texts = Object.fromEntries(Object.entries(TEXTS)
+    .map(([key, name]) => [key, clean(cell(name)?.textContent)]));
+  // a row name mistyped leaves its text out without a word: say so on preview pages
+  const known = [...Object.values(CODE_ROWS), ...Object.values(TEXTS), ...Object.values(SETTINGS)]
+    .map(toKey);
+  const missing = Object.entries(TEXTS).filter(([key]) => !texts[key]).map(([, name]) => name);
+  const unknown = rows.filter((cells) => cells.length >= 2)
+    .map((cells) => clean(cells[0].textContent))
+    .filter((name) => name && !known.includes(toKey(name)));
+  if (missing.length || unknown.length) {
+    notes.push(`rows not found (their texts aren't shown): ${missing.join(', ') || 'none'}; rows not known: ${unknown.join(', ') || 'none'}`);
+  }
+
+  const view = cell(SETTINGS.view);
+  const signup = cell(SETTINGS.signup);
   return {
     filters,
-    view: view || { label: translate('propertyFilterView'), base: propertyDetailPath(), params: {} },
-    signup,
+    view: view ? readViewButton(view, 'property-filter') : null,
+    signup: signup ? readSignupButton(signup) : null,
+    text: (key, values = {}) => (texts[key] || '')
+      .replace(/\{(\w+)\}/g, (all, name) => values[name] ?? all),
     notes,
   };
 }
@@ -135,7 +172,7 @@ function readChoices(properties, regionOrder = []) {
     if (!regions.has(regionCode)) {
       regions.set(regionCode, {
         code: regionCode,
-        name: translate(`region${regionCode}`) || regionCode,
+        name: regionName(regionCode) || regionCode,
         countries: new Map(),
       });
     }
@@ -210,13 +247,14 @@ function writeChoice({ region, country, city }) {
  * The region tabs: a tablist (the arrows, Home and End move between them, choosing).
  * @param {Object[]} regions
  * @param {string} prefix
+ * @param {string} label The tabs' name for screen readers (authored)
  * @param {function(Object): void} onChoose Called with the region chosen
  * @returns {{element: HTMLElement, show: function(Object): void}}
  */
-function buildRegionTabs(regions, prefix, onChoose) {
+function buildRegionTabs(regions, prefix, label, onChoose) {
   const list = el('div', 'property-filter-regions');
   list.setAttribute('role', 'tablist');
-  list.setAttribute('aria-label', translate('propertyFilterRegions'));
+  setLabel(list, label);
   const tabs = regions.map((region) => {
     const tab = el('button', 'property-filter-region', region.name);
     tab.type = 'button';
@@ -253,35 +291,38 @@ function buildRegionTabs(regions, prefix, onChoose) {
  * offers its cities ("Select City" first); Search shows the chosen city (the country's first when
  * none is chosen).
  * @param {string} prefix
+ * @param {function(string): string} text The authored texts (country, city, search)
  * @param {function(Object, Object|null): void} onSearch Called with the country and city
  * @returns {{element: HTMLElement, show: function(Object): void}}
  */
-function buildSelects(prefix, onSearch) {
+function buildSelects(prefix, text, onSearch) {
   const form = el('form', 'property-filter-selects');
-  const select = (name, label) => {
+  const select = (name) => {
     const control = el('select', `property-filter-select property-filter-select-${name}`);
     control.id = `${prefix}-${name}`;
-    control.setAttribute('aria-label', label);
+    setLabel(control, text(name));
     return control;
   };
-  const countrySelect = select('country', translate('propertyFilterCountry'));
-  const citySelect = select('city', translate('propertyFilterCity'));
+  const countrySelect = select('country');
+  const citySelect = select('city');
   const search = el('button', 'property-filter-search');
   search.type = 'submit';
-  search.setAttribute('aria-label', translate('propertyFilterSearch'));
+  setLabel(search, text('search'));
   const icon = el('span', 'property-filter-search-icon');
   icon.setAttribute('aria-hidden', 'true');
   search.append(icon);
   form.append(countrySelect, citySelect, search);
   let region = null;
-  const option = (value, text, selected = false) => {
-    const o = el('option', '', text);
+  const option = (value, label, selected = false) => {
+    const o = el('option', '', label);
     o.value = value;
     o.selected = selected;
     return o;
   };
+  // the first option, "Select Country" / "Select City", when authored
+  const placeholder = (name) => (text(name) ? [option('', text(name))] : []);
   const fillCities = (country, city = null) => {
-    citySelect.replaceChildren(option('', translate('propertyFilterCity')), ...(country?.cities || [])
+    citySelect.replaceChildren(...placeholder('city'), ...(country?.cities || [])
       .map((c) => option(c.key, c.label, c === city)));
   };
   countrySelect.addEventListener('change', () => {
@@ -295,7 +336,7 @@ function buildSelects(prefix, onSearch) {
   });
   const show = (choice) => {
     ({ region } = choice);
-    countrySelect.replaceChildren(option('', translate('propertyFilterCountry')), ...region.countries
+    countrySelect.replaceChildren(...placeholder('country'), ...region.countries
       .map((c) => option(c.code, c.name, c === choice.country)));
     fillCities(choice.country, choice.city);
   };
@@ -307,12 +348,13 @@ function buildSelects(prefix, onSearch) {
  * list is built once per region: a choice in the same region only opens the chosen city's country
  * and marks the city, so the countries the visitor opened stay open and focus stays put.
  * @param {string} prefix
+ * @param {string} label The list's name for screen readers (authored)
  * @param {function(Object, Object): void} onChoose Called with the country and city
  * @returns {{element: HTMLElement, show: function(Object): void}}
  */
-function buildCountryList(prefix, onChoose) {
+function buildCountryList(prefix, label, onChoose) {
   const nav = el('nav', 'property-filter-countries');
-  nav.setAttribute('aria-label', translate('propertyFilterCountries'));
+  setLabel(nav, label);
   let region = null;
   let items = [];
   const expand = (item, open) => {
@@ -369,20 +411,21 @@ function buildCountryList(prefix, onChoose) {
  * chosen one pressed, showing only the cards whose lounge offers it. None when the lounges offer
  * no service.
  * @param {{property: Object, card: HTMLElement}[]} cards The airport's lounges and their cards
+ * @param {string} groupLabel The tabs' name for screen readers (authored)
  * @returns {HTMLElement|null}
  */
-function buildServiceTabs(cards) {
+function buildServiceTabs(cards, groupLabel) {
   const tabs = [];
   cards.forEach(({ property }) => property.services.forEach(({ key, label }) => {
-    if (!tabs.some((tab) => tab.key === key)) tabs.push({ key, label });
+    if (!tabs.some((tab) => tab.key === key)) tabs.push({ key, name: label });
   }));
   if (!tabs.length) return null;
   const offers = (property, key) => property.services.some((service) => service.key === key);
   const group = el('div', 'property-filter-services');
   group.setAttribute('role', 'group');
-  group.setAttribute('aria-label', translate('propertyFilterServices'));
-  const buttons = [{ key: '', label: translate('propertyAll') }, ...tabs].map(({ key, label }) => {
-    const button = el('button', 'property-filter-service', label);
+  setLabel(group, groupLabel);
+  const buttons = [{ key: '', name: translate('propertyAll') }, ...tabs].map(({ key, name }) => {
+    const button = el('button', 'property-filter-service', name);
     button.type = 'button';
     button.setAttribute('aria-pressed', String(!key));
     button.addEventListener('click', () => {
@@ -400,10 +443,10 @@ function buildServiceTabs(cards) {
  * its cards (the shared cards, with the authored View button and sign-up link).
  * @param {HTMLElement} listing
  * @param {Object} city
- * @param {{view: Object, signup: Object|null}} settings
+ * @param {{view: Object|null, signup: Object|null, text: function(string): string}} settings
  * @param {string} prefix
  */
-function renderListing(listing, city, { view, signup }, prefix) {
+function renderListing(listing, city, { view, signup, text }, prefix) {
   const airports = new Map();
   city.properties.forEach((p) => {
     const key = p.location.key || p.iata;
@@ -425,7 +468,7 @@ function renderListing(listing, city, { view, signup }, prefix) {
         return { property, card };
       });
     list.append(...cards.map(({ card }) => card));
-    const tabs = buildServiceTabs(cards);
+    const tabs = buildServiceTabs(cards, text('services'));
     if (tabs) group.append(tabs);
     group.append(list);
     return group;
@@ -535,20 +578,20 @@ async function load(block, settings, prefix) {
     filters.selects.show(choice);
     filters.countries.show(choice);
     renderListing(listing, choice.city, settings, prefix);
-    status.textContent = translate('propertyFilterStatus', {
+    status.textContent = settings.text('status', {
       n: choice.city.properties.length, city: choice.city.label,
     });
     writeChoice(choice);
     block.dataset.region = choice.region.code;
     block.dataset.city = choice.city.codes[0] || '';
   };
-  filters.tabs = buildRegionTabs(regions, prefix, (region) => apply({
+  filters.tabs = buildRegionTabs(regions, prefix, settings.text('regions'), (region) => apply({
     region, country: region.countries[0], city: region.countries[0].cities[0],
   }));
-  filters.selects = buildSelects(prefix, (country, city) => apply({
+  filters.selects = buildSelects(prefix, settings.text, (country, city) => apply({
     region: choice.region, country, city: city || country.cities[0],
   }));
-  filters.countries = buildCountryList(prefix, (country, city) => apply({
+  filters.countries = buildCountryList(prefix, settings.text('countries'), (country, city) => apply({
     region: choice.region, country, city,
   }));
   const layout = el('div', 'property-filter-layout');

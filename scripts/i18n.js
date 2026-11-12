@@ -16,7 +16,7 @@ const SITES = {
   'ja-jp': 'ja-JP',
   'pt-br': 'pt-BR',
 };
-const DEFAULT_LANGUAGE = 'en';
+export const DEFAULT_LANGUAGE = 'en';
 export const DEFAULT_SITE = 'en-uk';
 
 // texts by language tag, or by its base language (zh-HK, then zh, then en)
@@ -193,53 +193,6 @@ const TEXTS = {
   },
   propertyRetry: {
     en: 'Try again', zh: '重试', 'zh-HK': '重試', ja: '再試行', pt: 'Tentar novamente',
-  },
-  // property filter (blocks/property-filter): the region tabs, the country and city choices, the
-  // countries list (from 992px), the service tabs' name and the cards' View button
-  propertyFilterRegions: {
-    en: 'Regions', zh: '地区', 'zh-HK': '地區', ja: '地域', pt: 'Regiões',
-  },
-  propertyFilterCountry: {
-    en: 'Select Country', zh: '选择国家/地区', 'zh-HK': '選擇國家/地區', ja: '国・地域を選択', pt: 'Selecionar país',
-  },
-  propertyFilterCity: {
-    en: 'Select City', zh: '选择城市', 'zh-HK': '選擇城市', ja: '都市を選択', pt: 'Selecionar cidade',
-  },
-  propertyFilterSearch: {
-    en: 'Search', zh: '搜索', 'zh-HK': '搜尋', ja: '検索', pt: 'Pesquisar',
-  },
-  propertyFilterCountries: {
-    en: 'Countries and cities', zh: '国家/地区和城市', 'zh-HK': '國家/地區和城市', ja: '国・地域と都市', pt: 'Países e cidades',
-  },
-  propertyFilterServices: {
-    en: 'Services', zh: '服务', 'zh-HK': '服務', ja: 'サービス', pt: 'Serviços',
-  },
-  propertyFilterView: {
-    en: 'View', zh: '查看', 'zh-HK': '查看', ja: '詳細', pt: 'Ver',
-  },
-  // (said to screen readers when a city is shown)
-  propertyFilterStatus: {
-    en: '{n} results in {city}', zh: '{city}：{n} 个结果', 'zh-HK': '{city}：{n} 個結果', ja: '{city}：{n} 件', pt: '{n} resultados em {city}',
-  },
-  // the booking system's regions, by code (region<CODE>), as the nav's Locations menu names them
-  regionCH: {
-    en: 'Chinese Mainland, Hong Kong, Macau and Taiwan regions', zh: '中国内地 -港澳及台地区', 'zh-HK': '中國內地 - 港澳及台地區', ja: '中国本土、香港、マカオおよび台湾地区', pt: 'China – Regiões do Continente, Hong Kong, Macau e Taiwan',
-  },
-  regionAS: {
-    en: 'Americas', zh: '美洲', 'zh-HK': '美洲', ja: 'アメリカ大陸', pt: 'Américas',
-  },
-  regionEP: {
-    en: 'Europe', zh: '欧洲', 'zh-HK': '歐洲', ja: 'ヨーロッパ', pt: 'Europa',
-  },
-  regionAP: {
-    en: 'Asia Pacific', zh: '亚太地区', 'zh-HK': '亞太地區', ja: 'アジア太平洋', pt: 'Ásia-Pacífico',
-  },
-  regionIM: {
-    en: 'India/Middle East/Africa', zh: '印度／中东／非洲', 'zh-HK': '印度／中東／非洲', ja: 'インド・中東・アフリカ', pt: 'Índia/Oriente Médio/África',
-  },
-  // (not in the Locations menu; English in every language until it's translated)
-  regionOP: {
-    en: 'Oceania Pacific',
   },
   propertyPrevious: {
     en: 'Previous photo', zh: '上一张照片', 'zh-HK': '上一張相片', ja: '前の写真', pt: 'Foto anterior',

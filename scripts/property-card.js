@@ -13,8 +13,6 @@ import {
 } from './properties.js';
 
 const VISIBLE_TAGS = 5;
-// this site's preview and live hosts: a View link to them is a page on this site
-const SITE_HOSTS = /^[\w-]+--plazapremiumlounge--eds-poc\.aem\.(page|live)$/;
 
 let styles;
 
@@ -260,9 +258,9 @@ export function readSignupButton(value) {
 }
 
 /**
- * The View now button's settings from its row: a link (its text is the label, its address the
- * lounge page, a page on this site) or plain text (the label; the lounge page in the page's site
- * folder). The listing page's own `currency`, `date` and `time` are passed on to the lounge pages.
+ * The View now button's settings from its row: a link (its text is the label, its path the lounge
+ * page, whatever its host) or plain text (the label; the lounge page in the page's site folder).
+ * The listing page's own `currency`, `date` and `time` are passed on to the lounge pages.
  * @param {HTMLElement} value The row's value cell
  * @param {string} [blockName] The block, for the note on preview pages
  * @returns {{label: string, base: string, params: Object<string, string>}|null}
@@ -275,11 +273,12 @@ export function readViewButton(value, blockName = 'property card') {
   if (link) {
     const href = toUrl(link.getAttribute('href'));
     const url = href ? new URL(href) : null;
-    if (url && (url.origin === window.location.origin || SITE_HOSTS.test(url.hostname)) && url.pathname !== '/') {
+    // (the lounge page by its path, whatever the link's host: the live site's isn't known here)
+    if (url && url.pathname !== '/') {
       base = `${url.pathname}${url.search}`;
     } else if (isPreview()) {
       // eslint-disable-next-line no-console
-      console.warn(`${blockName}: view-button links to "${href}", not a page on this site; using ${base}`);
+      console.warn(`${blockName}: view-button links to "${href}", not a lounge page; using ${base}`);
     }
   }
   const page = new URLSearchParams(window.location.search);

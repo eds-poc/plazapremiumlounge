@@ -24,9 +24,9 @@ A city's lounges, loaded live from the Plaza Premium properties service, as the 
     own lounge to the address (see Lounge page links below).
   - **Plain text** (e.g. `View now`): the label; the button opens the lounge page in the page's
     language folder.
-  - The link must be a page on this site (a path, or this site's preview or live address).
-    Another website's address is replaced by the language folder's lounge page (on the preview
-    site, the browser console says so).
+  - The button opens the link's page on the current site (its path), whatever address the link
+    is written with. A link to just the home page (`/`) is replaced by the language folder's
+    lounge page (on the preview site, the browser console says so).
   - **Leave the row out** for no button; the lounge names are then not links either.
 - **signup-button** (optional): a link. Its text and address are shown at the end of each card's
   Smart Traveller line (e.g. "… 20% off … per eligible visit. **Join here**"). Leave the row out for

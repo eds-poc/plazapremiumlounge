@@ -30,7 +30,7 @@ The choice is kept in the page address, so a reload or a shared link shows the s
 `?region=ep&country=it&city=fco` (the city by one of its airport codes). A value that isn't
 offered (a region without lounges in the answer, a mistyped code) gives the first one instead.
 
-## Table: two columns, a row per list
+## Table: two columns, a row per setting
 
 | Property Filter | |
 | --- | --- |
@@ -40,6 +40,13 @@ offered (a region without lounges in the answer, a mistyped code) gives the firs
 | Property | PRPRTY891, PRPRTY867 |
 | View button | [View](/en-uk/find/lounge) |
 | Signup button | [Join here](https://www.plazapremiumlounge.com/en-uk/sign-up?pid=plp) |
+| Regions label | Regions |
+| Country placeholder | Select Country |
+| City placeholder | Select City |
+| Search label | Search |
+| Countries label | Countries and cities |
+| Services label | Services |
+| Status | {n} results in {city} |
 
 The first four rows are **what the block asks the property filter service for**: their codes
 are sent as they are (a row left out or empty sends no codes for that level). The Region, Country
@@ -57,21 +64,35 @@ At least one of the four is needed.
 - **Property:** lounge codes, e.g. `PRPRTY891`.
 - **View button** (optional): the button on each card that opens the lounge's page. A link: its
   text is the label, its address the lounge page, e.g. `[View](/en-uk/find/lounge)` (each card
-  adds its own lounge to the address); plain text: that label, to the language folder's lounge
-  page. Without the row: **View** (in the page's language) to the language folder's lounge page.
+  adds its own lounge to the address, on whichever site the page is shown); plain text: that
+  label, to the language folder's lounge page. Leave the row out for no button.
 - **Signup button** (optional): a link, shown at the end of each card's Smart Traveller line
   (e.g. "… 20% off … per eligible visit. **Join here**"). Leave the row out for no link.
 
-Codes are separated by commas (or spaces, or one per line); capitals don't matter. Row names may
-also be written `Region code`, `Country code`, `IATA code` / `Airport`, `Property code`
-(`view-button` and `signup-button` work too).
+Codes are separated by commas (or spaces, or one per line); capitals don't matter. Row names
+ignore capitals and spaces.
+
+### The texts
+
+Every text of the filters is authored, in the page's language, a row each; a text left out isn't
+shown:
+- **Regions label**, **Countries label**, **Services label**, **Search label:** what screen
+  readers call the region tabs, the list of countries (from 992px), the service tabs and the
+  Search button (it shows an icon only).
+- **Country placeholder**, **City placeholder:** the dropdowns' first option ("Select Country",
+  "Select City"); without them the dropdowns start at the chosen country and city.
+- **Status:** said to screen readers when a city is shown; `{n}` is the number of lounges and
+  `{city}` the city, e.g. `{n} results in {city}` ("10 results in London (LHR / LGW)").
+
+The service tabs' **All**, the messages ("No lounges found.", the error and Try again) and
+**Loading…** are the site's own texts, in the page's language.
 
 ### Notes on preview pages
 
 On preview pages (`*.aem.page`), the browser console shows what the block read and what it left
 out: a row it doesn't know (e.g. an old `Additional Services` row: the service tabs now come from
-the service), a code that doesn't look like one (e.g. `Europe` instead of `EP`), or a table
-without any of the four rows.
+the service), a code that doesn't look like one (e.g. `Europe` instead of `EP`), the texts not
+authored, or a table without any of the four rows of codes.
 
 ## Where the rest comes from
 
@@ -80,5 +101,5 @@ without any of the four rows.
 | The lounges | The property filter service (`scripts/property-filter.js`, `filteredProperties` in `scripts/endpoints.js`), asked once for the table's lists, in the page's language |
 | Regions, countries, cities and their airports | The property filter service's answer, as it places each lounge (a city's airports share its city code, e.g. `GBLHR` for Heathrow and Gatwick) |
 | Service tabs | The property filter service's answer: each lounge's services (`servicetype`, named by `serviceDisplayName` in the page's language); the All tab's name from the site's translations (`propertyAll`) |
-| Region names | The site's translations (`region<CODE>` in `scripts/i18n.js`, e.g. `regionEP`, as the nav's Locations menu names them), else the code (`OP`, Oceania Pacific, is in English only for now) |
+| Region names | `scripts/regions.js`, by code in each language (as the nav's Locations menu names them), else the code (`OP`, Oceania Pacific, is in English only for now) |
 | The cards | `scripts/property-card.js` and `styles/property-card.css` |
