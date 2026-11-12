@@ -31,8 +31,9 @@ const BRAND = 'plaza premium lounge';
 let storing;
 // the page's name and site section set by a block (setPageDetails)
 let pageDetails = {};
-// whether a block sends the page's page view itself (skipPageView)
-let pageViewSkipped = false;
+// a lounge listing's address: /en-uk/find/<region>/<country>/<city> (not /en-uk/find/lounge),
+// whose page view the property-list block sends
+const LISTING_PATH = /^\/[^/]+\/find\/[^/]+\/[^/]+\/[^/]+\/?$/;
 
 /**
  * A logged-in member's kept details; when there are none, they're read in the background (once a
@@ -77,15 +78,6 @@ export function setPageDetails({ pageName, siteSection } = {}) {
     pageName: (pageName || '').trim(),
     siteSection: (siteSection || '').trim(),
   };
-}
-
-/**
- * Says a block sends the page's page view itself (pushEvent with PAGE_VIEW, e.g. the lounge
- * listing once its lounges are in), so initDataLayer doesn't send one too. Called as the block is
- * decorated (initDataLayer runs once the page's blocks are in, scripts.js loadDelayed).
- */
-export function skipPageView() {
-  pageViewSkipped = true;
 }
 
 /**
@@ -184,13 +176,13 @@ export function pushEvent(event, eventName, extra) {
 }
 
 /**
- * Starts analytics on a page: the page view (unless a block sends it, see skipPageView), then
- * the Launch script from the metadata `launch-script` (an https address; without one, the data
- * layer is still filled).
+ * Starts analytics on a page: the page view (not on a lounge listing, where the property-list
+ * block sends it), then the Launch script from the metadata `launch-script` (an https address;
+ * without one, the data layer is still filled).
  */
 export default function initDataLayer() {
   window.adobeDataLayer = window.adobeDataLayer || [];
-  if (!pageViewSkipped) pushEvent(PAGE_VIEW, 'page view');
+  if (!LISTING_PATH.test(window.location.pathname)) pushEvent(PAGE_VIEW, 'page view');
 
   const src = getMetadata('launch-script').trim();
   if (!src) return;

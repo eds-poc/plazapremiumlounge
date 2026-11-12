@@ -2,7 +2,7 @@ import { loadCSS } from '../../scripts/aem.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
 // eslint-disable-next-line import/no-cycle
 import {
-  PAGE_VIEW, pushEvent, setPageDetails, skipPageView,
+  PAGE_VIEW, pushEvent, setPageDetails,
 } from '../../scripts/datalayer.js';
 import {
   BRAND, chosenVisit, listLabel, pushEcommerce, viewSource,
@@ -10,7 +10,7 @@ import {
 import apiUrl from '../../scripts/endpoints.js';
 import { getLanguage, translate } from '../../scripts/i18n.js';
 import {
-  buildBadge, buildSlider, el, fetchJson, getApiLanguage, isIsoDate, isPreview, propertyDetailPath,
+  buildBadge, buildSlider, el, fetchJson, getApiLanguage, isPreview, propertyDetailPath,
   propertyDetailUrl, readProperty, safeNote, setLoading, toKey, toUrl,
 } from '../../scripts/properties.js';
 import { toUtcDateTime } from '../../scripts/utility.js';
@@ -49,12 +49,12 @@ function drawCrumb(crumb, country = '') {
 /**
  * Fetches the properties. Gives up after 8s.
  * @param {string} url
- * @returns {Promise<Object[]>} the API's items
+ * @returns {Promise<{items: Object[], count: number}>} the API's items and its `count`
  */
 async function fetchProperties(url) {
   const json = await fetchJson(url, TIMEOUT_MS);
   if (!Array.isArray(json.items)) throw new Error('Unexpected response');
-  return json.items;
+  return { items: json.items, count: json.count };
 }
 
 /**
@@ -225,59 +225,36 @@ function setListingPage(city) {
 }
 
 /**
- * A start at the place as ISO 8601 UTC without milliseconds (1700 in Beijing is 09:00:00Z).
- * @param {string} date YYYY-MM-DD
- * @param {string} time HHmm
- * @param {string} timeZone The place's time zone ('' for the browser's)
- * @returns {string}
- */
-function toUtc(date, time, timeZone) {
-  try {
-    return toUtcDateTime(date, time, timeZone || undefined);
-  } catch {
-    // an unknown time zone: the browser's
-    return toUtcDateTime(date, time);
-  }
-}
-
-/**
  * The booking chosen in the page address (the home page search sends
  * ?date=2026-11-10&time=1700&adult=1&children=0): the start at the place in UTC
- * ("2026-11-10T09:00:00Z" in Beijing), else now; the adults, else 1; the children, else 0.
- * @param {string} timeZone The place's time zone ('' for the browser's)
- * @returns {{checkin: string, adults: number, children: number}} checkin as YYYY-MM-DDTHH:MM:SSZ
+ * ("2026-11-10T09:00:00Z" in Beijing), else null; the adults and the children.
+ * @param {string} timeZone The place's time zone
+ * @returns {{checkin: string|null, adults: number, children: number}} checkin as
+ *   YYYY-MM-DDTHH:MM:SSZ
  */
 function chosenBooking(timeZone) {
   const params = new URLSearchParams(window.location.search);
-  const read = (name) => (params.get(name) || '').trim();
-  const count = (name, fallback) => (/^\d+$/.test(read(name)) ? Number(read(name)) : fallback);
-  const date = read('date');
-  const time = read('time');
-  const chosen = isIsoDate(date) && /^([01]\d|2[0-3])[0-5]\d$/.test(time);
+  const date = params.get('date');
+  const time = params.get('time');
   return {
-    checkin: chosen ? toUtc(date, time, timeZone) : new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
-    adults: count('adult', 1),
-    children: count('children', 0),
+    checkin: date && time ? toUtcDateTime(date, time, timeZone) : null,
+    adults: Number(params.get('adult')),
+    children: Number(params.get('children')),
   };
 }
 
 /**
  * The data layer's page view for the listing ("page load", sent here instead of by
- * scripts/datalayer.js, see skipPageView): the results shown for the filters in the page address
- * (the page's "N results"); the booking chosen there (`date` and `time` at the airport in UTC,
- * else now; `adult` and `children`, else 1 and 0); and the airport chosen there (?airport=PKX),
- * else the first lounge's: its `iataCode` and `locationName`. Without lounges (they didn't load),
- * the page view without them.
- * @param {Object[]} [properties]
- * @param {Object<string, Set<string>>} [selected] The filters from the page address
+ * scripts/datalayer.js on a listing page, see initDataLayer): the API's `count` as the search
+ * results; the booking chosen in the page address (`date` and `time` at the airport in UTC, else
+ * null; `adult` and `children`); and the airport chosen there (?airport=PKX), else
+ * the first lounge's: its `iataCode` and `locationName`.
+ * @param {Object[]} properties
+ * @param {Object<string, Set<string>>} selected The filters from the page address
+ * @param {number} count The API's `count`
  */
-function trackListingView(properties = [], selected = null) {
+function trackListingView(properties, selected, count) {
   const eventName = 'page load';
-  if (!properties.length) {
-    pushEvent(PAGE_VIEW, eventName);
-    return;
-  }
-  const count = properties.filter((p) => matches(p, selected)).length;
   const lounges = properties.filter((p) => !p.pass);
   const chosen = selected.airport.size === 1
     && lounges.find((p) => selected.airport.has(p.location.key));
@@ -380,15 +357,16 @@ function trackViewLounge(property, rank) {
 /**
  * The data layer's link click for a filter ticked or unticked in the filter form, or for its
  * Clear ("apply filter"): every filter now on ([] when none), each with its group's title
- * (`.property-list-group-title`) and its option's
- * label (Service Type's All, which is no filter, left out); the results now shown; the booking
- * chosen in the page address; and the airport filtered on (only one), else the first lounge
- * shown: its `iataCode` and `locationName`.
+ * (`.property-list-group-title`) and its option's label (Service Type's All, which is no filter,
+ * left out); the API's `count` as the search results; the booking chosen in the page address;
+ * and the airport filtered on (only one), else the first lounge shown: its `iataCode` and
+ * `locationName`.
  * @param {HTMLFormElement} form The filter form (`.property-list-filters`)
  * @param {Object[]} properties
  * @param {Object<string, Set<string>>} selected The filters now on
+ * @param {number} count The API's `count`
  */
-function trackFilters(form, properties, selected) {
+function trackFilters(form, properties, selected, count) {
   const shown = properties.filter((p) => matches(p, selected));
   const lounges = properties.filter((p) => !p.pass);
   const chosen = selected.airport.size === 1
@@ -406,7 +384,7 @@ function trackFilters(form, properties, selected) {
   pushEvent('web.webInteraction.linkClicks', eventName, {
     web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
     _plazapremiumloungemanagementli: {
-      searchDetails: { searchResultsCount: shown.length },
+      searchDetails: { searchResultsCount: count },
       filters,
       bookingInfo: {
         checkinDateTime: checkin,
@@ -777,15 +755,6 @@ export default async function decorate(block) {
   // the data layer's page name for the listing: the page's last path part until the API's city
   // name arrives (the first list on the page)
   if (useUrl) setListingPage(window.location.pathname.split('/').filter(Boolean).pop());
-  // the listing's page view (the first list on the page) is sent here, once: with the lounges, or
-  // without them when they don't load (a retry sends no other)
-  let viewed = !useUrl;
-  if (useUrl) skipPageView();
-  const sendView = (properties, selected) => {
-    if (viewed) return;
-    viewed = true;
-    trackListingView(properties, selected);
-  };
   if (crumb) {
     // (a missing stylesheet leaves the breadcrumb unstyled, never the lounges unloaded)
     await loadCSS(`${window.hlx.codeBasePath}/blocks/breadcrumb/breadcrumb.css`).catch((error) => {
@@ -812,21 +781,20 @@ export default async function decorate(block) {
   const render = async () => {
     if (!city) {
       showMessage(results, translate('propertyEmpty'), null, 'Add a "city-code" row (e.g. city-code | HKHKG) in the block.');
-      sendView();
       return;
     }
     const url = apiUrl('properties');
     url.searchParams.set('cityCode', city);
     url.searchParams.set('languageCode', getApiLanguage());
     let items;
+    let count;
     try {
-      items = await fetchProperties(url.href);
+      ({ items, count } = await fetchProperties(url.href));
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('property-list: could not load', url.href, error);
       if (crumb) drawCrumb(crumb);
       showMessage(results, translate('propertyError'), () => load());
-      sendView();
       return;
     }
     if (crumb) drawCrumb(crumb, items[0]?.countryName);
@@ -834,7 +802,6 @@ export default async function decorate(block) {
     const properties = items.map(readProperty).filter(Boolean);
     if (!properties.length) {
       showMessage(results, translate('propertyEmpty'), null, `City code "${city}" returned no lounges.`);
-      sendView();
       return;
     }
     const options = readOptions(properties);
@@ -846,13 +813,6 @@ export default async function decorate(block) {
       renderResults(results, properties, selected, status, clearAll, prefix, settings);
     };
     form = buildFilters(options, selected, update);
-    // the data layer's "apply filter" as a filter is ticked or unticked, or Clear removes them all
-    // (the listing has redrawn by then: the form's own listeners run first)
-    form?.addEventListener('change', (e) => {
-      if (e.target.matches('input[data-group]')) trackFilters(form, properties, selected);
-    });
-    form?.querySelector('.property-list-clear')
-      ?.addEventListener('click', () => trackFilters(form, properties, selected));
     sidebar.replaceChildren();
     if (form) {
       // the form sits in the sidebar, or in the Filters dialog on phones
@@ -879,8 +839,16 @@ export default async function decorate(block) {
       import('../../scripts/kwanko.js').then(({ listingTag }) => listingTag(codes));
       // the GA4 view_item_list, for the first list on the page
       if (useUrl) trackItemList(properties, selected);
+      // the data layer's page view, for the first list on the page
+      if (useUrl) trackListingView(properties, selected, count);
     }
-    sendView(properties, selected);
+    // the data layer's "apply filter" as a filter is ticked or unticked, or Clear removes them all
+    // (the listing has redrawn by then: the form's own listeners run first)
+    form?.addEventListener('change', (e) => {
+      if (e.target.matches('input[data-group]')) trackFilters(form, properties, selected, count);
+    });
+    form?.querySelector('.property-list-clear')
+      ?.addEventListener('click', () => trackFilters(form, properties, selected, count));
   };
   // the page's loader stays up until the lounges are shown (the first load is awaited, so the
   // page doesn't hide its loader before)
