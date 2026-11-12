@@ -1,8 +1,11 @@
 // The mini cart's Check Out / Edit links (from the page metadata), its promo code and the add-ons
-// hook, with routed answers: a stored lounge cart (fixtures/cart.json, the stage service's real
-// GET answer), the promo call as stage answers it today (400 VALIDATION_ERROR for {cartId,
-// promocode}), and a modelled success (no valid code on stage yet: the cart's
-// totalPromocodeAmount above 0). Usage: node mini-cart.test.mjs [width]
+// hook, with routed answers: a stored lounge or pass cart (fixtures/cart.json, cart-pass.json: the
+// stage service's real GET answers), and the promo service as stage answers it (2026-11-12, see
+// docs/cart.md): `{ code: "200", description: "Success" }`, then the cart's lines carry the code
+// (`itemPriceDetails.promocode[]`) and `totalPromocodeAmount`; refusals are a 200 with BKNG048
+// (no such code), BKNG043 (no line it applies to), BKNG004 (missing input), BKNG001 (no cart);
+// every cart PUT takes the code off. PASS10PW applies to passes (15%), LOUNGE15 (made up here) to
+// lounges (HKD 50). Usage: node mini-cart.test.mjs [width]
 import { readFileSync } from 'node:fs';
 import { open, PW } from '../booking-widget/harness.mjs';
 
@@ -18,8 +21,33 @@ const json = (body, status = 200) => ({
 });
 const wait = (ms) => new Promise((r) => { setTimeout(r, ms); });
 const LINE = CART.products[0];
-// the stage service's answer to {cartId, promocode} (2026-11-06)
-const STAGE_PROMO = json({ error: { code: 'VALIDATION_ERROR', details: {}, message: 'Request body is required for update cart' } }, 400);
+// the stage service's refusals (2026-11-12)
+const promoError = (errorCode, details, message = details) => json({ details, errorCode, message });
+const NO_CODE = promoError('BKNG048', 'No record found for the provided promotional code.', 'No record found for the given promocode');
+const NOT_ELIGIBLE = promoError('BKNG043', 'No item in the cart is eligible for the applied promo code.');
+// the codes this emulated service knows, and the kind of line each applies to
+const CODES = { PASS10PW: 'pass', LOUNGE15: 'lounge' };
+const PASS_A = PASS_CART.products[0].catalogueCode;
+const PASS_H = 'PRD3676-Regular-PRPRTY1235-GFTCRD-LCTN517-RTPLN3548';
+const PASSES = { [PASS_A]: { name: 'Global Family Pass', price: 85 }, [PASS_H]: { name: 'Hong Kong and Shanghai 2-Visit Pass', price: 75 } };
+
+/**
+ * The stage promo service: a known code on a cart with a line it applies to is applied
+ * (`state.applied` for `state.appliedTo`); `state.refuse` refuses the next request (BKNG043).
+ */
+function stagePromo(body, state) {
+  if (!body.cartId || !body.promocode) return promoError('BKNG004', 'Missing mandatory inputs');
+  if (state.refuse) {
+    state.refuse = false;
+    return NOT_ELIGIBLE;
+  }
+  const kind = CODES[body.promocode];
+  if (!kind) return NO_CODE;
+  if (kind !== state.kind) return NOT_ELIGIBLE;
+  state.applied = body.promocode;
+  state.appliedTo = body.cartId;
+  return json({ code: '200', description: 'Success' });
+}
 const CHECKOUT = 'https://www.plazapremiumlounge.com/{lang}/guest-checkout?cart={cartId}';
 const EDIT = 'https://www.plazapremiumlounge.com/{lang}/book-your-visit?date={date}&time={time}&adults={adults}&children={children}&product={catalogueCode}';
 
@@ -54,13 +82,16 @@ const stored = (kind = 'lounge') => `(() => {
  * one is applied), and the promo call answered by `promo(body, state)`; `meta` adds metadata.
  */
 async function openWithCart({
-  width = 1440, path = '/en-uk/', promo = () => STAGE_PROMO, meta = {}, kind = 'lounge',
+  width = 1440, path = '/en-uk/', promo = stagePromo, meta = {}, kind = 'lounge',
 } = {}) {
   const api = {
-    promos: [], gets: 0, posts: [], deletes: [],
+    promos: [], gets: 0, posts: [], deletes: [], puts: [],
   };
-  // the promo is applied to one cart (its id); a new cart (POST) is CRT_MC2, CRT_MC3…
-  const state = { applied: '', appliedTo: '', made: 1 };
+  // the promo is applied to one cart (its id); a new cart (POST) is CRT_MC2, CRT_MC3…; a pass
+  // cart's passes and currency follow its PUTs
+  const state = {
+    applied: '', appliedTo: '', made: 1, kind, passes: [{ catalogueCode: PASS_A, quantity: 1 }], currency: kind === 'pass' ? 'USD' : 'HKD',
+  };
   const page = await open(browser, {
     width,
     path,
@@ -101,14 +132,48 @@ async function openWithCart({
         }
         if (method === 'POST') {
           state.made += 1;
-          api.posts.push(JSON.parse(r.request().postData() || '{}'));
+          const body = JSON.parse(r.request().postData() || '{}');
+          api.posts.push(body);
+          if (state.kind === 'pass') state.passes = body.products.map((x) => ({ catalogueCode: x.catalogueCode, quantity: Number(x.quantity) }));
           await wait(300);
           return r.fulfill(json({ cartId: `CRT_MC${state.made}` }));
         }
+        if (method === 'PUT') {
+          // the cart's products replaced: the code comes off (as stage)
+          const body = JSON.parse(r.request().postData() || '{}');
+          api.puts.push(body);
+          if (state.kind === 'pass') state.passes = body.products.map((x) => ({ catalogueCode: x.catalogueCode, quantity: Number(x.quantity) }));
+          state.currency = body.currency || state.currency;
+          if (state.appliedTo === id) state.applied = '';
+          await wait(300);
+          return r.fulfill(json({ cartId: id }));
+        }
         api.gets += 1;
-        const cart = structuredClone(kind === 'pass' ? PASS_CART : CART);
+        const cart = structuredClone(state.kind === 'pass' ? PASS_CART : CART);
         cart.cartId = id || 'CRT_MC';
-        if (state.applied && state.appliedTo === cart.cartId) {
+        const applied = state.applied && state.appliedTo === cart.cartId ? state.applied : '';
+        const promoOn = (product, value) => {
+          const t = product.itemPriceDetails.productTotalPrice;
+          t.totalPromocodeAmount = value;
+          t.totalPrice = Math.round((t.totalPrice - value) * 100) / 100;
+          product.itemPriceDetails.promocode = [{
+            code: applied, name: 'promo code', promocodeDisplayName: applied === 'PASS10PW' ? 'Pass 15% off' : 'HKD 50 off', type: 'Percentage', value,
+          }];
+        };
+        if (state.kind === 'pass') {
+          cart.currency = state.currency;
+          cart.products = state.passes.map((x) => {
+            const product = structuredClone(PASS_CART.products[0]);
+            const amount = PASSES[x.catalogueCode].price * x.quantity;
+            Object.assign(product, { catalogueCode: x.catalogueCode, productDisplayName: PASSES[x.catalogueCode].name, quantity: x.quantity });
+            Object.assign(product.itemPriceDetails.productTotalPrice, { totalBasePrice: amount, totalPrice: amount });
+            if (applied) promoOn(product, Math.round(amount * 15) / 100);
+            return product;
+          });
+          const sum = (f) => cart.products.reduce((n, x) => n + (x.itemPriceDetails.productTotalPrice[f] || 0), 0);
+          Object.assign(cart.cartTotalPrice, { totalBasePrice: sum('totalBasePrice'), totalPromocodeAmount: Math.round(sum('totalPromocodeAmount') * 100) / 100, totalPrice: Math.round(sum('totalPrice') * 100) / 100 });
+        } else if (applied) {
+          promoOn(cart.products[0], 50);
           cart.cartTotalPrice.totalPromocodeAmount = 50;
           cart.cartTotalPrice.totalPrice -= 50;
         }
@@ -225,18 +290,19 @@ for (const width of WIDTHS) {
   await page.waitForFunction(() => document.querySelector('dialog.mini-cart-modal[open] .mini-cart-promo-message')?.textContent, null, { timeout: 10000 });
   m = await mini(page);
   check(`${width} promo by Enter: PUT {cartId, promocode} (the API's shape), the button busy meanwhile`, page.api.promos.length === 1 && page.api.promos[0].method === 'PUT' && JSON.stringify(page.api.promos[0].body) === '{"cartId":"CRT_MC","promocode":"SAVE10"}' && during.disabled && during.busy === 'true', JSON.stringify({ promos: page.api.promos, during }));
-  check(`${width} promo refused (stage's 400): "No record found for the provided promotional code.", the code kept, focus back, the totals unchanged, no reload`, m.message === 'No record found for the provided promotional code.' && m.error && m.value === 'SAVE10' && !m.readOnly && /mini-cart-promo-input/.test(m.focus || '') && m.rows.at(-1).endsWith('HKD 787.50') && page.api.gets === gets && nav.count === 0, JSON.stringify({ ...m, gets: page.api.gets - gets, nav: nav.count }));
+  check(`${width} promo refused (BKNG048): "No record found for the provided promotional code.", the code kept, focus back, the cart read again and unchanged, no reload`, m.message === 'No record found for the provided promotional code.' && m.error && m.value === 'SAVE10' && !m.readOnly && /mini-cart-promo-input/.test(m.focus || '') && m.rows.at(-1).endsWith('HKD 787.50') && page.api.gets === gets + 1 && nav.count === 0, JSON.stringify({ ...m, gets: page.api.gets - gets, nav: nav.count }));
   await page.close();
 }
-for (const [label, promo, message] of [
-  ['accepted but not applied (stage\'s 200 {cartId} for a full cart body)', () => json({ cartId: 'CRT_MC' }), 'No record found for the provided promotional code.'],
-  ['the service\'s error (200 with errorCode)', () => json({ errorCode: 'PROMO_ERR', message: 'Invalid promo' }), 'No record found for the provided promotional code.'],
+for (const [label, promo, message, code = 'SAVE10'] of [
+  ['"Success" but the cart names no code', () => json({ code: '200', description: 'Success' }), 'No record found for the provided promotional code.'],
+  ['a pass code on a lounge (BKNG043)', stagePromo, 'No item in the cart is eligible for the applied promo code.', 'PASS10PW'],
+  ['the service\'s other error (200 with errorCode)', () => promoError('BKNG999', 'Something else'), 'No record found for the provided promotional code.'],
   ['the network', () => 'abort', 'Error'],
   ['a 500', () => json('oops', 500), 'Error'],
 ]) {
   const page = await openWithCart({ promo });
   await openCart(page);
-  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').fill('SAVE10');
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').fill(code);
   await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-apply').click();
   await page.waitForFunction(() => document.querySelector('dialog.mini-cart-modal[open] .mini-cart-promo-message')?.textContent, null, { timeout: 10000 });
   const m = await mini(page);
@@ -244,17 +310,17 @@ for (const [label, promo, message] of [
   await page.close();
 }
 {
-  // applied (modelled: the cart then has a promo discount), then taken off
-  const page = await openWithCart({ promo: (body, state) => { state.applied = body.promocode; state.appliedTo = body.cartId; return json({ cartId: body.cartId }); } });
+  // applied (the lounge's line then carries the code), then taken off
+  const page = await openWithCart();
   const nav = watchNav(page);
   await openCart(page);
-  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').fill('SAVE10');
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').fill('LOUNGE15');
   await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-apply').click();
   await page.waitForSelector('dialog.mini-cart-modal[open] .mini-cart-promo-remove', { timeout: 10000 });
   await page.waitForTimeout(300);
   let m = await mini(page);
   const storedPromo = await page.evaluate(() => JSON.parse(sessionStorage.getItem('ppl-cart')).promoCode);
-  check('promo applied (modelled): the GET\'s promo amount as a row, the total from the GET, the code read only with its remove button, kept in the summary', m.rows.some((r) => r === 'Promo Code (SAVE10):- HKD 50.00') && m.rows.at(-1).endsWith('HKD 737.50') && m.value === 'SAVE10' && m.readOnly && /mini-cart-promo-remove/.test(m.action) && m.actionLabel === 'Remove promo code' && !m.msgShown && storedPromo === 'SAVE10' && nav.count === 0, JSON.stringify({
+  check('lounge promo applied: PUT {cartId, promocode}, the GET\'s promo amount as a row, the total from the GET, the code read only with its remove button, kept in the summary', JSON.stringify(page.api.promos[0]?.body) === '{"cartId":"CRT_MC","promocode":"LOUNGE15"}' && m.rows.some((r) => r === 'Promo Code (LOUNGE15):- HKD 50.00') && m.rows.at(-1).endsWith('HKD 737.50') && m.value === 'LOUNGE15' && m.readOnly && /mini-cart-promo-remove/.test(m.action) && m.actionLabel === 'Remove promo code' && !m.msgShown && storedPromo === 'LOUNGE15' && nav.count === 0, JSON.stringify({
     rows: m.rows, value: m.value, action: m.action, storedPromo,
   }));
   await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-remove').click();
@@ -271,7 +337,13 @@ for (const [label, promo, message] of [
   await page.waitForSelector('dialog.mini-cart-modal[open] .mini-cart-promo-apply', { timeout: 10000 });
   await page.waitForTimeout(300);
   m = await mini(page);
-  check('remove, Confirm: PUT with an empty code, the row gone, the field empty and editable, no reload', JSON.stringify(page.api.promos[1]?.body) === '{"cartId":"CRT_MC","promocode":""}' && !m.rows.some((r) => /Promo Code/.test(r)) && m.rows.at(-1).endsWith('HKD 787.50') && m.value === '' && !m.readOnly && nav.count === 0, JSON.stringify({ promos: page.api.promos, rows: m.rows, value: m.value }));
+  const put = page.api.puts[0];
+  const sameLounge = put && put.currency === 'HKD' && put.isThirdPartyFulfilment === false && JSON.stringify(put.products) === JSON.stringify([{
+    catalogueCode: LINE.catalogueCode, startDate: LINE.startDate, quantity: 1, guestsCount: { adult: '1', child: '0' },
+  }]);
+  check('remove, Confirm: the cart\'s own lounge sent again (PUT, which takes a code off; no promo call), the row gone, the field empty and editable, no reload', sameLounge && page.api.promos.length === 1 && !m.rows.some((r) => /Promo Code/.test(r)) && m.rows.at(-1).endsWith('HKD 787.50') && m.value === '' && !m.readOnly && nav.count === 0, JSON.stringify({
+    put, promos: page.api.promos.length, rows: m.rows, value: m.value,
+  }));
   await page.close();
 }
 
@@ -298,12 +370,12 @@ const bookAnother = async (page) => {
 const stateOf = (page) => page.evaluate(() => ({ id: JSON.parse(localStorage.getItem('ppl-cart-id') || 'null')?.id || null, stored: JSON.parse(sessionStorage.getItem('ppl-cart') || 'null') }));
 const hasPromoRow = (m) => m.rows.some((r) => r.startsWith('Promo Code'));
 for (const [label, promo, applied] of [
-  ['a refused code typed', () => STAGE_PROMO, false],
-  ['an applied code (modelled)', (body, state) => { state.applied = body.promocode; state.appliedTo = body.cartId; return json({ cartId: body.cartId }); }, true],
+  ['a refused code typed', stagePromo, false],
+  ['an applied code', stagePromo, true],
 ]) {
   const page = await openWithCart({ promo });
   await openCart(page);
-  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').fill('SAVE10');
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').fill(applied ? 'LOUNGE15' : 'SAVE10');
   await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-apply').click();
   if (applied) await page.waitForSelector('dialog.mini-cart-modal[open] .mini-cart-promo-remove', { timeout: 10000 });
   else await page.waitForFunction(() => document.querySelector('dialog.mini-cart-modal[open] .mini-cart-promo-message')?.textContent, null, { timeout: 10000 });
@@ -322,9 +394,9 @@ for (const [label, promo, applied] of [
 }
 {
   // the lounge removed while a code is being applied: the removed cart doesn't come back with it
-  const page = await openWithCart({ promo: async (body, state) => { await wait(2500); state.applied = body.promocode; state.appliedTo = body.cartId; return json({ cartId: body.cartId }); } });
+  const page = await openWithCart({ promo: async (body, state) => { await wait(2500); return stagePromo(body, state); } });
   await openCart(page);
-  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').fill('SAVE10');
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').fill('LOUNGE15');
   await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-apply').click();
   await page.waitForTimeout(200);
   await removeLine(page);
@@ -349,6 +421,107 @@ for (const [label, promo, applied] of [
   });
   await page.waitForTimeout(300);
   check('the same cart redrawn: what was typed stays', (await mini(page)).value === 'KEEPME');
+  await page.close();
+}
+
+// passes: PASS10PW on each pass (15%), kept through the cart's changes (every PUT takes it off:
+// the code is sent again), several passes, a refused re-apply, removal
+const applyCode = async (page, code) => {
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').fill(code);
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-apply').click();
+  await page.waitForFunction(() => document.querySelector('dialog.mini-cart-modal[open] .mini-cart-promo-remove, dialog.mini-cart-modal[open] .mini-cart-promo-message:not(:empty)'), null, { timeout: 10000 });
+  await page.waitForTimeout(300);
+};
+// a cart change from the site's own code (Add More, another pass, one taken out, another currency)
+const cartCall = (page, name, ...args) => page.evaluate(async ([fn, a]) => {
+  // eslint-disable-next-line import/no-unresolved, import/no-absolute-path
+  const cart = await import('/scripts/cart.js');
+  const result = await cart[fn](...a);
+  await new Promise((r) => { setTimeout(r, 400); });
+  return result?.status;
+}, [name, args]);
+const passItem = (code) => ({
+  type: 'pass', catalogueCode: code, currency: 'USD', name: PASSES[code].name, productCode: code.slice(0, 7), price: PASSES[code].price,
+});
+{
+  const page = await openWithCart({ kind: 'pass' });
+  const nav = watchNav(page);
+  await openCart(page);
+  await applyCode(page, 'pass10pw');
+  let m = await mini(page);
+  check('pass: a code in lower case is refused (codes are case sensitive): BKNG048\'s message', m.message === 'No record found for the provided promotional code.' && !m.readOnly, m.message);
+  await applyCode(page, 'PASS10PW');
+  m = await mini(page);
+  let s = await stateOf(page);
+  check('pass: PASS10PW applied: Service Total, the promo row, the total; read only; kept in the summary with each line\'s code', m.rows.join(' | ') === 'Service TotalUSD 85.00 | Promo Code (PASS10PW):- USD 12.75 | Total(Includes applicable taxes and fees)USD 72.25' && m.readOnly && m.value === 'PASS10PW' && s.stored?.promoCode === 'PASS10PW' && s.stored?.totals?.promo === 12.75 && s.stored?.lines?.[0]?.promo?.name === 'Pass 15% off', JSON.stringify({ rows: m.rows, promo: s.stored?.totals?.promo, line: s.stored?.lines?.[0]?.promo }));
+  const lineAmount = await page.evaluate(() => document.querySelector('dialog.mini-cart-modal[open] .mini-cart-line-amount')?.textContent);
+  check('pass: the line\'s price after the code', lineAmount === 'USD 72.25', lineAmount);
+  // Add More (the same pass): PUT, then the code again
+  let promos = page.api.promos.length;
+  await cartCall(page, 'addToCart', passItem(PASS_A));
+  m = await mini(page);
+  check('pass, Add More: PUT x2, the code sent again, still applied (USD 170.00 - 25.50)', page.api.puts.at(-1)?.products?.[0]?.quantity === '2' && page.api.promos.length === promos + 1 && page.api.promos.at(-1).body.promocode === 'PASS10PW' && m.rows.join(' | ') === 'Service TotalUSD 170.00 | Promo Code (PASS10PW):- USD 25.50 | Total(Includes applicable taxes and fees)USD 144.50' && m.readOnly, JSON.stringify({ puts: page.api.puts.length, promos: page.api.promos.length - promos, rows: m.rows }));
+  // another pass: both passes carry the code
+  promos = page.api.promos.length;
+  await cartCall(page, 'addToCart', passItem(PASS_H));
+  m = await mini(page);
+  s = await stateOf(page);
+  check('several passes: the code again after the PUT, each line with its own discount, the cart total', page.api.promos.length === promos + 1 && s.stored?.lines?.length === 2 && s.stored.lines.every((l) => l.promo?.code === 'PASS10PW') && m.rows.join(' | ') === 'Service TotalUSD 245.00 | Promo Code (PASS10PW):- USD 36.75 | Total(Includes applicable taxes and fees)USD 208.25', JSON.stringify({ rows: m.rows, lines: s.stored?.lines?.map((l) => l.promo) }));
+  // one pass taken out
+  promos = page.api.promos.length;
+  await cartCall(page, 'removeFromCart', PASS_H);
+  m = await mini(page);
+  check('several passes, one taken out: PUT with the rest, the code again, the total', page.api.promos.length === promos + 1 && m.rows.join(' | ') === 'Service TotalUSD 170.00 | Promo Code (PASS10PW):- USD 25.50 | Total(Includes applicable taxes and fees)USD 144.50', JSON.stringify(m.rows));
+  // another currency
+  promos = page.api.promos.length;
+  await cartCall(page, 'convertCart', 'HKD');
+  m = await mini(page);
+  check('passes in another currency: PUT in HKD, the code again, still applied', page.api.puts.at(-1)?.currency === 'HKD' && page.api.promos.length === promos + 1 && m.readOnly && m.rows.some((r) => r.startsWith('Promo Code (PASS10PW):- HKD')), JSON.stringify(m.rows));
+  // a change after which the code is refused (e.g. no pass it applies to): dropped, with why
+  page.state.refuse = true;
+  await cartCall(page, 'addToCart', { ...passItem(PASS_H), currency: 'HKD' });
+  m = await mini(page);
+  s = await stateOf(page);
+  check('the code refused after a change: no promo row, the field holds the code again with BKNG043\'s message, nothing kept', !m.rows.some((r) => r.startsWith('Promo Code')) && !m.readOnly && m.value === 'PASS10PW' && m.message === 'No item in the cart is eligible for the applied promo code.' && m.error && !s.stored?.promoCode && !(s.stored?.totals?.promo > 0), JSON.stringify({
+    rows: m.rows, value: m.value, message: m.message, stored: s.stored?.promoCode,
+  }));
+  // applied again, then removed: the passes sent again (no promo call)
+  await applyCode(page, 'PASS10PW');
+  promos = page.api.promos.length;
+  const puts = page.api.puts.length;
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-remove').click();
+  await page.waitForSelector('dialog.cart-confirm-modal[open]');
+  await page.locator('dialog.cart-confirm-modal[open] .cart-button', { hasText: 'Confirm' }).click();
+  await page.waitForSelector('dialog.mini-cart-modal[open] .mini-cart-promo-apply', { timeout: 10000 });
+  await page.waitForTimeout(300);
+  m = await mini(page);
+  s = await stateOf(page);
+  check('passes, the code removed: the passes sent again (PUT), no promo call, no promo row or discount kept, no reload', page.api.puts.length === puts + 1 && page.api.promos.length === promos && page.api.puts.at(-1).products.length === 2 && !m.rows.some((r) => r.startsWith('Promo Code')) && !s.stored?.promoCode && !(s.stored?.totals?.promo > 0) && nav.count === 0, JSON.stringify({ rows: m.rows, stored: s.stored?.promoCode }));
+  await page.close();
+}
+{
+  // a code on passes, the passes all taken out, a new pass cart: nothing of the code
+  const page = await openWithCart({ kind: 'pass' });
+  await openCart(page);
+  await applyCode(page, 'PASS10PW');
+  await removeLine(page);
+  const gone = await stateOf(page);
+  await cartCall(page, 'addToCart', passItem(PASS_A));
+  const s = await stateOf(page);
+  check('passes with a code all taken out, then a new pass cart: the cart forgotten, the new one without the code', page.api.deletes.length === 1 && !gone.stored && s.id === 'CRT_MC2' && !s.stored?.promoCode && !(s.stored?.totals?.promo > 0), JSON.stringify({ gone, s: { id: s.id, promo: s.stored?.promoCode } }));
+  await page.close();
+}
+{
+  // the cart the service no longer has (BKNG001): forgotten, the mini cart closed
+  const page = await openWithCart({ promo: () => promoError('BKNG001', 'Record not found', 'Cart not found') });
+  await openCart(page);
+  await page.route(/ppg-app\/cart(\?|$)/, (r) => (r.request().method() === 'GET' ? r.fulfill(promoError('BKNG001', 'Record not found', 'Cart not found')) : r.fallback()));
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').fill('LOUNGE15');
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-apply').click();
+  await page.waitForTimeout(2000);
+  const s = await stateOf(page);
+  const open1 = await page.evaluate(() => !!document.querySelector('dialog.mini-cart-modal[open]'));
+  check('a cart the service no longer has (BKNG001): forgotten, the mini cart closed', !s.id && !s.stored && !open1, JSON.stringify({ s, open: open1 }));
   await page.close();
 }
 
@@ -379,7 +552,7 @@ for (const [label, promo, applied] of [
 if (process.env.AXE_CORE) {
   const AXE = readFileSync(process.env.AXE_CORE, 'utf8');
   for (const width of WIDTHS) {
-    const page = await openWithCart({ width, meta: { 'cart-checkout-url': CHECKOUT, 'cart-edit-url': EDIT }, promo: (body, state) => { state.applied = body.promocode; state.appliedTo = body.cartId; return json({ cartId: body.cartId }); } });
+    const page = await openWithCart({ width, meta: { 'cart-checkout-url': CHECKOUT, 'cart-edit-url': EDIT } });
     await openCart(page);
     await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-apply').click();
     await page.addScriptTag({ content: AXE });
@@ -390,9 +563,11 @@ if (process.env.AXE_CORE) {
     });
     let res = await run();
     check(`axe, ${width} the mini cart with the promo field and its message: no violations`, !res.length, res.join(' | '));
-    await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').fill('SAVE10');
+    await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').fill('LOUNGE15');
     await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-apply').click();
     await page.waitForSelector('dialog.mini-cart-modal[open] .mini-cart-promo-remove', { timeout: 10000 });
+    res = await run();
+    check(`axe, ${width} the applied code (read only, its remove button): no violations`, !res.length, res.join(' | '));
     await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-remove').click();
     await page.waitForSelector('dialog.cart-confirm-modal[open]');
     res = await run();

@@ -14,7 +14,7 @@ import {
 } from './i18n.js';
 import { getCart, getCartId, onCartChange } from './cart-state.js';
 import {
-  addToCart, applyPromo, convertCart, refreshCart, removeFromCart, removePromo,
+  PROMO_DROPPED_EVENT, addToCart, applyPromo, convertCart, refreshCart, removeFromCart, removePromo,
 } from './cart.js';
 import { getCurrency } from './currency.js';
 // eslint-disable-next-line import/no-cycle
@@ -257,6 +257,17 @@ function confirmRemove(line, from) {
 }
 
 /**
+ * The message for a promo code the booking system refused or couldn't take.
+ * @param {{status: string, reason?: string}} result applyPromo's (or a dropped code's) answer
+ * @returns {string}
+ */
+function promoMessage(result) {
+  if (result.status === 'failed') return translate('cartPromoFailed');
+  if (result.reason === 'not-eligible') return translate('cartPromoNotEligible');
+  return translate('cartPromoInvalid');
+}
+
+/**
  * The promo code's field, as the source's: "Promo Code", the field and its arrow; Enter applies
  * too, an empty code says so without asking the booking system, and typing clears the message.
  * An applied code shows in the field (read only) with a button to take it off, after the source's
@@ -287,7 +298,8 @@ function buildPromo(cart) {
     else input.removeAttribute('aria-invalid');
   };
   show();
-  const applied = cart.totals?.promo > 0 ? cart.promoCode || '' : '';
+  // (the code the cart's lines carry)
+  const applied = cart.promoCode || '';
   const action = el('button', `mini-cart-promo-${applied ? 'remove' : 'apply'}`);
   action.type = 'button';
   action.setAttribute('aria-label', translate(applied ? 'cartPromoRemove' : 'cartPromoApply'));
@@ -354,11 +366,12 @@ function buildPromo(cart) {
       action.removeAttribute('aria-busy');
       input.readOnly = false;
     }
-    // (the cart went or changed while it answered: nothing of this code stays)
-    if (result.status === 'stale' || promo.cartId !== cart.cartId) return;
+    // (the cart went or changed while it answered, or the booking system no longer has it:
+    // nothing of this code stays)
+    if (result.status === 'stale' || result.reason === 'gone' || promo.cartId !== cart.cartId) return;
     const ok = result.status === 'applied';
     promo.draft = ok ? '' : code;
-    promo.message = ok ? '' : translate(result.status === 'failed' ? 'cartPromoFailed' : 'cartPromoInvalid');
+    promo.message = ok ? '' : promoMessage(result);
     promo.error = !ok;
     refocus();
   };
@@ -546,6 +559,16 @@ onCartChange((cart) => {
   if (!mini.dialog?.open) return;
   if (cart) renderMiniCart(cart);
   else if (!getCartId()) mini.dialog.close();
+});
+
+// a cart change (one more of a pass, another pass, one taken out, another currency) that the
+// booking system wouldn't keep the code for: the field offers the code again, with why
+document.addEventListener(PROMO_DROPPED_EVENT, (e) => {
+  const { cartId, code } = e.detail;
+  if (getCartId() !== cartId) return;
+  promoFor(getCart() || { cartId });
+  Object.assign(promo, { draft: code, message: promoMessage(e.detail), error: true });
+  if (mini.dialog?.open && getCart()) renderMiniCart(getCart());
 });
 
 /**

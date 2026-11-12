@@ -211,6 +211,22 @@ export function registerAdapter(type, adapter) {
 }
 
 /**
+ * A line's promo code from the service's product (`itemPriceDetails.promocode[]`), or null.
+ * @param {Object} p
+ * @returns {{code: string, name: string, value: number}|null}
+ */
+function readLinePromo(p) {
+  const promo = (Array.isArray(p?.itemPriceDetails?.promocode) ? p.itemPriceDetails.promocode : [])
+    .find((x) => text(x?.code));
+  if (!promo) return null;
+  return {
+    code: text(promo.code),
+    name: text(promo.promocodeDisplayName) || text(promo.name),
+    value: Number(promo.value) || 0,
+  };
+}
+
+/**
  * A cart line from the service's product: what the mini cart shows.
  * @param {Object} p
  * @returns {Object}
@@ -233,6 +249,9 @@ function readLine(p) {
     children: Number.parseInt(p?.guestsCount?.child, 10) || 0,
     quantity: Number.parseInt(p?.quantity, 10) || 1,
     total: Number(price.totalPrice),
+    // the promo code on this line, if any: its code, the service's name for it ("Pass 15% off")
+    // and its amount (each line the code applies to carries its own)
+    promo: readLinePromo(p),
   };
 }
 
@@ -257,12 +276,12 @@ function readCart(json) {
     totals: {
       base: Number(totals.totalBasePrice),
       discounts,
-      // a promo code's discount (none known yet: no valid code on stage)
+      // the promo code's discount, all its lines together
       promo: Number(totals.totalPromocodeAmount) || 0,
       total: Number(totals.totalPrice),
     },
-    // (the cart's promo code, if its answer names one: not seen yet)
-    promoCode: text(json?.promoCode || json?.promocode),
+    // the cart's promo code: the one on its lines (one code per cart)
+    promoCode: products.map(readLinePromo).find(Boolean)?.code || '',
   };
 }
 
@@ -288,11 +307,7 @@ export async function refreshCart(cartId) {
       forgetCart();
       return null;
     }
-    // a promo code applied here stays known while the cart has its discount (the answer may not
-    // name it)
-    const kept = getCart();
-    const promoCode = cart.promoCode || (cart.totals.promo > 0 && kept?.cartId === id ? kept.promoCode || '' : '');
-    saveCart({ ...cart, cartId: id, promoCode });
+    saveCart({ ...cart, cartId: id });
     return getCart();
   } catch (error) {
     if (error.service?.errorCode === 'BKNG001' && current()) {
@@ -325,6 +340,74 @@ function putProducts(cartId, currency, products, order) {
  */
 function passProducts(lines) {
   return lines.map((line) => passProduct(line.catalogueCode, line.quantity));
+}
+
+/**
+ * The cart's products again as the cart API takes them, whatever they are (a lounge: its
+ * product, start and guests; passes: as passProducts), with what its order takes besides.
+ * @param {Object[]} lines
+ * @returns {{products: Object[], order: Object}}
+ */
+function cartProducts(lines) {
+  const lounge = lines.some((line) => line.kind !== 'pass');
+  const products = lines.map((line) => (line.kind === 'pass'
+    ? passProduct(line.catalogueCode, line.quantity)
+    : {
+      catalogueCode: line.catalogueCode,
+      startDate: line.start,
+      quantity: line.quantity || 1,
+      guestsCount: { adult: String(line.adults || 1), child: String(line.children || 0) },
+    }));
+  return { products, order: { ...ORDER, ...(lounge ? ADAPTERS.lounge.order : {}) } };
+}
+
+// the service's promo code errors (a 200 with the error object)
+const PROMO_REASONS = { BKNG048: 'invalid', BKNG043: 'not-eligible', BKNG001: 'gone' };
+
+/**
+ * Sends a promo code for the cart (PUT cart-validate-promocode `{ cartId, promocode }`; it
+ * answers `{ code: "200", description: "Success" }`, or a 200 with `{ errorCode, message,
+ * details }`).
+ * @param {string} cartId
+ * @param {string} promocode
+ * @returns {Promise<{status: 'applied'|'invalid'|'failed', reason?: string, message?: string,
+ *   error?: Error}>} reason: invalid (BKNG048), not-eligible (BKNG043), gone (BKNG001), else
+ *   the service's error code
+ */
+async function sendPromo(cartId, promocode) {
+  try {
+    await fetchJson(apiUrl('cartPromo'), { cartId, promocode }, 'PUT');
+    return { status: 'applied' };
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.warn('cart: the promo code was not applied', error);
+    const code = error.service?.errorCode;
+    // (a refusal: the service's error, or a 4xx; else the service didn't answer)
+    if (!code && !(error.status >= 400 && error.status < 500)) return { status: 'failed', error };
+    return {
+      status: 'invalid',
+      reason: PROMO_REASONS[code] || code || 'invalid',
+      message: text(error.service?.details || error.service?.message),
+      error,
+    };
+  }
+}
+
+// the event when a cart's change takes its promo code off (the service refused it again)
+export const PROMO_DROPPED_EVENT = 'cart:promo-dropped';
+
+/**
+ * Puts the cart's promo code back after a PUT (every PUT takes it off): the same code again; a
+ * refusal (e.g. no line it applies to any more) is announced as `cart:promo-dropped`.
+ * @param {string} cartId
+ * @param {string} code The code the cart had before the PUT ('' for none)
+ */
+async function keepPromo(cartId, code) {
+  if (!code) return;
+  const result = await sendPromo(cartId, code);
+  if (result.status === 'applied') return;
+  const detail = { cartId, code, ...result };
+  document.dispatchEvent(new CustomEvent(PROMO_DROPPED_EVENT, { detail }));
 }
 
 /**
@@ -393,6 +476,7 @@ export function addToCart(item) {
       if (known.length) {
         // (the rules let only a pass join a cart: its passes, with this one or one more of it)
         await putProducts(cartId, currency, passProducts(lines), order);
+        await keepPromo(cartId, cart.promoCode);
       } else {
         const answer = await fetchJson(apiUrl('cart'), {
           currency, products: [adapter.toProduct(item)], ...order,
@@ -460,6 +544,7 @@ async function keepLines(cart, rest) {
     console.error('cart: the line was not taken out', error);
     return { status: 'failed', error };
   }
+  await keepPromo(cart.cartId, cart.promoCode);
   try {
     await refreshCart(cart.cartId);
   } catch {
@@ -524,6 +609,7 @@ export function convertCart(currency) {
       console.error('cart: the cart was not priced in', code, error);
       return { status: 'failed', error };
     }
+    await keepPromo(cart.cartId, cart.promoCode);
     try {
       // (only while it's still this site's cart: not one taken out meanwhile)
       if (getCartId() === cart.cartId) await refreshCart();
@@ -536,13 +622,14 @@ export function convertCart(currency) {
 let promoting = null;
 
 /**
- * Applies a promo code to the cart (PUT cart-validate-promocode with the cart's id and the code),
- * then reads the cart again: the booking system prices it. A code counts as applied when the cart
- * then has a promo discount. One at a time, after an add, a removal or a conversion under way.
- * @param {string} code
- * @returns {Promise<{status: 'applied'|'invalid'|'failed'|'stale', message?: string,
- *   error?: Error}>} invalid: the booking system refused the code (or didn't apply it); failed:
- *   it didn't answer; stale: the cart was taken out or replaced while it answered (nothing kept)
+ * Applies a promo code to the cart (see sendPromo), then reads the cart again: the booking system
+ * prices it, and its lines name the code. One at a time, after an add, a removal or a conversion
+ * under way.
+ * @param {string} code As typed (the service's codes are case sensitive)
+ * @returns {Promise<{status: 'applied'|'invalid'|'failed'|'stale', reason?: string,
+ *   message?: string, error?: Error}>} invalid: the booking system refused the code (`reason`:
+ *   invalid, not-eligible, gone, …); failed: it didn't answer; stale: the cart was taken out or
+ *   replaced while it answered (nothing kept)
  */
 export function applyPromo(code) {
   if (promoting) return promoting;
@@ -550,33 +637,28 @@ export function applyPromo(code) {
     await Promise.allSettled([pending, removing, converting].filter(Boolean));
     const cart = getCart();
     const promocode = text(code);
-    if (!cart || !promocode) return { status: 'invalid' };
-    try {
-      await fetchJson(apiUrl('cartPromo'), { cartId: cart.cartId, promocode }, 'PUT');
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.warn('cart: the promo code was not applied', error);
-      // (a refusal: a 4xx or the service's error; else the service didn't answer)
-      const refused = !!error.service || (error.status >= 400 && error.status < 500);
-      return { status: refused ? 'invalid' : 'failed', message: text(error.service?.message), error };
-    }
+    if (!cart || !promocode) return { status: 'invalid', reason: 'empty' };
+    const result = await sendPromo(cart.cartId, promocode);
     // a cart taken out (or replaced) meanwhile keeps nothing of this code
     if (getCartId() !== cart.cartId) return { status: 'stale' };
+    if (result.status === 'failed') return result;
+    // (read again either way: a refusal leaves the cart as it was, a cart the service doesn't
+    // know any more is forgotten)
     let now = null;
     try {
       now = await refreshCart();
     } catch { /* (read again next time) */ }
-    if (getCartId() !== cart.cartId) return { status: 'stale' };
-    if (!(now?.totals?.promo > 0)) return { status: 'invalid' };
-    if (!now.promoCode) saveCart({ ...now, promoCode: promocode });
-    return { status: 'applied' };
+    if (getCartId() !== cart.cartId) return result.reason === 'gone' ? result : { status: 'stale' };
+    if (result.status !== 'applied') return result;
+    return now?.promoCode ? { status: 'applied' } : { status: 'invalid', reason: 'invalid' };
   })().finally(() => { promoting = null; });
   return promoting;
 }
 
 /**
- * Takes the cart's promo code off (the same call with an empty code, as the source's), then reads
- * the cart again. One at a time, as applyPromo.
+ * Takes the cart's promo code off: the service has no call for it, but a cart PUT takes the code
+ * off, so the cart's own products are sent again (PUT, the same products, currency and guests);
+ * then the cart is read again. One at a time, as applyPromo.
  * @returns {Promise<{status: 'removed'|'failed', error?: Error}>}
  */
 export function removePromo() {
@@ -584,9 +666,10 @@ export function removePromo() {
   promoting = (async () => {
     await Promise.allSettled([pending, removing, converting].filter(Boolean));
     const cart = getCart();
-    if (!cart) return { status: 'removed' };
+    if (!cart?.lines.length || !cart.promoCode) return { status: 'removed' };
+    const { products, order } = cartProducts(cart.lines);
     try {
-      await fetchJson(apiUrl('cartPromo'), { cartId: cart.cartId, promocode: '' }, 'PUT');
+      await putProducts(cart.cartId, cart.currency, products, order);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('cart: the promo code was not taken off', error);
@@ -595,13 +678,19 @@ export function removePromo() {
     // (only while it's still this site's cart: not one taken out meanwhile)
     if (getCartId() !== cart.cartId) return { status: 'removed' };
     try {
-      const now = await refreshCart();
-      if (now?.cartId === cart.cartId && now.promoCode && !(now.totals?.promo > 0)) {
-        saveCart({ ...now, promoCode: '' });
-      }
+      await refreshCart();
     } catch {
+      // (taken off: what the page knows, without the code)
       const known = getCart();
-      if (known?.cartId === cart.cartId) saveCart({ ...known, promoCode: '' });
+      if (known?.cartId === cart.cartId) {
+        const total = (known.totals.total || 0) + (known.totals.promo || 0);
+        saveCart({
+          ...known,
+          promoCode: '',
+          lines: known.lines.map((line) => ({ ...line, promo: null })),
+          totals: { ...known.totals, promo: 0, total },
+        });
+      }
     }
     return { status: 'removed' };
   })().finally(() => { promoting = null; });

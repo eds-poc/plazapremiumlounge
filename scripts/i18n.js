@@ -626,6 +626,10 @@ const TEXTS = {
   cartPromoInvalid: {
     en: 'No record found for the provided promotional code.', zh: '找不到所提供优惠码的记录。', 'zh-HK': '找不到所提供優惠碼的記錄。', ja: '提供されたプロモーションコードの記録が見つかりません。', pt: 'Nenhum registro encontrado para o código promocional fornecido.',
   },
+  // the booking system's refusal of a code no line of the cart can take (BKNG043; translated here)
+  cartPromoNotEligible: {
+    en: 'No item in the cart is eligible for the applied promo code.', zh: '购物车中没有适用于此优惠码的商品。', 'zh-HK': '購物車中沒有適用於此優惠碼的商品。', ja: 'カート内にこのプロモーションコードの対象となる商品がありません。', pt: 'Nenhum item do carrinho é elegível para o código promocional aplicado.',
+  },
   cartPromoFailed: {
     en: 'Error', zh: 'Error', 'zh-HK': 'Error', ja: 'Error', pt: 'Error',
   },

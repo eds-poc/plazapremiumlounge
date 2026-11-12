@@ -96,28 +96,38 @@ the page after ⊗ → Yes, and that reload adds the promotional address's pass 
   as before.
 - Texts in the five languages, as the source's (see `cart*` in `scripts/i18n.js`).
 
-- **The promo code** (the source's field: "PROMO CODE", "Enter Code", the arrow; Enter applies too):
+- **The promo code** (the source's field: "PROMO CODE", "Enter Code", the arrow; Enter applies too),
+  for lounges and passes:
   - An empty code: "Please enter promo code." in red, with no request. Typing clears the message.
   - Applying: the arrow is off (busy) while the booking system answers (no full-page loader, as
     the source's), then the cart is read again.
-    - **Applied:** the cart has a promo discount (`totalPromocodeAmount` above 0). A "Promo Code
-      (CODE):" row shows under the discounts, and the total is the booking system's. The code shows
-      in the field (read only) with an ✕ to take it off.
+    - **Applied:** the cart's lines carry the code (see the API below). A "Promo Code (CODE):" row
+      shows under the discounts with the code's amount (all its lines together), a pass's line shows
+      its price after the code, and the total is the booking system's. The code shows in the field
+      (read only) with an ✕ to take it off. Codes are case sensitive, as typed.
+    - **Refused:** the code stays in the field, the cart unchanged, with the message:
+      - no such code (BKNG048): "No record found for the provided promotional code." (the source's)
+      - no line it applies to (BKNG043, e.g. a pass code on a lounge): "No item in the cart is
+        eligible for the applied promo code." (the service's; translated here)
+      - any other refusal: the source's "No record found…"
+      - no answer (the network, a 5xx): "Error", as the source's
+      - a cart the service no longer has (BKNG001): the cart is forgotten and the mini cart closes
     - **Taking it off:** the source's confirmation ("Are you sure. Do you want to Delete Promo
-      Code?", Cancel / Confirm) over the mini cart, then the same call with an empty code.
-    - **Refused:** "No record found for the provided promotional code." in red; the code stays in
-      the field and the cart is unchanged.
-    - **No answer:** "Error", as the source's.
+      Code?", Cancel / Confirm) over the mini cart, then the cart's own products are sent again
+      (PUT, which takes a code off: the service has no remove call), behind the loader.
+  - **Kept through the cart's changes:** every cart PUT takes the code off, so after one more of a
+    pass, another pass, a pass taken out or another currency the code is sent again. If the booking
+    system refuses it then (e.g. no pass it applies to any more), the field offers the code again
+    with the refusal's message, and no discount stays.
   - No reload: the source reloads only its cart pop-up; here the mini cart redraws from the cart.
   - **The code belongs to its cart:**
     - When the cart is removed (⊗ → Yes, Remove From Cart, expiry, another tab) or replaced, the
-      field's text, its message and the promo discount go with it. The next lounge's cart starts
-      with an empty field.
+      field's text, its message and the promo discount go with it. The next cart starts with an
+      empty field.
     - The same cart keeps what was typed while it redraws.
     - A removal while a code is being applied wins: the answer for the old cart is dropped, and
       the removed cart isn't read back.
-  - **Not finished:** stage has no valid code, so the applied state is built from a modelled answer
-    (see [The promo code API](#the-promo-code-api-cart-validate-promocode)).
+  - **Tested on stage** with PASS10PW (passes, 15%); a lounge code is still to come.
 - **View more options** (a lounge's add-ons): the hook is there (`registerAddons` in
   `scripts/mini-cart.js`), and the line's "Additional Services: 2x …" shows when the cart has
   add-ons. No link shows until the add-ons API exists (see [Add-ons](#add-ons-view-more-options)).
@@ -233,35 +243,56 @@ language folder, so authors change them without a code change:
 - **The 10-per-product limit isn't enforced:** a POST with 11 is accepted, and GET answers quantity
   11 with `maxNoOfProductsAllowed: 10`.
 - The service checks no lounge/pass rule (it takes both in one cart): the rules are this site's.
-- Not in the API yet, so not done: promo codes, add-ons, the checkout hand-off.
+- Not in the API yet, so not done: add-ons, the checkout hand-off. (Promo codes: below.)
 
 ### The promo code API (`cart-validate-promocode`)
 
-`apiUrl('cartPromo')`: `PUT …/ppg-app/cart-validate-promocode` with `{ cartId, promocode }` (as
-given), and an empty `promocode` to take a code off (as the source's remove).
+`apiUrl('cartPromo')`: `PUT …/ppg-app/cart-validate-promocode` with `{ cartId, promocode }`.
+Observed on stage on 2026-11-12, with PASS10PW and test pass and lounge carts:
 
-**Observed on stage (2026-11-06; no valid code available):**
-- `{ cartId, promocode }` → **400** VALIDATION_ERROR "Request body is required for update cart" for
-  any code and cart, including an unknown cart. Without a cartId: "cartId is required".
-- The cart body (`currency`, `channel`, `pointOfPurchase`, `products`) plus `promocode` → 200
-  `{ cartId }` for any code, valid or not. Nothing changes in the cart (`totalPromocodeAmount`
-  stays 0, no promo field).
-- POST → BKNG004 "Missing mandatory inputs". CORS allows PUT.
+- **Success:** `{ "code": "200", "description": "Success" }` (as the sample given). The answer has no
+  prices: the cart is read again (GET).
+- **Refusals** (all HTTP 200, `{ details, errorCode, message }`):
 
-So this site sends the documented shape. A refusal shows the source's "No record found…" message,
-and a code counts as applied only when the cart then has a promo amount.
+  | errorCode | When | message / details |
+  | --- | --- | --- |
+  | BKNG048 | No such code (also the right code in another case: codes are case sensitive) | "No record found for the given promocode" / "No record found for the provided promotional code." |
+  | BKNG043 | The code exists but no line of the cart takes it (PASS10PW on a lounge) | "No item in the cart is eligible for the applied promo code." |
+  | BKNG004 | No code, an empty or `null` code, or no cartId | "Missing mandatory inputs" |
+  | BKNG001 | An unknown cart | "Cart not found" / "Record not found" |
 
-**Open (to finish with a valid code):**
-1. The success answer, and the request shape that validates (the documented one is refused).
-2. How the cart shows a code: a `promoCode` field? Is the promo a `discounts[]` entry or
-   `totalPromocodeAmount`? Per line?
-3. Taking a code off, and whether PUT (Add More, removals, currency) and DELETE keep it.
-4. Error codes, and customer-facing, translated messages.
+  A refusal leaves the cart as it was, including a code applied before.
+- **The cart with a code** (GET): every line the code applies to has
+  `itemPriceDetails.promocode[]`: `{ code: "PASS10PW", name: "pass promo code",
+  promocodeDisplayName: "Pass 15% off", type: "Percentage", discountValue: 15, value: 14.85, … }`
+  (`value`: that line's amount), `itemPriceDetails.promoCodePrice.totalPromoAmount`, and its
+  `productTotalPrice.totalPromocodeAmount`; its `totalPrice` is after the code. The cart has
+  `cartTotalPrice.totalPromocodeAmount` (all the lines) and `totalPrice` after it. There's no
+  top-level code field: this site takes the cart's code from its lines (`promoCode`), each line's as
+  `promo` `{ code, name, value }`, and the total as `totals.promo`.
+  - PASS10PW: 15% of each pass (Global 2-Visit USD 99 → 84.15; with Hong Kong and Shanghai 2-Visit
+    USD 75 → 63.75 beside it, the cart USD 174 → 147.90); in HKD too.
+  - It doesn't touch the lounge's own discounts (`discounts[]`, e.g. the 10% online discount).
+- **Every cart PUT takes the code off** (one more of a pass, another pass, a line taken out, another
+  currency, the same products again); sending the code again applies it to the new products.
+  DELETE empties the cart; a new cart has no code.
+- **Taking a code off:** there's no call for it. An empty or `null` code is BKNG004; a space and a
+  DELETE on `cart-validate-promocode` answer Success but keep the code. A cart PUT with the cart's
+  own products takes it off (the line ids change), so that's what this site does.
+- POST answers as PUT; this site sends PUT, as given. CORS allows it.
+
+**Still open:**
+1. A lounge code (the same flow; tested only with routed answers so far).
+2. A remove call, if the service gets one (then `removePromo` uses it instead of the PUT).
+3. Rules not seen yet: one code per cart (a second code replaces the first?), codes combined with
+   the lounge's online discount, minimum spend, expiry (and their error codes).
+4. Customer-facing translations of the service's messages (BKNG043's is translated here).
 
 **The source's** (for comparison): `POST /bookingcart/applypromocode` `{ cartid, promocode }`.
 - A refusal is `{ isPromoCodeValid: false, statusCode: 400, message }`.
 - A success answers HTML, and it refreshes its cart pop-up (no page reload).
 - A remove applies an empty code after its confirmation.
+- Its applied look couldn't be seen (no live code; PASS10PW is stage's).
 
 ### Add-ons (View more options)
 
@@ -316,7 +347,7 @@ and a code counts as applied only when the cart then has a promo amount.
 | Remove From Cart on the card, Add More | `products[].catalogueCode` | the passes service's catalogue code (the regular rate's) matches the cart line's |
 | (kept) | `cartId` (and `products[].cartItemId`) | |
 
-Not shown (the source's mini cart doesn't either): `images`, `disclaimer`, the terms, `productVarients`, `basedOn`, `maxNoOfProductsAllowed`, `isFlightNumberMandatory`, `isStLoginMandatory`, `ageGroup`, `amountPayable`, `totalTax`; `totalPromocodeAmount` waits for the promo code.
+Not shown (the source's mini cart doesn't either): `images`, `disclaimer`, the terms, `productVarients`, `basedOn`, `maxNoOfProductsAllowed`, `isFlightNumberMandatory`, `isStLoginMandatory`, `ageGroup`, `amountPayable`, `totalTax`. The promo code: `cartTotalPrice.totalPromocodeAmount` (the promo row) and each line's `itemPriceDetails.promocode[]` (the code; see the promo code API).
 
 ### Adding a product type
 
