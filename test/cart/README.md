@@ -24,6 +24,24 @@ line, DELETE. It covers:
 - `?selectedPassID=`, the currency (the session's, a cart of passes converted, a lounge's not), the
   other languages (live's Add to Cart and Add More), axe
 
+`node mini-cart.test.mjs [width]` — the mini cart (99 checks).
+- The source's look (the 2026-11-12 audit's high and medium items) at 375 and 1440: the panel,
+  header, promo callout and field, the cross, the arrow, the spacing, the amounts, the lines; the
+  low items (with a child booking) at 375, 1100 and 1440; the cross's hover (0.5, then a steady
+  0.75, black).
+- Check Out / Edit from the page metadata (`cart-checkout-url`, `cart-edit-url`, injected) and the
+  promo code.
+- The promo service is emulated as stage answers it (see docs/cart.md): Success, then the lines
+  carry the code; BKNG048 / BKNG043 / BKNG004 / BKNG001; every cart PUT takes the code off.
+  PASS10PW applies to passes (15%), LOUNGE15 (made up) to the lounge.
+  - lounges and passes: applied, refused (each message), the network and a 500, case sensitivity
+  - Add More, another pass, a pass taken out, another currency: the code sent again; a refusal
+    then (the field offers the code again with why)
+  - taking it off (the cart's products sent again), a new cart afterwards, BKNG001
+- The source's look: the panel's place at 414, 575, 700, 767 and 1440, the header at 375 and
+  1440, the promo message's amber callout with its icon, focus after Enter and after a click.
+- The add-ons hook, and axe (the field's message, the applied code, the confirmation).
+
 `node storage.test.mjs` — where the cart is kept and when it's read again (15 checks).
 - The id in localStorage (24 hours, with the count and codes); the data in sessionStorage (2 hours).
 - A new tab (shown at once, read once; adds and removals read first); data past its 2 hours (the
@@ -38,6 +56,9 @@ real stage carts). Set `HOST` to the local preview or a branch preview, plus `WI
   the promotional address, and two tabs at once (reported, not checked). Then a real lounge cart
   refusing a pass and the promotional address, and the homepage Book Now refused with passes in the
   cart. After each step the page is compared with a fresh GET.
+- `node e2e/promo.e2e.mjs` (`CODE`, default PASS10PW): a pass, a wrong code and the code in lower
+  case refused, the code applied, Add More and another pass (still applied), the code removed, the
+  passes taken out and a new cart (no code). Compared with a fresh GET each time.
 - `node e2e/lounge.e2e.mjs`: the lounge journey. The modal is checked against the GET field by field,
   then Remove From Cart and ⊗ (Cancel, then Yes in place); another tab follows. It needs a bookable
   lounge card at HKG on stage.

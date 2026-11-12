@@ -1,13 +1,13 @@
 /* the cart's dialogs (scripts/mini-cart.js), as the source's #cart-popup and its dialogs, inside
    the site's dialog (styles/modal.css): the mini cart is a panel at the top right from 768px,
-   the width of the screen on phones; Checkout Cart, the failure message and the remove
+   below it the screen's width up to 420px, then a centred 420px panel; Checkout Cart, the failure message and the remove
    confirmation are centred */
 dialog.modal:is(.mini-cart-modal, .cart-message-modal, .cart-confirm-modal) {
   /* the source's measures */
   --cart-panel-width: 420px;
   --cart-panel-gap: 28px;
   --cart-panel-radius: 18px;
-  --cart-rule: 1px solid var(--color-text-strong);
+  --cart-rule: 0.6px solid var(--color-text-strong);
   --cart-label: rgb(0 0 0 / 60%);
   --cart-value: var(--color-brand-primary-action);
   --cart-detail-size: 13px;
@@ -24,46 +24,117 @@ dialog.modal:is(.mini-cart-modal, .cart-message-modal, .cart-confirm-modal) {
   --cart-soft: rgb(104 18 53 / 10%);
   --cart-soft-hover-border: rgb(86 94 100);
 
+  /* the source's promo field: 12px 25px padding, a 21px line and a 1px transparent border (47px);
+     the right kept clear of the arrow */
+  --cart-promo-height: 47px;
+  --cart-promo-padding: 12px 50px 12px 25px;
+  --cart-promo-border: 1px solid transparent;
+  --cart-promo-placeholder: rgb(33 37 41 / 75%);
+
+  /* its arrow: 11 x 10 in a 24px button, 10px from the field's right, 14px from its top */
+  --cart-promo-button: 24px;
+  --cart-promo-button-top: 14px;
+  --cart-promo-button-right: 10px;
+  --cart-promo-arrow-width: 11px;
+  --cart-promo-arrow-height: 10px;
+
+  /* the source's close (Bootstrap's: the icon 1em with 0.25em around it), 22px from the panel's
+     top and 20px from its right; smaller below 768px */
+  --cart-close-icon: 16px;
+  --cart-close-box: 24px;
+  --cart-close-top: 22px;
+  --cart-close-right: 20px;
+
+  /* Bootstrap's close: black at half opacity, 0.75 on hover, with no fade */
+  --cart-close-opacity: 0.5;
+  --cart-close-hover-opacity: 0.75;
+
+  /* the lines' padding and margin under them (12px below 768px), the discount row's (8px) */
+  --cart-line-gap: var(--spacing-4);
+  --cart-discount-after: 8px;
+  --cart-more-gap: 4px;
+  --cart-promo-surface: rgb(235 233 228);
+  --cart-promo-radius: 25px;
+  --cart-promo-icon: 16px;
+
+  /* the source's form message (.error-message): an amber callout with its icon */
+  --cart-alert-text: #92400e;
+  --cart-alert-surface: #fffbeb;
+  --cart-alert-border: 1px solid #f5ca45;
+  --cart-alert-radius: 5px;
+  --cart-alert-padding: 2px 10px;
+  --cart-alert-gap: 5px;
+  --cart-alert-size: 13px;
+  --cart-alert-icon-gap: 6px;
+
+  /* the source's header: the title's margin under it (Bootstrap's h4), its padding and the room
+     after its line; smaller below 768px */
+  --cart-title-gap: 8px;
+  --cart-header-padding: var(--spacing-6);
+  --cart-header-after: var(--spacing-7);
+
+  /* the source's fine type: "PROMO CODE"'s 1px spacing, "hrs" (Bootstrap's px-1, a 1.5 line),
+     the ⊗ (14px below 768px), the guests' divider (from 768px), the note at 992-1200px */
+  --cart-promo-label-spacing: 1px;
+  --cart-hours-pad: 4px;
+  --cart-remove-icon: var(--font-size-md);
+  --cart-guests-rule: 1px solid var(--color-text-strong);
+  --cart-note-narrow: 11px;
+
   font-family: var(--font-family-primary);
 }
 
+/* the source's panel (#cart-popup .modal-dialog): the screen's width up to 420px, then 420px wide
+   and centred (28px from the top from 576px), and at the top right from 768px */
 dialog.modal.mini-cart-modal {
-  width: 100%;
+  width: min(100%, var(--cart-panel-width));
   max-width: none;
-  margin: var(--spacing-3) 0 auto;
+  margin: var(--spacing-3) auto auto;
 }
 
 dialog.modal.mini-cart-modal .modal-content {
+  position: relative;
   border-radius: var(--cart-panel-radius);
   background-color: var(--color-surface-warm);
 }
 
 /* the title on the panel's colour, over a black line (the source's .sm-cart-header) */
 dialog.modal.mini-cart-modal .modal-header {
+  align-items: flex-start;
   margin: 0 var(--modal-padding);
   border-bottom: var(--cart-rule);
-  padding: var(--modal-padding) 0 var(--spacing-6);
+  padding: var(--modal-padding) 0 var(--cart-header-padding);
   background: none;
   color: var(--color-text);
 }
 
 dialog.modal.mini-cart-modal .modal-header .modal-title {
+  margin-bottom: var(--cart-title-gap);
   font-size: var(--cart-title-size);
   font-weight: var(--font-weight-medium);
   line-height: 1.2;
 }
 
-/* the source's cross (Bootstrap's close, icons/close-thin.svg), half-tone black */
+/* the source's cross (Bootstrap's close, icons/close-thin.svg), half-tone black, in its button
+   (24 x 24 with a 16px cross; 21 x 21 with 14px below 768px) at the panel's top right */
 dialog.modal.mini-cart-modal .modal-close {
-  width: var(--font-size-md);
-  height: var(--font-size-md);
+  position: absolute;
+  top: var(--cart-close-top);
+  right: var(--cart-close-right);
+  width: var(--cart-close-box);
+  height: var(--cart-close-box);
+  margin: 0;
   color: var(--color-text-strong);
-  opacity: 0.5;
-  mask-image: url('../icons/close-thin.svg');
+  opacity: var(--cart-close-opacity);
+  mask: url('../icons/close-thin.svg') center / var(--cart-close-icon) no-repeat;
+
+  /* (not the site dialog's grey hover, which faded the cross lighter than at rest) */
+  transition: none;
 }
 
 dialog.modal.mini-cart-modal .modal-close:hover {
-  opacity: 1;
+  color: var(--color-text-strong);
+  opacity: var(--cart-close-hover-opacity);
 }
 
 dialog.modal.mini-cart-modal .modal-close:focus-visible {
@@ -71,13 +142,13 @@ dialog.modal.mini-cart-modal .modal-close:focus-visible {
 }
 
 dialog.modal.mini-cart-modal .modal-body {
-  padding-top: var(--spacing-7);
+  padding-top: var(--cart-header-after);
 }
 
 .mini-cart-line {
-  margin-bottom: var(--spacing-4);
+  margin-bottom: var(--cart-line-gap);
   border-bottom: var(--cart-rule);
-  padding-bottom: var(--spacing-4);
+  padding-bottom: var(--cart-line-gap);
 }
 
 .mini-cart-name {
@@ -95,8 +166,8 @@ dialog.modal.mini-cart-modal .modal-body {
 /* the source's ⊗ after the lounge's name */
 .mini-cart-remove {
   flex: none;
-  width: var(--font-size-md);
-  height: var(--font-size-md);
+  width: var(--cart-remove-icon);
+  height: var(--cart-remove-icon);
   border: 0;
   padding: 0;
   background-color: var(--color-brand-primary);
@@ -117,6 +188,15 @@ dialog.modal.mini-cart-modal .modal-body {
 
 .mini-cart-place {
   color: var(--cart-label);
+}
+
+.mini-cart-line .mini-cart-details {
+  margin-bottom: var(--spacing-4);
+}
+
+/* (with View more options, its 10px are under the link: the source's .summary-content holds both) */
+.mini-cart-line .mini-cart-details:has(+ .mini-cart-more) {
+  margin-bottom: 0;
 }
 
 .mini-cart-detail {
@@ -148,7 +228,8 @@ dialog.modal.mini-cart-modal .modal-body {
 }
 
 .mini-cart-hours {
-  padding-left: var(--spacing-1);
+  padding: 0 var(--cart-hours-pad);
+  line-height: 1.5;
 }
 
 .mini-cart-row {
@@ -164,8 +245,22 @@ dialog.modal.mini-cart-modal .modal-body {
   font-weight: var(--font-weight-light);
 }
 
+.mini-cart-row .mini-cart-amount {
+  white-space: nowrap;
+}
+
+.mini-cart-discount {
+  padding-bottom: var(--cart-discount-after);
+}
+
 .mini-cart-discount .mini-cart-amount {
   color: var(--color-brand-primary-action);
+}
+
+/* the source's amounts (.summary-subtotal-amt): 16px, the Service Total's light and black */
+.mini-cart-service-total .mini-cart-amount {
+  color: var(--color-text-strong);
+  font-weight: var(--font-weight-light);
 }
 
 .mini-cart-total {
@@ -233,6 +328,182 @@ dialog.modal.mini-cart-modal .modal-body {
   color: var(--color-text-inverse);
 }
 
+/* Check Out and Edit as links (the pages the metadata names): the same pills (the site's link
+   colours would win otherwise) */
+a.cart-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-regular);
+  text-decoration: none;
+}
+
+a.cart-button-primary:any-link {
+  color: var(--color-text-inverse);
+}
+
+a.cart-button-primary:hover {
+  color: var(--color-brand-primary);
+  text-decoration: none;
+}
+
+a.cart-button-secondary:any-link {
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+a.cart-button-secondary:hover {
+  color: var(--color-text-inverse);
+  text-decoration: none;
+}
+
+/* the promo code, as the source's: an uppercase label, a warm grey pill with the arrow inside, the
+   message under it (red for a refusal) */
+.mini-cart-promo {
+  margin: 0 0 var(--spacing-7);
+  padding-top: var(--spacing-6);
+}
+
+.mini-cart-promo-label {
+  display: block;
+  margin-bottom: var(--spacing-3);
+  color: var(--color-text);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--cart-promo-label-spacing);
+}
+
+.mini-cart-promo-field {
+  position: relative;
+}
+
+.mini-cart-promo-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--cart-promo-height);
+  border: var(--cart-promo-border);
+  border-radius: var(--cart-promo-radius);
+  padding: var(--cart-promo-padding);
+  background-color: var(--cart-promo-surface);
+  color: var(--color-text-control);
+  font: inherit;
+  font-size: var(--font-size-sm);
+}
+
+.mini-cart-promo-input::placeholder {
+  color: var(--cart-promo-placeholder);
+}
+
+/* (over the dialog's focus ring, styles/modal.css) */
+dialog.modal.mini-cart-modal .mini-cart-promo-input:focus {
+  outline: none;
+  background-color: var(--color-background);
+  box-shadow: var(--shadow-focus);
+}
+
+.mini-cart-promo-input[readonly] {
+  font-weight: var(--font-weight-medium);
+}
+
+.mini-cart-promo-apply,
+.mini-cart-promo-remove {
+  position: absolute;
+  top: var(--cart-promo-button-top);
+  right: var(--cart-promo-button-right);
+  width: var(--cart-promo-button);
+  height: var(--cart-promo-button);
+  border: 0;
+  padding: 0;
+  background-color: var(--color-text-strong);
+  cursor: pointer;
+
+  /* (the source's promo-arrow.png, drawn at its size and weight: the site's arrow at 11px is too thin) */
+  mask: url('../icons/promo-arrow.svg') center / var(--cart-promo-arrow-width) var(--cart-promo-arrow-height) no-repeat;
+}
+
+.mini-cart-promo-remove {
+  mask-image: url('../icons/close-thin.svg');
+  mask-size: var(--cart-promo-icon);
+}
+
+.mini-cart-promo-apply:disabled {
+  cursor: progress;
+  opacity: 0.5;
+}
+
+.mini-cart-promo-message {
+  margin: var(--spacing-2) 0 0;
+  font-size: var(--font-size-sm);
+}
+
+.mini-cart-promo-message:empty {
+  display: none;
+}
+
+/* a refusal (or no answer), as the source's .error-message: an amber callout, its icon first */
+.mini-cart-promo-message.is-error {
+  margin: var(--cart-alert-gap) 0;
+  border: var(--cart-alert-border);
+  border-radius: var(--cart-alert-radius);
+  padding: var(--cart-alert-padding);
+  background-color: var(--cart-alert-surface);
+  color: var(--cart-alert-text);
+  font-size: var(--cart-alert-size);
+  line-height: var(--line-height-body);
+}
+
+/* (its space under it too, over the dialog's "no trailing space" rule in styles/modal.css) */
+dialog.modal.mini-cart-modal .mini-cart-promo .mini-cart-promo-message.is-error {
+  margin: var(--cart-alert-gap) 0;
+}
+
+.mini-cart-promo-message.is-error::before {
+  content: '';
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-right: var(--cart-alert-icon-gap);
+  background-color: currentcolor;
+  vertical-align: middle;
+  mask: url('../icons/circle-exclamation.svg') center / contain no-repeat;
+}
+
+/* a lounge's add-ons (Additional Services, one per line) and the source's View more options */
+.mini-cart-addon {
+  display: block;
+}
+
+.mini-cart-more {
+  display: flex;
+  gap: var(--spacing-2);
+  align-items: center;
+  margin: var(--cart-more-gap) 0 var(--spacing-4) auto;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--cart-value);
+  font: inherit;
+  font-size: var(--cart-detail-size);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.mini-cart-more::after {
+  content: '';
+  width: var(--cart-detail-size);
+  height: var(--cart-detail-size);
+  background-color: currentcolor;
+  mask: url('../icons/nav-arrow-right.svg') center / contain no-repeat;
+}
+
+/* (preview only) a cart link the metadata doesn't set */
+.mini-cart-hint {
+  margin: var(--spacing-3) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
 /* Checkout Cart and the failure message: centred, the site dialog's maroon title, the message,
    then the button the full width */
 dialog.modal:is(.cart-message-modal, .cart-confirm-modal) {
@@ -292,7 +563,40 @@ dialog.modal.cart-confirm-modal .modal-header {
 /* phones: the source's smaller text, each detail's label over its value */
 @media (width < 768px) {
   dialog.modal.mini-cart-modal {
+    --cart-title-size: 18px;
+    --cart-title-gap: var(--spacing-2);
+    --cart-header-padding: var(--spacing-5);
+    --cart-header-after: var(--spacing-5);
+    --cart-close-icon: 14px;
+    --cart-close-box: 21px;
+    --cart-close-top: 15px;
+    --cart-line-gap: var(--spacing-5);
+    --cart-promo-button-top: 11px;
+    --cart-remove-icon: var(--font-size-sm);
+
     font-size: var(--font-size-sm);
+  }
+
+  /* the source's amounts at 16px (the discount's medium), the Total 16px, its note 0.875em */
+  .mini-cart-row .mini-cart-amount {
+    font-size: var(--font-size-md);
+  }
+
+  .mini-cart-discount .mini-cart-amount {
+    font-weight: var(--font-weight-medium);
+  }
+
+  dialog.modal.mini-cart-modal .mini-cart-total .mini-cart-amount {
+    font-size: var(--font-size-md);
+  }
+
+  .mini-cart-note {
+    font-size: 0.875em;
+  }
+
+  /* (the source's .summary-content: 20px above a lounge's location and details) */
+  .mini-cart-line:not(.mini-cart-line-pass) .mini-cart-name + * {
+    padding-top: var(--spacing-7);
   }
 
   .mini-cart-name {
@@ -325,9 +629,32 @@ dialog.modal.cart-confirm-modal .modal-header {
   }
 }
 
+@media (576px <= width < 768px) {
+  dialog.modal.mini-cart-modal {
+    margin-top: var(--cart-panel-gap);
+  }
+}
+
 @media (width >= 768px) {
   dialog.modal.mini-cart-modal {
     width: var(--cart-panel-width);
     margin: var(--cart-panel-gap) var(--cart-panel-gap) auto auto;
+  }
+
+  /* the source's .summary-attribute b+b: a line before the children */
+  .mini-cart-children {
+    border-left: var(--cart-guests-rule);
+    padding-left: var(--spacing-2);
+  }
+}
+
+/* the source's total at 992-1200px: its note smaller, room after the label */
+@media (992px <= width <= 1200px) {
+  .mini-cart-total .mini-cart-label {
+    padding-right: var(--spacing-4);
+  }
+
+  .mini-cart-note {
+    font-size: var(--cart-note-narrow);
   }
 }

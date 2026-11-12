@@ -35,27 +35,38 @@ export function formatCartDate(start) {
 }
 
 /**
+ * The guests' two values, as the source's cart: "2 Adult(s)", then "1 Child(ren)" when there are
+ * children (the mini cart puts a line between them from 768px, as the source's b+b).
+ * @param {{adults: number, children: number}} line
+ * @returns {string[]}
+ */
+export function guestParts(line) {
+  const parts = [`${line.adults} ${translate('propertyAdults')}`];
+  if (line.children > 0) parts.push(`${line.children} ${translate('propertyChildren')}`);
+  return parts;
+}
+
+/**
  * The guests as the source's cart: "2 Adult(s) 1 Child(ren)" (its two values side by side).
  * @param {{adults: number, children: number}} line
  * @returns {string}
  */
 export function formatGuests(line) {
-  const parts = [`${line.adults} ${translate('propertyAdults')}`];
-  if (line.children > 0) parts.push(`${line.children} ${translate('propertyChildren')}`);
-  return parts.join(' ');
+  return guestParts(line).join(' ');
 }
 
 /**
  * A lounge line's details, in the source's order: Date, Time ("1500", followed by "hrs"), Guests,
  * Services; the ones without a value left out.
  * @param {Object} line A cart line (cart.js)
- * @returns {{label: string, value: string, unit?: string}[]}
+ * The guests also come as their `parts` ("2 Adult(s)", "1 Child(ren)").
+ * @returns {{label: string, value: string, unit?: string, parts?: string[]}[]}
  */
 export function loungeDetails(line) {
   return [
     { label: translate('cartDate'), value: formatCartDate(line.start) },
     { label: translate('cartTime'), value: line.start.slice(11, 16).replace(':', ''), unit: translate('cartHours') },
-    { label: translate('cartGuests'), value: formatGuests(line) },
+    { label: translate('cartGuests'), value: formatGuests(line), parts: guestParts(line) },
     { label: translate('cartServices'), value: line.product },
   ].filter((detail) => detail.value);
 }
