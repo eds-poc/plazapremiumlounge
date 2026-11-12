@@ -111,6 +111,7 @@
 
   /* (a loading skeleton's, or a missing photo's, grey) */
   --color-placeholder: #e5e5e5;
+  --color-placeholder-shine: rgb(255 255 255 / 60%);
 
   /* other colors */
   --color-yellow-400: #f5ca45;
@@ -244,6 +245,10 @@
   --shadow-image: 0 5px 12px rgb(0 0 0 / 30%);
   --shadow-card: 0 4px 24px rgb(0 0 0 / 10%);
   --shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 5%);
+
+  /* a card raised on hover (the source's lounge and pass cards) */
+  --shadow-card-hover: 0 10px 15px -3px rgb(0 0 0 / 10%);
+  --lift-card-hover: -4px;
   --shadow-campaign-card: 0 4px 16px rgb(0 0 0 / 2%);
   --shadow-campaign-soft: 0 3px 15px rgb(0 0 0 / 4%);
   --shadow-campaign-button: 0 4px 14px rgb(0 0 0 / 18%);
@@ -256,6 +261,7 @@
   --duration-normal: 0.25s;
   --duration-medium: 0.3s;
   --duration-slow: 0.5s;
+  --duration-shimmer: 1.4s;
   --ease-standard: ease-in-out;
   --ease-emphasized: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
@@ -637,6 +643,31 @@ button.button:disabled {
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+/* a loading placeholder (a block's skeleton): grey, a light sweeping across */
+.skeleton {
+  background:
+    linear-gradient(90deg, transparent, var(--color-placeholder-shine), transparent)
+    0 0 / 200% 100%,
+    var(--color-placeholder);
+  animation: skeleton-shimmer var(--duration-shimmer) linear infinite;
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 100% 0, 0 0;
+  }
+
+  to {
+    background-position: -100% 0, 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
 }
 
 main img {

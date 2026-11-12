@@ -9,12 +9,13 @@
  */
 import { translate } from '../../scripts/i18n.js';
 import {
-  PASSES_TIMEOUT_MS, buildAddButton, formatPrice, locationName, openPassDetails,
-  readCurrency, readPass, takeSelectedPass,
+  PASSES_TIMEOUT_MS, buildAddButton, buildLearnButton, formatPrice, locationName, readCurrency,
+  readPass, takeSelectedPass,
 } from '../../scripts/passes.js';
 import {
   el, fetchPassList, getApiContext, isPreview, readApiRow, readPassList, toKey,
 } from '../../scripts/properties.js';
+import { cellText, clean } from '../../scripts/utility.js';
 
 // the cart takes a pass announced under this name (scripts/scripts.js CART_EVENTS)
 const ADD_TO_CART = 'product-passes:add-to-cart';
@@ -32,27 +33,6 @@ const PRODUCT_CODE = /^[A-Z0-9]+$/;
 
 // placeholder cards while the passes load: a row's worth at the widest layout
 const PLACEHOLDERS = 3;
-
-/**
- * Authored text, trimmed, its runs of spaces made one.
- * @param {*} value
- * @returns {string}
- */
-function clean(value) {
-  return String(value ?? '').replace(/\s+/g, ' ').trim();
-}
-
-/**
- * A cell's text with its lines (paragraphs, list items, line breaks) as commas.
- * @param {HTMLElement} cell
- * @returns {string}
- */
-function cellText(cell) {
-  const copy = cell.cloneNode(true);
-  copy.querySelectorAll('br').forEach((br) => br.replaceWith(','));
-  copy.querySelectorAll('p, li').forEach((line) => line.append(','));
-  return copy.textContent;
-}
 
 /**
  * The authored settings, rows of name | value (names ignore capitals and spaces):
@@ -139,12 +119,7 @@ function buildCard(pass) {
     tags.append(...names.map((name) => el('li', 'product-passes-tag', name)));
     body.append(tags);
   }
-  const learn = el('button', 'product-passes-learn', translate('quickBuyLearnMore'));
-  learn.type = 'button';
-  learn.setAttribute('aria-haspopup', 'dialog');
-  learn.setAttribute('aria-label', `${translate('quickBuyLearnMore')}: ${pass.name}`);
-  learn.addEventListener('click', () => openPassDetails(pass, learn, ADD_TO_CART));
-  body.append(learn);
+  body.append(buildLearnButton(pass, 'product-passes-learn', ADD_TO_CART));
   // (the site's primary button, as the source's Add To Cart)
   const actions = el('div', 'product-passes-actions');
   actions.append(buildAddButton(pass, 'button primary product-passes-add', ADD_TO_CART));
@@ -161,8 +136,8 @@ function buildPlaceholder() {
   card.setAttribute('aria-hidden', 'true');
   const body = el('div', 'product-passes-body');
   body.append(...['title', 'line', 'button']
-    .map((kind) => el('span', `product-passes-bone product-passes-bone-${kind}`)));
-  card.append(el('div', 'product-passes-media product-passes-bone'), body);
+    .map((kind) => el('span', `skeleton product-passes-bone product-passes-bone-${kind}`)));
+  card.append(el('div', 'skeleton product-passes-media product-passes-bone'), body);
   return card;
 }
 

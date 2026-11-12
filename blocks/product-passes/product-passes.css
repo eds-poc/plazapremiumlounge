@@ -6,10 +6,6 @@
   --product-passes-title-size-lg: 22px;
   --product-passes-tag-size: 11px;
   --product-passes-tag-gap: 4px;
-  --product-passes-lift: -4px;
-  --product-passes-shadow-hover: 0 10px 15px -3px rgb(0 0 0 / 10%);
-  --product-passes-bone-shine: rgb(255 255 255 / 60%);
-  --product-passes-bone-speed: 1.4s;
 
   /* a Bootstrap column of n twelfths: its share of the row and a gutter, less the gutter */
   --product-passes-col-7: calc(7 / 12 * (100% + var(--grid-gutter)) - var(--grid-gutter));
@@ -40,8 +36,8 @@
 }
 
 .product-passes-card:hover {
-  box-shadow: var(--product-passes-shadow-hover);
-  transform: translateY(var(--product-passes-lift));
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(var(--lift-card-hover));
 }
 
 .product-passes-placeholder:hover {
@@ -53,6 +49,10 @@
   overflow: hidden;
   aspect-ratio: var(--product-passes-photo-ratio);
   border-radius: var(--radius-lg);
+}
+
+/* (behind an image still loading; a placeholder's is the skeleton's) */
+.product-passes-media:not(.skeleton) {
   background-color: var(--color-surface-warm);
 }
 
@@ -161,14 +161,10 @@
   width: 100%;
 }
 
-/* ---------- while the passes load: placeholder cards ---------- */
+/* ---------- while the passes load: placeholder cards (shimmering: .skeleton) ---------- */
 .product-passes-bone {
   display: block;
   border-radius: var(--radius-xs);
-  background:
-    linear-gradient(90deg, transparent, var(--product-passes-bone-shine), transparent) 0 0 / 200% 100%,
-    var(--color-placeholder);
-  animation: product-passes-shimmer var(--product-passes-bone-speed) linear infinite;
 }
 
 .product-passes-media.product-passes-bone {
@@ -190,16 +186,6 @@
 .product-passes-bone-button {
   height: calc(2 * (var(--spacing-2) + var(--base-border-width)) + var(--line-height-relaxed) * var(--font-size-sm));
   border-radius: var(--radius-xl);
-}
-
-@keyframes product-passes-shimmer {
-  from {
-    background-position: 100% 0, 0 0;
-  }
-
-  to {
-    background-position: -100% 0, 0 0;
-  }
 }
 
 /* ---------- no passes, or they didn't load ---------- */
@@ -256,9 +242,5 @@
 
   .product-passes-card:hover {
     transform: none;
-  }
-
-  .product-passes-bone {
-    animation: none;
   }
 }
