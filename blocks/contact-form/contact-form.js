@@ -65,6 +65,35 @@ function trackPageLoad() {
 }
 
 /**
+ * The data layer's link click for Submit, as the form is sent (every field valid and the captcha
+ * ticked): an empty booking ID and the form's submit step.
+ */
+function trackSubmit() {
+  const formName = 'contact us';
+  const eventName = `${formName} submit`;
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: {
+      webInteraction: {
+        name: eventName,
+        type: 'other',
+        linkClicks: {
+          value: 1,
+        },
+      },
+    },
+    _plazapremiumloungemanagementli: {
+      bookingInfo: {
+        bookingId: '',
+      },
+      formDetails: {
+        formName,
+        formStepName: eventName,
+      },
+    },
+  });
+}
+
+/**
  * Decorates the Contact Form block: the contact us form (the source /en-uk/contact-us). One
  * authored row per field (Field | Label | Placeholder | Required | Error), one-cell rows as text,
  * and the rows submit / success / error, and captcha (its Error cell: the message when the box
@@ -82,4 +111,6 @@ export default function decorate(block) {
   block.replaceChildren(form);
   // the data layer's "page load", once the form is shown
   trackPageLoad();
+  // the data layer's Submit click, as the form is sent (forms:submit comes after the checks)
+  form.addEventListener('forms:submit', trackSubmit);
 }
