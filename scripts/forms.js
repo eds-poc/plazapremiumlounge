@@ -916,7 +916,8 @@ function fieldSettings(field, cells) {
 }
 
 /**
- * The data layer's link click for a form's error: a send the service refused, or that failed.
+ * The data layer's link click for a form's error, in the site section "home": a send the service
+ * refused, or that failed.
  * @param {string} errorCode The service's code, else the HTTP status (network for no answer)
  * @param {string} errorMessage The message shown to the visitor
  */
@@ -933,6 +934,9 @@ function trackError(errorCode, errorMessage) {
       },
     },
     _plazapremiumloungemanagementli: {
+      pageDetails: {
+        siteSection: 'home',
+      },
       errors: [
         {
           errorCode,

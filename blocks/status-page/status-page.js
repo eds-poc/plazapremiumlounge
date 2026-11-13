@@ -49,23 +49,15 @@ function imageOf(line) {
   return line.querySelector('picture') || line.querySelector('img');
 }
 
-// the error pages' messages for the data layer, by code (the Maintenance page isn't an error)
+// the error pages' messages for the data layer, by the page's address (/en-uk/404, /en-uk/500);
+// the Maintenance page and any other address (e.g. a missing one) send none
 const ERROR_MESSAGES = {
   404: 'Page Not Found',
   500: 'Internal Server Error',
 };
 
 /**
- * The page's error code: 404.html's (any missing address; it sets window.errorCode), else the
- * address's last part (/en-uk/404, /en-uk/500).
- * @returns {string}
- */
-function readErrorCode() {
-  return window.errorCode || window.location.pathname.split('/').pop();
-}
-
-/**
- * The data layer's link click for an error page.
+ * The data layer's link click for an error page, in the site section "home".
  * @param {string} errorCode e.g. 404
  * @param {string} errorMessage e.g. Page Not Found
  */
@@ -82,6 +74,9 @@ function trackError(errorCode, errorMessage) {
       },
     },
     _plazapremiumloungemanagementli: {
+      pageDetails: {
+        siteSection: 'home',
+      },
       errors: [
         {
           errorCode,
@@ -128,6 +123,6 @@ export default function decorate(block) {
   }
   block.replaceChildren(notice);
   // the data layer's error, on the 404 and 500 pages
-  const errorCode = readErrorCode();
+  const errorCode = window.location.pathname.split('/').pop();
   if (ERROR_MESSAGES[errorCode]) trackError(errorCode, ERROR_MESSAGES[errorCode]);
 }
