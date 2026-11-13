@@ -1,7 +1,29 @@
 /*
  * Utilities: small general helpers shared by blocks and scripts (no page state, no network
- * calls), e.g. date and time conversions.
+ * calls), e.g. date and time conversions and reading authored cells.
  */
+
+/**
+ * Text, trimmed, its runs of spaces made one.
+ * @param {*} value
+ * @returns {string}
+ */
+export function clean(value) {
+  return String(value ?? '').replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * An authored cell's text with its lines (paragraphs, list items, line breaks) as commas, for a
+ * list written one item per line or comma-separated.
+ * @param {HTMLElement} cell
+ * @returns {string}
+ */
+export function cellText(cell) {
+  const copy = cell.cloneNode(true);
+  copy.querySelectorAll('br').forEach((br) => br.replaceWith(','));
+  copy.querySelectorAll('p, li').forEach((line) => line.append(','));
+  return copy.textContent;
+}
 
 /**
  * A date and time at a place as ISO 8601 UTC without milliseconds: 2026-11-20 at 1600 in Hong
@@ -11,7 +33,6 @@
  * @param {string} [timeZone] The place's IANA time zone, e.g. Asia/Hong_Kong
  * @returns {string}
  */
-// eslint-disable-next-line import/prefer-default-export
 export function toUtcDateTime(date, time, timeZone) {
   const [year, month, day] = date.split('-').map(Number);
   const wanted = Date.UTC(year, month - 1, day, Number(time.slice(0, 2)), Number(time.slice(2)));

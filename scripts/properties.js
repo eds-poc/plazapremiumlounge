@@ -217,24 +217,28 @@ export function getApiContext(codes = {}) {
 const passes = new Map();
 
 /**
- * Fetches a passes service answer once per page (a failure isn't kept, so it can be asked again).
+ * Fetches a passes service answer once per page (a failure isn't kept, so it can be asked again):
+ * a POST of the query as JSON.
  * @param {Object<string, string>} query
  * @param {number} timeout ms
  * @returns {Promise<Object[]>} the answer's items
  */
 function fetchPassItems(query, timeout) {
-  const url = apiUrl('productPasses');
-  Object.entries(query).forEach(([name, value]) => url.searchParams.set(name, value));
-  if (!passes.has(url.href)) {
-    const request = fetchJson(url.href, timeout)
+  // the same query in any key order is the same answer
+  const body = Object.fromEntries(Object.entries(query)
+    .filter(([, value]) => value !== undefined && value !== '')
+    .sort(([a], [b]) => a.localeCompare(b)));
+  const key = JSON.stringify(body);
+  if (!passes.has(key)) {
+    const request = fetchJson(apiUrl('productPasses').href, timeout, { body })
       .then((json) => (Array.isArray(json?.items) ? json.items : []))
       .catch((error) => {
-        passes.delete(url.href);
+        passes.delete(key);
         throw error;
       });
-    passes.set(url.href, request);
+    passes.set(key, request);
   }
-  return passes.get(url.href);
+  return passes.get(key);
 }
 
 /**
@@ -254,20 +258,24 @@ export function fetchPass(productCode, { propertyCode, iataCode }, currency, tim
 
 /**
  * Every pass from the passes service, in a currency, by product code: one call (the service takes
- * one code per call, so for several passes this is quicker and lighter than a call each). The list
- * is also kept for the session (see readPassList).
- * @param {{propertyCode: string, iataCode: string}} context See getApiContext
+ * one code per call, so for several passes this is quicker and lighter than a call each). With
+ * `productCodes`, they're sent as the request's `productCode` list (the service answers its passes
+ * for them). The list is also kept for the session (see readPassList).
+ * @param {{propertyCode: string, iataCode: string, productCodes?: string[]}} context See
+ *   getApiContext
  * @param {string} currency e.g. USD
  * @param {number} timeout ms
  * @returns {Promise<Map<string, Object>>}
  */
-export function fetchPassList({ propertyCode, iataCode }, currency, timeout) {
+export function fetchPassList(context, currency, timeout) {
+  const { propertyCode, iataCode, productCodes = [] } = context;
   const query = { propertyCode, iataCode, currencyCode: currency };
+  if (productCodes.length) query.productCode = productCodes;
   return fetchPassItems(query, timeout).then((items) => {
     const list = new Map(items.filter((item) => item?.productCode)
       .map((item) => [item.productCode, item]));
     // eslint-disable-next-line no-use-before-define
-    keepPassList({ propertyCode, iataCode }, currency, list);
+    keepPassList(context, currency, list);
     return list;
   });
 }
@@ -276,7 +284,10 @@ export function fetchPassList({ propertyCode, iataCode }, currency, timeout) {
 // service answers in 5-7s) while a fresh list is asked for; older than this, it isn't used
 const PASS_LIST_KEY = 'ppl-pass-list';
 const PASS_LIST_MAX_AGE = 30 * 60 * 1000;
-const passListKey = ({ propertyCode, iataCode }, currency) => `${PASS_LIST_KEY}:${propertyCode}:${iataCode}:${currency}`;
+// (a list asked for with product codes is kept apart from the full one)
+const passListKey = ({ propertyCode, iataCode, productCodes = [] }, currency) => [
+  PASS_LIST_KEY, propertyCode, iataCode, currency, ...(productCodes.length ? [productCodes.join(',')] : []),
+].join(':');
 
 /**
  * A pass with only what the pass blocks show (an answer's pass is about 2.4KB, this about 0.4KB).
