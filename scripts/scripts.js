@@ -367,10 +367,7 @@ async function loadEager(doc) {
  * Loads everything that doesn't need to be delayed.
  * @param {Element} doc The container element
  */
-async function loadLazy(doc) {
-  // the leave-site popup before links to other websites in `leave-site` sections (and the
-  // footer's Social column)
-  import('./leave-site.js').then(({ installLeaveSitePrompt }) => installLeaveSitePrompt());
+async function loadLazy(doc) {   
   loadHeader(doc.querySelector('body > header'));
 
   const main = doc.querySelector('main');
@@ -391,6 +388,9 @@ async function loadLazy(doc) {
  * without impacting the user experience.
  */
 function loadDelayed() {
+  // the leave-site popup before links to other websites in `leave-site` sections (and the
+  // footer's Social column)
+  import('./leave-site.js').then(({ installLeaveSitePrompt }) => installLeaveSitePrompt());
   import('./consent-check.js');
   // the back to top button, on every page
   import('./back-to-top.js').then(({ default: initBackToTop }) => initBackToTop());
