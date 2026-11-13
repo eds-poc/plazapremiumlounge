@@ -4,7 +4,7 @@
  * and the text (paragraphs, links). The block fills its section in the brand maroon.
  */
 // eslint-disable-next-line import/no-cycle
-import { pushEvent } from '../../scripts/datalayer.js';
+import { trackError } from '../../scripts/datalayer.js';
 
 const HEADINGS = 'h1, h2, h3, h4, h5, h6';
 const IMAGES = 'picture, img';
@@ -55,37 +55,6 @@ const ERROR_MESSAGES = {
   404: 'Page Not Found',
   500: 'Internal Server Error',
 };
-
-/**
- * The data layer's link click for an error page, in the site section "home".
- * @param {string} errorCode e.g. 404
- * @param {string} errorMessage e.g. Page Not Found
- */
-function trackError(errorCode, errorMessage) {
-  const eventName = 'error';
-  pushEvent('web.webInteraction.linkClicks', eventName, {
-    web: {
-      webInteraction: {
-        name: eventName,
-        type: 'other',
-        linkClicks: {
-          value: 1,
-        },
-      },
-    },
-    _plazapremiumloungemanagementli: {
-      pageDetails: {
-        siteSection: 'home',
-      },
-      errors: [
-        {
-          errorCode,
-          errorMessage,
-        },
-      ],
-    },
-  });
-}
 
 /**
  * Decorates the Status Page block by rendering a centered image, title, and text.

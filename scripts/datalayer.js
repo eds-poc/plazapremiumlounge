@@ -176,6 +176,38 @@ export function pushEvent(event, eventName, extra) {
 }
 
 /**
+ * The data layer's link click for an error, in the site section "home": an error page (the Status
+ * Page block's 404 and 500) or a form's send that failed (scripts/forms.js).
+ * @param {string} errorCode e.g. 404
+ * @param {string} errorMessage e.g. Page Not Found
+ */
+export function trackError(errorCode, errorMessage) {
+  const eventName = 'error';
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: {
+      webInteraction: {
+        name: eventName,
+        type: 'other',
+        linkClicks: {
+          value: 1,
+        },
+      },
+    },
+    _plazapremiumloungemanagementli: {
+      pageDetails: {
+        siteSection: 'home',
+      },
+      errors: [
+        {
+          errorCode,
+          errorMessage,
+        },
+      ],
+    },
+  });
+}
+
+/**
  * Starts analytics on a page: the page view (on the home page only; the lounge listing's is the
  * property-list block's), then the Launch script from the metadata `launch-script` (an https
  * address; without one, the data layer is still filled).

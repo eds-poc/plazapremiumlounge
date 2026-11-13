@@ -17,7 +17,7 @@ import { DEFAULT_SITE, getSiteFolder, translate } from './i18n.js';
 import apiUrl from './endpoints.js';
 import { addCaptcha, CAPTCHA_KEY } from './captcha.js';
 // eslint-disable-next-line import/no-cycle
-import { pushEvent } from './datalayer.js';
+import { trackError } from './datalayer.js';
 
 const INPUT_TYPES = ['text', 'email', 'password', 'tel', 'number', 'date', 'url'];
 const FIELD_TYPES = [...INPUT_TYPES, 'textarea', 'select', 'checkbox', 'checkboxes', 'country', 'phone', 'stepper'];
@@ -913,38 +913,6 @@ function fieldSettings(field, cells) {
   if (required) settings.set('required', emptyMessage || '');
   if (formatMessage) settings.set(settings.has('match') ? 'match message' : 'message', formatMessage);
   return settings;
-}
-
-/**
- * The data layer's link click for a form's error, in the site section "home": a send the service
- * refused, or that failed.
- * @param {string} errorCode The service's code, else the HTTP status (network for no answer)
- * @param {string} errorMessage The message shown to the visitor
- */
-function trackError(errorCode, errorMessage) {
-  const eventName = 'error';
-  pushEvent('web.webInteraction.linkClicks', eventName, {
-    web: {
-      webInteraction: {
-        name: eventName,
-        type: 'other',
-        linkClicks: {
-          value: 1,
-        },
-      },
-    },
-    _plazapremiumloungemanagementli: {
-      pageDetails: {
-        siteSection: 'home',
-      },
-      errors: [
-        {
-          errorCode,
-          errorMessage,
-        },
-      ],
-    },
-  });
 }
 
 /**
