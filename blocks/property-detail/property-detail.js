@@ -3,7 +3,7 @@ import {
 } from '../../scripts/aem.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
 // eslint-disable-next-line import/no-cycle
-import { pushEvent, setPageDetails } from '../../scripts/datalayer.js';
+import { PAGE_VIEW, pushEvent, setPageDetails } from '../../scripts/datalayer.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { translate } from '../../scripts/i18n.js';
 import openGallery from '../../scripts/gallery.js';
@@ -361,6 +361,78 @@ function counter(name, group, value, min) {
     step(1, translate('propertyMoreOf', { group }), 'property-detail-step property-detail-step-plus', '+'),
   );
   return wrap;
+}
+
+/**
+ * The data layer's "page load" page view, once the booking form has its first services: the
+ * page's name and site section, the booking as the form has it (the date and time in UTC, the
+ * guests), the lounge and its airport or station, and the chosen product (its code as the SKU;
+ * none without services).
+ * @param {Object} lounge
+ * @param {HTMLFormElement} form The booking form
+ */
+function trackPageLoad(lounge, form) {
+  // the page's name and site section, for this event and every one after it:
+  // "<cityName>:<locationName (iataCode)>:<lounge>" in "lounge detail"
+  const pageName = [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':');
+  setPageDetails({
+    pageName,
+    siteSection: 'lounge detail',
+  });
+  const formData = new FormData(form);
+  // the guests as the form has them (at least 1 adult)
+  const adultCount = Number(formData.get('adults')) || 1;
+  const childCount = Number(formData.get('children')) || 0;
+  // the chosen service and service details (the product), as the form shows them
+  const serviceData = form.querySelector('select[name="service"]')?.selectedOptions[0];
+  const productData = form.querySelector('select[name="product"]')?.selectedOptions[0];
+  const formFieldsData = {
+    service: serviceData?.value ? serviceData.textContent : '',
+    product: productData?.value ? productData.textContent : '',
+    productCode: productData?.value || '',
+    date: String(formData.get('date') || ''),
+    time: String(formData.get('time') || ''),
+  };
+  const details = {
+    bookingInfo: {
+      // the form's date and time at the lounge, in UTC (1830 in Hong Kong: 10:30:00Z)
+      checkinDateTime: toUtcDateTime(
+        formFieldsData.date,
+        formFieldsData.time,
+        lounge.timeZone,
+      ),
+      daysToBooking: 0,
+      totalGuestCount: adultCount + childCount,
+      adultCount,
+      childCount,
+    },
+    locationDetails: {
+      iataCode: lounge.iata,
+      locationName: lounge.airport,
+    },
+    outletDetails: {
+      outletId: lounge.outletId,
+      outletName: lounge.name,
+    },
+  };
+  // (the price's catalogueCode comes with Get Price only: the product's code instead)
+  if (formFieldsData.productCode) {
+    details.productList = [
+      {
+        sku: formFieldsData.productCode,
+        name: formFieldsData.product,
+        category: formFieldsData.service,
+      },
+    ];
+  }
+  pushEvent(PAGE_VIEW, 'page load', {
+    web: {
+      webPageDetails: {
+        name: pageName,
+      },
+    },
+    _plazapremiumloungemanagementli: details,
+  });
 }
 
 /**
@@ -1124,8 +1196,12 @@ export default async function decorate(block) {
       const ask = () => showServices(fetchServices(booking.startDateTime()));
       timer = setTimeout(ask, delayed ? SERVICES_DELAY_MS : 0);
     };
-    if (early) showServices(early);
-    else booking.setServices([]);
+    // the data layer's "page load", once the first services are shown (or there are none)
+    if (early) showServices(early).then(() => trackPageLoad(lounge, booking.form));
+    else {
+      booking.setServices([]);
+      trackPageLoad(lounge, booking.form);
+    }
   };
   load = async () => {
     setLoading(true);
