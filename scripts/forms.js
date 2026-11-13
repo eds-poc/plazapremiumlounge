@@ -16,6 +16,8 @@
 import { DEFAULT_SITE, getSiteFolder, translate } from './i18n.js';
 import apiUrl from './endpoints.js';
 import { addCaptcha, CAPTCHA_KEY } from './captcha.js';
+// eslint-disable-next-line import/no-cycle
+import { trackError } from './datalayer.js';
 
 const INPUT_TYPES = ['text', 'email', 'password', 'tel', 'number', 'date', 'url'];
 const FIELD_TYPES = [...INPUT_TYPES, 'textarea', 'select', 'checkbox', 'checkboxes', 'country', 'phone', 'stepper'];
@@ -1088,9 +1090,12 @@ export function buildForm(block, definition) {
         showApiErrors(form, data);
         // a captcha token works once
         captcha?.reset();
-        showStatus(data?.serviceResponseMsg || data?.message || texts.error || translate('formError'));
+        const errorMessage = data?.serviceResponseMsg || data?.message || texts.error || translate('formError');
+        showStatus(errorMessage);
         const code = Number(data?.serviceResponseCode) || res.status;
         form.dispatchEvent(new CustomEvent('forms:error', { bubbles: true, detail: { status: code, data, form } }));
+        // the data layer's error, with the message shown
+        trackError(String(code), errorMessage);
         return;
       }
       form.dispatchEvent(new CustomEvent('forms:success', { bubbles: true, detail: { data, values, form } }));
@@ -1108,8 +1113,11 @@ export function buildForm(block, definition) {
       }
     } catch {
       captcha?.reset();
-      showStatus(translate('formNetworkError'));
+      const errorMessage = translate('formNetworkError');
+      showStatus(errorMessage);
       form.dispatchEvent(new CustomEvent('forms:error', { bubbles: true, detail: { status: 0, form } }));
+      // the data layer's error: no answer
+      trackError('network', errorMessage);
     } finally {
       setBusy(false);
     }

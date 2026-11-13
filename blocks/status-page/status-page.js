@@ -3,6 +3,9 @@
  * for all three: only the authored content differs. One cell: the image, the title (a heading)
  * and the text (paragraphs, links). The block fills its section in the brand maroon.
  */
+// eslint-disable-next-line import/no-cycle
+import { trackError } from '../../scripts/datalayer.js';
+
 const HEADINGS = 'h1, h2, h3, h4, h5, h6';
 const IMAGES = 'picture, img';
 
@@ -46,6 +49,13 @@ function imageOf(line) {
   return line.querySelector('picture') || line.querySelector('img');
 }
 
+// the error pages' messages for the data layer, by the page's address (/en-uk/404, /en-uk/500);
+// the Maintenance page and any other address (e.g. a missing one) send none
+const ERROR_MESSAGES = {
+  404: 'Page Not Found',
+  500: 'Internal Server Error',
+};
+
 /**
  * Decorates the Status Page block by rendering a centered image, title, and text.
  * The first image becomes the status icon, the first heading becomes the title,
@@ -81,4 +91,7 @@ export default function decorate(block) {
     notice.append(text);
   }
   block.replaceChildren(notice);
+  // the data layer's error, on the 404 and 500 pages
+  const errorCode = window.location.pathname.split('/').pop();
+  if (ERROR_MESSAGES[errorCode]) trackError(errorCode, ERROR_MESSAGES[errorCode]);
 }
