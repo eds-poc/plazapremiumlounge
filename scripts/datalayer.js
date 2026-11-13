@@ -177,18 +177,12 @@ export function pushEvent(event, eventName, extra) {
 
 /**
  * Starts analytics on a page: the page view (on the home page only; the lounge listing's is the
- * property-list block's), the login modal's page view ("page load") each time it opens (a modal
- * dialog with the login form, scripts/modal.js), then the Launch script from the metadata
- * `launch-script` (an https address; without one, the data layer is still filled).
+ * property-list block's), then the Launch script from the metadata `launch-script` (an https
+ * address; without one, the data layer is still filled).
  */
 export default function initDataLayer() {
   window.adobeDataLayer = window.adobeDataLayer || [];
   if (HOMEPAGE_PATH.test(window.location.pathname)) pushEvent(PAGE_VIEW, 'page view');
-  new MutationObserver((records) => records.forEach(({ target }) => {
-    if (target.matches('dialog.modal[open]') && target.querySelector('form[data-action="login"]')) {
-      pushEvent(PAGE_VIEW, 'page load');
-    }
-  })).observe(document.body, { subtree: true, attributeFilter: ['open'] });
 
   const src = getMetadata('launch-script').trim();
   if (!src) return;
