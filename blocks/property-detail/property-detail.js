@@ -17,7 +17,7 @@ import {
   buildBadge, buildSlider, el, fetchJson, getApiLanguage, isPreview, readProperty,
   safeHtml, setLoading, toKey, toUrl,
 } from '../../scripts/properties.js';
-import { toUtcDateTime } from '../../scripts/utility.js';
+import { daysUntil, toUtcDateTime } from '../../scripts/utility.js';
 
 // the detail service answers in about 0.2-2s; the services one in 3-7s (at times far longer)
 const DETAIL_TIMEOUT_MS = 15000;
@@ -110,12 +110,14 @@ function readPromoRejection(json) {
 
 /**
  * The price in a price response (the first product's first price): the total, the price before
- * discounts, the first discount's amount (0 without one) and the currency. Null when there's
- * none (not available for that start or guests).
+ * discounts, the discount (the price before discounts less the total), the applied promo code
+ * and its amount ('' and 0 without one), the currency, and the product's and service's names.
+ * Null when there's none (not available for that start or guests).
  * @param {Object} json
  * @param {string} currency The currency asked for
- * @returns {{total: number, base: number, discountValue: number, currency: string,
- *   catalogueCode: string}|null}
+ * @returns {{total: number, base: number, discountValue: number, promoCode: string,
+ *   promoValue: number, currency: string, catalogueCode: string, productName: string,
+ *   serviceName: string}|null}
  */
 function readPrice(json, currency) {
   const item = Array.isArray(json?.items) ? json.items[0] : null;
@@ -124,15 +126,21 @@ function readPrice(json, currency) {
   if (!price || item.availability === false || price.isInventoryAvailable === false
     || !Number.isFinite(total)) return null;
   const base = Number(price.basePrice);
-  // e.g. discounts: [{ "name": "10% Discount", "discountValue": 110.5 }]
-  const discountData = price.discounts?.[0];
+  // only with an applied promo code, e.g. promocode: [{ "code": "ACG20", "discountValue": 217.6 }]
+  const promoData = Array.isArray(price.promocode) ? price.promocode[0] : null;
   return {
     total,
     base: Number.isFinite(base) ? base : total,
-    // the first discount's amount; 0 without one
-    discountValue: Number(discountData?.discountValue) || 0,
+    // basePrice less totalPrice, to the cent (1088 - 870.4: 217.6); 0 without a basePrice
+    discountValue: Math.round((base - total) * 100) / 100 || 0,
+    // the applied promo code and its amount; '' and 0 without one
+    promoCode: (promoData?.code || '').trim(),
+    promoValue: Number(promoData?.discountValue) || 0,
     currency: price.baseRate?.[0]?.currency || currency,
     catalogueCode: price.catalogueCode || '',
+    // e.g. "Lounge Use - 2 Hours" of the service "Lounge"
+    productName: (item.productDisplayName || '').trim(),
+    serviceName: (item.serviceDisplayName || '').trim(),
   };
 }
 
@@ -373,7 +381,8 @@ function counter(name, group, value, min) {
  * @param {Object} request The price request (see buildBooking)
  * @param {{service: string, product: string, date: string, time: string}} formFieldsData The
  *   chosen service's and product's names, and the form's date (YYYY-MM-DD) and time (HHmm)
- * @param {{total: number, base: number, discountValue: number, catalogueCode: string}|null} price
+ * @param {{total: number, base: number, discountValue: number, promoCode: string,
+ *   promoValue: number, catalogueCode: string}|null} price
  */
 function trackGetPrice(lounge, request, formFieldsData, price) {
   const eventName = 'get price';
@@ -393,7 +402,7 @@ function trackGetPrice(lounge, request, formFieldsData, price) {
       sku: price.catalogueCode,
       name: formFieldsData.product,
       actualPricePayCurr: price.base,
-      // the first discount's amount (discounts[0].discountValue), 0 without one
+      // basePrice less totalPrice
       discount: price.discountValue,
       sellPricePayCurr: price.total,
       category: formFieldsData.service,
@@ -433,10 +442,93 @@ function trackGetPrice(lounge, request, formFieldsData, price) {
         outletName: lounge.name,
       },
       productList: [product],
-      // (the promo code's value is to be decided: 0 for now)
+      // the applied promo code (promocode[0].code) and its amount (promocode[0].discountValue);
+      // '' and 0 without one or without a price
       offerDetails: {
-        promoCode: request.promocode,
-        promocodeValuePayCurr: 0,
+        promoCode: price?.promoCode || '',
+        promocodeValuePayCurr: price?.promoValue || 0,
+      },
+    },
+  });
+}
+
+/**
+ * The data layer's link click for Reserve Now (shown once Get Price has a price): the page's name
+ * and site section, the booking as the form has it (the date and time in UTC, the guests, the
+ * lounge's currency), the lounge and its airport or station, the promo code, the priced product
+ * (the guests as the quantity) and the booking form's step.
+ * @param {Object} lounge
+ * @param {HTMLFormElement} form The booking form (unchanged since the price: a change clears it)
+ * @param {{price: Object}} priced The priced choices: their price (see readPrice)
+ */
+function trackReserve(lounge, form, { price }) {
+  const eventName = 'reserve now';
+  // the page's name and site section, for this event and every one after it:
+  // "<cityName>:<locationName (iataCode)>:<lounge>" in "lounge detail"
+  const pageName = [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':');
+  setPageDetails({
+    pageName,
+    siteSection: 'lounge detail',
+  });
+  const formData = new FormData(form);
+  // the guests as the form has them (at least 1 adult)
+  const adultCount = Number(formData.get('adults')) || 1;
+  const childCount = Number(formData.get('children')) || 0;
+  const totalGuestCount = adultCount + childCount;
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: {
+      webInteraction: {
+        name: eventName,
+        type: 'other',
+        linkClicks: {
+          value: 1,
+        },
+      },
+    },
+    _plazapremiumloungemanagementli: {
+      bookingInfo: {
+        // the form's date and time at the lounge, in UTC (1400 in Hong Kong: 06:00:00Z)
+        checkinDateTime: toUtcDateTime(
+          formData.get('date') || '',
+          formData.get('time') || '',
+          lounge.timeZone,
+        ),
+        // the days from today (at the lounge) to the form's date: 0 for today
+        daysToBooking: daysUntil(formData.get('date') || '', lounge.timeZone),
+        totalGuestCount,
+        adultCount,
+        childCount,
+        propertyCurrencyCode: lounge.defaultCurrency,
+      },
+      locationDetails: {
+        iataCode: lounge.iata,
+        locationName: lounge.location.name,
+      },
+      outletDetails: {
+        outletId: lounge.outletId,
+        outletName: lounge.name,
+      },
+      // the applied promo code (promocode[0].code) and its amount (promocode[0].discountValue)
+      offerDetails: {
+        promoCode: price.promoCode,
+        promocodeValuePayCurr: price.promoValue,
+      },
+      productList: [
+        {
+          sku: price.catalogueCode,
+          name: price.productName,
+          category: price.serviceName,
+          // the prices are for all the guests already (basePrice, totalPrice)
+          actualPricePayCurr: price.base,
+          // basePrice less totalPrice
+          discountPayCurr: price.discountValue,
+          sellPricePayCurr: price.total,
+          quantity: totalGuestCount,
+        },
+      ],
+      formDetails: {
+        formName: 'ppl lounge booking',
+        formStepName: 'lounge detail',
       },
     },
   });
@@ -643,7 +735,10 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
   form.addEventListener('change', clearPrice);
   form.addEventListener('input', (e) => { if (e.target.name === 'promo') clearPrice(); });
   reserve.addEventListener('click', () => {
-    if (priced) form.dispatchEvent(new CustomEvent('property-detail:reserve', { bubbles: true, detail: priced }));
+    if (!priced) return;
+    form.dispatchEvent(new CustomEvent('property-detail:reserve', { bubbles: true, detail: priced }));
+    // the data layer's Reserve Now click, with the price shown
+    trackReserve(lounge, form, priced);
   });
 
   let services = [];
