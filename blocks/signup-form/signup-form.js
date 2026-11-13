@@ -99,6 +99,42 @@ function trackCreateAccount() {
 }
 
 /**
+ * The data layer's link click for a successful sign up (the Register API accepted it): the form's
+ * success step, the sign up source and the new member's identities from the answer, when there
+ * (membershipId, hashedEmail, hashedPhone).
+ * @param {Object} data The Register API's answer
+ */
+function trackSignupSuccess(data) {
+  const eventName = 'signup success';
+  const identities = {};
+  if (data?.membershipId) identities.stMemberId = String(data.membershipId);
+  if (data?.hashedEmail) identities.hashedEmail = data.hashedEmail;
+  if (data?.hashedPhone) identities.hashedPhone = data.hashedPhone;
+  const details = {
+    formDetails: {
+      formName: 'signup',
+      formStepName: eventName,
+    },
+    userInfo: {
+      signupSource: 'ppl',
+    },
+  };
+  if (Object.keys(identities).length) details.identities = identities;
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: {
+      webInteraction: {
+        name: eventName,
+        type: 'other',
+        linkClicks: {
+          value: 1,
+        },
+      },
+    },
+    _plazapremiumloungemanagementli: details,
+  });
+}
+
+/**
  * Decorates the Signup Form block: the sign up form (the source /en-uk/sign-up). One authored row
  * per field (Field | Label | Placeholder | Required | Error), one-cell rows as text, and the rows
  * submit / error. Sent to the Register API (endpoint signUp), then the confirmation page in the
@@ -119,4 +155,6 @@ export default function decorate(block) {
   trackPageLoad();
   // the data layer's Create Account click, as the form is sent (forms:submit: after the checks)
   form.addEventListener('forms:submit', trackCreateAccount);
+  // the data layer's successful sign up, with the Register API's answer (before the next page)
+  form.addEventListener('forms:success', (e) => trackSignupSuccess(e.detail.data));
 }
