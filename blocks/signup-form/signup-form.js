@@ -73,6 +73,32 @@ function trackPageLoad() {
 }
 
 /**
+ * The data layer's link click for Create Account (the form's submit), as the form is sent (every
+ * field valid): the form's create account step.
+ */
+function trackCreateAccount() {
+  const eventName = 'create account';
+  const formName = 'signup';
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: {
+      webInteraction: {
+        name: eventName,
+        type: 'other',
+        linkClicks: {
+          value: 1,
+        },
+      },
+    },
+    _plazapremiumloungemanagementli: {
+      formDetails: {
+        formName,
+        formStepName: `${formName} ${eventName}`,
+      },
+    },
+  });
+}
+
+/**
  * Decorates the Signup Form block: the sign up form (the source /en-uk/sign-up). One authored row
  * per field (Field | Label | Placeholder | Required | Error), one-cell rows as text, and the rows
  * submit / error. Sent to the Register API (endpoint signUp), then the confirmation page in the
@@ -91,4 +117,6 @@ export default function decorate(block) {
   block.replaceChildren(form);
   // the data layer's "page load", once the form is shown
   trackPageLoad();
+  // the data layer's Create Account click, as the form is sent (forms:submit: after the checks)
+  form.addEventListener('forms:submit', trackCreateAccount);
 }
