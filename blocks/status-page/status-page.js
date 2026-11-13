@@ -3,6 +3,9 @@
  * for all three: only the authored content differs. One cell: the image, the title (a heading)
  * and the text (paragraphs, links). The block fills its section in the brand maroon.
  */
+// eslint-disable-next-line import/no-cycle
+import { pushEvent } from '../../scripts/datalayer.js';
+
 const HEADINGS = 'h1, h2, h3, h4, h5, h6';
 const IMAGES = 'picture, img';
 
@@ -46,6 +49,49 @@ function imageOf(line) {
   return line.querySelector('picture') || line.querySelector('img');
 }
 
+// the error pages' messages for the data layer, by code (the Maintenance page isn't an error)
+const ERROR_MESSAGES = {
+  404: 'Page Not Found',
+  500: 'Internal Server Error',
+};
+
+/**
+ * The page's error code: 404.html's (any missing address; it sets window.errorCode), else the
+ * address's last part (/en-uk/404, /en-uk/500).
+ * @returns {string}
+ */
+function readErrorCode() {
+  return window.errorCode || window.location.pathname.split('/').pop();
+}
+
+/**
+ * The data layer's link click for an error page.
+ * @param {string} errorCode e.g. 404
+ * @param {string} errorMessage e.g. Page Not Found
+ */
+function trackError(errorCode, errorMessage) {
+  const eventName = 'error';
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: {
+      webInteraction: {
+        name: eventName,
+        type: 'other',
+        linkClicks: {
+          value: 1,
+        },
+      },
+    },
+    _plazapremiumloungemanagementli: {
+      errors: [
+        {
+          errorCode,
+          errorMessage,
+        },
+      ],
+    },
+  });
+}
+
 /**
  * Decorates the Status Page block by rendering a centered image, title, and text.
  * The first image becomes the status icon, the first heading becomes the title,
@@ -81,4 +127,7 @@ export default function decorate(block) {
     notice.append(text);
   }
   block.replaceChildren(notice);
+  // the data layer's error, on the 404 and 500 pages
+  const errorCode = readErrorCode();
+  if (ERROR_MESSAGES[errorCode]) trackError(errorCode, ERROR_MESSAGES[errorCode]);
 }

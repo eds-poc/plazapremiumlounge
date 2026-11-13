@@ -16,6 +16,8 @@
 import { DEFAULT_SITE, getSiteFolder, translate } from './i18n.js';
 import apiUrl from './endpoints.js';
 import { addCaptcha, CAPTCHA_KEY } from './captcha.js';
+// eslint-disable-next-line import/no-cycle
+import { pushEvent } from './datalayer.js';
 
 const INPUT_TYPES = ['text', 'email', 'password', 'tel', 'number', 'date', 'url'];
 const FIELD_TYPES = [...INPUT_TYPES, 'textarea', 'select', 'checkbox', 'checkboxes', 'country', 'phone', 'stepper'];
@@ -914,6 +916,34 @@ function fieldSettings(field, cells) {
 }
 
 /**
+ * The data layer's link click for a form's error: a send the service refused, or that failed.
+ * @param {string} errorCode The service's code, else the HTTP status (network for no answer)
+ * @param {string} errorMessage The message shown to the visitor
+ */
+function trackError(errorCode, errorMessage) {
+  const eventName = 'error';
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: {
+      webInteraction: {
+        name: eventName,
+        type: 'other',
+        linkClicks: {
+          value: 1,
+        },
+      },
+    },
+    _plazapremiumloungemanagementli: {
+      errors: [
+        {
+          errorCode,
+          errorMessage,
+        },
+      ],
+    },
+  });
+}
+
+/**
  * Builds a form block's form: one authored row per field (Field | Label | Placeholder | Required |
  * Error), the field's name in the first cell, matched to the block's definition; one-cell rows are
  * text (before the first field, in `intro` when the definition asks for it); the rows `submit`,
@@ -1088,9 +1118,12 @@ export function buildForm(block, definition) {
         showApiErrors(form, data);
         // a captcha token works once
         captcha?.reset();
-        showStatus(data?.serviceResponseMsg || data?.message || texts.error || translate('formError'));
+        const errorMessage = data?.serviceResponseMsg || data?.message || texts.error || translate('formError');
+        showStatus(errorMessage);
         const code = Number(data?.serviceResponseCode) || res.status;
         form.dispatchEvent(new CustomEvent('forms:error', { bubbles: true, detail: { status: code, data, form } }));
+        // the data layer's error, with the message shown
+        trackError(String(code), errorMessage);
         return;
       }
       form.dispatchEvent(new CustomEvent('forms:success', { bubbles: true, detail: { data, values, form } }));
@@ -1108,8 +1141,11 @@ export function buildForm(block, definition) {
       }
     } catch {
       captcha?.reset();
-      showStatus(translate('formNetworkError'));
+      const errorMessage = translate('formNetworkError');
+      showStatus(errorMessage);
       form.dispatchEvent(new CustomEvent('forms:error', { bubbles: true, detail: { status: 0, form } }));
+      // the data layer's error: no answer
+      trackError('network', errorMessage);
     } finally {
       setBusy(false);
     }
