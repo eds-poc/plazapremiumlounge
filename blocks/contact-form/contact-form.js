@@ -57,8 +57,8 @@ function trackPageLoad() {
         bookingId: '',
       },
       formDetails: {
-        formName: 'contact us',
-        formStepName: 'contact us start',
+        formName: pageName,
+        formStepName: `${pageName} start`,
       },
     },
   });
