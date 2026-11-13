@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-cycle
-import { PAGE_VIEW, pageInfo, pushEvent } from '../../scripts/datalayer.js';
+import { PAGE_VIEW, pushEvent, setPageDetails } from '../../scripts/datalayer.js';
 import { buildForm } from '../../scripts/forms.js';
 
 /*
@@ -36,11 +36,16 @@ const FIELDS = {
 };
 
 /**
- * The data layer's "page load" page view for the contact us page: the page's name, an empty
- * booking ID (no booking when the page opens) and the form's first step.
+ * The data layer's "page load" page view for the contact us page: the page's name and site
+ * section, an empty booking ID (no booking when the page opens) and the form's first step.
  */
 function trackPageLoad() {
-  const { pageName } = pageInfo();
+  // the page's name and site section, for this event and every one after it
+  const pageName = 'contact us';
+  setPageDetails({
+    pageName,
+    siteSection: 'home',
+  });
   pushEvent(PAGE_VIEW, 'page load', {
     web: {
       webPageDetails: {

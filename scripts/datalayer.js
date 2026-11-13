@@ -54,7 +54,7 @@ function memberFor(token) {
  * "news:some-story" in "news".
  * @returns {{pageName: string, siteSection: string}}
  */
-export function pageInfo() {
+function pageInfo() {
   const folder = getSiteFolder();
   const segments = window.location.pathname.replace(/\.html$/, '').split('/').filter(Boolean)
     .map((s) => s.toLowerCase());
