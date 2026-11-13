@@ -42,6 +42,25 @@ const TEXTS = {
   openMenu: {
     en: 'Open menu', zh: '打开菜单', 'zh-HK': '開啟選單', ja: 'メニューを開く', pt: 'Abrir menu',
   },
+  // the leave-site popup before a link to another website (scripts/leave-site.js; the source's
+  // wording in English)
+  leaveSiteTitle: {
+    en: 'See you again soon',
+    zh: '期待与您再次相见',
+    'zh-HK': '期待與您再次相見',
+    ja: 'またのお越しをお待ちしております',
+    pt: 'Até breve',
+  },
+  leaveSiteText: {
+    en: 'You are about to leave Plaza Premium Lounge and will be automatically redirected to another website in a few moments. Click the button below if you change your mind and would like to return to our website.',
+    zh: '您即将离开 Plaza Premium Lounge，片刻后将自动跳转至其他网站。如果您改变主意，想返回我们的网站，请点击下方按钮。',
+    'zh-HK': '您即將離開 Plaza Premium Lounge，稍後將自動轉至其他網站。如您改變主意並希望返回我們的網站，請按下方按鈕。',
+    ja: 'Plaza Premium Lounge のサイトを離れ、まもなく別のウェブサイトへ自動的に移動します。当サイトに戻る場合は、下のボタンをクリックしてください。',
+    pt: 'Você está prestes a sair do Plaza Premium Lounge e será redirecionado automaticamente para outro site em instantes. Clique no botão abaixo se mudar de ideia e quiser voltar ao nosso site.',
+  },
+  leaveSiteCancel: {
+    en: 'Cancel Redirect', zh: '取消跳转', 'zh-HK': '取消轉址', ja: '移動をキャンセル', pt: 'Cancelar redirecionamento',
+  },
   closeMenu: {
     en: 'Close menu', zh: '关闭菜单', 'zh-HK': '關閉選單', ja: 'メニューを閉じる', pt: 'Fechar menu',
   },
