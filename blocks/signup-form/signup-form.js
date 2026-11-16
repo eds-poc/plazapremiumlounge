@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-cycle
 import { PAGE_VIEW, pushEvent, setPageDetails } from '../../scripts/datalayer.js';
 import { buildForm } from '../../scripts/forms.js';
-import { sha256 } from '../../scripts/member.js';
+import { sha256 } from '../../scripts/utility.js';
 
 /*
  * The sign up form's fields: the Register API's keys and value types, and the source's rules. The
@@ -102,7 +102,7 @@ function trackCreateAccount() {
 /**
  * The data layer's link click for a successful sign up (the Register API accepted it): the form's
  * success step, the sign up source and the new member's identities, when there: the answer's
- * membershipID, and the SHA-256 of its userName (the email) and phone (scripts/member.js).
+ * membershipID, and the SHA-256 of its userName (the email) and phone (scripts/utility.js).
  * @param {Object} data The Register API's answer
  */
 async function trackSignupSuccess(data) {

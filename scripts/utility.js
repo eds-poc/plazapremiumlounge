@@ -48,3 +48,13 @@ export function toUtcDateTime(date, time, timeZone) {
   const guess = wanted - offset(wanted);
   return new Date(wanted - offset(guess)).toISOString().replace(/\.\d{3}Z$/, 'Z');
 }
+
+/**
+ * The SHA-256 of a text, as lowercase hex.
+ * @param {string} text
+ * @returns {Promise<string>}
+ */
+export async function sha256(text) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
