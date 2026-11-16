@@ -150,3 +150,10 @@ dialog.modal.square .modal-content {
 dialog.modal.square .modal-header .modal-title {
   font-size: 21px;
 }
+
+/* the leave-site popup (scripts/leave-site.js): the source's Cancel Redirect button centred below
+   the text */
+dialog.modal.leave-site .leave-site-actions {
+  margin-top: var(--spacing-7);
+  text-align: center;
+}
