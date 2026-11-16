@@ -40,7 +40,8 @@ the cart's terms, and beside them (a third of the row, from 992px) the **Booking
   airlines holding what's typed (any case), a click (or ↓ ↑ and Enter) fills the field, Escape or
   leaving closes the list. Any other text stays allowed, as the source's.
 - Contact No.: one rounded field, the dial code shown short ("+1", following the country) at its
-  left; it stays a real dropdown for the keyboard and screen readers.
+  left, its part as wide as the code (55px for +1, 76px for +374, as the source's); it stays a
+  real dropdown for the keyboard and screen readers.
 - The Privacy Policy and newsletter boxes' links open in a new tab.
 
 **Lounge vs pass:**

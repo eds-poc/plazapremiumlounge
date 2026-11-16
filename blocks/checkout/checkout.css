@@ -60,9 +60,8 @@
   --checkout-bar-text: var(--font-size-sm);
   --checkout-toggle-icon: 16px;
 
-  /* Contact No.: the dial code's 55px (its text 15px in), a small ▾ after it, the number 10px
-     after the line */
-  --checkout-dial-width: 55px;
+  /* Contact No.: the dial code 15px in, a small ▾ after it, 15px to the line (55px for +1, wider
+     for longer codes, as the source's), the number 10px after the line */
   --checkout-dial-inset: 15px;
   --checkout-dial-caret: 4px;
   --checkout-number-inset: 10px;
@@ -106,8 +105,24 @@
   position: relative;
 }
 
+/* the dial code's box: as wide as the code shown in it, the line at its right; the select over
+   the whole box (it opens the list and takes the focus) */
+.checkout .checkout-form .checkout-dial-box {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  border-right: 1px solid var(--color-border);
+
+  /* (the line within the source's 15px after the code) */
+  padding: 0 calc(var(--checkout-dial-inset) - 1px) 0 var(--checkout-dial-inset);
+}
+
 .checkout .checkout-form .form-phone-code {
-  width: var(--checkout-dial-width);
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  border: 0;
   padding: 0;
   background-image: none;
   color: transparent;
@@ -122,17 +137,14 @@
 }
 
 .checkout .checkout-dial {
-  position: absolute;
-  top: 50%;
-  left: var(--checkout-dial-inset);
   display: flex;
   gap: var(--spacing-2);
   align-items: center;
   color: var(--color-text);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-body);
+  white-space: nowrap;
   pointer-events: none;
-  transform: translateY(-50%);
 }
 
 .checkout .checkout-dial::after {

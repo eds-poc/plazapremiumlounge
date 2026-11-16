@@ -247,13 +247,15 @@ export default async function decorate(block) {
   });
   form.id = formId;
   form.classList.add('checkout-form');
-  // the contact number's dial code shown short ("+1"), as the source's; the select stays the
-  // control underneath
+  // the contact number's dial code shown short ("+1"), as the source's, in a box as wide as the
+  // code (+1, +374, +44-1534); the select stays the control, over it
   const code = form.querySelector('.form-phone-code');
   if (code) {
     const dial = el('span', 'checkout-dial');
     dial.setAttribute('aria-hidden', 'true');
-    code.parentElement.append(dial);
+    const dialBox = el('span', 'checkout-dial-box');
+    code.before(dialBox);
+    dialBox.append(code, dial);
     const show = () => { dial.textContent = (code.selectedOptions[0]?.textContent || '').trim().split(/\s+/)[0] || ''; };
     code.addEventListener('change', show);
     // (its list arrives later, with its preset)

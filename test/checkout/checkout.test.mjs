@@ -46,7 +46,9 @@ async function open({
   if (host !== HOST) {
     await page.route((url) => url.origin === host, async (r) => {
       const u = new URL(r.request().url());
-      await r.fulfill({ response: await r.fetch({ url: `${HOST}${u.pathname}${u.search}` }) });
+      try {
+        await r.fulfill({ response: await r.fetch({ url: `${HOST}${u.pathname}${u.search}` }) });
+      } catch { /* (the page closed meanwhile) */ }
     });
   }
   page.setDefaultTimeout(15000);
@@ -368,6 +370,16 @@ const tick = (page, key, on = true) => page.locator(`${field(key)} input`).setCh
   check('the dial code shown short ("+1"), the select underneath', dial.shown === '+1' && /^\+1/.test(dial.value || ''), JSON.stringify(dial));
   await page.locator(`${field('countryOfResidence')} select`).selectOption({ label: 'Hong Kong SAR, China' });
   check('the country sets the short dial code too', await page.locator('.checkout .checkout-dial').textContent() === '+852');
+  // a longer code: the box widens with it (+1 55px, +852 77px, as the source's), the number after
+  // the line, the code inside the box
+  const fit = await page.evaluate(() => {
+    const f = document.querySelector('.checkout .form-field[data-key="contactNumber"]');
+    const box = f.querySelector('.checkout-dial-box').getBoundingClientRect();
+    const dial = f.querySelector('.checkout-dial').getBoundingClientRect();
+    const input = f.querySelector('input').getBoundingClientRect();
+    return { box: Math.round(box.width), inside: dial.right <= box.right - 10, after: Math.round(input.left - box.right) };
+  });
+  check('a 3-digit dial code fits: its box wider than +1\'s 55px (about 76px), the code inside it, the number after the line', fit.box >= 74 && fit.box <= 79 && fit.inside && fit.after === 0, JSON.stringify(fit));
   // the promo field: capitals, an empty code, stage's BKNG048
   const promo = page.locator('.checkout .checkout-promo-input');
   await page.locator('.checkout .checkout-promo-apply').click();
