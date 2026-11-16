@@ -48,3 +48,17 @@ export function toUtcDateTime(date, time, timeZone) {
   const guess = wanted - offset(wanted);
   return new Date(wanted - offset(guess)).toISOString().replace(/\.\d{3}Z$/, 'Z');
 }
+
+/**
+ * The days from today at a place to a date: 0 for today, 2 for the day after tomorrow. Without a
+ * time zone, today is the browser's.
+ * @param {string} date YYYY-MM-DD
+ * @param {string} [timeZone] The place's IANA time zone, e.g. Asia/Hong_Kong
+ * @returns {number}
+ */
+export function daysUntil(date, timeZone) {
+  // today's date at the place as YYYY-MM-DD (as en-CA writes a date)
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone }).format(new Date());
+  const dayMs = 24 * 60 * 60 * 1000;
+  return Math.round((Date.parse(date) - Date.parse(today)) / dayMs);
+}
