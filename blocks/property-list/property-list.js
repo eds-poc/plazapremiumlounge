@@ -557,7 +557,7 @@ export default async function decorate(block) {
     }
     if (crumb) drawCrumb(crumb, items[0]?.countryName);
     if (useUrl) setListingPage((items.find((item) => item.cityName)?.cityName || '').trim());
-    const properties = items.map(readProperty).filter(Boolean);
+    const properties = items.map((item) => readProperty(item)).filter(Boolean);
     if (!properties.length) {
       showMessage(results, translate('propertyEmpty'), null, `City code "${city}" returned no lounges.`);
       return;

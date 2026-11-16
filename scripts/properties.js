@@ -411,7 +411,7 @@ export function propertyDetailUrl(code, {
 /**
  * Reads one API record (a listing item or a property detail) into what the cards, the filters and
  * the detail page need, or null for a record that isn't shown (not active, not one of the types,
- * or without a name).
+ * or without a name). Not for `Array.map` directly: map's index would be taken as the types.
  * @param {Object} item
  * @param {string[]} [types] The property types shown: lounges and passes, unless said otherwise
  * @returns {Object|null}
