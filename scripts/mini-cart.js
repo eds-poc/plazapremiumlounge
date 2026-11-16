@@ -538,7 +538,6 @@ function trackCartView(cart) {
         totalGuestCount: first.adults + first.children,
         adultCount: first.adults,
         childCount: first.children,
-        promocodeValuePayCurr: promoAmount,
       },
       locationDetails: { iataCode: first.iataCode, locationName: first.locationName },
       outletDetails: { outletId: first.propertyCode, outletName: first.propertyName },
