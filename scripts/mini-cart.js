@@ -235,24 +235,28 @@ function promoMessage(result) {
 /**
  * The promo code's field, as the source's: "Promo Code", the field and its arrow; Enter applies
  * too, an empty code says so without asking the booking system, and typing clears the message.
- * An applied code shows in the field (read only) with a button to take it off, after the source's
- * confirmation. Nothing reloads: the mini cart redraws from the cart.
+ * Codes are typed in capitals (as the source's fields). An applied code shows in the field (read
+ * only) with a button to take it off, after the source's confirmation. Nothing reloads: the mini
+ * cart (or the page's summary, e.g. the Checkout block's) redraws from the cart.
  * @param {Object} cart
+ * @param {{prefix?: string, redraw?: Function, root?: Function}} [options] prefix: the classes'
+ *   (and id's) start, `mini-cart` by default; redraw: draws the field's place again after an
+ *   answer (default: the open mini cart); root: where focus goes back to (default: the mini cart)
  * @returns {HTMLElement}
  */
-function buildPromo(cart) {
+export function buildPromo(cart, { prefix = 'mini-cart', redraw, root } = {}) {
   promoFor(cart);
-  const id = 'mini-cart-promo-code';
-  const box = el('div', 'mini-cart-promo');
-  const label = el('label', 'mini-cart-promo-label', translate('cartPromoCode'));
+  const id = `${prefix}-promo-code`;
+  const box = el('div', `${prefix}-promo`);
+  const label = el('label', `${prefix}-promo-label`, translate('cartPromoCode'));
   label.htmlFor = id;
-  const field = el('div', 'mini-cart-promo-field');
-  const input = el('input', 'mini-cart-promo-input');
+  const field = el('div', `${prefix}-promo-field`);
+  const input = el('input', `${prefix}-promo-input`);
   input.id = id;
   input.type = 'text';
   input.autocomplete = 'off';
   input.placeholder = translate('cartPromoPlaceholder');
-  const message = el('p', 'mini-cart-promo-message', promo.message);
+  const message = el('p', `${prefix}-promo-message`, promo.message);
   message.id = `${id}-message`;
   message.setAttribute('aria-live', 'polite');
   input.setAttribute('aria-describedby', message.id);
@@ -265,7 +269,7 @@ function buildPromo(cart) {
   show();
   // (the code the cart's lines carry)
   const applied = cart.promoCode || '';
-  const action = el('button', `mini-cart-promo-${applied ? 'remove' : 'apply'}`);
+  const action = el('button', `${prefix}-promo-${applied ? 'remove' : 'apply'}`);
   action.type = 'button';
   action.setAttribute('aria-label', translate(applied ? 'cartPromoRemove' : 'cartPromoApply'));
   field.append(input, action);
@@ -274,10 +278,11 @@ function buildPromo(cart) {
   // visitor was in the new one: the field, or its button: the arrow, or the cross once applied)
   const refocus = (target = 'field') => {
     const now = getCart();
+    if (redraw) redraw(now);
     // eslint-disable-next-line no-use-before-define
-    if (mini.dialog?.open && now) renderMiniCart(now);
-    const selector = target === 'button' ? '.mini-cart-promo-apply, .mini-cart-promo-remove' : '.mini-cart-promo-input';
-    mini.dialog?.querySelector(selector)?.focus();
+    else if (mini.dialog?.open && now) renderMiniCart(now);
+    const selector = target === 'button' ? `.${prefix}-promo-apply, .${prefix}-promo-remove` : `.${prefix}-promo-input`;
+    (root ? root() : mini.dialog)?.querySelector(selector)?.focus();
   };
   if (applied) {
     input.value = applied;
@@ -343,6 +348,13 @@ function buildPromo(cart) {
     refocus(from);
   };
   input.addEventListener('input', () => {
+    // (in capitals as typed, the caret where it was)
+    const upper = input.value.toUpperCase();
+    if (upper !== input.value) {
+      const { selectionStart, selectionEnd } = input;
+      input.value = upper;
+      input.setSelectionRange(selectionStart, selectionEnd);
+    }
     promo.draft = input.value;
     if (!promo.message) return;
     promo.message = '';

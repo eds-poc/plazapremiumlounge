@@ -17,6 +17,27 @@ the cart's terms, and beside them (a third of the row, from 992px) the **Booking
 - The cart is the one in `scripts/cart-state.js`.
 - It's read again from the booking system on every visit, so the prices are its own. A tab without the cart's data shows the site's loader first.
 - The summary follows the cart: another tab's change, or the cart emptied.
+- **No cart** (none, an empty one, or emptied while on the page, e.g. from the mini cart): the
+  visitor goes to the language's homepage (`/en-uk/`), as the source's (its server answers 302).
+  The address is replaced, so Back doesn't return here. Not on the preview (`.aem.page`,
+  localhost) or in the block library, where the page shows "Please add item" for authors. A
+  cart that can't be read keeps the `error` text.
+
+**The summary, as the source's:**
+- A lounge: its name, location, Date / Time / Guests / Services; a pass: its name, Quantity and
+  price, and the "For me" pill (the source's for a pass not bought as a gift; this site doesn't
+  sell gifts yet). On phones each line's details fold away under an arrow (→ open, ↓ folded).
+- Service Total and the discounts under a line, then **the promo code** (the mini cart's field and
+  texts: codes typed in capitals, Enter or the arrow applies, an applied code shows with ✕ to take
+  it off), then Total with "(Includes applicable taxes and fees)" under the amount, and Payment.
+
+**The form, as the source's:**
+- Leaving an empty field shows nothing; the format messages (contact number, emails) show when
+  the visitor leaves the field, and every message on Payment.
+- First and last names lose trailing spaces when left (leading ones stay).
+- Contact No.: one rounded field, the dial code shown short ("+1", following the country) at its
+  left; it stays a real dropdown for the keyboard and screen readers.
+- The Privacy Policy and newsletter boxes' links open in a new tab.
 
 **Lounge vs pass:**
 - A **lounge** checkout asks for the flight: the airline and the flight number.
@@ -29,7 +50,8 @@ the cart's terms, and beside them (a third of the row, from 992px) the **Booking
 - A valid form is announced as `checkout:payment` (see below), because the payment API isn't in yet.
 - On the preview (`.aem.page`, localhost), the `pending` text shows at the top of the form.
 
-Make the page `noindex` (metadata `robots: noindex, nofollow`).
+Make the page `noindex` (metadata `robots: noindex, nofollow`) and give it the checkout header
+(metadata `header: checkout`: no Book Now, no cart icon, as the source's).
 
 ## Table: field rows and text rows
 
@@ -117,6 +139,7 @@ stays in the form's column, beside the summary).
 | --- | --- |
 | Title | Guest Checkout \| Plaza Premium Lounge |
 | robots | noindex, nofollow |
+| header | checkout |
 
 - Last, inside the same section.
 
@@ -144,8 +167,10 @@ That step needs the booking system's own APIs, which this site doesn't have yet:
 
 ## Not yet
 
-- The promo code (the mini cart's, PR #97).
 - The "DEPARTURES LOUNGE" badge (no cart field known for it).
+- The source's airline list in the Arrival / Departure Flight field (no data source known).
+- A pass bought as a gift: the "Gift" pill and the "Buying for yourself or someone else?" steps
+  (the passes page has no gift mode yet).
 - A login for products that require one (`isStLoginMandatory`).
 - The source's "leave the booking journey" pop-up.
 - Analytics.

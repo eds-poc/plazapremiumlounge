@@ -38,9 +38,17 @@ const json = (body, status = 200) => ({
  * answers 500), `stored` keeps the cart's data in the tab already.
  */
 async function open({
-  cart = LOUNGE_CART, width = 1440, height = 900, stored = false, path = PATH, html,
+  cart = LOUNGE_CART, width = 1440, height = 900, stored = false, path = PATH, html, host = HOST,
 } = {}) {
   const page = await browser.newPage({ viewport: { width, height }, userAgent: UA });
+  // another host (e.g. http://checkout.test, standing for the live site): every request to it
+  // answered by the preview server
+  if (host !== HOST) {
+    await page.route((url) => url.origin === host, async (r) => {
+      const u = new URL(r.request().url());
+      await r.fulfill({ response: await r.fetch({ url: `${HOST}${u.pathname}${u.search}` }) });
+    });
+  }
   page.setDefaultTimeout(15000);
   page.errors = [];
   page.gets = 0;
@@ -59,6 +67,13 @@ async function open({
     if (cart === 'fail') return r.fulfill(json({ error: 'down' }, 500));
     return r.fulfill(json({ ...cart, cartId: 'CRT_TEST' }));
   });
+  // the promo code as stage answers it: an unknown code (BKNG048)
+  page.promos = [];
+  await page.route(/ppg-app\/cart-validate-promocode/, (r) => {
+    if (r.request().method() === 'OPTIONS') return r.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': '*' } });
+    page.promos.push(JSON.parse(r.request().postData() || '{}'));
+    return r.fulfill(json({ details: 'No record found', errorCode: 'BKNG048', message: 'No record found for the provided promotional code.' }));
+  });
   if (cart) {
     await page.addInitScript(`localStorage.setItem('ppl-cart-id', JSON.stringify({ id: 'CRT_TEST', expires: Date.now() + 20 * 3600e3, changed: Date.now(), count: 1, codes: [] }));
 ${stored ? 'sessionStorage.setItem(\'ppl-cart\', JSON.stringify({ cartId: \'CRT_TEST\', currency: \'HKD\', fetchedAt: Date.now(), expires: Date.now() + 3600e3, totals: { base: 100, discounts: [], total: 100 }, lines: [{ catalogueCode: \'X\', kind: \'lounge\', name: \'Stored Lounge\', product: \'Lounge Use\', place: \'\', start: \'2099-01-01 10:00:00\', adults: 1, children: 0, quantity: 1, total: 100 }], terms: [] }));' : ''}`);
@@ -67,7 +82,8 @@ ${stored ? 'sessionStorage.setItem(\'ppl-cart\', JSON.stringify({ cartId: \'CRT_
     window.payments = [];
     document.addEventListener('checkout:payment', (e) => window.payments.push(JSON.parse(JSON.stringify(e.detail))));
   });
-  await page.goto(`${HOST}${path}`, { waitUntil: 'load', timeout: 60000 });
+  await page.goto(`${host}${path}`, { waitUntil: 'load', timeout: 60000 });
+  if (host !== HOST) return page;
   await page.waitForFunction(() => document.querySelector('.checkout')?.dataset.blockStatus === 'loaded', null, { timeout: 30000 });
   // the countries in, the cart read
   await page.waitForFunction(() => document.querySelector('.checkout .form-field-country select')?.options.length > 2, null, { timeout: 15000 }).catch(() => {});
@@ -100,7 +116,7 @@ const tick = (page, key, on = true) => page.locator(`${field(key)} input`).setCh
   check('title and back link', info.title === 'Back to Edit Booking' && /makeabooking/.test(info.back), `${info.title} ${info.back}`);
   check('the current step is Details', info.active === 'Details', info.active);
   check('summary: lounge, place, date, time, guests, service', /Plaza Premium Lounge Near Gate 1, Departures, Hong Kong International Airport Date: 28-Nov-2026 Time: 1500 ?hrs Guests: 1 Adult\(s\) Services: Lounge Use - 5 Hours/.test(info.summary), info.summary);
-  check('summary: service total, discount, total', /Service Total: HKD 875\.00 10% Online Discount \[Lounge Booking\]: - HKD 87\.50 Total \(Includes applicable taxes and fees\) HKD 787\.50/.test(info.summary), info.summary);
+  check('summary: service total, discount, the promo field, the total with its note under it', /Service Total: HKD 875\.00 10% Online Discount \[Lounge Booking\]: - HKD 87\.50 PROMO CODE Total HKD 787\.50 \(Includes applicable taxes and fees\)/.test(info.summary), info.summary);
   check('the cart\'s terms after the T&C box', info.termsAfterBox && info.terms.length >= 1, info.terms.join(' | '));
   check('a lounge asks for the flight', info.flight.every(Boolean));
   check('no form button (Payment instead)', info.ownSubmit === 0);
@@ -187,7 +203,7 @@ const tick = (page, key, on = true) => page.locator(`${field(key)} input`).setCh
       terms: [...b.querySelectorAll('.checkout-terms-name')].map((h) => h.textContent),
     };
   });
-  check('pass: its name, Quantity and price', /Global Family Pass.*Quantity: 1 USD 85\.00 Total \(Includes applicable taxes and fees\) USD 85\.00/.test(info.summary), info.summary);
+  check('pass: its name, Quantity and price, the "For me" pill, the promo field', /Global Family Pass.*Quantity: 1 USD 85\.00 For me PROMO CODE Total USD 85\.00 \(Includes applicable taxes and fees\)/.test(info.summary), info.summary);
   check('pass: no flight fields', info.flight.every(Boolean));
   check('pass: its own terms', info.terms.some((t) => /PASS/i.test(t)), info.terms.join(' | '));
   await page.locator(`${field('title')} select`).selectOption('Ms.');
@@ -255,7 +271,7 @@ const tick = (page, key, on = true) => page.locator(`${field(key)} input`).setCh
     };
   });
   check('phone: the summary above the form', layout.summaryFirst);
-  check('phone: the bar fixed at the bottom, the total and Payment', layout.bar && /Total: HKD 787\.50/.test(layout.barText) && /Payment/.test(layout.barText), layout.barText);
+  check('phone: the bar fixed at the bottom, the total and Payment (in capitals, as the source\'s)', layout.bar && /Total:\s*HKD 787\.50/.test(layout.barText) && /PAYMENT/.test(layout.barText), layout.barText);
   check('phone: no Payment in the summary', !layout.summaryPayment);
   check('phone: the step band shows', layout.band === 'block', layout.band);
   const toggle = phone.locator('.checkout .checkout-summary-toggle').first();
@@ -298,6 +314,72 @@ const tick = (page, key, on = true) => page.locator(`${field(key)} input`).setCh
     check('axe: no violations', !violations.length, violations.join(', '));
   }
   await desk.close();
+}
+
+// the header as the source's checkout: no Book Now, no cart (metadata header = checkout); the
+// homepage keeps both
+{
+  const page = await open();
+  // the header's actions by where they go (a modal's #name, a modal page in data-href)
+  const head = (p) => p.evaluate(() => [...document.querySelectorAll('header .header-actions a, header .header-actions button')]
+    .map((n) => n.getAttribute('href') || n.dataset.href || '').filter(Boolean));
+  const h = await head(page);
+  check('header: no Book Now and no cart on the checkout, Log In kept', !h.includes('#book-now') && !h.includes('#cart') && h.some((x) => x.includes('login')), JSON.stringify(h));
+  await page.goto(`${HOST}/en-uk/`, { waitUntil: 'load', timeout: 60000 });
+  await page.waitForFunction(() => document.querySelector('header .header-actions'), null, { timeout: 30000 });
+  const home = await head(page);
+  check('header: the homepage keeps Book Now and the cart', home.includes('#book-now') && home.includes('#cart'), JSON.stringify(home));
+  await page.close();
+}
+
+// no cart on the live site: the language's homepage (address replaced); on the preview the page stays
+{
+  const LIVE_HOST = 'http://checkout.test';
+  const none = await open({ cart: null, host: LIVE_HOST });
+  await none.waitForURL(`${LIVE_HOST}/en-uk/`, { timeout: 20000 }).catch(() => {});
+  check('live, no cart: the homepage /en-uk/', none.url() === `${LIVE_HOST}/en-uk/`, none.url());
+  await none.close();
+  const emptied = await open({ host: LIVE_HOST });
+  await emptied.waitForFunction(() => document.querySelector('.checkout')?.dataset.blockStatus === 'loaded', null, { timeout: 30000 });
+  await emptied.waitForTimeout(1000);
+  const stayed = emptied.url() === `${LIVE_HOST}${PATH}`;
+  // eslint-disable-next-line import/no-unresolved, import/no-absolute-path
+  await emptied.evaluate(() => import('/scripts/cart-state.js').then((m) => m.forgetCart()));
+  await emptied.waitForURL(`${LIVE_HOST}/en-uk/`, { timeout: 20000 }).catch(() => {});
+  check('live, a cart: the checkout stays; emptied meanwhile: the homepage', stayed && emptied.url() === `${LIVE_HOST}/en-uk/`, emptied.url());
+  await emptied.close();
+}
+
+// the form as the source's: an empty field left is quiet, names lose trailing spaces, the Privacy
+// Policy and newsletter links open in a new tab, the dial code shows short
+{
+  const page = await open();
+  for (const key of ['firstName', 'lastName', 'emailAddress']) {
+    await page.locator(`${field(key)} input`).focus();
+    await page.locator(`${field(key)} input`).blur();
+  }
+  check('leaving empty fields shows no message (as the source\'s)', (await Promise.all(['firstName', 'lastName', 'emailAddress'].map((k) => errorOf(page, k)))).join('') === '');
+  await page.locator(`${field('firstName')} input`).fill('  Probe  ');
+  await page.locator(`${field('firstName')} input`).blur();
+  check('first name: trailing spaces off, leading kept (as the source\'s)', await page.locator(`${field('firstName')} input`).inputValue() === '  Probe');
+  const links = await page.evaluate(() => [...document.querySelectorAll('.checkout .form-field[data-key="consent"] a, .checkout .form-field[data-key="newsletter"] a, .checkout .form-field[data-key="termsAgreed"] a')].map((a) => `${a.closest('.form-field').dataset.key}:${a.target || 'same'}`));
+  check('Privacy Policy and newsletter links in a new tab, T&C in the same', links.join(' ') === 'consent:_blank newsletter:_blank termsAgreed:same', links.join(' '));
+  const dial = await page.evaluate(() => ({ shown: document.querySelector('.checkout .checkout-dial')?.textContent, value: document.querySelector('.checkout .form-phone-code')?.value }));
+  check('the dial code shown short ("+1"), the select underneath', dial.shown === '+1' && /^\+1/.test(dial.value || ''), JSON.stringify(dial));
+  await page.locator(`${field('countryOfResidence')} select`).selectOption({ label: 'Hong Kong SAR, China' });
+  check('the country sets the short dial code too', await page.locator('.checkout .checkout-dial').textContent() === '+852');
+  // the promo field: capitals, an empty code, stage's BKNG048
+  const promo = page.locator('.checkout .checkout-promo-input');
+  await page.locator('.checkout .checkout-promo-apply').click();
+  await page.waitForTimeout(300);
+  check('promo: an empty code says so, nothing sent', await page.locator('.checkout .checkout-promo-message').textContent() === 'Please enter promo code.' && page.promos.length === 0);
+  await promo.pressSequentially('zzbad1');
+  check('promo: typed in capitals', await promo.inputValue() === 'ZZBAD1', await promo.inputValue());
+  await promo.press('Enter');
+  await page.waitForFunction(() => /No record/.test(document.querySelector('.checkout .checkout-promo-message')?.textContent || ''), null, { timeout: 10000 }).catch(() => {});
+  check('promo: sent for this cart, stage\'s message shown', page.promos.at(-1)?.cartId === 'CRT_TEST' && page.promos.at(-1)?.promocode === 'ZZBAD1' && /No record found/.test(await page.locator('.checkout .checkout-promo-message').textContent()), JSON.stringify(page.promos));
+  check('no page errors (form, promo)', !page.errors.length, page.errors.join(' | '));
+  await page.close();
 }
 
 // the page's other blocks: Booking Steps and Title (back), desktop and phone

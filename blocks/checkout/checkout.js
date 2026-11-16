@@ -3,7 +3,8 @@ import safeDescription from '../../scripts/safe-description.js';
 import { formatAmount, loungeDetails } from '../../scripts/cart-summary.js';
 import { getCart, getCartId, onCartChange } from '../../scripts/cart-state.js';
 import { refreshCart } from '../../scripts/cart.js';
-import { translate } from '../../scripts/i18n.js';
+import { DEFAULT_SITE, getSiteFolder, translate } from '../../scripts/i18n.js';
+import { buildPromo } from '../../scripts/mini-cart.js';
 import { isPreview } from '../../scripts/properties.js';
 import { hideLoader, showLoader } from '../../scripts/scripts.js';
 
@@ -15,10 +16,15 @@ import { hideLoader, showLoader } from '../../scripts/scripts.js';
 const FIELDS = {
   title: { type: 'select', key: 'title', required: true },
   firstName: {
-    type: 'text', key: 'firstName', required: true, settings: { 'max length': 200, 'new row': '', autocomplete: 'given-name' },
+    type: 'text',
+    key: 'firstName',
+    required: true,
+    settings: {
+      'max length': 200, 'new row': '', autocomplete: 'given-name', 'trim end': '',
+    },
   },
   lastName: {
-    type: 'text', key: 'lastName', required: true, settings: { 'max length': 200, autocomplete: 'family-name' },
+    type: 'text', key: 'lastName', required: true, settings: { 'max length': 200, autocomplete: 'family-name', 'trim end': '' },
   },
   countryOfResidence: {
     type: 'country', key: 'countryOfResidence', required: true, settings: { value: 'countryId', 'value type': 'number' },
@@ -130,7 +136,9 @@ function totalRow(className, label, amount) {
 
 /**
  * A cart line in the summary, as the source's: a lounge (its name, location, then Date, Time,
- * Guests, Services, folding away on phones) or a pass (its name, Quantity: N and its price).
+ * Guests, Services) or a pass (its name, Quantity: N and its price, the "For me" pill: the source's
+ * for a pass not bought as a gift, which this site doesn't sell yet); its details fold away on
+ * phones.
  * @param {Object} line
  * @param {string} currency
  * @param {number} index
@@ -142,22 +150,22 @@ function buildLine(line, currency, index) {
   const head = el('div', 'checkout-summary-line-head');
   head.append(el('h3', 'checkout-summary-name', pass ? line.product || line.name : line.name || line.product));
   box.append(head);
+  const details = el(pass ? 'div' : 'dl', 'checkout-summary-details');
+  details.id = `checkout-summary-details-${count}-${index}`;
   if (pass) {
     const row = el('p', 'checkout-summary-quantity');
     row.append(el('span', '', `${translate('cartQuantity')} ${line.quantity}`), el('span', 'checkout-summary-line-amount', formatAmount(line.total, currency)));
-    box.append(row);
-    return box;
+    details.append(row, el('span', 'checkout-summary-intent', translate('cartPassForMe')));
+  } else if (line.place) head.append(el('p', 'checkout-summary-place', line.place));
+  if (!pass) {
+    loungeDetails(line).forEach(({ label, value, unit }) => {
+      const row = el('div', 'checkout-summary-detail');
+      const dd = el('dd', '', value);
+      if (unit) dd.append(el('span', 'checkout-summary-unit', unit));
+      row.append(el('dt', '', label), dd);
+      details.append(row);
+    });
   }
-  if (line.place) head.append(el('p', 'checkout-summary-place', line.place));
-  const details = el('dl', 'checkout-summary-details');
-  details.id = `checkout-summary-details-${count}-${index}`;
-  loungeDetails(line).forEach(({ label, value, unit }) => {
-    const row = el('div', 'checkout-summary-detail');
-    const dd = el('dd', '', value);
-    if (unit) dd.append(el('span', 'checkout-summary-unit', unit));
-    row.append(el('dt', '', label), dd);
-    details.append(row);
-  });
   // phones: the arrow folds the details away (the source's collapse), open to start with
   const toggle = el('button', 'checkout-summary-toggle');
   toggle.type = 'button';
@@ -206,6 +214,15 @@ function buildTerms(terms, heading) {
  * @param {Element} block The Checkout block element
  */
 export default async function decorate(block) {
+  // no cart: the language's homepage, as the source's (its server answers 302), the address
+  // replaced so Back doesn't come back here. Not on the preview site or in the block library,
+  // where authors look at the page itself
+  const live = !isPreview() && !window.location.pathname.includes('/docs/library/');
+  const leave = () => {
+    if (live) window.location.replace(`/${getSiteFolder() || DEFAULT_SITE}/`);
+    return live;
+  };
+  if (!getCartId() && leave()) return;
   count += 1;
   const texts = takeTexts(block);
   const text = (key) => texts.get(key)?.textContent.trim() || '';
@@ -215,6 +232,8 @@ export default async function decorate(block) {
   const { form } = buildForm(block, {
     fields: FIELDS,
     defaultWidth: 'half',
+    // as the source's: an empty field left shows nothing; Payment shows every message
+    quietEmpty: true,
     // the valid form: the guest and the cart, for the payment step (no API yet)
     onSubmit: (values) => {
       const cart = getCart();
@@ -228,6 +247,29 @@ export default async function decorate(block) {
   });
   form.id = formId;
   form.classList.add('checkout-form');
+  // the contact number's dial code shown short ("+1"), as the source's; the select stays the
+  // control underneath
+  const code = form.querySelector('.form-phone-code');
+  if (code) {
+    const dial = el('span', 'checkout-dial');
+    dial.setAttribute('aria-hidden', 'true');
+    code.parentElement.append(dial);
+    const show = () => { dial.textContent = (code.selectedOptions[0]?.textContent || '').trim().split(/\s+/)[0] || ''; };
+    code.addEventListener('change', show);
+    // (its list arrives later, with its preset)
+    new MutationObserver(() => queueMicrotask(show))
+      .observe(code, { childList: true, subtree: true });
+    show();
+  }
+  // the Privacy Policy and newsletter boxes' links open in a new tab, as the source's
+  ['consent', 'newsletter'].forEach((key) => {
+    fieldElement(form, key)?.querySelectorAll('label a[href]').forEach((a) => {
+      a.target = '_blank';
+      a.rel = 'noopener';
+      const note = el('span', 'visually-hidden', translate('opensInNewTab'));
+      a.append(note);
+    });
+  });
   // the form's own button gives way to Payment (in the summary and the phone bar)
   form.querySelector('.form-submit')?.remove();
 
@@ -268,8 +310,7 @@ export default async function decorate(block) {
     const title = el('h2', 'checkout-summary-title', text('summary'));
     title.id = `${formId}-summary`;
     const box = el('div', 'checkout-summary-box');
-    const totalLabel = el('span', 'checkout-summary-label');
-    totalLabel.append(el('span', '', translate('cartTotal')), el('small', 'checkout-summary-note', translate('cartTotalNote')));
+    const totalLabel = el('span', 'checkout-summary-label', translate('cartTotal'));
     if (!lastCart) {
       box.append(el('p', 'checkout-summary-empty', failure || text('empty')));
       summary.replaceChildren(title, box, paymentButton(text('payment'), formId, 'checkout-payment-summary'));
@@ -280,12 +321,22 @@ export default async function decorate(block) {
       lines.append(...lastCart.lines.map((line, i) => buildLine(line, currency, i)));
       const sums = el('div', 'checkout-summary-totals');
       // the base and the discounts, when there are discounts (as the source's)
-      if (totals.discounts?.length) {
+      if (totals.discounts?.length || totals.promo > 0) {
         sums.append(totalRow('checkout-summary-service', `${translate('cartServiceTotal')}:`, formatAmount(totals.base, currency)));
-        totals.discounts.forEach((d) => sums.append(totalRow('checkout-summary-discount', `${d.name}:`, `- ${formatAmount(d.value, currency)}`)));
+        (totals.discounts || []).forEach((d) => sums.append(totalRow('checkout-summary-discount', `${d.name}:`, `- ${formatAmount(d.value, currency)}`)));
+        if (totals.promo > 0) sums.append(totalRow('checkout-summary-discount checkout-summary-promo-discount', translate('cartPromoDiscount', { code: lastCart.promoCode || '' }), `- ${formatAmount(totals.promo, currency)}`));
       }
+      // the promo code (the mini cart's field), before the total, as the source's
+      const promo = buildPromo(lastCart, {
+        prefix: 'checkout',
+        // eslint-disable-next-line no-use-before-define
+        redraw: (now) => render(now),
+        root: () => summary,
+      });
+      // (the note under the amount, as the source's)
       const total = totalRow('checkout-summary-total', totalLabel, formatAmount(totals.total, currency));
-      box.append(lines, sums, total);
+      total.querySelector('.checkout-summary-amount').append(el('small', 'checkout-summary-note', translate('cartTotalNote')));
+      box.append(lines, sums, promo, total);
       summary.replaceChildren(title, box, paymentButton(text('payment'), formId, 'checkout-payment-summary'));
       // the phone bar: "Total: USD 67.50 (Includes applicable taxes and fees)", then Payment
       const barTotal = el('p', 'checkout-bar-total');
@@ -309,7 +360,12 @@ export default async function decorate(block) {
   };
 
   render(getCart());
-  onCartChange((cart) => render(cart));
+  // the cart emptied meanwhile (the mini cart's removal, another tab): the homepage, as the
+  // source's
+  onCartChange((cart) => {
+    if (((!cart && !getCartId()) || (cart && !cart.lines.length)) && leave()) return;
+    render(cart);
+  });
 
   // the booking system's cart (fresh prices): behind the loader when this tab has none yet, else
   // in the background (the summary shows at once)
@@ -317,7 +373,9 @@ export default async function decorate(block) {
     const first = !getCart();
     if (first) showLoader();
     try {
-      render(await refreshCart());
+      const cart = await refreshCart();
+      if (!cart?.lines.length && leave()) return;
+      render(cart);
     } catch {
       if (first) render(null, text('error'));
     } finally {

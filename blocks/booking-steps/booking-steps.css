@@ -11,8 +11,13 @@ main > .section:has(> .booking-steps-wrapper:first-child) {
   margin-bottom: var(--spacing-9);
 }
 
+/* (the source's steps from 768px: 2px above and below each, so the band is 56px) */
 @media (width >= 768px) {
   .booking-steps-wrapper .booking-steps {
     margin-bottom: var(--spacing-11);
+  }
+
+  .booking-steps-wrapper .booking-steps-item {
+    padding-block: var(--spacing-1);
   }
 }

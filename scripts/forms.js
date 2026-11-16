@@ -270,6 +270,14 @@ function setControlAttributes(control, def) {
   }
   // zeros before a shorter value when the visitor leaves the field (`pad: 3`: "7" → "007"), as the
   // source's flight number
+  // trailing spaces taken off when the visitor leaves the field (`trim end`), as the source's
+  // guest checkout names (its leading ones stay)
+  if (settings.has('trim end')) {
+    control.addEventListener('change', () => {
+      const value = control.value.replace(/\s+$/, '');
+      if (value !== control.value) control.value = value;
+    });
+  }
   const pad = Number(settings.get('pad'));
   if (pad > 0) {
     control.addEventListener('change', () => {
@@ -654,10 +662,20 @@ export function validateField(wrap) {
  * field left empty shows its error), and its error clears (or updates) while they type; a field
  * another one must match is rechecked too.
  * @param {HTMLFormElement} form
+ * @param {{quietEmpty?: boolean}} [options] quietEmpty: an empty field left shows nothing (its
+ *   message waits for the submit), as the source's guest checkout; one already in error still
+ *   updates
  */
-export function attachValidation(form) {
+export function attachValidation(form, { quietEmpty = false } = {}) {
   form.noValidate = true;
   const wrapOf = (target) => target.closest?.('.form-field');
+  // (quietEmpty: an empty field not yet in error stays quiet)
+  const quiet = (wrap) => {
+    if (!quietEmpty || wrap.classList.contains('has-error')) return false;
+    const state = fields.get(wrap);
+    const value = state ? valueOf(state) : '';
+    return value === '' || value === false;
+  };
   const recheck = (wrap) => {
     validateField(wrap);
     // fields that must match this one (e.g. Confirm Email), once the visitor has used them
@@ -671,11 +689,12 @@ export function attachValidation(form) {
     const wrap = wrapOf(e.target);
     if (!wrap || !fields.has(wrap) || wrap.contains(e.relatedTarget)) return;
     wrap.classList.add('is-touched');
+    if (quiet(wrap)) return;
     recheck(wrap);
   });
   const onChange = (e) => {
     const wrap = wrapOf(e.target);
-    if (!wrap) return;
+    if (!wrap || quiet(wrap)) return;
     if (e.type === 'change') wrap.classList.add('is-touched');
     if (wrap.classList.contains('has-error') || (e.type === 'change' && wrap.classList.contains('is-touched'))) recheck(wrap);
   };
@@ -949,7 +968,8 @@ function fieldSettings(field, cells) {
  *   or `{ key }` for the token's key in the data; default `h-captcha-response`), `datePicker`
  *   (`{ build, format }`: scripts/date-picker.js and the date's format, for date fields with
  *   `picker`), `onSubmit` (a function given the valid form's values and the form, instead of the
- *   action: it may answer a message to show, or a Promise of one)
+ *   action: it may answer a message to show, or a Promise of one), `quietEmpty` (true: an empty
+ *   field left shows no message until the submit)
  * @returns {{form: HTMLFormElement, intro: HTMLElement|null}}
  */
 export function buildForm(block, definition) {
@@ -1055,7 +1075,7 @@ export function buildForm(block, definition) {
     button.textContent = sending ? translate('formSending') : buttonText;
   };
 
-  attachValidation(form);
+  attachValidation(form, { quietEmpty: !!definition.quietEmpty });
   linkFields(form);
   form.addEventListener('submit', async (e) => {
     e.preventDefault();

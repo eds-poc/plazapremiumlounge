@@ -550,6 +550,10 @@ const TEXTS = {
     en: 'Services:', zh: '服务:', 'zh-HK': '服務:', ja: 'サービス:', pt: 'Serviços:',
   },
   // (a pass's line)
+  // a pass line's intent pill (the source's: "For me" in every language)
+  cartPassForMe: {
+    en: 'For me', zh: 'For me', 'zh-HK': 'For me', ja: 'For me', pt: 'For me',
+  },
   cartQuantity: {
     en: 'Quantity:', zh: '数量:', 'zh-HK': '數量:', ja: '数量:', pt: 'Quantidade:',
   },

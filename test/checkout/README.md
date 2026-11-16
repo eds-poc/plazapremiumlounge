@@ -20,7 +20,13 @@ It covers:
 - axe on the checkout, the title and the banner (with `AXE_CORE`; the steps band is left out, see
   below)
 
-66 checks.
+- the header without Book Now and the cart (the homepage keeps them); no cart on a live host
+  (http://checkout.test, answered by the preview server): the homepage, also when the cart is
+  emptied on the page
+- quiet empty fields, trailing trim, new-tab links, the short dial code, the promo field (an
+  empty code, capitals, stage's BKNG048)
+
+79 checks.
 
 ```sh
 BW_HOST=http://localhost:3000 PLAYWRIGHT=/path/to/playwright/index.mjs AXE_CORE=/path/to/axe.min.js node test/checkout/checkout.test.mjs

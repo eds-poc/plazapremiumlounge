@@ -161,20 +161,24 @@
 }
 
 /* option card: the source guest checkout's Smart Traveller box (.guest-checkout-st-promo): a white
-   card with a light border and 15px corners, left-aligned 16px text (its first line bold, 20px
-   under each line), then two 15px/600 pill buttons side by side: the outlined one (a maroon
-   border and text, a faint maroon wash on hover) and the filled one (maroon, darker on hover);
-   stacked at full width on phones */
+   card with a light warm border and 18px corners, 28px 32px inside (21.6px 20px on phones),
+   left-aligned 16px text (its first line bold, 20px under each line), then, 24px lower (20px on
+   phones), two 15px/600 pill buttons 16px apart: the outlined one (a maroon border and text, a
+   faint maroon wash on hover) and the filled one (maroon, darker on hover); on phones they share
+   the row (each at least 148px), else each takes the full width */
 .promo.card {
-  --promo-card-padding: var(--spacing-9);
+  --promo-card-padding: 28px 32px;
+  --promo-card-border: 1px solid #e8e4e0;
+  --promo-card-radius: 18px;
+  --promo-card-actions-gap: var(--spacing-stack);
   --promo-card-button-size: 15px;
   --promo-card-button-min: 148px;
   --promo-card-solid-hover: #4f0d28;
   --promo-card-outline-hover: rgb(104 18 53 / 6%);
 
   padding: var(--promo-card-padding);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-md);
+  border: var(--promo-card-border);
+  border-radius: var(--promo-card-radius);
   background: var(--color-background);
   color: var(--color-text);
   font-family: var(--font-family-primary);
@@ -199,7 +203,10 @@
 .promo.card .promo-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-bootstrap-3);
+  gap: var(--spacing-5) var(--spacing-bootstrap-3);
+
+  /* (padding: the text's margin above stays its own, as the source's gap after it) */
+  padding-top: var(--promo-card-actions-gap);
 }
 
 .promo.card .promo-action {
@@ -252,7 +259,8 @@
 
 @media (width < 768px) {
   .promo.card {
-    --promo-card-padding: var(--spacing-7);
+    --promo-card-padding: 21.6px var(--spacing-7);
+    --promo-card-actions-gap: var(--spacing-7);
 
     font-size: var(--font-size-sm);
   }
@@ -261,8 +269,8 @@
     font-size: var(--font-size-sm);
   }
 
-  .promo.card .promo-actions {
-    flex-direction: column;
+  .promo.card .promo-action {
+    flex: 1 1 var(--promo-card-button-min);
   }
 
   .promo.card .promo-action .promo-button {
