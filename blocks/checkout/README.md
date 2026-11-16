@@ -127,10 +127,11 @@ stays in the form's column, beside the summary).
 
 | Promo (card) |
 | --- |
-| **Book your visit with Smart Traveller**<br>**Smart Traveller** members get up to **20% off** and up to **150 ST points** per eligible visit. Register now and unlock a world of exciting benefits! Already a member? Login now!<br>[Log In](#login)<br>**[Sign up now](/en-uk/join-smart-traveller)** |
+| **Book your visit with Smart Traveller**<br>**Smart Traveller** members get up to **20% off** and up to **150 ST points** per eligible visit. Register now and unlock a world of exciting benefits! Already a member? Login now!<br>[Log In](/en-uk/modals/login)<br>**[Sign up now](/en-uk/join-smart-traveller)** |
 
 - The Smart Traveller banner: the first link is the outline button, a **bold** link the filled one;
-  `#login` opens the login pop-up. Leave the block out for no banner.
+  `/{lang}/modals/login` (the header's Log In page) opens the login pop-up over the checkout. Leave
+  the block out for no banner.
 
 | Checkout | | | | |
 | --- | --- | --- | --- | --- |

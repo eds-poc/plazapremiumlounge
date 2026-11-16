@@ -292,7 +292,7 @@ const tick = (page, key, on = true) => page.locator(`${field(key)} input`).setCh
       beside: summary.left > form.right && Math.abs(summary.top - form.top) < 80,
       bar: getComputedStyle(b.querySelector('.checkout-bar')).display,
       ratio: Math.round((form.width / (summary.right - form.left)) * 100),
-      banner: [outline?.textContent, outline?.getAttribute('href'), solid?.textContent, solid && getComputedStyle(solid).backgroundColor],
+      banner: [outline?.textContent, outline?.getAttribute('href') || outline?.dataset.href, solid?.textContent, solid && getComputedStyle(solid).backgroundColor],
       blocks: document.querySelectorAll('main .checkout').length,
       cards: document.querySelectorAll('main .promo.card').length,
       // the banner between the title and the checkout
@@ -302,7 +302,7 @@ const tick = (page, key, on = true) => page.locator(`${field(key)} input`).setCh
   check('desktop: the summary beside the form', d.beside, JSON.stringify(d));
   check('desktop: no bar', d.bar === 'none');
   check('the page: Booking Steps, Title (back), the banner, Checkout, once each', d.blocks === 1 && d.cards === 1 && d.order === 'booking-steps title promo checkout', `${d.order}; ${d.blocks} checkout, ${d.cards} cards`);
-  check('banner: Log In outlined (#login), Sign up now filled', d.banner[0] === 'Log In' && d.banner[1] === '#login' && d.banner[2] === 'Sign up now' && d.banner[3] === 'rgb(104, 18, 53)', JSON.stringify(d.banner));
+  check('banner: Log In outlined (the login modal page), Sign up now filled', d.banner[0] === 'Log In' && d.banner[1] === '/en-uk/modals/login' && d.banner[2] === 'Sign up now' && d.banner[3] === 'rgb(104, 18, 53)', JSON.stringify(d.banner));
 
   if (process.env.AXE_CORE) {
     await desk.addScriptTag({ path: process.env.AXE_CORE });
@@ -315,6 +315,13 @@ const tick = (page, key, on = true) => page.locator(`${field(key)} input`).setCh
     });
     check('axe: no violations', !violations.length, violations.join(', '));
   }
+  // a click: the language's login modal opens over the checkout (its title, focus inside), the
+  // address unchanged
+  const before = desk.url();
+  await desk.locator('main .promo.card .is-outline .promo-button').click();
+  await desk.waitForFunction(() => document.querySelector('dialog[open]'), null, { timeout: 10000 }).catch(() => {});
+  const login = await desk.evaluate(() => { const dlg = document.querySelector('dialog[open]'); return dlg && { title: dlg.querySelector('h1, h2, h3, .modal-title')?.textContent.trim(), focusIn: dlg.contains(document.activeElement) }; });
+  check('banner: Log In opens the login modal, the page stays', login?.title === 'Log In' && login.focusIn && desk.url() === before, JSON.stringify({ login, url: desk.url() }));
   await desk.close();
 }
 

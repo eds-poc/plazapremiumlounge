@@ -31,7 +31,9 @@ It covers:
 
 - a 3-digit dial code (+852) widening the dial code's part, the number after the line
 
-98 checks.
+- the Smart Traveller card's Log In opening the login modal over the checkout
+
+99 checks.
 
 ```sh
 BW_HOST=http://localhost:3000 PLAYWRIGHT=/path/to/playwright/index.mjs AXE_CORE=/path/to/axe.min.js node test/checkout/checkout.test.mjs

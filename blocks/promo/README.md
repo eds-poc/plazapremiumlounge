@@ -39,10 +39,10 @@ arrow.
 
 | Promo (card) |
 | --- |
-| **Book your visit with Smart Traveller**<br>**Smart Traveller** members get up to **20% off** and up to **150 ST points** per eligible visit. Register now and unlock a world of exciting benefits! Already a member? Login now!<br>[Log In](#login)<br>**[Sign up now](/en-uk/join-smart-traveller)** |
+| **Book your visit with Smart Traveller**<br>**Smart Traveller** members get up to **20% off** and up to **150 ST points** per eligible visit. Register now and unlock a world of exciting benefits! Already a member? Login now!<br>[Log In](/en-uk/modals/login)<br>**[Sign up now](/en-uk/join-smart-traveller)** |
 
-- Each line is its own paragraph. A line holding only a link is a button; `#login` opens the
-  login pop-up.
+- Each line is its own paragraph. A line holding only a link is a button; a link to the
+  language's login page in the `modals` folder (`/en-uk/modals/login`) opens the login pop-up.
 
 ### Example: light
 
