@@ -19,6 +19,8 @@ import {
 } from './cart.js';
 import { getCurrency } from './currency.js';
 // eslint-disable-next-line import/no-cycle
+import { PAGE_VIEW, pushEvent } from './datalayer.js';
+// eslint-disable-next-line import/no-cycle
 import { hideLoader, showLoader } from './scripts.js';
 
 const styles = loadCSS(`${window.hlx.codeBasePath}/styles/cart.css`);
@@ -518,6 +520,47 @@ function renderMiniCart(cart) {
 }
 
 /**
+ * The data layer's page view as the mini cart opens ("page load"), from the cart as shown: the
+ * booking (the first line's start as YYYY-MM-DDTHH:MM:SSZ, its guests), the lounge and its
+ * location (no IATA code: the cart API has none), the promo code and its amount (only when the
+ * cart API gives a code), and every product with its prices.
+ * @param {Object} cart The cart's summary (see readCart in cart.js)
+ */
+function trackCartView(cart) {
+  const [first] = cart.lines;
+  const promoAmount = cart.totals.promo || 0;
+  pushEvent(PAGE_VIEW, 'page load', {
+    _plazapremiumloungemanagementli: {
+      bookingInfo: {
+        // the lounge's local time as the cart API gives it ("2026-11-28 15:00:00"), not converted
+        checkinDateTime: first.start ? `${first.start.replace(' ', 'T')}Z` : null,
+        daysToBooking: 0,
+        totalGuestCount: first.adults + first.children,
+        adultCount: first.adults,
+        childCount: first.children,
+        promocodeValuePayCurr: promoAmount,
+      },
+      locationDetails: { iataCode: '', locationName: first.locationName },
+      outletDetails: { outletId: first.propertyCode, outletName: first.propertyName },
+      // (only with a promo code from the cart API)
+      ...(cart.promoCode && {
+        offerDetails: { promoCode: cart.promoCode, promocodeValuePayCurr: promoAmount },
+      }),
+      productList: cart.lines.map((line) => ({
+        sku: line.productCode,
+        name: line.productName,
+        category: line.category,
+        actualPricePayCurr: line.basePrice,
+        discountPayCurr: line.discount,
+        sellPricePayCurr: line.total,
+        quantity: line.quantity,
+      })),
+      formDetails: { formName: 'ppl lounge booking', formStepName: 'cart view' },
+    },
+  });
+}
+
+/**
  * Opens the mini cart (when the cart holds something), then reads the cart again in the
  * background, so it shows at once and stays right. A cart of passes in another currency than the
  * visitor's is priced in theirs first, behind the loader (the source shows its cart in the page's
@@ -558,6 +601,7 @@ export async function openMiniCart(trigger, { fresh = false } = {}) {
   }
   renderMiniCart(cart);
   const dialog = await mini.open(trigger);
+  if (dialog) trackCartView(cart);
   // (not when the cart was just read: after an add, a first read or a conversion)
   if (!read && !convert) refreshCart().catch(() => {});
   return dialog;
