@@ -31,6 +31,22 @@ folder serves every lounge: `/en-uk/find/lounge`, `/zh-cn/find/lounge`, `/zh-hk/
   - Keys as the source: the arrow keys and Page Up/Down move, Escape (or Delete) closes. Drag or
     swipe sideways to move, down to close. The focus returns to the photo that opened it.
 
+## Pass properties
+
+A property of passes (`propertyTypeCode` `GFTCRD`) that's active (`status` `Active`), e.g.
+`?propertycode=PRPRTY1312`, shows its passes instead of the booking form, as the source's pass
+pages (e.g. Plaza Premium Lounge Pass, Hong Kong):
+
+- **Desktop:** the grey title band (the name and location) and the breadcrumb; **phones:** neither,
+  as the source.
+- The description, full width.
+- The property's passes: a [Product Passes](../product-passes/README.md) block with the `raised`
+  option (3 cards per row on desktop, 2 from 576px, 1 on phones), asked for with the property's
+  code, its airport code and `isGlobal`, in the visitor's currency. Learn more and Add to Cart as
+  on any pass card.
+- No photos, booking form, Book your visit bar or panels, and no services or price requests; the
+  address keeps no date or time.
+
 ## Table: two columns, a setting per row (all optional)
 
 | Property Detail | |

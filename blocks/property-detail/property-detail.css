@@ -1059,6 +1059,12 @@ dialog.modal.property-detail-modal {
   margin-bottom: 0;
 }
 
+/* a pass property's page: the description, then its passes (the Product Passes block), as the
+   source's */
+.property-detail-passes .product-passes-wrapper {
+  margin-top: var(--spacing-11);
+}
+
 .property-detail-note {
   color: var(--color-text);
 }

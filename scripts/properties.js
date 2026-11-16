@@ -260,17 +260,22 @@ export function fetchPass(productCode, { propertyCode, iataCode }, currency, tim
  * Every pass from the passes service, in a currency, by product code: one call (the service takes
  * one code per call, so for several passes this is quicker and lighter than a call each). With
  * `productCodes`, they're sent as the request's `productCode` list (the service answers its passes
- * for them). The list is also kept for the session (see readPassList).
- * @param {{propertyCode: string, iataCode: string, productCodes?: string[]}} context See
- *   getApiContext
+ * for them); with `isGlobal`, the request's `isGlobal` is "true" (a pass property's passes need
+ * it). The list is also kept for the session (see readPassList).
+ * @param {{propertyCode: string, iataCode: string, productCodes?: string[], isGlobal?: boolean}}
+ *   context See getApiContext
  * @param {string} currency e.g. USD
  * @param {number} timeout ms
  * @returns {Promise<Map<string, Object>>}
  */
 export function fetchPassList(context, currency, timeout) {
-  const { propertyCode, iataCode, productCodes = [] } = context;
+  const {
+    propertyCode, iataCode, productCodes = [], isGlobal = false,
+  } = context;
   const query = { propertyCode, iataCode, currencyCode: currency };
   if (productCodes.length) query.productCode = productCodes;
+  // (the service takes it as text)
+  if (isGlobal) query.isGlobal = 'true';
   return fetchPassItems(query, timeout).then((items) => {
     const list = new Map(items.filter((item) => item?.productCode)
       .map((item) => [item.productCode, item]));
@@ -284,9 +289,13 @@ export function fetchPassList(context, currency, timeout) {
 // service answers in 5-7s) while a fresh list is asked for; older than this, it isn't used
 const PASS_LIST_KEY = 'ppl-pass-list';
 const PASS_LIST_MAX_AGE = 30 * 60 * 1000;
-// (a list asked for with product codes is kept apart from the full one)
-const passListKey = ({ propertyCode, iataCode, productCodes = [] }, currency) => [
-  PASS_LIST_KEY, propertyCode, iataCode, currency, ...(productCodes.length ? [productCodes.join(',')] : []),
+// (a list asked for with product codes, or as global, is kept apart from the full one)
+const passListKey = ({
+  propertyCode, iataCode, productCodes = [], isGlobal = false,
+}, currency) => [
+  PASS_LIST_KEY, propertyCode, iataCode, currency,
+  ...(productCodes.length ? [productCodes.join(',')] : []),
+  ...(isGlobal ? ['global'] : []),
 ].join(':');
 
 /**

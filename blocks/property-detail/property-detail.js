@@ -14,7 +14,7 @@ import {
 } from '../../scripts/booking.js';
 import buildDatePicker from '../../scripts/date-picker.js';
 import {
-  buildBadge, buildSlider, el, fetchJson, getApiLanguage, isPreview, readProperty,
+  PASS, buildBadge, buildSlider, el, fetchJson, getApiLanguage, isPreview, readProperty,
   safeHtml, setLoading, toKey, toUrl,
 } from '../../scripts/properties.js';
 import { daysUntil, toUtcDateTime } from '../../scripts/utility.js';
@@ -30,6 +30,8 @@ const MOBILE = '(width < 768px)';
 // desktop shows the first four photos, as the source
 const DESKTOP_PHOTOS = 4;
 const DEFAULT_CURRENCY = 'USD';
+// a property shown as its passes (no booking): a pass property (gift cards) that's active
+const PASS_STATUS = 'Active';
 
 /**
  * The page address's lounge and booking choices, as the source detail pages use them
@@ -177,6 +179,8 @@ function readDetail(json) {
       .filter((file) => /^https?:/.test(file.href || ''))
       .sort((a, b) => a.order - b.order)[0]?.href || '',
     description: detail.description || '',
+    // shown as its passes, without the booking form (see renderPasses)
+    passProperty: detail.propertyTypeCode === PASS && detail.status === PASS_STATUS,
     timeZone: readTimeZone(detail.timeZone),
     iata,
     leadMinutes: readLeadTime(detail.leadTime),
@@ -1130,6 +1134,35 @@ function buildBar(lounge, booking, settings) {
 }
 
 /**
+ * A pass property's page, as the source's: the name in the band, the breadcrumb, the description,
+ * then the property's passes (a Product Passes block, raised, asked for with the property's code,
+ * its airport and isGlobal); no photos, booking form or panels.
+ * @param {HTMLElement} block
+ * @param {Object} lounge See readDetail
+ */
+async function renderPasses(block, lounge) {
+  const band = el('div', 'property-detail-band');
+  band.append(buildHero(lounge));
+  const description = el('div', 'property-detail-description');
+  description.append(safeHtml(lounge.description, { blocks: true }));
+  const passes = buildBlock('product-passes', [
+    ['propertycode', lounge.code],
+    ['iata-code', lounge.iata],
+    ['isGlobal', 'true'],
+  ]);
+  passes.classList.add('raised');
+  const wrapper = el('div', 'product-passes-wrapper');
+  wrapper.append(passes);
+  const body = el('div', 'property-detail-body');
+  body.append(buildCrumbs(lounge), description, wrapper);
+  block.classList.add('property-detail-passes');
+  block.replaceChildren(band, body);
+  decorateBlock(passes);
+  await loadBlock(passes);
+  setHead(lounge, safeHtml(lounge.description, { blocks: true }));
+}
+
+/**
  * Decorates the property detail block: one lounge, loaded from the detail service by the page
  * address's `propertycode` (with `currency`, `date` and `time`), as the source detail pages. The
  * block itself only holds optional settings (signup-button); everything else comes from the
@@ -1167,6 +1200,10 @@ export default async function decorate(block) {
     }
     if (!lounge) {
       showMessage(block, translate('propertyNotFound'), null, `Property "${params.code}" isn't active or isn't a lounge or pass.`);
+      return;
+    }
+    if (lounge.passProperty) {
+      await renderPasses(block, lounge);
       return;
     }
     const mobile = window.matchMedia(MOBILE);
