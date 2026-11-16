@@ -10,9 +10,12 @@ import { DEFAULT_SITE, getSiteFolder, translate } from './i18n.js';
 import { hideLoader, showLoader } from './scripts.js';
 import { isIsoDate } from './booking.js';
 
-// property types shown, as the source pages: lounges, and passes (gift cards)
+// property types shown, as the source pages: lounges, and passes (gift cards); the detail page
+// also shows external partners' services and airport dining
 export const LOUNGE = 'LOUNGE';
 export const PASS = 'GFTCRD';
+export const EXTERNAL = 'EXTNL';
+export const AIRPORT_DINING = 'ARPRTDNG';
 const SWIPE_PX = 40;
 // the API's language code by site folder; other folders are sent as they are (zh-cn, pt-br …)
 const API_LANGUAGES = { 'en-uk': 'en' };
@@ -407,15 +410,16 @@ export function propertyDetailUrl(code, {
 
 /**
  * Reads one API record (a listing item or a property detail) into what the cards, the filters and
- * the detail page need, or null for a record that isn't shown (not active, another type, or
- * without a name).
+ * the detail page need, or null for a record that isn't shown (not active, not one of the types,
+ * or without a name).
  * @param {Object} item
+ * @param {string[]} [types] The property types shown: lounges and passes, unless said otherwise
  * @returns {Object|null}
  */
-export function readProperty(item) {
+export function readProperty(item, types = [LOUNGE, PASS]) {
   const type = item.propertyTypeCode;
   const name = (item.propertyDisplayName || item.propertyName || '').trim();
-  if (item.status !== 'Active' || ![LOUNGE, PASS].includes(type) || !name) return null;
+  if (item.status !== 'Active' || !types.includes(type) || !name) return null;
   const descriptions = Array.isArray(item.loungeDescription) ? item.loungeDescription : [];
   const describe = (kind) => descriptions.find((d) => d.type === kind);
   const iata = (item.iataCode || '').trim();
