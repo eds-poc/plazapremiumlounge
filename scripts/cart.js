@@ -253,16 +253,15 @@ function readLine(p) {
     // and its amount (each line the code applies to carries its own)
     promo: readLinePromo(p),
     // for analytics (scripts/mini-cart.js trackCartView): the service's own names, the product's
-    // category, and its price before discounts and its discounts
+    // category, and the line's price before discounts and its rate plan discounts (as `total`,
+    // the line's: its quantity included)
     propertyCode: text(p?.propertyCode),
     propertyName: text(p?.propertyName),
     locationName: text(p?.locationName),
     productName: text(p?.productName),
     category: text(p?.productType) || text(p?.serviceType),
-    basePrice: (p?.itemPriceDetails?.baseRate || [])
-      .reduce((sum, r) => sum + (Number(r?.price) || 0), 0),
-    discount: (p?.itemPriceDetails?.discounts || [])
-      .reduce((sum, d) => sum + (Number(d?.value) || 0), 0),
+    basePrice: Number(price.totalBasePrice),
+    discount: Number(price.totalDiscounts) || 0,
   };
 }
 

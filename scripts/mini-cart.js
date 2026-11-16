@@ -550,8 +550,9 @@ function trackCartView(cart) {
         sku: line.productCode,
         name: line.productName,
         category: line.category,
+        // the line's prices, its quantity included; the rate plan discount only when there is one
         actualPricePayCurr: line.basePrice,
-        discountPayCurr: line.discount,
+        ...(line.discount > 0 && { discountPayCurr: line.discount }),
         sellPricePayCurr: line.total,
         quantity: line.quantity,
       })),
