@@ -322,5 +322,23 @@ export default function decorate(block) {
     }
   });
 
+  // the login modal's data layer link clicks: Log In with the email and password filled in
+  // ("login"), and its Forgot Password? link ("forgot password")
+  if (form.dataset.action === 'login') {
+    form.addEventListener('click', (e) => {
+      const filled = [...form.querySelectorAll('input[type="email"], input[type="password"]')]
+        .every((input) => input.value.trim());
+      let eventName = '';
+      if (e.target.closest('button[type="submit"]') && filled) eventName = 'login';
+      else if (e.target.closest('a[href*="/modals/forgot-password"]')) eventName = 'forgot password';
+      if (!eventName) return;
+      import('../../scripts/datalayer.js').then(({ pushEvent }) => {
+        pushEvent('web.webInteraction.linkClicks', eventName, {
+          web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
+        });
+      });
+    });
+  }
+
   block.replaceChildren(form);
 }

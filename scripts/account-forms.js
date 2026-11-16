@@ -15,6 +15,7 @@
 import apiUrl from './endpoints.js';
 import { translate } from './i18n.js';
 import { isTokenValid, redirectTarget, setToken } from './auth.js';
+import { pushEvent } from './datalayer.js';
 import { storeMember } from './member.js';
 
 /**
@@ -81,6 +82,11 @@ function login(form) {
       // the member's details for analytics, kept before the page moves on (the button stays
       // busy meanwhile; at most a few seconds, then the page moves on without them)
       return storeMember(token).then(() => {
+        // the data layer's "login success" link click, with the member's identities kept just now
+        const eventName = 'login success';
+        pushEvent('web.webInteraction.linkClicks', eventName, {
+          web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
+        });
         // back to the members' page the visitor came from (replacing the home page in the history)
         const target = redirectTarget();
         if (target) window.location.replace(target);

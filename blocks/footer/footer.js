@@ -1,5 +1,6 @@
 import { loadFragment } from '../fragment/fragment.js';
 import { getDefaultSharedPagePath, getSharedPagePath } from '../../scripts/i18n.js';
+import { isLeaveSiteLink } from '../../scripts/leave-site.js';
 
 const HEADINGS = 'h1, h2, h3, h4, h5, h6';
 const IMAGE_LINK = /\.(jpe?g|png|webp|gif|avif)(\?|#|$)/i;
@@ -216,6 +217,16 @@ function buildColumns(section) {
     panel.id = `footer-column-panel-${i + 1}`;
     const panelInner = el('div', 'footer-column-panel-inner');
     panelInner.append(...buildColumnBody(entries));
+    // the social column: only icon links (no text, no text links), whatever its title or language.
+    // Its links to other websites ask first (the shared leave-site popup, scripts/leave-site.js)
+    // and then open in this tab, as the source
+    const body = [...panelInner.children];
+    if (body.length && body.every((n) => n.matches('.footer-media-list'))) {
+      col.classList.add('footer-column-social', 'leave-site');
+      panelInner.querySelectorAll('a[href]').forEach((a) => {
+        if (isLeaveSiteLink(a)) a.removeAttribute('target');
+      });
+    }
     panel.append(panelInner);
     if (title) {
       const h = el('h3', 'footer-column-title');

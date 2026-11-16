@@ -26,6 +26,10 @@ const BOOKING_ENDPOINTS = {
   // a promo code for the cart (PUT, JSON: cartId, promocode; an empty code takes it off). Its
   // answers aren't known yet: no valid code to try on stage (see docs/cart.md)
   cartPromo: '/api/v1/web/ppg-app/cart-validate-promocode',
+  // the passes (products) with their prices (POST, JSON: propertyCode, iataCode, currencyCode,
+  // optionally productCode, one code or a list, and startDateTime "YYYY-MM-DD HH:mm:ss"; every
+  // pass without productCode)
+  productPasses: '/api/v1/web/ppg-app/GetProductPasses',
 };
 
 // endpoint paths, joined to the API domain
@@ -67,8 +71,6 @@ const ENDPOINTS = {
   propertyServices: '/api/v1/web/app_demo/GetServices',
   // the price of a service's product for a start time and guests (POST, JSON body)
   propertyPrice: '/api/v1/web/app_demo/GetPrice',
-  // a pass (product) with its prices, for a product code and currency (GET)
-  productPasses: '/api/v1/web/app_demo/GetProductPasses',
   // the logged-in member's bookings (POST, JSON: languageCode, propertyTypeCode, status; the
   // login token as a Bearer token)
   bookingList: '/api/v1/web/app_demo/GetBookingList',

@@ -5,9 +5,9 @@
 .property-card {
   --property-card-tag-bg: color-mix(in srgb, var(--color-brand-primary-action) 10%, transparent);
   --property-card-shadow: 0 4px 6px -1px rgb(0 0 0 / 5%);
-  --property-card-shadow-hover: 0 10px 15px -3px rgb(0 0 0 / 10%);
+  --property-card-shadow-hover: var(--shadow-card-hover);
   --property-card-bg-hover: #d9d9d9;
-  --property-card-lift: -4px;
+  --property-card-lift: var(--lift-card-hover);
   --property-card-border: var(--color-border-card);
   --property-card-border-bottom: #ccc;
   --property-card-gallery-ratio: var(--ratio-property-photo);

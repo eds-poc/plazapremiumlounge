@@ -95,8 +95,8 @@ async function openPasses({
     path,
     extraRoute: async (p) => {
       if (init) await p.addInitScript(init);
-      await p.route(/app_demo\/GetProductPasses/, (r) => {
-        const code = new URL(r.request().url()).searchParams.get('productCode');
+      await p.route(/ppg-app\/GetProductPasses/, (r) => {
+        const code = r.request().postDataJSON()?.productCode;
         const items = code ? PASSES.items.filter((i) => i.productCode === code) : PASSES.items;
         return r.fulfill(json({ ...PASSES, count: items.length, items }));
       });
@@ -399,7 +399,7 @@ for (const [label, fail, before] of [
   const service = cartService();
   const asked = [];
   const page = await openPasses({ service });
-  page.on('request', (r) => { if (/GetProductPasses/.test(r.url())) asked.push(new URL(r.url()).searchParams.get('currencyCode')); });
+  page.on('request', (r) => { if (/GetProductPasses/.test(r.url())) asked.push(r.postDataJSON()?.currencyCode); });
   const { 'Global 2-Visit Pass': A } = await codes(page);
   await page.locator(`.quick-buy button[data-pass-add][data-catalogue-code="${A}"]`).click();
   await page.waitForSelector('dialog.mini-cart-modal[open]', { timeout: 15000 });

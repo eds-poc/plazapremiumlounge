@@ -208,6 +208,24 @@ export function buildAddButton(pass, className, eventName, named = true) {
   return add;
 }
 
+/**
+ * A pass's Learn more button (its card's), opening the pass's pop-up (see openPassDetails), named
+ * with the pass for screen readers.
+ * @param {Object} pass
+ * @param {string} className
+ * @param {string} eventName The pop-up's Add to Cart event
+ * @returns {HTMLButtonElement}
+ */
+export function buildLearnButton(pass, className, eventName) {
+  const learn = el('button', className, translate('quickBuyLearnMore'));
+  learn.type = 'button';
+  learn.setAttribute('aria-haspopup', 'dialog');
+  learn.setAttribute('aria-label', `${translate('quickBuyLearnMore')}: ${pass.name}`);
+  // eslint-disable-next-line no-use-before-define
+  learn.addEventListener('click', () => openPassDetails(pass, learn, eventName));
+  return learn;
+}
+
 // the promotional address's pass: ?selectedPassID=PRD2884 (any case)
 const SELECTED_PASS = 'selectedpassid';
 let selectedTaken = false;
