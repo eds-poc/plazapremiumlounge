@@ -47,7 +47,7 @@ const FIELDS = {
   },
   // a lounge's flight (not a pass's): the airline, and the flight number's digits (at most 4,
   // "7" becomes "007")
-  flight: { type: 'text', key: 'arrivalDepartureFlight', settings: { 'max length': 200 } },
+  flight: { type: 'text', key: 'arrivalDepartureFlight', settings: { 'max length': 200, suggestions: '' } },
   flightNumber: { type: 'text', key: 'flightNumber', settings: { rule: 'flight', pad: 3 } },
   partnerId: { type: 'text', key: 'partnerId', settings: { 'max length': 200 } },
   partnerName: { type: 'text', key: 'partnerName', settings: { 'max length': 200 } },

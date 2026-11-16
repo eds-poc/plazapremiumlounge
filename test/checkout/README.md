@@ -26,7 +26,10 @@ It covers:
 - quiet empty fields, trailing trim, new-tab links, the short dial code, the promo field (an
   empty code, capitals, stage's BKNG048)
 
-79 checks.
+- the Arrival / Departure Flight list (opens on focus with the 136 airlines, filters, a click or
+  ↓ Enter fills, Escape or leaving closes, free text kept; its look) at 1440 and 375
+
+97 checks.
 
 ```sh
 BW_HOST=http://localhost:3000 PLAYWRIGHT=/path/to/playwright/index.mjs AXE_CORE=/path/to/axe.min.js node test/checkout/checkout.test.mjs

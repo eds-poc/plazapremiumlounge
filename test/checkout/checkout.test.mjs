@@ -382,6 +382,55 @@ const tick = (page, key, on = true) => page.locator(`${field(key)} input`).setCh
   await page.close();
 }
 
+// the Arrival / Departure Flight list, as the source's (its 136 airlines, from the Placeholder cell)
+for (const width of [1440, 375]) {
+  const page = await open({ width, height: width < 768 ? 812 : 900 });
+  const flight = page.locator(`${field('arrivalDepartureFlight')} input`);
+  const list = () => page.evaluate(() => {
+    const l = document.querySelector('.checkout .form-field[data-key="arrivalDepartureFlight"] .form-suggest-list');
+    const i = document.querySelector('.checkout .form-field[data-key="arrivalDepartureFlight"] input');
+    const shown = [...l.querySelectorAll('.form-suggest-option')].filter((o) => !o.hidden);
+    const r = l.getBoundingClientRect();
+    const ir = i.getBoundingClientRect();
+    const o = shown[0]?.getBoundingClientRect();
+    return {
+      open: !l.hidden, expanded: i.getAttribute('aria-expanded'), role: i.getAttribute('role'), count: l.children.length, shown: shown.map((x) => x.textContent), value: i.value,
+      under: Math.round(r.top - ir.bottom), sameWidth: Math.round(r.width) === Math.round(ir.width), height: Math.round(r.height), item: o ? Math.round(o.height) : 0, border: getComputedStyle(l).borderTopStyle + '/' + getComputedStyle(l).borderBottomWidth,
+    };
+  });
+  await flight.scrollIntoViewIfNeeded();
+  check(`${width} flight list: closed to start with, a combobox`, !(await list()).open && (await list()).role === 'combobox' && (await list()).expanded === 'false');
+  await flight.click();
+  let m = await list();
+  check(`${width} flight list: opens under the field on focus, the source's 136 airlines, Cathay Pacific first`, m.open && m.expanded === 'true' && m.count === 136 && m.shown.length === 136 && m.shown[0] === 'Cathay Pacific (CX)', JSON.stringify({ ...m, shown: m.shown.length }));
+  check(`${width} flight list: as the source's look: right under the field, its width, 100px tall, ${width < 768 ? 36 : 38}px items, no top border`, m.under === 0 && m.sameWidth && m.height === 100 && m.item === (width < 768 ? 36 : 38) && m.border === 'none/1px', JSON.stringify({ ...m, shown: m.shown.length }));
+  await flight.pressSequentially('cath');
+  m = await list();
+  check(`${width} flight list: typing "cath" keeps Cathay Pacific only`, m.open && m.shown.join() === 'Cathay Pacific (CX)', m.shown.join(' | '));
+  await page.locator(`${field('arrivalDepartureFlight')} .form-suggest-option:not([hidden])`).first().click();
+  m = await list();
+  check(`${width} flight list: a click fills the field and closes the list`, m.value === 'Cathay Pacific (CX)' && !m.open && m.expanded === 'false', JSON.stringify({ value: m.value, open: m.open }));
+  await flight.fill('');
+  await flight.pressSequentially('zzz');
+  m = await list();
+  check(`${width} flight list: nothing matching: closed, the text kept (free text allowed)`, !m.open && m.value === 'zzz', JSON.stringify({ value: m.value, open: m.open }));
+  await flight.fill('');
+  await flight.pressSequentially('hong');
+  await page.keyboard.press('ArrowDown');
+  const active = await page.evaluate(() => document.querySelector('.checkout .form-field[data-key="arrivalDepartureFlight"] input').getAttribute('aria-activedescendant'));
+  await page.keyboard.press('Enter');
+  m = await list();
+  check(`${width} flight list: ↓ then Enter chooses (Hong Kong Airlines), the form not sent`, !!active && m.value === 'Hong Kong Airlines (HX)' && !m.open && (await page.evaluate(() => window.payments.length)) === 0, JSON.stringify({ active, value: m.value }));
+  await flight.fill('');
+  await flight.click();
+  await page.keyboard.press('Escape');
+  check(`${width} flight list: Escape closes it`, !(await list()).open);
+  await flight.click();
+  await page.locator(`${field('flightNumber')} input`).click();
+  check(`${width} flight list: leaving the field closes it`, !(await list()).open);
+  await page.close();
+}
+
 // the page's other blocks: Booking Steps and Title (back), desktop and phone
 for (const width of [1440, 375]) {
   const page = await open({ width, height: width < 768 ? 812 : 900 });

@@ -130,6 +130,56 @@
   border-radius: 0 var(--radius-input) var(--radius-input) 0;
 }
 
+/* a text field's suggestions (e.g. the guest checkout's airlines), as the source's list: white,
+   right under the field, a light grey border without a top, 100px tall then scrolling, 8px
+   around each suggestion, light grey under the pointer or the keyboard */
+.form-fields .form-suggest {
+  --form-suggest-height: 100px;
+  --form-suggest-border: 1px solid #ccc;
+  --form-suggest-hover: #f1f1f1;
+
+  position: relative;
+}
+
+.form-fields .form-suggest-list {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  z-index: 1;
+  box-sizing: border-box;
+  max-height: var(--form-suggest-height);
+  overflow-y: auto;
+  margin: 0;
+  border: var(--form-suggest-border);
+  border-top: 0;
+  padding: 0;
+  background-color: var(--color-background);
+  list-style: none;
+  scrollbar-color: var(--color-background) var(--color-brand-primary);
+  scrollbar-width: thin;
+}
+
+.form-fields .form-suggest-list[hidden] {
+  display: none;
+}
+
+.form-fields .form-suggest-option {
+  padding: var(--spacing-3);
+  color: var(--color-text);
+  font-size: var(--body-font-size);
+  line-height: var(--line-height-body);
+  cursor: pointer;
+}
+
+.form-fields .form-suggest-option[hidden] {
+  display: none;
+}
+
+.form-fields .form-suggest-option:is(:hover, .is-active) {
+  background-color: var(--form-suggest-hover);
+}
+
 /* checkboxes: a 14px round maroon ring that fills when checked, the label 12px after */
 .form-fields .form-field-checkbox {
   display: flex;

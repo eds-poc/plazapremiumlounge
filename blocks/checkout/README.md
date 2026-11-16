@@ -35,6 +35,10 @@ the cart's terms, and beside them (a third of the row, from 992px) the **Booking
 - Leaving an empty field shows nothing; the format messages (contact number, emails) show when
   the visitor leaves the field, and every message on Payment.
 - First and last names lose trailing spaces when left (leading ones stay).
+- Arrival / Departure Flight: the airlines in its row's Placeholder cell, one per line (live's 136,
+  the same for every lounge), open under the field when the visitor goes into it; typing keeps the
+  airlines holding what's typed (any case), a click (or ↓ ↑ and Enter) fills the field, Escape or
+  leaving closes the list. Any other text stays allowed, as the source's.
 - Contact No.: one rounded field, the dial code shown short ("+1", following the country) at its
   left; it stays a real dropdown for the keyboard and screen readers.
 - The Privacy Policy and newsletter boxes' links open in a new tab.
@@ -72,7 +76,7 @@ stays in the form's column, beside the summary).
 | phone | Contact No. | | yes | Please fill in contact number<br>Please fill in valid contact number |
 | email | Email Address | | yes | Please fill in email address.<br>Please enter a valid email address |
 | confirmEmail | Confirm Email Address | | yes | Please retype the email address<br>Email do not match |
-| flight | Arrival / Departure Flight | | | |
+| flight | Arrival / Departure Flight | Cathay Pacific (CX)<br>Hong Kong Airlines (HX)<br>Malaysia Airlines (MH)<br>… | | |
 | flightNumber | Flight Number | | | (empty line)<br>Flight number must be a maximum of 4 digits. |
 | partnerId | Partner / Membership ID | | | |
 | partnerName | Partner Name | | | |
@@ -168,7 +172,6 @@ That step needs the booking system's own APIs, which this site doesn't have yet:
 ## Not yet
 
 - The "DEPARTURES LOUNGE" badge (no cart field known for it).
-- The source's airline list in the Arrival / Departure Flight field (no data source known).
 - A pass bought as a gift: the "Gift" pill and the "Buying for yourself or someone else?" steps
   (the passes page has no gift mode yet).
 - A login for products that require one (`isStLoginMandatory`).

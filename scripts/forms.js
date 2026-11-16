@@ -185,6 +185,100 @@ function loadSource(state, select, map) {
   });
 }
 
+let suggestCount = 0;
+
+/**
+ * A text field's suggestions (`suggestions`: the Placeholder cell's lines), as the source's guest
+ * checkout airline list: the list opens under the field when the visitor goes into it, typing keeps
+ * the suggestions holding what's typed (any case), choosing one fills the field; anything else
+ * typed stays allowed. A combobox: ↓ ↑ move through the list, Enter chooses, Escape closes.
+ * @param {HTMLElement} box The control's wrapper (the list goes under the control)
+ * @param {HTMLInputElement} control
+ * @param {string[]} items
+ */
+function attachSuggestions(box, control, items) {
+  suggestCount += 1;
+  const list = el('ul', 'form-suggest-list');
+  list.id = `form-suggest-${suggestCount}`;
+  list.setAttribute('role', 'listbox');
+  list.hidden = true;
+  const options = items.map((text, i) => {
+    const option = el('li', 'form-suggest-option');
+    option.id = `${list.id}-${i}`;
+    option.setAttribute('role', 'option');
+    option.textContent = text;
+    return option;
+  });
+  list.append(...options);
+  box.classList.add('form-suggest');
+  box.append(list);
+  control.setAttribute('role', 'combobox');
+  control.setAttribute('aria-autocomplete', 'list');
+  control.setAttribute('aria-controls', list.id);
+  control.setAttribute('aria-expanded', 'false');
+  control.autocomplete = 'off';
+  let active = -1;
+  const shown = () => options.filter((o) => !o.hidden);
+  const setActive = (option) => {
+    options.forEach((o) => {
+      o.classList.toggle('is-active', o === option);
+      o.setAttribute('aria-selected', String(o === option));
+    });
+    active = option ? options.indexOf(option) : -1;
+    if (option) {
+      control.setAttribute('aria-activedescendant', option.id);
+      option.scrollIntoView({ block: 'nearest' });
+    } else control.removeAttribute('aria-activedescendant');
+  };
+  const close = () => {
+    list.hidden = true;
+    control.setAttribute('aria-expanded', 'false');
+    setActive(null);
+  };
+  // the suggestions holding what's typed; open when there are some
+  const open = () => {
+    const typed = control.value.trim().toLowerCase();
+    options.forEach((o) => { o.hidden = !!typed && !o.textContent.toLowerCase().includes(typed); });
+    const any = shown().length > 0;
+    list.hidden = !any;
+    control.setAttribute('aria-expanded', String(any));
+    if (!any) setActive(null);
+  };
+  const choose = (option) => {
+    control.value = option.textContent;
+    control.dispatchEvent(new Event('input', { bubbles: true }));
+    control.dispatchEvent(new Event('change', { bubbles: true }));
+    close();
+  };
+  control.addEventListener('focus', open);
+  control.addEventListener('input', () => { setActive(null); open(); });
+  control.addEventListener('keydown', (e) => {
+    const visible = shown();
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (list.hidden) open();
+      if (!visible.length) return;
+      const at = visible.indexOf(options[active]);
+      const next = e.key === 'ArrowDown' ? Math.min(at + 1, visible.length - 1) : Math.max(at - 1, 0);
+      setActive(visible[at < 0 && e.key === 'ArrowUp' ? visible.length - 1 : next]);
+    } else if (e.key === 'Enter' && !list.hidden && active >= 0) {
+      e.preventDefault();
+      choose(options[active]);
+    } else if (e.key === 'Escape' && !list.hidden) {
+      e.preventDefault();
+      close();
+    }
+  });
+  // (mousedown: chosen before the field loses focus)
+  list.addEventListener('mousedown', (e) => {
+    const option = e.target.closest('.form-suggest-option');
+    if (!option) return;
+    e.preventDefault();
+    choose(option);
+  });
+  control.addEventListener('blur', close);
+}
+
 /**
  * Builds a field's label: the authored text (or nodes, e.g. a checkbox label with links) and a
  * red * when required.
@@ -474,6 +568,11 @@ export function buildField({
     const box = el('div', 'form-control-wrap');
     box.append(control);
     wrap.append(buildLabel(def), box);
+    // a text field's suggestions (e.g. the airlines): its list under it
+    const suggestions = settings.get('suggestions');
+    if (Array.isArray(suggestions) && suggestions.length && control.matches('input')) {
+      attachSuggestions(box, control, suggestions);
+    }
     state.controls = [control];
     if (type === 'select') fillOptions(control, readOptions(settings.get('options')), state);
     if (type === 'country' || (type === 'select' && settings.has('source'))) {
@@ -942,6 +1041,9 @@ function fieldSettings(field, cells) {
   } else if (field.type === 'stepper') {
     // a stepper: the unit after its number ("hours")
     if (placeholder.length) settings.set('unit', placeholder[0]);
+  } else if (settings.has('suggestions')) {
+    // a text field with suggestions: one per line (e.g. the airlines), no hint text
+    settings.set('suggestions', placeholder);
   } else if (placeholder.length) {
     settings.set('placeholder', placeholder[0]);
   }
