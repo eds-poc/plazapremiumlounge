@@ -102,7 +102,7 @@ function trackCreateAccount() {
 /**
  * The data layer's link click for a successful sign up (the Register API accepted it): the form's
  * success step, the sign up source and the new member's identities, when there: the answer's
- * membershipId, and the SHA-256 of its userName (the email) and phone (scripts/member.js).
+ * membershipID, and the SHA-256 of its userName (the email) and phone (scripts/member.js).
  * @param {Object} data The Register API's answer
  */
 async function trackSignupSuccess(data) {
@@ -112,7 +112,7 @@ async function trackSignupSuccess(data) {
   const hashedEmail = email ? await sha256(email) : '';
   const hashedPhone = phone ? await sha256(phone) : '';
   const identities = {};
-  if (data?.membershipId) identities.stMemberId = String(data.membershipId);
+  if (data?.membershipID) identities.stMemberId = String(data.membershipID);
   if (hashedEmail) identities.hashedEmail = hashedEmail;
   if (hashedPhone) identities.hashedPhone = hashedPhone;
   const details = {
