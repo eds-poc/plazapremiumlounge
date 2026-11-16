@@ -522,8 +522,8 @@ function renderMiniCart(cart) {
 /**
  * The data layer's page view as the mini cart opens ("page load"), from the cart as shown: the
  * booking (the first line's start as YYYY-MM-DDTHH:MM:SSZ, its guests), the lounge and its
- * location (no IATA code: the cart API has none), the promo code and its amount (only when the
- * cart API gives a code), and every product with its prices.
+ * location (its IATA code when the cart API gives one, else ''), the promo code and its amount
+ * (only when the cart API gives a code), and every product with its prices.
  * @param {Object} cart The cart's summary (see readCart in cart.js)
  */
 function trackCartView(cart) {
@@ -540,7 +540,7 @@ function trackCartView(cart) {
         childCount: first.children,
         promocodeValuePayCurr: promoAmount,
       },
-      locationDetails: { iataCode: '', locationName: first.locationName },
+      locationDetails: { iataCode: first.iataCode, locationName: first.locationName },
       outletDetails: { outletId: first.propertyCode, outletName: first.propertyName },
       // (only with a promo code from the cart API)
       ...(cart.promoCode && {
@@ -550,7 +550,8 @@ function trackCartView(cart) {
         sku: line.productCode,
         name: line.productName,
         category: line.category,
-        // the line's prices, its quantity included; the rate plan discount only when there is one
+        // the line's prices, its quantity included; the discount (the rate plan's and a promo
+        // code's) only when there is one
         actualPricePayCurr: line.basePrice,
         ...(line.discount > 0 && { discountPayCurr: line.discount }),
         sellPricePayCurr: line.total,

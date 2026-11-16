@@ -252,16 +252,18 @@ function readLine(p) {
     // the promo code on this line, if any: its code, the service's name for it ("Pass 15% off")
     // and its amount (each line the code applies to carries its own)
     promo: readLinePromo(p),
-    // for analytics (scripts/mini-cart.js trackCartView): the service's own names, the product's
-    // category, and the line's price before discounts and its rate plan discounts (as `total`,
-    // the line's: its quantity included)
+    // for analytics (scripts/mini-cart.js trackCartView): the service's own names, the location's
+    // IATA code ('' while the service doesn't give one), the product's category, and the line's
+    // price before discounts and its discounts, the rate plan's and an applied promo code's (as
+    // `total`, the line's: its quantity included)
     propertyCode: text(p?.propertyCode),
     propertyName: text(p?.propertyName),
     locationName: text(p?.locationName),
+    iataCode: text(p?.iataCode),
     productName: text(p?.productName),
     category: text(p?.productType) || text(p?.serviceType),
     basePrice: Number(price.totalBasePrice),
-    discount: Number(price.totalDiscounts) || 0,
+    discount: (Number(price.totalDiscounts) || 0) + (Number(price.totalPromocodeAmount) || 0),
   };
 }
 
