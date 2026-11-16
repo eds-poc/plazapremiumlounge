@@ -1,6 +1,7 @@
 // eslint-disable-next-line import/no-cycle
 import { PAGE_VIEW, pushEvent, setPageDetails } from '../../scripts/datalayer.js';
 import { buildForm } from '../../scripts/forms.js';
+import { sha256 } from '../../scripts/member.js';
 
 /*
  * The sign up form's fields: the Register API's keys and value types, and the source's rules. The
@@ -100,16 +101,20 @@ function trackCreateAccount() {
 
 /**
  * The data layer's link click for a successful sign up (the Register API accepted it): the form's
- * success step, the sign up source and the new member's identities from the answer, when there
- * (membershipId, hashedEmail, hashedPhone).
+ * success step, the sign up source and the new member's identities, when there: the answer's
+ * membershipId, and the SHA-256 of its userName (the email) and phone (scripts/member.js).
  * @param {Object} data The Register API's answer
  */
-function trackSignupSuccess(data) {
+async function trackSignupSuccess(data) {
   const eventName = 'signup success';
+  const email = data?.userName;
+  const phone = data?.phone;
+  const hashedEmail = email ? await sha256(email) : '';
+  const hashedPhone = phone ? await sha256(phone) : '';
   const identities = {};
   if (data?.membershipId) identities.stMemberId = String(data.membershipId);
-  if (data?.hashedEmail) identities.hashedEmail = data.hashedEmail;
-  if (data?.hashedPhone) identities.hashedPhone = data.hashedPhone;
+  if (hashedEmail) identities.hashedEmail = hashedEmail;
+  if (hashedPhone) identities.hashedPhone = hashedPhone;
   const details = {
     formDetails: {
       formName: 'signup',
