@@ -389,6 +389,9 @@ async function loadLazy(doc) {
  * without impacting the user experience.
  */
 function loadDelayed() {
+  // the leave-site popup before links to other websites in `leave-site` sections (and the
+  // footer's Social column)
+  import('./leave-site.js').then(({ installLeaveSitePrompt }) => installLeaveSitePrompt());
   import('./consent-check.js');
   // the back to top button, on every page
   import('./back-to-top.js').then(({ default: initBackToTop }) => initBackToTop());

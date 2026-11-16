@@ -196,7 +196,7 @@ function applyView(fragment, view) {
 export async function openPageModal(url, trigger) {
   const { openModal } = await import('./modal-dialog.js');
   const key = url.pathname + url.hash;
-  openModal({
+  const dialog = await openModal({
     key,
     trigger,
     content: async () => {
@@ -213,6 +213,13 @@ export async function openPageModal(url, trigger) {
       return nodes;
     },
   });
+  // the data layer's page view ("page load") as the login modal opens (/en-uk/modals/login), and
+  // only the login modal
+  if (dialog && url.pathname.endsWith('/modals/login')) {
+    // eslint-disable-next-line import/no-cycle
+    const { PAGE_VIEW, pushEvent } = await import('./datalayer.js');
+    pushEvent(PAGE_VIEW, 'page load');
+  }
 }
 
 /**
