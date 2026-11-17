@@ -34,18 +34,22 @@ let pageDetails = {};
 // the home page's address: / or a site folder's (/en-uk/, /zh-cn/ …), the only page whose page
 // view initDataLayer sends
 const HOMEPAGE_PATH = /^\/([a-z]{2}-[a-z]{2}\/?)?$/;
-// the home page's links and buttons whose clicks are sent (trackHomeLinks): the header's menu (its
-// top items and the links in their menus, also the phones' drill-down), every footer link, the
-// latest offers' Explore Latest Offers and the lounge card's More at …
-const HOME_LINKS = [
+// the clicks the common link click sends, on every page (trackLinkClicks): every link, and the
+// header menu's buttons (its top items, e.g. Locations, and the phones' drill-down items)
+const LINK_CLICKS = [
+  'a[href]',
   '.header-link',
-  '.header-dropdown-link',
-  '.header-mega-link',
   '.header-drill-item',
-  '.header-drill-link',
-  'footer a[href]',
-  '.carousel-cards .button-wrapper a',
-  '.booking-widget-card-more',
+].join(', ');
+// the links with a link click of their own (their block sends it, with more details): the common
+// one leaves them out, so a click isn't sent twice
+const OWN_LINK_CLICKS = [
+  // the lounge listing's View Lounge ("view lounge", blocks/property-list)
+  '.property-list .property-card-view a',
+  // the login modal's Forgot Password? ("forgot password", blocks/form)
+  'form[data-action="login"] a[href*="/modals/forgot-password"]',
+  // the cart's Check Out and Edit ("checkout", scripts/mini-cart.js)
+  '.mini-cart-actions .cart-button',
 ].join(', ');
 
 /**
@@ -233,14 +237,15 @@ export function trackError(errorCode, errorMessage) {
 }
 
 /**
- * Sends, on the home page, a link click for each click on its menu, footer, Explore Latest Offers
- * and More at … links (see HOME_LINKS), named after the link: its label, else its text, else its
- * image's alt text, lowercase ("explore latest offers", "facebook").
+ * Sends, on every page, a link click for each click on a link or a header menu button (see
+ * LINK_CLICKS), except the links with a link click of their own (see OWN_LINK_CLICKS), named after
+ * the link: its label, else its text, else its image's alt text, lowercase ("explore latest
+ * offers", "facebook").
  */
-function trackHomeLinks() {
+function trackLinkClicks() {
   document.addEventListener('click', (e) => {
-    const link = e.target.closest(HOME_LINKS);
-    if (!link) return;
+    const link = e.target.closest(LINK_CLICKS);
+    if (!link || link.matches(OWN_LINK_CLICKS)) return;
     const linkName = [link.getAttribute('aria-label'), link.textContent, link.querySelector('img')?.alt]
       .map((text) => (text || '').replace(/\s+/g, ' ').trim())
       .find(Boolean);
@@ -261,16 +266,14 @@ function trackHomeLinks() {
 }
 
 /**
- * Starts analytics on a page: the page view and the links' clicks (on the home page only; the
- * lounge listing's page view is the property-list block's), then the Launch script from the
+ * Starts analytics on a page: the page view (on the home page only; the lounge listing's is the
+ * property-list block's), the links' clicks (on every page), then the Launch script from the
  * metadata `launch-script` (an https address; without one, the data layer is still filled).
  */
 export default function initDataLayer() {
   window.adobeDataLayer = window.adobeDataLayer || [];
-  if (HOMEPAGE_PATH.test(window.location.pathname)) {
-    pushEvent(PAGE_VIEW, 'page view');
-    trackHomeLinks();
-  }
+  if (HOMEPAGE_PATH.test(window.location.pathname)) pushEvent(PAGE_VIEW, 'page view');
+  trackLinkClicks();
 
   const src = getMetadata('launch-script').trim();
   if (!src) return;
