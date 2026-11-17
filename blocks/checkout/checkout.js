@@ -10,7 +10,7 @@ import { refreshCart } from '../../scripts/cart.js';
 import { DEFAULT_SITE, getSiteFolder, translate } from '../../scripts/i18n.js';
 import { buildPromo } from '../../scripts/mini-cart.js';
 import { isPreview } from '../../scripts/properties.js';
-import { hideLoader, showLoader } from '../../scripts/scripts.js';
+import { holdLoader } from '../../scripts/scripts.js';
 
 /*
  * The guest form's fields: their keys and the source guest checkout's rules
@@ -368,9 +368,10 @@ async function prefillMember(form) {
  * waits for the Privacy Policy and the Terms & Conditions; a valid form is announced as
  * `checkout:payment` (the guest details and the cart) until the payment API is in. The page's steps
  * band, back title and banner are blocks of their own (Booking Steps, Title (back), Promo (card)).
+ * It doesn't wait for the booking system (the page's section waits for its blocks): see the end.
  * @param {Element} block The Checkout block element
  */
-export default async function decorate(block) {
+export default function decorate(block) {
   // no cart: the language's homepage, as the source's (its server answers 302), the address
   // replaced so Back doesn't come back here. Not on the preview site or in the block library,
   // where authors look at the page itself
@@ -528,26 +529,17 @@ export default async function decorate(block) {
     render(cart);
   });
 
-  // the booking system's cart (fresh prices). A tab without the cart's data waits for it behind
-  // the loader (the page shows once it's in: the summary, the homepage for an empty cart, or the
-  // error text). A tab with it doesn't wait: the page (its section waits for this block) shows at
-  // once with the cart the tab has, and the booking system's answer redraws it when it comes.
+  // the booking system's cart (fresh prices), without holding up the page (its section, the
+  // header and footer after it, wait for this block): the answer redraws the summary when it comes.
+  // A tab with the cart's data shows it meanwhile (an unreadable answer keeps it). A tab without
+  // it keeps the loader up over the page until the cart is in (held past the page's first load,
+  // which hides its own loader), then shows the summary, the homepage for an empty cart, or the
+  // error text.
   if (!getCartId()) return;
-  const refresh = () => refreshCart().then((cart) => {
+  const refresh = refreshCart().then((cart) => {
     if (!cart?.lines.length && leave()) return;
     render(cart);
   });
-  if (getCart()) {
-    // (an unreadable answer keeps the summary as it is)
-    refresh().catch(() => {});
-    return;
-  }
-  showLoader();
-  try {
-    await refresh();
-  } catch {
-    render(null, text('error'));
-  } finally {
-    hideLoader();
-  }
+  if (getCart()) refresh.catch(() => {});
+  else holdLoader(refresh.catch(() => render(null, text('error'))));
 }

@@ -67,11 +67,34 @@ export function showLoader() {
   if (loader.parentElement !== host) host.prepend(loader);
 }
 
+// the waits holding the loader up (holdLoader): hideLoader leaves it up while any is pending
+const holds = new Set();
+
 /**
- * Hides the full-page loader.
+ * Hides the full-page loader, unless a wait holds it up (holdLoader); the last wait to end hides
+ * it.
  */
 export function hideLoader() {
+  if (holds.size) return;
   loader?.remove();
+}
+
+/**
+ * Shows the full-page loader until a wait ends (resolved or not), whoever else hides it meanwhile:
+ * for a block that doesn't hold up the page while it waits (e.g. the checkout's first cart, while
+ * the page's first load hides its own loader).
+ * @param {Promise<*>} wait
+ * @returns {Promise<*>} the same wait
+ */
+export function holdLoader(wait) {
+  holds.add(wait);
+  showLoader();
+  const done = () => {
+    holds.delete(wait);
+    hideLoader();
+  };
+  wait.then(done, done);
+  return wait;
 }
 
 /**

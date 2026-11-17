@@ -522,10 +522,11 @@ for (const width of [375, 576, 768, 992, 1440]) {
   }
 }
 
-// timing: the booking system's cart answers after 4s. A tab with the cart's data shows the page
-// before that (its stored summary; the page-load loader gone), then the answer's; an unreadable
-// answer keeps the stored summary. A tab without it keeps the loader up while it waits (past the
-// page's own load) and shows the page only once the cart is in.
+// timing: the booking system's cart answers after 4s; the Checkout block doesn't hold up the page
+// (decorate doesn't wait), so the page and its header load before that either way. A tab with the
+// cart's data shows its stored summary (the page-load loader gone), then the answer's; an
+// unreadable answer keeps the stored summary. A tab without it keeps the loader up over the page
+// until the cart is in (past the page's own load), then the summary, or the error text.
 {
   const DELAY = 4000;
   // when the page's section shows, the summary's text then, whether the loader is up then, and
@@ -540,7 +541,8 @@ for (const width of [375, 576, 768, 992, 1440]) {
       const s = await page.evaluate(() => {
         const section = document.querySelector('main .section:has(.checkout)');
         return {
-          shown: !!section && section.style.display !== 'none' && section.dataset.sectionStatus === 'loaded',
+          shown: !!section && section.style.display !== 'none' && section.dataset.sectionStatus === 'loaded'
+            && document.querySelector('header .header')?.dataset.blockStatus === 'loaded',
           text: document.querySelector('.checkout .checkout-summary')?.innerText.replace(/\s+/g, ' ') || '',
           loader: !!document.getElementById('spinner-overlay'),
         };
@@ -557,10 +559,12 @@ for (const width of [375, 576, 768, 992, 1440]) {
   };
   // (the cart's answer comes DELAY ms after its request, so no earlier than this)
   const answered = (page) => page.started + DELAY;
+  const loaderUp = (page) => page.evaluate(() => !!document.getElementById('spinner-overlay'));
+  const until = (page, ms) => page.waitForTimeout(Math.max(0, ms - (Date.now() - page.started)));
 
   let page = await open({ stored: true, cartDelay: DELAY, wait: false });
   let w = await watch(page);
-  check('timing, a tab with the cart: the page shows before the booking system answers, with the stored summary, no loader', w.shownAt && w.shownAt < answered(page) && /Stored Lounge/.test(w.shownText) && !w.loader, JSON.stringify({ shownAfter: w.shownAt - page.started, answerAfter: DELAY, text: w.shownText.slice(0, 60), loader: w.loader }));
+  check('timing, a tab with the cart: the page and its header show before the booking system answers, with the stored summary, no loader', w.shownAt && w.shownAt < answered(page) && /Stored Lounge/.test(w.shownText) && !w.loader, JSON.stringify({ shownAfter: w.shownAt - page.started, answerAfter: DELAY, text: w.shownText.slice(0, 60), loader: w.loader }));
   await page.waitForTimeout(Math.max(0, DELAY + 1500 - (Date.now() - page.started)));
   let text = await page.locator('.checkout .checkout-summary').innerText();
   check('timing, a tab with the cart: then the booking system\'s summary', /HKD 787\.50/.test(text) && !/Stored Lounge/.test(text), text.replace(/\s+/g, ' ').slice(0, 80));
@@ -575,7 +579,24 @@ for (const width of [375, 576, 768, 992, 1440]) {
 
   page = await open({ cartDelay: DELAY, wait: false });
   w = await watch(page);
-  check('timing, a tab without the cart: the loader, the page only once the cart is in, with its summary', w.loaderLate && w.shownAt >= answered(page) && /HKD 787\.50/.test(w.shownText), JSON.stringify({ shownAfter: w.shownAt - page.started, answerAfter: DELAY, loaderLate: w.loaderLate, text: w.shownText.slice(0, 60) }));
+  await until(page, 2500);
+  const early = await loaderUp(page);
+  await until(page, DELAY - 300);
+  const late = await loaderUp(page);
+  await until(page, DELAY + 1200);
+  const after = await loaderUp(page);
+  text = await page.locator('.checkout .checkout-summary').innerText();
+  check('timing, a tab without the cart: the page and its header load before the cart answers, under the loader', w.shownAt && w.shownAt < answered(page) && early && late, JSON.stringify({ shownAfter: w.shownAt - page.started, answerAfter: DELAY, loaderAt2500: early, loaderAt3700: late }));
+  check('timing, a tab without the cart: once the cart is in, the loader gone and its summary', !after && /HKD 787\.50/.test(text), JSON.stringify({ loaderAfter: after, text: text.replace(/\s+/g, ' ').slice(0, 80) }));
+  await page.close();
+
+  page = await open({ cart: 'fail', cartDelay: DELAY, wait: false });
+  await until(page, 2500);
+  const failEarly = await loaderUp(page);
+  await until(page, DELAY + 1200);
+  const failAfter = await loaderUp(page);
+  text = await page.locator('.checkout .checkout-summary').innerText();
+  check('timing, a tab without the cart, the answer unreadable: the loader, then the error text', failEarly && !failAfter && /something went wrong|try again|error/i.test(text) && !/HKD/.test(text), JSON.stringify({ failEarly, failAfter, text: text.replace(/\s+/g, ' ').slice(0, 80) }));
   await page.close();
 }
 

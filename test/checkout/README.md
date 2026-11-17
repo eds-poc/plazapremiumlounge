@@ -50,13 +50,15 @@ It covers:
   out; the other four languages (the title by its authored order); 375 and 1440; the Smart
   Traveller card (Promo card, guests-only) left out for a member, shown to a guest
 
-- timing, the booking system's cart answering after 4s: a tab with the cart shows the page before
-  that (its stored summary, no loader), then the answer's; an unreadable answer keeps the stored
-  summary; a tab without it keeps the loader up and shows the page once the cart is in
+- timing, the booking system's cart answering after 4s (the block doesn't hold up the page, so the
+  page and its header load before that either way): a tab with the cart shows its stored summary
+  (no loader), then the answer's; an unreadable answer keeps the stored summary; a tab without it
+  keeps the loader up over the page until the cart is in, then shows its summary, or the error text
+  for an unreadable answer
 
 The header checks wait for the header to load (its navigation comes after the checkout).
 
-171 checks.
+173 checks.
 
 ```sh
 BW_HOST=http://localhost:3000 PLAYWRIGHT=/path/to/playwright/index.mjs AXE_CORE=/path/to/axe.min.js node test/checkout/checkout.test.mjs

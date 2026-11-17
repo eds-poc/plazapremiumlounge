@@ -15,7 +15,7 @@ the cart's terms, and beside them (a third of the row, from 992px) the **Booking
 
 **Where the cart comes from:**
 - The cart is the one in `scripts/cart-state.js`.
-- It's read again from the booking system on every visit, so the prices are its own. A tab without the cart's data shows the site's loader until the cart is in. A tab with it shows the page at once with the cart it has, and the booking system's answer redraws the summary when it comes (an unreadable answer keeps it as it is).
+- It's read again from the booking system on every visit, so the prices are its own. The block doesn't wait for it (`decorate` is synchronous), so the page, its header and footer load at once, and the booking system's answer redraws the summary when it comes. A tab with the cart's data shows it meanwhile (an unreadable answer keeps it as it is). A tab without it keeps the site's loader up over the page until the cart is in (`holdLoader` in `scripts/scripts.js`, which outlasts the page's own load), then shows the summary, the homepage for an empty cart, or the error text.
 - The summary follows the cart: another tab's change, or the cart emptied.
 - **No cart** (none, an empty one, or emptied while on the page, e.g. from the mini cart): the
   visitor goes to the language's homepage (`/en-uk/`), as the source's (its server answers 302).
