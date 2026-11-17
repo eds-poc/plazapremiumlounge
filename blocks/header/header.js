@@ -596,8 +596,13 @@ export default async function decorate(block) {
   if (!fragment) return;
 
   const header = block.closest('header') || block;
-  // page metadata `header` = `transparent`: the bar sits over the page's hero (the source homepage)
-  header.classList.toggle('is-transparent', getMetadata('header').toLowerCase() === 'transparent');
+  // page metadata `header`, one or more words: `transparent`, the bar sits over the page's hero
+  // (the source homepage); `checkout`, no Book Now and no cart icon (the source's guest checkout)
+  const looks = getMetadata('header').toLowerCase().split(/[\s,]+/).filter(Boolean);
+  header.classList.toggle('is-transparent', looks.includes('transparent'));
+  const checkoutLook = looks.includes('checkout');
+  // (the actions the checkout leaves out: starting a booking, the cart)
+  const leftOut = (node) => checkoutLook && (/^#(book-now|cart)$/i.test(node.getAttribute('href') || '') || !!node.querySelector('.icon-cart'));
   // modal sections stay in the fragment (registered by decorateMain); the others carry the header
   const sections = [...fragment.querySelectorAll(':scope > .section:not([data-modal])')];
   // sections are found by their Section Metadata `name` (Brand, Menu, Actions, Menu footer), or
@@ -633,7 +638,7 @@ export default async function decorate(block) {
   const actions = el('div', 'header-actions');
   buttons.forEach((b, i) => {
     b.classList.add(i === 0 && buttons.length > 1 ? 'is-first' : 'is-more');
-    actions.append(b);
+    if (!leftOut(b)) actions.append(b);
   });
   // actions also offered in the menu footer (e.g. language) are shown there on mobile instead
   // links that open a modal page are buttons, with the link in data-href; a `#view` of a modal
@@ -660,6 +665,7 @@ export default async function decorate(block) {
         wrap.append(account.wrapper);
         return;
       }
+      if (leftOut(u)) return;
       if (footerHrefs.has(pageOf(hrefOf(u)))) u.classList.add('is-in-menu-footer');
       wrap.append(u);
     });
@@ -667,7 +673,7 @@ export default async function decorate(block) {
   }
 
   // the cart icon shows how many products the cart holds (as the source's), kept up to date
-  const cartLinks = utilities.filter((u) => u.querySelector('.icon-cart'));
+  const cartLinks = utilities.filter((u) => !leftOut(u) && u.querySelector('.icon-cart'));
   const showCartCount = () => {
     const count = cartCount();
     cartLinks.forEach((link) => {
@@ -753,7 +759,7 @@ export default async function decorate(block) {
   };
   toggle.addEventListener('click', () => setMenu(!header.classList.contains('is-menu-open')));
 
-  [...buttons, ...utilities.filter((u) => u.isConnected), ...(promo ? [promo.firstElementChild] : []), ...(menuFooter?.querySelectorAll('.header-menu-footer-link') || [])]
+  [...buttons.filter((b) => !leftOut(b)), ...utilities.filter((u) => u.isConnected), ...(promo ? [promo.firstElementChild] : []), ...(menuFooter?.querySelectorAll('.header-menu-footer-link') || [])]
     .forEach((link) => wireAction(link, header));
 
   document.addEventListener('keydown', (e) => {

@@ -7,7 +7,7 @@
 .booking-steps {
   display: none;
   box-sizing: content-box;
-  min-height: 22px;
+  min-height: var(--booking-steps-min-height, 22px);
   padding: var(--spacing-6) 0;
   background-color: var(--color-brand-primary);
   box-shadow: 0 0 0 100vmax var(--color-brand-primary);

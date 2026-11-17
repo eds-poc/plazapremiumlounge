@@ -5,7 +5,8 @@
  * scripts): the `gtm.js` event in `window.dataLayer`, then gtm.js in the <head>, with the page's
  * nonce so the container's Custom HTML tags may run too. Google's <noscript> iframe is added at the
  * top of the <body> as well; it only counts for browsers without JavaScript, which never get
- * here, so it's there for tools that look for it.
+ * here, so it's there for tools that look for it. Its iframe is text, as a browser running
+ * JavaScript parses a <noscript>, so ns.html isn't loaded.
  */
 import { getMetadata, loadScript } from './aem.js';
 
@@ -21,20 +22,18 @@ function pageNonce() {
 }
 
 /**
- * Google's <noscript> iframe, first in the <body>.
+ * Google's <noscript> iframe, first in the <body>. Its markup is the <noscript>'s text, not an
+ * element: a browser running JavaScript reads a <noscript> in the page's HTML as text too, so the
+ * iframe is never built and ns.html (the container for browsers without JavaScript) isn't loaded.
+ * An iframe element appended here would load it, as a hidden frame on every page.
+ * (textContent, not innerHTML: the page's Trusted Types policy refuses HTML strings.)
  * @param {string} id
  */
 function addNoscript(id) {
   if (document.querySelector('body > noscript[data-gtm]')) return;
   const noscript = document.createElement('noscript');
   noscript.dataset.gtm = '';
-  const iframe = document.createElement('iframe');
-  iframe.src = `https://www.googletagmanager.com/ns.html?id=${encodeURIComponent(id)}`;
-  iframe.height = '0';
-  iframe.width = '0';
-  iframe.style.display = 'none';
-  iframe.style.visibility = 'hidden';
-  noscript.append(iframe);
+  noscript.textContent = `<iframe src="https://www.googletagmanager.com/ns.html?id=${encodeURIComponent(id)}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`;
   document.body.prepend(noscript);
 }
 

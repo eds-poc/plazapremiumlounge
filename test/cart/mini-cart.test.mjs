@@ -463,11 +463,15 @@ const passItem = (code) => ({
   const page = await openWithCart({ kind: 'pass' });
   const nav = watchNav(page);
   await openCart(page);
-  await applyCode(page, 'pass10pw');
+  // typed in lower case: shown and sent in capitals, as the source's
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').pressSequentially('pass10pw');
+  const typed = await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-input').inputValue();
+  check('pass: a code typed in lower case shows in capitals (as the source\'s)', typed === 'PASS10PW', typed);
+  await page.locator('dialog.mini-cart-modal[open] .mini-cart-promo-apply').click();
+  await page.waitForFunction(() => document.querySelector('dialog.mini-cart-modal[open] .mini-cart-promo-remove, dialog.mini-cart-modal[open] .mini-cart-promo-message:not(:empty)'), null, { timeout: 10000 });
+  await page.waitForTimeout(300);
+  check('pass: … and sent as PASS10PW', page.api.promos.at(-1)?.body?.promocode === 'PASS10PW', JSON.stringify(page.api.promos.at(-1)?.body));
   let m = await mini(page);
-  check('pass: a code in lower case is refused (codes are case sensitive): BKNG048\'s message', m.message === 'No record found for the provided promotional code.' && !m.readOnly, m.message);
-  await applyCode(page, 'PASS10PW');
-  m = await mini(page);
   let s = await stateOf(page);
   check('pass: PASS10PW applied: Service Total, the promo row, the total; read only; kept in the summary with each line\'s code', m.rows.join(' | ') === 'Service TotalUSD 85.00 | Promo Code (PASS10PW):- USD 12.75 | Total(Includes applicable taxes and fees)USD 72.25' && m.readOnly && m.value === 'PASS10PW' && s.stored?.promoCode === 'PASS10PW' && s.stored?.totals?.promo === 12.75 && s.stored?.lines?.[0]?.promo?.name === 'Pass 15% off', JSON.stringify({ rows: m.rows, promo: s.stored?.totals?.promo, line: s.stored?.lines?.[0]?.promo }));
   const lineAmount = await page.evaluate(() => document.querySelector('dialog.mini-cart-modal[open] .mini-cart-line-amount')?.textContent);
@@ -640,7 +644,7 @@ for (const width of [375, 1440]) {
     };
   });
   const closeAt = phone ? [m.panelWidth - 20 - 21, 15, 21, 21] : [m.panelWidth - 20 - 24, 22, 24, 24];
-  check(`${width} the cross as the source's: ${closeAt[2]}px, ${closeAt[1]}px from the top and 20px from the right, its icon ${phone ? 14 : 16}px`, m.close.every((n, i) => Math.abs(n - closeAt[i]) <= 1) && m.closeIcon === `${phone ? 14 : 16}px`, JSON.stringify({ close: m.close, closeAt, icon: m.closeIcon }));
+  check(`${width} the cross as the source's: ${closeAt[2]}px, ${closeAt[1]}px from the top and 20px from the right, its icon ${phone ? 14 : 16}px`, m.close.every((n, i) => Math.abs(n - closeAt[i]) <= 1) && [`${phone ? 14 : 16}px`, `${phone ? 14 : 16}px auto`].includes(m.closeIcon), JSON.stringify({ close: m.close, closeAt, icon: m.closeIcon }));
   check(`${width} the promo field 47px, its placeholder as the source's; the arrow 11 x 10 in a 24px button, 10px from the right, ${phone ? 11 : 14}px from the top`, m.input === 47 && m.inputPlaceholder === 'rgba(33, 37, 41, 0.75)' && JSON.stringify(m.arrow) === JSON.stringify([24, 24, 10, phone ? 11 : 14]) && m.arrowIcon === '11px 10px', JSON.stringify(m));
   check(`${width} 15px above "PROMO CODE" (no margin), the discount row 8px`, m.promoTop === '15px' && m.promoMargin === '0px' && m.discountAfter === '8px', JSON.stringify([m.promoTop, m.promoMargin, m.discountAfter]));
   check(`${width} the amounts as the source's: Service Total 16px/300 black, the discount 16px/${phone ? 500 : 400}, Total ${phone ? 16 : 18}px, the note ${phone ? '12.25' : 14}px`, JSON.stringify(m.service) === '["16px","300","rgb(0, 0, 0)"]' && JSON.stringify(m.discount) === JSON.stringify(['16px', phone ? '500' : '400']) && m.total === `${phone ? 16 : 18}px` && m.note === `${phone ? 12.25 : 14}px`, JSON.stringify(m));

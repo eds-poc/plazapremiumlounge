@@ -249,6 +249,9 @@ function readLine(p) {
     children: Number.parseInt(p?.guestsCount?.child, 10) || 0,
     quantity: Number.parseInt(p?.quantity, 10) || 1,
     total: Number(price.totalPrice),
+    // what the checkout asks for (the flight number; a Smart Traveller login)
+    flightRequired: p?.isFlightNumberMandatory === true,
+    loginRequired: p?.isStLoginMandatory === true,
     // the promo code on this line, if any: its code, the service's name for it ("Pass 15% off")
     // and its amount (each line the code applies to carries its own)
     promo: readLinePromo(p),
@@ -256,8 +259,21 @@ function readLine(p) {
 }
 
 /**
+ * The cart's terms and conditions, as the checkout shows them: each policy's name and its text
+ * (the service's HTML, made safe where it's shown).
+ * @param {Object} json
+ * @returns {{name: string, html: string}[]}
+ */
+function readTerms(json) {
+  const policies = Array.isArray(json?.sortedTermsPolicies) ? json.sortedTermsPolicies : [];
+  return policies
+    .map((t) => ({ name: text(t?.termsName), html: String(t?.description ?? '').trim() }))
+    .filter((t) => t.name || t.html);
+}
+
+/**
  * The cart's summary from the service's cart: its lines, its currency and totals (the base,
- * each discount, the total).
+ * each discount, the total), and its terms.
  * @param {Object} json
  * @returns {Object}
  */
@@ -280,6 +296,7 @@ function readCart(json) {
       promo: Number(totals.totalPromocodeAmount) || 0,
       total: Number(totals.totalPrice),
     },
+    terms: readTerms(json),
     // the cart's promo code: the one on its lines (one code per cart)
     promoCode: products.map(readLinePromo).find(Boolean)?.code || '',
   };

@@ -1,0 +1,72 @@
+/* the booking pages' maroon band with the steps (shared styles: Edit Booking uses them too) */
+@import url('../../styles/booking-steps.css');
+
+/* booking steps: the band right under the header (its section starts with no space above), then
+   25px to what follows (35px from 768px, 50px from 992px), as the source's booking pages */
+main > .section:has(> .booking-steps-wrapper:first-child) {
+  padding-top: 0;
+}
+
+/* phones: the source's compact bar: 10px above and below the steps (no 22px minimum), 15px
+   numbers, regular weight, the steps done at 0.7; the current step's name regular too */
+.booking-steps-wrapper {
+  --booking-steps-min-height: 0px;
+  --booking-steps-number-size: 15px;
+}
+
+.booking-steps-wrapper .booking-steps {
+  margin-bottom: var(--spacing-8);
+}
+
+.booking-steps-wrapper .booking-steps:has(.booking-steps-list) {
+  padding-block: var(--spacing-4);
+}
+
+.booking-steps-wrapper .booking-steps-number {
+  width: var(--booking-steps-number-size);
+  height: var(--booking-steps-number-size);
+  font-weight: var(--font-weight-regular);
+}
+
+.booking-steps-wrapper .is-done .booking-steps-number {
+  opacity: 0.7;
+}
+
+.booking-steps-wrapper .is-active :is(.booking-steps-name, .booking-steps-short) {
+  font-weight: var(--font-weight-regular);
+}
+
+/* from 768px: the band's own 15px and 22px; 2px above and below each step (a 56px band), 5px after
+   each, 8px before each but the first and the current, as the source's */
+@media (width >= 768px) {
+  .booking-steps-wrapper {
+    --booking-steps-min-height: initial;
+  }
+
+  .booking-steps-wrapper .booking-steps {
+    margin-bottom: var(--spacing-10);
+  }
+
+  .booking-steps-wrapper .booking-steps:has(.booking-steps-list) {
+    padding-block: var(--spacing-6);
+  }
+
+  .booking-steps-wrapper .booking-steps-item {
+    padding-block: var(--spacing-1);
+    padding-right: var(--spacing-2);
+  }
+
+  .booking-steps-wrapper .booking-steps-item:not(:first-child, .is-active) {
+    padding-left: var(--spacing-3);
+  }
+
+  .booking-steps-wrapper .is-active :is(.booking-steps-name, .booking-steps-short) {
+    font-weight: inherit;
+  }
+}
+
+@media (width >= 992px) {
+  .booking-steps-wrapper .booking-steps {
+    margin-bottom: var(--spacing-11);
+  }
+}

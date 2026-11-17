@@ -87,6 +87,9 @@ to stay in view, as on the source (also when the window is resized while it's op
   the top of the page with a white logo, links and icons (for pages that start with a full-width
   hero image, like the homepage). Without it the bar is white with a colour logo and dark links,
   and the page starts below it.
+- **Checkout header:** page metadata `header` = `checkout` (with `transparent` too if needed:
+  `transparent, checkout`). The bar leaves out Book Now and the cart icon, as the source's guest
+  checkout; the rest stays.
 - **Another nav:** page metadata `nav` = the path of another nav page.
 
 ## Notes
