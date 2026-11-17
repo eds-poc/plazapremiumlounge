@@ -494,6 +494,15 @@ function buildAccount({
   const list = el('ul', 'header-account-list');
   panel.append(toolbar, list);
 
+  // the dropdown kept inside the window, as the source's (Popper shifts its dropdown): from under
+  // the badge, moved left by what would run past the window's right edge (the scrollbar excluded)
+  const place = () => {
+    dropdown.style.removeProperty('--header-account-shift');
+    const overflow = dropdown.getBoundingClientRect().right - document.documentElement.clientWidth;
+    if (overflow > 0) dropdown.style.setProperty('--header-account-shift', `${Math.ceil(overflow)}px`);
+  };
+  window.addEventListener('resize', () => { if (!dropdown.hidden) place(); });
+
   const closeAccount = () => {
     dropdown.hidden = true;
     button.setAttribute('aria-expanded', 'false');
@@ -531,6 +540,7 @@ function buildAccount({
     if (desktop.matches) {
       button.setAttribute('aria-controls', dropdown.id);
       dropdown.hidden = false;
+      place();
     } else {
       button.setAttribute('aria-controls', panel.id);
       panel.showModal();
