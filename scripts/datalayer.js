@@ -168,23 +168,11 @@ function basePayload(event, eventName) {
     };
   }
 
-  // the page's name in web for page views only (a link click's web is its webInteraction)
-  if (event === PAGE_VIEW) {
-    return {
-      event,
-      web: {
-        webPageDetails: {
-          pageName,
-          pageViews: {
-            value: 1,
-          },
-        },
-      },
-      _plazapremiumloungemanagementli: details,
-    };
-  }
+  const webPageDetails = { pageName };
+  if (event === PAGE_VIEW) webPageDetails.pageViews = { value: 1 };
   return {
     event,
+    web: { webPageDetails },
     _plazapremiumloungemanagementli: details,
   };
 }
