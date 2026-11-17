@@ -10,7 +10,7 @@
 import { getMetadata } from './aem.js';
 import apiUrl from './endpoints.js';
 import {
-  DAY_MINUTES, chooseSlot, nextDay, nowAt, toStartDateTime, toTime,
+  DAY_MINUTES, chooseSlot, nextDay, nowAt, readTimeZone, toStartDateTime, toTime,
 } from './booking.js';
 import { DEFAULT_SITE, getSiteFolder } from './i18n.js';
 import {
@@ -244,9 +244,14 @@ function readLine(p) {
     name: text(p?.propertyDisplayName) || text(p?.propertyName),
     product: text(p?.productDisplayName) || text(p?.productName),
     place: [p?.shortLocation, p?.locationName].map(text).filter(Boolean).join(', '),
-    // for the data layer's Check Out: the service ("Lounge") and the airport's name
+    // for the data layer's Check Out: the service ("Lounge"), the airport's name and code (KUL),
+    // the LMS outlet code and the lounge's time zone ("(GMT+8:00) Asia/Kuala_Lumpur, …" as
+    // Asia/Kuala_Lumpur)
     service: text(p?.serviceDisplayName) || text(p?.serviceName),
     locationName: text(p?.locationName),
+    iataCode: text(p?.iataCode),
+    lmsOutletCode: text(p?.lmsOutletCode),
+    timeZone: readTimeZone(text(p?.timeZone)) || '',
     start: text(p?.startDate),
     adults: Number.parseInt(p?.guestsCount?.adult, 10) || 0,
     children: Number.parseInt(p?.guestsCount?.child, 10) || 0,

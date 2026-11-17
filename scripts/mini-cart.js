@@ -417,11 +417,9 @@ function trackCheckout(cart) {
   // the cart's lounge booking (a cart of passes: its first pass)
   const cartProduct = cart?.lines?.find((product) => product.kind !== 'pass') || cart?.lines?.[0];
   if (!cartProduct) return;
-  // the lounge's IATA code, outlet and time zone: not known yet (without a time zone, the dates
+  // the lounge's IATA code, outlet and time zone, from the cart (without a time zone, the dates
   // are the visitor's own)
-  const iataCode = '';
-  const outletId = '';
-  const timeZone = '';
+  const { iataCode = '', lmsOutletCode = '', timeZone = '' } = cartProduct;
   // the visit at the airport, e.g. "2026-11-20 23:00:00"
   const visitDate = cartProduct.start.slice(0, 10);
   const visitTime = cartProduct.start.slice(11, 16).replace(':', '');
@@ -442,7 +440,7 @@ function trackCheckout(cart) {
     },
     _plazapremiumloungemanagementli: {
       bookingInfo: {
-        // the visit's date and time in UTC (for now from the visitor's time zone, see above)
+        // the visit's date and time at the airport, in UTC (2300 in Kuala Lumpur: 15:00:00Z)
         checkinDateTime: hasVisit ? toUtcDateTime(visitDate, visitTime, timeZone || undefined) : '',
         daysToBooking: hasVisit ? daysUntil(visitDate, timeZone || undefined) : 0,
         totalGuestCount,
@@ -455,7 +453,8 @@ function trackCheckout(cart) {
         locationName: cartProduct.locationName,
       },
       outletDetails: {
-        outletId,
+        // the cart's lmsOutletCode
+        outletId: lmsOutletCode,
         outletName: cartProduct.name,
       },
       offerDetails: {
