@@ -40,6 +40,7 @@ const json = (body, status = 200) => ({
  */
 async function open({
   cart = LOUNGE_CART, width = 1440, height = 900, stored = false, path = PATH, html, host = HOST, setup,
+  cartDelay = 0, wait = true,
 } = {}) {
   const page = await browser.newPage({ viewport: { width, height }, userAgent: UA });
   // (the test's own routes and storage, before the page loads)
@@ -67,10 +68,14 @@ async function open({
     });
   }
   await page.route(/\/GetCountries/, (r) => r.fulfill(json(COUNTRIES)));
-  await page.route(/ppg-app\/cart/, (r) => {
+  await page.route(/ppg-app\/cart/, async (r) => {
     page.gets += 1;
-    if (cart === 'fail') return r.fulfill(json({ error: 'down' }, 500));
-    return r.fulfill(json({ ...cart, cartId: 'CRT_TEST' }));
+    // (the booking system's answer after cartDelay ms, e.g. stage's few seconds)
+    if (cartDelay) await new Promise((res) => { setTimeout(res, cartDelay); });
+    try {
+      if (cart === 'fail') await r.fulfill(json({ error: 'down' }, 500));
+      else await r.fulfill(json({ ...cart, cartId: 'CRT_TEST' }));
+    } catch { /* (the page closed meanwhile) */ }
   });
   // the promo code as stage answers it: an unknown code (BKNG048)
   page.promos = [];
@@ -87,8 +92,9 @@ ${stored ? 'sessionStorage.setItem(\'ppl-cart\', JSON.stringify({ cartId: \'CRT_
     window.payments = [];
     document.addEventListener('checkout:payment', (e) => window.payments.push(JSON.parse(JSON.stringify(e.detail))));
   });
+  page.started = Date.now();
   await page.goto(`${host}${path}`, { waitUntil: 'load', timeout: 60000 });
-  if (host !== HOST) return page;
+  if (host !== HOST || !wait) return page;
   await page.waitForFunction(() => document.querySelector('.checkout')?.dataset.blockStatus === 'loaded', null, { timeout: 30000 });
   // the countries in, the cart read
   await page.waitForFunction(() => document.querySelector('.checkout .form-field-country select')?.options.length > 2, null, { timeout: 15000 }).catch(() => {});
@@ -514,6 +520,63 @@ for (const width of [375, 576, 768, 992, 1440]) {
     check(`${width} member: filled, nothing wider than the screen`, f.first === 'Kai' && f.dial === '+44' && !wide, JSON.stringify([f.first, f.dial, wide]));
     await page.close();
   }
+}
+
+// timing: the booking system's cart answers after 4s. A tab with the cart's data shows the page
+// before that (its stored summary; the page-load loader gone), then the answer's; an unreadable
+// answer keeps the stored summary. A tab without it keeps the loader up while it waits (past the
+// page's own load) and shows the page only once the cart is in.
+{
+  const DELAY = 4000;
+  // when the page's section shows, the summary's text then, whether the loader is up then, and
+  // whether it was still up 2.5s in (the cart's own wait, past the page-load loader)
+  const watch = async (page) => {
+    let shownAt = 0;
+    let shownText = '';
+    let loader = false;
+    let loaderLate = false;
+    for (let t = 0; t < 120 && !shownAt; t += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      const s = await page.evaluate(() => {
+        const section = document.querySelector('main .section:has(.checkout)');
+        return {
+          shown: !!section && section.style.display !== 'none' && section.dataset.sectionStatus === 'loaded',
+          text: document.querySelector('.checkout .checkout-summary')?.innerText.replace(/\s+/g, ' ') || '',
+          loader: !!document.getElementById('spinner-overlay'),
+        };
+      }).catch(() => ({ shown: false, text: '', loader: false }));
+      loader = s.loader;
+      if (s.loader && Date.now() - page.started > 2500) loaderLate = true;
+      if (s.shown) { shownAt = Date.now(); shownText = s.text; }
+      // eslint-disable-next-line no-await-in-loop
+      else await page.waitForTimeout(100);
+    }
+    return {
+      shownAt, shownText, loader, loaderLate,
+    };
+  };
+  // (the cart's answer comes DELAY ms after its request, so no earlier than this)
+  const answered = (page) => page.started + DELAY;
+
+  let page = await open({ stored: true, cartDelay: DELAY, wait: false });
+  let w = await watch(page);
+  check('timing, a tab with the cart: the page shows before the booking system answers, with the stored summary, no loader', w.shownAt && w.shownAt < answered(page) && /Stored Lounge/.test(w.shownText) && !w.loader, JSON.stringify({ shownAfter: w.shownAt - page.started, answerAfter: DELAY, text: w.shownText.slice(0, 60), loader: w.loader }));
+  await page.waitForTimeout(Math.max(0, DELAY + 1500 - (Date.now() - page.started)));
+  let text = await page.locator('.checkout .checkout-summary').innerText();
+  check('timing, a tab with the cart: then the booking system\'s summary', /HKD 787\.50/.test(text) && !/Stored Lounge/.test(text), text.replace(/\s+/g, ' ').slice(0, 80));
+  await page.close();
+
+  page = await open({ cart: 'fail', stored: true, cartDelay: DELAY, wait: false });
+  w = await watch(page);
+  await page.waitForTimeout(Math.max(0, DELAY + 1500 - (Date.now() - page.started)));
+  text = await page.locator('.checkout .checkout-summary').innerText();
+  check('timing, a tab with the cart, the answer unreadable: shown at once, the stored summary kept', w.shownAt && w.shownAt < answered(page) && /Stored Lounge/.test(text), JSON.stringify({ shownAfter: w.shownAt - page.started, text: text.replace(/\s+/g, ' ').slice(0, 80) }));
+  await page.close();
+
+  page = await open({ cartDelay: DELAY, wait: false });
+  w = await watch(page);
+  check('timing, a tab without the cart: the loader, the page only once the cart is in, with its summary', w.loaderLate && w.shownAt >= answered(page) && /HKD 787\.50/.test(w.shownText), JSON.stringify({ shownAfter: w.shownAt - page.started, answerAfter: DELAY, loaderLate: w.loaderLate, text: w.shownText.slice(0, 60) }));
+  await page.close();
 }
 
 // the layouts

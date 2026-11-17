@@ -528,19 +528,26 @@ export default async function decorate(block) {
     render(cart);
   });
 
-  // the booking system's cart (fresh prices): behind the loader when this tab has none yet, else
-  // in the background (the summary shows at once)
-  if (getCartId()) {
-    const first = !getCart();
-    if (first) showLoader();
-    try {
-      const cart = await refreshCart();
-      if (!cart?.lines.length && leave()) return;
-      render(cart);
-    } catch {
-      if (first) render(null, text('error'));
-    } finally {
-      if (first) hideLoader();
-    }
+  // the booking system's cart (fresh prices). A tab without the cart's data waits for it behind
+  // the loader (the page shows once it's in: the summary, the homepage for an empty cart, or the
+  // error text). A tab with it doesn't wait: the page (its section waits for this block) shows at
+  // once with the cart the tab has, and the booking system's answer redraws it when it comes.
+  if (!getCartId()) return;
+  const refresh = () => refreshCart().then((cart) => {
+    if (!cart?.lines.length && leave()) return;
+    render(cart);
+  });
+  if (getCart()) {
+    // (an unreadable answer keeps the summary as it is)
+    refresh().catch(() => {});
+    return;
+  }
+  showLoader();
+  try {
+    await refresh();
+  } catch {
+    render(null, text('error'));
+  } finally {
+    hideLoader();
   }
 }
