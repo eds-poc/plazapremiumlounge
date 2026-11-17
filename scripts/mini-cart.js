@@ -19,6 +19,8 @@ import {
 } from './cart.js';
 import { getCurrency } from './currency.js';
 // eslint-disable-next-line import/no-cycle
+import { pushEvent } from './datalayer.js';
+// eslint-disable-next-line import/no-cycle
 import { hideLoader, showLoader } from './scripts.js';
 
 const styles = loadCSS(`${window.hlx.codeBasePath}/styles/cart.css`);
@@ -599,6 +601,35 @@ function setBusy(from, busy) {
 }
 
 /**
+ * The data layer's link click for a pass's Add to Cart (and Add More) once the booking system has
+ * it ("add to cart"): the pass's line in the cart as it answered (its catalogue code, display
+ * name, service's display name, its totals and its quantity in the cart: 2 after Add More).
+ * @param {Object} item The pass, as its Add to Cart announced it
+ * @param {Object|null} cart The cart after the add (see readCart in cart.js)
+ */
+function trackAddToCart(item, cart) {
+  const line = cart?.lines.find((l) => l.catalogueCode === item.catalogueCode);
+  if (!line) return;
+  const eventName = 'add to cart';
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
+    _plazapremiumloungemanagementli: {
+      productList: [{
+        sku: line.catalogueCode,
+        name: line.product,
+        category: line.category,
+        // the line's totals (its quantity included)
+        actualPricePayCurr: line.basePrice,
+        discountPayCurr: line.discount,
+        sellPricePayCurr: line.total,
+        quantity: line.quantity,
+      }],
+      formDetails: { formName: 'ppl pass purchase', formStepName: 'add to cart' },
+    },
+  });
+}
+
+/**
  * Adds a product and shows the answer, as the source: the site's loader while the booking system
  * answers (the button that asked off), then the mini cart, "Checkout Cart" (its View Cart opens
  * the mini cart), or the failure message.
@@ -618,6 +649,7 @@ export async function addAndShow(item, trigger) {
     setBusy(from, false);
   }
   if (result.status === 'added') {
+    if (item.type === 'pass') trackAddToCart(item, result.cart);
     await openMiniCart(from, { fresh: true });
   } else if (result.reason === 'checkout-first') {
     const view = button(translate('cartViewCart'), 'primary', () => openMiniCart(from));
