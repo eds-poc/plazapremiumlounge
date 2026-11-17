@@ -20,6 +20,9 @@ import {
 import { getCurrency } from './currency.js';
 // eslint-disable-next-line import/no-cycle
 import { hideLoader, showLoader } from './scripts.js';
+// eslint-disable-next-line import/no-cycle
+import { pushEvent } from './datalayer.js';
+import { daysUntil, toUtcDateTime } from './utility.js';
 
 const styles = loadCSS(`${window.hlx.codeBasePath}/styles/cart.css`);
 
@@ -403,6 +406,84 @@ function buildPromo(cart) {
 }
 
 /**
+ * The data layer's link click for Check Out and Edit (both "checkout"), from the cart: the lounge's
+ * visit (its startDate at the airport, in UTC, and the days to it), the guests and the cart's
+ * currency, the airport and the lounge, the promo code, the product with the
+ * cart's prices (the guests as the quantity) and the booking form's step.
+ * @param {Object} cart The cart's summary (see cart.js)
+ */
+function trackCheckout(cart) {
+  const eventName = 'checkout';
+  // the cart's lounge booking (a cart of passes: its first pass)
+  const cartProduct = cart?.lines?.find((product) => product.kind !== 'pass') || cart?.lines?.[0];
+  if (!cartProduct) return;
+  // the lounge's IATA code, outlet and time zone: not known yet (without a time zone, the dates
+  // are the visitor's own)
+  const iataCode = '';
+  const outletId = '';
+  const timeZone = '';
+  // the visit at the airport, e.g. "2026-11-20 23:00:00"
+  const visitDate = cartProduct.start.slice(0, 10);
+  const visitTime = cartProduct.start.slice(11, 16).replace(':', '');
+  const hasVisit = /^\d{4}-\d{2}-\d{2}$/.test(visitDate) && /^\d{4}$/.test(visitTime);
+  const adultCount = cartProduct.adults;
+  const childCount = cartProduct.children;
+  const totalGuestCount = adultCount + childCount;
+  const { totals: cartTotals = {} } = cart;
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: {
+      webInteraction: {
+        name: eventName,
+        type: 'other',
+        linkClicks: {
+          value: 1,
+        },
+      },
+    },
+    _plazapremiumloungemanagementli: {
+      bookingInfo: {
+        // the visit's date and time in UTC (for now from the visitor's time zone, see above)
+        checkinDateTime: hasVisit ? toUtcDateTime(visitDate, visitTime, timeZone || undefined) : '',
+        daysToBooking: hasVisit ? daysUntil(visitDate, timeZone || undefined) : 0,
+        totalGuestCount,
+        adultCount,
+        childCount,
+        propertyCurrencyCode: cart.currency,
+      },
+      locationDetails: {
+        iataCode,
+        locationName: cartProduct.locationName,
+      },
+      outletDetails: {
+        outletId,
+        outletName: cartProduct.name,
+      },
+      offerDetails: {
+        // the cart's promo code (promocode[0].code and .value), '' and 0 without one
+        promoCode: cartProduct.promo?.code || '',
+        promocodeValuePayCurr: cartProduct.promo?.value || 0,
+      },
+      productList: [
+        {
+          sku: cartProduct.catalogueCode,
+          name: cartProduct.product,
+          category: cartProduct.service,
+          // the cart's totals (cartTotalPrice): totalBasePrice, less totalPrice, totalPrice
+          actualPricePayCurr: cartTotals.base,
+          discountPayCurr: Math.round((cartTotals.base - cartTotals.total) * 100) / 100 || 0,
+          sellPricePayCurr: cartTotals.total,
+          quantity: totalGuestCount,
+        },
+      ],
+      formDetails: {
+        formName: 'ppl lounge booking',
+        formStepName: eventName,
+      },
+    },
+  });
+}
+
+/**
  * Fills the mini cart from the cart's summary.
  * @param {Object} cart
  */
@@ -665,3 +746,7 @@ export async function removeAndShow(catalogueCode, trigger) {
   }
   if (result.status === 'failed') await showFailure('cartRemoveFailed', from);
 }
+
+// the data layer's Check Out and Edit clicks (the buttons announce them, see renderMiniCart)
+document.addEventListener('cart:checkout', (e) => trackCheckout(e.detail.cart));
+document.addEventListener('cart:edit', (e) => trackCheckout(e.detail.cart));

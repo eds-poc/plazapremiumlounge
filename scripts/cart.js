@@ -244,6 +244,9 @@ function readLine(p) {
     name: text(p?.propertyDisplayName) || text(p?.propertyName),
     product: text(p?.productDisplayName) || text(p?.productName),
     place: [p?.shortLocation, p?.locationName].map(text).filter(Boolean).join(', '),
+    // for the data layer's Check Out: the service ("Lounge") and the airport's name
+    service: text(p?.serviceDisplayName) || text(p?.serviceName),
+    locationName: text(p?.locationName),
     start: text(p?.startDate),
     adults: Number.parseInt(p?.guestsCount?.adult, 10) || 0,
     children: Number.parseInt(p?.guestsCount?.child, 10) || 0,
