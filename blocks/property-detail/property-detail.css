@@ -1059,8 +1059,15 @@ dialog.modal.property-detail-modal {
   margin-bottom: 0;
 }
 
+/* a pass property's page: the description, then its passes (the Product Passes block), as the
+   source's */
+.property-detail-passes .product-passes-wrapper {
+  margin-top: var(--spacing-11);
+}
+
+/* the Note / Important Information panel's text, as the source's */
 .property-detail-note {
-  color: var(--color-text);
+  color: var(--color-text-secondary);
 }
 
 .property-detail-note a:any-link {
@@ -1407,6 +1414,15 @@ dialog.modal.property-detail-modal {
 
   .property-detail-content {
     padding-top: var(--spacing-9);
+  }
+
+  /* no booking form: the panels start level with the photos, as the source */
+  .property-detail-unbookable .property-detail-content {
+    padding-top: 0;
+  }
+
+  .property-detail-unbookable .property-detail-content .accordion-wrapper {
+    margin-top: 0;
   }
 
   .property-detail-booking {
