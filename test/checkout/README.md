@@ -33,7 +33,13 @@ It covers:
 
 - the Smart Traveller card's Log In opening the login modal over the checkout
 
-99 checks.
+- the Departures / Arrivals badge above a lounge's name: departures (the fixture), arrivals, none
+  for a location that says neither or a pass; its look and plane; its tip (hidden, hover, a click,
+  Escape, a click elsewhere; to its right, above it on a phone); the zh-hk page's words and texts
+
+The header checks wait for the header to load (its navigation comes after the checkout).
+
+113 checks.
 
 ```sh
 BW_HOST=http://localhost:3000 PLAYWRIGHT=/path/to/playwright/index.mjs AXE_CORE=/path/to/axe.min.js node test/checkout/checkout.test.mjs

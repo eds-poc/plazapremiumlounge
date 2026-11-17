@@ -27,6 +27,14 @@ the cart's terms, and beside them (a third of the row, from 992px) the **Booking
 - A lounge: its name, location, Date / Time / Guests / Services; a pass: its name, Quantity and
   price, and the "For me" pill (the source's for a pass not bought as a gift; this site doesn't
   sell gifts yet). On phones each line's details fold away under an arrow (→ open, ↓ folded).
+- Above a lounge's name, the **Departures / Arrivals badge**, as the source's: a burgundy pill with
+  a plane and "DEPARTURES LOUNGE" (or "ARRIVALS LOUNGE"), from the words in the lounge's location
+  ("Near Gate 1, Departures, …"): departure, 出境, 離境, 离境, 出発 or partida make it Departures;
+  otherwise arrival, 入境, 到着 or chegada make it Arrivals; neither, no badge. Its tip ("Located
+  after security & immigration …") shows on hover, keyboard focus or a click, to its right (above
+  it up to 480px); a second click, a click elsewhere or Escape hides it. The labels and tips are
+  the source's in each language (`cartBadge…` in `scripts/i18n.js`). On the source a Tag Manager
+  tag adds it; here the block does, with nothing to author.
 - Service Total and the discounts under a line, then **the promo code** (the mini cart's field and
   texts: codes typed in capitals, Enter or the arrow applies, an applied code shows with ✕ to take
   it off), then Total with "(Includes applicable taxes and fees)" under the amount, and Payment.
@@ -173,7 +181,6 @@ That step needs the booking system's own APIs, which this site doesn't have yet:
 
 ## Not yet
 
-- The "DEPARTURES LOUNGE" badge (no cart field known for it).
 - A pass bought as a gift: the "Gift" pill and the "Buying for yourself or someone else?" steps
   (the passes page has no gift mode yet).
 - A login for products that require one (`isStLoginMandatory`).

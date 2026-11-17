@@ -2,6 +2,7 @@
 // API as stage answers it (test/cart/fixtures: a lounge cart, a pass cart), the countries as the
 // GetCountries API answers them (fixtures/countries.json). Checks:
 // - the summary, the terms and the flight fields for a lounge cart and a pass cart
+// - a lounge's Departures / Arrivals badge (from its location's words) and its tip
 // - Payment off until both boxes are ticked
 // - the source's rules: required fields, the contact number (digits; with its code, 7 to 15),
 //   the emails, the flight number (digits, padded to 3)
@@ -256,6 +257,91 @@ const tick = (page, key, on = true) => page.locator(`${field(key)} input`).setCh
   await stored.close();
 }
 
+// the Departures / Arrivals badge above a lounge's name, from its location's words (as the
+// source's): departures (the fixture's "Near Gate 1, Departures"), arrivals, neither, a pass; its
+// tip on hover, a click, Escape, a click elsewhere; above it on a phone; the zh-hk page's words
+{
+  const placed = (place) => {
+    const c = structuredClone(LOUNGE_CART);
+    c.products[0].shortLocation = place;
+    return c;
+  };
+  const badgeOf = (page) => page.evaluate(() => {
+    const badge = document.querySelector('.checkout .checkout-summary-line .checkout-badge');
+    if (!badge) return null;
+    const button = badge.querySelector('.checkout-badge-button');
+    const tip = document.getElementById(button.getAttribute('aria-describedby'));
+    const cs = getComputedStyle(button);
+    const r = button.getBoundingClientRect();
+    const t = tip.getBoundingClientRect();
+    return {
+      side: badge.className.replace('checkout-badge ', ''),
+      text: button.innerText.trim(),
+      tip: tip?.getAttribute('role') === 'tooltip' && tip.textContent,
+      shown: getComputedStyle(tip).visibility === 'visible',
+      beforeName: badge.nextElementSibling?.classList.contains('checkout-summary-name'),
+      look: [cs.backgroundColor, cs.color, cs.fontSize, cs.fontWeight, cs.textTransform, cs.borderRadius, cs.padding, Math.round(r.height)].join(' '),
+      icon: getComputedStyle(badge.querySelector('.checkout-badge-icon')).transform,
+      tipAbove: t.bottom <= r.top,
+      tipRight: t.left >= r.right,
+    };
+  });
+  const tipShown = async (page) => (await badgeOf(page)).shown;
+
+  let page = await open();
+  let b = await badgeOf(page);
+  check('badge: a departures lounge, above its name', b?.side === 'checkout-badge-departure' && b.text === 'DEPARTURES LOUNGE' && b.beforeName, JSON.stringify(b));
+  check('badge: the source\'s look (#530e2a pill, white 11px 700 capitals, 6px corners, 4px 10px, 24px)', b?.look === 'rgb(83, 14, 42) rgb(255, 255, 255) 11px 700 uppercase 6px 4px 10px 24', b?.look);
+  check('badge: the plane taking off', b?.icon === 'matrix(0.707107, -0.707107, 0.707107, 0.707107, 0, 0)', b?.icon);
+  check('badge: its tip, hidden to start with', b?.tip === 'Located after security & immigration — you’ll need your boarding pass to enter.' && !b.shown, JSON.stringify(b));
+  const button = page.locator('.checkout .checkout-badge-button');
+  await button.hover();
+  await page.waitForTimeout(250);
+  const hovered = await badgeOf(page);
+  check('badge: hover shows the tip, to its right', hovered.shown && hovered.tipRight, JSON.stringify(hovered));
+  await page.mouse.move(1, 1);
+  await page.waitForTimeout(250);
+  check('badge: the tip goes with the pointer', !(await tipShown(page)));
+  await button.click();
+  await page.mouse.move(1, 1);
+  await page.waitForTimeout(250);
+  check('badge: a click keeps the tip shown', await tipShown(page));
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(250);
+  check('badge: Escape hides it', !(await tipShown(page)));
+  await button.click();
+  await page.mouse.move(1, 1);
+  await page.locator('.checkout .checkout-summary-title').click();
+  await page.waitForTimeout(250);
+  check('badge: a click elsewhere hides it', !(await tipShown(page)));
+  await page.close();
+
+  page = await open({ cart: placed('Arrival Hall, Terminal 1') });
+  b = await badgeOf(page);
+  check('badge: an arrivals lounge, the plane landing', b?.side === 'checkout-badge-arrival' && b.text === 'ARRIVALS LOUNGE' && b.icon === 'matrix(0, 1, -1, 0, 0, 0)' && /^Located after you land/.test(b.tip), JSON.stringify(b));
+  await page.close();
+
+  page = await open({ cart: placed('Terminal 1') });
+  check('badge: none when the location says neither', !(await badgeOf(page)));
+  await page.close();
+
+  page = await open({ cart: PASS_CART });
+  check('badge: none on a pass', !(await badgeOf(page)));
+  await page.close();
+
+  page = await open({ width: 375, height: 812 });
+  await page.locator('.checkout .checkout-badge-button').hover();
+  await page.waitForTimeout(250);
+  b = await badgeOf(page);
+  check('badge: on a phone the tip is above it', b?.shown && b.tipAbove, JSON.stringify(b));
+  await page.close();
+
+  page = await open({ cart: placed('1號登機閘口附近, 離境層'), path: '/zh-hk/guest-checkout' });
+  b = await badgeOf(page);
+  check('badge: the zh-hk page\'s words and texts', b?.side === 'checkout-badge-departure' && b.text === '離境貴賓室' && b.tip === '位於安檢及離境檢查之後,需出示登機證方可進入。', JSON.stringify(b));
+  await page.close();
+}
+
 // the layouts
 {
   const phone = await open({ width: 375, height: 812 });
@@ -330,8 +416,12 @@ const tick = (page, key, on = true) => page.locator(`${field(key)} input`).setCh
 {
   const page = await open();
   // the header's actions by where they go (a modal's #name, a modal page in data-href)
-  const head = (p) => p.evaluate(() => [...document.querySelectorAll('header .header-actions a, header .header-actions button')]
-    .map((n) => n.getAttribute('href') || n.dataset.href || '').filter(Boolean));
+  // (once the header is in: its navigation loads after the checkout)
+  const head = async (p) => {
+    await p.waitForFunction(() => document.querySelector('header .header')?.dataset.blockStatus === 'loaded', null, { timeout: 20000 }).catch(() => {});
+    return p.evaluate(() => [...document.querySelectorAll('header .header-actions a, header .header-actions button')]
+      .map((n) => n.getAttribute('href') || n.dataset.href || '').filter(Boolean));
+  };
   const h = await head(page);
   check('header: no Book Now and no cart on the checkout, Log In kept', !h.includes('#book-now') && !h.includes('#cart') && h.some((x) => x.includes('login')), JSON.stringify(h));
   await page.goto(`${HOST}/en-uk/`, { waitUntil: 'load', timeout: 60000 });

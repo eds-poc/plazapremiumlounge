@@ -43,6 +43,26 @@
   --checkout-pill-padding: 4px 12px;
   --checkout-pill-size: 13px;
 
+  /* a lounge line's Departures / Arrivals badge (the source's ppg-ppl-arrdep-badge--summary): an
+     11px bold capitals pill with a 16px plane, 6px above the name; its tip 8px to its right (above
+     it on small phones), 220px wide, dark */
+  --checkout-badge-surface: var(--color-brand-primary);
+  --checkout-badge-padding: 4px 10px;
+  --checkout-badge-gap: 6px;
+  --checkout-badge-after: 6px;
+  --checkout-badge-size: 11px;
+  --checkout-badge-weight: 700;
+  --checkout-badge-spacing: 0.06em;
+  --checkout-badge-icon: 16px;
+  --checkout-badge-label-shift: 1px;
+  --checkout-tip-surface: #1d1d1d;
+  --checkout-tip-width: 220px;
+  --checkout-tip-padding: 10px 12px;
+  --checkout-tip-offset: 8px;
+  --checkout-tip-arrow: 5px;
+  --checkout-tip-arrow-inset: 14px;
+  --checkout-tip-shadow: 0 4px 16px rgb(0 0 0 / 20%);
+
   /* the source's gaps: after the intro, above the Privacy box, between the boxes, the terms */
   --checkout-intro-after: 14px;
   --checkout-consent-before: 44px;
@@ -276,6 +296,118 @@
 
 .checkout .checkout-summary-place {
   margin: 0;
+}
+
+/* the Departures / Arrivals badge above the lounge's name; its tip on hover, keyboard focus or a
+   click (blocks/checkout/checkout.js) */
+.checkout .checkout-badge {
+  position: relative;
+  display: flex;
+  width: max-content;
+  margin-bottom: var(--checkout-badge-after);
+}
+
+.checkout .checkout-badge-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--checkout-badge-gap);
+  margin: 0;
+  border: 0;
+  border-radius: var(--radius-xs);
+  padding: var(--checkout-badge-padding);
+  background-color: var(--checkout-badge-surface);
+  color: var(--color-text-inverse);
+  font-family: inherit;
+  font-size: var(--checkout-badge-size);
+  font-weight: var(--checkout-badge-weight);
+  line-height: 1;
+  letter-spacing: var(--checkout-badge-spacing);
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.checkout .checkout-badge-button:focus-visible {
+  outline: 2px solid var(--checkout-badge-surface);
+  outline-offset: 2px;
+}
+
+.checkout .checkout-badge-icon {
+  flex-shrink: 0;
+  width: var(--checkout-badge-icon);
+  height: var(--checkout-badge-icon);
+  background-color: currentcolor;
+  mask: url('../../icons/plane.svg') center / contain no-repeat;
+}
+
+/* the plane taking off for departures, landing for arrivals */
+.checkout .checkout-badge-departure .checkout-badge-icon {
+  transform: rotate(-45deg);
+}
+
+.checkout .checkout-badge-arrival .checkout-badge-icon {
+  transform: rotate(90deg);
+}
+
+.checkout .checkout-badge-label {
+  position: relative;
+  top: var(--checkout-badge-label-shift);
+}
+
+.checkout .checkout-badge-tip {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + var(--checkout-tip-offset));
+  z-index: 2;
+  box-sizing: border-box;
+  width: var(--checkout-tip-width);
+  border-radius: var(--radius-xs);
+  padding: var(--checkout-tip-padding);
+  background-color: var(--checkout-tip-surface);
+  box-shadow: var(--checkout-tip-shadow);
+  color: var(--color-text-inverse);
+  font-size: var(--checkout-badge-size);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.4;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-50%);
+  transition: opacity var(--duration-fast);
+}
+
+.checkout .checkout-badge-tip::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  border: var(--checkout-tip-arrow) solid transparent;
+  border-right-color: var(--checkout-tip-surface);
+  transform: translateY(-50%);
+}
+
+.checkout .checkout-badge:is(:hover, .is-open, :has(.checkout-badge-button:focus-visible)):not(.is-dismissed) .checkout-badge-tip {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* small phones: the tip above the badge, from its left */
+@media (width <= 480px) {
+  .checkout .checkout-badge-tip {
+    top: auto;
+    bottom: calc(100% + var(--checkout-tip-offset));
+    left: 0;
+    transform: none;
+  }
+
+  .checkout .checkout-badge-tip::after {
+    top: 100%;
+    right: auto;
+    left: var(--checkout-tip-arrow-inset);
+    border-right-color: transparent;
+    border-top-color: var(--checkout-tip-surface);
+    transform: none;
+  }
 }
 
 .checkout .checkout-summary-toggle {

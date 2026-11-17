@@ -134,11 +134,76 @@ function totalRow(className, label, amount) {
   return row;
 }
 
+// the words in a lounge's location that make it a Departures or an Arrivals lounge (the source's,
+// in every language; departures first)
+const SIDE_WORDS = {
+  departure: ['departure', '出境', '離境', '离境', '出発', 'partida'],
+  arrival: ['arrival', '入境', '到着', 'chegada'],
+};
+
+/**
+ * Whether a lounge is a Departures or an Arrivals one, from its location ("Near Gate 1,
+ * Departures, Hong Kong International Airport"), as the source's; '' when it says neither.
+ * @param {string} place
+ * @returns {'departure'|'arrival'|''}
+ */
+function loungeSide(place) {
+  const text = (place || '').toLowerCase();
+  return Object.keys(SIDE_WORDS).find((side) => SIDE_WORDS[side].some((word) => text.includes(word))) || '';
+}
+
+let badges = 0;
+
+/**
+ * The Departures / Arrivals badge, as the source's: a plane and "Departures Lounge", its tip
+ * ("Located after security & immigration …") shown on hover, keyboard focus or a click (a second
+ * click, a click elsewhere or Escape hides it).
+ * @param {'departure'|'arrival'} side
+ * @returns {HTMLElement}
+ */
+function buildBadge(side) {
+  badges += 1;
+  const key = side === 'departure' ? 'cartBadgeDeparture' : 'cartBadgeArrival';
+  const badge = el('span', `checkout-badge checkout-badge-${side}`);
+  const button = el('button', 'checkout-badge-button');
+  button.type = 'button';
+  const icon = el('span', 'checkout-badge-icon');
+  icon.setAttribute('aria-hidden', 'true');
+  button.append(icon, el('span', 'checkout-badge-label', translate(key)));
+  const tip = el('span', 'checkout-badge-tip', translate(`${key}Tip`));
+  tip.id = `checkout-badge-tip-${badges}`;
+  tip.setAttribute('role', 'tooltip');
+  button.setAttribute('aria-describedby', tip.id);
+  badge.append(button, tip);
+  button.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = !badge.classList.contains('is-open');
+    document.querySelectorAll('.checkout-badge.is-open').forEach((b) => b.classList.remove('is-open'));
+    badge.classList.toggle('is-open', open);
+    badge.classList.remove('is-dismissed');
+  });
+  // Escape hides the tip until the pointer or focus leaves
+  button.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    badge.classList.remove('is-open');
+    badge.classList.add('is-dismissed');
+  });
+  const reset = () => badge.classList.remove('is-dismissed');
+  badge.addEventListener('mouseleave', reset);
+  button.addEventListener('blur', reset);
+  return badge;
+}
+
+// a click elsewhere hides an open tip
+document.addEventListener('click', () => {
+  document.querySelectorAll('.checkout-badge.is-open').forEach((b) => b.classList.remove('is-open'));
+});
+
 /**
  * A cart line in the summary, as the source's: a lounge (its name, location, then Date, Time,
- * Guests, Services) or a pass (its name, Quantity: N and its price, the "For me" pill: the source's
- * for a pass not bought as a gift, which this site doesn't sell yet); its details fold away on
- * phones.
+ * Guests, Services; above its name the Departures / Arrivals badge when its location says which)
+ * or a pass (its name, Quantity: N and its price, the "For me" pill: the source's for a pass not
+ * bought as a gift, which this site doesn't sell yet); its details fold away on phones.
  * @param {Object} line
  * @param {string} currency
  * @param {number} index
@@ -148,6 +213,8 @@ function buildLine(line, currency, index) {
   const pass = line.kind === 'pass';
   const box = el('div', `checkout-summary-line${pass ? ' checkout-summary-line-pass' : ''}`);
   const head = el('div', 'checkout-summary-line-head');
+  const side = pass ? '' : loungeSide(line.place);
+  if (side) head.append(buildBadge(side));
   head.append(el('h3', 'checkout-summary-name', pass ? line.product || line.name : line.name || line.product));
   box.append(head);
   const details = el(pass ? 'div' : 'dl', 'checkout-summary-details');
