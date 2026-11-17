@@ -113,7 +113,7 @@
 }
 
 /* after the page's banner (a Promo card before it): 24px, as the source's */
-.promo-wrapper + .checkout-wrapper {
+.promo-wrapper+.checkout-wrapper {
   margin-top: var(--spacing-stack);
 }
 
@@ -257,7 +257,7 @@
   box-shadow: none;
 }
 
-.checkout .checkout-form .form-check-input:checked + .form-check-label::before {
+.checkout .checkout-form .form-check-input:checked+.form-check-label::before {
   content: '';
   position: absolute;
   top: var(--checkout-box-top);
@@ -447,11 +447,6 @@
   transform: rotate(90deg);
 }
 
-.checkout .checkout-badge-label {
-  position: relative;
-  top: var(--checkout-badge-label-shift);
-}
-
 .checkout .checkout-badge-tip {
   position: absolute;
   top: 50%;
@@ -490,7 +485,7 @@
 }
 
 /* small phones: the tip above the badge, from its left */
-@media (width <= 480px) {
+@media (width <=480px) {
   .checkout .checkout-badge-tip {
     top: auto;
     bottom: calc(100% + var(--checkout-tip-offset));
@@ -835,7 +830,7 @@
 }
 
 /* from 576px: the bar's Payment 14px, as the source's */
-@media (width >= 576px) {
+@media (width >=576px) {
   .checkout {
     --checkout-bar-button-size: var(--font-size-sm);
   }
@@ -843,7 +838,7 @@
 
 /* from 768px: the summary's 16px text, details side by side 3px apart, 400 amounts, the 18px
    total, its 14px note; 14px terms; no fold; the source's inset and phone bar sizes */
-@media (width >= 768px) {
+@media (width >=768px) {
   .checkout {
     --checkout-inset: clamp(0px, calc(var(--checkout-inset-max) - max(0px, (100vw - var(--container-max-width)) / 2)), var(--checkout-inset-max));
     --checkout-bar-text: var(--font-size-md);
@@ -888,7 +883,7 @@
 
 /* from 992px (the source's desktop): the form beside the summary (a third of the row), the intro
    three quarters of the form's width, no bar */
-@media (width >= 992px) {
+@media (width >=992px) {
   .checkout .checkout-layout {
     grid-template-columns: calc((100% + var(--grid-gutter)) * 2 / 3 - var(--grid-gutter)) minmax(0, 1fr);
   }
