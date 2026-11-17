@@ -43,6 +43,10 @@ const REGIONS = [
   },
 ];
 
+// the regions' codes in the site's order (the nav's Locations menu, and the source's lounge lists:
+// CH, AS, EP, AP, IM)
+export const REGION_ORDER = REGIONS.map(({ code }) => code);
+
 /**
  * A region's name in the page's language, else its base language, else the default language (as
  * scripts/i18n.js translate looks a text up); '' for a code not listed.

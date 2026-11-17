@@ -177,6 +177,89 @@
   }
 }
 
+/* option lounges: an airport's lounges in Property Filter (accordion list), as the source's card and
+   bank pages' lists (/en-uk/cmb .airport-list): no lines, a dot before each light 16px name and a
+   small plum arrow right after it (down when closed, up when open); an open lounge is a maroon box
+   with white text, its details (opening hours, location) below the name, 10px between lounges */
+.accordion.lounges {
+  /* one-off: the source's 5px dot, 12px arrow and 4px corners */
+  --accordion-lounge-dot: 5px;
+  --accordion-lounge-arrow: 12px;
+  --accordion-lounge-radius: 4px;
+  --accordion-lounge-indent: calc(var(--accordion-lounge-dot) + var(--spacing-4));
+}
+
+/* (:nth-child(n): every item, at the specificity of the other options' item rules) */
+.accordion.lounges .accordion-item:nth-child(n) {
+  margin-bottom: var(--spacing-4);
+  padding: 3px var(--spacing-5);
+  border: 0;
+  border-radius: var(--accordion-lounge-radius);
+  background-color: transparent;
+  color: var(--color-text-strong);
+}
+
+.accordion.lounges .accordion-item[open] {
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+.accordion.lounges .accordion-item:nth-child(n) > .accordion-question {
+  align-items: flex-start;
+  padding: 0;
+  color: inherit;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-body);
+}
+
+/* the dot, centred on the first line */
+.accordion.lounges .accordion-item:nth-child(n) > .accordion-question::before {
+  content: '';
+  flex: none;
+  width: var(--accordion-lounge-dot);
+  height: var(--accordion-lounge-dot);
+  margin: calc(var(--line-height-body) * 0.5em - var(--accordion-lounge-dot) / 2) var(--spacing-4) 0 0;
+  border-radius: var(--radius-circle);
+  background-color: currentcolor;
+}
+
+/* the arrow right after the name (not at the far end), plum, down until open */
+.accordion.lounges .accordion-item:nth-child(n) > .accordion-question::after {
+  width: var(--accordion-lounge-arrow);
+  height: var(--accordion-lounge-arrow);
+  margin: calc(var(--line-height-body) * 0.5em - var(--accordion-lounge-arrow) / 2) 0 0 3px;
+  background-color: var(--color-brand-primary-action);
+  mask-image: url('../../icons/arrow-down.svg');
+}
+
+.accordion.lounges .accordion-item[open] > .accordion-question::after {
+  transform: rotate(180deg);
+}
+
+.accordion.lounges .accordion-answer {
+  padding: var(--spacing-2) 0 0 var(--accordion-lounge-indent);
+  color: inherit;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-light);
+}
+
+.accordion.lounges .accordion-answer ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.accordion.lounges .accordion-answer li {
+  margin: 0 0 var(--spacing-2);
+  padding: 0;
+}
+
+.accordion.lounges .accordion-answer a:any-link {
+  color: inherit;
+  text-decoration: underline;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .accordion .accordion-question,
   .accordion .accordion-question::after,

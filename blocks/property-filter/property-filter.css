@@ -390,11 +390,172 @@
   margin: 0;
 }
 
+/* ---------- option accordion-list: every lounge, by region, country and airport ----------
+   as the source's card and bank pages (/en-uk/cmb: .lounge-region-links, .lounge-list-wrapper):
+   the region links (pills), then per region a warm panel with its plum title, its countries (two
+   columns from 576px, plum titles), per country its airports, each with its lounges' Accordion
+   (blocks/accordion, option lounges) */
+.property-filter.accordion-list {
+  /* one-off: the source's 17px airport titles, 21px region titles and pills' tint */
+  --property-filter-list-airport-size: 17px;
+  --property-filter-list-region-size: 21px;
+  --property-filter-list-link-bg: rgb(104 18 53 / 10%);
+}
+
+/* the region links: "View lounges by region" above its pills */
+.property-filter-list-links-label {
+  margin: 0 0 var(--spacing-3);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.property-filter-list-links-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  margin: 0 0 var(--spacing-8);
+  padding: 0;
+  list-style: none;
+}
+
+.property-filter-list-link:any-link {
+  display: inline-block;
+  padding: 6px var(--spacing-8);
+  border-radius: var(--radius-pill);
+  background: var(--property-filter-list-link-bg);
+  color: var(--color-brand-primary-action);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-light);
+  letter-spacing: var(--letter-spacing-label);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+}
+
+.property-filter-list-link:any-link:hover,
+.property-filter-list-link:any-link:focus-visible {
+  background: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+/* the authored "Last updated" note under the links (the source's .region-updated-date): 14px, 15px
+   below the pills and 25px above the first region */
+.property-filter-list-links:has(+ .property-filter-list-updated) .property-filter-list-links-list {
+  margin-bottom: var(--spacing-6);
+}
+
+.property-filter-list-updated {
+  margin: 0 0 var(--spacing-8);
+  font-size: var(--font-size-sm);
+}
+
+/* a region: its panel (the links' target, clear of the sticky header); below 768px it runs to the
+   screen's edges, as the source's */
+.property-filter-list-region {
+  margin: 0 calc(-1 * var(--container-padding)) var(--spacing-10);
+  padding: var(--spacing-9);
+  border-radius: var(--radius-campaign-panel);
+  background: var(--color-surface-warm);
+  scroll-margin-top: var(--nav-height);
+}
+
+.property-filter-list-region-title {
+  margin: 0 0 var(--spacing-8);
+  color: var(--color-brand-primary-action);
+  font-size: var(--property-filter-list-region-size);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+/* its countries: one column on phones, two from 576px (the source's col-sm-6) */
+.property-filter-list-countries {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: var(--grid-gutter);
+}
+
+.property-filter-list-country {
+  margin-bottom: var(--spacing-bootstrap-3);
+}
+
+.property-filter-list-country-title {
+  margin: 0 0 var(--spacing-3);
+  color: var(--color-brand-primary-action);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.property-filter-list-airport-title {
+  margin: 0 0 var(--spacing-3);
+  color: var(--color-text);
+  font-size: var(--property-filter-list-airport-size);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.property-filter-list-lounges {
+  margin-bottom: var(--spacing-8);
+}
+
+/* while it loads: the label, pills, and a region's titles and lounges */
+.property-filter-bone-links-label {
+  width: 200px;
+  height: var(--font-size-md);
+  margin-bottom: var(--spacing-3);
+}
+
+.property-filter-bone-link {
+  width: 140px;
+  height: calc(12px + var(--line-height-body) * var(--font-size-sm));
+  border-radius: var(--radius-pill);
+}
+
+.property-filter-skeleton .property-filter-list-region .property-filter-bone-title {
+  width: 50%;
+}
+
+.property-filter-bone-country-title {
+  width: 30%;
+  height: var(--font-size-xl);
+  margin-bottom: var(--spacing-3);
+}
+
+.property-filter-bone-airport-title {
+  width: 45%;
+  height: var(--property-filter-list-airport-size);
+  margin-bottom: var(--spacing-5);
+}
+
+.property-filter-bone-lounge {
+  width: 65%;
+  height: var(--font-size-md);
+  margin-bottom: var(--spacing-5);
+}
+
 @media (width >=576px) {
   /* the source's col-sm-5 / col-sm-5 / col-sm-2 */
   .property-filter-selects {
     grid-template-columns: var(--property-filter-col-5) var(--property-filter-col-5) minmax(0, 1fr);
     column-gap: var(--grid-gutter);
+  }
+
+  .property-filter-list-countries {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width >=768px) {
+  .property-filter-list-region {
+    margin-inline: 0;
+  }
+}
+
+@media (width >=992px) {
+  /* the source's 18px label from 992px */
+  .property-filter-list-links-label {
+    font-size: var(--font-size-lg);
   }
 }
 

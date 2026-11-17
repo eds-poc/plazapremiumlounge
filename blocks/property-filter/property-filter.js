@@ -9,14 +9,23 @@
  * from scripts/regions.js), and the chosen city's lounges are shown; the first region, country
  * and city are chosen when the page opens, and the choice is kept in the page address
  * (?region=ep&country=it&city=fco).
+ *
+ * Option `accordion-list` (Property Filter (accordion list)), as the source's card and bank pages
+ * (/en-uk/cmb): the same lounges, listed whole instead of chosen: "View lounges by region" links,
+ * then per region its countries, per country its airports, and per airport an Accordion block
+ * (option `lounges`) with an item per lounge, opening to its opening hours and location. Its
+ * Country, IATA and Property rows also limit the lounges shown to theirs.
  */
+import { buildBlock, decorateBlock, loadBlock } from '../../scripts/aem.js';
 import { translate } from '../../scripts/i18n.js';
 import {
   buildPropertyCard, loadPropertyCardStyles, readSignupButton, readViewButton,
 } from '../../scripts/property-card.js';
 import { fetchFilteredProperties, hasFilters, readFilters } from '../../scripts/property-filter.js';
-import { el, isPreview, toKey } from '../../scripts/properties.js';
-import regionName from '../../scripts/regions.js';
+import {
+  el, isPreview, propertyDetailUrl, toKey,
+} from '../../scripts/properties.js';
+import regionName, { REGION_ORDER } from '../../scripts/regions.js';
 
 // the address's parameters for the choice
 const PARAMS = ['region', 'country', 'city'];
@@ -40,7 +49,18 @@ const TEXTS = {
   countries: 'Countries label',
   services: 'Services label',
   status: 'Status',
+  hours: 'Hours label',
+  location: 'Location label',
+  updated: 'Updated',
 };
+// the texts each layout uses (the accordion list's `Regions label` is its region links' label;
+// its `Updated`, e.g. "Last updated: 03 Jul 2026", shows under them, and is optional)
+const LIST_TEXTS = ['regions', 'hours', 'location'];
+const FILTER_TEXTS = Object.keys(TEXTS)
+  .filter((key) => !['hours', 'location', 'updated'].includes(key));
+
+// the option for the accordion list layout
+const LIST_OPTION = 'accordion-list';
 // the settings rows (not texts): the cards' View button and the sign-up link on their loyalty line
 const SETTINGS = { view: 'View button', signup: 'Signup button' };
 
@@ -130,7 +150,8 @@ export function readSettings(block) {
   // a row name mistyped leaves its text out without a word: say so on preview pages
   const known = [...Object.values(CODE_ROWS), ...Object.values(TEXTS), ...Object.values(SETTINGS)]
     .map(toKey);
-  const missing = Object.entries(TEXTS).filter(([key]) => !texts[key]).map(([, name]) => name);
+  const used = block.classList.contains(LIST_OPTION) ? LIST_TEXTS : FILTER_TEXTS;
+  const missing = used.filter((key) => !texts[key]).map((key) => TEXTS[key]);
   const unknown = rows.filter((cells) => cells.length >= 2)
     .map((cells) => clean(cells[0].textContent))
     .filter((name) => name && !known.includes(toKey(name)));
@@ -529,6 +550,187 @@ function buildSkeleton() {
   return [outline, el('p', 'visually-hidden', translate('propertyLoading'))];
 }
 
+/* ---------- option accordion-list: every lounge, by region, country and airport ---------- */
+
+/**
+ * The lounges the accordion list shows: the service's answer, limited to the authored Country,
+ * IATA and Property codes (a row left out or empty limits nothing). The service answers whole
+ * regions for a Region or Country row, so a card's list of lounges is its Property row.
+ * @param {Object[]} properties
+ * @param {{country: string[], iataCode: string[], propertyCode: string[]}} filters
+ * @returns {Object[]}
+ */
+function narrowProperties(properties, { country, iataCode, propertyCode }) {
+  const keep = (list, value) => !list.length || list.includes(value);
+  return properties.filter((p) => keep(country, p.country) && keep(iataCode, p.iata)
+    && keep(propertyCode, p.code));
+}
+
+/**
+ * The accordion list's tree: regions (in the authored Region row's order, else the site's: CH,
+ * AS, EP, AP, IM), each named as the service names it (else the site's name); their countries by
+ * name; per country its airports by name (a city's airports apart: LHR and LGW), each with its
+ * heading (`Hong Kong International Airport (HKG)`) and its lounges in the service's order, then
+ * by name.
+ * @param {Object[]} properties
+ * @param {string[]} regionOrder The authored region codes
+ * @returns {{code: string, name: string, countries: {code: string, name: string,
+ *   airports: {key: string, heading: string, lounges: Object[]}[]}[]}[]}
+ */
+function readTree(properties, regionOrder) {
+  const lang = document.documentElement.lang || undefined;
+  const byText = (a, b) => a.localeCompare(b, lang);
+  return readChoices(properties, regionOrder.length ? regionOrder : REGION_ORDER)
+    .map((region) => ({
+      code: region.code,
+      name: region.countries[0]?.cities[0]?.properties[0]?.regionName || region.name,
+      countries: region.countries.map((country) => {
+        const airports = new Map();
+        country.cities.flatMap((city) => city.properties).forEach((p) => {
+          const key = p.location.key || p.iata;
+          if (!airports.has(key)) {
+            const heading = p.location.heading || p.location.name || p.iata;
+            airports.set(key, { key, heading, lounges: [] });
+          }
+          airports.get(key).lounges.push(p);
+        });
+        return {
+          code: country.code,
+          name: country.name,
+          airports: [...airports.values()]
+            .map((airport) => ({
+              ...airport,
+              lounges: airport.lounges.sort((a, b) => a.seq - b.seq || byText(a.name, b.name)),
+            }))
+            .sort((a, b) => byText(a.heading, b.heading)),
+        };
+      }),
+    }));
+}
+
+/**
+ * An accordion item's content: the lounge's opening hours and location, each after its authored
+ * label (`Hours label`, `Location label`), and the authored View button's link to its page.
+ * @param {Object} property
+ * @param {{view: Object|null, text: function(string): string}} settings
+ * @returns {HTMLElement[]}
+ */
+function buildLoungeDetails(property, { view, text }) {
+  const list = el('ul', 'property-filter-lounge-details');
+  [['hours', property.hours], ['location', property.line]].forEach(([key, value]) => {
+    if (!value) return;
+    const line = el('li');
+    const label = text(key);
+    if (label) line.append(el('strong', '', label), ' ');
+    line.append(value);
+    list.append(line);
+  });
+  const nodes = list.children.length ? [list] : [];
+  const href = view ? propertyDetailUrl(property.code, { ...view.params, base: view.base }) : '';
+  if (href) {
+    const link = el('a', 'property-filter-lounge-view', view.label);
+    link.href = href;
+    link.setAttribute('aria-label', `${view.label} ${property.name}`);
+    const wrap = el('p');
+    wrap.append(link);
+    nodes.push(wrap);
+  }
+  return nodes;
+}
+
+/**
+ * One airport's lounges as an Accordion block (option `lounges`): an item per lounge, its name
+ * the question, its details the answer (blocks/accordion; each item opens on its own).
+ * @param {{heading: string, lounges: Object[]}} airport
+ * @param {Object} settings
+ * @returns {{group: HTMLElement, accordion: HTMLElement}}
+ */
+function buildAirport(airport, settings) {
+  const group = el('div', 'property-filter-list-airport');
+  group.append(el('h4', 'property-filter-list-airport-title', airport.heading));
+  const accordion = buildBlock('accordion', airport.lounges.map((property) => [
+    el('p', '', property.name),
+    { elems: buildLoungeDetails(property, settings) },
+  ]));
+  accordion.classList.add('lounges');
+  const wrapper = el('div', 'property-filter-list-lounges');
+  wrapper.append(accordion);
+  group.append(wrapper);
+  decorateBlock(accordion);
+  return { group, accordion };
+}
+
+/**
+ * The accordion list: the region links ("View lounges by region", `Regions label`) and the
+ * authored `Updated` note, then per region (a panel, its links' target) its name, its countries
+ * (two columns from 576px), and per country its airports, each with its lounges' Accordion.
+ * @param {HTMLElement} block
+ * @param {Object[]} tree See readTree
+ * @param {Object} settings
+ * @param {string} prefix
+ */
+async function renderTree(block, tree, settings, prefix) {
+  const accordions = [];
+  const label = settings.text('regions');
+  const nav = el('nav', 'property-filter-list-links');
+  if (label) {
+    const title = el('p', 'property-filter-list-links-label', label);
+    title.id = `${prefix}-links`;
+    nav.setAttribute('aria-labelledby', title.id);
+    nav.append(title);
+  }
+  const links = el('ul', 'property-filter-list-links-list');
+  const regions = tree.map((region) => {
+    const panel = el('section', 'property-filter-list-region');
+    panel.id = `${prefix}-${toKey(region.code)}`;
+    const heading = el('h2', 'property-filter-list-region-title', region.name);
+    heading.id = `${panel.id}-title`;
+    panel.setAttribute('aria-labelledby', heading.id);
+    const countries = el('div', 'property-filter-list-countries');
+    countries.append(...region.countries.map((country) => {
+      const group = el('div', 'property-filter-list-country');
+      group.append(el('h3', 'property-filter-list-country-title', country.name));
+      country.airports.forEach((airport) => {
+        const built = buildAirport(airport, settings);
+        accordions.push(built.accordion);
+        group.append(built.group);
+      });
+      return group;
+    }));
+    panel.append(heading, countries);
+    const item = el('li');
+    const link = el('a', 'property-filter-list-link', region.name);
+    link.href = `#${panel.id}`;
+    item.append(link);
+    links.append(item);
+    return panel;
+  });
+  nav.append(links);
+  const updated = settings.text('updated');
+  const note = updated ? [el('p', 'property-filter-list-updated', updated)] : [];
+  // (the Accordions decorate before they show, so the list doesn't change once shown)
+  await Promise.all(accordions.map((accordion) => loadBlock(accordion)));
+  block.replaceChildren(nav, ...note, ...regions);
+}
+
+/**
+ * While the accordion list loads: an outline of the region links and of a region's panel (its
+ * title, a country, an airport and its lounges), hidden from screen readers (which hear the
+ * loading message).
+ * @returns {HTMLElement[]}
+ */
+function buildListSkeleton() {
+  const bones = (n, kind) => Array.from({ length: n }, () => el('span', `property-filter-bone property-filter-bone-${kind}`));
+  const outline = el('div', 'property-filter-skeleton');
+  outline.setAttribute('aria-hidden', 'true');
+  const links = el('div', 'property-filter-list-links-list');
+  links.append(...bones(SKELETON.regions + 1, 'link'));
+  const panel = el('div', 'property-filter-list-region');
+  panel.append(...bones(1, 'title'), ...bones(1, 'country-title'), ...bones(1, 'airport-title'), ...bones(3, 'lounge'));
+  outline.append(...bones(1, 'links-label'), links, panel);
+  return [outline, el('p', 'visually-hidden', translate('propertyLoading'))];
+}
+
 /**
  * Loads the lounges (a skeleton meanwhile), then builds the filters and shows the chosen city's
  * lounges; a failure shows a message with Try again.
@@ -537,16 +739,28 @@ function buildSkeleton() {
  * @param {string} prefix
  */
 async function load(block, settings, prefix) {
+  const list = block.classList.contains(LIST_OPTION);
   block.setAttribute('aria-busy', 'true');
-  block.replaceChildren(...buildSkeleton());
-  // (without their stylesheet the cards show unstyled, never the lounges unloaded)
-  const cardStyles = loadPropertyCardStyles().catch((error) => {
+  block.replaceChildren(...(list ? buildListSkeleton() : buildSkeleton()));
+  // (without their stylesheet the cards show unstyled, never the lounges unloaded; the accordion
+  // list has no cards)
+  const cardStyles = list ? null : loadPropertyCardStyles().catch((error) => {
     // eslint-disable-next-line no-console
     console.error('property-filter: the card styles did not load', error);
   });
   let properties;
   try {
     [{ properties }] = await Promise.all([fetchFilteredProperties(settings.filters), cardStyles]);
+    if (list) {
+      const shown = narrowProperties(properties, settings.filters);
+      const tree = readTree(shown, settings.filters.region);
+      if (!tree.length) {
+        showMessage(block, translate('propertyEmpty'));
+        return;
+      }
+      await renderTree(block, tree, settings, prefix);
+      return;
+    }
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(`property-filter: the lounges didn't load (${error.kind || error.message})`, error);

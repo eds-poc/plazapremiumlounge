@@ -3,7 +3,8 @@
  * Discover the World Before Departure"). Built automatically when the page has the metadata
  * `breadcrumb` = `on` (set for a whole folder in the metadata sheet). The parent is the page one
  * level up in the same language folder (/zh-cn/offers for /zh-cn/offers/ctbcreward: the page named
- * after the folder, else the folder's own index page). Each item's label is that page's own
+ * after the folder, else the folder's own index page); for a page right under the language folder
+ * (/en-uk/cmb) it's the language homepage, "Home". Each item's label is that page's own
  * `breadcrumb-title` metadata, else its title; the parent's is read from its page (kept for the
  * browser session once found). Without a parent page or label, only the page itself shows. A
  * breadcrumb authored on the page (one line per item, a link on each but the last) is used as
@@ -115,10 +116,11 @@ async function readParent(path) {
 }
 
 /**
- * The page's parent path (one level up, in the same language folder) and the page's own name;
- * null outside a language folder or on its homepage. A page right under the language folder has
- * no parent (its homepage isn't a breadcrumb level).
- * @returns {{parent: string, current: string}|null}
+ * The page's parent path (one level up, in the same language folder), the language homepage and
+ * the page's own name; null outside a language folder or on its homepage. A page right under the
+ * language folder (e.g. a card page, /en-uk/cmb) has no parent path: its parent is the homepage,
+ * "Home" (as the source's "Home < CMB").
+ * @returns {{parent: string, home: string, current: string}|null}
  */
 function readLevels() {
   const site = getSiteFolder();
@@ -127,6 +129,7 @@ function readLevels() {
   if (!segments.length) return null;
   return {
     parent: segments.length > 1 ? `/${site}/${segments.slice(0, -1).join('/')}` : '',
+    home: `/${site}/`,
     current: segments[segments.length - 1],
   };
 }
@@ -186,9 +189,14 @@ export default function decorate(block) {
   const current = labelOf((name) => getMetadata(name), document.title)
     || document.querySelector('main h1')?.textContent.trim()
     || decodeURIComponent(levels.current).replace(/[-_]+/g, ' ');
-  const kept = levels.parent ? readCache()[levels.parent] : null;
-  if (!levels.parent || kept?.label) {
-    block.replaceChildren(buildTrail([...(kept?.label ? [kept] : []), { label: current }]));
+  // (a page right under the language folder: the homepage, "Home", is its parent)
+  if (!levels.parent) {
+    block.replaceChildren(buildTrail([{ label: translate('home'), href: levels.home }, { label: current }]));
+    return;
+  }
+  const kept = readCache()[levels.parent];
+  if (kept?.label) {
+    block.replaceChildren(buildTrail([kept, { label: current }]));
     return;
   }
   // the row's space is kept (the page alone, hidden) while the parent is read, so nothing moves

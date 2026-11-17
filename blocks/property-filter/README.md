@@ -94,6 +94,51 @@ out: a row it doesn't know (e.g. an old `Additional Services` row: the service t
 the service), a code that doesn't look like one (e.g. `Europe` instead of `EP`), the texts not
 authored, or a table without any of the four rows of codes.
 
+## Option: accordion list
+
+`Property Filter (accordion list)` lists a card's or bank's eligible lounges **whole**, as the
+source's card and bank pages (e.g. `/en-uk/cmb`, `/en-uk/Luso-International-Banking-Ltd`), instead
+of letting visitors choose a city:
+
+- **View lounges by region:** a link per region (pills), each going to its region below.
+- **Per region:** a panel with the region's name, then its countries (one column on phones, two
+  from 576px), per country its airports (`Beijing Daxing International Airport (PKX)`), and per
+  airport its lounges as an [Accordion](../accordion/README.md) (look `lounges`): one item per
+  lounge, several under an airport when it has several. A lounge opens to its **opening hours**
+  and **location** (the property filter service's), each after its label; several can be open at
+  once.
+- **Order:** regions in the order of your `Region` row, else the site's (Mainland China…,
+  Americas, Europe, Asia-Pacific, India/Middle East/Africa); countries and airports by name;
+  lounges in the service's order, then by name. Region names are the service's (as the source's
+  lists name them), in the page's language.
+
+| Property Filter (accordion list) | |
+| --- | --- |
+| Property | PRPRTY1303, PRPRTY1183, PRPRTY1184 |
+| Regions label | View lounges by region: |
+| Hours label | OPENING HOURS: |
+| Location label | LOCATION: |
+| Updated | Last updated: 03 Jul 2026 |
+| View button | [View lounge](/en-uk/find/lounge) |
+
+- **The lounges:** the same rows of codes as above. In this option the `Country`, `IATA` and
+  `Property` rows also **limit the lounges shown** to theirs (the service answers whole regions
+  for `Region` and `Country`). For a card's or bank's list, write its lounges in the `Property`
+  row: the service then answers only those.
+- **Regions label:** the text before the region links (without it, the links show without a text).
+- **Hours label**, **Location label:** shown before a lounge's opening hours and location, as
+  written (e.g. the source's `OPENING HOURS:`); without them the values show alone.
+- **Updated** (optional): a short note under the region links, e.g. the source's
+  `Last updated: 03 Jul 2026`, written as it should read.
+- **View button** (optional): a link to the lounge's page under its details. Leave the row out
+  for none (the source's lists have none).
+- The filters' rows (Country placeholder, City placeholder, Search label, Countries label,
+  Services label, Status) and the Signup button aren't used.
+
+Put the page's other content (banner, title, the card's text) above the block.
+While the lounges load, the block shows an outline of the links and a region; the messages are the
+same as above.
+
 ## Where the rest comes from
 
 | What | From |
@@ -101,5 +146,6 @@ authored, or a table without any of the four rows of codes.
 | The lounges | The property filter service (`scripts/property-filter.js`, `filteredProperties` in `scripts/endpoints.js`), asked once for the table's lists, in the page's language |
 | Regions, countries, cities and their airports | The property filter service's answer, as it places each lounge (a city's airports share its city code, e.g. `GBLHR` for Heathrow and Gatwick) |
 | Service tabs | The property filter service's answer: each lounge's services (`servicetype`, named by `serviceDisplayName` in the page's language); the All tab's name from the site's translations (`propertyAll`) |
-| Region names | `scripts/regions.js`, by code in each language (as the nav's Locations menu names them), else the code (`OP`, Oceania Pacific, is in English only for now) |
+| Region names | `scripts/regions.js`, by code in each language (as the nav's Locations menu names them), else the code (`OP`, Oceania Pacific, is in English only for now). The accordion list uses the service's names (`regionName`), else these |
+| The accordion list's lounges | The [Accordion](../accordion/README.md) block (look `lounges`), built by the block per airport |
 | The cards | `scripts/property-card.js` and `styles/property-card.css` |

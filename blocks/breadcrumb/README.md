@@ -41,7 +41,7 @@ don't author it.
 | The parent has no `breadcrumb-title` and no title | The page alone |
 | The parent can't be read (an error, or no answer within 8s) | The page alone, for that view |
 | The page has no `breadcrumb-title` | Its title, else its first heading |
-| A page right under the language folder (e.g. `/en-uk/about`) | The page alone |
+| A page right under the language folder (e.g. the card page `/en-uk/cmb`) | **Home** (the language homepage, in the site's language) and the page: "Home < CMB", as the source |
 
 - While the parent is read, the breadcrumb's row is kept empty, so nothing on the page moves, and
   the parent and the page appear together. A parent found once is remembered for the browser
