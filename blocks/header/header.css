@@ -1254,7 +1254,8 @@ header .header-cart-dropdown p {
   }
 
   /* the account dropdown (source .dropdown-menu): under the badge, 200px wide, centred items
-     with lines between them; the items' 5px margins collapse between them, as the source */
+     with lines between them; the items' 5px margins collapse between them, as the source. Moved
+     left by --header-account-shift when it would run past the window's right edge (header.js) */
   header .header-account-dropdown {
     /* one-offs: the source dropdown border, item lines and text */
     --header-account-border: #666;
@@ -1264,7 +1265,7 @@ header .header-cart-dropdown p {
 
     position: absolute;
     top: calc(100% + 1px);
-    left: var(--spacing-2);
+    left: calc(var(--spacing-2) - var(--header-account-shift, 0px));
     z-index: var(--z-megamenu);
     box-sizing: border-box;
     display: block;

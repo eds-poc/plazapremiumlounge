@@ -66,7 +66,9 @@ names, the sections are read in this order:
 
 When a user is logged in, the user icon action (the link with `:user:`) shows their initials in
 a circle (e.g. "KJ") instead, and clicking it opens the account menu: a dropdown under the badge
-on desktop, a "View Profile" panel on tablet and mobile (full screen on phones).
+on desktop, a "View Profile" panel on tablet and mobile (full screen on phones). Where the
+dropdown would run past the window's right edge (e.g. at 1200–1460px), it moves left just enough
+to stay in view, as on the source (also when the window is resized while it's open).
 
 - **Account menu section** in the nav page (Section Metadata `name` = Account menu): a heading
   (the panel title, e.g. View Profile) and a bulleted list of links, e.g.
