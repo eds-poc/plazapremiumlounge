@@ -540,14 +540,16 @@ function trackCartView(cart) {
         childCount: first.children,
       },
       locationDetails: { iataCode: first.iataCode, locationName: first.locationName },
-      outletDetails: { outletId: first.propertyCode, outletName: first.propertyName },
+      // (the line's name: the property's display name)
+      outletDetails: { outletId: first.propertyCode, outletName: first.name },
       // (only with a promo code from the cart API)
       ...(cart.promoCode && {
         offerDetails: { promoCode: cart.promoCode, promocodeValuePayCurr: promoAmount },
       }),
       productList: cart.lines.map((line) => ({
-        sku: line.productCode,
-        name: line.productName,
+        // the catalogue code, the product's display name, the service's display name
+        sku: line.catalogueCode,
+        name: line.product,
         category: line.category,
         // the line's prices, its quantity included; the discount (the rate plan's and a promo
         // code's) only when there is one
