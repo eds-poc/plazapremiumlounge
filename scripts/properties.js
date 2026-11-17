@@ -16,6 +16,8 @@ export const LOUNGE = 'LOUNGE';
 export const PASS = 'GFTCRD';
 export const EXTERNAL = 'EXTNL';
 export const AIRPORT_DINING = 'ARPRTDNG';
+// the status of a property that's shown (others aren't)
+export const ACTIVE = 'Active';
 const SWIPE_PX = 40;
 // the API's language code by site folder; other folders are sent as they are (zh-cn, pt-br …)
 const API_LANGUAGES = { 'en-uk': 'en' };
@@ -411,15 +413,16 @@ export function propertyDetailUrl(code, {
 /**
  * Reads one API record (a listing item or a property detail) into what the cards, the filters and
  * the detail page need, or null for a record that isn't shown (not active, not one of the types,
- * or without a name). Not for `Array.map` directly: map's index would be taken as the types.
+ * or without a name).
  * @param {Object} item
- * @param {string[]} [types] The property types shown: lounges and passes, unless said otherwise
+ * @param {{types?: string[]}} [options] The property types shown: lounges and passes, unless
+ *   said otherwise
  * @returns {Object|null}
  */
-export function readProperty(item, types = [LOUNGE, PASS]) {
+export function readProperty(item, { types = [LOUNGE, PASS] } = {}) {
   const type = item.propertyTypeCode;
   const name = (item.propertyDisplayName || item.propertyName || '').trim();
-  if (item.status !== 'Active' || !types.includes(type) || !name) return null;
+  if (item.status !== ACTIVE || !types.includes(type) || !name) return null;
   const descriptions = Array.isArray(item.loungeDescription) ? item.loungeDescription : [];
   const describe = (kind) => descriptions.find((d) => d.type === kind);
   const iata = (item.iataCode || '').trim();

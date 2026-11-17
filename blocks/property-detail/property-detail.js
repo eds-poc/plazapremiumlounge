@@ -32,9 +32,6 @@ const DESKTOP_PHOTOS = 4;
 const DEFAULT_CURRENCY = 'USD';
 // the property types the page shows: lounges, passes, external partners' services, airport dining
 const DETAIL_TYPES = [LOUNGE, PASS, EXTERNAL, AIRPORT_DINING];
-// an active property: a pass property (gift cards) is shown as its passes, and the booking form
-// shows only with online booking (the service's isTecoEnabled)
-const ACTIVE_STATUS = 'Active';
 // the note (Note / Important Information panel) shows for these types, when it has text; its title
 // is authored (the row's name, as compared)
 const NOTE_TYPES = [EXTERNAL, AIRPORT_DINING];
@@ -165,7 +162,7 @@ function readPrice(json, currency) {
 function readDetail(json) {
   const detail = json?.propertyDetail;
   if (!detail || typeof detail !== 'object') return null;
-  const base = readProperty(detail, DETAIL_TYPES);
+  const base = readProperty(detail, { types: DETAIL_TYPES });
   if (!base) return null;
   const iata = (detail.iataCode || '').trim();
   const locationName = (detail.locationName || '').trim();
@@ -189,12 +186,15 @@ function readDetail(json) {
       .filter((file) => /^https?:/.test(file.href || ''))
       .sort((a, b) => a.order - b.order)[0]?.href || '',
     description: detail.description || '',
+    // (readProperty keeps only active properties, so each of these is for an active one)
     // shown as its passes, without the booking form (see renderPasses)
-    passProperty: detail.propertyTypeCode === PASS && detail.status === ACTIVE_STATUS,
-    // the booking form (and the phone's Book your visit bar): online booking, and active
-    bookable: detail.isTecoEnabled === true && detail.status === ACTIVE_STATUS,
-    // the Note / Important Information panel: an external partner's or airport dining's note
-    showNote: NOTE_TYPES.includes(detail.propertyTypeCode) && !!base.note,
+    passProperty: detail.propertyTypeCode === PASS,
+    // the booking form (and the phone's Book your visit bar): online booking
+    bookable: detail.isTecoEnabled === true,
+    // the Note / Important Information panel: an external partner's or airport dining's note,
+    // when it has text (not only empty paragraphs or spaces)
+    showNote: NOTE_TYPES.includes(detail.propertyTypeCode)
+      && !!safeHtml(base.note).textContent.trim(),
     timeZone: readTimeZone(detail.timeZone),
     iata,
     leadMinutes: readLeadTime(detail.leadTime),
@@ -1203,6 +1203,8 @@ async function renderPasses(block, lounge) {
   decorateBlock(passes);
   await loadBlock(passes);
   setHead(lounge, safeHtml(lounge.description, { blocks: true }));
+  // no booking form: the page, the airport and the property only
+  trackPageLoad(lounge);
 }
 
 /**
