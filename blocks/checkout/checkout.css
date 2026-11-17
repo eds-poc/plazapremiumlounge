@@ -16,17 +16,18 @@
   --checkout-inset: 0px;
   --checkout-inset-max: 40px;
 
-  /* the summary: 16px text (14px below 768px), detail rows 3px apart (10px, label over value),
-     the totals under a light line, the promo field, the total's note under the amount */
-  --checkout-text: var(--font-size-md);
-  --checkout-detail-gap: 3px;
+  /* the summary: 14px text (16px from 768px), each detail's label over its value, 10px apart
+     (side by side, 3px apart, from 768px), the totals under a light line with 16px/500 amounts
+     (400 from 768px), the promo field, the total's note under the amount */
+  --checkout-text: var(--font-size-sm);
+  --checkout-detail-gap: var(--spacing-4);
   --checkout-line-rule: 1px solid #bbb;
-  --checkout-amount-weight: var(--font-weight-regular);
-  --checkout-total-size: var(--font-size-lg);
-  --checkout-note-size: var(--font-size-sm);
+  --checkout-amount-weight: var(--font-weight-medium);
+  --checkout-total-size: var(--font-size-md);
+  --checkout-note-size: 11px;
   --checkout-promo-surface: rgb(231 229 229);
   --checkout-promo-height: 47px;
-  --checkout-promo-padding: 12px 50px 12px 25px;
+  --checkout-promo-padding: 12px 25px;
   --checkout-promo-button: 24px;
   --checkout-promo-arrow: 11px 10px;
   --checkout-disabled-opacity: 0.65;
@@ -38,6 +39,23 @@
   --checkout-alert-surface: #fffbeb;
   --checkout-alert-border: 1px solid #f5ca45;
   --checkout-alert-size: 13px;
+
+  /* the boxes 1px down from their line's top, the tick over a ticked one (the source's 12px check,
+     10.5px wide); a field with an error: the red "!" (16.5px) 8.25px in from its right (36px in a
+     dropdown, left of the arrow), its text kept clear of it; the dropdowns' arrow 12px in, 16 x 12px */
+  --checkout-box: 14px;
+  --checkout-box-top: 1px;
+  --checkout-tick: 10.5px;
+  --checkout-invalid-icon: 16.5px;
+  --checkout-invalid-inset: 8.25px;
+  --checkout-invalid-select-inset: calc(3 * var(--spacing-5));
+  --checkout-select-arrow: 16px 12px;
+  --checkout-error-gap: 1px;
+
+  /* the phone fold arrow (live's 0.875em glyph) at the line's top right, 16 x 20px, 5px down */
+  --checkout-toggle-width: 16px;
+  --checkout-toggle-height: var(--spacing-7);
+  --checkout-toggle-top: var(--spacing-2);
 
   /* a pass line's "For me" pill */
   --checkout-pill-padding: 4px 12px;
@@ -63,13 +81,16 @@
   --checkout-tip-arrow-inset: 14px;
   --checkout-tip-shadow: 0 4px 16px rgb(0 0 0 / 20%);
 
-  /* the source's gaps: after the intro, above the Privacy box, between the boxes, the terms */
+  /* the source's gaps: after the intro, above the Privacy box, between the boxes (each box's row
+     at least 24px tall, as the source's form-check), then 2px and a line of the terms (12px, 14px
+     from 768px) before them */
   --checkout-intro-after: 14px;
-  --checkout-consent-before: 44px;
-  --checkout-newsletter-before: 28px;
-  --checkout-terms-before: 21px;
-  --checkout-terms-slot-before: 25px;
-  --checkout-summary-top: var(--spacing-7);
+  --checkout-consent-before: 46px;
+  --checkout-newsletter-before: var(--spacing-stack);
+  --checkout-terms-before: var(--spacing-7);
+  --checkout-box-row: var(--spacing-stack);
+  --checkout-terms-slot-before: calc(var(--spacing-1) + var(--font-size-xs) * var(--line-height-body));
+  --checkout-summary-top: calc(2 * var(--spacing-7));
 
   /* the phone bar: its shadow, the space kept free for it at the page's end, Payment in capitals */
   --checkout-bar-space: 150px;
@@ -78,7 +99,7 @@
   --checkout-bar-button-size: var(--font-size-xs);
   --checkout-bar-button-padding: 15px;
   --checkout-bar-text: var(--font-size-sm);
-  --checkout-toggle-icon: 16px;
+  --checkout-bar-amount-size: var(--font-size-md);
 
   /* Contact No.: the dial code 15px in, a small ▾ after it, 15px to the line (55px for +1, wider
      for longer codes, as the source's), the number 10px after the line */
@@ -86,7 +107,8 @@
   --checkout-dial-caret: 4px;
   --checkout-number-inset: 10px;
 
-  padding: 0 var(--checkout-inset) var(--spacing-9);
+  /* (the end of the page clear of the phone bar; 30px from 992px, with no bar) */
+  padding: 0 var(--checkout-inset) var(--checkout-bar-space);
   color: var(--color-text);
 }
 
@@ -97,7 +119,7 @@
 
 .checkout .checkout-layout {
   display: grid;
-  gap: var(--spacing-7) var(--grid-gutter);
+  gap: var(--spacing-stack) var(--grid-gutter);
 }
 
 .checkout .checkout-details {
@@ -118,6 +140,52 @@
 
 .checkout .checkout-form .form-field[hidden] {
   display: none;
+}
+
+/* the dropdowns (Title, Country of Residence): the arrow 12px in from the right, 25px of room */
+.checkout .checkout-form .form-select:not(.form-phone-code) {
+  padding-right: var(--spacing-8);
+  background-position: right var(--spacing-5) center;
+  background-size: var(--checkout-select-arrow);
+}
+
+/* a field with an error, as the source's: no red ring, the red "!" inside it at the right; its
+   message right under it */
+.checkout .checkout-form .form-field.has-error :is(.form-input, .form-phone) {
+  box-shadow: none;
+}
+
+.checkout .checkout-form .form-field.has-error :is(.form-control-wrap, .form-phone) {
+  position: relative;
+}
+
+.checkout .checkout-form .form-field.has-error :is(.form-control-wrap, .form-phone)::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: var(--checkout-invalid-inset);
+  width: var(--checkout-invalid-icon);
+  height: var(--checkout-invalid-icon);
+  background-color: var(--color-error);
+  transform: translateY(-50%);
+  pointer-events: none;
+  mask: url('../../icons/circle-exclamation-outline.svg') center / contain no-repeat;
+}
+
+.checkout .checkout-form .form-field.has-error .form-control-wrap:has(.form-select)::after {
+  right: var(--checkout-invalid-select-inset);
+}
+
+.checkout .checkout-form .form-field.has-error .form-input:not(.form-phone-code, .form-select) {
+  padding-right: calc(var(--checkout-invalid-icon) + 2 * var(--checkout-invalid-inset));
+}
+
+.checkout .checkout-form .form-field.has-error .form-select:not(.form-phone-code) {
+  padding-right: calc(var(--checkout-invalid-select-inset) + var(--checkout-invalid-icon) + var(--spacing-5));
+}
+
+.checkout .checkout-form .form-field:not(.form-field-checkbox) .form-error {
+  margin-top: var(--checkout-error-gap);
 }
 
 /* Contact No.: one rounded field, the dial code short at its left, as the source's */
@@ -174,7 +242,33 @@
   border-left: var(--checkout-dial-caret) solid transparent;
 }
 
-/* the boxes: 14px labels, the newsletter's and the Terms & Conditions' grey, as the source's */
+/* the boxes: 14px labels, the newsletter's and the Terms & Conditions' grey, as the source's; a
+   ticked box filled maroon with the white check over it */
+.checkout .checkout-form .form-field-checkbox {
+  position: relative;
+  min-height: var(--checkout-box-row);
+}
+
+.checkout .checkout-form .form-check-input {
+  margin-top: var(--checkout-box-top);
+}
+
+.checkout .checkout-form .form-check-input:checked {
+  box-shadow: none;
+}
+
+.checkout .checkout-form .form-check-input:checked + .form-check-label::before {
+  content: '';
+  position: absolute;
+  top: var(--checkout-box-top);
+  left: 0;
+  width: var(--checkout-box);
+  height: var(--checkout-box);
+  background-color: var(--color-text-inverse);
+  pointer-events: none;
+  mask: url('../../icons/check.svg') center / var(--checkout-tick) auto no-repeat;
+}
+
 .checkout .checkout-form .form-field-checkbox .form-check-label {
   font-size: var(--font-size-sm);
   line-height: var(--line-height-body);
@@ -202,12 +296,13 @@
 
 .checkout .checkout-form .form-check-label a:any-link {
   color: inherit;
+  font-weight: inherit;
   text-decoration: underline;
 }
 
-/* the cart's terms: 14px grey (12px below 768px), each policy's name as the booking system has it */
+/* the cart's terms: 12px grey (14px from 768px), each policy's name as the booking system has it */
 .checkout .checkout-terms {
-  --checkout-terms-size: var(--font-size-sm);
+  --checkout-terms-size: var(--font-size-xs);
 
   color: var(--checkout-terms-text);
   font-size: var(--checkout-terms-size);
@@ -239,11 +334,13 @@
 }
 
 .checkout .checkout-terms-text :is(ul, ol) {
+  margin: 0 0 var(--spacing-6) var(--spacing-7);
   padding-left: var(--spacing-7);
 }
 
 .checkout .checkout-terms-text li {
   margin-bottom: var(--spacing-3);
+  padding: var(--spacing-1) var(--spacing-2) var(--spacing-3);
 }
 
 .checkout .checkout-terms .checkout-terms-text a:any-link {
@@ -267,7 +364,7 @@
 
 .checkout .checkout-summary-title {
   margin: 0 0 var(--spacing-7);
-  padding-bottom: var(--spacing-6);
+  padding-bottom: 0;
   color: var(--color-text);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-medium);
@@ -279,11 +376,12 @@
 }
 
 .checkout .checkout-summary-line {
-  padding-bottom: var(--spacing-2);
+  padding-bottom: 0;
 }
 
 .checkout .checkout-summary-line-head {
   position: relative;
+  padding-right: calc(var(--spacing-11) + var(--spacing-4));
 }
 
 .checkout .checkout-summary-name {
@@ -410,17 +508,39 @@
   }
 }
 
+/* below 992px: the arrow at the line's top right folds its details away (→ open, ↓ folded, as the
+   source's), the arrow as wide as the source's glyph (0.875em) */
 .checkout .checkout-summary-toggle {
-  display: none;
+  position: absolute;
+  top: var(--checkout-toggle-top);
+  right: 0;
+  display: block;
+  width: var(--checkout-toggle-width);
+  height: var(--checkout-toggle-height);
+  border: 0;
+  padding: 0;
+  background-color: var(--color-brand-primary);
+  font-size: inherit;
+  mask: url('../../icons/arrow-right-light.svg') center / 0.875em auto no-repeat;
+  cursor: pointer;
+  transition: transform var(--duration-normal) var(--ease-standard);
+}
+
+.checkout .checkout-summary-toggle[aria-expanded='false'] {
+  transform: rotate(90deg);
 }
 
 .checkout .checkout-summary-details {
   margin: 0;
-  padding-top: var(--spacing-6);
+  padding-top: var(--spacing-7);
+}
+
+.checkout .is-folded .checkout-summary-details {
+  display: none;
 }
 
 .checkout .checkout-summary-detail {
-  display: flex;
+  display: block;
   flex-wrap: wrap;
   gap: 0 0.3em;
   padding-bottom: var(--checkout-detail-gap);
@@ -437,7 +557,8 @@
 }
 
 .checkout .checkout-summary-unit {
-  margin-left: var(--spacing-1);
+  padding: 0 calc(2 * var(--spacing-1));
+  line-height: var(--line-height-relaxed);
 }
 
 /* a pass line: "Quantity: N" 15px under its name, the price at the right, the white "For me" pill
@@ -447,7 +568,7 @@
 }
 
 .checkout .checkout-summary-line-pass .checkout-summary-details {
-  padding-top: var(--spacing-6);
+  padding-top: var(--spacing-7);
 }
 
 .checkout .checkout-summary-quantity {
@@ -455,6 +576,12 @@
   justify-content: space-between;
   gap: var(--spacing-4);
   margin: 0;
+}
+
+.checkout .checkout-summary-line-amount {
+  color: var(--color-text-strong);
+  font-size: var(--font-size-md);
+  font-weight: var(--checkout-amount-weight);
 }
 
 .checkout .checkout-summary-intent {
@@ -496,17 +623,25 @@
   font-weight: var(--checkout-amount-weight);
 }
 
+.checkout .checkout-summary-totals .checkout-summary-row {
+  gap: 0;
+}
+
+.checkout .checkout-summary-totals .checkout-summary-amount {
+  flex: 0 1 auto;
+  text-align: end;
+}
+
+.checkout .checkout-summary-discount .checkout-summary-amount {
+  color: var(--color-brand-primary-action);
+}
+
 /* the promo code (the mini cart's field, scripts/mini-cart.js): "PROMO CODE", a grey pill with
    the arrow, its message; 15px above it, 20px under it */
 .checkout .checkout-promo {
   margin-bottom: var(--spacing-7);
   padding-top: var(--spacing-6);
   color: var(--color-text);
-}
-
-/* (no totals, e.g. passes: the promo field 10px under the last line, as the source's) */
-.checkout .checkout-summary-totals:empty + .checkout-promo {
-  margin-top: var(--spacing-4);
 }
 
 .checkout .checkout-promo-label {
@@ -538,7 +673,7 @@
 }
 
 .checkout .checkout-promo-input::placeholder {
-  color: var(--color-text-secondary);
+  color: color-mix(in srgb, var(--color-text-control) 75%, transparent);
 }
 
 .checkout .checkout-promo-input:focus {
@@ -572,7 +707,7 @@
 
 /* its message: the site's amber callout (as the mini cart's) */
 .checkout .checkout-promo-message {
-  margin: var(--spacing-2) 0 0;
+  margin: var(--spacing-2) 0;
   font-size: var(--checkout-alert-size);
   line-height: var(--line-height-body);
 }
@@ -624,11 +759,10 @@
 
 .checkout .checkout-summary-note {
   display: block;
-  padding-top: var(--spacing-1);
-  color: var(--checkout-label);
+  color: var(--color-text-soft-dark);
   font-size: var(--checkout-note-size);
   font-weight: var(--font-weight-light);
-  line-height: var(--line-height-heading);
+  line-height: var(--line-height-body);
 }
 
 /* Payment: a full-width 47px pill, 24px above it; grey and faded until the boxes are ticked */
@@ -638,6 +772,7 @@
   border-radius: var(--radius-xl);
   padding: var(--spacing-5) var(--spacing-11);
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-light);
   text-transform: capitalize;
 }
 
@@ -665,13 +800,13 @@
 
 .checkout .checkout-bar-total {
   margin: 0 0 var(--spacing-3);
-  padding: 0 var(--spacing-5);
+  padding: 0 var(--spacing-6);
 }
 
 .checkout .checkout-bar-amount {
   display: inline-block;
-  padding-left: var(--spacing-3);
-  font-size: var(--font-size-md);
+  padding-left: var(--spacing-5);
+  font-size: var(--checkout-bar-amount-size);
   font-weight: var(--font-weight-campaign-bold);
 }
 
@@ -694,85 +829,60 @@
   opacity: 1;
 }
 
-/* (the end of the page clear of the phone bar) */
-@media (width < 992px) {
-  .checkout {
-    padding-bottom: var(--checkout-bar-space);
-  }
+/* (below 992px Payment is the phone bar's) */
+.checkout .checkout-payment-summary {
+  display: none;
+}
 
-  .checkout .checkout-payment-summary {
-    display: none;
+/* from 576px: the bar's Payment 14px, as the source's */
+@media (width >= 576px) {
+  .checkout {
+    --checkout-bar-button-size: var(--font-size-sm);
   }
 }
 
-/* phones: 14px, each detail's label over its value (10px apart), the lounge's details folding
-   away under its arrow (open to start with), 16px/500 amounts, 12px terms */
-@media (width < 768px) {
-  .checkout {
-    --checkout-text: var(--font-size-sm);
-    --checkout-detail-gap: var(--spacing-4);
-    --checkout-amount-weight: var(--font-weight-medium);
-    --checkout-total-size: var(--font-size-md);
-    --checkout-note-size: 0.875em;
-    --checkout-summary-top: calc(2 * var(--spacing-7));
-  }
-
-  .checkout .checkout-terms {
-    --checkout-terms-size: var(--font-size-xs);
-  }
-
-  .checkout .checkout-summary-title {
-    padding-bottom: 0;
-  }
-
-  .checkout .checkout-summary-detail {
-    display: block;
-  }
-
-  .checkout .checkout-summary-detail dt {
-    display: block;
-  }
-
-  .checkout .checkout-summary-details,
-  .checkout .checkout-summary-line-pass .checkout-summary-details {
-    padding-top: var(--spacing-7);
-  }
-
-  .checkout .checkout-summary-line-head {
-    padding-right: var(--spacing-11);
-  }
-
-  .checkout .checkout-summary-toggle {
-    position: absolute;
-    top: 0;
-    right: 0;
-    display: block;
-    width: var(--spacing-8);
-    height: var(--spacing-8);
-    border: 0;
-    padding: 0;
-    background-color: var(--color-brand-primary);
-    mask: url('../../icons/arrow-right-light.svg') center / var(--checkout-toggle-icon) no-repeat;
-    cursor: pointer;
-    transition: transform var(--duration-normal) var(--ease-standard);
-  }
-
-  /* (as the source's: → while the details show, ↓ once they're folded away) */
-  .checkout .checkout-summary-toggle[aria-expanded='false'] {
-    transform: rotate(90deg);
-  }
-
-  .checkout .is-folded .checkout-summary-details {
-    display: none;
-  }
-}
-
+/* from 768px: the summary's 16px text, details side by side 3px apart, 400 amounts, the 18px
+   total, its 14px note; 14px terms; no fold; the source's inset and phone bar sizes */
 @media (width >= 768px) {
   .checkout {
     --checkout-inset: clamp(0px, calc(var(--checkout-inset-max) - max(0px, (100vw - var(--container-max-width)) / 2)), var(--checkout-inset-max));
     --checkout-bar-text: var(--font-size-md);
     --checkout-bar-button-margin: var(--spacing-7);
-    --checkout-bar-button-size: var(--font-size-sm);
+    --checkout-bar-amount-size: var(--font-size-lg);
+    --checkout-text: var(--font-size-md);
+    --checkout-detail-gap: calc(2 * var(--spacing-1));
+    --checkout-amount-weight: var(--font-weight-regular);
+    --checkout-total-size: var(--font-size-lg);
+    --checkout-summary-top: var(--spacing-7);
+    --checkout-toggle-height: calc(var(--spacing-7) + var(--spacing-1));
+    --checkout-terms-slot-before: calc(var(--spacing-1) + var(--font-size-sm) * var(--line-height-body));
+    --checkout-error-gap: calc(2 * var(--spacing-1));
+    --checkout-toggle-top: calc(var(--spacing-2) + 1px);
+  }
+
+  .checkout .checkout-bar-total {
+    padding: 0 var(--spacing-5);
+  }
+
+  .checkout .checkout-terms {
+    --checkout-terms-size: var(--font-size-sm);
+  }
+
+  .checkout .checkout-summary-title {
+    padding-bottom: var(--spacing-6);
+  }
+
+  .checkout .checkout-summary-line-head {
+    padding-right: 0;
+  }
+
+  .checkout .checkout-summary-details,
+  .checkout .checkout-summary-line-pass .checkout-summary-details {
+    padding-top: var(--spacing-6);
+  }
+
+  .checkout .checkout-summary-detail {
+    display: flex;
   }
 }
 
@@ -794,12 +904,22 @@
   .checkout .checkout-bar {
     display: none;
   }
-}
 
-/* (the source's narrow desktop: the total's note smaller) */
-@media (992px <= width < 1200px) {
+  .checkout .checkout-summary-toggle {
+    display: none;
+  }
+
+  .checkout .is-folded .checkout-summary-details {
+    display: block;
+  }
+
   .checkout {
-    --checkout-note-size: 11px;
+    padding-bottom: var(--spacing-9);
+  }
+
+  /* (the site's button display) */
+  .checkout .checkout-payment-summary {
+    display: inline-flex;
   }
 }
 

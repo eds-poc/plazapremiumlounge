@@ -11,7 +11,7 @@ the cart's terms, and beside them (a third of the row, from 992px) the **Booking
 **Below 992px:**
 - The summary comes first, then the form.
 - A bar at the bottom of the screen shows the total and **Payment**.
-- On phones the lounge's details fold away under an arrow.
+- The lounge's details fold away under an arrow (as the source's, up to 991px).
 
 **Where the cart comes from:**
 - The cart is the one in `scripts/cart-state.js`.
@@ -26,7 +26,17 @@ the cart's terms, and beside them (a third of the row, from 992px) the **Booking
 **The summary, as the source's:**
 - A lounge: its name, location, Date / Time / Guests / Services; a pass: its name, Quantity and
   price, and the "For me" pill (the source's for a pass not bought as a gift; this site doesn't
-  sell gifts yet). On phones each line's details fold away under an arrow (→ open, ↓ folded).
+  sell gifts yet). Below 992px each line's details fold away under an arrow (→ open, ↓ folded).
+- **The look, as the source's** (checked against it on 2026-11-17 at 13 widths, see
+  `.migration/plans/guest-checkout-ui-audit.md`):
+  - the dropdowns' arrow 12px in from the right
+  - a ticked box filled maroon with a white check
+  - a field with an error has no red border: a red "!" shows inside it at the right, with its
+    message right under it
+  - the terms' lists indented 40px, their items 8px apart
+  - the summary: the discount's amount in maroon (it wraps with its label when narrow), a pass's
+    price in black, "(Includes applicable taxes and fees)" 11px grey at every width, Payment light
+  - the phone bar: 15px in from the edges (12px from 768px); its Payment 14px from 576px
 - Above a lounge's name, the **Departures / Arrivals badge**, as the source's: a burgundy pill with
   a plane and "DEPARTURES LOUNGE" (or "ARRIVALS LOUNGE"), from the words in the lounge's location
   ("Near Gate 1, Departures, …"): departure, 出境, 離境, 离境, 出発 or partida make it Departures;

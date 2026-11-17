@@ -27,4 +27,6 @@ Booking's band (`scripts/booking-steps.js`, `styles/booking-steps.css`).
 ## Where to put it
 
 First in the page's first section: that section then starts right under the header, and the band
-leaves 30px (50px from 768px) to what follows.
+leaves 25px (35px from 768px, 50px from 992px) to what follows, as the source's. On phones it's the
+source's compact bar: 10px above and below the step numbers (15px circles) and the current step's
+name; from 768px each step has 5px after it and 8px before it (but the first and the current).

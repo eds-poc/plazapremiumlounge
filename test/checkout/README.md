@@ -13,7 +13,7 @@ It covers:
 - no cart, a cart that can't be read, a cart emptied meanwhile, a tab's stored data
 - the phone layout (the summary first, the bar, the fold) and the desktop one
 - the page's other blocks: Booking Steps (the band itself, its steps, done and current, its phone
-  name with and without row 2, 30px / 50px after it), Title (back) (the heading 1 link, its arrow's
+  name with and without row 2, 25px / 50px after it), Title (back) (the heading 1 link, its arrow's
   size, colour and hover, 18px / 32px), the banner's Promo card; the order of the four blocks
 - old Checkout rows (`steps`, `back`, `banner`) left out of the checkout
 - the other four languages' pages
@@ -37,9 +37,15 @@ It covers:
   for a location that says neither or a pass; its look and plane; its tip (hidden, hover, a click,
   Escape, a click elsewhere; to its right, above it on a phone); the zh-hk page's words and texts
 
+- the source's look (the UI audit of 2026-11-17) at 375, 576, 768, 992 and 1440: the space under
+  the steps band (25 / 35 / 50px), the back title's text after its arrow (20 / 23px), the dropdown
+  arrow, a ticked box (filled, the white check), a field with an error (no ring, the "!", its message
+  1px / 4px under it), the terms' lists, the fold arrow up to 991px, the discount's maroon, the
+  note's 11px #555, Payment light, the phone bar's inset and Payment size
+
 The header checks wait for the header to load (its navigation comes after the checkout).
 
-113 checks.
+148 checks.
 
 ```sh
 BW_HOST=http://localhost:3000 PLAYWRIGHT=/path/to/playwright/index.mjs AXE_CORE=/path/to/axe.min.js node test/checkout/checkout.test.mjs

@@ -342,6 +342,57 @@ const tick = (page, key, on = true) => page.locator(`${field(key)} input`).setCh
   await page.close();
 }
 
+// the source's look (the UI audit of 2026-11-17, .migration/plans/guest-checkout-ui-audit.md): the
+// space under the steps band, the back title's text after its arrow, the dropdown arrow, the boxes
+// (a ticked one filled with the white check), a field with an error (no ring, the "!" in it, the
+// message right under it), the terms' lists, the summary (the fold up to 991px, the discount
+// maroon, the note 11px #555, Payment light), the phone bar (15px in, Payment 14px from 576px)
+const listed = structuredClone(LOUNGE_CART);
+listed.sortedTermsPolicies = [...(listed.sortedTermsPolicies || []), { termsName: 'GENERAL - TERMS AND CONDITIONS', description: '<ul>SERVICE AND LOCATION<li>Guests must make sure that the area of their selected service location matches the area of the airport.</li><li>Shower usage is subject to availability.</li></ul>' }];
+for (const width of [375, 576, 768, 992, 1440]) {
+  const page = await open({ cart: listed, width, height: 900 });
+  const f = (k) => page.locator(`.checkout .form-field[data-key="${k}"] .form-input:not(.form-phone-code)`);
+  await f('emailAddress').fill('bad');
+  await page.keyboard.press('Tab');
+  await page.locator('.checkout .form-field[data-key="consent"] .form-check-input').check({ force: true });
+  await page.mouse.move(1, 1);
+  await page.waitForTimeout(300);
+  const L = await page.evaluate(() => {
+    const cs = (sel, pseudo) => { const n = document.querySelector(sel); return n && getComputedStyle(n, pseudo || null); };
+    const box = (sel) => document.querySelector(sel)?.getBoundingClientRect();
+    const arrow = box('main .title.back .title-back-arrow');
+    const range = document.createRange();
+    const link = document.querySelector('main .title.back .title-back');
+    range.selectNodeContents([...link.childNodes].find((n) => n.nodeType === 3 && n.textContent.trim()) || link);
+    const email = document.querySelector('.checkout .form-field[data-key="emailAddress"]');
+    const control = email.querySelector('.form-input').getBoundingClientRect();
+    const message = email.querySelector('.form-error');
+    return {
+      stepsAfter: cs('main .booking-steps.block').marginBottom,
+      titleGap: Math.round(range.getBoundingClientRect().left - arrow.right),
+      select: [cs('.checkout .form-field[data-key="title"] .form-select').backgroundPositionX, cs('.checkout .form-field[data-key="title"] .form-select').paddingRight],
+      ticked: [cs('.checkout .form-field[data-key="consent"] .form-check-input').backgroundColor, cs('.checkout .form-field[data-key="consent"] .form-check-input').boxShadow, cs('.checkout .form-field[data-key="consent"] .form-check-label', '::before').maskImage.includes('check.svg')],
+      invalid: [cs('.checkout .form-field[data-key="emailAddress"] .form-input').boxShadow, cs('.checkout .form-field[data-key="emailAddress"] .form-control-wrap', '::after').maskImage.includes('circle-exclamation-outline'), Math.round(message.getBoundingClientRect().top - control.bottom), message.textContent],
+      list: [cs('.checkout .checkout-terms-text ul').marginLeft, cs('.checkout .checkout-terms-text ul').paddingLeft, cs('.checkout .checkout-terms-text li').padding],
+      toggle: cs('.checkout .checkout-summary-toggle')?.display,
+      discount: cs('.checkout .checkout-summary-discount .checkout-summary-amount')?.color,
+      note: [cs('.checkout .checkout-summary-note').fontSize, cs('.checkout .checkout-summary-note').color],
+      payment: cs('.checkout .checkout-payment-summary').fontWeight,
+      bar: [cs('.checkout .checkout-bar-total')?.paddingLeft, cs('.checkout .checkout-payment-bar')?.fontSize, cs('.checkout .checkout-bar')?.display],
+    };
+  });
+  const phone = width < 768;
+  check(`${width} look: ${phone ? 25 : width < 992 ? 35 : 50}px under the steps band; the title's text ${phone ? 20 : 23}px after its arrow`, L.stepsAfter === `${phone ? 25 : width < 992 ? 35 : 50}px` && L.titleGap === (phone ? 20 : 23), JSON.stringify([L.stepsAfter, L.titleGap]));
+  check(`${width} look: the dropdown arrow 12px in, 25px of room`, L.select[0] === 'calc(100% - 12px)' && L.select[1] === '25px', JSON.stringify(L.select));
+  check(`${width} look: a ticked box filled maroon (no inner ring) with the white check`, L.ticked[0] === 'rgb(83, 14, 42)' && L.ticked[1] === 'none' && L.ticked[2], JSON.stringify(L.ticked));
+  check(`${width} look: an invalid field without the red ring, the "!" in it, its message ${phone ? 1 : 4}px under it`, L.invalid[0] === 'none' && L.invalid[1] && L.invalid[2] === (phone ? 1 : 4) && L.invalid[3] === 'Please enter a valid email address', JSON.stringify(L.invalid));
+  check(`${width} look: the terms' lists 20px + 20px in, items 2px 5px 8px`, JSON.stringify(L.list) === JSON.stringify(['20px', '20px', '2px 5px 8px']), JSON.stringify(L.list));
+  check(`${width} look: the fold arrow ${width < 992 ? 'shown' : 'hidden'}; the discount maroon; the note 11px #555`, L.toggle === (width < 992 ? 'block' : 'none') && L.discount === 'rgb(104, 18, 53)' && JSON.stringify(L.note) === JSON.stringify(['11px', 'rgb(85, 85, 85)']), JSON.stringify([L.toggle, L.discount, L.note]));
+  if (width < 992) check(`${width} look: the phone bar ${phone ? 15 : 12}px in, its Payment ${width < 576 ? 12 : 14}px`, L.bar[0] === `${phone ? 15 : 12}px` && L.bar[1] === `${width < 576 ? 12 : 14}px` && L.bar[2] === 'block', JSON.stringify(L.bar));
+  else check(`${width} look: Payment light (300), no phone bar`, L.payment === '300' && L.bar[2] === 'none', JSON.stringify([L.payment, L.bar]));
+  await page.close();
+}
+
 // the layouts
 {
   const phone = await open({ width: 375, height: 812 });
@@ -574,7 +625,7 @@ for (const width of [1440, 375]) {
   const phone = width < 768;
   check(`${width} Booking Steps: the band itself, first in its section with no space above`, m.own && m.top === '0px', JSON.stringify([m.own, m.top]));
   check(`${width} Booking Steps: four steps, Details current (two done), named after the page's heading`, m.steps === 'Lounges › Book › Details › Confirm & Pay' && m.done === 2 && m.current === 2 && m.nav === 'Back to Edit Booking', JSON.stringify(m));
-  check(`${width} Booking Steps: ${phone ? 'the phone name shown' : 'no phone name'}, ${phone ? 30 : 50}px to the title`, m.short === 'Details' && m.shortShown === phone && m.after === (phone ? '30px' : '50px'), JSON.stringify([m.short, m.shortShown, m.after]));
+  check(`${width} Booking Steps: ${phone ? 'the phone name shown' : 'no phone name'}, ${phone ? 25 : 50}px to the title`, m.short === 'Details' && m.shortShown === phone && m.after === (phone ? '25px' : '50px'), JSON.stringify([m.short, m.shortShown, m.after]));
   check(`${width} Title (back): a heading 1 link with the arrow before it, ${phone ? '18px' : '32px'}/500`, m.tag === 'H1' && m.linkText === 'Back to Edit Booking' && /makeabooking$/.test(m.href) && m.size === (phone ? '18px' : '32px') && m.weight === '500' && m.decoration === 'none', JSON.stringify(m));
   check(`${width} Title (back): the maroon arrow ${phone ? '14 x 16' : '21 x 24'}, hidden from screen readers`, JSON.stringify(m.arrow) === JSON.stringify([phone ? 14 : 21, phone ? 16 : 24, 'true', 'rgb(83, 14, 42)']), JSON.stringify(m.arrow));
   if (!phone) {
