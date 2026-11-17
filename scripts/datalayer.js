@@ -34,6 +34,19 @@ let pageDetails = {};
 // the home page's address: / or a site folder's (/en-uk/, /zh-cn/ …), the only page whose page
 // view initDataLayer sends
 const HOMEPAGE_PATH = /^\/([a-z]{2}-[a-z]{2}\/?)?$/;
+// the home page's links and buttons whose clicks are sent (trackHomeLinks): the header's menu (its
+// top items and the links in their menus, also the phones' drill-down), every footer link, the
+// latest offers' Explore Latest Offers and the lounge card's More at …
+const HOME_LINKS = [
+  '.header-link',
+  '.header-dropdown-link',
+  '.header-mega-link',
+  '.header-drill-item',
+  '.header-drill-link',
+  'footer a[href]',
+  '.carousel-cards .button-wrapper a',
+  '.booking-widget-card-more',
+].join(', ');
 
 /**
  * A logged-in member's kept details; when there are none, they're read in the background (once a
@@ -151,11 +164,23 @@ function basePayload(event, eventName) {
     };
   }
 
-  const webPageDetails = { pageName };
-  if (event === PAGE_VIEW) webPageDetails.pageViews = { value: 1 };
+  // the page's name in web for page views only (a link click's web is its webInteraction)
+  if (event === PAGE_VIEW) {
+    return {
+      event,
+      web: {
+        webPageDetails: {
+          pageName,
+          pageViews: {
+            value: 1,
+          },
+        },
+      },
+      _plazapremiumloungemanagementli: details,
+    };
+  }
   return {
     event,
-    web: { webPageDetails },
     _plazapremiumloungemanagementli: details,
   };
 }
@@ -208,13 +233,44 @@ export function trackError(errorCode, errorMessage) {
 }
 
 /**
- * Starts analytics on a page: the page view (on the home page only; the lounge listing's is the
- * property-list block's), then the Launch script from the metadata `launch-script` (an https
- * address; without one, the data layer is still filled).
+ * Sends, on the home page, a link click for each click on its menu, footer, Explore Latest Offers
+ * and More at … links (see HOME_LINKS), named after the link: its label, else its text, else its
+ * image's alt text, lowercase ("explore latest offers", "facebook").
+ */
+function trackHomeLinks() {
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest(HOME_LINKS);
+    if (!link) return;
+    const linkName = [link.getAttribute('aria-label'), link.textContent, link.querySelector('img')?.alt]
+      .map((text) => (text || '').replace(/\s+/g, ' ').trim())
+      .find(Boolean);
+    if (!linkName) return;
+    const eventName = linkName.toLowerCase();
+    pushEvent('web.webInteraction.linkClicks', eventName, {
+      web: {
+        webInteraction: {
+          name: eventName,
+          type: 'other',
+          linkClicks: {
+            value: 1,
+          },
+        },
+      },
+    });
+  });
+}
+
+/**
+ * Starts analytics on a page: the page view and the links' clicks (on the home page only; the
+ * lounge listing's page view is the property-list block's), then the Launch script from the
+ * metadata `launch-script` (an https address; without one, the data layer is still filled).
  */
 export default function initDataLayer() {
   window.adobeDataLayer = window.adobeDataLayer || [];
-  if (HOMEPAGE_PATH.test(window.location.pathname)) pushEvent(PAGE_VIEW, 'page view');
+  if (HOMEPAGE_PATH.test(window.location.pathname)) {
+    pushEvent(PAGE_VIEW, 'page view');
+    trackHomeLinks();
+  }
 
   const src = getMetadata('launch-script').trim();
   if (!src) return;
