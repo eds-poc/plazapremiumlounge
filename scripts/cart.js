@@ -10,7 +10,7 @@
 import { getMetadata } from './aem.js';
 import apiUrl from './endpoints.js';
 import {
-  DAY_MINUTES, chooseSlot, nextDay, nowAt, toStartDateTime, toTime,
+  DAY_MINUTES, chooseSlot, nextDay, nowAt, readTimeZone, toStartDateTime, toTime,
 } from './booking.js';
 import { DEFAULT_SITE, getSiteFolder } from './i18n.js';
 import {
@@ -252,13 +252,15 @@ function readLine(p) {
     // the promo code on this line, if any: its code, the service's name for it ("Pass 15% off")
     // and its amount (each line the code applies to carries its own)
     promo: readLinePromo(p),
-    // for analytics (scripts/mini-cart.js trackCartView): the property's code, the location's name
-    // and IATA code ('' while the service doesn't give one), the service's name as the product's
+    // for analytics (scripts/mini-cart.js trackCartView): the LMS outlet code, the location's name,
+    // IATA code and time zone ('' while the service doesn't give them; the time zone as its IANA
+    // name, from e.g. "(GMT+8:00) Asia/Hong_Kong, …"), the service's name as the product's
     // category, and the line's price before discounts and its discounts, the rate plan's and an
     // applied promo code's (as `total`, the line's: its quantity included)
-    propertyCode: text(p?.propertyCode),
+    outletId: text(p?.lmsOutletCode),
     locationName: text(p?.locationName),
     iataCode: text(p?.iataCode),
+    timeZone: readTimeZone(text(p?.timeZone)) || '',
     category: text(p?.serviceDisplayName),
     basePrice: Number(price.totalBasePrice),
     discount: (Number(price.totalDiscounts) || 0) + (Number(price.totalPromocodeAmount) || 0),

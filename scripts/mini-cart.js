@@ -22,6 +22,7 @@ import { getCurrency } from './currency.js';
 import { PAGE_VIEW, pushEvent } from './datalayer.js';
 // eslint-disable-next-line import/no-cycle
 import { hideLoader, showLoader } from './scripts.js';
+import { toUtcDateTime } from './utility.js';
 
 const styles = loadCSS(`${window.hlx.codeBasePath}/styles/cart.css`);
 
@@ -521,27 +522,33 @@ function renderMiniCart(cart) {
 
 /**
  * The data layer's page view as the mini cart opens ("page load"), from the cart as shown: the
- * booking (the first line's start as YYYY-MM-DDTHH:MM:SSZ, its guests), the lounge and its
- * location (its IATA code when the cart API gives one, else ''), the promo code and its amount
- * (only when the cart API gives a code), and every product with its prices.
+ * booking (the first line's start in UTC as YYYY-MM-DDTHH:MM:SSZ, its guests), the lounge (its
+ * LMS outlet code) and its location (its IATA code), the promo code and its amount (only when the
+ * cart API gives a code), and every product with its prices. What the cart API doesn't give yet
+ * goes as '' (the start, without its time zone: null).
  * @param {Object} cart The cart's summary (see readCart in cart.js)
  */
 function trackCartView(cart) {
-  const [first] = cart.lines;
+  // the booked item (a cart holds one lounge, or passes: the first line) gives the booking, the
+  // outlet and its location
+  const [bookedItem] = cart.lines;
   const promoAmount = cart.totals.promo || 0;
+  // the start at the lounge ("2026-11-28 15:00:00") in UTC, with its time zone (15:00 in Hong
+  // Kong: 07:00:00Z)
+  const [, date, hour, minute] = bookedItem.start.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/) || [];
   pushEvent(PAGE_VIEW, 'page load', {
     _plazapremiumloungemanagementli: {
       bookingInfo: {
-        // the lounge's local time as the cart API gives it ("2026-11-28 15:00:00"), not converted
-        checkinDateTime: first.start ? `${first.start.replace(' ', 'T')}Z` : null,
+        checkinDateTime: date && bookedItem.timeZone
+          ? toUtcDateTime(date, `${hour}${minute}`, bookedItem.timeZone) : null,
         daysToBooking: 0,
-        totalGuestCount: first.adults + first.children,
-        adultCount: first.adults,
-        childCount: first.children,
+        totalGuestCount: bookedItem.adults + bookedItem.children,
+        adultCount: bookedItem.adults,
+        childCount: bookedItem.children,
       },
-      locationDetails: { iataCode: first.iataCode, locationName: first.locationName },
+      locationDetails: { iataCode: bookedItem.iataCode, locationName: bookedItem.locationName },
       // (the line's name: the property's display name)
-      outletDetails: { outletId: first.propertyCode, outletName: first.name },
+      outletDetails: { outletId: bookedItem.outletId, outletName: bookedItem.name },
       // (only with a promo code from the cart API)
       ...(cart.promoCode && {
         offerDetails: { promoCode: cart.promoCode, promocodeValuePayCurr: promoAmount },
