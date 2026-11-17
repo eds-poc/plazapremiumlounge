@@ -257,6 +257,8 @@ function readLine(p) {
     children: Number.parseInt(p?.guestsCount?.child, 10) || 0,
     quantity: Number.parseInt(p?.quantity, 10) || 1,
     total: Number(price.totalPrice),
+    // the line's price before discounts (for the data layer's Check Out of passes)
+    base: Number(price.totalBasePrice),
     // the promo code on this line, if any: its code, the service's name for it ("Pass 15% off")
     // and its amount (each line the code applies to carries its own)
     promo: readLinePromo(p),

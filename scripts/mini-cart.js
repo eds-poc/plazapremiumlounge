@@ -406,17 +406,15 @@ function buildPromo(cart) {
 }
 
 /**
- * The data layer's link click for Check Out and Edit (both "checkout"), from the cart: the lounge's
- * visit (its startDate at the airport, in UTC, and the days to it), the guests and the cart's
- * currency, the airport and the lounge, the promo code, the product with the
- * cart's prices (the guests as the quantity) and the booking form's step.
+ * The data layer's link click for Check Out and Edit (both "checkout") of a lounge booking, from
+ * the cart: the lounge's visit (its startDate at the airport, in UTC, and the days to it), the
+ * guests and the cart's currency, the airport and the lounge, the promo code, the product with
+ * the cart's prices (the guests as the quantity) and the booking form's step.
  * @param {Object} cart The cart's summary (see cart.js)
+ * @param {Object} cartProduct The cart's lounge booking
  */
-function trackCheckout(cart) {
+function trackLoungeCheckout(cart, cartProduct) {
   const eventName = 'checkout';
-  // the cart's lounge booking (a cart of passes: its first pass)
-  const cartProduct = cart?.lines?.find((product) => product.kind !== 'pass') || cart?.lines?.[0];
-  if (!cartProduct) return;
   // the lounge's IATA code, outlet and time zone, from the cart (without a time zone, the dates
   // are the visitor's own)
   const { iataCode = '', lmsOutletCode = '', timeZone = '' } = cartProduct;
@@ -480,6 +478,66 @@ function trackCheckout(cart) {
       },
     },
   });
+}
+
+/**
+ * The data layer's link click for Check Out of passes ("checkout", the lounge passes' flow), from
+ * the cart: the promo code, one product per pass with its own prices and quantity, and the pass
+ * purchase's step.
+ * @param {Object[]} passes The cart's passes (see cart.js)
+ */
+function trackPassCheckout(passes) {
+  const eventName = 'checkout';
+  // the cart's promo code (one per cart): promocode[0].code and .value, '' and 0 without one
+  const cartPromo = passes.find((pass) => pass.promo)?.promo;
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: {
+      webInteraction: {
+        name: eventName,
+        type: 'other',
+        linkClicks: {
+          value: 1,
+        },
+      },
+    },
+    _plazapremiumloungemanagementli: {
+      offerDetails: {
+        promoCode: cartPromo?.code || '',
+        promocodeValuePayCurr: cartPromo?.value || 0,
+      },
+      // each pass with its own prices (productTotalPrice): totalBasePrice, less totalPrice,
+      // totalPrice, and its quantity
+      productList: passes.map((pass) => ({
+        sku: pass.catalogueCode,
+        name: pass.product,
+        category: pass.service,
+        actualPricePayCurr: pass.base,
+        discountPayCurr: Math.round((pass.base - pass.total) * 100) / 100 || 0,
+        sellPricePayCurr: pass.total,
+        quantity: pass.quantity,
+      })),
+      formDetails: {
+        formName: 'ppl pass purchase',
+        formStepName: eventName,
+      },
+    },
+  });
+}
+
+/**
+ * The data layer's link click for the cart's Check Out and Edit: a lounge booking's (see
+ * trackLoungeCheckout), else the passes' (see trackPassCheckout).
+ * @param {Object} cart The cart's summary (see cart.js)
+ */
+function trackCheckout(cart) {
+  const cartProducts = cart?.lines || [];
+  const lounge = cartProducts.find((product) => product.kind !== 'pass');
+  if (lounge) {
+    trackLoungeCheckout(cart, lounge);
+    return;
+  }
+  const passes = cartProducts.filter((product) => product.kind === 'pass');
+  if (passes.length) trackPassCheckout(passes);
 }
 
 /**
