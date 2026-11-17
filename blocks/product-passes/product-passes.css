@@ -6,6 +6,8 @@
   --product-passes-title-size-lg: 22px;
   --product-passes-tag-size: 11px;
   --product-passes-tag-gap: 4px;
+  --product-passes-raised-radius: 24px;
+  --product-passes-raised-shadow: 0 0 10px rgb(0 0 0 / 20%);
 
   /* a Bootstrap column of n twelfths: its share of the row and a gutter, less the gutter */
   --product-passes-col-7: calc(7 / 12 * (100% + var(--grid-gutter)) - var(--grid-gutter));
@@ -159,6 +161,17 @@
 
 .product-passes-actions .product-passes-add {
   width: 100%;
+}
+
+/* raised: the source lounge page's passes (a pass property's page): rounder cards, a shadow all
+   round, rows closer */
+.product-passes.raised .product-passes-grid {
+  row-gap: var(--spacing-7);
+}
+
+.product-passes.raised .product-passes-card {
+  border-radius: var(--product-passes-raised-radius);
+  box-shadow: var(--product-passes-raised-shadow);
 }
 
 /* ---------- while the passes load: placeholder cards (shimmering: .skeleton) ---------- */

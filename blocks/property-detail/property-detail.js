@@ -14,10 +14,10 @@ import {
 } from '../../scripts/booking.js';
 import buildDatePicker from '../../scripts/date-picker.js';
 import {
-  buildBadge, buildSlider, el, fetchJson, getApiLanguage, isPreview, readProperty,
-  safeHtml, setLoading, toKey, toUrl,
+  AIRPORT_DINING, EXTERNAL, LOUNGE, PASS, buildBadge, buildSlider, el, fetchJson, getApiLanguage,
+  isPreview, readProperty, safeHtml, setLoading, toKey, toUrl,
 } from '../../scripts/properties.js';
-import { daysUntil, toUtcDateTime } from '../../scripts/utility.js';
+import { clean, daysUntil, toUtcDateTime } from '../../scripts/utility.js';
 
 // the detail service answers in about 0.2-2s; the services one in 3-7s (at times far longer)
 const DETAIL_TIMEOUT_MS = 15000;
@@ -30,6 +30,15 @@ const MOBILE = '(width < 768px)';
 // desktop shows the first four photos, as the source
 const DESKTOP_PHOTOS = 4;
 const DEFAULT_CURRENCY = 'USD';
+// the property types the page shows: lounges, passes, external partners' services, airport dining
+const DETAIL_TYPES = [LOUNGE, PASS, EXTERNAL, AIRPORT_DINING];
+// the note (Note / Important Information panel) shows for these types, when it has text; its title
+// is authored (the row's name, as compared)
+const NOTE_TYPES = [EXTERNAL, AIRPORT_DINING];
+const NOTE_TITLE_ROW = 'note-title';
+// the panels open on desktop, as the source (Available Services and Details closed, even when a
+// lounge has no features)
+const OPEN_PANELS = ['lounge', 'features', 'note'];
 
 /**
  * The page address's lounge and booking choices, as the source detail pages use them
@@ -153,7 +162,7 @@ function readPrice(json, currency) {
 function readDetail(json) {
   const detail = json?.propertyDetail;
   if (!detail || typeof detail !== 'object') return null;
-  const base = readProperty(detail);
+  const base = readProperty(detail, { types: DETAIL_TYPES });
   if (!base) return null;
   const iata = (detail.iataCode || '').trim();
   const locationName = (detail.locationName || '').trim();
@@ -177,6 +186,15 @@ function readDetail(json) {
       .filter((file) => /^https?:/.test(file.href || ''))
       .sort((a, b) => a.order - b.order)[0]?.href || '',
     description: detail.description || '',
+    // (readProperty keeps only active properties, so each of these is for an active one)
+    // shown as its passes, without the booking form (see renderPasses)
+    passProperty: detail.propertyTypeCode === PASS,
+    // the booking form (and the phone's Book your visit bar): online booking
+    bookable: detail.isTecoEnabled === true,
+    // the Note / Important Information panel: an external partner's or airport dining's note,
+    // when it has text (not only empty paragraphs or spaces)
+    showNote: NOTE_TYPES.includes(detail.propertyTypeCode)
+      && !!safeHtml(base.note).textContent.trim(),
     timeZone: readTimeZone(detail.timeZone),
     iata,
     leadMinutes: readLeadTime(detail.leadTime),
@@ -189,14 +207,18 @@ function readDetail(json) {
 }
 
 /**
- * The authored settings: rows of name | value, as property-list (`signup-button`, a link).
+ * The authored settings: rows of name | value, as property-list (`signup-button`, a link), and
+ * the Note / Important Information panel's title (`Note title`).
  * @param {Element} block
- * @returns {{signup: HTMLAnchorElement|null}}
+ * @returns {{signup: HTMLAnchorElement|null, noteTitle: string}}
  */
 function readSettings(block) {
-  const settings = { signup: null };
+  const settings = { signup: null, noteTitle: '' };
   [...block.children].forEach((row) => {
     const [name, value] = row.children;
+    if (toKey(name?.textContent) === NOTE_TITLE_ROW) {
+      settings.noteTitle = clean(value?.textContent);
+    }
     if (toKey(name?.textContent) === 'signup-button') {
       const link = value?.querySelector('a[href]');
       const href = toUrl(link?.getAttribute('href'));
@@ -372,21 +394,13 @@ function counter(name, group, value, min) {
 }
 
 /**
- * The data layer's "page load" page view, once the booking form has its first services: the
- * page's name and site section, the booking as the form has it (the date and time in UTC, the
- * guests), the lounge and its airport or station, and the chosen product (its code as the SKU;
- * none without services).
+ * The page load's booking, as the booking form has it: the date and time in UTC and the guests,
+ * and the chosen product (its code as the SKU; none without services).
  * @param {Object} lounge
  * @param {HTMLFormElement} form The booking form
+ * @returns {{bookingInfo: Object, productList?: Object[]}}
  */
-function trackPageLoad(lounge, form) {
-  // the page's name and site section, for this event and every one after it:
-  // "<cityName>:<locationName (iataCode)>:<lounge>" in "lounge detail"
-  const pageName = [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':');
-  setPageDetails({
-    pageName,
-    siteSection: 'lounge detail',
-  });
+function readBookingDetails(lounge, form) {
   const formData = new FormData(form);
   // the guests as the form has them (at least 1 adult)
   const adultCount = Number(formData.get('adults')) || 1;
@@ -414,14 +428,6 @@ function trackPageLoad(lounge, form) {
       adultCount,
       childCount,
     },
-    locationDetails: {
-      iataCode: lounge.iata,
-      locationName: lounge.airport,
-    },
-    outletDetails: {
-      outletId: lounge.outletId,
-      outletName: lounge.name,
-    },
   };
   // (the price's catalogueCode comes with Get Price only: the product's code instead)
   if (formFieldsData.productCode) {
@@ -433,6 +439,36 @@ function trackPageLoad(lounge, form) {
       },
     ];
   }
+  return details;
+}
+
+/**
+ * The data layer's "page load" page view, once the booking form has its first services: the
+ * page's name and site section, the booking as the form has it (the date and time in UTC, the
+ * guests), the lounge and its airport or station, and the chosen product (its code as the SKU;
+ * none without services). Without a booking form, only the page, the airport and the lounge.
+ * @param {Object} lounge
+ * @param {HTMLFormElement} [form] The booking form (none when the lounge isn't bookable)
+ */
+function trackPageLoad(lounge, form) {
+  // the page's name and site section, for this event and every one after it:
+  // "<cityName>:<locationName (iataCode)>:<lounge>" in "lounge detail"
+  const pageName = [lounge.city, lounge.airport, lounge.name].filter(Boolean).join(':');
+  setPageDetails({
+    pageName,
+    siteSection: 'lounge detail',
+  });
+  const details = {
+    ...(form && readBookingDetails(lounge, form)),
+    locationDetails: {
+      iataCode: lounge.iata,
+      locationName: lounge.airport,
+    },
+    outletDetails: {
+      outletId: lounge.outletId,
+      outletName: lounge.name,
+    },
+  };
   pushEvent(PAGE_VIEW, 'page load', {
     web: {
       webPageDetails: {
@@ -1043,30 +1079,41 @@ function showMessage(block, text, retry, hint) {
 }
 
 /**
- * The four panels (The Lounge, Lounge Features, Available Services, Details), as an Accordion
- * block (option detail), the first two open, as the source.
+ * The panels (The Lounge, Lounge Features, Available Services, Details, and Note / Important
+ * Information when the note is shown), as an Accordion block (option detail), The Lounge, Lounge
+ * Features and the note open, as the source.
  * @param {Object} lounge
  * @param {HTMLElement} description
+ * @param {string} noteTitle The note panel's authored title (without it, no note panel)
  * @returns {Promise<HTMLElement>} the accordion's wrapper
  */
-async function buildPanels(lounge, description) {
+async function buildPanels(lounge, description, noteTitle) {
   const rows = [['lounge', translate('propertyPanelLounge'), description]];
   if (lounge.features.length) rows.push(['features', translate('propertyPanelFeatures'), buildTags(lounge.features, 'features')]);
   if (lounge.services.length) rows.push(['services', translate('propertyPanelServices'), buildTags(lounge.services, 'services')]);
   const details = buildDetails(lounge);
   if (details.children.length) rows.push(['details', translate('propertyPanelDetails'), details]);
+  if (lounge.showNote && noteTitle) {
+    const note = el('div', 'property-detail-note');
+    note.append(safeHtml(lounge.note));
+    rows.push(['note', noteTitle, note]);
+  } else if (lounge.showNote && isPreview()) {
+    // eslint-disable-next-line no-console
+    console.warn('property-detail: the note isn\'t shown: no "Note title" row in the block');
+  }
   const accordion = buildBlock('accordion', rows.map(([, title, content]) => [el('p', '', title), content]));
   accordion.classList.add('detail');
   const wrapper = el('div', 'accordion-wrapper');
   wrapper.append(accordion);
   decorateBlock(accordion);
   await loadBlock(accordion);
-  // each panel named by its content (property-detail-panel-services is a card on phones); the
-  // first two open on desktop, as the source
+  // each panel named by its content (property-detail-panel-services is a card on phones); some
+  // open on desktop (see OPEN_PANELS)
   [...accordion.querySelectorAll(':scope > details')].forEach((item, i) => {
     if (rows[i]) item.classList.add(`property-detail-panel-${rows[i][0]}`);
-    item.dataset.desktopOpen = i < 2;
-    item.open = i < 2;
+    const open = OPEN_PANELS.includes(rows[i]?.[0]);
+    item.dataset.desktopOpen = open;
+    item.open = open;
   });
   // phones show every panel open, and their headings don't close them (see setPanelsMode)
   accordion.addEventListener('click', (e) => {
@@ -1077,7 +1124,7 @@ async function buildPanels(lounge, description) {
 
 /**
  * The panels on phones, as the source: every panel open, no arrows, and the headings don't open
- * or close anything (out of the tab order); on desktop, accordions again, the first two open.
+ * or close anything (out of the tab order); on desktop, accordions again (see OPEN_PANELS).
  * @param {HTMLElement} panels The accordion's wrapper
  * @param {boolean} mobile
  */
@@ -1130,6 +1177,37 @@ function buildBar(lounge, booking, settings) {
 }
 
 /**
+ * A pass property's page, as the source's: the name in the band, the breadcrumb, the description,
+ * then the property's passes (a Product Passes block, raised, asked for with the property's code,
+ * its airport and isGlobal); no photos, booking form or panels.
+ * @param {HTMLElement} block
+ * @param {Object} lounge See readDetail
+ */
+async function renderPasses(block, lounge) {
+  const band = el('div', 'property-detail-band');
+  band.append(buildHero(lounge));
+  const description = el('div', 'property-detail-description');
+  description.append(safeHtml(lounge.description, { blocks: true }));
+  const passes = buildBlock('product-passes', [
+    ['propertycode', lounge.code],
+    ['iata-code', lounge.iata],
+    ['isGlobal', 'true'],
+  ]);
+  passes.classList.add('raised');
+  const wrapper = el('div', 'product-passes-wrapper');
+  wrapper.append(passes);
+  const body = el('div', 'property-detail-body');
+  body.append(buildCrumbs(lounge), description, wrapper);
+  block.classList.add('property-detail-passes');
+  block.replaceChildren(band, body);
+  decorateBlock(passes);
+  await loadBlock(passes);
+  setHead(lounge, safeHtml(lounge.description, { blocks: true }));
+  // no booking form: the page, the airport and the property only
+  trackPageLoad(lounge);
+}
+
+/**
  * Decorates the property detail block: one lounge, loaded from the detail service by the page
  * address's `propertycode` (with `currency`, `date` and `time`), as the source detail pages. The
  * block itself only holds optional settings (signup-button); everything else comes from the
@@ -1166,7 +1244,11 @@ export default async function decorate(block) {
       return;
     }
     if (!lounge) {
-      showMessage(block, translate('propertyNotFound'), null, `Property "${params.code}" isn't active or isn't a lounge or pass.`);
+      showMessage(block, translate('propertyNotFound'), null, `Property "${params.code}" isn't active or isn't a type this page shows.`);
+      return;
+    }
+    if (lounge.passProperty) {
+      await renderPasses(block, lounge);
       return;
     }
     const mobile = window.matchMedia(MOBILE);
@@ -1194,11 +1276,10 @@ export default async function decorate(block) {
       });
       return { controller, request };
     };
-    const early = lounge.iata ? fetchServices(toStartDateTime(slot.date, slot.time)) : null;
+    const early = lounge.bookable && lounge.iata
+      ? fetchServices(toStartDateTime(slot.date, slot.time)) : null;
 
     const description = el('div', 'property-detail-description');
-    if (lounge.note) description.append(el('p', 'property-detail-note'));
-    if (lounge.note) description.querySelector('.property-detail-note').append(safeHtml(lounge.note));
     description.append(safeHtml(lounge.description, { blocks: true }));
 
     const hero = buildHero(lounge);
@@ -1208,7 +1289,7 @@ export default async function decorate(block) {
     const intro = el('div', 'property-detail-intro');
     const gallery = el('div', 'property-detail-gallery');
     gallery.append(photos);
-    const booking = buildBooking(lounge, slot, settings, {
+    const booking = lounge.bookable && buildBooking(lounge, slot, settings, {
       currency,
       onSlotChange: () => requestServices(true),
       // the price of the choices: a POST; no price for them (or the service's "not available"
@@ -1230,33 +1311,39 @@ export default async function decorate(block) {
         return { ...price, promoRejected };
       },
     });
-    const panels = await buildPanels(lounge, description);
+    const panels = await buildPanels(lounge, description, settings.noteTitle);
     const content = el('div', 'property-detail-content');
-    content.append(booking.panel, panels);
+    if (booking) content.append(booking.panel);
+    content.append(panels);
     const main = el('div', 'property-detail-main');
     main.append(gallery, content);
     const body = el('div', 'property-detail-body');
     body.append(crumbs, main);
-    const bar = buildBar(lounge, booking, settings);
     block.classList.toggle('property-detail-first', lounge.first);
-    block.replaceChildren(band, intro, body, bar);
-    // the page ends with room for the bar, as tall as it is (no Smart Traveller line: shorter)
-    new ResizeObserver(() => {
-      block.style.setProperty('--property-detail-bar-space', `${bar.offsetHeight}px`);
-    }).observe(bar);
+    block.classList.toggle('property-detail-unbookable', !booking);
+    block.replaceChildren(band, intro, body);
+    if (booking) {
+      // the phone's bar books; the page ends with room for it, as tall as it is (no Smart
+      // Traveller line: shorter)
+      const bar = buildBar(lounge, booking, settings);
+      block.append(bar);
+      new ResizeObserver(() => {
+        block.style.setProperty('--property-detail-bar-space', `${bar.offsetHeight}px`);
+      }).observe(bar);
+    }
 
     // phones: the slider, the name and the description share the grey intro; desktop: the name in
     // the band, the photos beside the booking panel, the description in The Lounge panel
     const loungeAnswer = panels.querySelector('details .accordion-answer');
     const place = () => {
       // (the date's pop-up is desktop's; the dialog's calendar is always open)
-      booking.closeCalendar();
+      if (booking) booking.closeCalendar();
       if (mobile.matches) {
         intro.append(slider, hero, description);
       } else {
         band.append(hero);
         loungeAnswer?.append(description);
-        if (!booking.panel.contains(booking.form)) {
+        if (booking && !booking.panel.contains(booking.form)) {
           booking.form.closest('dialog')?.close();
           booking.panel.append(booking.form);
         }
@@ -1267,6 +1354,11 @@ export default async function decorate(block) {
     mobile.addEventListener('change', place);
     place();
     setHead(lounge, safeHtml(lounge.description, { blocks: true }));
+    if (!booking) {
+      // no booking form: no services to wait for
+      trackPageLoad(lounge);
+      return;
+    }
 
     // the services' answer into the booking form (an answer replaced by a newer request is dropped)
     const showServices = ({ controller, request }) => request.then((json) => {

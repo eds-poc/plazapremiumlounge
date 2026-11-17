@@ -20,8 +20,9 @@ import { cellText, clean } from '../../scripts/utility.js';
 // the cart takes a pass announced under this name (scripts/scripts.js CART_EVENTS)
 const ADD_TO_CART = 'product-passes:add-to-cart';
 
-// the settings rows (not texts): the passes' product codes (names ignore capitals and spaces)
-const SETTINGS = { products: 'Products' };
+// the settings rows (not texts; names ignore capitals and spaces): the passes' product codes, and
+// isGlobal (`true` for a pass property's passes: the service needs it for them)
+const SETTINGS = { products: 'Products', global: 'isGlobal' };
 
 // the authored texts: the block's name for each, and its row's name; a text left out isn't shown
 const TEXTS = {
@@ -38,11 +39,12 @@ const PLACEHOLDERS = 3;
  * The authored settings, rows of name | value (names ignore capitals and spaces):
  * - `codes`: the property and airport codes (`propertycode`, `iata-code`; see readApiRow);
  * - `productCodes`: the `Products` row's codes, comma-separated (or one per line), once each;
+ * - `isGlobal`: whether the `isGlobal` row is `true`;
  * - `texts`: the authored texts by their TEXTS key ('' when not authored);
  * - `notes`: what couldn't be used (rows not found or not known, codes that don't look like
  *   product codes), for preview pages.
  * @param {HTMLElement} block
- * @returns {{codes: Object<string, string>, productCodes: string[],
+ * @returns {{codes: Object<string, string>, productCodes: string[], isGlobal: boolean,
  *   texts: Object<string, string>, notes: string[]}}
  */
 function readSettings(block) {
@@ -64,15 +66,13 @@ function readSettings(block) {
   const wrong = listed.filter((code) => !PRODUCT_CODE.test(code));
   if (wrong.length) notes.push(`${SETTINGS.products}: "${wrong.join('", "')}" left out (not a product code)`);
   const productCodes = [...new Set(listed.filter((code) => PRODUCT_CODE.test(code)))];
+  const isGlobal = clean(cell(SETTINGS.global)?.textContent).toLowerCase() === 'true';
 
   const texts = Object.fromEntries(Object.entries(TEXTS)
     .map(([key, name]) => [key, clean(cell(name)?.textContent)]));
   // a row name mistyped leaves its text out without a word: say so on preview pages
   const known = [...Object.values(SETTINGS), ...Object.values(TEXTS)].map(toKey);
-  const missing = [
-    ...(products ? [] : [SETTINGS.products]),
-    ...Object.entries(TEXTS).filter(([key]) => !texts[key]).map(([, name]) => name),
-  ];
+  const missing = Object.entries(TEXTS).filter(([key]) => !texts[key]).map(([, name]) => name);
   const unknown = cells.filter((c) => c.length >= 2)
     .map((c) => clean(c[0].textContent))
     .filter((name) => name && !known.includes(toKey(name)));
@@ -80,7 +80,7 @@ function readSettings(block) {
     notes.push(`rows not found: ${missing.join(', ') || 'none'}; rows not known: ${unknown.join(', ') || 'none'}`);
   }
   return {
-    codes, productCodes, texts, notes,
+    codes, productCodes, isGlobal, texts, notes,
   };
 }
 
@@ -172,7 +172,7 @@ function showMessage(at, text, retry, notes = []) {
 export default function decorate(block) {
   const settings = readSettings(block);
   const api = getApiContext(settings.codes);
-  const context = { ...api, productCodes: settings.productCodes };
+  const context = { ...api, productCodes: settings.productCodes, isGlobal: settings.isGlobal };
   const notes = [...settings.notes, ...api.problems];
   block.replaceChildren();
   if (isPreview()) {

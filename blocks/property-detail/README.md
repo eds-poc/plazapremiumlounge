@@ -12,8 +12,9 @@ folder serves every lounge: `/en-uk/find/lounge`, `/zh-cn/find/lounge`, `/zh-hk/
   - a breadcrumb: Lounges (back to the listing the visitor came from) < the lounge
   - the first four photos beside the **Book your visit** panel; as on the source, the foot of the
     photo column fades to light grey until the pointer is over the photos
-  - the panels: The Lounge, Lounge Features, Available Services, Details (an
-    [Accordion](../accordion/README.md) with the `detail` option, the first two open)
+  - the panels: The Lounge, Lounge Features, Available Services, Details, and Note / Important
+    Information when the note shows (an [Accordion](../accordion/README.md) with the `detail`
+    option; The Lounge, Lounge Features and the note open)
 - **Phones:**
   - a grey intro: a photo slider, the Departures/Arrivals badge, the name, location, hours and
     description
@@ -31,15 +32,42 @@ folder serves every lounge: `/en-uk/find/lounge`, `/zh-cn/find/lounge`, `/zh-hk/
   - Keys as the source: the arrow keys and Page Up/Down move, Escape (or Delete) closes. Drag or
     swipe sideways to move, down to close. The focus returns to the photo that opened it.
 
+## Pass properties
+
+A property of passes (`propertyTypeCode` `GFTCRD`) that's active (`status` `Active`), e.g.
+`?propertycode=PRPRTY1312`, shows its passes instead of the booking form, as the source's pass
+pages (e.g. Plaza Premium Lounge Pass, Hong Kong):
+
+- **Desktop:** the grey title band (the name and location) and the breadcrumb; **phones:** neither,
+  as the source.
+- The description, full width.
+- The property's passes: a [Product Passes](../product-passes/README.md) block with the `raised`
+  option (3 cards per row on desktop, 2 from 576px, 1 on phones), asked for with the property's
+  code, its airport code and `isGlobal`, in the visitor's currency. Learn more and Add to Cart as
+  on any pass card.
+- No photos, booking form, Book your visit bar or panels, and no services or price requests; the
+  address keeps no date or time.
+
+## What the service decides
+
+| Shown | When (from the property's details) |
+| --- | --- |
+| The page | `status` `Active`, and `propertyTypeCode` `LOUNGE`, `GFTCRD`, `EXTNL` (an external partner's service) or `ARPRTDNG` (airport dining) |
+| The booking form and the phone's Book your visit bar | `isTecoEnabled` `true` and `status` `Active`. Otherwise neither, and no services or price requests: on desktop the panels start level with the photos (e.g. Allways Airport Meet & Greet, Orlando) |
+| Note / Important Information, the last panel | The `note` has text and `propertyTypeCode` is `EXTNL` or `ARPRTDNG` (a lounge's note isn't shown). Its title is the **Note title** row |
+
 ## Table: two columns, a setting per row (all optional)
 
 | Property Detail | |
 | --- | --- |
 | signup-button | [Join free](https://www.plazapremiumlounge.com/en-uk/sign-up?pid=pdp) |
+| Note title | Note / Important Information |
 
 - **signup-button:** a link, shown after the Smart Traveller line (the pill in the booking panel,
   and the bottom bar on phones). Leave the row out for no link. Links to other websites open in a
   new tab.
+- **Note title:** the Note / Important Information panel's heading, in the page's language.
+  Without it the panel isn't shown (on the preview site the browser console says so).
 - An empty block (no rows) is fine: everything else comes from the service.
 - Make the template page **noindex** (page metadata Robots). The block sets the page title,
   description, share image and canonical address from the lounge.
