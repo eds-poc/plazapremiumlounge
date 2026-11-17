@@ -77,6 +77,46 @@ export function getCountries() {
   return countries;
 }
 
+// a country's name where GetProfile spells it differently from GetCountries
+const COUNTRY_ALIASES = {
+  'united states': 'united states of america',
+  usa: 'united states of america',
+  'hong kong': 'hong kong sar china',
+  macau: 'macau sar china',
+  macao: 'macau sar china',
+  korea: 'south korea',
+  'republic of korea': 'south korea',
+  'korea republic of': 'south korea',
+  turkey: 'turkiye',
+  'viet nam': 'vietnam',
+};
+
+/**
+ * A country name for matching: lower case, no accents or punctuation ("Türkiye" → "turkiye"), and
+ * the countries list's own name for a known other spelling.
+ * @param {*} name
+ * @returns {string}
+ */
+function countryKey(name) {
+  const key = String(name || '').normalize('NFD').replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+  return COUNTRY_ALIASES[key] || key;
+}
+
+/**
+ * The country (from getCountries) with a name, matched loosely (see countryKey), e.g. a member
+ * profile's `countryName`; undefined when none has it.
+ * @param {object[]} list
+ * @param {*} name
+ * @returns {object|undefined}
+ */
+export function findCountryByName(list, name) {
+  const key = countryKey(name);
+  return key ? list.find((c) => countryKey(c.countryName) === key) : undefined;
+}
+
 // lists a choice field can be filled from (`source: countries`)
 const SOURCES = {
   countries: {

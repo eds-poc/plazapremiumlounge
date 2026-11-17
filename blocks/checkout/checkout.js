@@ -1,4 +1,8 @@
-import { buildForm, fieldElement } from '../../scripts/forms.js';
+import {
+  buildForm, fieldElement, findCountryByName, getCountries,
+} from '../../scripts/forms.js';
+import { getToken, isTokenValid } from '../../scripts/auth.js';
+import { readProfile } from '../../scripts/member.js';
 import safeDescription from '../../scripts/safe-description.js';
 import { formatAmount, loungeDetails } from '../../scripts/cart-summary.js';
 import { getCart, getCartId, onCartChange } from '../../scripts/cart-state.js';
@@ -269,6 +273,92 @@ function buildTerms(terms, heading) {
 }
 
 /**
+ * A title as compared with the dropdown's options: lower case, no full stops or spaces ("Mr." and
+ * "MR" are the same).
+ * @param {*} value
+ * @returns {string}
+ */
+function titleKey(value) {
+  return String(value ?? '').toLowerCase().replace(/[.\s]/g, '');
+}
+
+// the titles in the order every language's page authors them (Mr., Mrs., Ms., Miss: 先生, 太太,
+// 女士, 小姐 …), for a profile's English title on a page in another language
+const TITLE_ORDER = ['mr', 'mrs', 'ms', 'miss'];
+
+/**
+ * A logged-in member's details in the form, as the source's guest checkout shows them for a member
+ * (its server fills the form; here GetProfile, read once with the stored login, kept nowhere):
+ * - the title (`salutation`: by its text, else, on a page in another language, by its place in
+ *   the authored order Mr., Mrs., Ms., Miss)
+ * - the names (`firstName`, `lastName`), the email in both email fields (`userName`)
+ * - the contact number (`phone`, digits) with its dial code (`countryPhoneCode`; for a shared code
+ *   such as +1 the country's own, e.g. "+1 (CA)")
+ * - the country of residence (`countryName`, matched by name in the countries list)
+ * Only empty fields are filled, so what the visitor has typed meanwhile stays; the dial code only
+ * with the number. The values are set without the form's change events, so no message shows
+ * (they're checked on Payment, as typed ones). A guest, or a profile that can't be read, leaves
+ * the form as it is.
+ * @param {HTMLFormElement} form
+ * @returns {Promise<void>}
+ */
+async function prefillMember(form) {
+  const token = getToken();
+  if (!token || !isTokenValid(token)) return;
+  const profile = await readProfile(token);
+  if (!profile) return;
+  const control = (key) => fieldElement(form, key)?.querySelector('.form-input:not(.form-phone-code)');
+  const text = (value) => (typeof value === 'string' ? value.trim() : '');
+  // (within the field's own maximum length)
+  const fit = (input, value) => value.slice(0, input.maxLength > 0 ? input.maxLength : undefined);
+  const fill = (key, value) => {
+    const input = control(key);
+    if (input && !input.value && text(value)) input.value = fit(input, text(value));
+  };
+  fill('firstName', profile.firstName);
+  fill('lastName', profile.lastName);
+  fill('emailAddress', profile.userName);
+  fill('confirmEmailAddress', profile.userName);
+  const title = control('title');
+  const titleWanted = titleKey(profile.salutation);
+  if (title && !title.value && titleWanted) {
+    const options = [...title.options].filter((o) => o.value);
+    const option = options.find((o) => titleKey(o.value) === titleWanted
+      || titleKey(o.textContent) === titleWanted)
+      || (options.length === TITLE_ORDER.length ? options[TITLE_ORDER.indexOf(titleWanted)] : null);
+    if (option) title.value = option.value;
+  }
+  const number = control('contactNumber');
+  const digits = String(profile.phone ?? '').replace(/\D/g, '');
+  const withNumber = !!(number && !number.value && digits);
+  if (withNumber) number.value = fit(number, digits);
+
+  // the country and the dial code once the countries are in (their lists are filled by then)
+  let countries;
+  try {
+    countries = await getCountries();
+  } catch {
+    return;
+  }
+  const country = findCountryByName(countries, profile.countryName);
+  const residence = control('countryOfResidence');
+  if (residence && !residence.value && country
+    && [...residence.options].some((o) => o.value === String(country.countryId))) {
+    residence.value = String(country.countryId);
+  }
+  const code = fieldElement(form, 'contactNumber')?.querySelector('.form-phone-code');
+  const dial = String(profile.countryPhoneCode ?? '').replace(/\D/g, '');
+  if (!withNumber || !code || !dial) return;
+  const options = [...code.options];
+  const option = options.find((o) => o.value === `+${dial}` && country && o.textContent === country.phoneCodeCountryCode)
+    || options.find((o) => o.value === `+${dial}`);
+  if (!option || option.selected) return;
+  option.selected = true;
+  // (not bubbling: the short dial code follows, the form doesn't check the field)
+  code.dispatchEvent(new Event('change'));
+}
+
+/**
  * Decorates the Checkout block: the guest checkout (the source /{lang}/guest-checkout) for the
  * cart this site holds (cart-state.js, read again from the booking system): the guest's details
  * (the authored form rows: Field | Label | Placeholder | Required | Error, see README), the Privacy
@@ -341,6 +431,8 @@ export default async function decorate(block) {
   });
   // the form's own button gives way to Payment (in the summary and the phone bar)
   form.querySelector('.form-submit')?.remove();
+  // a logged-in member's details in the form (in the background; a guest's form stays empty)
+  prefillMember(form);
 
   const summary = el('aside', 'checkout-summary');
   summary.setAttribute('aria-labelledby', `${formId}-summary`);

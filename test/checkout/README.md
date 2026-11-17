@@ -43,9 +43,15 @@ It covers:
   1px / 4px under it), the terms' lists, the fold arrow up to 991px, the discount's maroon, the
   note's 11px #555, Payment light, the phone bar's inset and Payment size
 
+- a logged-in member (a stand-in login and routed GetProfile answers, never a real account): the
+  title, names, both emails, the number with its dial code (a shared +1 by the country), the country
+  by name; only empty fields filled; no messages; Payment sends the filled details; a guest makes
+  no request; a profile error, refusal or no answer leaves the form empty; an expired login logs
+  out; the other four languages (the title by its authored order); 375 and 1440
+
 The header checks wait for the header to load (its navigation comes after the checkout).
 
-148 checks.
+165 checks.
 
 ```sh
 BW_HOST=http://localhost:3000 PLAYWRIGHT=/path/to/playwright/index.mjs AXE_CORE=/path/to/axe.min.js node test/checkout/checkout.test.mjs

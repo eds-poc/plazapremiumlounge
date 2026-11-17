@@ -23,6 +23,22 @@ the cart's terms, and beside them (a third of the row, from 992px) the **Booking
   localhost) or in the block library, where the page shows "Please add item" for authors. A
   cart that can't be read keeps the `error` text.
 
+**A logged-in member** (the login pop-up's session, `scripts/auth.js`): the form is filled with
+their details, as on the source (its server fills the form for a member). Nothing to author.
+- Read once from GetProfile with the member's login (`readProfile` in `scripts/member.js`) and kept
+  nowhere.
+- **Title** ← `salutation` (matched to the authored options, "Mr" = "Mr."; on the other
+  languages' pages by its place: author the options in the order Mr., Mrs., Ms., Miss), **First Name**,
+  **Last Name** ← `firstName`, `lastName`, **Email Address** and **Confirm Email Address** ←
+  `userName`, **Contact No.** ← `phone` (digits) with the dial code ← `countryPhoneCode` (for a
+  shared code such as +1, the country's own), **Country of Residence** ← `countryName` (matched by
+  name, as the Profile Form: `findCountryByName` in `scripts/forms.js`).
+- The flight and partner fields stay empty (the profile has none).
+- Only empty fields are filled: what the visitor typed meanwhile stays. Everything stays editable.
+  No message shows; the values are checked on Payment, as typed ones.
+- A guest makes no request. A profile that can't be read (an error, refused, no answer within 5s)
+  leaves the form empty, with no message; an expired login already logs out on page load.
+
 **The summary, as the source's:**
 - A lounge: its name, location, Date / Time / Guests / Services; a pass: its name, Quantity and
   price, and the "For me" pill (the source's for a pass not bought as a gift; this site doesn't

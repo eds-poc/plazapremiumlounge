@@ -39,9 +39,11 @@ const json = (body, status = 200) => ({
  * answers 500), `stored` keeps the cart's data in the tab already.
  */
 async function open({
-  cart = LOUNGE_CART, width = 1440, height = 900, stored = false, path = PATH, html, host = HOST,
+  cart = LOUNGE_CART, width = 1440, height = 900, stored = false, path = PATH, html, host = HOST, setup,
 } = {}) {
   const page = await browser.newPage({ viewport: { width, height }, userAgent: UA });
+  // (the test's own routes and storage, before the page loads)
+  if (setup) await setup(page);
   // another host (e.g. http://checkout.test, standing for the live site): every request to it
   // answered by the preview server
   if (host !== HOST) {
@@ -391,6 +393,118 @@ for (const width of [375, 576, 768, 992, 1440]) {
   if (width < 992) check(`${width} look: the phone bar ${phone ? 15 : 12}px in, its Payment ${width < 576 ? 12 : 14}px`, L.bar[0] === `${phone ? 15 : 12}px` && L.bar[1] === `${width < 576 ? 12 : 14}px` && L.bar[2] === 'block', JSON.stringify(L.bar));
   else check(`${width} look: Payment light (300), no phone bar`, L.payment === '300' && L.bar[2] === 'none', JSON.stringify([L.payment, L.bar]));
   await page.close();
+}
+
+// a logged-in member: the form filled from GetProfile (routed; a stand-in login, never a real one),
+// as the source's guest checkout for a member: the title, names, both emails, the number with its
+// dial code (a shared +1 by the country), the country by name; only empty fields; no messages;
+// Payment sends the filled values. A guest makes no request; a profile error or no answer leaves
+// the form empty; an expired login logs out (home). The other languages; 375 and 1440.
+{
+  const part = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
+  const jwt = (exp) => `${part({ alg: 'HS256', typ: 'JWT' })}.${part({ sub: 'member', exp })}.c2lnbmF0dXJl`;
+  const VALID = jwt(Math.floor(Date.now() / 1000) + 3600);
+  const EXPIRED = jwt(Math.floor(Date.now() / 1000) - 60);
+  const PROFILE = {
+    serviceResponseCode: 200, salutation: 'Mr', firstName: 'Kai', lastName: 'Chan', userName: 'kai.chan@example.com', phone: '07700 900123', countryPhoneCode: '44', countryName: 'United Kingdom', membershipID: 'ST0001',
+  };
+  // routes GetProfile (its answer, a status, or a delay) and stores a login before the page loads
+  const member = ({ token = VALID, profile = PROFILE, status = 200, delay = 0 } = {}) => async (page) => {
+    page.profileCalls = 0;
+    await page.route(/\/GetProfile/, async (r) => {
+      page.profileCalls += 1;
+      page.profileAuth = r.request().headers().authorization;
+      if (delay) await new Promise((res) => { setTimeout(res, delay); });
+      try { await r.fulfill(json(profile, status)); } catch { /* (the page closed meanwhile) */ }
+    });
+    if (token) await page.addInitScript(`localStorage.setItem('token', ${JSON.stringify(token)});`);
+  };
+  const filled = (page) => page.evaluate(() => {
+    const v = (k) => document.querySelector(`.checkout .form-field[data-key="${k}"] .form-input:not(.form-phone-code)`)?.value;
+    const code = document.querySelector('.checkout .form-field[data-key="contactNumber"] .form-phone-code');
+    return {
+      title: v('title'), first: v('firstName'), last: v('lastName'), email: v('emailAddress'), confirm: v('confirmEmailAddress'), number: v('contactNumber'), country: v('countryOfResidence'),
+      code: code?.selectedOptions[0]?.textContent, dial: document.querySelector('.checkout .checkout-dial')?.textContent,
+      flight: v('arrivalDepartureFlight'), partner: v('partnerId'),
+      errors: [...document.querySelectorAll('.checkout .form-field.has-error')].map((n) => n.dataset.key),
+    };
+  });
+  const settle = (page) => page.waitForTimeout(1200);
+
+  let page = await open({ setup: member() });
+  await settle(page);
+  let f = await filled(page);
+  check('member: one GetProfile with the login', page.profileCalls === 1 && page.profileAuth === `Bearer ${VALID}`, JSON.stringify([page.profileCalls, page.profileAuth?.slice(0, 20)]));
+  check('member: title, names, both emails, the number (digits), +44 (GB) and its short code, the country by name', f.title === 'Mr.' && f.first === 'Kai' && f.last === 'Chan' && f.email === 'kai.chan@example.com' && f.confirm === 'kai.chan@example.com' && f.number === '07700900123' && f.code === '+44 (GB)' && f.dial === '+44' && f.country === '41', JSON.stringify(f));
+  check('member: the flight and partner fields empty, no messages', !f.flight && !f.partner && f.errors.length === 0, JSON.stringify(f));
+  // Payment sends the filled values (the boxes ticked, a flight given)
+  await tick(page, 'consent');
+  await tick(page, 'termsAgreed');
+  await page.locator('.checkout .form-field[data-key="arrivalDepartureFlight"] .form-input').fill('Cathay Pacific (CX)');
+  await page.locator('.checkout .form-field[data-key="flightNumber"] .form-input').fill('123');
+  await page.locator('.checkout .checkout-payment-summary').click();
+  await page.waitForTimeout(500);
+  const sent = await page.evaluate(() => window.payments[0]?.guest);
+  check('member: Payment sends the filled details', sent?.firstName === 'Kai' && sent.emailAddress === 'kai.chan@example.com' && sent.contactNumber === '07700900123' && sent.phoneCountryCode === '+44' && String(sent.countryOfResidence) === '41', JSON.stringify(sent));
+  await page.close();
+
+  page = await open({ setup: member({ profile: { ...PROFILE, countryName: 'Canada', countryPhoneCode: '+1', salutation: 'ms', phone: '4165550100' } }) });
+  await settle(page);
+  f = await filled(page);
+  check('member: a shared +1 by the country (+1 (CA)), "ms" as Ms.', f.code === '+1 (CA)' && f.dial === '+1' && f.country === '38' && f.title === 'Ms.', JSON.stringify(f));
+  await page.close();
+
+  // typed before the profile answers: kept
+  page = await open({ setup: member({ delay: 2500 }) });
+  await page.locator('.checkout .form-field[data-key="firstName"] .form-input').fill('Typed');
+  await page.waitForTimeout(3500);
+  f = await filled(page);
+  check('member: a name typed before the profile answers stays; the rest filled', f.first === 'Typed' && f.last === 'Chan' && f.errors.length === 0, JSON.stringify(f));
+  await page.close();
+
+  // a guest: no request, an empty form
+  page = await open({ setup: member({ token: '' }) });
+  await settle(page);
+  f = await filled(page);
+  check('guest: no GetProfile, an empty form', page.profileCalls === 0 && !f.first && !f.email && !f.number && f.code === '+1 (US)', JSON.stringify([page.profileCalls, f]));
+  await page.close();
+
+  // the profile refused, or no answer in time: an empty form, no messages
+  for (const [name, opt] of [['an error (500)', { status: 500, profile: { error: 'down' } }], ['refused (401)', { status: 401, profile: { message: 'Unauthorized' } }], ['no answer within 5s', { delay: 7000 }]]) {
+    page = await open({ setup: member(opt) });
+    await page.waitForTimeout(opt.delay ? 7500 : 1200);
+    f = await filled(page);
+    check(`member, profile ${name}: an empty form, no messages, the page stays`, !f.first && !f.email && !f.number && f.errors.length === 0 && /guest-checkout/.test(page.url()), JSON.stringify(f));
+    await page.close();
+  }
+
+  // an expired login: logged out on page load (home), no GetProfile
+  page = await browser.newPage({ viewport: { width: 1440, height: 900 }, userAgent: UA });
+  await member({ token: EXPIRED })(page);
+  await page.route(THIRD, (r) => r.abort());
+  await page.goto(`${HOST}${PATH}`, { waitUntil: 'load', timeout: 60000 }).catch(() => {});
+  await page.waitForTimeout(2000);
+  const stored = await page.evaluate(() => localStorage.getItem('token'));
+  check('member, an expired login: logged out (home), no GetProfile', page.profileCalls === 0 && !stored && !/guest-checkout/.test(page.url()), JSON.stringify([page.profileCalls, stored, page.url()]));
+  await page.close();
+
+  // the other languages (the title by its place in the authored order), phone and desktop
+  for (const [path, title] of [['/zh-cn/guest-checkout', '先生'], ['/zh-hk/guest-checkout', '先生'], ['/ja-jp/guest-checkout', null], ['/pt-br/guest-checkout', null]]) {
+    page = await open({ path, setup: member() });
+    await settle(page);
+    f = await filled(page);
+    const titleOk = title ? f.title === title : !!f.title;
+    check(`member ${path}: filled (title ${f.title}), no messages`, titleOk && f.first === 'Kai' && f.email === 'kai.chan@example.com' && f.number === '07700900123' && f.dial === '+44' && f.errors.length === 0, JSON.stringify(f));
+    await page.close();
+  }
+  for (const width of [375, 1440]) {
+    page = await open({ width, height: 900, setup: member() });
+    await settle(page);
+    f = await filled(page);
+    const wide = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+    check(`${width} member: filled, nothing wider than the screen`, f.first === 'Kai' && f.dial === '+44' && !wide, JSON.stringify([f.first, f.dial, wide]));
+    await page.close();
+  }
 }
 
 // the layouts

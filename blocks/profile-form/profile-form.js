@@ -1,4 +1,6 @@
-import { buildForm, fieldElement, getCountries } from '../../scripts/forms.js';
+import {
+  buildForm, fieldElement, findCountryByName, getCountries,
+} from '../../scripts/forms.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { authHeaders, logout } from '../../scripts/auth.js';
 import { getLanguage, translate } from '../../scripts/i18n.js';
@@ -29,33 +31,6 @@ const FIELDS = {
   nationality: { type: 'country', key: 'nationality' },
   isReceivePromotion: { type: 'checkbox', key: 'isReceivePromotion', settings: { 'value type': 'boolean' } },
 };
-
-// GetProfile's country names where GetCountries spells them differently
-const COUNTRY_ALIASES = {
-  'united states': 'united states of america',
-  usa: 'united states of america',
-  'hong kong': 'hong kong sar china',
-  macau: 'macau sar china',
-  macao: 'macau sar china',
-  korea: 'south korea',
-  'republic of korea': 'south korea',
-  'korea republic of': 'south korea',
-  turkey: 'turkiye',
-  'viet nam': 'vietnam',
-};
-
-/**
- * A country name for matching: lower case, no accents or punctuation ("Türkiye" → "turkiye").
- * @param {*} name
- * @returns {string}
- */
-function countryKey(name) {
-  const key = String(name || '').normalize('NFD').replace(/\p{M}/gu, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
-  return COUNTRY_ALIASES[key] || key;
-}
 
 /**
  * A date (and time) as given ("2027-12-31 23:59:59"), written in the page's language format and
@@ -135,7 +110,7 @@ function fill(form, profile, details) {
 
   // the countries (GetCountries) by name, and the phone code; after the lists are filled
   getCountries().then((countries) => {
-    const byName = (name) => countries.find((c) => countryKey(c.countryName) === countryKey(name));
+    const byName = (name) => findCountryByName(countries, name);
     selectValue(control('countryOfResidence'), byName(profile.countryName)?.countryId);
     // the nationality only by a name (GetProfile gives no name for it yet)
     const nationality = profile.nationalityName
