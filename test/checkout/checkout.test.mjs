@@ -437,6 +437,14 @@ for (const width of [375, 576, 768, 992, 1440]) {
   check('member: one GetProfile with the login', page.profileCalls === 1 && page.profileAuth === `Bearer ${VALID}`, JSON.stringify([page.profileCalls, page.profileAuth?.slice(0, 20)]));
   check('member: title, names, both emails, the number (digits), +44 (GB) and its short code, the country by name', f.title === 'Mr.' && f.first === 'Kai' && f.last === 'Chan' && f.email === 'kai.chan@example.com' && f.confirm === 'kai.chan@example.com' && f.number === '07700900123' && f.code === '+44 (GB)' && f.dial === '+44' && f.country === '41', JSON.stringify(f));
   check('member: the flight and partner fields empty, no messages', !f.flight && !f.partner && f.errors.length === 0, JSON.stringify(f));
+  // the Smart Traveller card (Promo card, guests-only) left out, with its space: the checkout
+  // right after the back title
+  const card = await page.evaluate(() => ({
+    card: !!document.querySelector('main .promo'),
+    after: document.querySelector('main .title-wrapper')?.nextElementSibling?.className,
+    gap: Math.round(document.querySelector('main .checkout').getBoundingClientRect().top - document.querySelector('main .title.back').getBoundingClientRect().bottom),
+  }));
+  check('member: no Smart Traveller card, the checkout 35px under the back title', !card.card && card.after === 'checkout-wrapper' && card.gap === 35, JSON.stringify(card));
   // Payment sends the filled values (the boxes ticked, a flight given)
   await tick(page, 'consent');
   await tick(page, 'termsAgreed');
@@ -467,6 +475,7 @@ for (const width of [375, 576, 768, 992, 1440]) {
   await settle(page);
   f = await filled(page);
   check('guest: no GetProfile, an empty form', page.profileCalls === 0 && !f.first && !f.email && !f.number && f.code === '+1 (US)', JSON.stringify([page.profileCalls, f]));
+  check('guest: the Smart Traveller card shown', await page.locator('main .promo.card.guests-only .promo-button').count() === 2);
   await page.close();
 
   // the profile refused, or no answer in time: an empty form, no messages

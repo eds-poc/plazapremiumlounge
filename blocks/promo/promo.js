@@ -1,4 +1,5 @@
 import { applyButtonAction } from '../../scripts/button-actions.js';
+import { getToken, isTokenValid } from '../../scripts/auth.js';
 
 const HEADINGS = 'h1, h2, h3, h4, h5, h6';
 
@@ -50,10 +51,16 @@ function buildButton(link) {
 /**
  * Decorates the promo block, a call-to-action box as the source offer pages' `premium-cta-box`
  * (Rogers Bank "Apply Now"): a gradient box with a centred heading (italic words become a gold
- * serif accent), text and a gold button from a paragraph holding only a link.
+ * serif accent), text and a gold button from a paragraph holding only a link. Option guests-only:
+ * not for a logged-in member (a valid login, scripts/auth.js): the block and its wrapper are taken
+ * out, so no space stays (e.g. the guest checkout's Smart Traveller card, as the source's).
  * @param {Element} block The promo block element
  */
 export default function decorate(block) {
+  if (block.classList.contains('guests-only') && isTokenValid(getToken())) {
+    (block.closest('.promo-wrapper') || block).remove();
+    return;
+  }
   const card = block.classList.contains('card');
   const content = lines(block).map((line) => {
     const link = line.querySelector('a[href]');

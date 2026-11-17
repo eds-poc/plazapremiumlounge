@@ -159,13 +159,14 @@ stays in the form's column, beside the summary).
 - The way back: a heading 1 written as a link, shown with the maroon arrow before it. Point it at
   the booking page (the mini cart's Edit).
 
-| Promo (card) |
+| Promo (card, guests-only) |
 | --- |
 | **Book your visit with Smart Traveller**<br>**Smart Traveller** members get up to **20% off** and up to **150 ST points** per eligible visit. Register now and unlock a world of exciting benefits! Already a member? Login now!<br>[Log In](/en-uk/modals/login)<br>**[Sign up now](/en-uk/join-smart-traveller)** |
 
 - The Smart Traveller banner: the first link is the outline button, a **bold** link the filled one;
-  `/{lang}/modals/login` (the header's Log In page) opens the login pop-up over the checkout. Leave
-  the block out for no banner.
+  `/{lang}/modals/login` (the header's Log In page) opens the login pop-up over the checkout.
+  `guests-only` leaves it out for a logged-in member, as the source's (the checkout then comes
+  right under the back title). Leave the block out for no banner.
 
 | Checkout | | | | |
 | --- | --- | --- | --- | --- |

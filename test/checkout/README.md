@@ -47,17 +47,18 @@ It covers:
   title, names, both emails, the number with its dial code (a shared +1 by the country), the country
   by name; only empty fields filled; no messages; Payment sends the filled details; a guest makes
   no request; a profile error, refusal or no answer leaves the form empty; an expired login logs
-  out; the other four languages (the title by its authored order); 375 and 1440
+  out; the other four languages (the title by its authored order); 375 and 1440; the Smart
+  Traveller card (Promo card, guests-only) left out for a member, shown to a guest
 
 The header checks wait for the header to load (its navigation comes after the checkout).
 
-165 checks.
+167 checks.
 
 ```sh
 BW_HOST=http://localhost:3000 PLAYWRIGHT=/path/to/playwright/index.mjs AXE_CORE=/path/to/axe.min.js node test/checkout/checkout.test.mjs
 ```
 
-The pages must be the split ones (Booking Steps, Title (back), Promo (card), Checkout) on the
+The pages must be the split ones (Booking Steps, Title (back), Promo (card, guests-only), Checkout) on the
 preview being tested, or in a local `content/` folder served with
 `aem up --html-folder content --html-mount / --prefer-plain-html`.
 

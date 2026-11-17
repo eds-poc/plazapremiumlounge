@@ -34,6 +34,7 @@ arrow.
 | `light` | A partner campaign call to action: a cool grey box with 10px corners, 40px below what's above it; a bold navy heading (24px, 28px above 768px), grey 16px text at most 700px wide, 40px above an orange pill button (bold 16px, 18px above 768px) without an arrow, which lifts slightly on hover (not with reduced motion) | CTBC Reward "Ready to Upgrade Your Travel?" |
 
 | `card` | A white card with a light warm border and 18px corners, left-aligned 16px text (14px on phones), then, 24px lower, pill buttons 16px apart: on phones two share the row (each at least 148px wide), else each takes the full width. A **bold** link is the filled maroon button, a plain link the outlined one | Guest checkout "Book your visit with Smart Traveller" |
+| `guests-only` | With any look: shown only to visitors who aren't logged in. For a logged-in member the box is left out, with no space kept for it. Use it for an offer to log in or sign up | Guest checkout: Promo (card, guests-only) |
 
 ### Example: card
 
