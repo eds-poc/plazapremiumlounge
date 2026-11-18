@@ -247,7 +247,7 @@ function readLine(p) {
     // for the data layer's Check Out: the service ("Lounge"), the airport's name and code (KUL),
     // the LMS outlet code and the lounge's time zone ("(GMT+8:00) Asia/Kuala_Lumpur, …" as
     // Asia/Kuala_Lumpur)
-    service: text(p?.serviceDisplayName) || text(p?.serviceName),
+    service: text(p?.serviceDisplayName),
     locationName: text(p?.locationName),
     iataCode: text(p?.iataCode),
     lmsOutletCode: text(p?.lmsOutletCode),
