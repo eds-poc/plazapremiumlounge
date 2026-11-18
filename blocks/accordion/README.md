@@ -46,7 +46,7 @@ Put the section title above the block, e.g. a [Title](../title/README.md) block.
 ## Lounges
 
 `Accordion (lounges)` is an airport's lounges in the
-[Property Filter (accordion list)](../property-filter/README.md#option-accordion-list), as the
+[Property Filter (lounge name only)](../property-filter/README.md#option-lounge-name-only), as the
 source's card and bank pages (e.g. `/en-uk/cmb`). The Property Filter builds it itself, one per
 airport; authors don't normally add it. It has:
 - no lines; a dot before each lounge's name (16px, light), and a small plum arrow right after it

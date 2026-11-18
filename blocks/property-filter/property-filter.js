@@ -10,11 +10,11 @@
  * and city are chosen when the page opens, and the choice is kept in the page address
  * (?region=ep&country=it&city=fco).
  *
- * Option `accordion-list` (Property Filter (accordion list)), as the source's card and bank pages
- * (/en-uk/cmb): the same lounges, listed whole instead of chosen: "View lounges by region" links,
- * then per region its countries, per country its airports, and per airport an Accordion block
- * (option `lounges`) with an item per lounge, opening to its opening hours and location. Its
- * Country, IATA and Property rows also limit the lounges shown to theirs.
+ * Option `lounge-name-only` (Property Filter (lounge name only)), as the source's card and bank
+ * pages (/en-uk/cmb): the same lounges, listed whole instead of chosen: "View lounges by region"
+ * links, then per region its countries, per country its airports, and per airport an Accordion
+ * block (option `lounges`) with an item per lounge, opening to its opening hours and location.
+ * Its Country, IATA and Property rows also limit the lounges shown to theirs.
  */
 import { buildBlock, decorateBlock, loadBlock } from '../../scripts/aem.js';
 import { translate } from '../../scripts/i18n.js';
@@ -53,14 +53,14 @@ const TEXTS = {
   location: 'Location label',
   updated: 'Updated',
 };
-// the texts each layout uses (the accordion list's `Regions label` is its region links' label;
-// its `Updated`, e.g. "Last updated: 03 Jul 2026", shows under them, and is optional)
+// the texts each layout uses (the lounge-name-only layout's `Regions label` is its region links'
+// label; its `Updated`, e.g. "Last updated: 03 Jul 2026", shows under them, and is optional)
 const LIST_TEXTS = ['regions', 'hours', 'location'];
 const FILTER_TEXTS = Object.keys(TEXTS)
   .filter((key) => !['hours', 'location', 'updated'].includes(key));
 
-// the option for the accordion list layout
-const LIST_OPTION = 'accordion-list';
+// the option for the lounge-name-only layout
+const LIST_OPTION = 'lounge-name-only';
 // the settings rows (not texts): the cards' View button and the sign-up link on their loyalty line
 const SETTINGS = { view: 'View button', signup: 'Signup button' };
 
@@ -550,12 +550,12 @@ function buildSkeleton() {
   return [outline, el('p', 'visually-hidden', translate('propertyLoading'))];
 }
 
-/* ---------- option accordion-list: every lounge, by region, country and airport ---------- */
+/* ---------- option lounge-name-only: every lounge, by region, country and airport ---------- */
 
 /**
- * The lounges the accordion list shows: the service's answer, limited to the authored Country,
- * IATA and Property codes (a row left out or empty limits nothing). The service answers whole
- * regions for a Region or Country row, so a card's list of lounges is its Property row.
+ * The lounges the lounge-name-only layout shows: the service's answer, limited to the authored
+ * Country, IATA and Property codes (a row left out or empty limits nothing). The service answers
+ * whole regions for a Region or Country row, so a card's list of lounges is its Property row.
  * @param {Object[]} properties
  * @param {{country: string[], iataCode: string[], propertyCode: string[]}} filters
  * @returns {Object[]}
@@ -567,11 +567,11 @@ function narrowProperties(properties, { country, iataCode, propertyCode }) {
 }
 
 /**
- * The accordion list's tree: regions (in the authored Region row's order, else the site's: CH,
- * AS, EP, AP, IM), each named as the service names it (else the site's name); their countries by
- * name; per country its airports by name (a city's airports apart: LHR and LGW), each with its
- * heading (`Hong Kong International Airport (HKG)`) and its lounges in the service's order, then
- * by name.
+ * The lounge-name-only layout's tree: regions (in the authored Region row's order, else the
+ * site's: CH, AS, EP, AP, IM), each named as the service names it (else the site's name); their
+ * countries by name; per country its airports by name (a city's airports apart: LHR and LGW),
+ * each with its heading (`Hong Kong International Airport (HKG)`) and its lounges in the
+ * service's order, then by name.
  * @param {Object[]} properties
  * @param {string[]} regionOrder The authored region codes
  * @returns {{code: string, name: string, countries: {code: string, name: string,
@@ -661,7 +661,7 @@ function buildAirport(airport, settings) {
 }
 
 /**
- * The accordion list: the region links ("View lounges by region", `Regions label`) and the
+ * The lounge-name-only layout: the region links ("View lounges by region", `Regions label`) and the
  * authored `Updated` note, then per region (a panel, its links' target) its name, its countries
  * (two columns from 576px), and per country its airports, each with its lounges' Accordion.
  * @param {HTMLElement} block
@@ -714,9 +714,9 @@ async function renderTree(block, tree, settings, prefix) {
 }
 
 /**
- * While the accordion list loads: an outline of the region links and of a region's panel (its
- * title, a country, an airport and its lounges), hidden from screen readers (which hear the
- * loading message).
+ * While the lounge-name-only layout loads: an outline of the region links and of a region's
+ * panel (its title, a country, an airport and its lounges), hidden from screen readers (which
+ * hear the loading message).
  * @returns {HTMLElement[]}
  */
 function buildListSkeleton() {

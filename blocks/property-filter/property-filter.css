@@ -390,12 +390,12 @@
   margin: 0;
 }
 
-/* ---------- option accordion-list: every lounge, by region, country and airport ----------
+/* ---------- option lounge-name-only: every lounge, by region, country and airport ----------
    as the source's card and bank pages (/en-uk/cmb: .lounge-region-links, .lounge-list-wrapper):
    the region links (pills), then per region a warm panel with its plum title, its countries (two
    columns from 576px, plum titles), per country its airports, each with its lounges' Accordion
    (blocks/accordion, option lounges) */
-.property-filter.accordion-list {
+.property-filter.lounge-name-only {
   /* one-off: the source's 17px airport titles, 21px region titles and pills' tint */
   --property-filter-list-airport-size: 17px;
   --property-filter-list-region-size: 21px;

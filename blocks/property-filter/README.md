@@ -94,9 +94,9 @@ out: a row it doesn't know (e.g. an old `Additional Services` row: the service t
 the service), a code that doesn't look like one (e.g. `Europe` instead of `EP`), the texts not
 authored, or a table without any of the four rows of codes.
 
-## Option: accordion list
+## Option: lounge name only
 
-`Property Filter (accordion list)` lists a card's or bank's eligible lounges **whole**, as the
+`Property Filter (lounge name only)` lists a card's or bank's eligible lounges **whole**, as the
 source's card and bank pages (e.g. `/en-uk/cmb`, `/en-uk/Luso-International-Banking-Ltd`), instead
 of letting visitors choose a city:
 
@@ -112,7 +112,7 @@ of letting visitors choose a city:
   lounges in the service's order, then by name. Region names are the service's (as the source's
   lists name them), in the page's language.
 
-| Property Filter (accordion list) | |
+| Property Filter (lounge name only) | |
 | --- | --- |
 | Property | PRPRTY1303, PRPRTY1183, PRPRTY1184 |
 | Regions label | View lounges by region: |
@@ -146,6 +146,6 @@ same as above.
 | The lounges | The property filter service (`scripts/property-filter.js`, `filteredProperties` in `scripts/endpoints.js`), asked once for the table's lists, in the page's language |
 | Regions, countries, cities and their airports | The property filter service's answer, as it places each lounge (a city's airports share its city code, e.g. `GBLHR` for Heathrow and Gatwick) |
 | Service tabs | The property filter service's answer: each lounge's services (`servicetype`, named by `serviceDisplayName` in the page's language); the All tab's name from the site's translations (`propertyAll`) |
-| Region names | `scripts/regions.js`, by code in each language (as the nav's Locations menu names them), else the code (`OP`, Oceania Pacific, is in English only for now). The accordion list uses the service's names (`regionName`), else these |
-| The accordion list's lounges | The [Accordion](../accordion/README.md) block (look `lounges`), built by the block per airport |
+| Region names | `scripts/regions.js`, by code in each language (as the nav's Locations menu names them), else the code (`OP`, Oceania Pacific, is in English only for now). The lounge-name-only layout uses the service's names (`regionName`), else these |
+| The lounge-name-only layout's lounges | The [Accordion](../accordion/README.md) block (look `lounges`), built by the block per airport |
 | The cards | `scripts/property-card.js` and `styles/property-card.css` |

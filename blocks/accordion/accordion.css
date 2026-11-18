@@ -177,7 +177,7 @@
   }
 }
 
-/* option lounges: an airport's lounges in Property Filter (accordion list), as the source's card and
+/* option lounges: an airport's lounges in Property Filter (lounge name only), as the source's card and
    bank pages' lists (/en-uk/cmb .airport-list): no lines, a dot before each light 16px name and a
    small plum arrow right after it (down when closed, up when open); an open lounge is a maroon box
    with white text, its details (opening hours, location) below the name, 10px between lounges */
