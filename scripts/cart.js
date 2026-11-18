@@ -255,6 +255,9 @@ function readLine(p) {
     // the promo code on this line, if any: its code, the service's name for it ("Pass 15% off")
     // and its amount (each line the code applies to carries its own)
     promo: readLinePromo(p),
+    // the line's first discount's value (itemPriceDetails.discounts[0].value), 0 without one (for
+    // the data layer's Check Out, scripts/mini-cart.js)
+    discountValue: Number(p?.itemPriceDetails?.discounts?.[0]?.value) || 0,
     // for analytics (scripts/mini-cart.js trackCartView): the LMS outlet code, the location's name,
     // IATA code and time zone ('' while the service doesn't give them; the time zone as its IANA
     // name, from e.g. "(GMT+8:00) Asia/Hong_Kong, …"), the service's name as the product's

@@ -374,6 +374,16 @@ export function buildPromo(cart, { prefix = 'mini-cart', redraw, root } = {}) {
 }
 
 /**
+ * A cart product's discount for the data layer's Check Out: its discount's value
+ * (itemPriceDetails.discounts[0].value), else its promo code's (promocode[0].value), else 0.
+ * @param {Object} cartProduct A cart line (see cart.js)
+ * @returns {number}
+ */
+function checkoutDiscount(cartProduct) {
+  return cartProduct.discountValue || cartProduct.promo?.value || 0;
+}
+
+/**
  * The data layer's link click for Check Out and Edit (both "checkout") of a lounge booking, from
  * the cart: the lounge's visit (its startDate at the airport, in UTC, and the days to it), the
  * guests and the cart's currency, the airport and the lounge, the promo code, the product with
@@ -433,9 +443,10 @@ function trackLoungeCheckout(cart, cartProduct) {
           sku: cartProduct.catalogueCode,
           name: cartProduct.product,
           category: cartProduct.category,
-          // the cart's totals (cartTotalPrice): totalBasePrice, less totalPrice, totalPrice
+          // the cart's totals (cartTotalPrice): totalBasePrice and totalPrice; the discount: see
+          // checkoutDiscount
           actualPricePayCurr: cartTotals.base,
-          discountPayCurr: Math.round((cartTotals.base - cartTotals.total) * 100) / 100 || 0,
+          discountPayCurr: checkoutDiscount(cartProduct),
           sellPricePayCurr: cartTotals.total,
           quantity: totalGuestCount,
         },
@@ -473,14 +484,14 @@ function trackPassCheckout(passes) {
         promoCode: cartPromo?.code || '',
         promocodeValuePayCurr: cartPromo?.value || 0,
       },
-      // each pass with its own prices (productTotalPrice): totalBasePrice, less totalPrice,
-      // totalPrice, and its quantity
+      // each pass with its own prices (productTotalPrice): totalBasePrice and totalPrice, its
+      // discount (see checkoutDiscount) and its quantity
       productList: passes.map((pass) => ({
         sku: pass.catalogueCode,
         name: pass.product,
         category: pass.category,
         actualPricePayCurr: pass.basePrice,
-        discountPayCurr: Math.round((pass.basePrice - pass.total) * 100) / 100 || 0,
+        discountPayCurr: checkoutDiscount(pass),
         sellPricePayCurr: pass.total,
         quantity: pass.quantity,
       })),
