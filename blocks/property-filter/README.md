@@ -114,17 +114,30 @@ of letting visitors choose a city:
 
 | Property Filter (lounge name only) | |
 | --- | --- |
+| Region | CH, AP |
+| Country | CN, HK, MO, TW, ID, JP, MY, PH, SG |
+| IATA | PKX, CGQ, HKG, MFM, TPE, KUL, SIN |
 | Property | PRPRTY1303, PRPRTY1183, PRPRTY1184 |
 | Regions label | View lounges by region: |
 | Hours label | OPENING HOURS: |
 | Location label | LOCATION: |
-| Updated | Last updated: 03 Jul 2026 |
+| Updated | Last updated: 04 Mar 2026 |
 | View button | [View lounge](/en-uk/find/lounge) |
 
-- **The lounges:** the same rows of codes as above. In this option the `Country`, `IATA` and
-  `Property` rows also **limit the lounges shown** to theirs (the service answers whole regions
-  for `Region` and `Country`). For a card's or bank's list, write its lounges in the `Property`
-  row: the service then answers only those.
+- **The lounges:** the same rows of codes as above; at least one is needed. The service answers
+  the lounges of **any** of the lists (whole regions for `Region`, whole countries for `Country`),
+  then the block keeps only those that match the `Country`, `IATA` **and** `Property` rows (a row
+  left out doesn't limit):
+  - **Region:** the card's or bank's regions; their order is the order of the region links and
+    panels.
+  - **Country**, **IATA:** the card's or bank's countries and airports, as its list shows them;
+    nothing outside them is shown.
+  - **Property:** the eligible lounges themselves, from the card's or bank's list: the row that
+    decides which lounges show.
+
+  For a card or bank page, write all four (e.g. `/en-uk/luso-international-banking-ltd`). The
+  codes are the live site's: on a site using the test (stage) property filter service, which
+  numbers lounges differently, the list shows other lounges or "No lounges found."
 - **Regions label:** the text before the region links (without it, the links show without a text).
 - **Hours label**, **Location label:** shown before a lounge's opening hours and location, as
   written (e.g. the source's `OPENING HOURS:`); without them the values show alone.
@@ -139,6 +152,27 @@ Put the page's other content above the block: the banner, then the title and the
 `Title (text-lg, intro-full)` (the text across the full width, as the source's).
 While the lounges load, the block shows an outline of the links and a region; the messages are the
 same as above.
+
+### A new card or bank page
+
+In Document Authoring, the Library has the template **Partner Lounges Page** (Templates) and
+the item **Property Filter (lounge name only)** (Blocks › Property Filter), with this guidance in
+its description. To make a page such as `/en-uk/luso-international-banking-ltd`:
+
+1. Create the page in the language folder (e.g. `en-uk/<bank-name>`, in lowercase with hyphens)
+   and insert the template.
+2. **Banner:** replace the placeholder image with the card's banner (alt text: the card or bank's
+   name). It stays in the first section, `background` = `grey`.
+3. **Title (text-lg, intro-full):** the card or bank's name as the heading 1, then its text.
+4. **Property Filter (lounge name only):** the `Region`, `Country`, `IATA` and `Property` codes
+   from the card's or bank's lounge list (see above), the labels in the page's language, and
+   `Updated` with the list's date (`Last updated: 04 Mar 2026`).
+5. **Metadata:** `Title` and `Description` (the card or bank's name), `breadcrumb` = `on` (Home ›
+   the page).
+6. Preview the page. On preview pages the browser console lists any row or code the block couldn't
+   use.
+
+No code change is needed for a new page.
 
 ## Where the rest comes from
 
