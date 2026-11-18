@@ -176,12 +176,13 @@ export function pushEvent(event, eventName, extra) {
 }
 
 /**
- * The data layer's link click for an error, in the site section "home": an error page (the Status
- * Page block's 404 and 500) or a form's send that failed (scripts/forms.js).
- * @param {string} errorCode e.g. 404
- * @param {string} errorMessage e.g. Page Not Found
+ * The data layer's link click for errors, in the site section "home": an error page (the Status
+ * Page block's 404 and 500), a form's send that failed, or a form's fields in error on submit
+ * (scripts/forms.js), one item each.
+ * @param {{errorCode?: string, errorMessage: string}[]} errors e.g. [{ errorCode: '404',
+ *   errorMessage: 'Page Not Found' }], or a form's [{ errorMessage: 'Please fill first name' }, …]
  */
-export function trackError(errorCode, errorMessage) {
+export function trackError(errors) {
   const eventName = 'error';
   pushEvent('web.webInteraction.linkClicks', eventName, {
     web: {
@@ -197,12 +198,7 @@ export function trackError(errorCode, errorMessage) {
       pageDetails: {
         siteSection: 'home',
       },
-      errors: [
-        {
-          errorCode,
-          errorMessage,
-        },
-      ],
+      errors,
     },
   });
 }

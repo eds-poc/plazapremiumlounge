@@ -1232,6 +1232,8 @@ export function buildForm(block, definition) {
     if (invalid.length) {
       // validateForm has moved focus to the first invalid field
       setBusy(false);
+      // the data layer's error: each field's message, as shown under it
+      trackError(invalid.map((wrap) => ({ errorMessage: fields.get(wrap).error.textContent })));
       return;
     }
 
@@ -1293,7 +1295,12 @@ export function buildForm(block, definition) {
         const code = Number(data?.serviceResponseCode) || res.status;
         form.dispatchEvent(new CustomEvent('forms:error', { bubbles: true, detail: { status: code, data, form } }));
         // the data layer's error, with the message shown
-        trackError(String(code), errorMessage);
+        trackError([
+          {
+            errorCode: String(code),
+            errorMessage,
+          },
+        ]);
         return;
       }
       form.dispatchEvent(new CustomEvent('forms:success', { bubbles: true, detail: { data, values, form } }));
@@ -1315,7 +1322,12 @@ export function buildForm(block, definition) {
       showStatus(errorMessage);
       form.dispatchEvent(new CustomEvent('forms:error', { bubbles: true, detail: { status: 0, form } }));
       // the data layer's error: no answer
-      trackError('network', errorMessage);
+      trackError([
+        {
+          errorCode: 'network',
+          errorMessage,
+        },
+      ]);
     } finally {
       setBusy(false);
     }
