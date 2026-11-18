@@ -524,8 +524,9 @@ function renderMiniCart(cart) {
  * The data layer's page view as the mini cart opens ("page load"), from the cart as shown: the
  * booking (the first line's start in UTC as YYYY-MM-DDTHH:MM:SSZ, its guests), the lounge (its
  * LMS outlet code) and its location (its IATA code), the promo code and its amount (only when the
- * cart API gives a code), and every product with its prices. What the cart API doesn't give yet
- * goes as '' (the start, without its time zone: null).
+ * cart API gives a code), and every product with its prices; the form is the lounge booking's,
+ * or the pass purchase's for a cart of passes. What the cart API doesn't give yet goes as '' (the
+ * start, without its time zone: null).
  * @param {Object} cart The cart's summary (see readCart in cart.js)
  */
 function trackCartView(cart) {
@@ -565,7 +566,10 @@ function trackCartView(cart) {
         sellPricePayCurr: line.total,
         quantity: line.quantity,
       })),
-      formDetails: { formName: 'ppl lounge booking', formStepName: 'cart view' },
+      formDetails: {
+        formName: bookedItem.kind === 'pass' ? 'ppl pass purchase' : 'ppl lounge booking',
+        formStepName: 'cart view',
+      },
     },
   });
 }
