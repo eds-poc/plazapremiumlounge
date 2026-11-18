@@ -31,9 +31,10 @@ const BRAND = 'plaza premium lounge';
 let storing;
 // the page's name and site section set by a block (setPageDetails)
 let pageDetails = {};
-// the home page's address: / or a site folder's (/en-uk/, /zh-cn/ …), the only page whose page
-// view initDataLayer sends
+// the pages whose page view initDataLayer sends: the home page (/ or a site folder's: /en-uk/,
+// /zh-cn/ …) and the lounge passes page (/en-uk/airport-lounge-passes)
 const HOMEPAGE_PATH = /^\/([a-z]{2}-[a-z]{2}\/?)?$/;
+const PASSES_PATH = /^\/[a-z]{2}-[a-z]{2}\/airport-lounge-passes\/?$/;
 // the clicks the common link click sends, on every page (trackLinkClicks): every link, and the
 // header menu's buttons (its top items, e.g. Locations, the Locations menu's region and country
 // tabs, and the phones' drill-down items)
@@ -195,12 +196,13 @@ export function pushEvent(event, eventName, extra) {
 }
 
 /**
- * The data layer's link click for an error, in the site section "home": an error page (the Status
- * Page block's 404 and 500) or a form's send that failed (scripts/forms.js).
- * @param {string} errorCode e.g. 404
- * @param {string} errorMessage e.g. Page Not Found
+ * The data layer's link click for errors, in the site section "home": an error page (the Status
+ * Page block's 404 and 500), a form's send that failed, or a form's fields in error on submit
+ * (scripts/forms.js), one item each.
+ * @param {{errorCode?: string, errorMessage: string}[]} errors e.g. [{ errorCode: '404',
+ *   errorMessage: 'Page Not Found' }], or a form's [{ errorMessage: 'Please fill first name' }, …]
  */
-export function trackError(errorCode, errorMessage) {
+export function trackError(errors) {
   const eventName = 'error';
   pushEvent('web.webInteraction.linkClicks', eventName, {
     web: {
@@ -216,12 +218,7 @@ export function trackError(errorCode, errorMessage) {
       pageDetails: {
         siteSection: 'home',
       },
-      errors: [
-        {
-          errorCode,
-          errorMessage,
-        },
-      ],
+      errors,
     },
   });
 }
@@ -256,13 +253,15 @@ function trackLinkClicks() {
 }
 
 /**
- * Starts analytics on a page: the page view (on the home page only; the lounge listing's is the
- * property-list block's), the links' clicks (on every page), then the Launch script from the
- * metadata `launch-script` (an https address; without one, the data layer is still filled).
+ * Starts analytics on a page: the page view ("page load", on the home page and the lounge passes
+ * page; the lounge listing's is the property-list block's), the links' clicks (on every page),
+ * then the Launch script from the metadata `launch-script` (an https address; without one, the
+ * data layer is still filled).
  */
 export default function initDataLayer() {
   window.adobeDataLayer = window.adobeDataLayer || [];
-  if (HOMEPAGE_PATH.test(window.location.pathname)) pushEvent(PAGE_VIEW, 'page view');
+  const { pathname } = window.location;
+  if (HOMEPAGE_PATH.test(pathname) || PASSES_PATH.test(pathname)) pushEvent(PAGE_VIEW, 'page load');
   trackLinkClicks();
 
   const src = getMetadata('launch-script').trim();
