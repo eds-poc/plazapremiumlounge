@@ -475,3 +475,20 @@
   /* one-off: the source's 76px */
   margin-bottom: 76px;
 }
+
+/* option intro-full: the intro across the full content width, 16px and 20px from 768px, 20px to
+   what follows (source card and bank pages' `.cc-top` intro, e.g. /en-uk/cmb) */
+.title.intro-full {
+  margin-bottom: 0;
+}
+
+.title.intro-full .title-intro {
+  max-width: none;
+  margin: 0 0 var(--spacing-7);
+}
+
+@media (width >= 768px) {
+  .title.intro-full .title-intro {
+    font-size: var(--font-size-xl);
+  }
+}

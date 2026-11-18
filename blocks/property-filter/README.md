@@ -135,7 +135,8 @@ of letting visitors choose a city:
 - The filters' rows (Country placeholder, City placeholder, Search label, Countries label,
   Services label, Status) and the Signup button aren't used.
 
-Put the page's other content (banner, title, the card's text) above the block.
+Put the page's other content above the block: the banner, then the title and the card's text as
+`Title (text-lg, intro-full)` (the text across the full width, as the source's).
 While the lounges load, the block shows an outline of the links and a region; the messages are the
 same as above.
 
