@@ -35,15 +35,17 @@ let pageDetails = {};
 // view initDataLayer sends
 const HOMEPAGE_PATH = /^\/([a-z]{2}-[a-z]{2}\/?)?$/;
 // the clicks the common link click sends, on every page (trackLinkClicks): every link, and the
-// header menu's buttons (its top items, e.g. Locations, and the phones' drill-down items)
+// header menu's buttons (its top items, e.g. Locations, the Locations menu's region and country
+// tabs, and the phones' drill-down items)
 const LINK_CLICKS = [
   'a[href]',
   '.header-link',
+  '.header-mega-tab',
   '.header-drill-item',
 ].join(', ');
 // the links with a link click of their own (their block sends it, with more details): the common
 // one leaves them out, so a click isn't sent twice
-const OWN_LINK_CLICKS = [
+const IGNORE_BUTTON_CLICKS = [
   // the lounge listing's View Lounge ("view lounge", blocks/property-list)
   '.property-list .property-card-view a',
   // the login modal's Forgot Password? ("forgot password", blocks/form)
@@ -226,14 +228,14 @@ export function trackError(errorCode, errorMessage) {
 
 /**
  * Sends, on every page, a link click for each click on a link or a header menu button (see
- * LINK_CLICKS), except the links with a link click of their own (see OWN_LINK_CLICKS), named after
- * the link: its label, else its text, else its image's alt text, lowercase ("explore latest
+ * LINK_CLICKS), except the links with a link click of their own (see IGNORE_BUTTON_CLICKS), named
+ * after the link: its label, else its text, else its image's alt text, lowercase ("explore latest
  * offers", "facebook").
  */
 function trackLinkClicks() {
   document.addEventListener('click', (e) => {
     const link = e.target.closest(LINK_CLICKS);
-    if (!link || link.matches(OWN_LINK_CLICKS)) return;
+    if (!link || link.matches(IGNORE_BUTTON_CLICKS)) return;
     const linkName = [link.getAttribute('aria-label'), link.textContent, link.querySelector('img')?.alt]
       .map((text) => (text || '').replace(/\s+/g, ' ').trim())
       .find(Boolean);
