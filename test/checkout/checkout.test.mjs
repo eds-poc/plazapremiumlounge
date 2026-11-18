@@ -405,7 +405,8 @@ for (const width of [375, 576, 768, 992, 1440]) {
 // as the source's guest checkout for a member: the title, names, both emails, the number, the
 // country by name and the dial code following it (not the profile's own code: a shared +1 by the
 // country; no country, the default); only empty fields (a country chosen meanwhile and its dial
-// code stay); no messages;
+// code stay); the filled names and both emails read-only (greyed, still focusable; a value their
+// rules refuse stays editable), the other fields editable; no messages;
 // Payment sends the filled values. A guest makes no request; a profile error or no answer leaves
 // the form empty; an expired login logs out (home). The other languages; 375 and 1440.
 {
@@ -434,6 +435,7 @@ for (const width of [375, 576, 768, 992, 1440]) {
       title: v('title'), first: v('firstName'), last: v('lastName'), email: v('emailAddress'), confirm: v('confirmEmailAddress'), number: v('contactNumber'), country: v('countryOfResidence'),
       code: code?.selectedOptions[0]?.textContent, dial: document.querySelector('.checkout .checkout-dial')?.textContent,
       flight: v('arrivalDepartureFlight'), partner: v('partnerId'),
+      locked: [...document.querySelectorAll('.checkout .form-field .form-input')].filter((i) => i.readOnly && !i.closest('[hidden]')).map((i) => i.closest('.form-field').dataset.key),
       errors: [...document.querySelectorAll('.checkout .form-field.has-error')].map((n) => n.dataset.key),
     };
   });
@@ -445,6 +447,35 @@ for (const width of [375, 576, 768, 992, 1440]) {
   check('member: one GetProfile with the login', page.profileCalls === 1 && page.profileAuth === `Bearer ${VALID}`, JSON.stringify([page.profileCalls, page.profileAuth?.slice(0, 20)]));
   check('member: title, names, both emails, the number (digits), the country by name, its dial code +44 (GB) and short code (not the profile\'s +852)', f.title === 'Mr.' && f.first === 'Kai' && f.last === 'Chan' && f.email === 'kai.chan@example.com' && f.confirm === 'kai.chan@example.com' && f.number === '07700900123' && f.code === '+44 (GB)' && f.dial === '+44' && f.country === '41', JSON.stringify(f));
   check('member: the flight and partner fields empty, no messages', !f.flight && !f.partner && f.errors.length === 0, JSON.stringify(f));
+  check('member: the names and both emails locked (read-only), nothing else', f.locked.join() === 'firstName,lastName,emailAddress,confirmEmailAddress', JSON.stringify(f.locked));
+  // typing into a locked field changes nothing; it still takes focus (read out, its focus ring);
+  // its text in the darker grey, no text cursor; the title stays editable
+  const first = page.locator('.checkout .form-field[data-key="firstName"] .form-input');
+  await first.click();
+  await page.keyboard.type('X');
+  await page.keyboard.press('Backspace');
+  const lockedLook = await first.evaluate((i) => {
+    const cs = getComputedStyle(i);
+    return {
+      value: i.value, focused: document.activeElement === i, color: cs.color, cursor: cs.cursor, ring: cs.boxShadow !== 'none', bg: cs.backgroundColor,
+    };
+  });
+  check('member: a locked name can\'t be typed in, still focusable (its ring), greyed text #666, no text cursor, warm grey', lockedLook.value === 'Kai' && lockedLook.focused && lockedLook.ring && lockedLook.color === 'rgb(102, 102, 102)' && lockedLook.cursor === 'default' && lockedLook.bg === 'rgb(245, 244, 241)', JSON.stringify(lockedLook));
+  await page.locator('.checkout .form-field[data-key="title"] select').selectOption({ index: 2 });
+  const phoneEdit = page.locator('.checkout .form-field[data-key="contactNumber"] .form-input:not(.form-phone-code)');
+  await phoneEdit.fill('07700900124');
+  check('member: the title and the number stay editable', (await page.locator('.checkout .form-field[data-key="title"] select').inputValue()) !== 'Mr.' && (await phoneEdit.inputValue()) === '07700900124');
+  await phoneEdit.fill('07700900123');
+  await page.locator('.checkout .form-field[data-key="title"] select').selectOption('Mr.');
+  if (process.env.AXE_CORE) {
+    await page.addScriptTag({ path: process.env.AXE_CORE });
+    const violations = await page.evaluate(async () => {
+      // eslint-disable-next-line no-undef
+      const result = await axe.run({ include: [['main .checkout .checkout-form']] }, { runOnly: ['wcag2a', 'wcag2aa'] });
+      return result.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join('; ')}`);
+    });
+    check('member: axe on the filled form (the locked fields\' contrast): no violations', !violations.length, violations.join(', '));
+  }
   // the Smart Traveller card (Promo card, guests-only) left out, with its space: the checkout
   // right after the back title
   const card = await page.evaluate(() => ({
@@ -491,14 +522,22 @@ for (const width of [375, 576, 768, 992, 1440]) {
   await page.locator('.checkout .form-field[data-key="firstName"] .form-input').fill('Typed');
   await page.waitForTimeout(3500);
   f = await filled(page);
-  check('member: a name typed before the profile answers stays; the rest filled', f.first === 'Typed' && f.last === 'Chan' && f.errors.length === 0, JSON.stringify(f));
+  check('member: a name typed before the profile answers stays, editable; the rest filled (and locked)', f.first === 'Typed' && f.last === 'Chan' && f.locked.join() === 'lastName,emailAddress,confirmEmailAddress' && f.errors.length === 0, JSON.stringify(f));
+  await page.close();
+
+  // a profile email the field's rules refuse: filled, but left editable (both email fields), so the
+  // member can put it right; the names still locked
+  page = await open({ setup: member({ profile: { ...PROFILE, userName: 'kai.chan@' } }) });
+  await settle(page);
+  f = await filled(page);
+  check('member: an email its rules refuse: filled, both email fields editable; the names locked', f.email === 'kai.chan@' && f.locked.join() === 'firstName,lastName' && f.errors.length === 0, JSON.stringify(f));
   await page.close();
 
   // a guest: no request, an empty form
   page = await open({ setup: member({ token: '' }) });
   await settle(page);
   f = await filled(page);
-  check('guest: no GetProfile, an empty form', page.profileCalls === 0 && !f.first && !f.email && !f.number && f.code === '+1 (US)', JSON.stringify([page.profileCalls, f]));
+  check('guest: no GetProfile, an empty form, nothing locked', page.profileCalls === 0 && !f.first && !f.email && !f.number && f.code === '+1 (US)' && !f.locked.length, JSON.stringify([page.profileCalls, f]));
   check('guest: the Smart Traveller card shown', await page.locator('main .promo.card.guests-only .promo-button').count() === 2);
   await page.close();
 

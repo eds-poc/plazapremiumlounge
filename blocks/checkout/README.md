@@ -38,7 +38,12 @@ their details, as on the source (its server fills the form for a member). Nothin
   matched country it stays +1 (US).
 - The flight and partner fields stay empty (the profile has none).
 - Only empty fields are filled: what the visitor typed or chose meanwhile stays (a country chosen
-  meanwhile keeps its dial code). Everything stays editable.
+  meanwhile keeps its dial code).
+- **First Name**, **Last Name**, **Email Address** and **Confirm Email Address** can't be edited
+  once filled: they're read-only (still focusable, read out and sent with Payment), their text in
+  a darker grey. A value its field's rules refuse (for example a broken email) stays editable so
+  the member can put it right; the confirmation is locked only with the email. Title, Contact No.,
+  Country of Residence and the rest stay editable.
   No message shows; the values are checked on Payment, as typed ones.
 - A guest makes no request. A profile that can't be read (an error, refused, no answer within 5s)
   leaves the form empty, with no message; an expired login already logs out on page load.

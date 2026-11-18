@@ -149,6 +149,18 @@
   background-size: var(--checkout-select-arrow);
 }
 
+/* a logged-in member's names and email, filled and locked (read-only): their text greyed, as the
+   Profile Form's read-only fields (in the darker grey: a read-only field's text keeps its contrast),
+   no text cursor; the field stays warm grey when focused, its focus ring kept */
+.checkout .checkout-form .form-input.checkout-locked {
+  color: var(--color-disabled-text);
+  cursor: default;
+}
+
+.checkout .checkout-form .form-input.checkout-locked:focus {
+  background-color: var(--color-surface-warm);
+}
+
 /* a field with an error, as the source's: no red ring, the red "!" inside it at the right; its
    message right under it */
 .checkout .checkout-form .form-field.has-error :is(.form-input, .form-phone) {

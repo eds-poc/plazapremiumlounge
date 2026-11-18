@@ -786,6 +786,17 @@ export function setFieldError(wrap, text) {
 }
 
 /**
+ * Whether a field's value passes its rules, without showing anything (validateField shows the
+ * message): e.g. before locking a value filled in for the visitor.
+ * @param {HTMLElement} wrap
+ * @returns {boolean}
+ */
+export function isFieldValid(wrap) {
+  const state = fields.get(wrap);
+  return !state || !check(state);
+}
+
+/**
  * Checks one field and shows its error.
  * @param {HTMLElement} wrap
  * @returns {boolean} Whether it's valid

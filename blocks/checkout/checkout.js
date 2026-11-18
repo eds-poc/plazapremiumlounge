@@ -1,5 +1,5 @@
 import {
-  buildForm, fieldElement, findCountryByName, getCountries,
+  buildForm, fieldElement, findCountryByName, getCountries, isFieldValid,
 } from '../../scripts/forms.js';
 import { getToken, isTokenValid } from '../../scripts/auth.js';
 import { readProfile } from '../../scripts/member.js';
@@ -298,6 +298,8 @@ const TITLE_ORDER = ['mr', 'mrs', 'ms', 'miss'];
  *   scripts/forms.js; a shared +1 by the country's own, e.g. "+1 (CA)"), and as the source's, whose
  *   dial code starts from the country its server selects. The profile's own `countryPhoneCode` is
  *   not used.
+ * The filled names and email (both email fields) are read-only, unless a value fails its field's
+ * rules (then it stays editable, to be put right).
  * Only empty fields are filled, so what the visitor has typed or chosen meanwhile stays (a country
  * already chosen has set its dial code). The values are set without the form's change events
  * reaching the form, so no message shows (they're checked on Payment, as typed ones). A guest, or a
@@ -314,14 +316,28 @@ async function prefillMember(form) {
   const text = (value) => (typeof value === 'string' ? value.trim() : '');
   // (within the field's own maximum length)
   const fit = (input, value) => value.slice(0, input.maxLength > 0 ? input.maxLength : undefined);
+  // (the field filled, or null when it already had a value or the profile has none)
   const fill = (key, value) => {
     const input = control(key);
-    if (input && !input.value && text(value)) input.value = fit(input, text(value));
+    if (!input || input.value || !text(value)) return null;
+    input.value = fit(input, text(value));
+    return input;
   };
-  fill('firstName', profile.firstName);
-  fill('lastName', profile.lastName);
-  fill('emailAddress', profile.userName);
-  fill('confirmEmailAddress', profile.userName);
+  // the member's own names and email, once filled, can't be edited (read-only: still focusable,
+  // read out and sent). A value its field's rules refuse stays editable, so the member can put it
+  // right before Payment.
+  const lock = (input) => {
+    if (!input || !isFieldValid(input.closest('.form-field'))) return false;
+    input.readOnly = true;
+    input.classList.add('checkout-locked');
+    return true;
+  };
+  lock(fill('firstName', profile.firstName));
+  lock(fill('lastName', profile.lastName));
+  const email = fill('emailAddress', profile.userName);
+  const confirm = fill('confirmEmailAddress', profile.userName);
+  // (the confirmation only with the email: alone it could hold a value the email doesn't match)
+  if (lock(email)) lock(confirm);
   const title = control('title');
   const titleWanted = titleKey(profile.salutation);
   if (title && !title.value && titleWanted) {
