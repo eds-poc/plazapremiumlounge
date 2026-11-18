@@ -179,12 +179,17 @@
 
 /* option lounges: an airport's lounges in Property Filter (lounge name only), as the source's card and
    bank pages' lists (/en-uk/cmb .airport-list): no lines, a dot before each light 16px name and a
-   small plum arrow right after it (down when closed, up when open); an open lounge is a maroon box
-   with white text, its details (opening hours, location) below the name, 10px between lounges */
+   small plum arrow right after its last word (down when closed, up when open); an open lounge is a
+   maroon box with white text, its details (opening hours, location) below the name, 10px between
+   lounges */
 .accordion.lounges {
-  /* one-off: the source's 5px dot, 12px arrow and 4px corners */
+  /* one-off: the source's 5px dot and 4px corners; its arrow, Font Awesome Light arrow-down at 12px:
+     9px by 10.5px, on the text's baseline (0.75px below it), a space and 3px after the name */
   --accordion-lounge-dot: 5px;
-  --accordion-lounge-arrow: 12px;
+  --accordion-lounge-arrow-width: 9px;
+  --accordion-lounge-arrow-height: 10.5px;
+  --accordion-lounge-arrow-drop: -0.75px;
+  --accordion-lounge-arrow-gap: calc(0.29em + 3px);
   --accordion-lounge-radius: 4px;
   --accordion-lounge-indent: calc(var(--accordion-lounge-dot) + var(--spacing-4));
 }
@@ -224,16 +229,25 @@
   background-color: currentcolor;
 }
 
-/* the arrow right after the name (not at the far end), plum, down until open */
+/* the arrow is at the end of the name's text (below), not at the far end */
 .accordion.lounges .accordion-item:nth-child(n) > .accordion-question::after {
-  width: var(--accordion-lounge-arrow);
-  height: var(--accordion-lounge-arrow);
-  margin: calc(var(--line-height-body) * 0.5em - var(--accordion-lounge-arrow) / 2) 0 0 3px;
-  background-color: var(--color-brand-primary-action);
-  mask-image: url('../../icons/arrow-down.svg');
+  content: none;
 }
 
-.accordion.lounges .accordion-item[open] > .accordion-question::after {
+/* the source's thin arrow, in line after the last word (a long name's last line), plum in both
+   states; up at once when open, as the source swaps its icon */
+.accordion.lounges .accordion-question-text::after {
+  content: '';
+  display: inline-block;
+  width: var(--accordion-lounge-arrow-width);
+  height: var(--accordion-lounge-arrow-height);
+  margin-left: var(--accordion-lounge-arrow-gap);
+  vertical-align: var(--accordion-lounge-arrow-drop);
+  background-color: var(--color-brand-primary-action);
+  mask: url('../../icons/arrow-down-light.svg') center / contain no-repeat;
+}
+
+.accordion.lounges .accordion-item[open] .accordion-question-text::after {
   transform: rotate(180deg);
 }
 
