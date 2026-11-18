@@ -18,7 +18,10 @@ import {
 } from './cart.js';
 import { getCurrency } from './currency.js';
 // eslint-disable-next-line import/no-cycle
+import { PAGE_VIEW, pushEvent } from './datalayer.js';
+// eslint-disable-next-line import/no-cycle
 import { hideLoader, showLoader } from './scripts.js';
+import { toUtcDateTime } from './utility.js';
 
 const styles = loadCSS(`${window.hlx.codeBasePath}/styles/cart.css`);
 
@@ -486,6 +489,64 @@ function renderMiniCart(cart) {
 }
 
 /**
+ * The data layer's page view as the mini cart opens ("page load"), from the cart as shown: the
+ * booking (the first line's start in UTC as YYYY-MM-DDTHH:MM:SSZ, its guests), the lounge (its
+ * LMS outlet code) and its location (its IATA code; neither for a cart of passes), the promo code
+ * and its amount (only when the cart API gives a code), and every product with its prices; the
+ * form is the lounge booking's, or the pass purchase's for a cart of passes. What the cart API
+ * doesn't give yet goes as '' (the start, without its time zone: null).
+ * @param {Object} cart The cart's summary (see readCart in cart.js)
+ */
+function trackCartView(cart) {
+  // the booked item (a cart holds one lounge, or passes: the first line) gives the booking, the
+  // outlet and its location
+  const [bookedItem] = cart.lines;
+  // a cart of passes (the passes page's flow): the pass purchase, without a lounge or location
+  const isPassPurchase = bookedItem.kind === 'pass';
+  const promoAmount = cart.totals.promo || 0;
+  // the start at the lounge ("2026-11-28 15:00:00") in UTC, with its time zone (15:00 in Hong
+  // Kong: 07:00:00Z)
+  const [, date, hour, minute] = bookedItem.start.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/) || [];
+  pushEvent(PAGE_VIEW, 'page load', {
+    _plazapremiumloungemanagementli: {
+      bookingInfo: {
+        checkinDateTime: date && bookedItem.timeZone
+          ? toUtcDateTime(date, `${hour}${minute}`, bookedItem.timeZone) : null,
+        daysToBooking: 0,
+        totalGuestCount: bookedItem.adults + bookedItem.children,
+        adultCount: bookedItem.adults,
+        childCount: bookedItem.children,
+      },
+      // (a lounge's only; the line's name: the property's display name)
+      ...(!isPassPurchase && {
+        locationDetails: { iataCode: bookedItem.iataCode, locationName: bookedItem.locationName },
+        outletDetails: { outletId: bookedItem.outletId, outletName: bookedItem.name },
+      }),
+      // (only with a promo code from the cart API)
+      ...(cart.promoCode && {
+        offerDetails: { promoCode: cart.promoCode, promocodeValuePayCurr: promoAmount },
+      }),
+      productList: cart.lines.map((line) => ({
+        // the catalogue code, the product's display name, the service's display name
+        sku: line.catalogueCode,
+        name: line.product,
+        category: line.category,
+        // the line's prices, its quantity included; the discount (the rate plan's and a promo
+        // code's) only when there is one
+        actualPricePayCurr: line.basePrice,
+        ...(line.discount > 0 && { discountPayCurr: line.discount }),
+        sellPricePayCurr: line.total,
+        quantity: line.quantity,
+      })),
+      formDetails: {
+        formName: isPassPurchase ? 'ppl pass purchase' : 'ppl lounge booking',
+        formStepName: 'cart view',
+      },
+    },
+  });
+}
+
+/**
  * Opens the mini cart (when the cart holds something), then reads the cart again in the
  * background, so it shows at once and stays right. A cart of passes in another currency than the
  * visitor's is priced in theirs first, behind the loader (the source shows its cart in the page's
@@ -526,6 +587,7 @@ export async function openMiniCart(trigger, { fresh = false } = {}) {
   }
   renderMiniCart(cart);
   const dialog = await mini.open(trigger);
+  if (dialog) trackCartView(cart);
   // (not when the cart was just read: after an add, a first read or a conversion)
   if (!read && !convert) refreshCart().catch(() => {});
   return dialog;
@@ -567,6 +629,35 @@ function setBusy(from, busy) {
 }
 
 /**
+ * The data layer's link click for a pass's Add to Cart (and Add More) once the booking system has
+ * it ("add to cart"): the pass's line in the cart as it answered (its catalogue code, display
+ * name, service's display name, its totals and its quantity in the cart: 2 after Add More).
+ * @param {Object} item The pass, as its Add to Cart announced it
+ * @param {Object|null} cart The cart after the add (see readCart in cart.js)
+ */
+function trackAddToCart(item, cart) {
+  const line = cart?.lines.find((l) => l.catalogueCode === item.catalogueCode);
+  if (!line) return;
+  const eventName = 'add to cart';
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
+    _plazapremiumloungemanagementli: {
+      productList: [{
+        sku: line.catalogueCode,
+        name: line.product,
+        category: line.category,
+        // the line's totals (its quantity included)
+        actualPricePayCurr: line.basePrice,
+        discountPayCurr: line.discount,
+        sellPricePayCurr: line.total,
+        quantity: line.quantity,
+      }],
+      formDetails: { formName: 'ppl pass purchase', formStepName: 'add to cart' },
+    },
+  });
+}
+
+/**
  * Adds a product and shows the answer, as the source: the site's loader while the booking system
  * answers (the button that asked off), then the mini cart, "Checkout Cart" (its View Cart opens
  * the mini cart), or the failure message.
@@ -586,6 +677,7 @@ export async function addAndShow(item, trigger) {
     setBusy(from, false);
   }
   if (result.status === 'added') {
+    if (item.type === 'pass') trackAddToCart(item, result.cart);
     await openMiniCart(from, { fresh: true });
   } else if (result.reason === 'checkout-first') {
     const view = button(translate('cartViewCart'), 'primary', () => openMiniCart(from));
