@@ -31,9 +31,10 @@ const BRAND = 'plaza premium lounge';
 let storing;
 // the page's name and site section set by a block (setPageDetails)
 let pageDetails = {};
-// the home page's address: / or a site folder's (/en-uk/, /zh-cn/ …), the only page whose page
-// view initDataLayer sends
+// the pages whose page view initDataLayer sends: the home page (/ or a site folder's: /en-uk/,
+// /zh-cn/ …) and the lounge passes page (/en-uk/airport-lounge-passes)
 const HOMEPAGE_PATH = /^\/([a-z]{2}-[a-z]{2}\/?)?$/;
+const PASSES_PATH = /^\/[a-z]{2}-[a-z]{2}\/airport-lounge-passes\/?$/;
 
 /**
  * A logged-in member's kept details; when there are none, they're read in the background (once a
@@ -208,13 +209,14 @@ export function trackError(errorCode, errorMessage) {
 }
 
 /**
- * Starts analytics on a page: the page view (on the home page only; the lounge listing's is the
- * property-list block's), then the Launch script from the metadata `launch-script` (an https
- * address; without one, the data layer is still filled).
+ * Starts analytics on a page: the page view ("page load", on the home page and the lounge passes
+ * page; the lounge listing's is the property-list block's), then the Launch script from the
+ * metadata `launch-script` (an https address; without one, the data layer is still filled).
  */
 export default function initDataLayer() {
   window.adobeDataLayer = window.adobeDataLayer || [];
-  if (HOMEPAGE_PATH.test(window.location.pathname)) pushEvent(PAGE_VIEW, 'page view');
+  const { pathname } = window.location;
+  if (HOMEPAGE_PATH.test(pathname) || PASSES_PATH.test(pathname)) pushEvent(PAGE_VIEW, 'page load');
 
   const src = getMetadata('launch-script').trim();
   if (!src) return;
