@@ -100,7 +100,8 @@ authored, or a table without any of the four rows of codes.
 source's card and bank pages (e.g. `/en-uk/cmb`, `/en-uk/Luso-International-Banking-Ltd`), instead
 of letting visitors choose a city:
 
-- **View lounges by region:** a link per region (pills), each going to its region below.
+- **View lounges by region:** a link per region (pills), each scrolling smoothly to its region
+  below, as on the source (at once for visitors who ask for reduced motion).
 - **Per region:** a panel with the region's name, then its countries (one column on phones, two
   from 576px), per country its airports (`Beijing Daxing International Airport (PKX)`), and per
   airport its lounges as an [Accordion](../accordion/README.md) (look `lounges`): one item per

@@ -661,6 +661,30 @@ function buildAirport(airport, settings) {
 }
 
 /**
+ * A region link's click: scrolls smoothly to its region, as the source (Bootstrap's smooth
+ * scrolling), at once when the visitor asks for reduced motion; the address gets the region's
+ * fragment and the focus moves to its heading, as a link to it would. Other clicks (a new tab or
+ * window) are the browser's.
+ * @param {MouseEvent} event
+ */
+function scrollToRegion(event) {
+  const link = event.target.closest('.property-filter-list-link');
+  if (!link || event.defaultPrevented || event.button !== 0
+    || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  const region = document.getElementById(decodeURIComponent(link.hash.slice(1)));
+  if (!region) return;
+  event.preventDefault();
+  const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  region.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+  if (window.location.hash !== link.hash) window.history.pushState(null, '', link.hash);
+  const heading = region.querySelector('.property-filter-list-region-title');
+  if (heading) {
+    heading.tabIndex = -1;
+    heading.focus({ preventScroll: true });
+  }
+}
+
+/**
  * The lounge-name-only layout: the region links ("View lounges by region", `Regions label`) and the
  * authored `Updated` note, then per region (a panel, its links' target) its name, its countries
  * (two columns from 576px), and per country its airports, each with its lounges' Accordion.
@@ -706,6 +730,7 @@ async function renderTree(block, tree, settings, prefix) {
     return panel;
   });
   nav.append(links);
+  nav.addEventListener('click', scrollToRegion);
   const updated = settings.text('updated');
   const note = updated ? [el('p', 'property-filter-list-updated', updated)] : [];
   // (the Accordions decorate before they show, so the list doesn't change once shown)
