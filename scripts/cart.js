@@ -244,30 +244,48 @@ function readLine(p) {
     name: text(p?.propertyDisplayName) || text(p?.propertyName),
     product: text(p?.productDisplayName) || text(p?.productName),
     place: [p?.shortLocation, p?.locationName].map(text).filter(Boolean).join(', '),
-    // for the data layer's Check Out: the service ("Lounge"), the airport's name and code (KUL),
-    // the LMS outlet code and the lounge's time zone ("(GMT+8:00) Asia/Kuala_Lumpur, …" as
-    // Asia/Kuala_Lumpur)
-    service: text(p?.serviceDisplayName),
-    locationName: text(p?.locationName),
-    iataCode: text(p?.iataCode),
-    lmsOutletCode: text(p?.lmsOutletCode),
-    timeZone: readTimeZone(text(p?.timeZone)) || '',
     start: text(p?.startDate),
     adults: Number.parseInt(p?.guestsCount?.adult, 10) || 0,
     children: Number.parseInt(p?.guestsCount?.child, 10) || 0,
     quantity: Number.parseInt(p?.quantity, 10) || 1,
     total: Number(price.totalPrice),
-    // the line's price before discounts (for the data layer's Check Out of passes)
-    base: Number(price.totalBasePrice),
+    // what the checkout asks for (the flight number; a Smart Traveller login)
+    flightRequired: p?.isFlightNumberMandatory === true,
+    loginRequired: p?.isStLoginMandatory === true,
     // the promo code on this line, if any: its code, the service's name for it ("Pass 15% off")
     // and its amount (each line the code applies to carries its own)
     promo: readLinePromo(p),
+    // for analytics (scripts/mini-cart.js trackCartView): the LMS outlet code, the location's name,
+    // IATA code and time zone ('' while the service doesn't give them; the time zone as its IANA
+    // name, from e.g. "(GMT+8:00) Asia/Hong_Kong, …"), the service's name as the product's
+    // category, and the line's price before discounts and its discounts, the rate plan's and an
+    // applied promo code's (as `total`, the line's: its quantity included)
+    outletId: text(p?.lmsOutletCode),
+    locationName: text(p?.locationName),
+    iataCode: text(p?.iataCode),
+    timeZone: readTimeZone(text(p?.timeZone)) || '',
+    category: text(p?.serviceDisplayName),
+    basePrice: Number(price.totalBasePrice),
+    discount: (Number(price.totalDiscounts) || 0) + (Number(price.totalPromocodeAmount) || 0),
   };
 }
 
 /**
+ * The cart's terms and conditions, as the checkout shows them: each policy's name and its text
+ * (the service's HTML, made safe where it's shown).
+ * @param {Object} json
+ * @returns {{name: string, html: string}[]}
+ */
+function readTerms(json) {
+  const policies = Array.isArray(json?.sortedTermsPolicies) ? json.sortedTermsPolicies : [];
+  return policies
+    .map((t) => ({ name: text(t?.termsName), html: String(t?.description ?? '').trim() }))
+    .filter((t) => t.name || t.html);
+}
+
+/**
  * The cart's summary from the service's cart: its lines, its currency and totals (the base,
- * each discount, the total).
+ * each discount, the total), and its terms.
  * @param {Object} json
  * @returns {Object}
  */
@@ -290,6 +308,7 @@ function readCart(json) {
       promo: Number(totals.totalPromocodeAmount) || 0,
       total: Number(totals.totalPrice),
     },
+    terms: readTerms(json),
     // the cart's promo code: the one on its lines (one code per cart)
     promoCode: products.map(readLinePromo).find(Boolean)?.code || '',
   };

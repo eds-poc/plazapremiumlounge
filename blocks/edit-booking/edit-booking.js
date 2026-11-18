@@ -2,7 +2,9 @@ import apiUrl from '../../scripts/endpoints.js';
 import { authHeaders, getToken } from '../../scripts/auth.js';
 import { translate } from '../../scripts/i18n.js';
 import { openModal } from '../../scripts/modal-dialog.js';
-import { isPreview, safeHtml, toUrl } from '../../scripts/properties.js';
+import { isPreview, toUrl } from '../../scripts/properties.js';
+import buildBookingSteps from '../../scripts/booking-steps.js';
+import safeDescription from '../../scripts/safe-description.js';
 import {
   bookingId, bookingLoader, dayText, fetchOrder, groupItems, itemPrice, money, orderCurrency,
   readTexts,
@@ -115,28 +117,6 @@ function postJson(name, body, signal, login = false) {
 }
 
 /**
- * An add-on's description (API HTML) as safe content: paragraphs, lists, bold and italic, and
- * links to web pages only (opening in a new tab).
- * @param {string} html
- * @returns {DocumentFragment}
- */
-function safeDescription(html) {
-  // scripts, styles and frames dropped with their text (the rest keeps only its text)
-  const source = new DOMParser().parseFromString(html || '', 'text/html').body;
-  source.querySelectorAll('script, style, template, noscript, iframe, object').forEach((n) => n.remove());
-  const content = safeHtml(source.innerHTML, { blocks: true });
-  content.querySelectorAll('a').forEach((a) => {
-    if (!/^https?:$/.test(new URL(a.href, window.location.href).protocol)) {
-      a.replaceWith(...a.childNodes);
-      return;
-    }
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-  });
-  return content;
-}
-
-/**
  * Decorates the Edit Booking block: a member's booking to change (the source Edit Your Booking
  * page), from GetOrderDetail for the address's `bookingid`, with the member's login token: the
  * date, the start time and the service (the lounge's products for that time, GetServices), and
@@ -152,32 +132,8 @@ export default function decorate(block) {
   const link = (key) => texts.get(key.toLowerCase())?.querySelector('a[href]');
 
   // the booking steps band, the current step (authored in bold) highlighted
-  // (styles/booking-steps.css)
-  const band = el('div', 'booking-steps');
-  const steps = [...(texts.get('steps')?.querySelectorAll('li') || [])].filter((li) => li.textContent.trim());
-  if (steps.length) {
-    const nav = el('nav');
-    nav.setAttribute('aria-label', text('heading'));
-    const list = el('ol', 'booking-steps-list');
-    steps.forEach((step, i) => {
-      const item = el('li', 'booking-steps-item');
-      item.append(el('span', 'booking-steps-number', i + 1), el('span', 'booking-steps-name', step.textContent.trim()));
-      if (step.querySelector('strong, b')) {
-        item.classList.add('is-active');
-        item.setAttribute('aria-current', 'step');
-      }
-      list.append(item);
-    });
-    // the steps before the current one, as done (the phone bar shows their numbers, then the
-    // current step's phone name, "Booking", if authored)
-    const active = [...list.children].findIndex((item) => item.classList.contains('is-active'));
-    [...list.children].slice(0, Math.max(active, 0)).forEach((item) => item.classList.add('is-done'));
-    if (active >= 0 && text('phoneStep')) {
-      list.children[active].append(el('span', 'booking-steps-short', text('phoneStep')));
-    }
-    nav.append(list);
-    band.append(nav);
-  }
+  // (scripts/booking-steps.js, styles/booking-steps.css)
+  const band = buildBookingSteps(texts.get('steps'), { label: text('heading'), phoneStep: text('phoneStep') });
 
   // the title, after the arrow back to the bookings list
   const heading = el('h1', 'edit-booking-title');

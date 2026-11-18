@@ -4,6 +4,8 @@
  * visitor logs in (scripts/account-forms.js), and kept in localStorage so no page waits for the
  * API. The email and the phone themselves are never kept. They belong to the token they were read
  * with, and go when it goes (logout, an expired token: clearToken in scripts/auth.js).
+ * readProfile() is the one GetProfile call: also for a page that shows the profile at once (the
+ * checkout's prefill), which keeps nothing.
  */
 import apiUrl from './endpoints.js';
 import { sha256 } from './utility.js';
@@ -69,12 +71,12 @@ export function forgetMember() {
 }
 
 /**
- * Reads the member's profile (GetProfile) with a token and keeps their details for it: called on
- * login. Gives up after PROFILE_TIMEOUT_MS; nothing is kept when the profile can't be read.
+ * The member's profile (GetProfile) for a token, as the API answers it, for the page that asks
+ * (e.g. the checkout's prefill); nothing is kept. Gives up after PROFILE_TIMEOUT_MS.
  * @param {string} token A valid login token
- * @returns {Promise<object|null>} the kept details, or null
+ * @returns {Promise<object|null>} the profile, or null (refused, an error, no answer in time)
  */
-export async function storeMember(token) {
+export async function readProfile(token) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), PROFILE_TIMEOUT_MS);
   try {
@@ -83,7 +85,25 @@ export async function storeMember(token) {
       signal: controller.signal,
     });
     const profile = resp.ok ? await resp.json() : null;
-    if (!profile || Number(profile.serviceResponseCode) >= 400) return null;
+    if (!profile || typeof profile !== 'object' || Number(profile.serviceResponseCode) >= 400) return null;
+    return profile;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Reads the member's profile (GetProfile) with a token and keeps their details for it: called on
+ * login. Gives up after PROFILE_TIMEOUT_MS; nothing is kept when the profile can't be read.
+ * @param {string} token A valid login token
+ * @returns {Promise<object|null>} the kept details, or null
+ */
+export async function storeMember(token) {
+  const profile = await readProfile(token);
+  if (!profile) return null;
+  try {
     const email = normalizeEmail(profile.userName);
     const phone = normalizePhone(profile.countryPhoneCode, profile.phone);
     const points = Number(profile.points);
@@ -97,9 +117,7 @@ export async function storeMember(token) {
     localStorage.setItem(MEMBER_KEY, JSON.stringify({ key: tokenKey(token), member }));
     return member;
   } catch {
-    // the profile didn't answer in time, or storage is blocked
+    // the hashing or the storage failed (e.g. storage blocked)
     return null;
-  } finally {
-    clearTimeout(timer);
   }
 }

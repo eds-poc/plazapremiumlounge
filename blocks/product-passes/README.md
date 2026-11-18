@@ -17,12 +17,20 @@ service, so they're always current.
 - **`propertycode` and `iata-code` (required):** the property code and airport (IATA) code the
   passes service is asked with. Letters and digits only; the key's case, spaces and dashes don't
   matter (`Property Code` works too).
-- **Products:** the passes' product codes (e.g. `PRD2766`), separated by commas (or one per line).
-  They're sent to the service as its `productCode` list; the passes shown are the ones the service
-  answers, in its order (choosing the passes by these codes is the service's).
+- **Products** (optional): the passes' product codes (e.g. `PRD2766`), separated by commas (or one
+  per line). They're sent to the service as its `productCode` list, and it answers those passes;
+  the passes shown are the ones it answers, in its order. Without the row, every pass it has for
+  the property and airport.
+- **isGlobal** (optional): `true` for a pass property's passes (a property of passes, e.g.
+  `PRPRTY1312`): the service needs `isGlobal` for them. Leave it out otherwise.
 - **Empty message** (optional): shown when the service answers no passes. Without it, nothing is
   shown then.
 - Row names ignore capitals and spaces.
+
+### Option
+
+- **raised:** rounder cards (24px corners), a shadow all round and the rows closer together (20px),
+  as the passes on the source's pass property pages.
 
 ## What visitors see
 
