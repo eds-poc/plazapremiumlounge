@@ -21,7 +21,7 @@ import { getCurrency } from './currency.js';
 import { PAGE_VIEW, pushEvent } from './datalayer.js';
 // eslint-disable-next-line import/no-cycle
 import { hideLoader, showLoader } from './scripts.js';
-import { toUtcDateTime } from './utility.js';
+import { daysUntil, toUtcDateTime } from './utility.js';
 
 const styles = loadCSS(`${window.hlx.codeBasePath}/styles/cart.css`);
 
@@ -371,6 +371,142 @@ export function buildPromo(cart, { prefix = 'mini-cart', redraw, root } = {}) {
   });
   action.addEventListener('click', () => apply('button'));
   return box;
+}
+
+/**
+ * The data layer's link click for Check Out and Edit (both "checkout") of a lounge booking, from
+ * the cart: the lounge's visit (its startDate at the airport, in UTC, and the days to it), the
+ * guests and the cart's currency, the airport and the lounge, the promo code, the product with
+ * the cart's prices (the guests as the quantity) and the booking form's step.
+ * @param {Object} cart The cart's summary (see cart.js)
+ * @param {Object} cartProduct The cart's lounge booking
+ */
+function trackLoungeCheckout(cart, cartProduct) {
+  const eventName = 'checkout';
+  // the lounge's IATA code, outlet and time zone, from the cart (without a time zone, the dates
+  // are the visitor's own)
+  const { iataCode = '', outletId = '', timeZone = '' } = cartProduct;
+  // the visit at the airport, e.g. "2026-11-20 23:00:00"
+  const visitDate = cartProduct.start.slice(0, 10);
+  const visitTime = cartProduct.start.slice(11, 16).replace(':', '');
+  const hasVisit = /^\d{4}-\d{2}-\d{2}$/.test(visitDate) && /^\d{4}$/.test(visitTime);
+  const adultCount = cartProduct.adults;
+  const childCount = cartProduct.children;
+  const totalGuestCount = adultCount + childCount;
+  const { totals: cartTotals = {} } = cart;
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: {
+      webInteraction: {
+        name: eventName,
+        type: 'other',
+        linkClicks: {
+          value: 1,
+        },
+      },
+    },
+    _plazapremiumloungemanagementli: {
+      bookingInfo: {
+        // the visit's date and time at the airport, in UTC (2300 in Kuala Lumpur: 15:00:00Z)
+        checkinDateTime: hasVisit ? toUtcDateTime(visitDate, visitTime, timeZone || undefined) : '',
+        daysToBooking: hasVisit ? daysUntil(visitDate, timeZone || undefined) : 0,
+        totalGuestCount,
+        adultCount,
+        childCount,
+        propertyCurrencyCode: cart.currency,
+      },
+      locationDetails: {
+        iataCode,
+        locationName: cartProduct.locationName,
+      },
+      outletDetails: {
+        // the cart's lmsOutletCode
+        outletId,
+        outletName: cartProduct.name,
+      },
+      offerDetails: {
+        // the cart's promo code (promocode[0].code and .value), '' and 0 without one
+        promoCode: cartProduct.promo?.code || '',
+        promocodeValuePayCurr: cartProduct.promo?.value || 0,
+      },
+      productList: [
+        {
+          sku: cartProduct.catalogueCode,
+          name: cartProduct.product,
+          category: cartProduct.category,
+          // the cart's totals (cartTotalPrice): totalBasePrice and totalPrice; the lounge's
+          // discount: its totalDiscounts, else its totalPromocodeAmount, else 0 (see cart.js)
+          actualPricePayCurr: cartTotals.base,
+          discountPayCurr: cartProduct.checkoutDiscount,
+          sellPricePayCurr: cartTotals.total,
+          quantity: totalGuestCount,
+        },
+      ],
+      formDetails: {
+        formName: 'ppl lounge booking',
+        formStepName: eventName,
+      },
+    },
+  });
+}
+
+/**
+ * The data layer's link click for Check Out of passes ("checkout", the lounge passes' flow), from
+ * the cart: the promo code, one product per pass with its own prices and quantity, and the pass
+ * purchase's step.
+ * @param {Object[]} passes The cart's passes (see cart.js)
+ */
+function trackPassCheckout(passes) {
+  const eventName = 'checkout';
+  // the cart's promo code (one per cart): promocode[0].code and .value, '' and 0 without one
+  const cartPromo = passes.find((pass) => pass.promo)?.promo;
+  pushEvent('web.webInteraction.linkClicks', eventName, {
+    web: {
+      webInteraction: {
+        name: eventName,
+        type: 'other',
+        linkClicks: {
+          value: 1,
+        },
+      },
+    },
+    _plazapremiumloungemanagementli: {
+      offerDetails: {
+        promoCode: cartPromo?.code || '',
+        promocodeValuePayCurr: cartPromo?.value || 0,
+      },
+      // each pass with its own prices (productTotalPrice): totalBasePrice and totalPrice, its
+      // discount (totalDiscounts, else totalPromocodeAmount, else 0: see cart.js) and its quantity
+      productList: passes.map((pass) => ({
+        sku: pass.catalogueCode,
+        name: pass.product,
+        category: pass.category,
+        actualPricePayCurr: pass.basePrice,
+        discountPayCurr: pass.checkoutDiscount,
+        sellPricePayCurr: pass.total,
+        quantity: pass.quantity,
+      })),
+      formDetails: {
+        formName: 'ppl pass purchase',
+        formStepName: eventName,
+      },
+    },
+  });
+}
+
+/**
+ * The data layer's link click for the cart's Check Out and Edit: a lounge booking's (see
+ * trackLoungeCheckout), else the passes' (see trackPassCheckout).
+ * @param {Object} cart The cart's summary (see cart.js)
+ */
+function trackCheckout(cart) {
+  const cartProducts = cart?.lines || [];
+  const lounge = cartProducts.find((product) => product.kind !== 'pass');
+  if (lounge) {
+    trackLoungeCheckout(cart, lounge);
+    return;
+  }
+  const passes = cartProducts.filter((product) => product.kind === 'pass');
+  if (passes.length) trackPassCheckout(passes);
 }
 
 /**
@@ -725,3 +861,7 @@ export async function removeAndShow(catalogueCode, trigger) {
   }
   if (result.status === 'failed') await showFailure('cartRemoveFailed', from);
 }
+
+// the data layer's Check Out and Edit clicks (the buttons announce them, see renderMiniCart)
+document.addEventListener('cart:checkout', (e) => trackCheckout(e.detail.cart));
+document.addEventListener('cart:edit', (e) => trackCheckout(e.detail.cart));
