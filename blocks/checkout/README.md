@@ -39,9 +39,10 @@ their details, as on the source (its server fills the form for a member). Nothin
 - The flight and partner fields stay empty (the profile has none).
 - Only empty fields are filled: what the visitor typed or chose meanwhile stays (a country chosen
   meanwhile keeps its dial code).
-- **First Name**, **Last Name**, **Email Address** and **Confirm Email Address** can't be edited
-  once filled: they're read-only (still focusable, read out and sent with Payment), their text in
-  a darker grey. A value its field's rules refuse (for example a broken email) stays editable so
+- **First Name**, **Last Name**, **Email Address** and **Confirm Email Address** can't be used once
+  filled: they're disabled, as on the source (no click, focus or typing, out of the Tab order;
+  still read out by a screen reader, and checked and sent with Payment). They look like the
+  source's disabled fields: 55% opacity on the warm grey, with the arrow cursor. A value its field's rules refuse (for example a broken email) stays editable so
   the member can put it right; the confirmation is locked only with the email. Title, Contact No.,
   Country of Residence and the rest stay editable.
   No message shows; the values are checked on Payment, as typed ones.

@@ -298,7 +298,7 @@ const TITLE_ORDER = ['mr', 'mrs', 'ms', 'miss'];
  *   scripts/forms.js; a shared +1 by the country's own, e.g. "+1 (CA)"), and as the source's, whose
  *   dial code starts from the country its server selects. The profile's own `countryPhoneCode` is
  *   not used.
- * The filled names and email (both email fields) are read-only, unless a value fails its field's
+ * The filled names and email (both email fields) are disabled, unless a value fails its field's
  * rules (then it stays editable, to be put right).
  * Only empty fields are filled, so what the visitor has typed or chosen meanwhile stays (a country
  * already chosen has set its dial code). The values are set without the form's change events
@@ -323,12 +323,13 @@ async function prefillMember(form) {
     input.value = fit(input, text(value));
     return input;
   };
-  // the member's own names and email, once filled, can't be edited (read-only: still focusable,
-  // read out and sent). A value its field's rules refuse stays editable, so the member can put it
-  // right before Payment.
+  // the member's own names and email, once filled, can't be used: disabled, as the source's
+  // locked fields (no focus, no clicks, out of the Tab order; still read out by a screen reader,
+  // and still checked and sent on Payment, which reads the values themselves: collectValues). A
+  // value its field's rules refuse stays editable, so the member can put it right before Payment.
   const lock = (input) => {
     if (!input || !isFieldValid(input.closest('.form-field'))) return false;
-    input.readOnly = true;
+    input.disabled = true;
     input.classList.add('checkout-locked');
     return true;
   };

@@ -31,6 +31,9 @@
   --checkout-promo-button: 24px;
   --checkout-promo-arrow: 11px 10px;
   --checkout-disabled-opacity: 0.65;
+
+  /* a member's locked field, as the source's disabled fields (style.min.css) */
+  --checkout-locked-opacity: 0.55;
   --checkout-label-spacing: 1px;
   --checkout-total-label-max: 150px;
 
@@ -149,16 +152,14 @@
   background-size: var(--checkout-select-arrow);
 }
 
-/* a logged-in member's names and email, filled and locked (read-only): their text greyed, as the
-   Profile Form's read-only fields (in the darker grey: a read-only field's text keeps its contrast),
-   no text cursor; the field stays warm grey when focused, its focus ring kept */
-.checkout .checkout-form .form-input.checkout-locked {
-  color: var(--color-disabled-text);
-  cursor: default;
-}
-
-.checkout .checkout-form .form-input.checkout-locked:focus {
+/* a logged-in member's names and email, filled and locked (disabled), as the source's disabled
+   fields (its `.form-control[disabled]`): the whole field at 55% on its warm grey, its text in the
+   field's own colour, the arrow cursor (not the text cursor, nor the shared forms' "loading" one) */
+.checkout .checkout-form .form-input.checkout-locked:disabled {
   background-color: var(--color-surface-warm);
+  color: var(--form-input-color);
+  opacity: var(--checkout-locked-opacity);
+  cursor: default;
 }
 
 /* a field with an error, as the source's: no red ring, the red "!" inside it at the right; its
