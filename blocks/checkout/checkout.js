@@ -292,13 +292,16 @@ const TITLE_ORDER = ['mr', 'mrs', 'ms', 'miss'];
  * - the title (`salutation`: by its text, else, on a page in another language, by its place in
  *   the authored order Mr., Mrs., Ms., Miss)
  * - the names (`firstName`, `lastName`), the email in both email fields (`userName`)
- * - the contact number (`phone`, digits) with its dial code (`countryPhoneCode`; for a shared code
- *   such as +1 the country's own, e.g. "+1 (CA)")
- * - the country of residence (`countryName`, matched by name in the countries list)
- * Only empty fields are filled, so what the visitor has typed meanwhile stays; the dial code only
- * with the number. The values are set without the form's change events, so no message shows
- * (they're checked on Payment, as typed ones). A guest, or a profile that can't be read, leaves
- * the form as it is.
+ * - the contact number (`phone`, digits)
+ * - the country of residence (`countryName`, matched by name in the countries list), and with it
+ *   the dial code: it follows the country, as when a visitor picks one (linkFields in
+ *   scripts/forms.js; a shared +1 by the country's own, e.g. "+1 (CA)"), and as the source's, whose
+ *   dial code starts from the country its server selects. The profile's own `countryPhoneCode` is
+ *   not used.
+ * Only empty fields are filled, so what the visitor has typed or chosen meanwhile stays (a country
+ * already chosen has set its dial code). The values are set without the form's change events
+ * reaching the form, so no message shows (they're checked on Payment, as typed ones). A guest, or a
+ * profile that can't be read, leaves the form as it is.
  * @param {HTMLFormElement} form
  * @returns {Promise<void>}
  */
@@ -330,10 +333,10 @@ async function prefillMember(form) {
   }
   const number = control('contactNumber');
   const digits = String(profile.phone ?? '').replace(/\D/g, '');
-  const withNumber = !!(number && !number.value && digits);
-  if (withNumber) number.value = fit(number, digits);
+  if (number && !number.value && digits) number.value = fit(number, digits);
 
-  // the country and the dial code once the countries are in (their lists are filled by then)
+  // the country, and with it the dial code, once the countries are in (their lists are filled by
+  // then)
   let countries;
   try {
     countries = await getCountries();
@@ -345,17 +348,11 @@ async function prefillMember(form) {
   if (residence && !residence.value && country
     && [...residence.options].some((o) => o.value === String(country.countryId))) {
     residence.value = String(country.countryId);
+    // the dial code follows it, as for a visitor's choice (linkFields listens on the field). Not
+    // bubbling: the form doesn't check the field, so no message; the dial code's own change
+    // updates its short code.
+    residence.dispatchEvent(new Event('change'));
   }
-  const code = fieldElement(form, 'contactNumber')?.querySelector('.form-phone-code');
-  const dial = String(profile.countryPhoneCode ?? '').replace(/\D/g, '');
-  if (!withNumber || !code || !dial) return;
-  const options = [...code.options];
-  const option = options.find((o) => o.value === `+${dial}` && country && o.textContent === country.phoneCodeCountryCode)
-    || options.find((o) => o.value === `+${dial}`);
-  if (!option || option.selected) return;
-  option.selected = true;
-  // (not bubbling: the short dial code follows, the form doesn't check the field)
-  code.dispatchEvent(new Event('change'));
 }
 
 /**

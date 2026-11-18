@@ -30,11 +30,15 @@ their details, as on the source (its server fills the form for a member). Nothin
 - **Title** ← `salutation` (matched to the authored options, "Mr" = "Mr."; on the other
   languages' pages by its place: author the options in the order Mr., Mrs., Ms., Miss), **First Name**,
   **Last Name** ← `firstName`, `lastName`, **Email Address** and **Confirm Email Address** ←
-  `userName`, **Contact No.** ← `phone` (digits) with the dial code ← `countryPhoneCode` (for a
-  shared code such as +1, the country's own), **Country of Residence** ← `countryName` (matched by
-  name, as the Profile Form: `findCountryByName` in `scripts/forms.js`).
+  `userName`, **Contact No.** ← `phone` (digits), **Country of Residence** ← `countryName` (matched
+  by name, as the Profile Form: `findCountryByName` in `scripts/forms.js`).
+- The dial code follows the country of residence, as when a visitor picks one (for a shared code
+  such as +1, the country's own, e.g. "+1 (CA)"), and as on the source, whose dial code starts from
+  the country its server selects. The profile's own `countryPhoneCode` isn't used. Without a
+  matched country it stays +1 (US).
 - The flight and partner fields stay empty (the profile has none).
-- Only empty fields are filled: what the visitor typed meanwhile stays. Everything stays editable.
+- Only empty fields are filled: what the visitor typed or chose meanwhile stays (a country chosen
+  meanwhile keeps its dial code). Everything stays editable.
   No message shows; the values are checked on Payment, as typed ones.
 - A guest makes no request. A profile that can't be read (an error, refused, no answer within 5s)
   leaves the form empty, with no message; an expired login already logs out on page load.

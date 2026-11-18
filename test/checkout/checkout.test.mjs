@@ -402,8 +402,10 @@ for (const width of [375, 576, 768, 992, 1440]) {
 }
 
 // a logged-in member: the form filled from GetProfile (routed; a stand-in login, never a real one),
-// as the source's guest checkout for a member: the title, names, both emails, the number with its
-// dial code (a shared +1 by the country), the country by name; only empty fields; no messages;
+// as the source's guest checkout for a member: the title, names, both emails, the number, the
+// country by name and the dial code following it (not the profile's own code: a shared +1 by the
+// country; no country, the default); only empty fields (a country chosen meanwhile and its dial
+// code stay); no messages;
 // Payment sends the filled values. A guest makes no request; a profile error or no answer leaves
 // the form empty; an expired login logs out (home). The other languages; 375 and 1440.
 {
@@ -412,7 +414,7 @@ for (const width of [375, 576, 768, 992, 1440]) {
   const VALID = jwt(Math.floor(Date.now() / 1000) + 3600);
   const EXPIRED = jwt(Math.floor(Date.now() / 1000) - 60);
   const PROFILE = {
-    serviceResponseCode: 200, salutation: 'Mr', firstName: 'Kai', lastName: 'Chan', userName: 'kai.chan@example.com', phone: '07700 900123', countryPhoneCode: '44', countryName: 'United Kingdom', membershipID: 'ST0001',
+    serviceResponseCode: 200, salutation: 'Mr', firstName: 'Kai', lastName: 'Chan', userName: 'kai.chan@example.com', phone: '07700 900123', countryPhoneCode: '852', countryName: 'United Kingdom', membershipID: 'ST0001',
   };
   // routes GetProfile (its answer, a status, or a delay) and stores a login before the page loads
   const member = ({ token = VALID, profile = PROFILE, status = 200, delay = 0 } = {}) => async (page) => {
@@ -441,7 +443,7 @@ for (const width of [375, 576, 768, 992, 1440]) {
   await settle(page);
   let f = await filled(page);
   check('member: one GetProfile with the login', page.profileCalls === 1 && page.profileAuth === `Bearer ${VALID}`, JSON.stringify([page.profileCalls, page.profileAuth?.slice(0, 20)]));
-  check('member: title, names, both emails, the number (digits), +44 (GB) and its short code, the country by name', f.title === 'Mr.' && f.first === 'Kai' && f.last === 'Chan' && f.email === 'kai.chan@example.com' && f.confirm === 'kai.chan@example.com' && f.number === '07700900123' && f.code === '+44 (GB)' && f.dial === '+44' && f.country === '41', JSON.stringify(f));
+  check('member: title, names, both emails, the number (digits), the country by name, its dial code +44 (GB) and short code (not the profile\'s +852)', f.title === 'Mr.' && f.first === 'Kai' && f.last === 'Chan' && f.email === 'kai.chan@example.com' && f.confirm === 'kai.chan@example.com' && f.number === '07700900123' && f.code === '+44 (GB)' && f.dial === '+44' && f.country === '41', JSON.stringify(f));
   check('member: the flight and partner fields empty, no messages', !f.flight && !f.partner && f.errors.length === 0, JSON.stringify(f));
   // the Smart Traveller card (Promo card, guests-only) left out, with its space: the checkout
   // right after the back title
@@ -462,10 +464,26 @@ for (const width of [375, 576, 768, 992, 1440]) {
   check('member: Payment sends the filled details', sent?.firstName === 'Kai' && sent.emailAddress === 'kai.chan@example.com' && sent.contactNumber === '07700900123' && sent.phoneCountryCode === '+44' && String(sent.countryOfResidence) === '41', JSON.stringify(sent));
   await page.close();
 
-  page = await open({ setup: member({ profile: { ...PROFILE, countryName: 'Canada', countryPhoneCode: '+1', salutation: 'ms', phone: '4165550100' } }) });
+  page = await open({ setup: member({ profile: { ...PROFILE, countryName: 'Canada', countryPhoneCode: '44', salutation: 'ms', phone: '4165550100' } }) });
   await settle(page);
   f = await filled(page);
-  check('member: a shared +1 by the country (+1 (CA)), "ms" as Ms.', f.code === '+1 (CA)' && f.dial === '+1' && f.country === '38' && f.title === 'Ms.', JSON.stringify(f));
+  check('member: a shared +1 by the country (+1 (CA), not the profile\'s +44), "ms" as Ms.', f.code === '+1 (CA)' && f.dial === '+1' && f.country === '38' && f.title === 'Ms.', JSON.stringify(f));
+  await page.close();
+
+  // a country the list doesn't have: no country, the default dial code (as the source's without a
+  // selected country), the rest filled
+  page = await open({ setup: member({ profile: { ...PROFILE, countryName: 'Atlantis' } }) });
+  await settle(page);
+  f = await filled(page);
+  check('member: an unknown country: no country, the dial code stays +1 (US) (not the profile\'s +852), the number filled', !f.country && f.code === '+1 (US)' && f.dial === '+1' && f.number === '07700900123' && f.errors.length === 0, JSON.stringify(f));
+  await page.close();
+
+  // a country chosen before the profile answers: it and its dial code stay
+  page = await open({ setup: member({ delay: 2500 }) });
+  await page.locator('.checkout .form-field[data-key="countryOfResidence"] select').selectOption({ label: 'Hong Kong SAR, China' });
+  await page.waitForTimeout(3500);
+  f = await filled(page);
+  check('member: a country chosen before the profile answers stays, with its dial code +852 (HK); the rest filled', f.code === '+852 (HK)' && f.dial === '+852' && f.country !== '41' && !!f.country && f.first === 'Kai' && f.number === '07700900123' && f.errors.length === 0, JSON.stringify(f));
   await page.close();
 
   // typed before the profile answers: kept
