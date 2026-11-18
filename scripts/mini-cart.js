@@ -374,16 +374,6 @@ export function buildPromo(cart, { prefix = 'mini-cart', redraw, root } = {}) {
 }
 
 /**
- * A cart product's discount for the data layer's Check Out: its discount's value
- * (itemPriceDetails.discounts[0].value), else its promo code's (promocode[0].value), else 0.
- * @param {Object} cartProduct A cart line (see cart.js)
- * @returns {number}
- */
-function checkoutDiscount(cartProduct) {
-  return cartProduct.discountValue || cartProduct.promo?.value || 0;
-}
-
-/**
  * The data layer's link click for Check Out and Edit (both "checkout") of a lounge booking, from
  * the cart: the lounge's visit (its startDate at the airport, in UTC, and the days to it), the
  * guests and the cart's currency, the airport and the lounge, the promo code, the product with
@@ -443,10 +433,10 @@ function trackLoungeCheckout(cart, cartProduct) {
           sku: cartProduct.catalogueCode,
           name: cartProduct.product,
           category: cartProduct.category,
-          // the cart's totals (cartTotalPrice): totalBasePrice and totalPrice; the discount: see
-          // checkoutDiscount
+          // the cart's totals (cartTotalPrice): totalBasePrice and totalPrice; the lounge's
+          // discount: its totalDiscounts, else its totalPromocodeAmount, else 0 (see cart.js)
           actualPricePayCurr: cartTotals.base,
-          discountPayCurr: checkoutDiscount(cartProduct),
+          discountPayCurr: cartProduct.checkoutDiscount,
           sellPricePayCurr: cartTotals.total,
           quantity: totalGuestCount,
         },
@@ -485,13 +475,13 @@ function trackPassCheckout(passes) {
         promocodeValuePayCurr: cartPromo?.value || 0,
       },
       // each pass with its own prices (productTotalPrice): totalBasePrice and totalPrice, its
-      // discount (see checkoutDiscount) and its quantity
+      // discount (totalDiscounts, else totalPromocodeAmount, else 0: see cart.js) and its quantity
       productList: passes.map((pass) => ({
         sku: pass.catalogueCode,
         name: pass.product,
         category: pass.category,
         actualPricePayCurr: pass.basePrice,
-        discountPayCurr: checkoutDiscount(pass),
+        discountPayCurr: pass.checkoutDiscount,
         sellPricePayCurr: pass.total,
         quantity: pass.quantity,
       })),
