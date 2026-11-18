@@ -332,7 +332,7 @@ export default function decorate(block) {
       if (e.target.closest('button[type="submit"]') && filled) eventName = 'login';
       else if (e.target.closest('a[href*="/modals/forgot-password"]')) eventName = 'forgot password';
       if (!eventName) return;
-      import('../../scripts/datalayer.js').then(({ pushEvent }) => {
+      import('../../scripts/adobe-datalayer.js').then(({ pushEvent }) => {
         pushEvent('web.webInteraction.linkClicks', eventName, {
           web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
         });

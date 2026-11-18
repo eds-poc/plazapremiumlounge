@@ -316,7 +316,7 @@ function slimPass(item) {
     productSeq: item.productSeq,
     images: (item.images || []).slice(0, 1).map((image) => ({ path: image?.path })),
     numberOfVisits: item.numberOfVisits,
-    // for analytics (scripts/ecommerce.js): the service and the pass's category codes
+    // for analytics (scripts/gtag-datalayer.js): the service and the pass's category codes
     serviceDisplayName: item.serviceDisplayName,
     passCategory: (item.passCategory || []).map((c) => ({ categoryCode: c?.categoryCode })),
     accuralPoints: item.accuralPoints,
@@ -436,8 +436,9 @@ export function readProperty(item, { types = [LOUNGE, PASS] } = {}) {
   return {
     code: item.propertyCode,
     name,
-    // for analytics (scripts/datalayer.js, scripts/ecommerce.js): the airport or station code, the
-    // LMS outlet code, the property's currency, its short location, city and country code
+    // for analytics (scripts/adobe-datalayer.js, scripts/gtag-datalayer.js): the airport or
+    // station code, the LMS outlet code, the property's currency, its short location, city and
+    // country code
     iata,
     outletId: item.lmsOutletCode ? String(item.lmsOutletCode).trim() : '',
     currency: (item.defaultCurrency || '').trim().toUpperCase(),
