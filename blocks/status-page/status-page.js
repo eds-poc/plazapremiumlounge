@@ -4,7 +4,7 @@
  * and the text (paragraphs, links). The block fills its section in the brand maroon.
  */
 // eslint-disable-next-line import/no-cycle
-import { trackError } from '../../scripts/datalayer.js';
+import { trackError } from '../../scripts/adobe-datalayer.js';
 
 const HEADINGS = 'h1, h2, h3, h4, h5, h6';
 const IMAGES = 'picture, img';

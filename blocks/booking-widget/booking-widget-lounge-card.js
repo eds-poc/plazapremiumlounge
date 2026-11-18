@@ -13,7 +13,7 @@
  */
 import { loadCSS } from '../../scripts/aem.js';
 // eslint-disable-next-line import/no-cycle
-import { pushEvent } from '../../scripts/datalayer.js';
+import { pushEvent } from '../../scripts/adobe-datalayer.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { translate } from '../../scripts/i18n.js';
 import { isInCart, onCartChange } from '../../scripts/cart-state.js';

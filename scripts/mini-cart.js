@@ -18,7 +18,7 @@ import {
 } from './cart.js';
 import { getCurrency } from './currency.js';
 // eslint-disable-next-line import/no-cycle
-import { PAGE_VIEW, pushEvent } from './datalayer.js';
+import { PAGE_VIEW, pushEvent } from './adobe-datalayer.js';
 // eslint-disable-next-line import/no-cycle
 import { hideLoader, showLoader } from './scripts.js';
 import { daysUntil, toUtcDateTime } from './utility.js';

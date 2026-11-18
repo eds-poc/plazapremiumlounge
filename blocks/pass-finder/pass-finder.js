@@ -1,6 +1,6 @@
 import {
   BRAND, listLabel, pushEcommerce, viewSource,
-} from '../../scripts/ecommerce.js';
+} from '../../scripts/gtag-datalayer.js';
 import { translate } from '../../scripts/i18n.js';
 import {
   PASSES_TIMEOUT_MS, buildAddButton, buildPoints, formatPrice, icon, locationName, openPassDetails,
@@ -139,9 +139,9 @@ function choose(passes, { region, search, sort }) {
 }
 
 /**
- * The GA4 `view_item_list` for the passes (window.dataLayer, scripts/ecommerce.js): every pass the
- * finder lists, in its order (all its pages), as "Other - Airport Lounge Passes", in the visitor's
- * currency. A pass has no airport, city or visit, so those parameters are blank.
+ * The GA4 `view_item_list` for the passes (window.dataLayer, scripts/gtag-datalayer.js): every
+ * pass the finder lists, in its order (all its pages), as "Other - Airport Lounge Passes", in the
+ * visitor's currency. A pass has no airport, city or visit, so those parameters are blank.
  * @param {Object[]} list The passes, as chosen (see choose)
  */
 function trackPassList(list) {

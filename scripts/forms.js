@@ -17,7 +17,7 @@ import { DEFAULT_SITE, getSiteFolder, translate } from './i18n.js';
 import apiUrl from './endpoints.js';
 import { addCaptcha, CAPTCHA_KEY } from './captcha.js';
 // eslint-disable-next-line import/no-cycle
-import { trackError } from './datalayer.js';
+import { trackError } from './adobe-datalayer.js';
 
 const INPUT_TYPES = ['text', 'email', 'password', 'tel', 'number', 'date', 'url'];
 const FIELD_TYPES = [...INPUT_TYPES, 'textarea', 'select', 'checkbox', 'checkboxes', 'country', 'phone', 'stepper'];

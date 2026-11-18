@@ -1,6 +1,6 @@
 /*
- * The logged-in member's details for analytics (scripts/datalayer.js): the membership number, the
- * points and the SHA-256 hashes of the email and the phone, read from GetProfile once, when the
+ * The logged-in member's details for analytics (scripts/adobe-datalayer.js): the membership number,
+ * the points and the SHA-256 hashes of the email and the phone, read from GetProfile once, when the
  * visitor logs in (scripts/account-forms.js), and kept in localStorage so no page waits for the
  * API. The email and the phone themselves are never kept. They belong to the token they were read
  * with, and go when it goes (logout, an expired token: clearToken in scripts/auth.js).
