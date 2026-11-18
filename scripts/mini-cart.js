@@ -523,16 +523,18 @@ function renderMiniCart(cart) {
 /**
  * The data layer's page view as the mini cart opens ("page load"), from the cart as shown: the
  * booking (the first line's start in UTC as YYYY-MM-DDTHH:MM:SSZ, its guests), the lounge (its
- * LMS outlet code) and its location (its IATA code), the promo code and its amount (only when the
- * cart API gives a code), and every product with its prices; the form is the lounge booking's,
- * or the pass purchase's for a cart of passes. What the cart API doesn't give yet goes as '' (the
- * start, without its time zone: null).
+ * LMS outlet code) and its location (its IATA code; neither for a cart of passes), the promo code
+ * and its amount (only when the cart API gives a code), and every product with its prices; the
+ * form is the lounge booking's, or the pass purchase's for a cart of passes. What the cart API
+ * doesn't give yet goes as '' (the start, without its time zone: null).
  * @param {Object} cart The cart's summary (see readCart in cart.js)
  */
 function trackCartView(cart) {
   // the booked item (a cart holds one lounge, or passes: the first line) gives the booking, the
   // outlet and its location
   const [bookedItem] = cart.lines;
+  // a cart of passes (the passes page's flow): the pass purchase, without a lounge or location
+  const isPassPurchase = bookedItem.kind === 'pass';
   const promoAmount = cart.totals.promo || 0;
   // the start at the lounge ("2026-11-28 15:00:00") in UTC, with its time zone (15:00 in Hong
   // Kong: 07:00:00Z)
@@ -547,9 +549,11 @@ function trackCartView(cart) {
         adultCount: bookedItem.adults,
         childCount: bookedItem.children,
       },
-      locationDetails: { iataCode: bookedItem.iataCode, locationName: bookedItem.locationName },
-      // (the line's name: the property's display name)
-      outletDetails: { outletId: bookedItem.outletId, outletName: bookedItem.name },
+      // (a lounge's only; the line's name: the property's display name)
+      ...(!isPassPurchase && {
+        locationDetails: { iataCode: bookedItem.iataCode, locationName: bookedItem.locationName },
+        outletDetails: { outletId: bookedItem.outletId, outletName: bookedItem.name },
+      }),
       // (only with a promo code from the cart API)
       ...(cart.promoCode && {
         offerDetails: { promoCode: cart.promoCode, promocodeValuePayCurr: promoAmount },
@@ -567,7 +571,7 @@ function trackCartView(cart) {
         quantity: line.quantity,
       })),
       formDetails: {
-        formName: bookedItem.kind === 'pass' ? 'ppl pass purchase' : 'ppl lounge booking',
+        formName: isPassPurchase ? 'ppl pass purchase' : 'ppl lounge booking',
         formStepName: 'cart view',
       },
     },
