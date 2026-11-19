@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-cycle
 import { PAGE_VIEW, pushEvent, setPageDetails } from '../../scripts/adobe-datalayer.js';
 import { buildForm } from '../../scripts/forms.js';
-import { pushEcommerce } from '../../scripts/gtag-datalayer.js';
+import { pushGtagEvent } from '../../scripts/gtag-datalayer.js';
 import { sha256 } from '../../scripts/utility.js';
 
 /*
@@ -147,7 +147,7 @@ async function trackSignupSuccess(data) {
  * @param {Object} data The Register API's answer
  */
 function trackSignUp(data) {
-  pushEcommerce('sign_up', {
+  pushGtagEvent('sign_up', {
     method: 'email',
     user_id: data?.membershipID ? String(data.membershipID) : '',
     user_properties: {
