@@ -296,6 +296,9 @@ const TEXTS = {
   formPhone: {
     en: 'Please fill in valid contact number', zh: '请填写有效的联系电话', 'zh-HK': '請填寫有效的聯絡電話', ja: '有効な電話番号を入力してください', pt: 'Preencha um número de contato válido',
   },
+  formFlightNumber: {
+    en: 'Flight number must be a maximum of 4 digits.', zh: '航班编号最多为 4 位数字.', 'zh-HK': '航班編號最多為 4 位數字。', ja: '便名は最大4桁である必要があります。', pt: 'O número do voo deve ter no máximo 4 dígitos.',
+  },
   formUrl: {
     en: 'Please enter a valid web address.', zh: '请输入有效的网址。', 'zh-HK': '請輸入有效的網址。', ja: '有効な URL を入力してください。', pt: 'Insira um endereço web válido.',
   },
@@ -566,6 +569,31 @@ const TEXTS = {
     en: 'Services:', zh: '服务:', 'zh-HK': '服務:', ja: 'サービス:', pt: 'Serviços:',
   },
   // (a pass's line)
+  // a pass line's intent pill (the source's: "For me" in every language)
+  cartPassForMe: {
+    en: 'For me', zh: 'For me', 'zh-HK': 'For me', ja: 'For me', pt: 'For me',
+  },
+  // the checkout summary's Departures / Arrivals badge and its tip (the source's texts)
+  cartBadgeDeparture: {
+    en: 'Departures Lounge', zh: '出境贵宾室', 'zh-HK': '離境貴賓室', ja: '出発ラウンジ', pt: 'Sala de Partidas',
+  },
+  cartBadgeDepartureTip: {
+    en: 'Located after security & immigration — you’ll need your boarding pass to enter.',
+    zh: '位于安检及出境检查之后,需出示登机牌方可进入。',
+    'zh-HK': '位於安檢及離境檢查之後,需出示登機證方可進入。',
+    ja: '保安検査およびイミグレーション通過後にご利用いただけます。ご利用には搭乗券が必要です。',
+    pt: 'Localizada após o controlo de segurança e imigração — é necessário apresentar o cartão de embarque para entrar.',
+  },
+  cartBadgeArrival: {
+    en: 'Arrivals Lounge', zh: '入境贵宾室', 'zh-HK': '入境貴賓室', ja: '到着ラウンジ', pt: 'Sala de Chegadas',
+  },
+  cartBadgeArrivalTip: {
+    en: 'Located after you land and clear immigration — open to everyone, no boarding pass needed.',
+    zh: '完成入境检查后即可使用,无需登机牌,欢迎所有旅客使用。',
+    'zh-HK': '完成入境檢查後即可使用,毋須登機證,歡迎所有旅客使用。',
+    ja: '入国審査通過後にご利用いただけます。どなたでもご利用可能で、搭乗券は不要です。',
+    pt: 'Localizada após o desembarque e controlo de imigração — aberta a todos os passageiros, sem necessidade de cartão de embarque.',
+  },
   cartQuantity: {
     en: 'Quantity:', zh: '数量:', 'zh-HK': '數量:', ja: '数量:', pt: 'Quantidade:',
   },

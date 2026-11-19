@@ -15,7 +15,7 @@
 import apiUrl from './endpoints.js';
 import { translate } from './i18n.js';
 import { isTokenValid, redirectTarget, setToken } from './auth.js';
-import { pushEvent } from './datalayer.js';
+import { pushEvent } from './adobe-datalayer.js';
 import { storeMember } from './member.js';
 
 /**

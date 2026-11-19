@@ -2,10 +2,10 @@ import { loadCSS } from '../../scripts/aem.js';
 // eslint-disable-next-line import/no-cycle
 import {
   PAGE_VIEW, pushEvent, setPageDetails,
-} from '../../scripts/datalayer.js';
+} from '../../scripts/adobe-datalayer.js';
 import {
   BRAND, chosenVisit, listLabel, pushEcommerce, viewSource,
-} from '../../scripts/ecommerce.js';
+} from '../../scripts/gtag-datalayer.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { getLanguage, translate } from '../../scripts/i18n.js';
 import {
@@ -122,7 +122,7 @@ function chosenBooking(timeZone) {
 
 /**
  * The data layer's page view for the listing ("page load", sent here instead of by
- * scripts/datalayer.js on a listing page, see initDataLayer): the API's `count` as the search
+ * scripts/adobe-datalayer.js on a listing page, see initDataLayer): the API's `count` as the search
  * results; the booking chosen in the page address (`date` and `time` at the airport in UTC, else
  * null; `adult` and `children`); and the airport chosen there (?airport=PKX), else
  * the first lounge's: its `iataCode` and `locationName`.
@@ -153,10 +153,10 @@ function trackListingView(properties, selected, count) {
 }
 
 /**
- * The GA4 `view_item_list` for the listing (window.dataLayer, scripts/ecommerce.js): the lounges
- * shown (not the passes), in their order. The list is named after the city ("Mega Menu - Beijing",
- * "Other - Beijing"); from the home page search widget, after its airport ("HP Search Widget - JFK"
- * as the id, "HP Search Widget - John F. Kennedy International Airport" as the name).
+ * The GA4 `view_item_list` for the listing (window.dataLayer, scripts/gtag-datalayer.js): the
+ * lounges shown (not the passes), in their order. The list is named after the city ("Mega Menu -
+ * Beijing", "Other - Beijing"); from the home page search widget, after its airport ("HP Search
+ * Widget - JFK" as the id, "HP Search Widget - John F. Kennedy International Airport" as the name).
  * @param {Object[]} properties
  * @param {Object<string, Set<string>>} selected The filters from the page address
  */

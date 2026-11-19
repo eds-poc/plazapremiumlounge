@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-cycle
-import { PAGE_VIEW, pushEvent, setPageDetails } from '../../scripts/datalayer.js';
+import { PAGE_VIEW, pushEvent, setPageDetails } from '../../scripts/adobe-datalayer.js';
 import { buildForm } from '../../scripts/forms.js';
 
 /*

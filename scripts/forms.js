@@ -17,7 +17,7 @@ import { DEFAULT_SITE, getSiteFolder, translate } from './i18n.js';
 import apiUrl from './endpoints.js';
 import { addCaptcha, CAPTCHA_KEY } from './captcha.js';
 // eslint-disable-next-line import/no-cycle
-import { trackError } from './datalayer.js';
+import { trackError } from './adobe-datalayer.js';
 
 const INPUT_TYPES = ['text', 'email', 'password', 'tel', 'number', 'date', 'url'];
 const FIELD_TYPES = [...INPUT_TYPES, 'textarea', 'select', 'checkbox', 'checkboxes', 'country', 'phone', 'stepper'];
@@ -48,6 +48,8 @@ const RULES = {
   phone: { pattern: /^[0-9+\-/\s]+$/, maxLength: 20, message: 'formPhone' },
   // numbers only (e.g. a contact number without its country code)
   digits: { pattern: /^\d+$/, message: 'formPhone' },
+  // source guest checkout: a flight number's digits, at most 4 (padded to 3 with `pad: 3`)
+  flight: { pattern: /^\d{1,4}$/, maxLength: 4, message: 'formFlightNumber' },
   url: { pattern: /^https?:\/\/[^\s.]+\.\S+$/i, message: 'formUrl' },
   postcode: { pattern: /^[A-Za-z0-9][A-Za-z0-9 -]{1,9}$/, message: 'formPostcode' },
 };
@@ -73,6 +75,46 @@ export function getCountries() {
     countries.catch(() => { countries = null; });
   }
   return countries;
+}
+
+// a country's name where GetProfile spells it differently from GetCountries
+const COUNTRY_ALIASES = {
+  'united states': 'united states of america',
+  usa: 'united states of america',
+  'hong kong': 'hong kong sar china',
+  macau: 'macau sar china',
+  macao: 'macau sar china',
+  korea: 'south korea',
+  'republic of korea': 'south korea',
+  'korea republic of': 'south korea',
+  turkey: 'turkiye',
+  'viet nam': 'vietnam',
+};
+
+/**
+ * A country name for matching: lower case, no accents or punctuation ("Türkiye" → "turkiye"), and
+ * the countries list's own name for a known other spelling.
+ * @param {*} name
+ * @returns {string}
+ */
+function countryKey(name) {
+  const key = String(name || '').normalize('NFD').replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+  return COUNTRY_ALIASES[key] || key;
+}
+
+/**
+ * The country (from getCountries) with a name, matched loosely (see countryKey), e.g. a member
+ * profile's `countryName`; undefined when none has it.
+ * @param {object[]} list
+ * @param {*} name
+ * @returns {object|undefined}
+ */
+export function findCountryByName(list, name) {
+  const key = countryKey(name);
+  return key ? list.find((c) => countryKey(c.countryName) === key) : undefined;
 }
 
 // lists a choice field can be filled from (`source: countries`)
@@ -183,6 +225,100 @@ function loadSource(state, select, map) {
   });
 }
 
+let suggestCount = 0;
+
+/**
+ * A text field's suggestions (`suggestions`: the Placeholder cell's lines), as the source's guest
+ * checkout airline list: the list opens under the field when the visitor goes into it, typing keeps
+ * the suggestions holding what's typed (any case), choosing one fills the field; anything else
+ * typed stays allowed. A combobox: ↓ ↑ move through the list, Enter chooses, Escape closes.
+ * @param {HTMLElement} box The control's wrapper (the list goes under the control)
+ * @param {HTMLInputElement} control
+ * @param {string[]} items
+ */
+function attachSuggestions(box, control, items) {
+  suggestCount += 1;
+  const list = el('ul', 'form-suggest-list');
+  list.id = `form-suggest-${suggestCount}`;
+  list.setAttribute('role', 'listbox');
+  list.hidden = true;
+  const options = items.map((text, i) => {
+    const option = el('li', 'form-suggest-option');
+    option.id = `${list.id}-${i}`;
+    option.setAttribute('role', 'option');
+    option.textContent = text;
+    return option;
+  });
+  list.append(...options);
+  box.classList.add('form-suggest');
+  box.append(list);
+  control.setAttribute('role', 'combobox');
+  control.setAttribute('aria-autocomplete', 'list');
+  control.setAttribute('aria-controls', list.id);
+  control.setAttribute('aria-expanded', 'false');
+  control.autocomplete = 'off';
+  let active = -1;
+  const shown = () => options.filter((o) => !o.hidden);
+  const setActive = (option) => {
+    options.forEach((o) => {
+      o.classList.toggle('is-active', o === option);
+      o.setAttribute('aria-selected', String(o === option));
+    });
+    active = option ? options.indexOf(option) : -1;
+    if (option) {
+      control.setAttribute('aria-activedescendant', option.id);
+      option.scrollIntoView({ block: 'nearest' });
+    } else control.removeAttribute('aria-activedescendant');
+  };
+  const close = () => {
+    list.hidden = true;
+    control.setAttribute('aria-expanded', 'false');
+    setActive(null);
+  };
+  // the suggestions holding what's typed; open when there are some
+  const open = () => {
+    const typed = control.value.trim().toLowerCase();
+    options.forEach((o) => { o.hidden = !!typed && !o.textContent.toLowerCase().includes(typed); });
+    const any = shown().length > 0;
+    list.hidden = !any;
+    control.setAttribute('aria-expanded', String(any));
+    if (!any) setActive(null);
+  };
+  const choose = (option) => {
+    control.value = option.textContent;
+    control.dispatchEvent(new Event('input', { bubbles: true }));
+    control.dispatchEvent(new Event('change', { bubbles: true }));
+    close();
+  };
+  control.addEventListener('focus', open);
+  control.addEventListener('input', () => { setActive(null); open(); });
+  control.addEventListener('keydown', (e) => {
+    const visible = shown();
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (list.hidden) open();
+      if (!visible.length) return;
+      const at = visible.indexOf(options[active]);
+      const next = e.key === 'ArrowDown' ? Math.min(at + 1, visible.length - 1) : Math.max(at - 1, 0);
+      setActive(visible[at < 0 && e.key === 'ArrowUp' ? visible.length - 1 : next]);
+    } else if (e.key === 'Enter' && !list.hidden && active >= 0) {
+      e.preventDefault();
+      choose(options[active]);
+    } else if (e.key === 'Escape' && !list.hidden) {
+      e.preventDefault();
+      close();
+    }
+  });
+  // (mousedown: chosen before the field loses focus)
+  list.addEventListener('mousedown', (e) => {
+    const option = e.target.closest('.form-suggest-option');
+    if (!option) return;
+    e.preventDefault();
+    choose(option);
+  });
+  control.addEventListener('blur', close);
+}
+
 /**
  * Builds a field's label: the authored text (or nodes, e.g. a checkbox label with links) and a
  * red * when required.
@@ -249,7 +385,7 @@ function setControlAttributes(control, def) {
   const max = settings.get('max length') || rule?.maxLength;
   if (max && control.matches('input:not([type="date"]):not([type="number"]), textarea')) control.maxLength = Number(max);
   // numbers only: the number keypad, and anything else typed or pasted is left out
-  if (settings.get('rule') === 'digits') {
+  if (['digits', 'flight'].includes(settings.get('rule'))) {
     control.inputMode = 'numeric';
     control.addEventListener('input', () => {
       const digits = control.value.replace(/\D/g, '');
@@ -266,6 +402,23 @@ function setControlAttributes(control, def) {
         control.value = control.value.slice(0, control.maxLength);
       }
       control.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+  }
+  // zeros before a shorter value when the visitor leaves the field (`pad: 3`: "7" → "007"), as the
+  // source's flight number
+  // trailing spaces taken off when the visitor leaves the field (`trim end`), as the source's
+  // guest checkout names (its leading ones stay)
+  if (settings.has('trim end')) {
+    control.addEventListener('change', () => {
+      const value = control.value.replace(/\s+$/, '');
+      if (value !== control.value) control.value = value;
+    });
+  }
+  const pad = Number(settings.get('pad'));
+  if (pad > 0) {
+    control.addEventListener('change', () => {
+      const value = control.value.trim();
+      if (value && value.length < pad && /^\d+$/.test(value)) control.value = value.padStart(pad, '0');
     });
   }
   if (settings.has('required')) control.required = true;
@@ -455,6 +608,11 @@ export function buildField({
     const box = el('div', 'form-control-wrap');
     box.append(control);
     wrap.append(buildLabel(def), box);
+    // a text field's suggestions (e.g. the airlines): its list under it
+    const suggestions = settings.get('suggestions');
+    if (Array.isArray(suggestions) && suggestions.length && control.matches('input')) {
+      attachSuggestions(box, control, suggestions);
+    }
     state.controls = [control];
     if (type === 'select') fillOptions(control, readOptions(settings.get('options')), state);
     if (type === 'country' || (type === 'select' && settings.has('source'))) {
@@ -599,6 +757,13 @@ function check(state) {
     const minAge = Number(settings.get('min age'));
     if (minAge && ageOn(value) < minAge) return message(def, 'min age', 'formMinAge', { n: minAge });
   }
+  // a phone number with its country code: their digits together in a range (`total length: 7-15`,
+  // as the source's guest checkout)
+  const total = type === 'phone' && settings.get('total length')?.match(/^(\d+)\s*-\s*(\d+)$/);
+  if (total && state.code) {
+    const digits = state.code.value.replace(/\D/g, '').length + value.replace(/\D/g, '').length;
+    if (digits < Number(total[1]) || digits > Number(total[2])) return message(def, 'total length', 'formPhone');
+  }
   if (settings.has('match')) {
     const other = fieldByKey(state.wrap.closest('form'), settings.get('match'));
     if (other && valueOf(other) !== value) return message(def, 'match', 'formMatch', { label: def.label });
@@ -638,10 +803,20 @@ export function validateField(wrap) {
  * field left empty shows its error), and its error clears (or updates) while they type; a field
  * another one must match is rechecked too.
  * @param {HTMLFormElement} form
+ * @param {{quietEmpty?: boolean}} [options] quietEmpty: an empty field left shows nothing (its
+ *   message waits for the submit), as the source's guest checkout; one already in error still
+ *   updates
  */
-export function attachValidation(form) {
+export function attachValidation(form, { quietEmpty = false } = {}) {
   form.noValidate = true;
   const wrapOf = (target) => target.closest?.('.form-field');
+  // (quietEmpty: an empty field not yet in error stays quiet)
+  const quiet = (wrap) => {
+    if (!quietEmpty || wrap.classList.contains('has-error')) return false;
+    const state = fields.get(wrap);
+    const value = state ? valueOf(state) : '';
+    return value === '' || value === false;
+  };
   const recheck = (wrap) => {
     validateField(wrap);
     // fields that must match this one (e.g. Confirm Email), once the visitor has used them
@@ -655,11 +830,12 @@ export function attachValidation(form) {
     const wrap = wrapOf(e.target);
     if (!wrap || !fields.has(wrap) || wrap.contains(e.relatedTarget)) return;
     wrap.classList.add('is-touched');
+    if (quiet(wrap)) return;
     recheck(wrap);
   });
   const onChange = (e) => {
     const wrap = wrapOf(e.target);
-    if (!wrap) return;
+    if (!wrap || quiet(wrap)) return;
     if (e.type === 'change') wrap.classList.add('is-touched');
     if (wrap.classList.contains('has-error') || (e.type === 'change' && wrap.classList.contains('is-touched'))) recheck(wrap);
   };
@@ -905,6 +1081,9 @@ function fieldSettings(field, cells) {
   } else if (field.type === 'stepper') {
     // a stepper: the unit after its number ("hours")
     if (placeholder.length) settings.set('unit', placeholder[0]);
+  } else if (settings.has('suggestions')) {
+    // a text field with suggestions: one per line (e.g. the airlines), no hint text
+    settings.set('suggestions', placeholder);
   } else if (placeholder.length) {
     settings.set('placeholder', placeholder[0]);
   }
@@ -932,7 +1111,9 @@ function fieldSettings(field, cells) {
  *   text is the authored `submit` row, else "Submit" in the visitor's language), `captcha` (true,
  *   or `{ key }` for the token's key in the data; default `h-captcha-response`), `datePicker`
  *   (`{ build, format }`: scripts/date-picker.js and the date's format, for date fields with
- *   `picker`)
+ *   `picker`), `onSubmit` (a function given the valid form's values and the form, instead of the
+ *   action: it may answer a message to show, or a Promise of one), `quietEmpty` (true: an empty
+ *   field left shows no message until the submit)
  * @returns {{form: HTMLFormElement, intro: HTMLElement|null}}
  */
 export function buildForm(block, definition) {
@@ -1038,7 +1219,7 @@ export function buildForm(block, definition) {
     button.textContent = sending ? translate('formSending') : buttonText;
   };
 
-  attachValidation(form);
+  attachValidation(form, { quietEmpty: !!definition.quietEmpty });
   linkFields(form);
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -1051,6 +1232,8 @@ export function buildForm(block, definition) {
     if (invalid.length) {
       // validateForm has moved focus to the first invalid field
       setBusy(false);
+      // the data layer's error: each field's message, as shown under it
+      trackError(invalid.map((wrap) => ({ errorMessage: fields.get(wrap).error.textContent })));
       return;
     }
 
@@ -1064,6 +1247,23 @@ export function buildForm(block, definition) {
       values[definition.captcha.key || CAPTCHA_KEY] = token;
     }
     const before = new CustomEvent('forms:submit', { bubbles: true, cancelable: true, detail: { values, form } });
+    // a block that takes the valid form itself (e.g. Checkout): its handler, nothing posted here;
+    // a message it answers shows at the top of the form
+    if (definition.onSubmit) {
+      if (!form.dispatchEvent(before)) {
+        setBusy(false);
+        return;
+      }
+      setBusy(true, true);
+      try {
+        showStatus(await definition.onSubmit(values, form) || '');
+      } catch {
+        showStatus(texts.error || translate('formError'));
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
     const url = actionUrl(definition.action);
     if (!form.dispatchEvent(before) || !url) {
       setBusy(false);
@@ -1095,7 +1295,12 @@ export function buildForm(block, definition) {
         const code = Number(data?.serviceResponseCode) || res.status;
         form.dispatchEvent(new CustomEvent('forms:error', { bubbles: true, detail: { status: code, data, form } }));
         // the data layer's error, with the message shown
-        trackError(String(code), errorMessage);
+        trackError([
+          {
+            errorCode: String(code),
+            errorMessage,
+          },
+        ]);
         return;
       }
       form.dispatchEvent(new CustomEvent('forms:success', { bubbles: true, detail: { data, values, form } }));
@@ -1117,7 +1322,12 @@ export function buildForm(block, definition) {
       showStatus(errorMessage);
       form.dispatchEvent(new CustomEvent('forms:error', { bubbles: true, detail: { status: 0, form } }));
       // the data layer's error: no answer
-      trackError('network', errorMessage);
+      trackError([
+        {
+          errorCode: 'network',
+          errorMessage,
+        },
+      ]);
     } finally {
       setBusy(false);
     }

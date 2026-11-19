@@ -3,7 +3,7 @@ import {
 } from '../../scripts/aem.js';
 import { applyButtonAction } from '../../scripts/button-actions.js';
 // eslint-disable-next-line import/no-cycle
-import { PAGE_VIEW, pushEvent, setPageDetails } from '../../scripts/datalayer.js';
+import { PAGE_VIEW, pushEvent, setPageDetails } from '../../scripts/adobe-datalayer.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { translate } from '../../scripts/i18n.js';
 import openGallery from '../../scripts/gallery.js';
@@ -1247,7 +1247,7 @@ export default async function decorate(block) {
       showMessage(block, translate('propertyNotFound'), null, `Property "${params.code}" isn't active or isn't a type this page shows.`);
       return;
     }
-    if (lounge.passProperty) {
+    if (lounge.passProperty && lounge.bookable) {
       await renderPasses(block, lounge);
       return;
     }

@@ -67,11 +67,34 @@ export function showLoader() {
   if (loader.parentElement !== host) host.prepend(loader);
 }
 
+// the waits holding the loader up (holdLoader): hideLoader leaves it up while any is pending
+const holds = new Set();
+
 /**
- * Hides the full-page loader.
+ * Hides the full-page loader, unless a wait holds it up (holdLoader); the last wait to end hides
+ * it.
  */
 export function hideLoader() {
+  if (holds.size) return;
   loader?.remove();
+}
+
+/**
+ * Shows the full-page loader until a wait ends (resolved or not), whoever else hides it meanwhile:
+ * for a block that doesn't hold up the page while it waits (e.g. the checkout's first cart, while
+ * the page's first load hides its own loader).
+ * @param {Promise<*>} wait
+ * @returns {Promise<*>} the same wait
+ */
+export function holdLoader(wait) {
+  holds.add(wait);
+  showLoader();
+  const done = () => {
+    holds.delete(wait);
+    hideLoader();
+  };
+  wait.then(done, done);
+  return wait;
 }
 
 /**
@@ -401,11 +424,11 @@ function loadDelayed() {
   import('./consentag.js').then(({ default: initConsenTag }) => initConsenTag());
   // analytics: the page view in the data layer, then the Launch script (metadata
   // `launch-script`)
-  import('./datalayer.js').then(({ default: initDataLayer }) => initDataLayer());
+  import('./adobe-datalayer.js').then(({ default: initDataLayer }) => initDataLayer());
   // Google Tag Manager (metadata `gtm-id`)
   import('./gtm.js').then(({ default: initGtm }) => initGtm());
   // GA4 ecommerce: how the visitor comes to a listing (a mega menu or search widget link click)
-  import('./ecommerce.js').then(({ trackViewSource }) => trackViewSource());
+  import('./gtag-datalayer.js').then(({ trackViewSource }) => trackViewSource());
   // load anything that can be postponed to the latest here
 }
 

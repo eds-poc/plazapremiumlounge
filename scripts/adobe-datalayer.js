@@ -31,9 +31,29 @@ const BRAND = 'plaza premium lounge';
 let storing;
 // the page's name and site section set by a block (setPageDetails)
 let pageDetails = {};
-// the home page's address: / or a site folder's (/en-uk/, /zh-cn/ …), the only page whose page
-// view initDataLayer sends
+// the pages whose page view initDataLayer sends: the home page (/ or a site folder's: /en-uk/,
+// /zh-cn/ …) and the lounge passes page (/en-uk/airport-lounge-passes)
 const HOMEPAGE_PATH = /^\/([a-z]{2}-[a-z]{2}\/?)?$/;
+const PASSES_PATH = /^\/[a-z]{2}-[a-z]{2}\/airport-lounge-passes\/?$/;
+// the clicks the common link click sends, on every page (trackLinkClicks): every link, and the
+// header menu's buttons (its top items, e.g. Locations, the Locations menu's region and country
+// tabs, and the phones' drill-down items)
+const LINK_CLICKS = [
+  'a[href]',
+  '.header-link',
+  '.header-mega-tab',
+  '.header-drill-item',
+].join(', ');
+// the links with a link click of their own (their block sends it, with more details): the common
+// one leaves them out, so a click isn't sent twice
+const IGNORE_BUTTON_CLICKS = [
+  // the lounge listing's View Lounge ("view lounge", blocks/property-list)
+  '.property-list .property-card-view a',
+  // the login modal's Forgot Password? ("forgot password", blocks/form)
+  'form[data-action="login"] a[href*="/modals/forgot-password"]',
+  // the cart's Check Out and Edit ("checkout", scripts/mini-cart.js)
+  '.mini-cart-actions .cart-button',
+].join(', ');
 
 /**
  * A logged-in member's kept details; when there are none, they're read in the background (once a
@@ -176,12 +196,13 @@ export function pushEvent(event, eventName, extra) {
 }
 
 /**
- * The data layer's link click for an error, in the site section "home": an error page (the Status
- * Page block's 404 and 500) or a form's send that failed (scripts/forms.js).
- * @param {string} errorCode e.g. 404
- * @param {string} errorMessage e.g. Page Not Found
+ * The data layer's link click for errors, in the site section "home": an error page (the Status
+ * Page block's 404 and 500), a form's send that failed, or a form's fields in error on submit
+ * (scripts/forms.js), one item each.
+ * @param {{errorCode?: string, errorMessage: string}[]} errors e.g. [{ errorCode: '404',
+ *   errorMessage: 'Page Not Found' }], or a form's [{ errorMessage: 'Please fill first name' }, …]
  */
-export function trackError(errorCode, errorMessage) {
+export function trackError(errors) {
   const eventName = 'error';
   pushEvent('web.webInteraction.linkClicks', eventName, {
     web: {
@@ -197,24 +218,51 @@ export function trackError(errorCode, errorMessage) {
       pageDetails: {
         siteSection: 'home',
       },
-      errors: [
-        {
-          errorCode,
-          errorMessage,
-        },
-      ],
+      errors,
     },
   });
 }
 
 /**
- * Starts analytics on a page: the page view (on the home page only; the lounge listing's is the
- * property-list block's), then the Launch script from the metadata `launch-script` (an https
- * address; without one, the data layer is still filled).
+ * Sends, on every page, a link click for each click on a link or a header menu button (see
+ * LINK_CLICKS), except the links with a link click of their own (see IGNORE_BUTTON_CLICKS), named
+ * after the link: its label, else its text, else its image's alt text, lowercase ("explore latest
+ * offers", "facebook").
+ */
+function trackLinkClicks() {
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest(LINK_CLICKS);
+    if (!link || link.matches(IGNORE_BUTTON_CLICKS)) return;
+    const linkName = [link.getAttribute('aria-label'), link.textContent, link.querySelector('img')?.alt]
+      .map((text) => (text || '').replace(/\s+/g, ' ').trim())
+      .find(Boolean);
+    if (!linkName) return;
+    const eventName = linkName.toLowerCase();
+    pushEvent('web.webInteraction.linkClicks', eventName, {
+      web: {
+        webInteraction: {
+          name: eventName,
+          type: 'other',
+          linkClicks: {
+            value: 1,
+          },
+        },
+      },
+    });
+  });
+}
+
+/**
+ * Starts analytics on a page: the page view ("page load", on the home page and the lounge passes
+ * page; the lounge listing's is the property-list block's), the links' clicks (on every page),
+ * then the Launch script from the metadata `launch-script` (an https address; without one, the
+ * data layer is still filled).
  */
 export default function initDataLayer() {
   window.adobeDataLayer = window.adobeDataLayer || [];
-  if (HOMEPAGE_PATH.test(window.location.pathname)) pushEvent(PAGE_VIEW, 'page view');
+  const { pathname } = window.location;
+  if (HOMEPAGE_PATH.test(pathname) || PASSES_PATH.test(pathname)) pushEvent(PAGE_VIEW, 'page load');
+  trackLinkClicks();
 
   const src = getMetadata('launch-script').trim();
   if (!src) return;

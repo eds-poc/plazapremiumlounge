@@ -217,7 +217,7 @@ export async function openPageModal(url, trigger) {
   // only the login modal
   if (dialog && url.pathname.endsWith('/modals/login')) {
     // eslint-disable-next-line import/no-cycle
-    const { PAGE_VIEW, pushEvent } = await import('./datalayer.js');
+    const { PAGE_VIEW, pushEvent } = await import('./adobe-datalayer.js');
     pushEvent(PAGE_VIEW, 'page load');
   }
 }
