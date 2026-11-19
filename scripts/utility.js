@@ -72,3 +72,16 @@ export async function sha256(text) {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
+
+// the months as the GA4 events write a date (see toCheckInDate)
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/**
+ * A date as the GA4 events write it: DD-MMM-YYYY (2026-11-19 → 19-Nov-2026), '' for another value.
+ * @param {string} date YYYY-MM-DD
+ * @returns {string}
+ */
+export function toCheckInDate(date) {
+  const [, y, m, d] = String(date || '').match(/^(\d{4})-(\d{2})-(\d{2})$/) || [];
+  return y && MONTHS[Number(m) - 1] ? `${d}-${MONTHS[Number(m) - 1]}-${y}` : '';
+}
