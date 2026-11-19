@@ -1,5 +1,5 @@
 import {
-  buildForm, fieldElement, findCountryByName, getCountries,
+  buildForm, fieldElement, findCountryByName, getCountries, isFieldValid,
 } from '../../scripts/forms.js';
 import { getToken, isTokenValid } from '../../scripts/auth.js';
 import { readProfile } from '../../scripts/member.js';
@@ -292,13 +292,18 @@ const TITLE_ORDER = ['mr', 'mrs', 'ms', 'miss'];
  * - the title (`salutation`: by its text, else, on a page in another language, by its place in
  *   the authored order Mr., Mrs., Ms., Miss)
  * - the names (`firstName`, `lastName`), the email in both email fields (`userName`)
- * - the contact number (`phone`, digits) with its dial code (`countryPhoneCode`; for a shared code
- *   such as +1 the country's own, e.g. "+1 (CA)")
- * - the country of residence (`countryName`, matched by name in the countries list)
- * Only empty fields are filled, so what the visitor has typed meanwhile stays; the dial code only
- * with the number. The values are set without the form's change events, so no message shows
- * (they're checked on Payment, as typed ones). A guest, or a profile that can't be read, leaves
- * the form as it is.
+ * - the contact number (`phone`, digits)
+ * - the country of residence (`countryName`, matched by name in the countries list), and with it
+ *   the dial code: it follows the country, as when a visitor picks one (linkFields in
+ *   scripts/forms.js; a shared +1 by the country's own, e.g. "+1 (CA)"), and as the source's, whose
+ *   dial code starts from the country its server selects. The profile's own `countryPhoneCode` is
+ *   not used.
+ * The filled names and email (both email fields) are disabled, unless a value fails its field's
+ * rules (then it stays editable, to be put right).
+ * Only empty fields are filled, so what the visitor has typed or chosen meanwhile stays (a country
+ * already chosen has set its dial code). The values are set without the form's change events
+ * reaching the form, so no message shows (they're checked on Payment, as typed ones). A guest, or a
+ * profile that can't be read, leaves the form as it is.
  * @param {HTMLFormElement} form
  * @returns {Promise<void>}
  */
@@ -311,14 +316,29 @@ async function prefillMember(form) {
   const text = (value) => (typeof value === 'string' ? value.trim() : '');
   // (within the field's own maximum length)
   const fit = (input, value) => value.slice(0, input.maxLength > 0 ? input.maxLength : undefined);
+  // (the field filled, or null when it already had a value or the profile has none)
   const fill = (key, value) => {
     const input = control(key);
-    if (input && !input.value && text(value)) input.value = fit(input, text(value));
+    if (!input || input.value || !text(value)) return null;
+    input.value = fit(input, text(value));
+    return input;
   };
-  fill('firstName', profile.firstName);
-  fill('lastName', profile.lastName);
-  fill('emailAddress', profile.userName);
-  fill('confirmEmailAddress', profile.userName);
+  // the member's own names and email, once filled, can't be used: disabled, as the source's
+  // locked fields (no focus, no clicks, out of the Tab order; still read out by a screen reader,
+  // and still checked and sent on Payment, which reads the values themselves: collectValues). A
+  // value its field's rules refuse stays editable, so the member can put it right before Payment.
+  const lock = (input) => {
+    if (!input || !isFieldValid(input.closest('.form-field'))) return false;
+    input.disabled = true;
+    input.classList.add('checkout-locked');
+    return true;
+  };
+  lock(fill('firstName', profile.firstName));
+  lock(fill('lastName', profile.lastName));
+  const email = fill('emailAddress', profile.userName);
+  const confirm = fill('confirmEmailAddress', profile.userName);
+  // (the confirmation only with the email: alone it could hold a value the email doesn't match)
+  if (lock(email)) lock(confirm);
   const title = control('title');
   const titleWanted = titleKey(profile.salutation);
   if (title && !title.value && titleWanted) {
@@ -330,10 +350,10 @@ async function prefillMember(form) {
   }
   const number = control('contactNumber');
   const digits = String(profile.phone ?? '').replace(/\D/g, '');
-  const withNumber = !!(number && !number.value && digits);
-  if (withNumber) number.value = fit(number, digits);
+  if (number && !number.value && digits) number.value = fit(number, digits);
 
-  // the country and the dial code once the countries are in (their lists are filled by then)
+  // the country, and with it the dial code, once the countries are in (their lists are filled by
+  // then)
   let countries;
   try {
     countries = await getCountries();
@@ -345,17 +365,11 @@ async function prefillMember(form) {
   if (residence && !residence.value && country
     && [...residence.options].some((o) => o.value === String(country.countryId))) {
     residence.value = String(country.countryId);
+    // the dial code follows it, as for a visitor's choice (linkFields listens on the field). Not
+    // bubbling: the form doesn't check the field, so no message; the dial code's own change
+    // updates its short code.
+    residence.dispatchEvent(new Event('change'));
   }
-  const code = fieldElement(form, 'contactNumber')?.querySelector('.form-phone-code');
-  const dial = String(profile.countryPhoneCode ?? '').replace(/\D/g, '');
-  if (!withNumber || !code || !dial) return;
-  const options = [...code.options];
-  const option = options.find((o) => o.value === `+${dial}` && country && o.textContent === country.phoneCodeCountryCode)
-    || options.find((o) => o.value === `+${dial}`);
-  if (!option || option.selected) return;
-  option.selected = true;
-  // (not bubbling: the short dial code follows, the form doesn't check the field)
-  code.dispatchEvent(new Event('change'));
 }
 
 /**
