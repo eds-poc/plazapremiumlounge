@@ -37,6 +37,14 @@ Adds third-party code to a page: **scripts** and **styles** go into the page's `
 - **The page doesn't wait for scripts.** Content shows straight away; a slow third-party file only delays the rows after it.
 - **Each script file loads only once**, even if several blocks or fragments on the page use it.
 - **Code written to run on page load still runs.** The page has loaded by the time the block runs, so `DOMContentLoaded` (and `load`) listeners that script code adds are called straight after the code.
+- **A pass's Add to Cart works as on the source.** Campaign code copied from the source site calls the source's `AddToCart(button, catalogueCode, …)` from a pass card's button (e.g. Beyond The Event's `AddToCart(btn, btn.getAttribute('data-prd'), …)`).
+  - **What it does here:** this site provides that function, so the pass goes into this site's cart: the button is off and the loader shows while the booking system answers, then the mini cart opens, as for the passes page's Add to Cart.
+  - **Its rules:**
+    - **A lounge in the cart:** "Checkout Cart".
+    - **The same pass again:** one more of it.
+    - **The booking system refuses it:** the Notice "An error occurred. Please try again later."
+  - **Its codes:** only a pass's catalogue code is taken (it has `-GFTCRD-` in it, e.g. `PRD3068-Regular-PRPRTY742-GFTCRD-LCTN1001-RTPLN9248`). Anything else adds nothing (a warning in the browser console). The source's other arguments (region, must log in, promo and partner codes) aren't used.
+  - **The environment:** the codes must exist in the booking system the site uses. On 2026-11-19 the stage booking system refused Beyond The Event's live codes ("invalid locationCode"), so there its cards show the notice.
 
 ## Styles
 
