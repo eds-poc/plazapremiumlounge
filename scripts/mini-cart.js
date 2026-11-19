@@ -19,9 +19,12 @@ import {
 import { getCurrency } from './currency.js';
 // eslint-disable-next-line import/no-cycle
 import { PAGE_VIEW, pushEvent } from './adobe-datalayer.js';
+import {
+  BRAND, listLabel, pushEcommerce,
+} from './gtag-datalayer.js';
 // eslint-disable-next-line import/no-cycle
 import { hideLoader, showLoader } from './scripts.js';
-import { daysUntil, toUtcDateTime } from './utility.js';
+import { daysUntil, toDayMonthYear, toUtcDateTime } from './utility.js';
 
 const styles = loadCSS(`${window.hlx.codeBasePath}/styles/cart.css`);
 
@@ -682,6 +685,84 @@ function trackCartView(cart) {
   });
 }
 
+// the home page's list (its search widget), and its address: / or a site folder's (/en-uk/ …)
+const HOMEPAGE_LIST = 'Homepage Search Widget';
+const HOMEPAGE_PATH = /^\/([a-z]{2}-[a-z]{2}\/?)?$/;
+
+/**
+ * The list a cart is viewed from: where the visitor is. The page's list, as its last
+ * view_item_list in the data layer named it (the listing's "HP Search Widget - LHR", the passes
+ * page's "Other - Airport Lounge Passes" …); the home page's "Homepage Search Widget"; else
+ * "Other - " and the cart's airport code, id and name alike: "Other - HKG" (its name without a
+ * code).
+ * @param {string} iata The cart's airport code
+ * @param {string} airport The cart's airport name
+ * @returns {{id: string, name: string}}
+ */
+function cartList(iata, airport) {
+  const pageList = (window.dataLayer || [])
+    .findLast((e) => e?.event === 'view_item_list' && e.ecommerce?.item_list_id)?.ecommerce;
+  if (pageList) return { id: pageList.item_list_id, name: pageList.item_list_name };
+  if (HOMEPAGE_PATH.test(window.location.pathname)) {
+    return { id: HOMEPAGE_LIST, name: HOMEPAGE_LIST };
+  }
+  const label = listLabel('others', iata || airport);
+  return { id: label, name: label };
+}
+
+/**
+ * The GA4 `view_cart` (window.dataLayer, scripts/gtag-datalayer.js) as the mini cart opens
+ * ("mini_cart"), or as the checkout page shows the cart ("full_page", blocks/checkout), from the
+ * cart as shown: in the visitor's currency, the cart's total, and every line as an item (the
+ * property, its promo code and discount, the product, the airport with its code, the city and
+ * country code, its price and quantity, and for a lounge the visit and guests), in the list of
+ * where it's viewed (the mini cart: see cartList; the checkout: "View Cart - HKG").
+ * @param {Object} cart The cart's summary (see readCart in cart.js)
+ * @param {'mini_cart'|'full_page'} [cartType]
+ */
+export function trackViewCart(cart, cartType = 'mini_cart') {
+  const [bookedItem] = cart.lines;
+  const list = cartType === 'full_page'
+    ? {
+      id: listLabel('view_cart', bookedItem.iataCode),
+      name: listLabel('view_cart', bookedItem.locationName),
+    }
+    : cartList(bookedItem.iataCode, bookedItem.locationName);
+  pushEcommerce('view_cart', {
+    currency: getCurrency(),
+    value: cart.totals.total,
+    cart_type: cartType,
+    items: cart.lines.map((line) => {
+      const isPass = line.kind === 'pass';
+      // a lounge's visit and guests (a pass has neither, as in its view_item_list)
+      // (its start is the lounge's local time, "2026-11-28 15:00:00": "28-Nov-2026", "1500")
+      const visit = isPass ? { date: '', time: '' } : toDayMonthYear(line.start);
+      return {
+        item_id: line.propertyCode,
+        item_name: line.shortLocation ? `${line.name} (${line.shortLocation})` : line.name,
+        coupon: line.promo?.code || '',
+        discount: line.discount,
+        item_brand: BRAND,
+        item_category: line.product,
+        // the airport with its code, e.g. Hong Kong International Airport (HKG)
+        item_category2: line.iataCode ? `${line.locationName} (${line.iataCode})` : line.locationName,
+        item_category3: line.name,
+        item_category4: cart.cityName,
+        item_category5: cart.countryCode,
+        item_list_id: list.id,
+        item_list_name: list.name,
+        price: line.total,
+        quantity: line.quantity,
+        checkInDate: visit.date,
+        checkInTime: visit.time,
+        adults: isPass ? '' : line.adults,
+        children: isPass ? '' : line.children,
+        total_guest_count: isPass ? '' : line.adults + line.children,
+      };
+    }),
+  });
+}
+
 /**
  * Opens the mini cart (when the cart holds something), then reads the cart again in the
  * background, so it shows at once and stays right. A cart of passes in another currency than the
@@ -723,7 +804,10 @@ export async function openMiniCart(trigger, { fresh = false } = {}) {
   }
   renderMiniCart(cart);
   const dialog = await mini.open(trigger);
-  if (dialog) trackCartView(cart);
+  if (dialog) {
+    trackCartView(cart);
+    trackViewCart(cart);
+  }
   // (not when the cart was just read: after an add, a first read or a conversion)
   if (!read && !convert) refreshCart().catch(() => {});
   return dialog;

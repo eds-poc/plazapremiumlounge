@@ -8,7 +8,7 @@ import { formatAmount, loungeDetails } from '../../scripts/cart-summary.js';
 import { getCart, getCartId, onCartChange } from '../../scripts/cart-state.js';
 import { refreshCart } from '../../scripts/cart.js';
 import { DEFAULT_SITE, getSiteFolder, translate } from '../../scripts/i18n.js';
-import { buildPromo } from '../../scripts/mini-cart.js';
+import { buildPromo, trackViewCart } from '../../scripts/mini-cart.js';
 import { isPreview } from '../../scripts/properties.js';
 import { holdLoader } from '../../scripts/scripts.js';
 
@@ -400,6 +400,8 @@ export default function decorate(block) {
   const text = (key) => texts.get(key)?.textContent.trim() || '';
   const formId = `checkout-form-${count}`;
   let lastCart = null;
+  // the GA4 view_cart ("full_page") went out: once a page, the first time the cart shows
+  let viewed = false;
 
   const { form } = buildForm(block, {
     fields: FIELDS,
@@ -483,6 +485,10 @@ export default function decorate(block) {
    */
   const render = (cart, failure = '') => {
     lastCart = cart?.lines.length ? cart : null;
+    if (lastCart && !viewed) {
+      viewed = true;
+      trackViewCart(lastCart, 'full_page');
+    }
     const title = el('h2', 'checkout-summary-title', text('summary'));
     title.id = `${formId}-summary`;
     const box = el('div', 'checkout-summary-box');
