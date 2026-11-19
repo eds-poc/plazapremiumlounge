@@ -94,6 +94,87 @@ out: a row it doesn't know (e.g. an old `Additional Services` row: the service t
 the service), a code that doesn't look like one (e.g. `Europe` instead of `EP`), the texts not
 authored, or a table without any of the four rows of codes.
 
+## Option: lounge name only
+
+`Property Filter (lounge name only)` lists a card's or bank's eligible lounges **whole**, as the
+source's card and bank pages (e.g. `/en-uk/cmb`, `/en-uk/Luso-International-Banking-Ltd`), instead
+of letting visitors choose a city:
+
+- **View lounges by region:** a link per region (pills), each scrolling smoothly to its region
+  below, as on the source (at once for visitors who ask for reduced motion).
+- **Per region:** a panel with the region's name, then its countries (one column on phones, two
+  from 576px), per country its airports (`Beijing Daxing International Airport (PKX)`), and per
+  airport its lounges as an [Accordion](../accordion/README.md) (look `lounges`): one item per
+  lounge, several under an airport when it has several. A lounge opens to its **opening hours**
+  and **location** (the property filter service's), each after its label; several can be open at
+  once.
+- **Order:** regions in the order of your `Region` row, else the site's (Mainland China…,
+  Americas, Europe, Asia-Pacific, India/Middle East/Africa); countries and airports by name;
+  lounges in the service's order, then by name. Region names are the service's (as the source's
+  lists name them), in the page's language.
+
+| Property Filter (lounge name only) | |
+| --- | --- |
+| Region | CH, AP |
+| Country | CN, HK, MO, TW, ID, JP, MY, PH, SG |
+| IATA | PKX, CGQ, HKG, MFM, TPE, KUL, SIN |
+| Property | PRPRTY1303, PRPRTY1183, PRPRTY1184 |
+| Regions label | View lounges by region: |
+| Hours label | OPENING HOURS: |
+| Location label | LOCATION: |
+| Updated | Last updated: 04 Mar 2026 |
+| View button | [View lounge](/en-uk/find/lounge) |
+
+- **The lounges:** the same rows of codes as above; at least one is needed. The service answers
+  the lounges of **any** of the lists (whole regions for `Region`, whole countries for `Country`),
+  then the block keeps only those that match the `Country`, `IATA` **and** `Property` rows (a row
+  left out doesn't limit):
+  - **Region:** the card's or bank's regions; their order is the order of the region links and
+    panels.
+  - **Country**, **IATA:** the card's or bank's countries and airports, as its list shows them;
+    nothing outside them is shown.
+  - **Property:** the eligible lounges themselves, from the card's or bank's list: the row that
+    decides which lounges show.
+
+  For a card or bank page, write all four (e.g. `/en-uk/luso-international-banking-ltd`). The
+  codes are the live site's: on a site using the test (stage) property filter service, which
+  numbers lounges differently, the list shows other lounges or "No lounges found."
+- **Regions label:** the text before the region links (without it, the links show without a text).
+- **Hours label**, **Location label:** shown before a lounge's opening hours and location, as
+  written (e.g. the source's `OPENING HOURS:`); without them the values show alone.
+- **Updated** (optional): a short note under the region links, e.g. the source's
+  `Last updated: 03 Jul 2026`, written as it should read.
+- **View button** (optional): a link to the lounge's page under its details. Leave the row out
+  for none (the source's lists have none).
+- The filters' rows (Country placeholder, City placeholder, Search label, Countries label,
+  Services label, Status) and the Signup button aren't used.
+
+Put the page's other content above the block: the banner, then the title and the card's text as
+`Title (text-lg, intro-full)` (the text across the full width, as the source's).
+While the lounges load, the block shows an outline of the links and a region; the messages are the
+same as above.
+
+### A new card or bank page
+
+In Document Authoring, the Library has the template **Partner Lounges Page** (Templates) and
+the item **Property Filter (lounge name only)** (Blocks › Property Filter), with this guidance in
+its description. To make a page such as `/en-uk/luso-international-banking-ltd`:
+
+1. Create the page in the language folder (e.g. `en-uk/<bank-name>`, in lowercase with hyphens)
+   and insert the template.
+2. **Banner:** replace the placeholder image with the card's banner (alt text: the card or bank's
+   name). It stays in the first section, `background` = `grey`.
+3. **Title (text-lg, intro-full):** the card or bank's name as the heading 1, then its text.
+4. **Property Filter (lounge name only):** the `Region`, `Country`, `IATA` and `Property` codes
+   from the card's or bank's lounge list (see above), the labels in the page's language, and
+   `Updated` with the list's date (`Last updated: 04 Mar 2026`).
+5. **Metadata:** `Title` and `Description` (the card or bank's name), `breadcrumb` = `on` (Home ›
+   the page).
+6. Preview the page. On preview pages the browser console lists any row or code the block couldn't
+   use.
+
+No code change is needed for a new page.
+
 ## Where the rest comes from
 
 | What | From |
@@ -101,5 +182,6 @@ authored, or a table without any of the four rows of codes.
 | The lounges | The property filter service (`scripts/property-filter.js`, `filteredProperties` in `scripts/endpoints.js`), asked once for the table's lists, in the page's language |
 | Regions, countries, cities and their airports | The property filter service's answer, as it places each lounge (a city's airports share its city code, e.g. `GBLHR` for Heathrow and Gatwick) |
 | Service tabs | The property filter service's answer: each lounge's services (`servicetype`, named by `serviceDisplayName` in the page's language); the All tab's name from the site's translations (`propertyAll`) |
-| Region names | `scripts/regions.js`, by code in each language (as the nav's Locations menu names them), else the code (`OP`, Oceania Pacific, is in English only for now) |
+| Region names | `scripts/regions.js`, by code in each language (as the nav's Locations menu names them), else the code (`OP`, Oceania Pacific, is in English only for now). The lounge-name-only layout uses the service's names (`regionName`), else these |
+| The lounge-name-only layout's lounges | The [Accordion](../accordion/README.md) block (look `lounges`), built by the block per airport |
 | The cards | `scripts/property-card.js` and `styles/property-card.css` |

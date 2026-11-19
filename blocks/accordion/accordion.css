@@ -177,6 +177,103 @@
   }
 }
 
+/* option lounges: an airport's lounges in Property Filter (lounge name only), as the source's card and
+   bank pages' lists (/en-uk/cmb .airport-list): no lines, a dot before each light 16px name and a
+   small plum arrow right after its last word (down when closed, up when open); an open lounge is a
+   maroon box with white text, its details (opening hours, location) below the name, 10px between
+   lounges */
+.accordion.lounges {
+  /* one-off: the source's 5px dot and 4px corners; its arrow, Font Awesome Light arrow-down at 12px:
+     9px by 10.5px, on the text's baseline (0.75px below it), a space and 3px after the name */
+  --accordion-lounge-dot: 5px;
+  --accordion-lounge-arrow-width: 9px;
+  --accordion-lounge-arrow-height: 10.5px;
+  --accordion-lounge-arrow-drop: -0.75px;
+  --accordion-lounge-arrow-gap: calc(0.29em + 3px);
+  --accordion-lounge-radius: 4px;
+  --accordion-lounge-indent: calc(var(--accordion-lounge-dot) + var(--spacing-4));
+}
+
+/* (:nth-child(n): every item, at the specificity of the other options' item rules) */
+.accordion.lounges .accordion-item:nth-child(n) {
+  margin-bottom: var(--spacing-4);
+  padding: 3px var(--spacing-5);
+  border: 0;
+  border-radius: var(--accordion-lounge-radius);
+  background-color: transparent;
+  color: var(--color-text-strong);
+}
+
+.accordion.lounges .accordion-item[open] {
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+.accordion.lounges .accordion-item:nth-child(n) > .accordion-question {
+  align-items: flex-start;
+  padding: 0;
+  color: inherit;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-body);
+}
+
+/* the dot, centred on the first line */
+.accordion.lounges .accordion-item:nth-child(n) > .accordion-question::before {
+  content: '';
+  flex: none;
+  width: var(--accordion-lounge-dot);
+  height: var(--accordion-lounge-dot);
+  margin: calc(var(--line-height-body) * 0.5em - var(--accordion-lounge-dot) / 2) var(--spacing-4) 0 0;
+  border-radius: var(--radius-circle);
+  background-color: currentcolor;
+}
+
+/* the arrow is at the end of the name's text (below), not at the far end */
+.accordion.lounges .accordion-item:nth-child(n) > .accordion-question::after {
+  content: none;
+}
+
+/* the source's thin arrow, in line after the last word (a long name's last line), plum in both
+   states; up at once when open, as the source swaps its icon */
+.accordion.lounges .accordion-question-text::after {
+  content: '';
+  display: inline-block;
+  width: var(--accordion-lounge-arrow-width);
+  height: var(--accordion-lounge-arrow-height);
+  margin-left: var(--accordion-lounge-arrow-gap);
+  vertical-align: var(--accordion-lounge-arrow-drop);
+  background-color: var(--color-brand-primary-action);
+  mask: url('../../icons/arrow-down-light.svg') center / contain no-repeat;
+}
+
+.accordion.lounges .accordion-item[open] .accordion-question-text::after {
+  transform: rotate(180deg);
+}
+
+.accordion.lounges .accordion-answer {
+  padding: var(--spacing-2) 0 0 var(--accordion-lounge-indent);
+  color: inherit;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-light);
+}
+
+.accordion.lounges .accordion-answer ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.accordion.lounges .accordion-answer li {
+  margin: 0 0 var(--spacing-2);
+  padding: 0;
+}
+
+.accordion.lounges .accordion-answer a:any-link {
+  color: inherit;
+  text-decoration: underline;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .accordion .accordion-question,
   .accordion .accordion-question::after,

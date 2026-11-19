@@ -42,3 +42,15 @@ block builds it itself; authors don't normally add it. It has:
 - on phones: 14px uppercase questions, no lines, and 30px between items
 
 Put the section title above the block, e.g. a [Title](../title/README.md) block.
+
+## Lounges
+
+`Accordion (lounges)` is an airport's lounges in the
+[Property Filter (lounge name only)](../property-filter/README.md#option-lounge-name-only), as the
+source's card and bank pages (e.g. `/en-uk/cmb`). The Property Filter builds it itself, one per
+airport; authors don't normally add it. It has:
+- no lines; a dot before each lounge's name (16px, light), and the source's small thin plum arrow
+  right after the name's last word, on its line (down when closed, up when open)
+- an open lounge as a maroon box with white text, its details (opening hours, location) below the
+  name
+- 10px between lounges; several can be open at once

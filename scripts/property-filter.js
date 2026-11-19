@@ -104,8 +104,9 @@ function load(payload) {
 /**
  * The service's properties for the filters (its whole answer), as cards read them
  * (scripts/properties.js readProperty: active lounges and passes), each once, with its place as
- * the service gives it, `region` (its code), `countryName` and `cityCode` (the same for a city's
- * airports: GBLHR for Heathrow and Gatwick).
+ * the service gives it, `region` (its code), `regionName` (the service's name for it, in the
+ * page's language), `countryName` and `cityCode` (the same for a city's airports: GBLHR for
+ * Heathrow and Gatwick).
  * Rejects with an Error whose `kind` says what went wrong (see describeError).
  * @param {{region?: string[]|string, country?: string[]|string, iataCode?: string[]|string,
  *   propertyCode?: string[]|string}} filters
@@ -122,6 +123,7 @@ export async function fetchFilteredProperties(filters) {
       return {
         ...property,
         region: String(item.regionCode ?? '').trim().toUpperCase(),
+        regionName: String(item.regionName ?? '').trim(),
         countryName: String(item.countryName ?? '').trim(),
         cityCode: String(item.cityCode ?? '').trim().toUpperCase(),
       };
