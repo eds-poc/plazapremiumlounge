@@ -177,8 +177,10 @@ export default function decorate(block) {
   trackPageLoad();
   // the data layer's Create Account click, as the form is sent (forms:submit: after the checks)
   form.addEventListener('forms:submit', trackCreateAccount);
-  // the data layer's successful sign up, with the Register API's answer (before the next page)
-  form.addEventListener('forms:success', (e) => trackSignupSuccess(e.detail.data));
-  // and GA4's sign_up, at the same moment
-  form.addEventListener('forms:success', (e) => trackSignUp(e.detail.data));
+  // the successful sign up, with the Register API's answer (before the next page): the Adobe data
+  // layer's signup success and GA4's sign_up
+  form.addEventListener('forms:success', (e) => {
+    trackSignupSuccess(e.detail.data);
+    trackSignUp(e.detail.data);
+  });
 }
