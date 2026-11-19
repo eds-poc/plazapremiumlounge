@@ -17,34 +17,21 @@ import apiUrl from './endpoints.js';
 import { translate } from './i18n.js';
 import { isTokenValid, redirectTarget, setToken } from './auth.js';
 import { pushEvent } from './adobe-datalayer.js';
-import { findCountryByName, getCountries } from './forms.js';
 import { storeMember } from './member.js';
 
 /**
- * A country's ISO 3166-1 alpha-2 code from its name (a profile's `countryName`, matched as the
- * checkout matches it) in the countries list (GetCountries); '' when the list doesn't have it.
- * @param {object[]} countries
- * @param {string} name e.g. "Hong Kong"
- * @returns {string} e.g. "HK"
- */
-function countryCode(countries, name) {
-  return String(findCountryByName(countries, name)?.countryCode || '').toUpperCase();
-}
-
-/**
  * The GA4 `login` in Google's data layer (`window.dataLayer`, read by the GTM container) after a
- * successful login: by email, the member's ST Member ID and their country of residence (ISO
- * 3166-1 alpha-2, e.g. HK; blank when unknown).
+ * successful login: by email, the member's ST Member ID. The country of residence's code is
+ * blank for now (GetProfile gives only the country's name).
  * @param {string} userId The ST Member ID
- * @param {string} residenceCountryCode
  */
-function trackLogin(userId, residenceCountryCode) {
+function trackLogin(userId) {
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({
     event: 'login',
     method: 'email',
     user_id: userId,
-    user_properties: { residence_country_code: residenceCountryCode },
+    user_properties: { residence_country_code: '' },
   });
 }
 
@@ -110,18 +97,15 @@ function login(form) {
       setToken(token);
       password.value = '';
       // the member's details for analytics, kept before the page moves on (the button stays
-      // busy meanwhile; at most a few seconds, then the page moves on without them), and, read
-      // alongside, the countries, for the residence country's code (none if they fail)
-      const countries = getCountries().catch(() => []);
-      return Promise.all([storeMember(token), countries]).then(([member, list]) => {
+      // busy meanwhile; at most a few seconds, then the page moves on without them)
+      return storeMember(token).then((member) => {
         // the data layer's "login success" link click, with the member's identities kept just now
         const eventName = 'login success';
         pushEvent('web.webInteraction.linkClicks', eventName, {
           web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
         });
-        // the GA4 login: the ST Member ID and the country of residence's code (blank without the
-        // profile)
-        trackLogin(member?.stMemberId || '', countryCode(list, member?.countryName));
+        // the GA4 login: the ST Member ID (blank without the profile)
+        trackLogin(member?.stMemberId || '');
         // back to the members' page the visitor came from (replacing the home page in the history)
         const target = redirectTarget();
         if (target) window.location.replace(target);
