@@ -4,7 +4,8 @@
  * answer is in; a refusal's message shows under the button.
  * - `action: login`: `{ username, password }` to the Login API. A success answers `{ jwt, … }`: a
  *   `jwt` that is well formed and not expired (scripts/auth.js) logs the visitor in: the token is
- *   stored, the member's details for analytics are kept (scripts/member.js), and the page
+ *   stored, the member's details for analytics are kept (scripts/member.js), the data layers get
+ *   the login (Adobe's "login success", GA4's `login`: trackLogin), and the page
  *   reloads, its header then logged in (or the visitor goes to the page in the
  *   address's `redirectUrl`, the members' page they came from). A refusal answers `{ errorCode,
  *   message }` or `{ error }`.
@@ -16,7 +17,44 @@ import apiUrl from './endpoints.js';
 import { translate } from './i18n.js';
 import { isTokenValid, redirectTarget, setToken } from './auth.js';
 import { pushEvent } from './adobe-datalayer.js';
+import { findCountryByName, getCountries } from './forms.js';
 import { storeMember } from './member.js';
+
+// how long logging in waits for the countries (the residence country's code) before moving on
+const COUNTRIES_TIMEOUT_MS = 3000;
+
+/**
+ * A country's ISO 3166-1 alpha-2 code from its name (a profile's `countryName`, matched as the
+ * checkout matches it), from the countries list (GetCountries); '' when unknown, or when the list
+ * isn't in within COUNTRIES_TIMEOUT_MS.
+ * @param {string} name e.g. "Hong Kong"
+ * @returns {Promise<string>} e.g. "HK"
+ */
+function countryCode(name) {
+  if (!name) return Promise.resolve('');
+  const lookup = getCountries()
+    .then((list) => String(findCountryByName(list, name)?.countryCode || '').toUpperCase())
+    .catch(() => '');
+  const timeout = new Promise((resolve) => { setTimeout(() => resolve(''), COUNTRIES_TIMEOUT_MS); });
+  return Promise.race([lookup, timeout]);
+}
+
+/**
+ * The GA4 `login` in Google's data layer (`window.dataLayer`, read by the GTM container) after a
+ * successful login: by email, the member's ST Member ID and their country of residence (ISO
+ * 3166-1 alpha-2, e.g. HK; blank when unknown).
+ * @param {string} userId The ST Member ID
+ * @param {string} residenceCountryCode
+ */
+function trackLogin(userId, residenceCountryCode) {
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({
+    event: 'login',
+    method: 'email',
+    user_id: userId,
+    user_properties: { residence_country_code: residenceCountryCode },
+  });
+}
 
 /**
  * Posts a form's data as JSON with its button busy, then hands the answer to `done`; a network
@@ -81,12 +119,15 @@ function login(form) {
       password.value = '';
       // the member's details for analytics, kept before the page moves on (the button stays
       // busy meanwhile; at most a few seconds, then the page moves on without them)
-      return storeMember(token).then(() => {
+      return storeMember(token).then(async (member) => {
         // the data layer's "login success" link click, with the member's identities kept just now
         const eventName = 'login success';
         pushEvent('web.webInteraction.linkClicks', eventName, {
           web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
         });
+        // the GA4 login: the ST Member ID and the country of residence's code (blank without the
+        // profile)
+        trackLogin(member?.stMemberId || '', await countryCode(member?.countryName));
         // back to the members' page the visitor came from (replacing the home page in the history)
         const target = redirectTarget();
         if (target) window.location.replace(target);

@@ -98,7 +98,8 @@ export async function readProfile(token) {
  * Reads the member's profile (GetProfile) with a token and keeps their details for it: called on
  * login. Gives up after PROFILE_TIMEOUT_MS; nothing is kept when the profile can't be read.
  * @param {string} token A valid login token
- * @returns {Promise<object|null>} the kept details, or null
+ * @returns {Promise<object|null>} the kept details, with the profile's country of residence by
+ *   name (`countryName`, for the GA4 login; not kept), or null
  */
 export async function storeMember(token) {
   const profile = await readProfile(token);
@@ -115,7 +116,7 @@ export async function storeMember(token) {
       hashedPhone: phone ? await sha256(phone) : '',
     };
     localStorage.setItem(MEMBER_KEY, JSON.stringify({ key: tokenKey(token), member }));
-    return member;
+    return { ...member, countryName: typeof profile.countryName === 'string' ? profile.countryName : '' };
   } catch {
     // the hashing or the storage failed (e.g. storage blocked)
     return null;
