@@ -20,23 +20,15 @@ import { pushEvent } from './adobe-datalayer.js';
 import { findCountryByName, getCountries } from './forms.js';
 import { storeMember } from './member.js';
 
-// how long logging in waits for the countries (the residence country's code) before moving on
-const COUNTRIES_TIMEOUT_MS = 3000;
-
 /**
  * A country's ISO 3166-1 alpha-2 code from its name (a profile's `countryName`, matched as the
- * checkout matches it), from the countries list (GetCountries); '' when unknown, or when the list
- * isn't in within COUNTRIES_TIMEOUT_MS.
+ * checkout matches it) in the countries list (GetCountries); '' when the list doesn't have it.
+ * @param {object[]} countries
  * @param {string} name e.g. "Hong Kong"
- * @returns {Promise<string>} e.g. "HK"
+ * @returns {string} e.g. "HK"
  */
-function countryCode(name) {
-  if (!name) return Promise.resolve('');
-  const lookup = getCountries()
-    .then((list) => String(findCountryByName(list, name)?.countryCode || '').toUpperCase())
-    .catch(() => '');
-  const timeout = new Promise((resolve) => { setTimeout(() => resolve(''), COUNTRIES_TIMEOUT_MS); });
-  return Promise.race([lookup, timeout]);
+function countryCode(countries, name) {
+  return String(findCountryByName(countries, name)?.countryCode || '').toUpperCase();
 }
 
 /**
@@ -118,8 +110,10 @@ function login(form) {
       setToken(token);
       password.value = '';
       // the member's details for analytics, kept before the page moves on (the button stays
-      // busy meanwhile; at most a few seconds, then the page moves on without them)
-      return storeMember(token).then(async (member) => {
+      // busy meanwhile; at most a few seconds, then the page moves on without them), and, read
+      // alongside, the countries, for the residence country's code (none if they fail)
+      const countries = getCountries().catch(() => []);
+      return Promise.all([storeMember(token), countries]).then(([member, list]) => {
         // the data layer's "login success" link click, with the member's identities kept just now
         const eventName = 'login success';
         pushEvent('web.webInteraction.linkClicks', eventName, {
@@ -127,7 +121,7 @@ function login(form) {
         });
         // the GA4 login: the ST Member ID and the country of residence's code (blank without the
         // profile)
-        trackLogin(member?.stMemberId || '', await countryCode(member?.countryName));
+        trackLogin(member?.stMemberId || '', countryCode(list, member?.countryName));
         // back to the members' page the visitor came from (replacing the home page in the history)
         const target = redirectTarget();
         if (target) window.location.replace(target);
