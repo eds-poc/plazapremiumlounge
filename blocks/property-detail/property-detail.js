@@ -1247,7 +1247,7 @@ export default async function decorate(block) {
       showMessage(block, translate('propertyNotFound'), null, `Property "${params.code}" isn't active or isn't a type this page shows.`);
       return;
     }
-    if (lounge.passProperty) {
+    if (lounge.passProperty && lounge.bookable) {
       await renderPasses(block, lounge);
       return;
     }
