@@ -4,7 +4,8 @@
  * - Upcoming / Past Bookings / Cancelled tabs, the tab kept in the page address (`?status=past`);
  * - a card per booking: the lounge's photos, the order number, the lounge and where it is, date,
  *   time, guests, services, price and the booking's actions (resend the confirmation, view or
- *   modify, cancel after a confirmation popup), a page at a time (scripts/pagination.js).
+ *   modify, cancel: after a confirmation popup, the cancel page), a page at a time
+ *   (scripts/pagination.js).
  * The bookings come from the booking list API with the login token (scripts/auth.js). Every text
  * the block shows is authored, a row of the block's table each (see TEXTS); a text left out isn't
  * shown.
@@ -63,7 +64,6 @@ const TEXTS = {
   cancelConfirm: 'Cancel confirm',
   cancelYes: 'Cancel yes',
   cancelNo: 'Cancel no',
-  cancelDone: 'Cancelled message',
   resent: 'Resent',
   actionError: 'Action error',
   noUpcoming: 'No upcoming',
@@ -80,7 +80,11 @@ const VALUE_AT = {
   children: '{n} {text}',
 };
 // the settings rows (not texts)
-const SETTINGS = ['View page', 'Page size'];
+const SETTINGS = ['View page', 'Cancel page', 'Page size'];
+// the booking pages a card links to, in the language site without their rows (the booking added
+// as `?bookingid=`)
+const VIEW_PAGE = 'view-booking';
+const CANCEL_PAGE = 'cancel-your-booking';
 // the source's English month names (its dates are 30-Nov-2026); other languages use their own
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 // the API's service date: "30 Nov 2026 16:00:00", the lounge's local time (shown as it is)
@@ -104,12 +108,14 @@ function clean(value) {
 
 /**
  * The authored settings, rows of name | value (names ignore capitals and spaces): `View page` (the
- * booking page, a link or path; else /{site}/view-booking), `Page size` (bookings per page, 10
- * without it), and the texts (TEXTS).
+ * booking page, a link or path; else /{site}/view-booking), `Cancel page` (the page that cancels
+ * a booking; else /{site}/cancel-your-booking), `Page size` (bookings per page, 10 without it),
+ * and the texts (TEXTS).
  * @param {HTMLElement} block
  * @returns {{ text: function(string, Object=): string, template: function(string): string,
- *   viewPage: string, pageSize: number }} `text`: an authored text by its TEXTS key, `{id}` and
- *   `{n}` filled in; `template`: the same, its `{id}` and `{n}` left in; '' when not authored
+ *   viewPage: string, cancelPage: string, pageSize: number }} `text`: an authored text by its
+ *   TEXTS key, `{id}` and `{n}` filled in; `template`: the same, its `{id}` and `{n}` left in; ''
+ *   when not authored
  */
 function readSettings(block) {
   const rows = [...block.children].map((row) => [...row.children]);
@@ -147,9 +153,22 @@ function readSettings(block) {
     text: (key, values = {}) => (texts[key] || '')
       .replace(/\{(\w+)\}/g, (all, name) => values[name] ?? all),
     template: (key) => texts[key] || '',
-    viewPage: sameSite(value(cell('View page'))) || `/${getSiteFolder() || DEFAULT_SITE}/view-booking`,
+    viewPage: sameSite(value(cell('View page'))) || `/${getSiteFolder() || DEFAULT_SITE}/${VIEW_PAGE}`,
+    cancelPage: sameSite(value(cell('Cancel page'))) || `/${getSiteFolder() || DEFAULT_SITE}/${CANCEL_PAGE}`,
     pageSize: readPageSize(value(cell('Page size'))),
   };
+}
+
+/**
+ * A booking page's address for one booking: the page, with the booking as `?bookingid=`.
+ * @param {string} page A path (see readSettings)
+ * @param {string} orderId
+ * @returns {string} e.g. /en-uk/view-booking?bookingid=HKBC-11339-64SCYL
+ */
+function bookingHref(page, orderId) {
+  const url = new URL(page, window.location.href);
+  url.searchParams.set('bookingid', orderId);
+  return `${url.pathname}${url.search}`;
 }
 
 /**
@@ -407,9 +426,7 @@ function buildCard(booking, {
   const media = el('div', 'booking-list-media');
   media.append(buildSlider({ images: booking.images, name: booking.name, line: booking.line }, eager, 'booking-list-slider'));
 
-  const view = new URL(viewPage, window.location.href);
-  view.searchParams.set('bookingid', booking.orderId);
-  const viewHref = `${view.pathname}${view.search}`;
+  const viewHref = bookingHref(viewPage, booking.orderId);
 
   const details = el('div', 'booking-list-details');
   const title = el('h3', 'booking-list-order');
@@ -492,8 +509,9 @@ function buildCard(booking, {
 /**
  * Asks before cancelling, as the source: the site's popup with the Cancel title, the Cancel
  * confirm question (the order number in bold), the lounge (its name in bold, then its place in the
- * airport) and the Cancel yes and Cancel no buttons. Resolves true for Cancel yes only; Cancel no,
- * the close button, Esc and a click beside the popup keep the booking.
+ * airport) and the Cancel yes and Cancel no buttons. Resolves true for Cancel yes only (the
+ * caller goes to the cancel page); Cancel no, the close button, Esc and a click beside the popup
+ * keep the booking.
  * @param {Object} booking See readBookings
  * @param {HTMLElement} trigger The Cancel Booking button (focus returns there)
  * @param {{ text: function(string, Object=): string, template: function(string): string }} settings
@@ -552,13 +570,12 @@ async function confirmCancel(booking, trigger, { text, template }, key) {
 
 /**
  * Fills the block with the member's bookings; nothing when nobody is logged in (a members' page
- * sends them home: scripts/auth.js checkSession). Runs again after a cancellation.
+ * sends them home: scripts/auth.js checkSession).
  * @param {HTMLElement} block
  * @param {Object} settings
  * @param {string} prefix
- * @param {string} [notice] A message shown above the tabs (e.g. a booking was cancelled)
  */
-async function load(block, settings, prefix, notice = '') {
+async function load(block, settings, prefix) {
   const { text } = settings;
   const token = getToken();
   if (!token || !isTokenValid(token)) {
@@ -651,28 +668,24 @@ async function load(block, settings, prefix, notice = '') {
     })
     : null;
 
-  // resend the confirmation, or cancel the booking (after the confirmation popup), with the API
+  // Cancel Booking: after the confirmation popup, the cancel page for that booking (it cancels
+  // it); Resend: the API sends the confirmation again
   panel.addEventListener('click', async (e) => {
     const b = e.target.closest('button.booking-list-action');
     if (!b || b.disabled) return;
     const card = b.closest('.booking-list-card');
     const { orderId } = card.dataset;
-    const note = card.querySelector('.booking-list-note');
-    const cancel = b.dataset.action === 'cancel';
-    if (cancel && !(await confirmCancel(bookingOf.get(card), b, settings, `${prefix}-cancel`))) {
+    if (b.dataset.action === 'cancel') {
+      if (await confirmCancel(bookingOf.get(card), b, settings, `${prefix}-cancel`)) {
+        window.location.assign(bookingHref(settings.cancelPage, orderId));
+      }
       return;
     }
+    const note = card.querySelector('.booking-list-note');
     b.disabled = true;
     note.textContent = '';
-    // the site's loader while the booking is cancelled (the list then loads again)
-    if (cancel) setLoading(true);
     try {
-      await request(apiUrl(cancel ? 'cancelBooking' : 'resendBookingConfirmation').href, { orderId });
-      // a cancelled booking moves to the Cancelled tab: the list is loaded again, with the message
-      if (cancel) {
-        load(block, settings, prefix, text('cancelDone', { id: orderId }));
-        return;
-      }
+      await request(apiUrl('resendBookingConfirmation').href, { orderId });
       note.textContent = text('resent');
     } catch (error) {
       note.textContent = text('actionError');
@@ -681,16 +694,9 @@ async function load(block, settings, prefix, notice = '') {
         console.error(`booking-list: ${b.dataset.action} for ${orderId} failed (${error.message})`);
       }
     } finally {
-      if (cancel) setLoading(false);
       b.disabled = false;
     }
   });
-
-  if (notice) {
-    const done = el('p', 'booking-list-notice', notice);
-    done.setAttribute('role', 'status');
-    results.append(done);
-  }
   if (tabs) results.append(tabs.element);
   results.append(panel, pager.element);
   // the page buttons' look first, then the tab's bookings, all still hidden: shown at once
@@ -721,7 +727,7 @@ async function load(block, settings, prefix, notice = '') {
 
 /**
  * Decorates the Booking List block: the visitor's bookings once they're logged in. Rows: the texts
- * (TEXTS) and, optional, `View page` and `Page size` (see readSettings).
+ * (TEXTS) and, optional, `View page`, `Cancel page` and `Page size` (see readSettings).
  * @param {HTMLElement} block
  */
 export default function decorate(block) {
