@@ -1,7 +1,7 @@
 /**
  * The Cancel Booking block: a member's booking before cancelling it, as the source "Review Cancel
- * Booking Details" page (`/en-uk/cancel-your-booking?bookingid=…`):
- * - the booking pages' steps band (My Bookings › Review Cancelled Booking Details › Confirm);
+ * Booking Details" page (`/en-uk/cancel-your-booking?bookingid=…`), under the page's Booking Steps
+ * block (My Bookings › Review Cancelled Booking Details › Confirm):
  * - the title after an arrow back to the bookings;
  * - the booking summary: a row per booked lounge visit (location with the To Cancel tag, date and
  *   time, guests, services, its add-ons, price);
@@ -11,7 +11,6 @@
  * the member's login token. Every text the block shows is authored, a Key | Text row each.
  */
 import { getToken } from '../../scripts/auth.js';
-import buildBookingSteps from '../../scripts/booking-steps.js';
 import {
   bookingId, bookingLoader, fetchOrder, groupItems, itemPrice, money, orderCurrency, readTexts,
   visitTime,
@@ -47,8 +46,7 @@ function readAmounts(order) {
 }
 
 /**
- * Decorates the Cancel Booking block. Rows: Key | Text (see README); the steps row holds a list,
- * the current step in bold, and the back row a link.
+ * Decorates the Cancel Booking block. Rows: Key | Text (see README); the back row holds a link.
  * @param {Element} block The Cancel Booking block element
  */
 export default function decorate(block) {
@@ -56,7 +54,7 @@ export default function decorate(block) {
   const text = (key) => texts.get(key.toLowerCase())?.textContent.trim() || '';
   const link = (key) => texts.get(key.toLowerCase())?.querySelector('a[href]');
 
-  // the title, after the arrow back to the bookings; the steps band named after it
+  // the title, after the arrow back to the bookings
   const heading = el('h1', 'cancel-booking-title');
   const back = link('back');
   if (back) {
@@ -66,14 +64,13 @@ export default function decorate(block) {
     heading.append(arrow);
   }
   heading.append(text('heading'));
-  const band = buildBookingSteps(texts.get('steps'), { label: text('heading') });
 
   const message = el('p', 'cancel-booking-message');
   message.setAttribute('role', 'status');
   message.hidden = true;
   const body = el('div', 'cancel-booking-body');
   body.hidden = true;
-  block.replaceChildren(band, heading, message, body);
+  block.replaceChildren(heading, message, body);
 
   const orderId = bookingId();
   const showMessage = (content, retry) => {

@@ -1,8 +1,7 @@
 # Cancel Booking: authoring guide
 
 A member's booking before it's cancelled (the live site's Review Cancel Booking Details page,
-`/en-uk/cancel-your-booking?bookingid=…`): the booking pages' steps band, the title after an arrow
-back to the bookings, the booking summary (one row per booked lounge visit, tagged **To Cancel**),
+`/en-uk/cancel-your-booking?bookingid=…`): the title after an arrow back to the bookings, the booking summary (one row per booked lounge visit, tagged **To Cancel**),
 the total, the cancellation fee and the refund amount, and a bar with the **Cancel Booking**
 button. Authors write the texts; the booking comes from the **GetOrderDetail** API for the
 address's `bookingid`, with the member's login token.
@@ -14,11 +13,17 @@ token (401), logs out and goes home. A missing or unknown booking shows the `not
 other failure shows the `error` text with Try again. The site's loader shows until the booking is
 in.
 
+## Where to put it
+
+In the page's first section, right after a [Booking Steps](../booking-steps/README.md) block with
+the page's steps (`- My Bookings`, `- **Review Cancelled Booking Details**`, `- Confirm`): the
+band then sits right under the header, with the source's space below it. The section has no space
+of its own under the block, so the bar sits right on the footer.
+
 ## Table: 2 columns (Key | Text)
 
 | Cancel Booking | |
 | --- | --- |
-| steps | - My Bookings<br>- **Review Cancelled Booking Details**<br>- Confirm |
 | heading | Review Cancel Booking Details |
 | back | [My Bookings](/en-uk/membership/my-booking) |
 | summary | BOOKING SUMMARY |
@@ -42,9 +47,6 @@ in.
 | notFound | We couldn’t find this booking. |
 | error | We couldn’t load your booking. |
 
-- **steps**: the steps band's steps, as a list; make the current step **bold** (the steps before
-  it count as done). The band is the shared one of the booking pages (`scripts/booking-steps.js`).
-  Leave the row out for a band without steps.
 - **back**: the arrow before the heading links to this page; the link text is what screen readers
   announce. Leave it out for no arrow.
 - **adults**, **children**: the guests' labels; a count of 0 isn't shown.
@@ -77,7 +79,6 @@ place to change when its source is known.
 ## Look
 
 As the live site:
-- The booking pages' maroon steps band right under the header.
 - The content 1230px wide at most, centred.
 - From 992px, the visit's five parts in a row with thin lines between them (each label beside its
   value), a grey line under them; below 992px stacked, each label grey above its maroon value.
