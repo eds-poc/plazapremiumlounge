@@ -4,7 +4,8 @@
  * answer is in; a refusal's message shows under the button.
  * - `action: login`: `{ username, password }` to the Login API. A success answers `{ jwt, … }`: a
  *   `jwt` that is well formed and not expired (scripts/auth.js) logs the visitor in: the token is
- *   stored, the member's details for analytics are kept (scripts/member.js), and the page
+ *   stored, the member's details for analytics are kept (scripts/member.js), the data layers get
+ *   the login (Adobe's "login success", GA4's `login`: trackLogin), and the page
  *   reloads, its header then logged in (or the visitor goes to the page in the
  *   address's `redirectUrl`, the members' page they came from). A refusal answers `{ errorCode,
  *   message }` or `{ error }`.
@@ -16,7 +17,24 @@ import apiUrl from './endpoints.js';
 import { translate } from './i18n.js';
 import { isTokenValid, redirectTarget, setToken } from './auth.js';
 import { pushEvent } from './adobe-datalayer.js';
+import { pushGtagEvent } from './gtag-datalayer.js';
 import { storeMember } from './member.js';
+
+/**
+ * GA4's `login` (window.dataLayer, scripts/gtag-datalayer.js) after a successful login: how (by
+ * email), the member's ST Member ID ('' without one) and their residence country's code ('' for
+ * now: GetProfile gives only the country's name).
+ * @param {string} userId The ST Member ID
+ */
+function trackLogin(userId) {
+  pushGtagEvent('login', {
+    method: 'email',
+    user_id: userId,
+    user_properties: {
+      residence_country_code: '',
+    },
+  });
+}
 
 /**
  * Posts a form's data as JSON with its button busy, then hands the answer to `done`; a network
@@ -81,12 +99,14 @@ function login(form) {
       password.value = '';
       // the member's details for analytics, kept before the page moves on (the button stays
       // busy meanwhile; at most a few seconds, then the page moves on without them)
-      return storeMember(token).then(() => {
+      return storeMember(token).then((member) => {
         // the data layer's "login success" link click, with the member's identities kept just now
         const eventName = 'login success';
         pushEvent('web.webInteraction.linkClicks', eventName, {
           web: { webInteraction: { name: eventName, type: 'other', linkClicks: { value: 1 } } },
         });
+        // the GA4 login: the ST Member ID (blank without the profile)
+        trackLogin(member?.stMemberId || '');
         // back to the members' page the visitor came from (replacing the home page in the history)
         const target = redirectTarget();
         if (target) window.location.replace(target);
