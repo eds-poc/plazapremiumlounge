@@ -17,21 +17,22 @@ import apiUrl from './endpoints.js';
 import { translate } from './i18n.js';
 import { isTokenValid, redirectTarget, setToken } from './auth.js';
 import { pushEvent } from './adobe-datalayer.js';
+import { pushGtagEvent } from './gtag-datalayer.js';
 import { storeMember } from './member.js';
 
 /**
- * The GA4 `login` in Google's data layer (`window.dataLayer`, read by the GTM container) after a
- * successful login: by email, the member's ST Member ID. The country of residence's code is
- * blank for now (GetProfile gives only the country's name).
+ * GA4's `login` (window.dataLayer, scripts/gtag-datalayer.js) after a successful login: how (by
+ * email), the member's ST Member ID ('' without one) and their residence country's code ('' for
+ * now: GetProfile gives only the country's name).
  * @param {string} userId The ST Member ID
  */
 function trackLogin(userId) {
-  window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push({
-    event: 'login',
+  pushGtagEvent('login', {
     method: 'email',
     user_id: userId,
-    user_properties: { residence_country_code: '' },
+    user_properties: {
+      residence_country_code: '',
+    },
   });
 }
 
