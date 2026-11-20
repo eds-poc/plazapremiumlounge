@@ -33,6 +33,7 @@ A missing row shows the English text above. The title shows in capitals.
   outlined Add pills. **From 992px:** the title over a black line and a line under the list,
   outlined Add pills (180px from 1200px), an added add-on's row tinted.
 - **No add-ons** (or no lounge in the cart): the block takes no space.
+- **The block library** (`/docs/library/blocks/add-ons`): the add-ons of Book Your Visit's sample visit; Add closes the pop-up, nothing is saved, and an author's own cart isn't shown or changed.
 
 ## Data (`scripts/add-ons.js`)
 

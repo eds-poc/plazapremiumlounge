@@ -6,7 +6,7 @@ import {
 import { buildBadge, buildSummaryBox, loungeSide } from '../../scripts/booking-summary.js';
 import { formatAmount, formatCartDate, formatGuests } from '../../scripts/cart-summary.js';
 import { getCart, getCartId, onCartChange } from '../../scripts/cart-state.js';
-import { refreshCart, updateLounge } from '../../scripts/cart.js';
+import { readCart, refreshCart, updateLounge } from '../../scripts/cart.js';
 import buildDatePicker from '../../scripts/date-picker.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { DEFAULT_SITE, getSiteFolder, translate } from '../../scripts/i18n.js';
@@ -148,6 +148,18 @@ function checkoutUrl() {
   return (getMetadata('cart-checkout-url') || '/{lang}/guest-checkout').replace('{lang}', lang);
 }
 
+// the block library's sample visit (the booking system's cart answer: a lounge at Hong Kong)
+const LIBRARY_CART = `${window.hlx?.codeBasePath || ''}/blocks/book-your-visit/library-cart.json`;
+
+/**
+ * Whether the page is the block library's (authors look at the block there: no cart, nothing
+ * saved, no leaving).
+ * @returns {boolean}
+ */
+function inLibrary() {
+  return window.location.pathname.includes('/docs/library/');
+}
+
 /**
  * Leaves for the homepage (an empty cart, or one without a lounge), as the source's.
  */
@@ -231,7 +243,7 @@ export default function decorate(block) {
     // eslint-disable-next-line no-use-before-define
     renderPhone();
     document.dispatchEvent(new CustomEvent('book-your-visit:change', {
-      detail: { start: time ? toStartDateTime(date, time) : '', line },
+      detail: { start: time ? toStartDateTime(date, time) : '', line, cart },
     }));
   };
   timeSelect.addEventListener('change', () => choose(date, timeSelect.value));
@@ -411,6 +423,7 @@ export default function decorate(block) {
 
   // Check Out / Confirm & Proceed: a bookable time, the visit saved when it changed, the checkout
   const proceed = async (button) => {
+    if (inLibrary()) return;
     showError('');
     first = firstSlot(lounge.timeZone || line.timeZone, lounge.leadMinutes);
     if (!time) {
@@ -475,6 +488,15 @@ export default function decorate(block) {
     renderSummary();
     return true;
   };
+
+  // the block library: the sample visit (no cart there), nothing read or saved
+  if (inLibrary()) {
+    fetch(LIBRARY_CART)
+      .then((resp) => (resp.ok ? resp.json() : null))
+      .then((json) => { if (json) show(readCart(json)); })
+      .catch(() => {});
+    return;
+  }
 
   onCartChange((now) => {
     if (now) show(now);

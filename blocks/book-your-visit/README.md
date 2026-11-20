@@ -60,6 +60,7 @@ A missing row shows the English text above (the note shows nothing). The labels 
   - **A failed save:** the `error` text, and the page stays.
 - **The add-ons** follow the chosen date and time (the `book-your-visit:change` event).
 - **No cart, or a cart without a lounge (passes):** the homepage, as the source's.
+- **The block library** (`/docs/library/blocks/book-your-visit`): a sample visit (a lounge at Hong Kong, `library-cart.json`), so authors see the block; nothing is read from or saved to a cart there, and the page doesn't leave.
 
 ## Data
 

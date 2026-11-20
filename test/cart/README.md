@@ -48,7 +48,7 @@ line, DELETE. It covers:
   booking system's new price only); the tab shown again.
 - Two tabs (they follow and settle); the earlier cookie moved; blocked storage.
 
-`node book-your-visit.test.mjs` — the Book Your Visit page and its Add-ons (32 checks), on the
+`node book-your-visit.test.mjs` — the Book Your Visit page and its Add-ons (35 checks), on the
 local `/{lang}/book-your-visit` pages (`BW_HOST` with local content). The cart service is routed
 (the lounge fixture a week ahead, the add-on lines the PUTs give it); the add-ons are the sample
 answer (`blocks/add-ons/sample-add-ons.json`). Set `AXE_CORE` for the axe checks.
@@ -63,6 +63,7 @@ answer (`blocks/add-ons/sample-add-ons.json`). Set `AXE_CORE` for the axe checks
   15 minutes, onto the next half hour, at the lounge).
 - 375: the list with Edit, the date pop-up, one promo field, the fixed bar.
 - No cart, a cart of passes (the homepage); the four other languages; axe at 1440 and 375.
+- The block library's pages: the sample visit, no leaving, nothing saved (also with an author's cart).
 
 **End to end** (`e2e/`, nothing routed: the real stage passes and cart APIs, so they make and delete
 real stage carts). Set `HOST` to the local preview or a branch preview, plus `WIDTH` and

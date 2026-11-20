@@ -1,7 +1,7 @@
 import { addOnsRequest, fetchAddOns } from '../../scripts/add-ons.js';
 import { formatAmount } from '../../scripts/cart-summary.js';
 import { getCart, onCartChange } from '../../scripts/cart-state.js';
-import { setAddon } from '../../scripts/cart.js';
+import { readCart, setAddon } from '../../scripts/cart.js';
 import { translate } from '../../scripts/i18n.js';
 import { openModal } from '../../scripts/modal-dialog.js';
 import { safeHtml } from '../../scripts/properties.js';
@@ -90,7 +90,12 @@ export default function decorate(block) {
   let start = '';
   let asked = 0;
 
-  const lounge = () => getCart()?.lines.find((l) => l.kind !== 'pass') || null;
+  // the cart's lounge; in the block library, its sample visit only (the author's own cart is
+  // neither shown nor changed there)
+  const library = window.location.pathname.includes('/docs/library/');
+  let fromPage = null;
+  const lounge = () => (library ? fromPage?.line
+    : getCart()?.lines.find((l) => l.kind !== 'pass')) || null;
   const inCart = (code) => lounge()?.addons?.find((a) => a.catalogueCode === code);
 
   /**
@@ -100,6 +105,8 @@ export default function decorate(block) {
    * @returns {Promise<boolean>}
    */
   const save = async (item, quantity) => {
+    // (the block library's sample: nothing saved, the pop-up closes)
+    if (library) return true;
     showLoader();
     try {
       const result = await setAddon({
@@ -241,7 +248,8 @@ export default function decorate(block) {
     }
     asked += 1;
     const mine = asked;
-    const request = addOnsRequest({ ...line, start: start || line.start }, getCart());
+    const cart = library ? fromPage?.cart : getCart();
+    const request = addOnsRequest({ ...line, start: start || line.start }, cart);
     try {
       const found = await fetchAddOns(request);
       if (mine !== asked) return;
@@ -255,6 +263,7 @@ export default function decorate(block) {
   };
 
   document.addEventListener('book-your-visit:change', (e) => {
+    if (e.detail?.line) fromPage = e.detail;
     const next = e.detail?.start || '';
     if (next === start) return;
     start = next;
@@ -270,5 +279,16 @@ export default function decorate(block) {
   if (lounge()) {
     loaded = true;
     load();
+  } else if (library) {
+    // the block library on its own (no Book Your Visit block, no cart): its sample visit
+    fetch(`${window.hlx?.codeBasePath || ''}/blocks/book-your-visit/library-cart.json`)
+      .then((resp) => (resp.ok ? resp.json() : null))
+      .then((json) => {
+        if (!json || fromPage) return;
+        const cart = readCart(json);
+        fromPage = { cart, line: cart.lines.find((l) => l.kind !== 'pass') };
+        load();
+      })
+      .catch(() => {});
   }
 }

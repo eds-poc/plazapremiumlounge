@@ -342,7 +342,7 @@ function attachAddons(products) {
  * @param {Object} json
  * @returns {Object}
  */
-function readCart(json) {
+export function readCart(json) {
   const totals = json?.cartTotalPrice || {};
   const products = Array.isArray(json?.products) ? json.products : [];
   const discounts = products

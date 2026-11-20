@@ -297,6 +297,33 @@ for (const [lang, title, checkout] of [['zh-cn', '日期', '结账'], ['zh-hk', 
   await page.close();
 }
 
+// 10b. the block library: the sample visit (no cart there), no leaving, nothing saved; an
+// author's own cart neither shown nor changed (the header's mini cart still reads it)
+for (const [name, cart] of [['book-your-visit', false], ['add-ons', false], ['add-ons', true]]) {
+  // eslint-disable-next-line no-await-in-loop
+  const page = await open({ path: `/docs/library/blocks/${name}`, cart });
+  // eslint-disable-next-line no-await-in-loop
+  const s = await state(page);
+  if (name === 'add-ons') {
+    // eslint-disable-next-line no-await-in-loop
+    await page.locator('.add-ons-item-button').first().click();
+    // eslint-disable-next-line no-await-in-loop
+    await page.waitForSelector('dialog.add-ons-modal[open]');
+    // eslint-disable-next-line no-await-in-loop
+    await page.locator('dialog.add-ons-modal[open] .add-ons-popup-add').click();
+    // eslint-disable-next-line no-await-in-loop
+    await page.waitForTimeout(800);
+  }
+  // eslint-disable-next-line no-await-in-loop
+  const closed = await page.evaluate(() => !document.querySelector('dialog.add-ons-modal[open]'));
+  const shown = name === 'book-your-visit'
+    ? s.name === 'Plaza Premium Lounge' && /Check Out/.test(s.checkOut) && s.locked.length === 3
+    : s.addons.length === 2 && closed;
+  check(`library ${name}${cart ? ' (with an author\'s cart)' : ''}: the sample visit, the page stays, nothing saved${cart ? '' : ' or read'}`, shown && /docs\/library/.test(s.url) && !page.api.puts.length && (cart || !page.api.gets), JSON.stringify([s.name, s.addons, s.url, page.api.puts.length, page.api.gets]));
+  // eslint-disable-next-line no-await-in-loop
+  await page.close();
+}
+
 // 11. axe (1440 and 375)
 if (process.env.AXE_CORE) {
   for (const width of [1440, 375]) {
