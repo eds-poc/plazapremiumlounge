@@ -685,16 +685,18 @@ function trackCartView(cart) {
   });
 }
 
-// the home page's list (its search widget), and its address: / or a site folder's (/en-uk/ …)
-const HOMEPAGE_LIST = 'Homepage Search Widget';
+// the home page's address: / or a site folder's (/en-uk/ …)
 const HOMEPAGE_PATH = /^\/([a-z]{2}-[a-z]{2}\/?)?$/;
 
 /**
- * The list a cart is viewed from: where the visitor is. The page's list, as its last
- * view_item_list in the data layer named it (the listing's "HP Search Widget - LHR", the passes
- * page's "Other - Airport Lounge Passes" …); the home page's "Homepage Search Widget"; else
- * "Other - " and the cart's airport code, id and name alike: "Other - HKG" (its name without a
- * code).
+ * The list a cart is viewed from: how the visitor came to the page they view it on, with the
+ * cart's airport, its code in the id and its name in the name. How they came: as the page's last
+ * view_item_list in the data layer says (`view_source`: a listing opened from the mega menu or the
+ * home page search widget, else others); on the home page, its search widget; else others. So
+ * "HP Search Widget - HKG" / "HP Search Widget - Hong Kong International Airport", "Mega Menu -
+ * HKG" / "Mega Menu - Hong Kong International Airport", "Other - HKG" / "Other - Hong Kong
+ * International Airport". A cart without an airport (passes) is in the page's list ("Other -
+ * Airport Lounge Passes" on the passes page).
  * @param {string} iata The cart's airport code
  * @param {string} airport The cart's airport name
  * @returns {{id: string, name: string}}
@@ -702,12 +704,12 @@ const HOMEPAGE_PATH = /^\/([a-z]{2}-[a-z]{2}\/?)?$/;
 function cartList(iata, airport) {
   const pageList = (window.dataLayer || [])
     .findLast((e) => e?.event === 'view_item_list' && e.ecommerce?.item_list_id)?.ecommerce;
-  if (pageList) return { id: pageList.item_list_id, name: pageList.item_list_name };
-  if (HOMEPAGE_PATH.test(window.location.pathname)) {
-    return { id: HOMEPAGE_LIST, name: HOMEPAGE_LIST };
+  const homepage = HOMEPAGE_PATH.test(window.location.pathname);
+  if (!iata && !airport && pageList) {
+    return { id: pageList.item_list_id, name: pageList.item_list_name };
   }
-  const label = listLabel('others', iata || airport);
-  return { id: label, name: label };
+  const source = pageList?.view_source || (homepage ? 'hp_search_widget_click' : 'others');
+  return { id: listLabel(source, iata || airport), name: listLabel(source, airport || iata) };
 }
 
 /**
