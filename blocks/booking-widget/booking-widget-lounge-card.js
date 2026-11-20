@@ -20,7 +20,8 @@ import { isInCart, onCartChange } from '../../scripts/cart-state.js';
 import {
   buildSlider, el, fetchJson, getApiLanguage, toUrl,
 } from '../../scripts/properties.js';
-import { daysUntil, toUtcDateTime } from '../../scripts/utility.js';
+import { daysUntil, toCheckInDate, toUtcDateTime } from '../../scripts/utility.js';
+import { BRAND, listLabel, pushEcommerce } from '../../scripts/gtag-datalayer.js';
 
 // the service answers in about 1.5-4.5s
 const PRODUCTS_TIMEOUT_MS = 20000;
@@ -123,6 +124,8 @@ export function readCard(json) {
       .filter(Boolean)
       .join(', '),
     propertyCode: text(json.propertyCode),
+    // for GA4's view_item: the lounge's place in the airport (International Departures, …)
+    shortLocation: text(json.shortLocation),
     // for the data layer's Book Now: the outlet, the airport's name and the lounge's currency
     outletId: text(json.lmsOutletCode),
     locationName: text(json.locationDisplayName) || text(json.locationName),
@@ -523,6 +526,59 @@ function trackSearch(choice) {
 }
 
 /**
+ * GA4's `view_item` for the lounge card a Search shows (window.dataLayer,
+ * scripts/gtag-datalayer.js): the lounge with the product it shows first and its price
+ * (getbookingwidgetproducts' answer), the airport's city and country (the locations service's),
+ * the visit chosen, in the list of the airport as the home page search widget's ("HP Search
+ * Widget - SIN" / "HP Search Widget - Singapore Changi Airport").
+ * @param {Object} data The card's data (see readCard)
+ * @param {Object} choice The widget's choices (see current in booking-widget.js)
+ * @param {Object} product The product shown (see readCard)
+ */
+function trackViewItem(data, choice, product) {
+  const { priceData } = product;
+  const adults = Number.parseInt(choice.adult, 10) || 1;
+  const children = Number.parseInt(choice.children, 10) || 0;
+  const totalGuestCount = adults + children;
+  // the price for all the guests, "" without one
+  const price = priceData.totalPrice ?? '';
+  // only with an applied promo code, e.g. promocode: [{ "code": "ACG20", "discountValue": 217.6 }]
+  const promoData = Array.isArray(priceData.promocode) ? priceData.promocode[0] : null;
+  // the first discount's amount, else the promo code's, else ""
+  const discountData = Array.isArray(priceData.discounts) ? priceData.discounts[0] : null;
+  const discount = discountData?.discountValue ?? promoData?.value ?? promoData?.discountValue ?? '';
+  const source = 'hp_search_widget_click';
+  pushEcommerce('view_item', {
+    currency: data.defaultCurrency,
+    value: price,
+    items: [
+      {
+        item_id: data.propertyCode,
+        // the lounge and its place: "Plaza Premium Lounge (International Departures)"
+        item_name: data.shortLocation ? `${data.name} (${data.shortLocation})` : data.name,
+        coupon: text(promoData?.code),
+        discount,
+        item_brand: BRAND,
+        item_category: product.name,
+        item_category2: data.locationName,
+        item_category3: data.name,
+        item_category4: choice.location.city || '',
+        item_category5: choice.location.countryCode || '',
+        item_list_id: listLabel(source, choice.airport),
+        item_list_name: listLabel(source, data.locationName || choice.location.name),
+        price,
+        quantity: totalGuestCount,
+        checkInDate: toCheckInDate(choice.date),
+        checkInTime: choice.time || '',
+        adults,
+        children,
+        total_guest_count: totalGuestCount,
+      },
+    ],
+  });
+}
+
+/**
  * Adds the lounge card: in its host's place for it (`data-booking-products` inside an element
  * marked `data-booking-products-host`, e.g. the hero's), else after the widget's place. It shows
  * once an airport is chosen: its loading skeleton has the usual card's height, so the card
@@ -573,7 +629,7 @@ export default async function decorateLoungeCard(block, { current }) {
   /**
    * Shows the airport's featured lounge for the widget's choices.
    * @param {{fresh?: boolean}} [options] fresh: ask the service again (Search), not this page's
-   *   earlier answer
+   *   earlier answer; the card it shows sends GA4's view_item
    */
   const show = async ({ fresh = false } = {}) => {
     const choice = current();
@@ -628,6 +684,9 @@ export default async function decorateLoungeCard(block, { current }) {
       list.replaceChildren(buildCard(data, choice, id));
       section.classList.add('has-card');
       setMore(choice, data.total > 1 ? 'more' : false);
+      // GA4's view_item for a Search's card, with the product it shows first (none when the
+      // lounge has online booking off)
+      if (fresh && data.state === 'card') trackViewItem(data, choice, data.groups[0].items[0]);
     } catch (error) {
       if (stale()) return;
       // eslint-disable-next-line no-console

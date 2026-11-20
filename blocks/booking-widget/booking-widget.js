@@ -144,6 +144,9 @@ function readLocations(data, pages) {
         label: `${name} (${code})`,
         name,
         nameEN,
+        // for GA4's view_item (booking-widget-lounge-card.js): the city and the country's code
+        city: toText(item.city),
+        countryCode: toText(item.countryCode).toUpperCase(),
         // ARPRT (airport) or RLWYSTN (railway station), when the service gives it
         type: toText(item.locationTypeCode),
         page: pages.get(code),
