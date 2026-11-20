@@ -1,0 +1,245 @@
+/* cancel booking confirmation: the source "Order Cancelled!" page. The block fills its section in
+   the brand maroon (no Section Metadata needed; from 1200px under the header's white-on-maroon
+   bar, page metadata header: transparent): the title and message in white on the left, the Cancellation Details card (warm
+   grey, rounded) on the right from 992px (stacked below), then the Back To Home button centred */
+.cancel-booking-confirmation {
+  /* the source's content width (1230px, centred) and its button (215px) */
+  --cancel-booking-confirmation-width: 1230px;
+  --cancel-booking-confirmation-button: 215px;
+
+  max-width: var(--cancel-booking-confirmation-width);
+  margin-inline: auto;
+}
+
+/* the section: the brand maroon with white text, 50px above the content, 80px below it (from
+   1200px, the bar's height more above: the section starts under the transparent bar) */
+main > .section.cancel-booking-confirmation-container {
+  padding-block: var(--spacing-11) var(--spacing-12);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+.cancel-booking-confirmation .cancel-booking-confirmation-columns {
+  display: grid;
+  gap: var(--spacing-9);
+  align-items: start;
+}
+
+/* the title and message, white */
+.cancel-booking-confirmation .cancel-booking-confirmation-title {
+  margin: 0 0 var(--spacing-4);
+  font-size: var(--heading-section-size);
+  font-weight: var(--font-weight-semi-bold);
+  line-height: var(--line-height-heading);
+}
+
+.cancel-booking-confirmation .cancel-booking-confirmation-text {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-body);
+}
+
+.cancel-booking-confirmation .cancel-booking-confirmation-text p {
+  margin: 0 0 var(--spacing-4);
+}
+
+/* the message's links white and underlined, and the white focus ring on the maroon */
+.cancel-booking-confirmation .cancel-booking-confirmation-text a:any-link {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.cancel-booking-confirmation :is(.cancel-booking-confirmation-intro, .cancel-booking-confirmation-actions, .cancel-booking-confirmation-status) :focus-visible {
+  outline-color: var(--color-text-inverse);
+}
+
+.cancel-booking-confirmation .cancel-booking-confirmation-status {
+  margin: var(--spacing-7) 0 0;
+}
+
+.cancel-booking-confirmation .cancel-booking-confirmation-retry {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* the card: warm grey, rounded, 20px inside (30px under the last part), the text dark */
+.cancel-booking-confirmation .cancel-booking-confirmation-card {
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-7) var(--spacing-7) var(--spacing-9);
+  background-color: var(--color-surface-warm);
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+.cancel-booking-confirmation .cancel-booking-confirmation-card[hidden] {
+  display: none;
+}
+
+/* (no weight of its own: the parts' own spacing below wins) */
+.cancel-booking-confirmation :where(.cancel-booking-confirmation-card p, .cancel-booking-confirmation-card dl, .cancel-booking-confirmation-card dd) {
+  margin: 0;
+}
+
+/* Cancellation Details and the order number on one line (the number below it on narrow cards) */
+.cancel-booking-confirmation .cancel-booking-confirmation-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-3) var(--spacing-7);
+}
+
+.cancel-booking-confirmation .cancel-booking-confirmation-card-title {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+/* the parts 30px apart: the lead guest, then each lounge visit */
+.cancel-booking-confirmation .cancel-booking-confirmation-section {
+  margin-top: var(--spacing-9);
+}
+
+.cancel-booking-confirmation .cancel-booking-confirmation-section-title {
+  margin: 0 0 var(--spacing-3);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+}
+
+/* "First Name: Abc": the label and its value grey, on one line */
+.cancel-booking-confirmation .cancel-booking-confirmation-detail.is-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--spacing-2);
+  color: var(--color-text-secondary);
+}
+
+/* the lounge's name (bold), then where it is (grey) */
+.cancel-booking-confirmation .cancel-booking-confirmation-lounge b {
+  display: block;
+  font-weight: var(--font-weight-semi-bold);
+}
+
+.cancel-booking-confirmation .cancel-booking-confirmation-lounge span {
+  display: block;
+  color: var(--color-text-secondary);
+}
+
+/* the visit's details: date and time beside the guests, the services below (one column on
+   phones); each label grey above its maroon value */
+.cancel-booking-confirmation .cancel-booking-confirmation-visit-details {
+  display: grid;
+  gap: var(--spacing-4) var(--spacing-7);
+  margin-top: var(--spacing-6);
+}
+
+.cancel-booking-confirmation .cancel-booking-confirmation-visit-details dt {
+  color: var(--color-text-secondary);
+}
+
+.cancel-booking-confirmation .cancel-booking-confirmation-visit-details dd {
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-semi-bold);
+}
+
+/* the amounts: a grey line above what was paid and the fee, another above the refund; each label
+   grey on the left, its amount on the right */
+.cancel-booking-confirmation :is(.cancel-booking-confirmation-amounts, .cancel-booking-confirmation-refund) {
+  display: grid;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.cancel-booking-confirmation .cancel-booking-confirmation-amounts {
+  margin-top: var(--spacing-11);
+  padding: var(--spacing-6) 0;
+}
+
+.cancel-booking-confirmation .cancel-booking-confirmation-refund {
+  padding-top: var(--spacing-7);
+}
+
+.cancel-booking-confirmation :is(.cancel-booking-confirmation-amounts, .cancel-booking-confirmation-refund) .cancel-booking-confirmation-detail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-7);
+}
+
+.cancel-booking-confirmation :is(.cancel-booking-confirmation-amounts, .cancel-booking-confirmation-refund) dt {
+  color: var(--color-text-secondary);
+}
+
+.cancel-booking-confirmation :is(.cancel-booking-confirmation-amounts, .cancel-booking-confirmation-refund) dd {
+  font-weight: var(--font-weight-medium);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* the refund's note under its amount, small and regular */
+.cancel-booking-confirmation .cancel-booking-confirmation-note {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  white-space: normal;
+}
+
+/* Back To Home: the site's button in white with maroon text (a white line on hover), centred,
+   35px under the columns (its width and weight over the site's button's) */
+.cancel-booking-confirmation .cancel-booking-confirmation-actions {
+  margin: var(--spacing-10) 0 0;
+  text-align: center;
+}
+
+.cancel-booking-confirmation a.button.cancel-booking-confirmation-back {
+  min-width: var(--cancel-booking-confirmation-button);
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
+  padding-block: var(--spacing-1);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semi-bold);
+  line-height: var(--line-height-body);
+}
+
+.cancel-booking-confirmation a.button.cancel-booking-confirmation-back:is(:hover, :focus-visible) {
+  border-color: var(--color-text-inverse);
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
+}
+
+/* the visit's details two to a row from 576px */
+@media (width >= 576px) {
+  .cancel-booking-confirmation .cancel-booking-confirmation-visit-details {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cancel-booking-confirmation .cancel-booking-confirmation-detail.is-wide {
+    grid-column: 1 / -1;
+  }
+}
+
+/* from 992px: the message and the card side by side, the message 20px */
+@media (width >= 992px) {
+  .cancel-booking-confirmation .cancel-booking-confirmation-columns {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-10);
+  }
+
+  .cancel-booking-confirmation .cancel-booking-confirmation-text {
+    font-size: var(--font-size-xl);
+    line-height: var(--line-height-heading);
+  }
+}
+
+/* from 1200px the section starts under the transparent bar: its height more above, 92px from the
+   bar to the content, as the source */
+@media (width >= 1200px) {
+  main > .section.cancel-booking-confirmation-container {
+    padding-top: calc(var(--nav-height-desktop) + var(--spacing-12) + var(--spacing-5));
+  }
+}

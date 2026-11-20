@@ -1,0 +1,278 @@
+/* cancel booking: the source Review Cancel Booking Details page, under the page's Booking Steps
+   block. The title after a back arrow, the booking summary (a row of five parts per visit, thin lines between them from
+   992px, stacked below), the total, fee and refund on the right, then a tinted bar the page's
+   full width with the Cancel Booking button on the right, right above the footer */
+.cancel-booking {
+  --cancel-booking-accent: var(--color-brand-primary-action);
+  --cancel-booking-value: var(--color-brand-primary);
+  --cancel-booking-bar: var(--color-brand-tint);
+
+  /* one-off: the source's light grey labels below 992px ("Date:", "Services") */
+  --cancel-booking-label: #888;
+
+  /* the source's content width (1230px, centred; the bar still the page's width) */
+  --cancel-booking-width: 1230px;
+
+  max-width: var(--cancel-booking-width);
+  margin-inline: auto;
+  color: var(--color-text);
+  font-size: var(--body-font-size);
+}
+
+/* the bar right on the footer: the section has no spacing of its own below the block (the Booking
+   Steps block before it takes away the space above) */
+main > .section:has(> .cancel-booking-wrapper) {
+  padding-bottom: 0;
+}
+
+/* the title: the site's section heading size, 25px below (35px from 992px) */
+.cancel-booking .cancel-booking-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-6);
+  margin: 0 0 var(--spacing-8);
+  font-size: var(--heading-section-size);
+  line-height: var(--line-height-heading);
+}
+
+/* the source's maroon arrow (16px tall below 768px, 24px from it), 15px before the title */
+.cancel-booking .cancel-booking-back {
+  display: block;
+  flex: none;
+  width: 14px;
+  height: 16px;
+  background-color: var(--color-brand-primary);
+  mask: url('../../icons/arrow-left-regular.svg') center / contain no-repeat;
+}
+
+.cancel-booking .cancel-booking-message {
+  margin: 0 0 var(--spacing-11);
+}
+
+.cancel-booking .cancel-booking-retry {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--color-brand-primary);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* BOOKING SUMMARY: the small uppercase maroon label */
+.cancel-booking .cancel-booking-label {
+  margin: 0;
+  color: var(--cancel-booking-accent);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+}
+
+/* a visit: its parts stacked below 992px (20px above and below), a grey line under it */
+.cancel-booking .cancel-booking-box {
+  display: grid;
+  gap: var(--spacing-4);
+  border-bottom: 1px solid var(--color-text-secondary);
+  padding: var(--spacing-7) 0;
+}
+
+.cancel-booking .cancel-booking-cell p,
+.cancel-booking .cancel-booking-details,
+.cancel-booking .cancel-booking-details dd,
+.cancel-booking .cancel-booking-service-list {
+  margin: 0;
+}
+
+.cancel-booking .cancel-booking-cell .cancel-booking-cell-title {
+  margin-bottom: var(--spacing-3);
+  font-weight: var(--font-weight-medium);
+}
+
+/* below 992px the parts' titles hide (the labels say what each value is), but the services' (a
+   grey label, "Services:") and the price's */
+.cancel-booking :is(.cancel-booking-location, .cancel-booking-date-time, .cancel-booking-guests) .cancel-booking-cell-title {
+  display: none;
+}
+
+.cancel-booking .cancel-booking-services .cancel-booking-cell-title {
+  margin-bottom: 0;
+  color: var(--cancel-booking-label);
+  font-weight: var(--font-weight-light);
+}
+
+.cancel-booking .cancel-booking-services .cancel-booking-cell-title::after {
+  content: ':';
+}
+
+/* the lounge's name (medium), then where it is */
+.cancel-booking .cancel-booking-lounge span {
+  display: block;
+}
+
+.cancel-booking .cancel-booking-lounge-name {
+  font-weight: var(--font-weight-medium);
+}
+
+/* To Cancel: a maroon uppercase pill on the brand tint, 10px under the address */
+.cancel-booking .cancel-booking-cell .cancel-booking-tag {
+  display: inline-block;
+  margin-top: var(--spacing-4);
+  border-radius: var(--radius-pill);
+  padding: 1px var(--spacing-8);
+  background-color: var(--cancel-booking-bar);
+  color: var(--cancel-booking-value);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+}
+
+/* label and value: the label light grey above its maroon value (phones and tablets) */
+.cancel-booking .cancel-booking-details {
+  display: grid;
+  gap: var(--spacing-3);
+}
+
+.cancel-booking .cancel-booking-details dt {
+  color: var(--cancel-booking-label);
+  font-weight: var(--font-weight-light);
+}
+
+.cancel-booking .cancel-booking-details dd {
+  color: var(--cancel-booking-value);
+  font-weight: var(--font-weight-medium);
+}
+
+/* "hrs", 4px from the time */
+.cancel-booking .cancel-booking-unit {
+  padding-left: 4px;
+}
+
+.cancel-booking .cancel-booking-service-list {
+  display: grid;
+  gap: var(--spacing-3);
+  padding: 0;
+  font-weight: var(--font-weight-medium);
+  list-style: none;
+}
+
+.cancel-booking .cancel-booking-price-amount {
+  font-weight: var(--font-weight-medium);
+}
+
+/* the amounts: the rows on the right (the page's full width below 992px, its right half from
+   it), 35px under the summary, 8px apart; the refund amount in maroon */
+.cancel-booking .cancel-booking-totals {
+  display: grid;
+  gap: var(--spacing-3);
+  margin: var(--spacing-10) 0 0 auto;
+}
+
+.cancel-booking .cancel-booking-total-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-7);
+}
+
+.cancel-booking .cancel-booking-total-row dd {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.cancel-booking .cancel-booking-total-row.is-refund dd {
+  color: var(--cancel-booking-value);
+}
+
+/* the bar: the brand tint the page's full width (painted past its container, so the page doesn't
+   scroll sideways), the button on the right, 15px above and below it; 130px under the amounts */
+.cancel-booking .cancel-booking-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: calc(var(--spacing-12) + var(--spacing-11));
+  padding: var(--spacing-6) 0;
+  background-color: var(--cancel-booking-bar);
+  box-shadow: 0 0 0 100vmax var(--cancel-booking-bar);
+  clip-path: inset(0 -100vmax);
+}
+
+.cancel-booking .cancel-booking-button {
+  min-width: 177px;
+  padding-block: var(--spacing-3);
+  font-size: var(--font-size-md);
+}
+
+.cancel-booking .cancel-booking-note {
+  margin: 0;
+}
+
+/* the design-system breakpoint (768px): the 24px arrow */
+@media (width >= 768px) {
+  .cancel-booking .cancel-booking-back {
+    width: 21px;
+    height: 24px;
+  }
+}
+
+/* from 992px (the source's desktop): the visit's parts in a row (location the widest, the price
+   narrow and on the right), a thin line 16px before each but the first; each label beside its
+   value; the amounts the right half, in the source's sizes */
+@media (width >= 992px) {
+  .cancel-booking .cancel-booking-title {
+    margin-bottom: var(--spacing-10);
+  }
+
+  .cancel-booking .cancel-booking-label {
+    margin-bottom: var(--spacing-8);
+  }
+
+  .cancel-booking .cancel-booking-box {
+    grid-template-columns: 24fr 22fr 22fr 22fr 10fr;
+    gap: 0;
+    padding: 0 0 var(--spacing-6);
+  }
+
+  .cancel-booking .cancel-booking-cell + .cancel-booking-cell {
+    border-left: 1px solid var(--color-text-secondary);
+    padding-left: var(--spacing-6);
+  }
+
+  .cancel-booking .cancel-booking-cell .cancel-booking-cell-title {
+    display: block;
+    margin-bottom: var(--spacing-5);
+    color: var(--color-text);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .cancel-booking .cancel-booking-services .cancel-booking-cell-title::after {
+    content: none;
+  }
+
+  .cancel-booking .cancel-booking-detail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--spacing-2);
+  }
+
+  .cancel-booking .cancel-booking-details dt {
+    color: var(--color-text);
+  }
+
+  .cancel-booking .cancel-booking-price {
+    text-align: right;
+  }
+
+  .cancel-booking .cancel-booking-totals {
+    width: 50%;
+    margin-top: var(--spacing-11);
+  }
+
+  .cancel-booking .cancel-booking-total-row dt {
+    font-size: var(--font-size-xl);
+  }
+
+  .cancel-booking .cancel-booking-total-row dd {
+    font-size: var(--font-size-2xl);
+  }
+}

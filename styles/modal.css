@@ -157,3 +157,65 @@ dialog.modal.leave-site .leave-site-actions {
   margin-top: var(--spacing-7);
   text-align: center;
 }
+
+/* confirm (scripts/confirm-dialog.js): the source's booking confirmations. Everything centred, the
+   title in the body (the maroon bar keeps only the close), the yes button outlined beside the no
+   button filled (180px each); wide: 800px from 992px (Bootstrap modal-lg), its text 18px */
+dialog.modal.confirm {
+  --confirm-button: 180px;
+  --confirm-wide-width: 800px;
+}
+
+dialog.modal.confirm .modal-body {
+  padding: var(--spacing-9) var(--spacing-10);
+  text-align: center;
+}
+
+dialog.modal.confirm .confirm-title {
+  margin: 0 0 var(--spacing-7);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semi-bold);
+  line-height: var(--line-height-heading);
+}
+
+dialog.modal.confirm .confirm-text {
+  margin: 0 0 var(--spacing-7);
+  font-size: var(--font-size-md);
+}
+
+dialog.modal.confirm .confirm-text b {
+  font-weight: var(--font-weight-semi-bold);
+}
+
+dialog.modal.confirm .confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-6) var(--spacing-11);
+}
+
+dialog.modal.confirm .confirm-actions .button {
+  width: var(--confirm-button);
+  min-width: 0;
+  padding-block: var(--spacing-3);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+}
+
+@media (width >= 768px) {
+  dialog.modal.confirm .confirm-title {
+    font-size: var(--font-size-3xl);
+  }
+
+  dialog.modal.confirm.wide .confirm-text {
+    font-size: var(--font-size-lg);
+  }
+}
+
+/* breakpoint-exception: the source Bootstrap modal-lg breakpoint (992px) */
+@media (width >= 992px) {
+  dialog.modal.confirm.wide {
+    width: var(--confirm-wide-width);
+    max-width: var(--confirm-wide-width);
+  }
+}

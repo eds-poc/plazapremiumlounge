@@ -1,0 +1,145 @@
+{
+  "orderId": "HKBC-11339-64UIPS",
+  "orderStatus": "Cancelled",
+  "orderTotalPrice": {
+    "totalBasePrice": 1763.64,
+    "totalAdditionalPrice": 0.0,
+    "totalDiscounts": 0.0,
+    "totalPromocodeAmount": 0.0,
+    "totalTax": 0.0,
+    "totalPrice": 1763.64
+  },
+  "cancellationCharge": 0.0,
+  "waiverAmount": 0.0,
+  "orderCurrency": "HKD",
+  "contactInfo": {
+    "title": "Mr.",
+    "firstName": "Sample",
+    "lastName": "Guest",
+    "emailId": "guest@example.com"
+  },
+  "orderItems": [
+    {
+      "catalogueCode": "PRD3138-Regular-PRPRTY817-LOUNGE-LCTN517-RTPLN3464",
+      "productId": 3138,
+      "productCode": "PRD3138",
+      "productName": "Lounge Use - 3 Hours",
+      "productDisplayName": "Lounge Use - 3 Hours",
+      "productDescription": "Lounge Use - 3 Hours",
+      "status": "Cancelled",
+      "productVarients": [
+        {
+          "attributeKey": "Duration",
+          "value": "3 hours",
+          "mandatory": false,
+          "name": "Duration"
+        }
+      ],
+      "subOrderId": "SUB_ORDR_ZWhCZIWVNf",
+      "productType": "Regular",
+      "propertyCode": "PRPRTY817",
+      "propertyName": "Plaza Premium First  (Near Gate 35, West Hall)",
+      "propertyCodeId": "",
+      "propertyLeadTime": "1.0",
+      "locationCode": "LCTN517",
+      "locationName": "Hong Kong International Airport",
+      "locationType": "",
+      "serviceCode": "SRVC1619",
+      "serviceName": "Lounge",
+      "serviceDisplayName": "Lounge",
+      "basedOn": "Per Person",
+      "isFlightNumberMandatory": false,
+      "additionalAttributes": [],
+      "startDate": "2026-11-25 19:30:00",
+      "startDateGMT": "2026-11-25 11:30:00",
+      "quantity": 1,
+      "guestsCount": {
+        "adult": 2,
+        "child": 0
+      },
+      "priceDetails": {
+        "taxes": [],
+        "baseRate": [
+          {
+            "price": 1763.64,
+            "groups": "adult",
+            "currency": "HKD"
+          },
+          {
+            "price": 0.0,
+            "groups": "child",
+            "currency": "HKD"
+          }
+        ],
+        "discounts": [],
+        "priceCode": "RTPLN3464",
+        "priceName": "Smart Traveller - Lounge (upsell)",
+        "isSTRatePlan": false,
+        "termsPolicies": [],
+        "additionalCharges": []
+      },
+      "itemPriceDetails": {
+        "taxes": [],
+        "baseRate": [
+          {
+            "count": 2,
+            "price": 1763.64,
+            "groups": "adult",
+            "currency": "HKD",
+            "totalMarkUpCharge": 0.0
+          },
+          {
+            "count": 0,
+            "price": 0.0,
+            "groups": "child",
+            "currency": "HKD",
+            "totalMarkUpCharge": 0.0
+          }
+        ],
+        "discounts": [],
+        "priceCode": "RTPLN3464",
+        "priceName": "Smart Traveller - Lounge (upsell)",
+        "isSTRatePlan": false,
+        "termsPolicies": [],
+        "additionalCharges": [],
+        "productTotalPrice": {
+          "totalTax": 0.0,
+          "totalPrice": 1763.64,
+          "totalBasePrice": 1763.64,
+          "totalDiscounts": 0.0,
+          "totalMarkUpCharge": 0.0,
+          "totalAdditionalPrice": 0.0,
+          "totalPromocodeAmount": 0.0,
+          "totalPriceUSD": 225.6,
+          "totalPromocodeAmountUSD": 0.0
+        }
+      },
+      "specialRemarks": "",
+      "quantityText": "",
+      "itemTotalPriceInUSD": 225.6,
+      "itemPromoCodeInUSD": 0.0,
+      "opsUnitId": 39,
+      "isThirdPartyFulfilment": false,
+      "propertyTypeId": 6,
+      "propertyTypeCode": "LOUNGE",
+      "propertyTypeName": "Lounge",
+      "isStLoginMandatory": false,
+      "serviceType": "LOUNGE",
+      "shortLocation": "Near Gate 35, West Hall",
+      "countryOfResidence": "United States",
+      "pplPartnerName": "",
+      "pplPartnershipNumber": "",
+      "address": "Level 6, Departures Level, Terminal 1, Hong Kong International Airport (near Gate 35)",
+      "outletCode": "11339",
+      "lmsProductSku": "PPL2-L3H",
+      "propertyDisplayName": "Plaza Premium First ",
+      "zipCode": "",
+      "marketingSubscriptionFlag": "",
+      "propertyImage": "",
+      "isEligibleForCancel": false,
+      "isEligibleForModify": false
+    }
+  ],
+  "itemCancellationCharge": [],
+  "totalRefund": 0.0
+}
