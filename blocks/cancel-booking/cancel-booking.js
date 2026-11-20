@@ -6,8 +6,9 @@
  * - the booking summary: a row per booked lounge visit (location with the To Cancel tag, date and
  *   time, guests, services, its add-ons, price);
  * - the total, the cancellation fee and the refund amount;
- * - a bar with the Cancel Booking button: a notice popup (the refund and when it comes), whose
- *   Confirm asks the cancel booking API to cancel it (its answer isn't shown yet).
+ * - a bar with the Cancel Booking button: a notice popup (the refund and when it comes), then a
+ *   confirmation popup, whose Yes asks the cancel booking API to cancel it (its answer isn't
+ *   shown yet).
  * The booking comes from GetOrderDetail (scripts/bookings.js) for the address's `bookingid`, with
  * the member's login token. Every text the block shows is authored, a Key | Text row each.
  */
@@ -20,9 +21,10 @@ import {
 import { translate } from '../../scripts/i18n.js';
 import { setLoading } from '../../scripts/properties.js';
 
-// the notice popup: built once (its key) and refilled each time it opens
-const NOTICE_KEY = 'cancel-booking-notice';
-let noticeRoot;
+// the popups before cancelling (the notice, then the confirmation): one popup, built once (its
+// key) and refilled for each
+const POPUP_KEY = 'cancel-booking-popup';
+let popupRoot;
 
 /**
  * Creates an element with an optional class name and text.
@@ -68,44 +70,46 @@ async function cancelBooking(orderId, reason) {
 }
 
 /**
- * The notice before cancelling, as the source's: the site's popup with the noticeTitle, the notice
- * text (`{amount}`, the refund amount, filled in) and the noticeConfirm and noticeCancel buttons.
- * Resolves true for noticeConfirm only; noticeCancel, the close button, Esc and a click beside the
- * popup keep the booking.
+ * One of the popups before cancelling, as the source's: the site's popup with a title, a text and
+ * two buttons, centred (the title in the body, the maroon bar keeping only the close; the yes
+ * button outlined, the no button filled). Resolves true for the yes button only; the no button,
+ * the close button, Esc and a click beside the popup resolve false. The popup is built once and
+ * refilled for each question.
  * @param {HTMLElement} trigger The Cancel Booking button (focus returns there)
- * @param {function(string): string} text The authored texts
- * @param {string} amount The refund amount, as shown
+ * @param {{title: string, text: string, yes: string, no: string}} question The authored texts
+ *   ('' for a title or a no button left out)
  * @returns {Promise<boolean>}
  */
-async function confirmNotice(trigger, text, amount) {
+async function ask(trigger, question) {
   const { openModal } = await import('../../scripts/modal-dialog.js');
-  noticeRoot = noticeRoot || el('div', 'cancel-booking-notice');
+  popupRoot = popupRoot || el('div', 'cancel-booking-popup');
   // the title stays in the popup's body, as the source's (a heading would go to its maroon bar)
-  const title = el('p', 'cancel-booking-notice-title', text('noticeTitle'));
-  title.id = 'cancel-booking-notice-title';
+  const title = el('p', 'cancel-booking-popup-title', question.title);
+  title.id = 'cancel-booking-popup-title';
   title.setAttribute('role', 'heading');
   title.setAttribute('aria-level', '2');
-  const notice = el('p', 'cancel-booking-notice-text', text('notice').replaceAll('{amount}', amount));
-  const actions = el('div', 'cancel-booking-notice-actions');
-  // as the source: Confirm outlined, Cancel (keep the booking) filled
+  const actions = el('div', 'cancel-booking-popup-actions');
   const choice = (label, look) => {
     const b = el('button', `button ${look}`, label);
     b.type = 'button';
     actions.append(b);
     return b;
   };
-  const yes = choice(text('noticeConfirm'), 'tertiary');
-  const no = text('noticeCancel') ? choice(text('noticeCancel'), 'primary') : null;
-  noticeRoot.replaceChildren(...[text('noticeTitle') && title, notice, actions].filter(Boolean));
+  const yes = choice(question.yes, 'tertiary');
+  const no = question.no ? choice(question.no, 'primary') : null;
+  popupRoot.replaceChildren(...[
+    question.title && title, el('p', 'cancel-booking-popup-text', question.text), actions,
+  ].filter(Boolean));
 
-  const root = noticeRoot;
+  const root = popupRoot;
   const dialog = await openModal({
-    key: NOTICE_KEY,
+    key: POPUP_KEY,
     trigger,
     content: () => Object.assign([root], { styles: ['cancel-booking-modal'] }),
   });
   if (!dialog) return false;
-  if (text('noticeTitle')) dialog.setAttribute('aria-labelledby', title.id);
+  if (question.title) dialog.setAttribute('aria-labelledby', title.id);
+  else dialog.removeAttribute('aria-labelledby');
   return new Promise((resolve) => {
     let confirmed = false;
     yes.addEventListener('click', () => {
@@ -264,7 +268,21 @@ export default function decorate(block) {
       button.type = 'button';
       button.setAttribute('aria-haspopup', 'dialog');
       button.addEventListener('click', async () => {
-        if (!(await confirmNotice(button, text, money(refund, currency)))) return;
+        // the notice, then (when it's authored) the confirmation: both must be accepted
+        const notice = {
+          title: text('noticeTitle'),
+          text: text('notice').replaceAll('{amount}', money(refund, currency)),
+          yes: text('noticeConfirm'),
+          no: text('noticeCancel'),
+        };
+        if (!(await ask(button, notice))) return;
+        const confirmation = {
+          title: text('confirmTitle'),
+          text: text('confirmText'),
+          yes: text('confirmYes'),
+          no: text('confirmNo'),
+        };
+        if (confirmation.text && confirmation.yes && !(await ask(button, confirmation))) return;
         // the site's loader while the booking is cancelled
         button.disabled = true;
         setLoading(true);

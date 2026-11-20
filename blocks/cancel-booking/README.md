@@ -3,7 +3,7 @@
 A member's booking before it's cancelled (the live site's Review Cancel Booking Details page,
 `/en-uk/cancel-your-booking?bookingid=…`): the title after an arrow back to the bookings, the booking summary (one row per booked lounge visit, tagged **To Cancel**),
 the total, the cancellation fee and the refund amount, and a bar with the **Cancel Booking**
-button, which shows a notice popup before the booking is cancelled. Authors write the texts; the booking comes from the **GetOrderDetail** API for the
+button, which shows a notice popup, then a confirmation popup, before the booking is cancelled. Authors write the texts; the booking comes from the **GetOrderDetail** API for the
 address's `bookingid`, with the member's login token.
 
 The page needs a login: give it `members-only` true (the page's Metadata, or a metadata sheet row
@@ -46,6 +46,10 @@ of its own under the block, so the bar sits right on the footer.
 | notice | Your refund amount of {amount} will be processed and it may take up to 4-6 weeks, depending on your card issuing company, for it to appear in your original payment method. |
 | noticeConfirm | Confirm |
 | noticeCancel | Cancel |
+| confirmTitle | Confirmation |
+| confirmText | Are you sure you wish to cancel this booking? |
+| confirmYes | Yes |
+| confirmNo | No |
 | cancellationReason | Change of travel plans |
 | notCancellable | This booking can’t be cancelled online. |
 | loading | Loading your booking… |
@@ -64,9 +68,14 @@ of its own under the block, so the bar sits right on the footer.
 - **noticeTitle**, **notice**, **noticeConfirm**, **noticeCancel**: the popup the button opens, as
   the source's: the site's dialog (the maroon bar with the close button, then, centred, the
   title, the text with `{amount}` as the refund amount, "HKD 442.32", and Confirm (outlined) and
-  Cancel (filled)). **noticeConfirm** cancels the booking; **noticeCancel**, the close button, Esc
-  and a click beside the popup keep it (focus back on the button). Without **noticeTitle** the
-  popup has no title; without **noticeCancel**, only Confirm.
+  Cancel (filled)). **noticeConfirm** goes on to the confirmation; **noticeCancel**, the close
+  button, Esc and a click beside the popup keep the booking (focus back on the button). Without
+  **noticeTitle** the popup has no title; without **noticeCancel**, only Confirm.
+- **confirmTitle**, **confirmText**, **confirmYes**, **confirmNo**: the second popup, after the
+  notice's Confirm, in the same look ("Are you sure you wish to cancel this booking?", Yes
+  outlined, No filled). **confirmYes** cancels the booking; **confirmNo**, the close button, Esc
+  and a click beside it keep it. Without **confirmText** or **confirmYes** there's no second popup:
+  the notice's Confirm cancels.
 - **cancellationReason**: the reason sent with the cancellation.
 - **loading**, **notFound**, **error**: the messages (loading for screen readers, while the
   site's loader shows; error with Try again). Row names ignore capitals.
@@ -88,7 +97,7 @@ of its own under the block, so the bar sits right on the footer.
 
 ## Cancelling
 
-**noticeConfirm** asks the cancel booking API (`apiUrl('cancelBooking')`, the booking system's
+**confirmYes** (or the notice's Confirm, without the confirmation) asks the cancel booking API (`apiUrl('cancelBooking')`, the booking system's
 `/api/v1/web/ppg-app/cancel-booking` in `scripts/endpoints.js`) to cancel the booking: a `POST` of
 JSON `{ "orderId": "HKBC-10240-64UIS3", "cancellationReason": "Change of travel plans" }` with the
 member's login token (`Authorization: Bearer <token>`, `scripts/auth.js`). The site's loader shows
