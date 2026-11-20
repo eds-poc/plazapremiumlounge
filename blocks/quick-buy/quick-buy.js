@@ -1,7 +1,7 @@
 import { translate } from '../../scripts/i18n.js';
 import {
   PASSES_TIMEOUT_MS as TIMEOUT_MS, buildAddButton, buildPoints, formatPrice, icon, openPassDetails,
-  readCurrency, readPass, takeSelectedPass,
+  readCurrency, readPass, takeSelectedPass, trackPassView,
 } from '../../scripts/passes.js';
 import {
   el, fetchPass, fetchPassList, getApiContext, isPreview, readApiRow, readPassList,
@@ -121,7 +121,11 @@ function buildCard(product) {
     learn.type = 'button';
     learn.setAttribute('aria-haspopup', 'dialog');
     learn.setAttribute('aria-label', `${translate('quickBuyLearnMore')}: ${pass.name}`);
-    learn.addEventListener('click', () => openPassDetails(pass, learn, ADD_TO_CART));
+    learn.addEventListener('click', () => {
+      openPassDetails(pass, learn, ADD_TO_CART);
+      // GA4's view_item for the pass
+      trackPassView(pass);
+    });
     actions.append(learn, buildAddButton(pass, 'quick-buy-add', ADD_TO_CART));
     card.removeAttribute('aria-busy');
   };

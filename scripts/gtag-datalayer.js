@@ -43,20 +43,26 @@ export function trackViewSource() {
   }, true);
 }
 
+// how the visitor came to this page, once read (see viewSource)
+let pageSource;
+
 /**
  * How the visitor came to this page: the noted click for it, used once (so a reload is
- * `others`), else `others`.
+ * `others`), else `others`; kept for the page, so every event on it says the same (e.g. the
+ * passes' view_item_list and a pass's view_item).
  * @returns {'mega_menu'|'hp_search_widget_click'|'others'}
  */
 export function viewSource() {
+  if (pageSource) return pageSource;
+  pageSource = 'others';
   try {
     const noted = JSON.parse(sessionStorage.getItem(SOURCE_KEY) || 'null');
     if (noted && noted.pathname === window.location.pathname && SOURCES[noted.source]) {
       sessionStorage.removeItem(SOURCE_KEY);
-      return noted.source;
+      pageSource = noted.source;
     }
   } catch { /* nothing noted */ }
-  return 'others';
+  return pageSource;
 }
 
 /**
