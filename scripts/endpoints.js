@@ -30,6 +30,9 @@ const BOOKING_ENDPOINTS = {
   // optionally productCode, one code or a list, and startDateTime "YYYY-MM-DD HH:mm:ss"; every
   // pass without productCode)
   productPasses: '/api/v1/web/ppg-app/GetProductPasses',
+  // cancelling a booking of the logged-in member (POST, JSON: orderId, cancellationReason;
+  // Authorization: Bearer <jwt>)
+  cancelBooking: '/api/v1/web/ppg-app/cancel-booking',
 };
 
 // endpoint paths, joined to the API domain
@@ -74,10 +77,9 @@ const ENDPOINTS = {
   // the logged-in member's bookings (POST, JSON: languageCode, propertyTypeCode, status; the
   // login token as a Bearer token)
   bookingList: '/api/v1/web/app_demo/GetBookingList',
-  // resending a booking's confirmation and cancelling it (POST, JSON: orderId): placeholder paths
-  // until these APIs exist
+  // resending a booking's confirmation (POST, JSON: orderId): a placeholder path until its API
+  // exists
   resendBookingConfirmation: '/api/v1/web/app_demo/ResendBookingConfirmation',
-  cancelBooking: '/api/v1/web/app_demo/CancelBooking',
 };
 
 /**
