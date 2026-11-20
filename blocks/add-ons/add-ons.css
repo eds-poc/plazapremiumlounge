@@ -1,0 +1,372 @@
+/* Add-ons: the source's Book Your Visit "Additional Services" (#bookyourvisit-addons-wrapper),
+   mobile first. Phones: a warm grey panel the screen's width (15px round), each add-on's name
+   (14px/300) with a filled 30px Add pill (12px) at the right, a black line under each. Tablets: no
+   panel, outlined 150px pills. From 992px: "ADDITIONAL SERVICES" (12px/500 capitals over a black
+   line), each add-on in its own pill-shaped row (16px/300), a black line under the list, an
+   outlined Add pill (127px, 12px; from 1200px 180 x 33px, 14px). An add-on in the cart: its row
+   tinted, the name and "2x …" maroon, Remove (the same pill). */
+.add-ons {
+  --add-ons-panel: var(--color-surface-warm);
+  --add-ons-rule: 1px solid var(--color-text-strong);
+  --add-ons-row-rule: 1px solid var(--color-text-strong);
+  --add-ons-added: rgb(221 218 207 / 30%);
+  --add-ons-label-spacing: 1px;
+  --add-ons-button-height: 30px;
+  --add-ons-button-width: 80px;
+  --add-ons-button-width-tablet: 150px;
+  --add-ons-button-width-992: 127px;
+  --add-ons-button-height-desktop: 33px;
+  --add-ons-button-width-desktop: 180px;
+  --add-ons-detail: var(--color-text-subtle);
+
+  margin: var(--spacing-bootstrap-3) calc(-1 * var(--spacing-6)) var(--spacing-6);
+  padding: var(--spacing-6);
+  border-radius: var(--radius-md);
+  background-color: var(--add-ons-panel);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-body);
+}
+
+/* the pop-ups open outside the block (the site's dialog in the page's body): their own variables.
+   The add-on's: 400px from 576px, 20px round; the name 20px/300, the quantity a warm grey pill
+   with − and +, the service total 20px/500, Add an outlined pill */
+dialog.modal:is(.add-ons-modal, .add-ons-confirm-modal) {
+  --add-ons-row-rule: 1px solid var(--color-border);
+  --add-ons-popup-width: 400px;
+  --add-ons-stepper-height: 31px;
+}
+
+.add-ons .add-ons-title {
+  margin: 0;
+  padding-bottom: var(--spacing-6);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--add-ons-label-spacing);
+  text-transform: uppercase;
+}
+
+.add-ons .add-ons-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.add-ons .add-ons-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  padding: 0 0 var(--spacing-6);
+  border-bottom: var(--add-ons-row-rule);
+  margin-bottom: var(--spacing-4);
+}
+
+.add-ons .add-ons-item:last-child {
+  margin-bottom: 0;
+}
+
+.add-ons .add-ons-item-text {
+  display: grid;
+  gap: var(--spacing-2);
+  min-width: 0;
+}
+
+.add-ons .add-ons-item-name {
+  color: var(--color-text-strong);
+  font-weight: var(--font-weight-light);
+}
+
+.add-ons .add-ons-item-detail {
+  color: var(--add-ons-detail);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-light);
+}
+
+.add-ons .add-ons-item-button {
+  flex: none;
+  box-sizing: border-box;
+  min-width: var(--add-ons-button-width);
+  height: var(--add-ons-button-height);
+  margin: 0;
+  padding: var(--spacing-2);
+  border: 1px solid var(--color-brand-primary);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+  font: inherit;
+  font-size: var(--font-size-xs);
+  text-transform: capitalize;
+  cursor: pointer;
+}
+
+.add-ons .is-added .add-ons-item-button {
+  background-color: transparent;
+  color: var(--color-brand-primary);
+}
+
+.add-ons .add-ons-item-button:hover {
+  background-color: var(--color-brand-primary-action);
+  color: var(--color-text-inverse);
+}
+
+.add-ons .add-ons-item-button:focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+}
+
+/* the pop-up */
+dialog.modal.add-ons-modal .modal-content {
+  border-radius: var(--radius-lg);
+}
+
+dialog.modal.add-ons-modal .modal-header {
+  justify-content: flex-end;
+}
+
+.add-ons-modal .add-ons-popup {
+  display: grid;
+  gap: var(--spacing-3);
+}
+
+.add-ons-modal .add-ons-popup-name {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-heading);
+}
+
+.add-ons-modal .add-ons-popup-description {
+  font-size: var(--font-size-sm);
+}
+
+.add-ons-modal .add-ons-popup-description :is(p, ul) {
+  margin: 0 0 var(--spacing-3);
+}
+
+.add-ons-modal .add-ons-popup-description a {
+  color: var(--color-brand-primary);
+}
+
+.add-ons-modal .add-ons-popup-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+}
+
+.add-ons-modal .add-ons-popup-quantity {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--spacing-5);
+  align-items: center;
+  padding: var(--spacing-6) 0;
+  border-top: var(--add-ons-row-rule);
+  border-bottom: var(--add-ons-row-rule);
+}
+
+.add-ons-modal .add-ons-popup-label {
+  color: var(--color-text-strong);
+  font-weight: var(--font-weight-medium);
+}
+
+.add-ons-modal .add-ons-stepper {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  height: var(--add-ons-stepper-height);
+  padding: 0 var(--spacing-6);
+  border-radius: var(--radius-input);
+  background-color: var(--color-surface-warm);
+}
+
+.add-ons-modal .add-ons-step {
+  padding: 0 var(--spacing-2);
+  border: 0;
+  background: none;
+  color: var(--color-text-strong);
+  font: inherit;
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.add-ons-modal .add-ons-step:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.add-ons-modal .add-ons-step:focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+}
+
+.add-ons-modal .add-ons-qty {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-control);
+  font: inherit;
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+}
+
+.add-ons-modal .add-ons-popup-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  padding-top: var(--spacing-3);
+}
+
+.add-ons-modal .add-ons-popup-total {
+  margin: 0;
+}
+
+.add-ons-modal .add-ons-popup-amount {
+  color: var(--color-text-strong);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+}
+
+.add-ons-modal .add-ons-popup-add {
+  min-width: 120px;
+  padding: var(--spacing-2) var(--spacing-6);
+  border: 1px solid var(--color-brand-primary);
+  border-radius: var(--radius-input);
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
+  font: inherit;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.add-ons-modal .add-ons-popup-add:hover {
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+.add-ons-modal .add-ons-popup-add:disabled {
+  opacity: 0.65;
+  cursor: progress;
+}
+
+.add-ons-modal .add-ons-popup-error {
+  margin: 0;
+  color: var(--color-error);
+  text-align: center;
+}
+
+.add-ons-modal .add-ons-popup-error:empty {
+  display: none;
+}
+
+/* the remove confirmation: its text centred, Cancel and Yes */
+.add-ons-confirm-modal .add-ons-confirm {
+  text-align: center;
+}
+
+.add-ons-confirm-modal .add-ons-confirm-text,
+.add-ons-confirm-modal .add-ons-confirm-name {
+  margin: 0;
+}
+
+.add-ons-confirm-modal .add-ons-confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-7);
+}
+
+.add-ons-confirm-modal .add-ons-confirm-actions .button {
+  margin: 0;
+}
+
+@media (width >= 576px) {
+  dialog.modal.add-ons-modal {
+    width: min(var(--add-ons-popup-width), calc(100% - 2 * var(--spacing-3)));
+  }
+}
+
+/* tablets (the phones' list and bar still): no panel, the column's width, outlined Add pills
+   (150px), the names #333, as the source's */
+@media (width >= 768px) {
+  .add-ons {
+    margin: var(--spacing-bootstrap-3) 0 var(--spacing-9);
+    padding: var(--spacing-7) 0;
+    background: none;
+    font-size: var(--font-size-md);
+  }
+
+  .add-ons .add-ons-list {
+    margin-bottom: var(--spacing-8);
+  }
+
+  .add-ons .add-ons-item-name {
+    color: var(--color-text);
+  }
+
+  .add-ons .add-ons-item-button {
+    min-width: var(--add-ons-button-width-tablet);
+    background-color: transparent;
+    color: var(--color-brand-primary);
+  }
+}
+
+/* from 992px: the rows as pills, a black line under the list, the Add pill 127px (12px) to
+   1199px and 180 x 33px (14px) from 1200px, as the source's */
+@media (width >= 992px) {
+  .add-ons {
+    padding: 0;
+    border-radius: 0;
+  }
+
+  .add-ons .add-ons-list {
+    border-bottom: var(--add-ons-rule);
+  }
+
+  .add-ons .add-ons-title {
+    margin-bottom: var(--spacing-3);
+    border-bottom: var(--add-ons-rule);
+  }
+
+  .add-ons .add-ons-item {
+    margin-bottom: var(--spacing-4);
+    padding: var(--spacing-4) var(--spacing-6);
+    border: 0;
+    border-radius: var(--radius-pill);
+  }
+
+  .add-ons .add-ons-item.is-added {
+    background-color: var(--add-ons-added);
+  }
+
+  .add-ons .is-added :is(.add-ons-item-name, .add-ons-item-detail) {
+    color: var(--color-brand-primary-action);
+  }
+
+  .add-ons .add-ons-item-text {
+    grid-auto-flow: column;
+    justify-content: start;
+    gap: var(--spacing-6);
+  }
+
+  .add-ons .add-ons-item-detail {
+    font-size: inherit;
+    font-weight: var(--font-weight-regular);
+  }
+
+  .add-ons .add-ons-item-button {
+    min-width: var(--add-ons-button-width-992);
+  }
+}
+
+@media (width >= 1200px) {
+  .add-ons .add-ons-item-button {
+    min-width: var(--add-ons-button-width-desktop);
+    height: var(--add-ons-button-height-desktop);
+    font-size: var(--font-size-sm);
+  }
+}

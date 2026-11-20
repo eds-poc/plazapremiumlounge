@@ -164,7 +164,7 @@ stays in the form's column, beside the summary).
 
 | Title (back) |
 | --- |
-| # [Back to Edit Booking](/en-uk/makeabooking) |
+| # [Back to Edit Booking](/en-uk/book-your-visit) |
 
 - The way back: a heading 1 written as a link, shown with the maroon arrow before it. Point it at
   the booking page (the mini cart's Edit).

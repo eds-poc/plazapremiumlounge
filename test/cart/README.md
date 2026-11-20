@@ -48,6 +48,22 @@ line, DELETE. It covers:
   booking system's new price only); the tab shown again.
 - Two tabs (they follow and settle); the earlier cookie moved; blocked storage.
 
+`node book-your-visit.test.mjs` — the Book Your Visit page and its Add-ons (32 checks), on the
+local `/{lang}/book-your-visit` pages (`BW_HOST` with local content). The cart service is routed
+(the lounge fixture a week ahead, the add-on lines the PUTs give it); the add-ons are the sample
+answer (`blocks/add-ons/sample-add-ons.json`). Set `AXE_CORE` for the axe checks.
+- The page at 1440: its blocks, the lounge and badge, Date and Time from the cart, the locked
+  fields, the authored labels, the back arrow (the lounge page with the visit), the Booking
+  Summary, the add-ons under the form; no page errors.
+- An add-on: its pop-up (the booked lounge's price, 1 to the maximum), Add (one PUT with the lounge
+  and the add-on), the added row and the summary's Additional Services, the count; Remove (the
+  confirmation, a PUT with the lounge alone). XO Sauce: the first lounge in stock's price.
+- A time change (the add-ons asked again), Check Out after it (a PUT with the new start) and
+  without one (no PUT); a failed save; a failed add; today's first bookable time (now + an hour +
+  15 minutes, onto the next half hour, at the lounge).
+- 375: the list with Edit, the date pop-up, one promo field, the fixed bar.
+- No cart, a cart of passes (the homepage); the four other languages; axe at 1440 and 375.
+
 **End to end** (`e2e/`, nothing routed: the real stage passes and cart APIs, so they make and delete
 real stage carts). Set `HOST` to the local preview or a branch preview, plus `WIDTH` and
 `PLAYWRIGHT`.

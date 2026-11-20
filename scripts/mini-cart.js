@@ -119,8 +119,9 @@ const promoConfirm = new CartDialog('cart-promo-remove', 'cart-confirm-modal');
 const PREVIEW_HOST = /\.aem\.page$|^localhost$/;
 
 // the cart links without a metadata row: Check Out goes to this site's checkout page (the
-// Checkout block) in the visitor's language folder; Edit has no page of this site's yet
-const DEFAULT_LINKS = { checkout: '/{lang}/guest-checkout' };
+// Checkout block), Edit to its Book Your Visit page (the Book Your Visit block), in the visitor's
+// language folder, as the source's
+const DEFAULT_LINKS = { checkout: '/{lang}/guest-checkout', edit: '/{lang}/book-your-visit' };
 
 /**
  * A cart link from the page metadata, e.g. `cart-checkout-url` (set per language folder in the

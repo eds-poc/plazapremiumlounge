@@ -265,12 +265,46 @@ function readLine(p) {
     // category, and the line's price before discounts and its discounts, the rate plan's and an
     // applied promo code's (as `total`, the line's: its quantity included)
     outletId: text(p?.lmsOutletCode),
+    // the lounge's codes (Book Your Visit's add-ons request): its property and service
+    propertyCode: text(p?.propertyCode),
+    serviceCode: text(p?.serviceCode),
     locationName: text(p?.locationName),
     iataCode: text(p?.iataCode),
     timeZone: readTimeZone(text(p?.timeZone)) || '',
     category: text(p?.serviceDisplayName),
     basePrice: Number(price.totalBasePrice),
     discount: (Number(price.totalDiscounts) || 0) + (Number(price.totalPromocodeAmount) || 0),
+  };
+}
+
+// an add-on's product in the booking system's cart (Book Your Visit's Additional Services)
+const ADDON = /-Add-On-/i;
+
+/**
+ * Whether a product of the service's cart is an add-on (its type, or its catalogue code's).
+ * @param {Object} p
+ * @returns {boolean}
+ */
+function isAddon(p) {
+  return text(p?.productType).toLowerCase() === 'add-on' || ADDON.test(text(p?.catalogueCode));
+}
+
+/**
+ * An add-on of the lounge, from the service's product: its code, name, quantity and total (what
+ * the mini cart's "Additional Services: 2x …" and the summary show).
+ * @param {Object} p
+ * @returns {{id: string, catalogueCode: string, productCode: string, name: string,
+ *   quantity: number, total: number, start: string}}
+ */
+function readAddon(p) {
+  return {
+    id: text(p?.cartItemId),
+    catalogueCode: text(p?.catalogueCode),
+    productCode: text(p?.productCode),
+    name: text(p?.productDisplayName) || text(p?.productName),
+    quantity: Number.parseInt(p?.quantity, 10) || 1,
+    total: Number(p?.itemPriceDetails?.productTotalPrice?.totalPrice),
+    start: text(p?.startDate),
   };
 }
 
@@ -285,6 +319,21 @@ function readTerms(json) {
   return policies
     .map((t) => ({ name: text(t?.termsName), html: String(t?.description ?? '').trim() }))
     .filter((t) => t.name || t.html);
+}
+
+/**
+ * The cart's lines from the service's products: its lounge (with its add-ons, as `addons`) or
+ * passes. Add-ons without a lounge (not expected) are left out.
+ * @param {Object[]} products
+ * @returns {Object[]}
+ */
+function attachAddons(products) {
+  const lines = products.filter((p) => !isAddon(p)).map(readLine)
+    .filter((line) => line.catalogueCode);
+  const addons = products.filter(isAddon).map(readAddon).filter((a) => a.catalogueCode);
+  const lounge = lines.find((line) => line.kind !== 'pass');
+  if (lounge && addons.length) lounge.addons = addons;
+  return lines;
 }
 
 /**
@@ -304,7 +353,8 @@ function readCart(json) {
   return {
     cartId: text(json?.cartId),
     currency: text(json?.currency),
-    lines: products.map(readLine).filter((line) => line.catalogueCode),
+    // (a lounge's add-ons go with it, as line.addons: a cart has one lounge)
+    lines: attachAddons(products),
     totals: {
       base: Number(totals.totalBasePrice),
       discounts,
@@ -376,6 +426,18 @@ function passProducts(lines) {
 }
 
 /**
+ * A lounge's add-ons as the cart API takes them: each with the lounge's start and its quantity (as
+ * the source's addrelatedservice: the visit's date and time).
+ * @param {Object} line The lounge's line
+ * @returns {Object[]}
+ */
+function addonProducts(line) {
+  return (line.addons || []).filter((a) => a.quantity > 0).map((a) => ({
+    catalogueCode: a.catalogueCode, startDate: line.start, quantity: String(a.quantity),
+  }));
+}
+
+/**
  * The cart's products again as the cart API takes them, whatever they are (a lounge: its
  * product, start and guests; passes: as passProducts), with what its order takes besides.
  * @param {Object[]} lines
@@ -383,14 +445,14 @@ function passProducts(lines) {
  */
 function cartProducts(lines) {
   const lounge = lines.some((line) => line.kind !== 'pass');
-  const products = lines.map((line) => (line.kind === 'pass'
-    ? passProduct(line.catalogueCode, line.quantity)
-    : {
+  const products = lines.flatMap((line) => (line.kind === 'pass'
+    ? [passProduct(line.catalogueCode, line.quantity)]
+    : [{
       catalogueCode: line.catalogueCode,
       startDate: line.start,
       quantity: line.quantity || 1,
       guestsCount: { adult: String(line.adults || 1), child: String(line.children || 0) },
-    }));
+    }, ...addonProducts(line)]));
   return { products, order: { ...ORDER, ...(lounge ? ADAPTERS.lounge.order : {}) } };
 }
 
@@ -728,4 +790,76 @@ export function removePromo() {
     return { status: 'removed' };
   })().finally(() => { promoting = null; });
   return promoting;
+}
+
+let updating = null;
+
+/**
+ * Sends the cart's lounge again with a change (PUT: the lounge and its add-ons, in the cart's
+ * currency), puts the promo code back, then reads the cart again. One at a time, after an add, a
+ * removal, a conversion or a promo code under way.
+ * @param {function(Object): Object} change The lounge's line → the line to send
+ * @param {string} what For the console when it fails
+ * @returns {Promise<{status: 'updated'|'failed'|'absent', cart?: Object, error?: Error}>} absent:
+ *   no lounge in the cart
+ */
+function updateLoungeLine(change, what) {
+  if (updating) return updating.then(() => updateLoungeLine(change, what));
+  updating = (async () => {
+    await Promise.allSettled([pending, removing, converting, promoting].filter(Boolean));
+    let cart = getCart();
+    if (!cart && getCartId()) {
+      try {
+        cart = await refreshCart();
+      } catch (error) {
+        return { status: 'failed', error };
+      }
+    }
+    const lounge = cart?.lines.find((line) => line.kind !== 'pass');
+    if (!lounge) return { status: 'absent' };
+    const lines = cart.lines.map((line) => (line === lounge ? change(line) : line));
+    const { products, order } = cartProducts(lines);
+    try {
+      await putProducts(cart.cartId, cart.currency, products, order);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`cart: ${what} not saved`, error);
+      return { status: 'failed', error };
+    }
+    await keepPromo(cart.cartId, cart.promoCode);
+    try {
+      return { status: 'updated', cart: await refreshCart(cart.cartId) };
+    } catch {
+      // (saved: what the page knows, the totals read again next time)
+      const known = { ...cart, lines };
+      if (getCartId() === cart.cartId) saveCart(known);
+      return { status: 'updated', cart: getCart() };
+    }
+  })().finally(() => { updating = null; });
+  return updating;
+}
+
+/**
+ * Changes the cart's lounge visit (Book Your Visit): its start (and with it its add-ons'), as the
+ * booking system takes it ("YYYY-MM-DD HH:mm:ss").
+ * @param {{start: string}} changes
+ * @returns {Promise<{status: 'updated'|'failed'|'absent', cart?: Object, error?: Error}>}
+ */
+export function updateLounge({ start }) {
+  return updateLoungeLine((line) => ({ ...line, start }), 'the visit');
+}
+
+/**
+ * Sets one of the lounge's add-ons (Book Your Visit's Additional Services): added with this
+ * quantity, or another quantity of it; 0 takes it out.
+ * @param {{catalogueCode: string, name?: string, quantity: number}} addon
+ * @returns {Promise<{status: 'updated'|'failed'|'absent', cart?: Object, error?: Error}>}
+ */
+export function setAddon({ catalogueCode, name = '', quantity }) {
+  const qty = Math.max(0, Number.parseInt(quantity, 10) || 0);
+  return updateLoungeLine((line) => {
+    const others = (line.addons || []).filter((a) => a.catalogueCode !== catalogueCode);
+    const addons = qty ? [...others, { catalogueCode, name, quantity: qty }] : others;
+    return { ...line, addons };
+  }, qty ? 'the add-on' : 'the add-on\'s removal');
 }

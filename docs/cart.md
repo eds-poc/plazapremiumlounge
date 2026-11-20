@@ -37,9 +37,10 @@ the page after ⊗ → Yes, and that reload adds the promotional address's pass 
     (`HKD 1,755.00`)
   - **Check Out**: a link to this site's checkout page, `/{lang}/guest-checkout` (unless the page
     metadata names another), announced too (`cart:checkout`).
-  - **Edit** (only with a lounge): a link to the page the metadata names, announced too
-    (`cart:edit`); without one it only announces, and on the preview site a note under the buttons
-    names the missing row (see [Check Out and Edit](#check-out-and-edit-for-authors)).
+  - **Edit** (only with a lounge): a link to this site's Book Your Visit page,
+    `/{lang}/book-your-visit` (unless the page metadata names another), announced too
+    (`cart:edit`). There the visit's date and time can be changed and add-ons added (the Book Your
+    Visit and Add-ons blocks).
 - **⊗**: "Would you like to remove this order from the shopping cart?" with the product, over the
   mini cart (both show).
   - **Cancel** (maroon) closes only the question.
@@ -137,21 +138,21 @@ the page after ⊗ → Yes, and that reload adds the promotional address's pass 
   `scripts/mini-cart.js`), and the line's "Additional Services: 2x …" shows when the cart has
   add-ons. No link shows until the add-ons API exists (see [Add-ons](#add-ons-view-more-options)).
 
-Not there yet: the add-ons modal itself, and the checkout (the pages Check Out and Edit link to).
+Not there yet: the mini cart's add-ons modal ("View more options"; Book Your Visit's Add-ons block adds them meanwhile).
 
 ### Check Out and Edit (for authors)
 
 - **Check Out** goes to **this site's checkout page**, `/{lang}/guest-checkout` (the Checkout
   block), in the visitor's language folder (`/zh-cn/guest-checkout` on a Chinese page). It reads
   the same cart (the id in localStorage, the data in sessionStorage). No metadata row is needed.
-- **Edit** has no page of this site's yet: it stays a button that only announces `cart:edit` until
-  a `cart-edit-url` row names one (on the preview, a note under the buttons says so).
+- **Edit** goes to **this site's Book Your Visit page**, `/{lang}/book-your-visit` (the Book Your
+  Visit block), in the visitor's language folder. No metadata row is needed.
 - Either can be set (or Check Out changed) in the **bulk metadata sheet** (`/metadata` in Document
   Authoring), one row per language folder, without a code change:
 
 | URL | cart-checkout-url | cart-edit-url |
 | --- | --- | --- |
-| `/**` | (none: this site's `/{lang}/guest-checkout`) | e.g. `https://www.plazapremiumlounge.com/{lang}/book-your-visit` |
+| `/**` | (none: this site's `/{lang}/guest-checkout`) | (none: this site's `/{lang}/book-your-visit`) |
 
 (One `/**` row with `{lang}` covers every folder. A row's value wins over the default, even one
 that isn't a web address: then Check Out is a button that only announces.)
@@ -336,10 +337,22 @@ Observed on stage on 2026-11-12, with PASS10PW and test pass and lounge carts:
   sections, Next / Checkout / Close, Learn more, Upgrade, Add / Added, the success messages,
   Service total, Quantity, Adult(s), Child(ren), All Guests).
 
-**This site:** waiting for the add-ons API.
-- Wire it with `registerAddons({ available(line), open(line, trigger) })` from
-  `scripts/mini-cart.js`.
-- The cart's lines need `addons: [{ name, quantity }]` from the GET (the shape isn't known).
+**This site:**
+- **The cart's add-ons** (since Book Your Visit): the booking system's cart holds each add-on as a
+  product line (`productType` "Add-On", its `catalogueCode` `…-Add-On-…`, `quantity`), sent with
+  its lounge in a PUT (the lounge's start). `readCart` attaches them to the lounge's line as
+  `addons: [{ id, catalogueCode, productCode, name, quantity, total, start }]`, so the cart still
+  has one line (the rules, the mini cart, the checkout see a lounge).
+  - **The count** adds their quantities (as the source's).
+  - **Every PUT sends them again**: `cartProducts` (a promo code taken off, a lounge changed).
+- **Changing the cart's lounge** (Book Your Visit): `updateLounge({ start })` (the visit's start;
+  its add-ons follow) and `setAddon({ catalogueCode, name, quantity })` (0 takes it out). Each is a
+  PUT with the lounge and its add-ons, then the promo code put back (`keepPromo`) and the cart read
+  again; one at a time, after an add, a removal, a conversion or a promo code under way.
+- **The add-ons to offer** come from `scripts/add-ons.js` (`fetchAddOns`; the client API's sample
+  answer for now; see `blocks/add-ons/README.md`).
+- **The mini cart's View more options** isn't wired yet: `registerAddons({ available(line),
+  open(line, trigger) })` from `scripts/mini-cart.js` takes it.
 
 ### The mini cart from the GET answer
 
