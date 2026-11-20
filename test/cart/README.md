@@ -63,6 +63,15 @@ as for the passes, with each card's name and price. It covers:
   booking system's new price only); the tab shown again.
 - Two tabs (they follow and settle); the earlier cookie moved; blocked storage.
 
+`node reserve-now.test.mjs` — the lounge page's Reserve Now with the cart (12 checks), on
+`/en-uk/find/lounge?propertycode=PRPRTY1219` (the lounge's services as they are; the cart routed).
+Set `AXE_CORE` for the axe check.
+- A lounge in the cart: Get Price, Reserve Now → the source's Checkout Cart dialog (its texts and
+  look: centred 500px, the maroon title bar, the 21px title), the cart only read, nothing reserved;
+  static (Esc), View Cart (the mini cart), ✕.
+- Passes in the cart: the same dialog. No cart: no dialog, `property-detail:reserve` as before.
+- 375: over the Book Your Visit dialog, which stays open after ✕. axe.
+
 `node book-your-visit.test.mjs` — the Book Your Visit page and its Add-ons (35 checks), on the
 local `/{lang}/book-your-visit` pages (`BW_HOST` with local content). The cart service is routed
 (the lounge fixture a week ahead, the add-on lines the PUTs give it); the add-ons are the sample

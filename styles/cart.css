@@ -510,12 +510,25 @@ dialog.modal:is(.cart-message-modal, .cart-confirm-modal) {
   margin: auto;
 }
 
+/* the source's #checkoutCartFirstPopup: its title Bootstrap's h4 (21px, 1.5) at every width, 15px
+   under the button */
+dialog.modal.cart-message-modal {
+  --cart-message-title-size: 21px;
+  --cart-message-button-space: var(--spacing-6);
+}
+
+dialog.modal.cart-message-modal .modal-header .modal-title {
+  font-size: var(--cart-message-title-size);
+  line-height: var(--line-height-relaxed);
+}
+
 .cart-message-modal .cart-dialog-body p {
   margin: 0 0 var(--spacing-7);
 }
 
 .cart-message-modal .cart-button {
   width: 100%;
+  margin-bottom: var(--cart-message-button-space);
 }
 
 /* the remove confirmation: no title, the question and the product, Cancel and Yes at the right */

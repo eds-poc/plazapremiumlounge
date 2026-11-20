@@ -520,6 +520,50 @@ let pending = null;
 let converting = null;
 
 /**
+ * The cart as an add finds it, and the rule that keeps a product out ('' when it may go in). The
+ * booking system has the last word on what the cart holds (as the source's, where it answers
+ * 409, or `validtoaddcart` isValid false): a cart it no longer has doesn't hold the product back.
+ * @param {{type: string}} item
+ * @returns {Promise<{cart: Object|null, rule: string, error?: Error}>} error: a cart this tab
+ *   hasn't read couldn't be read (nothing may be added then)
+ */
+async function readForAdd(item) {
+  let cart = getCart();
+  if (cart?.lines.length) {
+    try {
+      cart = await refreshCart();
+    } catch { /* (unreachable: what this site knows stands) */ }
+  } else if (getCartId()) {
+    // a cart this tab hasn't read yet (a new tab, its data past its 2 hours, another tab's
+    // change): read it first, or the add would make a second cart; unreachable, no add
+    try {
+      cart = await refreshCart();
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('cart: the cart could not be read before the add', error);
+      return { cart: null, rule: '', error };
+    }
+  }
+  return { cart, rule: RULES.map((r) => r({ cart, item })).find(Boolean) || '' };
+}
+
+/**
+ * Whether a product may go into the cart as it is, without adding it (the source's lounge page
+ * Reserve Now asks `validtoaddcart` first): the cart's rules, the cart read from the booking
+ * system as an add reads it. Nothing in the cart changes.
+ * @param {{type: string}} item The product's type (e.g. `{ type: 'lounge' }`)
+ * @returns {Promise<{status: 'allowed'|'refused'|'failed', reason?: string, error?: Error}>}
+ *   refused: a rule said no (`reason`, e.g. 'checkout-first'); failed: the cart couldn't be read
+ */
+export async function checkAdd(item) {
+  // (after an add or a conversion under way: they change the cart)
+  await Promise.allSettled([pending, converting].filter(Boolean));
+  const { rule, error } = await readForAdd(item);
+  if (error) return { status: 'failed', error };
+  return rule ? { status: 'refused', reason: rule } : { status: 'allowed' };
+}
+
+/**
  * Adds a product to the cart. An empty cart is made with it (POST); a pass joins the cart's passes
  * (PUT with them all), and the same pass again is one more of it. One at a time: while an add is
  * under way, another click gets the same answer.
@@ -535,25 +579,8 @@ export function addToCart(item) {
     if (converting) await converting;
     const adapter = ADAPTERS[item?.type];
     if (!adapter) return { status: 'refused', reason: 'invalid' };
-    let cart = getCart();
-    // the booking system has the last word on what the cart holds (as the source's, where it
-    // answers 409): a cart it no longer has doesn't hold the add back
-    if (cart?.lines.length) {
-      try {
-        cart = await refreshCart();
-      } catch { /* (unreachable: what this site knows stands) */ }
-    } else if (getCartId()) {
-      // a cart this tab hasn't read yet (a new tab, its data past its 2 hours, another tab's
-      // change): read it first, or the add would make a second cart; unreachable, no add
-      try {
-        cart = await refreshCart();
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('cart: the cart could not be read before the add', error);
-        return { status: 'failed', error };
-      }
-    }
-    const rule = RULES.map((r) => r({ cart, item })).find(Boolean);
+    const { cart, rule, error: unread } = await readForAdd(item);
+    if (unread) return { status: 'failed', error: unread };
     if (rule) return { status: 'refused', reason: rule };
     const check = adapter.check(item);
     if (check) return { status: 'refused', reason: check };

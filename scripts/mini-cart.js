@@ -14,7 +14,8 @@ import { DEFAULT_SITE, getSiteFolder, translate } from './i18n.js';
 import { formatAmount, loungeDetails } from './cart-summary.js';
 import { getCart, getCartId, onCartChange } from './cart-state.js';
 import {
-  PROMO_DROPPED_EVENT, addToCart, applyPromo, convertCart, refreshCart, removeFromCart, removePromo,
+  PROMO_DROPPED_EVENT, addToCart, applyPromo, checkAdd, convertCart, refreshCart, removeFromCart,
+  removePromo,
 } from './cart.js';
 import { getCurrency } from './currency.js';
 // eslint-disable-next-line import/no-cycle
@@ -817,9 +818,8 @@ export async function addAndShow(item, trigger) {
     if (item.type === 'pass') trackAddToCart(item, result.cart);
     await openMiniCart(from, { fresh: true });
   } else if (result.reason === 'checkout-first') {
-    const view = button(translate('cartViewCart'), 'primary', () => openMiniCart(from));
-    checkoutFirst.fill(translate('cartCheckoutFirstTitle'), [el('p', '', translate('cartCheckoutFirst')), view]);
-    await checkoutFirst.open(from);
+    // eslint-disable-next-line no-use-before-define
+    await showCheckoutFirst(from);
   } else if (item.type === 'pass') {
     // (the source's pass page: its notice)
     // eslint-disable-next-line no-use-before-define
@@ -828,6 +828,37 @@ export async function addAndShow(item, trigger) {
     // eslint-disable-next-line no-use-before-define
     await showFailure('cartAddFailed', from);
   }
+}
+
+/**
+ * The source's Checkout Cart dialog (#checkoutCartFirstPopup): "Please proceed to checkout before
+ * adding new item into cart." with View Cart, which opens the mini cart.
+ * @param {HTMLElement|null} from The button that asked
+ * @param {{stack?: boolean}} [options] stack: over the open dialog (the source's phone booking
+ *   form, #mobileVisit, stays under it)
+ */
+async function showCheckoutFirst(from, options = {}) {
+  const view = button(translate('cartViewCart'), 'primary', () => openMiniCart(from));
+  checkoutFirst.fill(translate('cartCheckoutFirstTitle'), [el('p', '', translate('cartCheckoutFirst')), view]);
+  await checkoutFirst.open(from, options);
+}
+
+/**
+ * Checks, without adding it, that a product may go into the cart, and shows the source's Checkout
+ * Cart dialog when it may not (the source's lounge page Reserve Now: `validtoaddcart`, then
+ * #checkoutCartFirstPopup). As the source's, no loader meanwhile. The cart doesn't change.
+ * @param {{type: string}} item The product's type (e.g. `{ type: 'lounge' }`)
+ * @param {HTMLElement} [trigger] The button
+ * @returns {Promise<boolean>} true: the product may go in (or the cart couldn't be read, so this
+ *   check doesn't hold it back); false: refused, the dialog shown
+ */
+export async function checkAndShow(item, trigger) {
+  const from = trigger instanceof Element ? trigger.closest('button, a') || trigger : null;
+  const result = await checkAdd(item);
+  if (result.status !== 'refused') return true;
+  // (asked from a dialog, e.g. the phone's booking form: over it, as the source's)
+  if (result.reason === 'checkout-first') await showCheckoutFirst(from, { stack: !!from?.closest('dialog[open]') });
+  return false;
 }
 
 /**
