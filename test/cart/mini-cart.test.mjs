@@ -258,12 +258,12 @@ for (const width of WIDTHS) {
   await page.close();
 }
 {
-  // a lounge cart without metadata: Check Out to this site's checkout; Edit a button, the hint
-  // names its row only; zh-cn's Check Out in its own folder
+  // a lounge cart without metadata: Check Out to this site's checkout, Edit to its Book Your
+  // Visit page, both in zh-cn's own folder; no hint
   const page = await openWithCart({ path: '/zh-cn/' });
   await openCart(page);
   const m = await mini(page);
-  check('no metadata, a lounge (zh-cn): Check Out to /zh-cn/guest-checkout, Edit a button, the hint names cart-edit-url only', m.actions[0]?.tag === 'A' && new URL(m.actions[0].href).pathname === '/zh-cn/guest-checkout' && m.actions[1]?.tag === 'BUTTON' && /cart-edit-url/.test(m.hint || '') && !/cart-checkout-url/.test(m.hint || ''), JSON.stringify(m.actions) + m.hint);
+  check('no metadata, a lounge (zh-cn): Check Out to /zh-cn/guest-checkout, Edit to /zh-cn/book-your-visit, no hint', m.actions[0]?.tag === 'A' && new URL(m.actions[0].href).pathname === '/zh-cn/guest-checkout' && m.actions[1]?.tag === 'A' && new URL(m.actions[1].href).pathname === '/zh-cn/book-your-visit' && !m.hint, JSON.stringify(m.actions) + m.hint);
   await page.close();
 }
 {

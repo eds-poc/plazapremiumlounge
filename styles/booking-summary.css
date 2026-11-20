@@ -1,0 +1,597 @@
+/* the Booking Summary card, shared by the Checkout and Book Your Visit blocks (both import this):
+   its lines (a lounge's Departures / Arrivals badge, its details, a pass's quantity), the totals,
+   the promo field, the total with its note, the summary's button and the phones' bar; the source's
+   .booking-summary-wrapper. Its variables are the summary's (the blocks keep their own). Moved out of
+   blocks/checkout/checkout.css unchanged (the same selectors, scoped to either block) */
+:is(.checkout, .book-your-visit) {
+  /* the summary: 14px text (16px from 768px), each detail's label over its value, 10px apart
+     (side by side, 3px apart, from 768px), the totals under a light line with 16px/500 amounts
+     (400 from 768px), the promo field (its message the site's amber callout with its "!", as the
+     mini cart's), the total's note under the amount; the phone fold arrow (live's 0.875em glyph)
+     at the line's top right, 16 x 20px, 5px down; a pass line's "For me" pill; a lounge line's
+     Departures / Arrivals badge (the source's ppg-ppl-arrdep-badge--summary): an 11px bold
+     capitals pill with a 16px plane, 6px above the name, its tip 8px to its right (above it on
+     small phones), 220px wide, dark; the phone bar: its shadow, the space kept free for it at the
+     page's end, the button in capitals */
+  --checkout-label: rgb(0 0 0 / 60%);
+  --checkout-value: var(--color-brand-primary-action);
+  --checkout-text: var(--font-size-sm);
+  --checkout-detail-gap: var(--spacing-4);
+  --checkout-line-rule: 1px solid #bbb;
+  --checkout-amount-weight: var(--font-weight-medium);
+  --checkout-total-size: var(--font-size-md);
+  --checkout-note-size: 11px;
+  --checkout-promo-surface: rgb(231 229 229);
+  --checkout-promo-height: 47px;
+  --checkout-promo-padding: 12px 25px;
+  --checkout-promo-button: 24px;
+  --checkout-promo-arrow: 11px 10px;
+  --checkout-disabled-opacity: 0.65;
+  --checkout-label-spacing: 1px;
+  --checkout-total-label-max: 150px;
+  --checkout-alert-text: #92400e;
+  --checkout-alert-surface: #fffbeb;
+  --checkout-alert-border: 1px solid #f5ca45;
+  --checkout-alert-size: 13px;
+  --checkout-toggle-width: 16px;
+  --checkout-toggle-height: var(--spacing-7);
+  --checkout-toggle-top: var(--spacing-2);
+  --checkout-pill-padding: 4px 12px;
+  --checkout-pill-size: 13px;
+  --checkout-badge-surface: var(--color-brand-primary);
+  --checkout-badge-padding: 4px 10px;
+  --checkout-badge-gap: 6px;
+  --checkout-badge-after: 6px;
+  --checkout-badge-size: 11px;
+  --checkout-badge-weight: 700;
+  --checkout-badge-spacing: 0.06em;
+  --checkout-badge-icon: 16px;
+  --checkout-badge-label-shift: 1px;
+  --checkout-tip-surface: #1d1d1d;
+  --checkout-tip-width: 220px;
+  --checkout-tip-padding: 10px 12px;
+  --checkout-tip-offset: 8px;
+  --checkout-tip-arrow: 5px;
+  --checkout-tip-arrow-inset: 14px;
+  --checkout-tip-shadow: 0 4px 16px rgb(0 0 0 / 20%);
+  --checkout-summary-top: calc(2 * var(--spacing-7));
+  --checkout-bar-space: 150px;
+  --checkout-bar-shadow: 0 -5px 30px -10px rgb(0 0 0 / 20%);
+  --checkout-bar-button-margin: 23px;
+  --checkout-bar-button-size: var(--font-size-xs);
+  --checkout-bar-button-padding: 15px;
+  --checkout-bar-text: var(--font-size-sm);
+  --checkout-bar-amount-size: var(--font-size-md);
+}
+
+/* the summary card: warm grey, 20px round, 20px inside; the title 20px; each line (its name
+   16px/500 black, the location and labels grey and light, the values maroon), the totals under a
+   line, the promo field, the total, Payment. Below 992px it comes first, as the source's */
+:is(.checkout, .book-your-visit) .checkout-summary {
+  order: -1;
+  align-self: start;
+  border-radius: var(--radius-lg);
+  padding: var(--checkout-summary-top) var(--spacing-7) var(--spacing-7);
+  background-color: var(--color-surface-warm);
+  color: var(--checkout-label);
+  font-size: var(--checkout-text);
+  line-height: var(--line-height-body);
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-title {
+  margin: 0 0 var(--spacing-7);
+  padding-bottom: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-empty {
+  margin: 0 0 var(--spacing-7);
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-line {
+  padding-bottom: 0;
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-line-head {
+  position: relative;
+  padding-right: calc(var(--spacing-11) + var(--spacing-4));
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-name {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-place {
+  margin: 0;
+}
+
+/* the Departures / Arrivals badge above the lounge's name; its tip on hover, keyboard focus or a
+   click (blocks/checkout/checkout.js) */
+:is(.checkout, .book-your-visit) .checkout-badge {
+  position: relative;
+  display: flex;
+  width: max-content;
+  margin-bottom: var(--checkout-badge-after);
+}
+
+:is(.checkout, .book-your-visit) .checkout-badge-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--checkout-badge-gap);
+  margin: 0;
+  border: 0;
+  border-radius: var(--radius-xs);
+  padding: var(--checkout-badge-padding);
+  background-color: var(--checkout-badge-surface);
+  color: var(--color-text-inverse);
+  font-family: inherit;
+  font-size: var(--checkout-badge-size);
+  font-weight: var(--checkout-badge-weight);
+  line-height: 1;
+  letter-spacing: var(--checkout-badge-spacing);
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: default;
+}
+
+:is(.checkout, .book-your-visit) .checkout-badge-button:focus-visible {
+  outline: 2px solid var(--checkout-badge-surface);
+  outline-offset: 2px;
+}
+
+:is(.checkout, .book-your-visit) .checkout-badge-icon {
+  flex-shrink: 0;
+  width: var(--checkout-badge-icon);
+  height: var(--checkout-badge-icon);
+  background-color: currentcolor;
+  mask: url('../../icons/plane.svg') center / contain no-repeat;
+}
+
+/* the plane taking off for departures, landing for arrivals */
+:is(.checkout, .book-your-visit) .checkout-badge-departure .checkout-badge-icon {
+  transform: rotate(-45deg);
+}
+
+:is(.checkout, .book-your-visit) .checkout-badge-arrival .checkout-badge-icon {
+  transform: rotate(90deg);
+}
+
+:is(.checkout, .book-your-visit) .checkout-badge-tip {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + var(--checkout-tip-offset));
+  z-index: 2;
+  box-sizing: border-box;
+  width: var(--checkout-tip-width);
+  border-radius: var(--radius-xs);
+  padding: var(--checkout-tip-padding);
+  background-color: var(--checkout-tip-surface);
+  box-shadow: var(--checkout-tip-shadow);
+  color: var(--color-text-inverse);
+  font-size: var(--checkout-badge-size);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.4;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-50%);
+  transition: opacity var(--duration-fast);
+}
+
+:is(.checkout, .book-your-visit) .checkout-badge-tip::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  border: var(--checkout-tip-arrow) solid transparent;
+  border-right-color: var(--checkout-tip-surface);
+  transform: translateY(-50%);
+}
+
+:is(.checkout, .book-your-visit) .checkout-badge:is(:hover, .is-open, :has(.checkout-badge-button:focus-visible)):not(.is-dismissed) .checkout-badge-tip {
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (width <=480px) {
+  :is(.checkout, .book-your-visit) .checkout-badge-tip {
+    top: auto;
+    bottom: calc(100% + var(--checkout-tip-offset));
+    left: 0;
+    transform: none;
+  }
+
+  :is(.checkout, .book-your-visit) .checkout-badge-tip::after {
+    top: 100%;
+    right: auto;
+    left: var(--checkout-tip-arrow-inset);
+    border-right-color: transparent;
+    border-top-color: var(--checkout-tip-surface);
+    transform: none;
+  }
+}
+
+/* below 992px: the arrow at the line's top right folds its details away (→ open, ↓ folded, as the
+   source's), the arrow as wide as the source's glyph (0.875em) */
+:is(.checkout, .book-your-visit) .checkout-summary-toggle {
+  position: absolute;
+  top: var(--checkout-toggle-top);
+  right: 0;
+  display: block;
+  width: var(--checkout-toggle-width);
+  height: var(--checkout-toggle-height);
+  border: 0;
+  padding: 0;
+  background-color: var(--color-brand-primary);
+  font-size: inherit;
+  mask: url('../../icons/arrow-right-light.svg') center / 0.875em auto no-repeat;
+  cursor: pointer;
+  transition: transform var(--duration-normal) var(--ease-standard);
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-toggle[aria-expanded='false'] {
+  transform: rotate(90deg);
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-details {
+  margin: 0;
+  padding-top: var(--spacing-7);
+}
+
+:is(.checkout, .book-your-visit) .is-folded .checkout-summary-details {
+  display: none;
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-detail {
+  display: block;
+  flex-wrap: wrap;
+  gap: 0 0.3em;
+  padding-bottom: var(--checkout-detail-gap);
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-detail dt {
+  font-weight: var(--font-weight-light);
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-detail dd {
+  margin: 0;
+  color: var(--checkout-value);
+  font-weight: var(--font-weight-medium);
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-unit {
+  padding: 0 calc(2 * var(--spacing-1));
+  line-height: var(--line-height-relaxed);
+}
+
+/* a pass line: "Quantity: N" 15px under its name, the price at the right, the white "For me" pill
+   10px under them; 20px under each pass */
+:is(.checkout, .book-your-visit) .checkout-summary-line-pass {
+  padding-bottom: var(--spacing-7);
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-line-pass .checkout-summary-details {
+  padding-top: var(--spacing-7);
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-quantity {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  margin: 0;
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-line-amount {
+  color: var(--color-text-strong);
+  font-size: var(--font-size-md);
+  font-weight: var(--checkout-amount-weight);
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-intent {
+  display: inline-flex;
+  margin-top: var(--spacing-4);
+  border-radius: var(--radius-pill);
+  padding: var(--checkout-pill-padding);
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
+  font-size: var(--checkout-pill-size);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.3;
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-totals {
+  margin: var(--spacing-4) 0 var(--spacing-7);
+  border-top: var(--checkout-line-rule);
+  padding: var(--spacing-4) 0;
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-totals:empty {
+  display: none;
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-service {
+  padding-bottom: var(--spacing-4);
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-row .checkout-summary-amount {
+  flex: none;
+  color: var(--color-text-strong);
+  font-size: var(--font-size-md);
+  font-weight: var(--checkout-amount-weight);
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-totals .checkout-summary-row {
+  gap: 0;
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-totals .checkout-summary-amount {
+  flex: 0 1 auto;
+  text-align: end;
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-discount .checkout-summary-amount {
+  color: var(--color-brand-primary-action);
+}
+
+/* the promo code (the mini cart's field, scripts/mini-cart.js): "PROMO CODE", a grey pill with
+   the arrow, its message; 15px above it, 20px under it */
+:is(.checkout, .book-your-visit) .checkout-promo {
+  margin-bottom: var(--spacing-7);
+  padding-top: var(--spacing-6);
+  color: var(--color-text);
+}
+
+:is(.checkout, .book-your-visit) .checkout-promo-label {
+  display: block;
+  margin-bottom: var(--spacing-3);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--checkout-label-spacing);
+  text-transform: uppercase;
+}
+
+:is(.checkout, .book-your-visit) .checkout-promo-field {
+  position: relative;
+}
+
+:is(.checkout, .book-your-visit) .checkout-promo-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--checkout-promo-height);
+  border: 1px solid transparent;
+  border-radius: var(--radius-input);
+  padding: var(--checkout-promo-padding);
+  background-color: var(--checkout-promo-surface);
+  color: var(--color-brand-primary-action);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
+:is(.checkout, .book-your-visit) .checkout-promo-input::placeholder {
+  color: color-mix(in srgb, var(--color-text-control) 75%, transparent);
+}
+
+:is(.checkout, .book-your-visit) .checkout-promo-input:focus {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+}
+
+:is(.checkout, .book-your-visit) :is(.checkout-promo-apply, .checkout-promo-remove) {
+  position: absolute;
+  top: 50%;
+  right: var(--spacing-4);
+  width: var(--checkout-promo-button);
+  height: var(--checkout-promo-button);
+  border: 0;
+  padding: 0;
+  background-color: var(--color-text-strong);
+  cursor: pointer;
+  transform: translateY(-50%);
+  mask: url('../../icons/promo-arrow.svg') center / var(--checkout-promo-arrow) no-repeat;
+}
+
+:is(.checkout, .book-your-visit) .checkout-promo-remove {
+  mask-image: url('../../icons/close-thin.svg');
+  mask-size: var(--font-size-md);
+}
+
+:is(.checkout, .book-your-visit) :is(.checkout-promo-apply, .checkout-promo-remove):disabled {
+  opacity: var(--checkout-disabled-opacity);
+  cursor: progress;
+}
+
+/* its message: the site's amber callout (as the mini cart's) */
+:is(.checkout, .book-your-visit) .checkout-promo-message {
+  margin: var(--spacing-2) 0;
+  font-size: var(--checkout-alert-size);
+  line-height: var(--line-height-body);
+}
+
+:is(.checkout, .book-your-visit) .checkout-promo-message:empty {
+  display: none;
+}
+
+:is(.checkout, .book-your-visit) .checkout-promo-message.is-error {
+  border: var(--checkout-alert-border);
+  border-radius: var(--spacing-2);
+  padding: var(--spacing-1) var(--spacing-4);
+  background-color: var(--checkout-alert-surface);
+  color: var(--checkout-alert-text);
+}
+
+:is(.checkout, .book-your-visit) .checkout-promo-message.is-error::before {
+  content: '';
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-right: var(--spacing-2);
+  background-color: currentcolor;
+  vertical-align: middle;
+  mask: url('../../icons/circle-exclamation.svg') center / contain no-repeat;
+}
+
+/* the total: "Total" light and grey, its amount 18px/500 (16px below 768px) with the note under it
+   at the right */
+:is(.checkout, .book-your-visit) .checkout-summary-total {
+  align-items: center;
+  padding-bottom: var(--spacing-4);
+  color: var(--color-text);
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-total .checkout-summary-label {
+  max-width: var(--checkout-total-label-max);
+  color: var(--checkout-label);
+  font-weight: var(--font-weight-light);
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-total .checkout-summary-amount {
+  color: var(--color-text);
+  font-size: var(--checkout-total-size);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+  text-align: end;
+}
+
+:is(.checkout, .book-your-visit) .checkout-summary-note {
+  display: block;
+  color: var(--color-text-soft-dark);
+  font-size: var(--checkout-note-size);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-body);
+}
+
+/* Payment: a full-width 47px pill, 24px above it; grey and faded until the boxes are ticked */
+:is(.checkout, .book-your-visit) .checkout-payment {
+  width: 100%;
+  margin-top: var(--spacing-stack);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-5) var(--spacing-11);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-light);
+  text-transform: capitalize;
+}
+
+:is(.checkout, .book-your-visit) .checkout-payment:disabled {
+  border-color: transparent;
+  background-color: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+  font-weight: var(--font-weight-light);
+  opacity: var(--checkout-disabled-opacity);
+  cursor: not-allowed;
+}
+
+/* the phone bar: white, fixed at the bottom of the screen: "Total: USD 74.77" (the amount bold),
+   the note under it, then Payment in capitals */
+:is(.checkout, .book-your-visit) .checkout-bar {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: var(--z-megamenu);
+  padding: var(--spacing-6) 0;
+  background-color: var(--color-background);
+  box-shadow: var(--checkout-bar-shadow);
+  color: var(--color-text);
+  font-size: var(--checkout-bar-text);
+}
+
+:is(.checkout, .book-your-visit) .checkout-bar-total {
+  margin: 0 0 var(--spacing-3);
+  padding: 0 var(--spacing-6);
+}
+
+:is(.checkout, .book-your-visit) .checkout-bar-amount {
+  display: inline-block;
+  padding-left: var(--spacing-5);
+  font-size: var(--checkout-bar-amount-size);
+  font-weight: var(--font-weight-campaign-bold);
+}
+
+:is(.checkout, .book-your-visit) .checkout-bar-note {
+  display: block;
+  font-size: inherit;
+}
+
+:is(.checkout, .book-your-visit) .checkout-bar .checkout-payment {
+  width: calc(100% - 2 * var(--checkout-bar-button-margin));
+  margin: 0 var(--checkout-bar-button-margin);
+  padding: var(--checkout-bar-button-padding);
+  font-size: var(--checkout-bar-button-size);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--checkout-label-spacing);
+  text-transform: uppercase;
+}
+
+:is(.checkout, .book-your-visit) .checkout-bar .checkout-payment:disabled {
+  opacity: 1;
+}
+
+/* (below 992px Payment is the phone bar's) */
+:is(.checkout, .book-your-visit) .checkout-payment-summary {
+  display: none;
+}
+
+@media (width >=768px) {
+  :is(.checkout, .book-your-visit) .checkout-bar-total {
+    padding: 0 var(--spacing-5);
+  }
+
+  :is(.checkout, .book-your-visit) .checkout-summary-title {
+    padding-bottom: var(--spacing-6);
+  }
+
+  :is(.checkout, .book-your-visit) .checkout-summary-line-head {
+    padding-right: 0;
+  }
+
+  :is(.checkout, .book-your-visit) .checkout-summary-details,
+  :is(.checkout, .book-your-visit) .checkout-summary-line-pass .checkout-summary-details {
+    padding-top: var(--spacing-6);
+  }
+
+  :is(.checkout, .book-your-visit) .checkout-summary-detail {
+    display: flex;
+  }
+}
+
+@media (width >=992px) {
+  :is(.checkout, .book-your-visit) .checkout-summary {
+    order: 0;
+  }
+
+  :is(.checkout, .book-your-visit) .checkout-bar {
+    display: none;
+  }
+
+  :is(.checkout, .book-your-visit) .checkout-summary-toggle {
+    display: none;
+  }
+
+  :is(.checkout, .book-your-visit) .is-folded .checkout-summary-details {
+    display: block;
+  }
+
+  /* (the site's button display) */
+  :is(.checkout, .book-your-visit) .checkout-payment-summary {
+    display: inline-flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.checkout, .book-your-visit) .checkout-summary-toggle {
+    transition: none;
+  }
+}

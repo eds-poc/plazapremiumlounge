@@ -124,7 +124,7 @@ const tick = (page, key, on = true) => page.locator(`${field(key)} input`).setCh
       metaRobots: document.querySelector('meta[name="robots"]')?.content || '',
     };
   });
-  check('title and back link', info.title === 'Back to Edit Booking' && /makeabooking/.test(info.back), `${info.title} ${info.back}`);
+  check('title and back link', info.title === 'Back to Edit Booking' && /book-your-visit$/.test(info.back), `${info.title} ${info.back}`);
   check('the current step is Details', info.active === 'Details', info.active);
   check('summary: lounge, place, date, time, guests, service', /Plaza Premium Lounge Near Gate 1, Departures, Hong Kong International Airport Date: 28-Nov-2026 Time: 1500 ?hrs Guests: 1 Adult\(s\) Services: Lounge Use - 5 Hours/.test(info.summary), info.summary);
   check('summary: service total, discount, the promo field, the total with its note under it', /Service Total: HKD 875\.00 10% Online Discount \[Lounge Booking\]: - HKD 87\.50 PROMO CODE Total HKD 787\.50 \(Includes applicable taxes and fees\)/.test(info.summary), info.summary);
@@ -898,7 +898,7 @@ for (const width of [1440, 375]) {
   check(`${width} Booking Steps: the band itself, first in its section with no space above`, m.own && m.top === '0px', JSON.stringify([m.own, m.top]));
   check(`${width} Booking Steps: four steps, Details current (two done), named after the page's heading`, m.steps === 'Lounges › Book › Details › Confirm & Pay' && m.done === 2 && m.current === 2 && m.nav === 'Back to Edit Booking', JSON.stringify(m));
   check(`${width} Booking Steps: ${phone ? 'the phone name shown' : 'no phone name'}, ${phone ? 25 : 50}px to the title`, m.short === 'Details' && m.shortShown === phone && m.after === (phone ? '25px' : '50px'), JSON.stringify([m.short, m.shortShown, m.after]));
-  check(`${width} Title (back): a heading 1 link with the arrow before it, ${phone ? '18px' : '32px'}/500`, m.tag === 'H1' && m.linkText === 'Back to Edit Booking' && /makeabooking$/.test(m.href) && m.size === (phone ? '18px' : '32px') && m.weight === '500' && m.decoration === 'none', JSON.stringify(m));
+  check(`${width} Title (back): a heading 1 link with the arrow before it, ${phone ? '18px' : '32px'}/500`, m.tag === 'H1' && m.linkText === 'Back to Edit Booking' && /book-your-visit$/.test(m.href) && m.size === (phone ? '18px' : '32px') && m.weight === '500' && m.decoration === 'none', JSON.stringify(m));
   check(`${width} Title (back): the maroon arrow ${phone ? '14 x 16' : '21 x 24'}, hidden from screen readers`, JSON.stringify(m.arrow) === JSON.stringify([phone ? 14 : 21, phone ? 16 : 24, 'true', 'rgb(83, 14, 42)']), JSON.stringify(m.arrow));
   if (!phone) {
     await page.locator('main .title-back').hover();
@@ -935,7 +935,7 @@ for (const lang of ['zh-cn', 'zh-hk', 'ja-jp', 'pt-br']) {
     fields: document.querySelectorAll('main .checkout .form-field').length,
     summary: !!document.querySelector('main .checkout .checkout-summary-line'),
   }));
-  check(`${lang}: Booking Steps, Title (back), the banner, Checkout; its current step, back link, fields, summary`, m.order === 'booking-steps title promo checkout' && !!m.active && m.back === `/${lang}/makeabooking` && m.fields >= 14 && m.summary && !page.errors.length, JSON.stringify({ ...m, errors: page.errors }));
+  check(`${lang}: Booking Steps, Title (back), the banner, Checkout; its current step, back link, fields, summary`, m.order === 'booking-steps title promo checkout' && !!m.active && m.back === `/${lang}/book-your-visit` && m.fields >= 14 && m.summary && !page.errors.length, JSON.stringify({ ...m, errors: page.errors }));
   await page.close();
 }
 

@@ -4,11 +4,11 @@ import {
 import { getToken, isTokenValid } from '../../scripts/auth.js';
 import { readProfile } from '../../scripts/member.js';
 import safeDescription from '../../scripts/safe-description.js';
-import { formatAmount, loungeDetails } from '../../scripts/cart-summary.js';
+import { formatAmount } from '../../scripts/cart-summary.js';
+import { buildSummaryBox } from '../../scripts/booking-summary.js';
 import { getCart, getCartId, onCartChange } from '../../scripts/cart-state.js';
 import { refreshCart } from '../../scripts/cart.js';
 import { DEFAULT_SITE, getSiteFolder, translate } from '../../scripts/i18n.js';
-import { buildPromo } from '../../scripts/mini-cart.js';
 import { isPreview } from '../../scripts/properties.js';
 import { holdLoader } from '../../scripts/scripts.js';
 
@@ -123,134 +123,6 @@ function paymentButton(label, formId, className) {
   b.type = 'submit';
   b.setAttribute('form', formId);
   return b;
-}
-
-/**
- * A row of the summary's totals: its label and amount.
- * @param {string} className
- * @param {Node|string} label
- * @param {string} amount
- * @returns {HTMLElement}
- */
-function totalRow(className, label, amount) {
-  const row = el('div', `checkout-summary-row ${className}`);
-  row.append(typeof label === 'string' ? el('span', 'checkout-summary-label', label) : label, el('span', 'checkout-summary-amount', amount));
-  return row;
-}
-
-// the words in a lounge's location that make it a Departures or an Arrivals lounge (the source's,
-// in every language; departures first)
-const SIDE_WORDS = {
-  departure: ['departure', '出境', '離境', '离境', '出発', 'partida'],
-  arrival: ['arrival', '入境', '到着', 'chegada'],
-};
-
-/**
- * Whether a lounge is a Departures or an Arrivals one, from its location ("Near Gate 1,
- * Departures, Hong Kong International Airport"), as the source's; '' when it says neither.
- * @param {string} place
- * @returns {'departure'|'arrival'|''}
- */
-function loungeSide(place) {
-  const text = (place || '').toLowerCase();
-  return Object.keys(SIDE_WORDS).find((side) => SIDE_WORDS[side].some((word) => text.includes(word))) || '';
-}
-
-let badges = 0;
-
-/**
- * The Departures / Arrivals badge, as the source's: a plane and "Departures Lounge", its tip
- * ("Located after security & immigration …") shown on hover, keyboard focus or a click (a second
- * click, a click elsewhere or Escape hides it).
- * @param {'departure'|'arrival'} side
- * @returns {HTMLElement}
- */
-function buildBadge(side) {
-  badges += 1;
-  const key = side === 'departure' ? 'cartBadgeDeparture' : 'cartBadgeArrival';
-  const badge = el('span', `checkout-badge checkout-badge-${side}`);
-  const button = el('button', 'checkout-badge-button');
-  button.type = 'button';
-  const icon = el('span', 'checkout-badge-icon');
-  icon.setAttribute('aria-hidden', 'true');
-  button.append(icon, el('span', 'checkout-badge-label', translate(key)));
-  const tip = el('span', 'checkout-badge-tip', translate(`${key}Tip`));
-  tip.id = `checkout-badge-tip-${badges}`;
-  tip.setAttribute('role', 'tooltip');
-  button.setAttribute('aria-describedby', tip.id);
-  badge.append(button, tip);
-  button.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const open = !badge.classList.contains('is-open');
-    document.querySelectorAll('.checkout-badge.is-open').forEach((b) => b.classList.remove('is-open'));
-    badge.classList.toggle('is-open', open);
-    badge.classList.remove('is-dismissed');
-  });
-  // Escape hides the tip until the pointer or focus leaves
-  button.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
-    badge.classList.remove('is-open');
-    badge.classList.add('is-dismissed');
-  });
-  const reset = () => badge.classList.remove('is-dismissed');
-  badge.addEventListener('mouseleave', reset);
-  button.addEventListener('blur', reset);
-  return badge;
-}
-
-// a click elsewhere hides an open tip
-document.addEventListener('click', () => {
-  document.querySelectorAll('.checkout-badge.is-open').forEach((b) => b.classList.remove('is-open'));
-});
-
-/**
- * A cart line in the summary, as the source's: a lounge (its name, location, then Date, Time,
- * Guests, Services; above its name the Departures / Arrivals badge when its location says which)
- * or a pass (its name, Quantity: N and its price, the "For me" pill: the source's for a pass not
- * bought as a gift, which this site doesn't sell yet); its details fold away on phones.
- * @param {Object} line
- * @param {string} currency
- * @param {number} index
- * @returns {HTMLElement}
- */
-function buildLine(line, currency, index) {
-  const pass = line.kind === 'pass';
-  const box = el('div', `checkout-summary-line${pass ? ' checkout-summary-line-pass' : ''}`);
-  const head = el('div', 'checkout-summary-line-head');
-  const side = pass ? '' : loungeSide(line.place);
-  if (side) head.append(buildBadge(side));
-  head.append(el('h3', 'checkout-summary-name', pass ? line.product || line.name : line.name || line.product));
-  box.append(head);
-  const details = el(pass ? 'div' : 'dl', 'checkout-summary-details');
-  details.id = `checkout-summary-details-${count}-${index}`;
-  if (pass) {
-    const row = el('p', 'checkout-summary-quantity');
-    row.append(el('span', '', `${translate('cartQuantity')} ${line.quantity}`), el('span', 'checkout-summary-line-amount', formatAmount(line.total, currency)));
-    details.append(row, el('span', 'checkout-summary-intent', translate('cartPassForMe')));
-  } else if (line.place) head.append(el('p', 'checkout-summary-place', line.place));
-  if (!pass) {
-    loungeDetails(line).forEach(({ label, value, unit }) => {
-      const row = el('div', 'checkout-summary-detail');
-      const dd = el('dd', '', value);
-      if (unit) dd.append(el('span', 'checkout-summary-unit', unit));
-      row.append(el('dt', '', label), dd);
-      details.append(row);
-    });
-  }
-  // phones: the arrow folds the details away (the source's collapse), open to start with
-  const toggle = el('button', 'checkout-summary-toggle');
-  toggle.type = 'button';
-  toggle.setAttribute('aria-expanded', 'true');
-  toggle.setAttribute('aria-controls', details.id);
-  toggle.setAttribute('aria-label', line.name || line.product);
-  toggle.addEventListener('click', () => {
-    const open = toggle.getAttribute('aria-expanded') !== 'true';
-    toggle.setAttribute('aria-expanded', String(open));
-    box.classList.toggle('is-folded', !open);
-  });
-  head.append(toggle);
-  box.append(details);
-  return box;
 }
 
 /**
@@ -485,34 +357,20 @@ export default function decorate(block) {
     lastCart = cart?.lines.length ? cart : null;
     const title = el('h2', 'checkout-summary-title', text('summary'));
     title.id = `${formId}-summary`;
-    const box = el('div', 'checkout-summary-box');
-    const totalLabel = el('span', 'checkout-summary-label', translate('cartTotal'));
     if (!lastCart) {
+      const box = el('div', 'checkout-summary-box');
       box.append(el('p', 'checkout-summary-empty', failure || text('empty')));
       summary.replaceChildren(title, box, paymentButton(text('payment'), formId, 'checkout-payment-summary'));
       bar.replaceChildren(paymentButton(text('payment'), formId, 'checkout-payment-bar'));
     } else {
       const { currency, totals = {} } = lastCart;
-      const lines = el('div', 'checkout-summary-lines');
-      lines.append(...lastCart.lines.map((line, i) => buildLine(line, currency, i)));
-      const sums = el('div', 'checkout-summary-totals');
-      // the base and the discounts, when there are discounts (as the source's)
-      if (totals.discounts?.length || totals.promo > 0) {
-        sums.append(totalRow('checkout-summary-service', `${translate('cartServiceTotal')}:`, formatAmount(totals.base, currency)));
-        (totals.discounts || []).forEach((d) => sums.append(totalRow('checkout-summary-discount', `${d.name}:`, `- ${formatAmount(d.value, currency)}`)));
-        if (totals.promo > 0) sums.append(totalRow('checkout-summary-discount checkout-summary-promo-discount', translate('cartPromoDiscount', { code: lastCart.promoCode || '' }), `- ${formatAmount(totals.promo, currency)}`));
-      }
-      // the promo code (the mini cart's field), before the total, as the source's
-      const promo = buildPromo(lastCart, {
-        prefix: 'checkout',
+      // the lines, the totals, the promo field, the total (scripts/booking-summary.js)
+      const box = buildSummaryBox(lastCart, {
+        uid: String(count),
         // eslint-disable-next-line no-use-before-define
         redraw: (now) => render(now),
         root: () => summary,
       });
-      // (the note under the amount, as the source's)
-      const total = totalRow('checkout-summary-total', totalLabel, formatAmount(totals.total, currency));
-      total.querySelector('.checkout-summary-amount').append(el('small', 'checkout-summary-note', translate('cartTotalNote')));
-      box.append(lines, sums, promo, total);
       summary.replaceChildren(title, box, paymentButton(text('payment'), formId, 'checkout-payment-summary'));
       // the phone bar: "Total: USD 67.50 (Includes applicable taxes and fees)", then Payment
       const barTotal = el('p', 'checkout-bar-total');
