@@ -24,6 +24,21 @@ line, DELETE. It covers:
 - `?selectedPassID=`, the currency (the session's, a cart of passes converted, a lounge's not), the
   other languages (live's Add to Cart and Add More), axe
 
+`node embed-pass.test.mjs [width]` — a campaign page's own Add to Cart (22 checks: 11 at each of
+1440 and 375). Beyond The Event's pass cards (an Embed Code block's script) call the source's global
+`AddToCart(button, catalogueCode, …)`, which `scripts/scripts.js` provides. The cart API is routed
+as for the passes, with each card's name and price. It covers:
+- a card's Add to Cart: the button off and the loader meanwhile, one POST with the card's code
+  (`data-prd`), the mini cart, the count
+- the same card again (PUT, quantity 2), another card (PUT with both)
+- a lounge in the cart: Checkout Cart, nothing sent
+- the booking system refusing the code (as stage answers the live codes: BKNG030 "invalid
+  locationCode"): the Notice, no cart kept
+- a code that isn't a pass's: nothing sent, a console warning
+- `?currencyCode=HKD`: the POST in HKD
+- no page errors from the site's code (the local copy's section-metadata table, loaded there as a
+  block, aside)
+
 `node mini-cart.test.mjs [width]` — the mini cart (100 checks).
 - The source's look (the 2026-11-12 audit's high and medium items) at 375 and 1440: the panel,
   header, promo callout and field, the cross, the arrow, the spacing, the amounts, the lines; the
