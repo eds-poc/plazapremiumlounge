@@ -148,7 +148,6 @@ function trackPassList(list) {
   if (!list.length) return;
   const source = viewSource();
   const label = listLabel(source, LIST_NAME);
-  // (also the list of a cart viewed on this page: see cartList in scripts/mini-cart.js)
   pushEcommerce('view_item_list', {
     currency: readCurrency(),
     item_list_id: label,

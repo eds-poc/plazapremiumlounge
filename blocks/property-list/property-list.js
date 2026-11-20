@@ -179,7 +179,6 @@ function trackItemList(properties, selected) {
   if (source === 'hp_search_widget_click') {
     listName = listLabel(source, chosen ? chosen.location.name : city);
   }
-  // (also the list of a cart viewed on this page: see cartList in scripts/mini-cart.js)
   pushEcommerce('view_item_list', {
     // the first lounge's own currency
     currency: shown[0].currency,

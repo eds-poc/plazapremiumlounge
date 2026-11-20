@@ -20,7 +20,7 @@ import { getCurrency } from './currency.js';
 // eslint-disable-next-line import/no-cycle
 import { PAGE_VIEW, pushEvent } from './adobe-datalayer.js';
 import {
-  BRAND, listLabel, pushEcommerce,
+  BRAND, listLabel, pushEcommerce, viewSource,
 } from './gtag-datalayer.js';
 // eslint-disable-next-line import/no-cycle
 import { hideLoader, showLoader } from './scripts.js';
@@ -687,29 +687,31 @@ function trackCartView(cart) {
 
 // the home page's address: / or a site folder's (/en-uk/ …)
 const HOMEPAGE_PATH = /^\/([a-z]{2}-[a-z]{2}\/?)?$/;
+// the passes' list name in the GA4 events, as the pass finder's ("Other - Airport Lounge Passes")
+const PASSES_LIST_NAME = 'Airport Lounge Passes';
 
 /**
- * The list a cart is viewed from: how the visitor came to the page they view it on, with the
- * cart's airport, its code in the id and its name in the name. How they came: as the page's last
- * view_item_list in the data layer says (`view_source`: a listing opened from the mega menu or the
- * home page search widget, else others); on the home page, its search widget; else others. So
- * "HP Search Widget - HKG" / "HP Search Widget - Hong Kong International Airport", "Mega Menu -
- * HKG" / "Mega Menu - Hong Kong International Airport", "Other - HKG" / "Other - Hong Kong
- * International Airport". A cart without an airport (passes) is in the page's list ("Other -
- * Airport Lounge Passes" on the passes page).
- * @param {string} iata The cart's airport code
- * @param {string} airport The cart's airport name
+ * The list a cart is viewed from: how the visitor came to the page they view it on (viewSource:
+ * the mega menu, the home page search widget, else others; on the home page, its search widget),
+ * with the cart's airport, its code in the id and its name in the name: "HP Search Widget - HKG" /
+ * "HP Search Widget - Hong Kong International Airport", "Mega Menu - HKG" / "Mega Menu - Hong Kong
+ * International Airport", "Other - HKG" / "Other - Hong Kong International Airport". A cart of
+ * passes (they have no airport) is in the passes' list ("Other - Airport Lounge Passes").
+ * @param {Object} line The cart's first line (see readLine in cart.js)
  * @returns {{id: string, name: string}}
  */
-function cartList(iata, airport) {
-  const pageList = (window.dataLayer || [])
-    .findLast((e) => e?.event === 'view_item_list' && e.ecommerce?.item_list_id)?.ecommerce;
-  const homepage = HOMEPAGE_PATH.test(window.location.pathname);
-  if (!iata && !airport && pageList) {
-    return { id: pageList.item_list_id, name: pageList.item_list_name };
+function cartList(line) {
+  const source = HOMEPAGE_PATH.test(window.location.pathname)
+    ? 'hp_search_widget_click' : viewSource();
+  const { iataCode, locationName } = line;
+  if (line.kind === 'pass' || (!iataCode && !locationName)) {
+    const label = listLabel(source, PASSES_LIST_NAME);
+    return { id: label, name: label };
   }
-  const source = pageList?.view_source || (homepage ? 'hp_search_widget_click' : 'others');
-  return { id: listLabel(source, iata || airport), name: listLabel(source, airport || iata) };
+  return {
+    id: listLabel(source, iataCode || locationName),
+    name: listLabel(source, locationName || iataCode),
+  };
 }
 
 /**
@@ -729,7 +731,7 @@ export function trackViewCart(cart, cartType = 'mini_cart') {
       id: listLabel('view_cart', bookedItem.iataCode),
       name: listLabel('view_cart', bookedItem.locationName),
     }
-    : cartList(bookedItem.iataCode, bookedItem.locationName);
+    : cartList(bookedItem);
   pushEcommerce('view_cart', {
     currency: getCurrency(),
     value: cart.totals.total,
