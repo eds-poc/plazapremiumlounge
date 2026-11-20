@@ -45,7 +45,10 @@ and the rows it doesn't know, so a mistyped row name (`Veiw` for `View`) shows u
 | View and modify | View/Modify Booking |
 | View | View Booking |
 | Cancel | Cancel Booking |
-| Cancel confirm | Cancel booking {id}? |
+| Cancel title | Confirmation |
+| Cancel confirm | Are you sure you wish to Cancel the Lounge Booking of Order No.# {id} |
+| Cancel yes | Confirm |
+| Cancel no | Cancel |
 | Cancelled message | Booking {id} was cancelled. |
 | Resent | The booking confirmation was sent again. |
 | Action error | That didn't work. Please try again. |
@@ -65,7 +68,7 @@ and the rows it doesn't know, so a mistyped row name (`Veiw` for `View`) shows u
 | Adult, Adults, Child, Children | The guests: one adult, more adults, one child, more children (`2 Adults, 1 Child`) |
 | Price note | Below the price |
 | Resend, View and modify, View, Cancel | The card's actions (see [Actions](#actions)) |
-| Cancel confirm | The question asked before cancelling |
+| Cancel title, Cancel confirm, Cancel yes, Cancel no | The cancel confirmation popup: its title, the question (`{id}`, the order number, in bold; without `{id}`, the number goes at the end), the button that cancels and the one that keeps the booking |
 | Cancelled message | Above the tabs once a booking is cancelled |
 | Resent, Action error | On the card, after resending, or when an action fails |
 | No upcoming, No past, No cancelled | Instead of the cards when a tab has no bookings |
@@ -89,7 +92,9 @@ and the rows it doesn't know, so a mistyped row name (`Veiw` for `View`) shows u
 | Adult, Adults, Child or Children | Leaves that count out of the guests |
 | Price note | Shows the price alone |
 | An action (Resend, View and modify, View, Cancel) | Doesn't show that action |
-| Cancel confirm | Doesn't show **Cancel Booking** (a booking is never cancelled without asking) |
+| Cancel confirm or Cancel yes | Doesn't show **Cancel Booking** (a booking is never cancelled without asking) |
+| Cancel title | Shows the popup without its title |
+| Cancel no | Shows only **Confirm** (the close button keeps the booking) |
 | A message | Shows nothing in its place |
 
 ## What each card shows
@@ -118,8 +123,15 @@ carry the lounge.
 
 - **Resend Booking Confirmation** asks the API to send it again and shows the **Resent** text on
   the card.
-- **Cancel Booking** asks the **Cancel confirm** question first. When it's done, the list loads
-  again (the booking moves to Cancelled) with the **Cancelled message** above the tabs.
+- **Cancel Booking** asks first, in a popup as the source's (the site's dialog: the maroon bar
+  with the close button, then, centred, the **Cancel title**, the **Cancel confirm** question,
+  the lounge's name in bold and its place in the airport (`Plaza Premium First` Near Gate 35, West
+  Hall), and the **Cancel yes** (outlined) and **Cancel no** (filled) buttons; 800px wide from
+  992px, 500px from 576px, the screen's width on phones, where the buttons stack).
+  - **Cancel yes** cancels it: the site's loader shows while the API cancels it, then the list
+    loads again (the booking moves to Cancelled) with the **Cancelled message** above the tabs.
+  - **Cancel no**, the close button, Esc and a click beside the popup keep the booking; the focus
+    goes back to **Cancel Booking**.
 - If an action fails, the card shows the **Action error** text.
 
 ## The page address
