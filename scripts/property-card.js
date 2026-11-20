@@ -159,10 +159,13 @@ function buildLoyalty(text, signup) {
  * @param {number} [options.rank] The card's position in the list as shown (1 for the first)
  * @param {function(Object, number): void} [options.onView] Called as the View button is clicked,
  *   with the property and its rank (e.g. for analytics), before the page moves on
+ * @param {function(Object, number): void} [options.onSelect] Called as either link to the
+ *   lounge's page is clicked (its name or the View button), with the property and its rank (e.g.
+ *   for analytics), before the page moves on
  * @returns {HTMLElement}
  */
 export function buildPropertyCard(property, {
-  id, eager = false, view = null, signup = null, rank = 1, onView,
+  id, eager = false, view = null, signup = null, rank = 1, onView, onSelect,
 } = {}) {
   const card = el('li', 'property-card');
   if (property.first) card.classList.add('property-card-first');
@@ -181,7 +184,10 @@ export function buildPropertyCard(property, {
   if (detail) {
     const link = el('a', '', property.name);
     link.href = detail;
-    title.append(applyButtonAction(link));
+    const nameLink = applyButtonAction(link);
+    // pushed as the click happens, before the page moves on
+    if (onSelect) nameLink.addEventListener('click', () => onSelect(property, rank));
+    title.append(nameLink);
   } else {
     title.textContent = property.name;
   }
@@ -233,6 +239,7 @@ export function buildPropertyCard(property, {
       const viewLink = applyButtonAction(button);
       // pushed as the click happens, before the page moves on
       if (onView) viewLink.addEventListener('click', () => onView(property, rank));
+      if (onSelect) viewLink.addEventListener('click', () => onSelect(property, rank));
       wrap.append(viewLink);
       action.append(wrap);
     }

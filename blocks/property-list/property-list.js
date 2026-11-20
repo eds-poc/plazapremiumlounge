@@ -153,6 +153,36 @@ function trackListingView(properties, selected, count) {
 }
 
 /**
+ * A listing lounge as a GA4 item (view_item_list, select_item): the lounge, its airport with its
+ * code, city and country, its lowest price, and the visit and guests chosen (see chosenVisit), the
+ * guests as the quantity. Without the list (`item_list_id`, `item_list_name`), the promo code and
+ * the discount, which each event adds as it needs.
+ * @param {Object} p The lounge
+ * @param {number} index Its position in the list (1 for the first)
+ * @returns {Object}
+ */
+function listingItem(p, index) {
+  const visit = chosenVisit(p.timeZone);
+  return {
+    item_id: p.code,
+    item_name: p.shortLocation ? `${p.name} (${p.shortLocation})` : p.name,
+    index,
+    item_brand: BRAND,
+    // the product's display name: the listing has none
+    item_category: '',
+    // the airport or station with its code, e.g. Beijing Daxing International Airport (PKX)
+    item_category2: p.iata ? `${p.location.name} (${p.iata})` : p.location.name,
+    item_category3: p.name,
+    item_category4: p.city,
+    item_category5: p.country,
+    // the lowest price, "" without one
+    price: p.price ? p.price.amount : '',
+    quantity: visit.total_guest_count,
+    ...visit,
+  };
+}
+
+/**
  * The GA4 `view_item_list` for the listing (window.dataLayer, scripts/gtag-datalayer.js): the
  * lounges shown (not the passes), in their order. The list is named after the city ("Mega Menu -
  * Beijing", "Other - Beijing"); from the home page search widget, after its airport ("HP Search
@@ -177,30 +207,35 @@ function trackItemList(properties, selected) {
     item_list_id: listId,
     item_list_name: listName,
     view_source: source,
-    items: shown.map((p, i) => {
-      const visit = chosenVisit(p.timeZone);
-      return {
-        item_id: p.code,
-        item_name: p.shortLocation ? `${p.name} (${p.shortLocation})` : p.name,
-        coupon: '',
-        discount: '',
-        index: i + 1,
-        item_brand: BRAND,
-        // the product's display name: the listing has none
-        item_category: '',
-        // the airport or station with its code, e.g. Beijing Daxing International Airport (PKX)
-        item_category2: p.iata ? `${p.location.name} (${p.iata})` : p.location.name,
-        item_category3: p.name,
-        item_category4: p.city,
-        item_category5: p.country,
-        item_list_id: listId,
-        item_list_name: listName,
-        // the lowest price, "" without one
-        price: p.price ? p.price.amount : '',
-        quantity: visit.total_guest_count,
-        ...visit,
-      };
-    }),
+    items: shown.map((p, i) => ({
+      ...listingItem(p, i + 1),
+      coupon: '',
+      discount: '',
+      item_list_id: listId,
+      item_list_name: listName,
+    })),
+  });
+}
+
+/**
+ * The GA4 `select_item` as a lounge's name or View button is clicked (before its page opens),
+ * window.dataLayer (scripts/gtag-datalayer.js): in the lounge's own currency, the lounge as an
+ * item at its position in the list. The lists are blank for now; the listing has no promo code
+ * or discount, so `coupon` and `discount` aren't sent. (Not for the passes, as view_item_list.)
+ * @param {Object} property
+ * @param {number} rank The card's position in the list as shown (1 for the first)
+ */
+function trackSelectItem(property, rank) {
+  if (property.pass) return;
+  pushEcommerce('select_item', {
+    currency: property.currency,
+    item_list_id: '',
+    item_list_name: '',
+    items: [{
+      ...listingItem(property, rank),
+      item_list_id: '',
+      item_list_name: '',
+    }],
   });
 }
 
@@ -409,6 +444,7 @@ function renderResults(results, properties, selected, status, onClear, prefix, s
         signup: settings.signup,
         rank: n + 1,
         onView: trackViewLounge,
+        onSelect: trackSelectItem,
       }));
       n += 1;
     });
