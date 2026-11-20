@@ -215,16 +215,10 @@
   cursor: progress;
 }
 
-.booking-list .booking-list-note:not(:empty),
-.booking-list .booking-list-notice {
+.booking-list .booking-list-note:not(:empty) {
   margin: var(--spacing-4) 0 0;
   color: var(--color-text);
   font-size: var(--font-size-sm);
-}
-
-.booking-list .booking-list-notice {
-  margin: 0 0 var(--spacing-7);
-  font-weight: var(--font-weight-medium);
 }
 
 .booking-list .booking-list-message {
