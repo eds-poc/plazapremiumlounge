@@ -392,6 +392,9 @@ async function loadEager(doc) {
  * @param {Element} doc The container element
  */
 async function loadLazy(doc) {
+  // GA4: how the visitor comes to a listing (a mega menu or home page search widget link click),
+  // noted from the start, before the header's and the search widget's links can be clicked
+  import('./gtag-datalayer.js').then(({ trackViewSource }) => trackViewSource());
   loadHeader(doc.querySelector('body > header'));
 
   const main = doc.querySelector('main');
@@ -427,8 +430,6 @@ function loadDelayed() {
   import('./adobe-datalayer.js').then(({ default: initDataLayer }) => initDataLayer());
   // Google Tag Manager (metadata `gtm-id`)
   import('./gtm.js').then(({ default: initGtm }) => initGtm());
-  // GA4 ecommerce: how the visitor comes to a listing (a mega menu or search widget link click)
-  import('./gtag-datalayer.js').then(({ trackViewSource }) => trackViewSource());
   // load anything that can be postponed to the latest here
 }
 
