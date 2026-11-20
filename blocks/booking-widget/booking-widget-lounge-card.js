@@ -546,7 +546,7 @@ function trackViewItem(data, choice, product) {
   const promoData = Array.isArray(priceData.promocode) ? priceData.promocode[0] : null;
   // the first discount's amount, else the promo code's, else ""
   const discountData = Array.isArray(priceData.discounts) ? priceData.discounts[0] : null;
-  const discount = discountData?.discountValue ?? promoData?.value ?? promoData?.discountValue ?? '';
+  const discount = discountData?.discountValue ?? promoData?.discountValue ?? '';
   const source = 'hp_search_widget_click';
   pushEcommerce('view_item', {
     currency: data.defaultCurrency,
