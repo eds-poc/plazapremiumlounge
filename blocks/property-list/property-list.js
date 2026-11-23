@@ -156,14 +156,15 @@ function trackListingView(properties, selected, count) {
 
 /**
  * A listing lounge as a GA4 item (view_item_list, select_item): the lounge, its airport with its
- * code, city and country, its lowest price, and the visit and guests chosen (see chosenVisit), the
- * guests as the quantity. Without the list (`item_list_id`, `item_list_name`), the promo code and
- * the discount, which each event adds as it needs.
+ * code, city and country, the listing's list, its lowest price, and the visit and guests chosen
+ * (see chosenVisit), the guests as the quantity. Without the promo code and the discount, which
+ * each event adds as it needs.
  * @param {Object} p The lounge
  * @param {number} index Its position in the list (1 for the first)
+ * @param {{id: string, name: string}} list The listing's list (see trackItemList)
  * @returns {Object}
  */
-function listingItem(p, index) {
+function listingItem(p, index, list) {
   const visit = chosenVisit(p.timeZone);
   return {
     item_id: p.code,
@@ -177,6 +178,8 @@ function listingItem(p, index) {
     item_category3: p.name,
     item_category4: p.city,
     item_category5: p.country,
+    item_list_id: list.id,
+    item_list_name: list.name,
     // the lowest price, "" without one
     price: p.price ? p.price.amount : '',
     quantity: visit.total_guest_count,
@@ -212,11 +215,9 @@ function trackItemList(properties, selected) {
     item_list_name: listName,
     view_source: source,
     items: shown.map((p, i) => ({
-      ...listingItem(p, i + 1),
+      ...listingItem(p, i + 1, shownList),
       coupon: '',
       discount: '',
-      item_list_id: listId,
-      item_list_name: listName,
     })),
   });
 }
@@ -233,15 +234,13 @@ function trackItemList(properties, selected) {
  */
 function trackSelectItem(property, rank) {
   if (property.pass) return;
+  // the listing's list, as its view_item_list named it
+  const { id: listId, name: listName } = shownList;
   pushEcommerce('select_item', {
     currency: property.currency,
-    item_list_id: shownList.id,
-    item_list_name: shownList.name,
-    items: [{
-      ...listingItem(property, rank),
-      item_list_id: shownList.id,
-      item_list_name: shownList.name,
-    }],
+    item_list_id: listId,
+    item_list_name: listName,
+    items: [listingItem(property, rank, shownList)],
   });
 }
 
