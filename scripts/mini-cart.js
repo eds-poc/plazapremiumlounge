@@ -25,7 +25,9 @@ import {
 } from './gtag-datalayer.js';
 // eslint-disable-next-line import/no-cycle
 import { hideLoader, showLoader } from './scripts.js';
-import { daysUntil, toCheckInDate, toUtcDateTime } from './utility.js';
+import {
+  clean, daysUntil, toCheckInDate, toUtcDateTime,
+} from './utility.js';
 
 const styles = loadCSS(`${window.hlx.codeBasePath}/styles/cart.css`);
 
@@ -751,6 +753,98 @@ export function trackViewCart(cart, cartType = 'mini_cart') {
   });
 }
 
+// the mini cart's Check Out click, noted for the checkout page it opens (see trackBeginCheckout)
+const CHECKOUT_KEY = 'ppl-begin-checkout';
+
+/**
+ * Notes the mini cart's Check Out click for the page its link opens (this browser session; a
+ * later click replaces it). Without a link, nothing opens and nothing is noted.
+ * @param {Object} cart The cart's summary (see readCart in cart.js)
+ */
+function noteCheckout(cart) {
+  const href = cartLink('checkout', cart);
+  if (!href) return;
+  try {
+    sessionStorage.setItem(CHECKOUT_KEY, JSON.stringify({ pathname: new URL(href).pathname }));
+  } catch { /* storage blocked: no begin_checkout */ }
+}
+
+/**
+ * A cart line's coupon: its first discount's code, else its promo code's, else ''.
+ * @param {Object} line See readLine in cart.js
+ * @returns {string}
+ */
+function couponOf(line) {
+  return line.discountCode || line.promo?.code || '';
+}
+
+/**
+ * The GA4 `begin_checkout` (window.dataLayer, scripts/gtag-datalayer.js) as the checkout page
+ * (blocks/checkout) first shows the cart, when the visitor came from the mini cart's Check Out
+ * (noted for this page and used once: a reload sends none). From the cart: its currency and total,
+ * its coupon (the first line's with one), and every line as an item (the property, its coupon
+ * and discount, the product, the airport with its code, the city and country code, its price and
+ * quantity, and for a lounge the visit and guests). The list, as view_cart's: how the visitor
+ * came with the cart's airport ("Other - HKG" / "Other - Hong Kong International Airport"); a
+ * cart of passes, the passes' list ("Other - Airport Lounge Passes").
+ * @param {Object} cart The cart's summary (see readCart in cart.js)
+ */
+export function trackBeginCheckout(cart) {
+  let noted = null;
+  try {
+    noted = JSON.parse(sessionStorage.getItem(CHECKOUT_KEY) || 'null');
+    if (noted?.pathname !== window.location.pathname) return;
+    sessionStorage.removeItem(CHECKOUT_KEY);
+  } catch {
+    // nothing noted
+    return;
+  }
+  const [bookedItem] = cart.lines;
+  const source = viewSource();
+  const isPassCart = bookedItem.kind === 'pass';
+  const listId = listLabel(source, isPassCart ? PASSES_LIST_NAME : bookedItem.iataCode);
+  const listName = listLabel(source, isPassCart ? PASSES_LIST_NAME : bookedItem.locationName);
+  const cartCoupon = cart.lines.map(couponOf).find(Boolean) || '';
+  pushEcommerce('begin_checkout', {
+    currency: cart.currency,
+    value: cart.totals.total,
+    coupon: cartCoupon,
+    items: cart.lines.map((line) => {
+      const isPass = line.kind === 'pass';
+      // a lounge's visit (its startDate, the lounge's local time "2026-11-28 15:00:00":
+      // "28-Nov-2026", "1500") and guests; a pass has neither
+      const [, date = '', hour = '', minute = ''] = isPass ? []
+        : String(line.start || '').match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/) || [];
+      const totalGuestCount = line.adults + line.children;
+      return {
+        item_id: line.propertyCode,
+        item_name: clean(line.propertyName) || line.name,
+        coupon: couponOf(line),
+        // the line's totalDiscounts and totalPromocodeAmount
+        discount: line.discount,
+        item_brand: BRAND,
+        item_category: line.product,
+        // the airport with its code, e.g. Hong Kong International Airport (HKG)
+        item_category2: line.iataCode ? `${line.locationName} (${line.iataCode})` : line.locationName,
+        item_category3: line.name,
+        item_category4: cart.cityName,
+        item_category5: cart.countryCode,
+        item_list_id: listId,
+        item_list_name: listName,
+        // a lounge: the cart's total (cartTotalPrice.totalPrice, its add-ons included); a pass:
+        // its own line's
+        price: isPass ? line.total : cart.totals.total,
+        quantity: isPass ? line.quantity : totalGuestCount,
+        checkInDate: toCheckInDate(date),
+        checkInTime: `${hour}${minute}`,
+        adults: isPass ? '' : line.adults,
+        children: isPass ? '' : line.children,
+        total_guest_count: isPass ? '' : totalGuestCount,
+      };
+    }),
+  });
+}
+
 /**
  * Opens the mini cart (when the cart holds something), then reads the cart again in the
  * background, so it shows at once and stays right. A cart of passes in another currency than the
@@ -965,5 +1059,9 @@ export async function removeAndShow(catalogueCode, trigger) {
 }
 
 // the data layer's Check Out and Edit clicks (the buttons announce them, see renderMiniCart)
-document.addEventListener('cart:checkout', (e) => trackCheckout(e.detail.cart));
+document.addEventListener('cart:checkout', (e) => {
+  trackCheckout(e.detail.cart);
+  // the checkout page's GA4 begin_checkout, as it loads
+  noteCheckout(e.detail.cart);
+});
 document.addEventListener('cart:edit', (e) => trackCheckout(e.detail.cart));

@@ -277,6 +277,10 @@ function readLine(p) {
     // for the GA4 view_cart (scripts/mini-cart.js trackViewCart): the property's code and its
     // short location ("International Departures, Terminal 1")
     shortLocation: text(p?.shortLocation),
+    // for the GA4 begin_checkout (scripts/mini-cart.js trackBeginCheckout): the property's full
+    // name ("Plaza Premium Lounge (Near Gate 1, Departures)") and the first discount's code
+    propertyName: text(p?.propertyName),
+    discountCode: text(p?.itemPriceDetails?.discounts?.[0]?.code),
   };
 }
 
