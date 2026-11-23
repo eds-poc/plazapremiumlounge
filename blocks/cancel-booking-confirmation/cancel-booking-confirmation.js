@@ -3,7 +3,8 @@
  * Cancelled!" page (`/en-uk/booking-cancel-confirmation?bookingid=…`): the title and message (left
  * from 992px), the Cancellation Details card (right): the order number, the lead guest, each
  * cancelled lounge visit (date and time, guests, services), what was paid, the cancellation fee and
- * the refund; then the Back To Home button. The summary comes from the cancellation summary API
+ * the refund; then the Back To Home button. The block fills its section in the brand maroon (no
+ * Section Metadata needed). The summary comes from the cancellation summary API
  * for the address's `bookingid`, with the member's login token; every text is authored, a Key |
  * Text row each.
  */
@@ -107,7 +108,7 @@ export default function decorate(block) {
   columns.append(intro, card);
   block.replaceChildren(columns, status);
 
-  // Back To Home: the authored link as the site's button (white on the maroon section)
+  // Back To Home: the authored link as the site's button (white on the block's maroon)
   const backLink = texts.get('back')?.querySelector('a[href]');
   if (backLink) {
     const actions = el('p', 'cancel-booking-confirmation-actions');

@@ -9,8 +9,8 @@ Authors write the texts; the summary comes from the **cancellation summary** API
 
 ## The page
 
-- **The section:** put the block alone in the page's first section, with Section Metadata `style` =
-  `maroon` (the maroon background, white text and the white button).
+- **The section:** put the block alone in the page's first section. The block fills the section
+  in the brand maroon (white text, the white button): no Section Metadata needed.
 - **Page metadata:** `members-only` = `true` (a guest goes to the home page and comes back after
   logging in) and `header` = `transparent` (from 1200px the header's bar is white on the maroon
   section, as the source).

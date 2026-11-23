@@ -1,6 +1,6 @@
-/* cancel booking confirmation: the source "Order Cancelled!" page. In a maroon section (Section
-   Metadata style maroon; from 1200px under the header's white-on-maroon bar, page metadata header:
-   transparent): the title and message in white on the left, the Cancellation Details card (warm
+/* cancel booking confirmation: the source "Order Cancelled!" page. The block fills its section in
+   the brand maroon (no Section Metadata needed; from 1200px under the header's white-on-maroon
+   bar, page metadata header: transparent): the title and message in white on the left, the Cancellation Details card (warm
    grey, rounded) on the right from 992px (stacked below), then the Back To Home button centred */
 .cancel-booking-confirmation {
   /* the source's content width (1230px, centred) and its button (215px) */
@@ -11,10 +11,12 @@
   margin-inline: auto;
 }
 
-/* the section: 50px above the content, 80px below it (from 1200px, the bar's height more above:
-   the section starts under the transparent bar) */
-main > .section:has(> .cancel-booking-confirmation-wrapper) {
+/* the section: the brand maroon with white text, 50px above the content, 80px below it (from
+   1200px, the bar's height more above: the section starts under the transparent bar) */
+main > .section.cancel-booking-confirmation-container {
   padding-block: var(--spacing-11) var(--spacing-12);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
 }
 
 .cancel-booking-confirmation .cancel-booking-confirmation-columns {
@@ -40,8 +42,14 @@ main > .section:has(> .cancel-booking-confirmation-wrapper) {
   margin: 0 0 var(--spacing-4);
 }
 
+/* the message's links white and underlined, and the white focus ring on the maroon */
 .cancel-booking-confirmation .cancel-booking-confirmation-text a:any-link {
+  color: inherit;
   text-decoration: underline;
+}
+
+.cancel-booking-confirmation :is(.cancel-booking-confirmation-intro, .cancel-booking-confirmation-actions, .cancel-booking-confirmation-status) :focus-visible {
+  outline-color: var(--color-text-inverse);
 }
 
 .cancel-booking-confirmation .cancel-booking-confirmation-status {
@@ -181,8 +189,8 @@ main > .section:has(> .cancel-booking-confirmation-wrapper) {
   white-space: normal;
 }
 
-/* Back To Home: the maroon section's white button, centred, 35px under the columns (its width
-   and weight over the site's button's) */
+/* Back To Home: the site's button in white with maroon text (a white line on hover), centred,
+   35px under the columns (its width and weight over the site's button's) */
 .cancel-booking-confirmation .cancel-booking-confirmation-actions {
   margin: var(--spacing-10) 0 0;
   text-align: center;
@@ -190,10 +198,18 @@ main > .section:has(> .cancel-booking-confirmation-wrapper) {
 
 .cancel-booking-confirmation a.button.cancel-booking-confirmation-back {
   min-width: var(--cancel-booking-confirmation-button);
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
   padding-block: var(--spacing-1);
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-semi-bold);
   line-height: var(--line-height-body);
+}
+
+.cancel-booking-confirmation a.button.cancel-booking-confirmation-back:is(:hover, :focus-visible) {
+  border-color: var(--color-text-inverse);
+  background-color: var(--color-background);
+  color: var(--color-brand-primary);
 }
 
 /* the visit's details two to a row from 576px */
@@ -223,7 +239,7 @@ main > .section:has(> .cancel-booking-confirmation-wrapper) {
 /* from 1200px the section starts under the transparent bar: its height more above, 92px from the
    bar to the content, as the source */
 @media (width >= 1200px) {
-  main > .section:has(> .cancel-booking-confirmation-wrapper) {
+  main > .section.cancel-booking-confirmation-container {
     padding-top: calc(var(--nav-height-desktop) + var(--spacing-12) + var(--spacing-5));
   }
 }
