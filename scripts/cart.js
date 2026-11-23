@@ -274,6 +274,9 @@ function readLine(p) {
     category: text(p?.serviceDisplayName),
     basePrice: Number(price.totalBasePrice),
     discount: (Number(price.totalDiscounts) || 0) + (Number(price.totalPromocodeAmount) || 0),
+    // for the GA4 view_cart (scripts/mini-cart.js trackViewCart): the property's code and its
+    // short location ("International Departures, Terminal 1")
+    shortLocation: text(p?.shortLocation),
   };
 }
 
@@ -365,6 +368,10 @@ export function readCart(json) {
     terms: readTerms(json),
     // the cart's promo code: the one on its lines (one code per cart)
     promoCode: products.map(readLinePromo).find(Boolean)?.code || '',
+    // for the GA4 view_cart (scripts/mini-cart.js trackViewCart): its airport's city and country
+    // code ("Hong Kong SAR", "HK")
+    cityName: text(json?.cityName),
+    countryCode: text(json?.countryCode).toUpperCase(),
   };
 }
 

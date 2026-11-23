@@ -10,6 +10,12 @@ import { openModal } from './modal-dialog.js';
 import { el, safeHtml } from './properties.js';
 import { isInCart, onCartChange } from './cart-state.js';
 import { getCurrency } from './currency.js';
+import {
+  BRAND, listLabel, pushEcommerce, viewSource,
+} from './gtag-datalayer.js';
+
+// the passes list's name in the GA4 events ("Other - Airport Lounge Passes")
+export const PASSES_LIST_NAME = 'Airport Lounge Passes';
 
 export const DEFAULT_CURRENCY = 'USD';
 // the passes service answers in about 5-7s
@@ -111,6 +117,46 @@ export function readPass(item) {
     service: item.serviceDisplayName ?? '',
     category: ((code) => (code === 'All' ? 'Global' : code))(item.passCategory?.[0]?.categoryCode ?? ''),
   };
+}
+
+/**
+ * The GA4 `view_item` for a pass whose Learn More is clicked (window.dataLayer,
+ * scripts/gtag-datalayer.js): the pass as the service gives it (its catalogue code, display name,
+ * number of visits and service's name), its price, in the list of the passes ("Other - Airport
+ * Lounge Passes", as their view_item_list). A pass has no airport, city or visit, so those
+ * parameters are blank.
+ * @param {Object} pass See readPass
+ */
+export function trackPassView(pass) {
+  const label = listLabel(viewSource(), PASSES_LIST_NAME);
+  pushEcommerce('view_item', {
+    currency: pass.currency,
+    value: pass.total,
+    items: [
+      {
+        item_id: pass.catalogueCode,
+        item_name: pass.displayName,
+        coupon: '',
+        discount: '',
+        item_brand: BRAND,
+        // the number of visits
+        item_category: pass.visits ? String(pass.visits) : '',
+        item_category2: '',
+        item_category3: pass.service,
+        item_category4: '',
+        item_category5: '',
+        item_list_id: label,
+        item_list_name: label,
+        price: pass.total,
+        quantity: 1,
+        checkInDate: '',
+        checkInTime: '',
+        adults: '',
+        children: '',
+        total_guest_count: '',
+      },
+    ],
+  });
 }
 
 /**

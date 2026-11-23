@@ -43,20 +43,26 @@ export function trackViewSource() {
   }, true);
 }
 
+// how the visitor came to this page, once read (see viewSource)
+let pageSource;
+
 /**
  * How the visitor came to this page: the noted click for it, used once (so a reload is
- * `others`), else `others`.
+ * `others`), else `others`; kept for the page, so every event on it says the same (e.g. the
+ * passes' view_item_list and a pass's view_item).
  * @returns {'mega_menu'|'hp_search_widget_click'|'others'}
  */
 export function viewSource() {
+  if (pageSource) return pageSource;
+  pageSource = 'others';
   try {
     const noted = JSON.parse(sessionStorage.getItem(SOURCE_KEY) || 'null');
     if (noted && noted.pathname === window.location.pathname && SOURCES[noted.source]) {
       sessionStorage.removeItem(SOURCE_KEY);
-      return noted.source;
+      pageSource = noted.source;
     }
   } catch { /* nothing noted */ }
-  return 'others';
+  return pageSource;
 }
 
 /**
@@ -123,6 +129,21 @@ export function chosenVisit(timeZone) {
     children,
     total_guest_count: adults + children,
   };
+}
+
+/**
+ * Pushes a GA4 event that isn't an ecommerce one to the data layer: its name and its fields, next
+ * to each other, e.g. `{ event: 'sign_up', method: 'email', user_id: '6000032669',
+ * user_properties: {…} }`.
+ * @param {string} event e.g. sign_up
+ * @param {Object} fields
+ * @returns {Object} the pushed event
+ */
+export function pushGtagEvent(event, fields) {
+  window.dataLayer = window.dataLayer || [];
+  const entry = { event, ...fields };
+  window.dataLayer.push(entry);
+  return entry;
 }
 
 /**
