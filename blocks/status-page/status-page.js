@@ -5,6 +5,7 @@
  */
 // eslint-disable-next-line import/no-cycle
 import { trackError } from '../../scripts/adobe-datalayer.js';
+import { trackAllError } from '../../scripts/gtag-datalayer.js';
 
 const HEADINGS = 'h1, h2, h3, h4, h5, h6';
 const IMAGES = 'picture, img';
@@ -91,7 +92,7 @@ export default function decorate(block) {
     notice.append(text);
   }
   block.replaceChildren(notice);
-  // the data layer's error, on the 404 and 500 pages
+  // the data layer's error, on the 404 and 500 pages, and GA4's all_error
   const errorCode = window.location.pathname.split('/').pop();
   if (ERROR_MESSAGES[errorCode]) {
     trackError([
@@ -100,5 +101,6 @@ export default function decorate(block) {
         errorMessage: ERROR_MESSAGES[errorCode],
       },
     ]);
+    trackAllError(ERROR_MESSAGES[errorCode], errorCode);
   }
 }

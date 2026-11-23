@@ -147,6 +147,24 @@ export function pushGtagEvent(event, fields) {
 }
 
 /**
+ * GA4's `all_error` for an error shown to the visitor, on any page or form (the error pages,
+ * forms, the login, the lounge page's price, the cart): its message as shown and the service's
+ * code for it ('' without one), e.g. `{ event: 'all_error', error_message_code: 'BKNG049',
+ * error_message: 'Past booking is not allowed' }`. Nothing without a message.
+ * @param {string} message
+ * @param {string|number} [code] e.g. BKNG049, 404
+ * @returns {Object|null} the pushed event
+ */
+export function trackAllError(message, code = '') {
+  const errorMessage = String(message ?? '').replace(/\s+/g, ' ').trim();
+  if (!errorMessage) return null;
+  return pushGtagEvent('all_error', {
+    error_message_code: code ? String(code) : '',
+    error_message: errorMessage,
+  });
+}
+
+/**
  * Pushes a GA4 ecommerce event to the data layer, after clearing the last one's `ecommerce`.
  * @param {string} event e.g. view_item_list
  * @param {Object} ecommerce

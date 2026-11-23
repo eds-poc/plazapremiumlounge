@@ -21,7 +21,7 @@ import { getCurrency } from './currency.js';
 // eslint-disable-next-line import/no-cycle
 import { PAGE_VIEW, pushEvent } from './adobe-datalayer.js';
 import {
-  BRAND, listLabel, pushEcommerce, viewSource,
+  BRAND, listLabel, pushEcommerce, trackAllError, viewSource,
 } from './gtag-datalayer.js';
 // eslint-disable-next-line import/no-cycle
 import { hideLoader, showLoader } from './scripts.js';
@@ -218,7 +218,7 @@ function confirmRemove(line, from) {
       if (result.status === 'failed') {
         // (as the source: the mini cart stays, with the message)
         // eslint-disable-next-line no-use-before-define
-        showFailure('cartRemoveFailed', from, { stack: true });
+        showFailure('cartRemoveFailed', from, { stack: true, code: errorCode(result) });
         return;
       }
       // (the mini cart has followed the cart: what's left, or closed, focus back to its trigger)
@@ -353,6 +353,8 @@ export function buildPromo(cart, { prefix = 'mini-cart', redraw, root } = {}) {
     promo.draft = ok ? '' : code;
     promo.message = ok ? '' : promoMessage(result);
     promo.error = !ok;
+    // GA4's all_error for a refused code, with the booking system's code (e.g. BKNG048)
+    if (!ok) trackAllError(promo.message, result.error?.service?.errorCode);
     refocus(from);
   };
   input.addEventListener('input', () => {
@@ -818,6 +820,7 @@ document.addEventListener(PROMO_DROPPED_EVENT, (e) => {
   if (getCartId() !== cartId) return;
   promoFor(getCart() || { cartId });
   Object.assign(promo, { draft: code, message: promoMessage(e.detail), error: true });
+  trackAllError(promo.message, e.detail.error?.service?.errorCode);
   if (mini.dialog?.open && getCart()) renderMiniCart(getCart());
 });
 
@@ -893,10 +896,10 @@ export async function addAndShow(item, trigger) {
   } else if (item.type === 'pass') {
     // (the source's pass page: its notice)
     // eslint-disable-next-line no-use-before-define
-    await showFailure('cartPassAddFailed', from, { title: 'cartNotice' });
+    await showFailure('cartPassAddFailed', from, { title: 'cartNotice', code: errorCode(result) });
   } else {
     // eslint-disable-next-line no-use-before-define
-    await showFailure('cartAddFailed', from);
+    await showFailure('cartAddFailed', from, { code: errorCode(result) });
   }
 }
 
@@ -932,14 +935,26 @@ export async function checkAndShow(item, trigger) {
 }
 
 /**
+ * The booking system's error code for a cart change that failed (e.g. CRT_ERR_004), '' without one.
+ * @param {{error?: Error}} result The cart's answer (see cart.js)
+ * @returns {string}
+ */
+function errorCode(result) {
+  const service = result?.error?.service;
+  return String(service?.errorCode || service?.code || '');
+}
+
+/**
  * A failure's message (the source's alert, in the site's dialog), e.g. "Unable to add to cart."
  * @param {string} key The text's key
  * @param {HTMLElement} [trigger]
- * @param {{stack?: boolean, title?: string}} [options] stack: over the open dialog (e.g. the mini
- *   cart); title: the title's key (else the cart's)
+ * @param {{stack?: boolean, title?: string, code?: string}} [options] stack: over the open dialog
+ *   (e.g. the mini cart); title: the title's key (else the cart's); code: the booking system's
+ *   error code, for GA4's all_error (sent with the message)
  */
-async function showFailure(key, trigger, { title = 'cartTitle', ...options } = {}) {
+async function showFailure(key, trigger, { title = 'cartTitle', code = '', ...options } = {}) {
   failure.fill(translate(title), [el('p', '', translate(key))]);
+  trackAllError(translate(key), code);
   await failure.open(trigger, options);
 }
 
@@ -961,7 +976,7 @@ export async function removeAndShow(catalogueCode, trigger) {
     hideLoader();
     setBusy(from, false);
   }
-  if (result.status === 'failed') await showFailure('cartRemoveFailed', from);
+  if (result.status === 'failed') await showFailure('cartRemoveFailed', from, { code: errorCode(result) });
 }
 
 // the data layer's Check Out and Edit clicks (the buttons announce them, see renderMiniCart)

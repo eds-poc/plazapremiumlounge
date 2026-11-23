@@ -5,7 +5,7 @@ import { applyButtonAction } from '../../scripts/button-actions.js';
 // eslint-disable-next-line import/no-cycle
 import { PAGE_VIEW, pushEvent, setPageDetails } from '../../scripts/adobe-datalayer.js';
 import {
-  BRAND, chosenVisit, listLabel, pushEcommerce, viewSource,
+  BRAND, chosenVisit, listLabel, pushEcommerce, trackAllError, viewSource,
 } from '../../scripts/gtag-datalayer.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { translate } from '../../scripts/i18n.js';
@@ -1123,6 +1123,9 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
       // the service's own message when it gave one (e.g. "Inventory not found"), else the page's
       errorMessage = error.service?.message || message.textContent;
       errorCode = String(error.service?.errorCode || '');
+      // GA4's all_error, as the price couldn't be given (e.g. BKNG049, "Past booking is not
+      // allowed")
+      trackAllError(errorMessage, errorCode);
     } finally {
       setLoading(false);
       if (pricing === controller) form.removeAttribute('aria-busy');
