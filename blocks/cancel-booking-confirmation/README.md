@@ -63,14 +63,12 @@ Authors write the texts; the summary comes from the **cancellation summary** API
 (`scripts/endpoints.js`), a `GET` with the order in the address (`?orderId=HKBC-11339-64UJVG`) and
 the member's login token (`Authorization: Bearer <token>`).
 
-**Not live yet.** Until it is, on the preview and local sites only (`.aem.page`, localhost) a
-failure shows the sample answer `sample-cancellation-summary.json` (the order HKBC-11339-64UIPS),
-with a console warning, so the page can be reviewed. Never on `.aem.live` or the real site.
+A failure shows the **error** text with Try again (a missing booking, the **notFound** text).
 
 | Shown | The answer | Notes |
 | --- | --- | --- |
 | Order No | `orderId` | |
-| Lead Guest Details | `contactInfo.firstName`, `.lastName`, `.emailId` | assumed, as GetOrderDetail's `contactInfo` (not in the first sample) |
+| Lead Guest Details | `contactInfo.firstName`, `.lastName`, `.emailId` | as GetOrderDetail's `contactInfo` |
 | The lounge | `orderItems[].propertyDisplayName`, `shortLocation`, `locationName` | the items at the same lounge and start time are one visit |
 | Date & Time | `orderItems[].startDate` | "25-Nov-2026, 1930 hrs", the lounge's local time as given |
 | Guests | `orderItems[].guestsCount.adult`, `.child` | |

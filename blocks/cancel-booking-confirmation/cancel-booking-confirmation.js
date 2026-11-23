@@ -14,11 +14,6 @@ import {
 } from '../../scripts/bookings.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { translate } from '../../scripts/i18n.js';
-import { isPreview } from '../../scripts/properties.js';
-
-// until the cancellation summary API exists: the sample answer shown on the preview and local
-// sites only, so the page can be reviewed (never on .aem.live or the real site)
-const SAMPLE = 'sample-cancellation-summary.json';
 
 /**
  * Creates an element with an optional class name and text.
@@ -37,31 +32,21 @@ function el(tag, className, text) {
 /**
  * The cancelled booking's summary: a GET with the order id (`?orderId=`) and the login token. A
  * refused token (401) logs out and goes home (the promise then gives null); a missing booking
- * rejects with `notFound`, any other failure without. On the preview and local sites a failure
- * shows the sample answer instead (the API isn't live yet).
+ * rejects with `notFound`, any other failure without.
  * @param {string} orderId
  * @returns {Promise<object|null>}
  */
 async function fetchSummary(orderId) {
-  try {
-    const url = apiUrl('cancellationSummary');
-    url.searchParams.set('orderId', orderId);
-    const res = await fetch(url, { headers: authHeaders() });
-    if (res.status === 401) {
-      logout();
-      return null;
-    }
-    const data = await res.json().catch(() => ({}));
-    if (res.ok && data?.orderId && !data.error && !data.errorCode) return data;
-    throw Object.assign(new Error('cancellation summary'), { notFound: res.ok || res.status === 404 });
-  } catch (error) {
-    if (!isPreview()) throw error;
-    const sample = await fetch(`${window.hlx.codeBasePath}/blocks/cancel-booking-confirmation/${SAMPLE}`);
-    if (!sample.ok) throw error;
-    // eslint-disable-next-line no-console
-    console.warn('cancel-booking-confirmation: the cancellation summary API failed; showing the sample answer', error);
-    return sample.json();
+  const url = apiUrl('cancellationSummary');
+  url.searchParams.set('orderId', orderId);
+  const res = await fetch(url, { headers: authHeaders() });
+  if (res.status === 401) {
+    logout();
+    return null;
   }
+  const data = await res.json().catch(() => ({}));
+  if (res.ok && data?.orderId && !data.error && !data.errorCode) return data;
+  throw Object.assign(new Error('cancellation summary'), { notFound: res.ok || res.status === 404 });
 }
 
 /**
