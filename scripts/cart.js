@@ -276,7 +276,6 @@ function readLine(p) {
     discount: (Number(price.totalDiscounts) || 0) + (Number(price.totalPromocodeAmount) || 0),
     // for the GA4 view_cart (scripts/mini-cart.js trackViewCart): the property's code and its
     // short location ("International Departures, Terminal 1")
-    propertyCode: text(p?.propertyCode),
     shortLocation: text(p?.shortLocation),
   };
 }
