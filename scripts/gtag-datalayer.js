@@ -132,6 +132,21 @@ export function chosenVisit(timeZone) {
 }
 
 /**
+ * Pushes a GA4 event that isn't an ecommerce one to the data layer: its name and its fields, next
+ * to each other, e.g. `{ event: 'sign_up', method: 'email', user_id: '6000032669',
+ * user_properties: {…} }`.
+ * @param {string} event e.g. sign_up
+ * @param {Object} fields
+ * @returns {Object} the pushed event
+ */
+export function pushGtagEvent(event, fields) {
+  window.dataLayer = window.dataLayer || [];
+  const entry = { event, ...fields };
+  window.dataLayer.push(entry);
+  return entry;
+}
+
+/**
  * Pushes a GA4 ecommerce event to the data layer, after clearing the last one's `ecommerce`.
  * @param {string} event e.g. view_item_list
  * @param {Object} ecommerce
