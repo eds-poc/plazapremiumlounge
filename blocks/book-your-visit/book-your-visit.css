@@ -1,0 +1,667 @@
+/* the shared Booking Summary card (with the Checkout block) */
+@import url('../../styles/booking-summary.css');
+
+/* Book Your Visit: the source's /{lang}/book-your-visit (#bookyourvisitform, .summary-form-wrapper,
+   .booking-summary-wrapper, .lounge-bottom-booking), mobile first. Phones and tablets: the note,
+   the Departures / Arrivals badge, the lounge (its name and location, the arrow folding its
+   details), a list of the visit's Date and Time (each with Edit, a pop-up) and its guests and
+   service, the promo field, the page's Add-ons, and a bar fixed at the bottom (the subtotal, the
+   struck price before discounts, Confirm & Proceed). From 992px: the form (two thirds; Date and
+   Time to choose, the guests and the service locked) beside the Booking Summary with Check Out. */
+.book-your-visit {
+  /* the fields: 45px warm grey pills (the time's 37px), 12px 25px inside, 14px text */
+  --book-your-visit-field-height: 45px;
+  --book-your-visit-time-height: 37px;
+  --book-your-visit-field-bg: var(--color-surface-warm);
+  --book-your-visit-label: var(--color-text-secondary);
+  --book-your-visit-label-note: #bbb;
+  --book-your-visit-label-spacing: 1px;
+  --book-your-visit-locked: #808080;
+  --book-your-visit-hrs-inset: calc(var(--spacing-8) + 4ch + var(--spacing-2));
+
+  /* the page's badge: the summary's, larger (the source's ppg-ppl-arrdep-badge--pagehero) */
+  --book-your-visit-badge-size: var(--font-size-xs);
+  --book-your-visit-badge-padding: 6px 12px;
+  --book-your-visit-badge-size-desktop: var(--font-size-sm);
+  --book-your-visit-badge-padding-desktop: 8px 16px;
+  --book-your-visit-tip-width: 280px;
+  --book-your-visit-tip-padding: 14px 16px;
+
+  /* the phones' bar: white, 52px, the subtotal 14px/500 and the price before discounts 11px struck,
+     Confirm & Proceed an 11px capitals pill */
+  --book-your-visit-bar-height: 52px;
+  --book-your-visit-bar-space: 80px;
+  --book-your-visit-bar-shadow: 0 -5px 30px -10px rgb(0 0 0 / 20%);
+  --book-your-visit-bar-struck: 11px;
+  --book-your-visit-bar-button: 11px;
+  --book-your-visit-bar-button-padding: 6px 15px;
+
+  /* the calendar (the lounge page's, the source's jQuery UI datepicker; sizes in em follow its font) */
+  --book-your-visit-calendar-width: 350px;
+  --book-your-visit-calendar-shadow: 0 4px 8px rgb(10 10 10 / 10%);
+  --book-your-visit-calendar-fade: 0.4s;
+  --book-your-visit-calendar-top-height: 13px;
+  --book-your-visit-calendar-close-width: 19px;
+  --book-your-visit-calendar-close-height: 30px;
+  --book-your-visit-calendar-header-top: 1.65em;
+  --book-your-visit-calendar-nav: 1.8em;
+  --book-your-visit-calendar-nav-inset: var(--spacing-6);
+  --book-your-visit-calendar-title-inset: 0;
+  --book-your-visit-calendar-arrow-width: 14px;
+  --book-your-visit-calendar-arrow-height: 16px;
+  --book-your-visit-calendar-bold: 700;
+  --book-your-visit-calendar-day-size: 32px;
+  --book-your-visit-calendar-day: #454545;
+  --book-your-visit-modal-gap: var(--spacing-7);
+
+  /* (the end of the page clear of the phones' bar) */
+  padding-bottom: var(--book-your-visit-bar-space);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-body);
+}
+
+.book-your-visit .book-your-visit-layout {
+  display: grid;
+  gap: var(--spacing-stack) var(--grid-gutter);
+}
+
+.book-your-visit .book-your-visit-main {
+  min-width: 0;
+}
+
+/* the note: 14px (16px from 768px), its link 500 maroon; 20px under it */
+.book-your-visit .book-your-visit-note {
+  margin-bottom: var(--spacing-7);
+}
+
+.book-your-visit .book-your-visit-note p {
+  margin: 0;
+}
+
+.book-your-visit .book-your-visit-note a {
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+}
+
+.book-your-visit .book-your-visit-note a:hover {
+  text-decoration: underline;
+}
+
+/* a message (no time left today, the lead time, a failed save): the site's red over the form */
+.book-your-visit .book-your-visit-error {
+  margin: 0 0 var(--spacing-6);
+  color: var(--color-error);
+  font-weight: var(--font-weight-medium);
+}
+
+/* the lounge: its badge (12px above the name), then its name (20px/500) and location (16px/300),
+   the arrow at the right; 25px above and below it, a line under it */
+.book-your-visit .book-your-visit-lounge .checkout-badge {
+  margin-bottom: var(--spacing-5);
+}
+
+.book-your-visit .book-your-visit-toggle {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  width: 100%;
+  margin: 0;
+  padding: var(--spacing-8) var(--spacing-10) var(--spacing-8) 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.book-your-visit .book-your-visit-toggle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: var(--spacing-3);
+  width: var(--spacing-6);
+  height: var(--spacing-6);
+  background-color: currentcolor;
+  mask: url('../../icons/arrow-down.svg') center / contain no-repeat;
+  translate: 0 -50%;
+  transition: rotate var(--duration-normal, 0.2s) ease;
+}
+
+.book-your-visit .book-your-visit-toggle[aria-expanded='false']::after {
+  rotate: -90deg;
+}
+
+.book-your-visit .book-your-visit-toggle:focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+}
+
+.book-your-visit .book-your-visit-name {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.book-your-visit .book-your-visit-place {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-heading);
+}
+
+/* the form's fields (from 992px): two columns 24px apart, each label 12px/500 capitals in grey 16px
+   over its pill */
+.book-your-visit .book-your-visit-fields {
+  display: none;
+}
+
+.book-your-visit .book-your-visit-field {
+  min-width: 0;
+}
+
+.book-your-visit .book-your-visit-label {
+  display: block;
+  margin-bottom: var(--spacing-bootstrap-3);
+  color: var(--book-your-visit-label);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--book-your-visit-label-spacing);
+  text-transform: uppercase;
+}
+
+.book-your-visit .book-your-visit-label-note {
+  color: var(--book-your-visit-label-note);
+  font-weight: var(--font-weight-light);
+  text-transform: none;
+}
+
+.book-your-visit :is(.book-your-visit-time-select, .book-your-visit-locked, .book-your-visit-date-text),
+.book-your-visit-modal .book-your-visit-time-select {
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--book-your-visit-field-height);
+  margin: 0;
+  padding: var(--spacing-5) var(--spacing-8);
+  border: 0;
+  border-radius: var(--radius-input);
+  background-color: var(--book-your-visit-field-bg);
+  color: var(--color-text-control);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+/* the time: "1300 hrs", 500, the arrow 12px in */
+.book-your-visit .book-your-visit-time,
+.book-your-visit-modal .book-your-visit-time {
+  position: relative;
+}
+
+.book-your-visit .book-your-visit-time-select,
+.book-your-visit-modal .book-your-visit-time-select {
+  height: var(--book-your-visit-time-height);
+  padding-block: var(--spacing-3);
+  font-weight: var(--font-weight-medium);
+  appearance: none;
+  background-image: url('../../icons/arrow-down.svg');
+  background-position: right var(--spacing-5) center;
+  background-repeat: no-repeat;
+  background-size: var(--font-size-md) var(--spacing-5);
+  cursor: pointer;
+}
+
+.book-your-visit .book-your-visit-hrs,
+.book-your-visit-modal .book-your-visit-hrs {
+  position: absolute;
+  font-size: var(--font-size-sm);
+  top: 50%;
+  left: var(--book-your-visit-hrs-inset);
+  font-weight: var(--font-weight-medium);
+  translate: 0 -50%;
+  pointer-events: none;
+}
+
+/* the guests and the service: shown, locked (the source's disabled fields), the guests centred */
+.book-your-visit .book-your-visit-locked {
+  color: var(--book-your-visit-locked);
+  cursor: default;
+}
+
+.book-your-visit .book-your-visit-field:nth-child(3) .book-your-visit-locked,
+.book-your-visit .book-your-visit-field:nth-child(4) .book-your-visit-locked {
+  text-align: center;
+}
+
+.book-your-visit :is(.book-your-visit-time-select, .book-your-visit-date-text):focus-visible,
+.book-your-visit-modal .book-your-visit-time-select:focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+}
+
+/* phones and tablets: Date and Time (each with Edit at the right), Guests, Services: their labels
+   light grey, their values maroon 500 */
+.book-your-visit .book-your-visit-phone-list {
+  margin: var(--spacing-6) 0 0;
+}
+
+.book-your-visit .book-your-visit-phone-row {
+  position: relative;
+  margin-bottom: var(--spacing-5);
+  padding-bottom: var(--spacing-4);
+}
+
+.book-your-visit .book-your-visit-phone-row dt {
+  color: var(--checkout-label);
+  font-weight: var(--font-weight-regular);
+}
+
+.book-your-visit .book-your-visit-phone-row dd {
+  margin: 0;
+  padding-right: var(--spacing-11);
+  color: var(--color-brand-primary-action);
+  font-weight: var(--font-weight-medium);
+}
+
+.book-your-visit .book-your-visit-edit {
+  position: absolute;
+  top: 0;
+  right: var(--spacing-6);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-brand-primary);
+  font: inherit;
+  font-weight: var(--font-weight-light);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.book-your-visit .book-your-visit-edit:focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+}
+
+.book-your-visit .book-your-visit-promo {
+  margin-top: var(--spacing-5);
+}
+
+/* the page's badge: the summary's badge (styles/booking-summary.css) at the page's sizes; the
+   summary card's own badge keeps the summary's */
+.book-your-visit .book-your-visit-lounge {
+  --checkout-badge-size: var(--book-your-visit-badge-size);
+  --checkout-badge-padding: var(--book-your-visit-badge-padding);
+  --checkout-tip-width: var(--book-your-visit-tip-width);
+  --checkout-tip-padding: var(--book-your-visit-tip-padding);
+}
+
+/* the summary card is the desktop's (the phones have the list and the bar); its text 16px, as
+   the source's on this page (the checkout's is 14px) */
+.book-your-visit .book-your-visit-summary {
+  --checkout-text: var(--font-size-md);
+
+  display: none;
+}
+
+/* the phones' bar */
+.book-your-visit .book-your-visit-bar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  box-sizing: border-box;
+  min-height: var(--book-your-visit-bar-height);
+  padding: var(--spacing-3) var(--spacing-6) var(--spacing-3) var(--spacing-4);
+  background-color: var(--color-background);
+  box-shadow: var(--book-your-visit-bar-shadow);
+}
+
+.book-your-visit .book-your-visit-bar-price {
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: var(--spacing-3);
+  align-items: center;
+  margin: 0;
+}
+
+.book-your-visit .book-your-visit-bar-label {
+  grid-row: span 2;
+}
+
+.book-your-visit .book-your-visit-bar-amount {
+  font-weight: var(--font-weight-medium);
+}
+
+.book-your-visit .book-your-visit-bar-base {
+  grid-column: 2;
+  font-size: var(--book-your-visit-bar-struck);
+  font-weight: var(--font-weight-medium);
+}
+
+.book-your-visit .book-your-visit-proceed {
+  margin: 0;
+  padding: var(--book-your-visit-bar-button-padding);
+  font-size: var(--book-your-visit-bar-button);
+  font-weight: var(--font-weight-regular);
+  text-transform: uppercase;
+}
+
+/* the phones' Edit pop-ups: the field, then Confirm centred */
+.book-your-visit-modal .book-your-visit-popup {
+  display: grid;
+  gap: var(--spacing-7);
+}
+
+.book-your-visit-modal .book-your-visit-confirm {
+  justify-self: center;
+  margin: 0;
+}
+
+.book-your-visit-modal .book-your-visit-label {
+  display: block;
+  margin-bottom: var(--spacing-3);
+  font-weight: var(--font-weight-medium);
+}
+
+/* the date as the source writes it; desktop: the source's calendar pops up under it (the "Date"
+   title and close, the month between previous and next, the days) */
+
+.book-your-visit-date {
+  position: relative;
+}
+
+.book-your-visit-date-text {
+  display: flex;
+  align-items: center;
+  text-align: start;
+  cursor: text;
+}
+
+.book-your-visit-date-text:focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+}
+
+/* the dialog's date text (see the dialog's rules) */
+
+.book-your-visit-date-value {
+  display: none;
+}
+
+.book-your-visit-calendar {
+  position: absolute;
+  top: calc(100% + var(--spacing-4));
+  left: 0;
+  z-index: 2;
+  display: none;
+  box-sizing: border-box;
+  width: var(--book-your-visit-calendar-width);
+  padding: var(--spacing-7);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-warm);
+  box-shadow: var(--book-your-visit-calendar-shadow);
+  color: var(--color-text);
+  font-family: var(--font-family-campaign);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+.book-your-visit-date.is-open .book-your-visit-calendar {
+  display: block;
+  animation: book-your-visit-calendar-in var(--book-your-visit-calendar-fade) ease;
+}
+
+@keyframes book-your-visit-calendar-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* "Date", its text above its short line box as the source's, and close at the top right */
+
+.book-your-visit-calendar-top {
+  position: relative;
+  height: var(--book-your-visit-calendar-top-height);
+}
+
+.book-your-visit-calendar-heading {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+}
+
+.book-your-visit-calendar-close,
+.book-your-visit-calendar-nav {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.book-your-visit-calendar-close {
+  position: absolute;
+  top: 0;
+  right: var(--spacing-5);
+  width: var(--book-your-visit-calendar-close-width);
+  height: var(--book-your-visit-calendar-close-height);
+}
+
+.book-your-visit-calendar-close::before,
+.book-your-visit-calendar-nav::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: currentcolor;
+  mask: url('../../icons/close-light.svg') center / contain no-repeat;
+}
+
+/* the month and year between previous and next */
+
+.book-your-visit-calendar-header {
+  display: grid;
+  grid-template-columns: var(--book-your-visit-calendar-nav) 1fr var(--book-your-visit-calendar-nav);
+  gap: var(--book-your-visit-calendar-title-inset);
+  align-items: end;
+  padding: var(--book-your-visit-calendar-header-top) var(--book-your-visit-calendar-nav-inset) 0.75em;
+}
+
+.book-your-visit-calendar-title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--book-your-visit-calendar-bold);
+  line-height: 1.8;
+  text-align: center;
+}
+
+.book-your-visit-calendar-nav {
+  width: var(--book-your-visit-calendar-nav);
+  height: var(--book-your-visit-calendar-nav);
+  border-radius: var(--radius-xs);
+  transition: color var(--duration-normal) ease-in-out;
+}
+
+.book-your-visit-calendar-nav::before {
+  width: var(--book-your-visit-calendar-arrow-width);
+  height: var(--book-your-visit-calendar-arrow-height);
+  margin: auto;
+  mask-image: url('../../icons/arrow-left-light.svg');
+}
+
+.book-your-visit-calendar-next::before {
+  mask-image: url('../../icons/arrow-right-light.svg');
+}
+
+.book-your-visit-calendar-nav:hover {
+  color: var(--color-text-subtle);
+}
+
+.book-your-visit-calendar-nav:disabled {
+  color: inherit;
+  opacity: 0.35;
+  cursor: default;
+}
+
+.book-your-visit-calendar-close:focus-visible,
+.book-your-visit-calendar-nav:focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+}
+
+/* the days: one month, the days before the first bookable one faded, the chosen one in maroon */
+
+.book-your-visit-calendar-grid {
+  width: 100%;
+  margin: 0 0 0.4em;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+
+.book-your-visit-calendar-grid th {
+  padding: 0.7em 0.3em;
+  font-weight: var(--book-your-visit-calendar-bold);
+  text-align: center;
+}
+
+.book-your-visit-calendar-grid td {
+  padding: calc(var(--spacing-1) / 2);
+  text-align: center;
+  cursor: pointer;
+}
+
+.book-your-visit-calendar-grid td:not([data-date]),
+.book-your-visit-calendar-grid td[aria-disabled='true'] {
+  cursor: default;
+}
+
+.book-your-visit-calendar-grid td[aria-disabled='true'] {
+  opacity: 0.35;
+}
+
+.book-your-visit-calendar-day {
+  display: inline-block;
+  width: var(--book-your-visit-calendar-day-size);
+  height: var(--book-your-visit-calendar-day-size);
+  border-radius: var(--radius-circle);
+  color: var(--book-your-visit-calendar-day);
+  font-size: var(--font-size-sm);
+  line-height: 2.2;
+  vertical-align: middle;
+}
+
+.book-your-visit-calendar-grid td[aria-selected='true'] .book-your-visit-calendar-day {
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+.book-your-visit-calendar-grid td:focus-visible {
+  outline: 0;
+}
+
+.book-your-visit-calendar-grid td:focus-visible .book-your-visit-calendar-day {
+  box-shadow: var(--shadow-focus);
+}
+
+/* the dialog's date, as the source's: the date as plain text over the calendar, always open, white
+   and the dialog's width */
+
+.book-your-visit-modal .book-your-visit-date-text,
+.book-your-visit-modal .book-your-visit-calendar-top {
+  display: none;
+}
+
+/* (as the source's, a little wider than the other fields, and the calendar's own space under it
+   as the gap to the next) */
+
+.book-your-visit-modal .book-your-visit-date {
+  margin-inline: calc(-1 * var(--spacing-5));
+  margin-bottom: calc(-1 * var(--book-your-visit-modal-gap));
+}
+
+.book-your-visit-modal .book-your-visit-date-value {
+  display: block;
+  margin: 0;
+  padding: 0 var(--spacing-bootstrap-3);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+}
+
+.book-your-visit-modal .book-your-visit-date .book-your-visit-calendar {
+  position: static;
+  display: block;
+  width: auto;
+  padding: var(--spacing-7) 0;
+  background-color: var(--color-background);
+  box-shadow: none;
+  font-size: var(--font-size-sm);
+  animation: none;
+}
+
+.book-your-visit-modal .book-your-visit-calendar-header {
+  align-items: center;
+  padding-top: 0;
+  padding-inline: var(--spacing-5);
+}
+
+@media (width >= 768px) {
+  .book-your-visit {
+    font-size: var(--font-size-md);
+  }
+
+  .book-your-visit .book-your-visit-lounge .checkout-badge {
+    --checkout-badge-size: var(--book-your-visit-badge-size-desktop);
+    --checkout-badge-padding: var(--book-your-visit-badge-padding-desktop);
+  }
+}
+
+@media (width >= 992px) {
+  .book-your-visit {
+    padding-bottom: var(--spacing-9);
+  }
+
+  .book-your-visit .book-your-visit-layout {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .book-your-visit .book-your-visit-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-stack);
+    padding: var(--spacing-3) 0 var(--spacing-6);
+  }
+
+  .book-your-visit .book-your-visit-fields[hidden],
+  .book-your-visit .book-your-visit-phone {
+    display: none;
+  }
+
+  .book-your-visit .book-your-visit-summary {
+    display: block;
+  }
+
+  .book-your-visit .book-your-visit-bar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .book-your-visit .book-your-visit-toggle::after,
+  .book-your-visit-date.is-open .book-your-visit-calendar {
+    transition: none;
+    animation: none;
+  }
+}

@@ -28,6 +28,17 @@ const OLD_COOKIE = 'cartid';
 const memory = new Map();
 
 /**
+ * How many products the lines hold, as the header counts them (the source's): each line's
+ * quantity, a lounge's add-ons' quantities too.
+ * @param {Object[]} lines
+ * @returns {number}
+ */
+function countOf(lines) {
+  return lines.reduce((sum, line) => sum + (Number(line.quantity) || 1)
+    + (line.addons || []).reduce((n, a) => n + (Number(a.quantity) || 0), 0), 0);
+}
+
+/**
  * A storage, by name, or null when the browser blocks it.
  * @param {'localStorage'|'sessionStorage'} name
  * @returns {Storage|null}
@@ -97,7 +108,7 @@ function migrate() {
       expires: Number(old?.expires) > Date.now()
         ? Number(old.expires) : Date.now() + ID_LIFETIME_MS,
       changed: Date.now(),
-      count: lines.reduce((sum, line) => sum + (Number(line.quantity) || 1), 0),
+      count: countOf(lines),
       codes: lines.map((line) => line.catalogueCode).filter(Boolean),
     });
   }
@@ -182,14 +193,15 @@ export function needsRead() {
 }
 
 /**
- * The number shown on the header's cart: the lines' quantities, as the source's (without this
+ * The number shown on the header's cart: the lines' quantities (a lounge's add-ons' too), as the
+ * source's (without this
  * tab's data: the count kept with the cart's id).
  * @param {Object|null} [cart]
  * @returns {number}
  */
 export function cartCount(cart = getCart()) {
   const lines = cart?.lines || [];
-  if (lines.length) return lines.reduce((sum, line) => sum + (Number(line.quantity) || 1), 0);
+  if (lines.length) return countOf(lines);
   return Number(readEntry()?.count) || 0;
 }
 
@@ -220,13 +232,14 @@ export function saveCart(cart) {
   // same answer read again keeps the entry as it was (no storage event, so tabs don't keep
   // signalling each other's reads)
   const sig = JSON.stringify([cart.currency || '', cart.totals?.total ?? '', cart.promoCode || '',
-    lines.map((line) => [line.catalogueCode, line.quantity, line.total])]);
+    lines.map((line) => [line.catalogueCode, line.quantity, line.total,
+      (line.addons || []).map((x) => [x.catalogueCode, x.quantity])])]);
   const same = known?.id === cart.cartId && known.sig === sig;
   write('localStorage', ID_KEY, {
     id: cart.cartId,
     expires: known?.id === cart.cartId ? known.expires : now + ID_LIFETIME_MS,
     changed: same ? known.changed : now,
-    count: lines.reduce((sum, line) => sum + (Number(line.quantity) || 1), 0),
+    count: countOf(lines),
     codes: lines.map((line) => line.catalogueCode).filter(Boolean),
     sig,
   });

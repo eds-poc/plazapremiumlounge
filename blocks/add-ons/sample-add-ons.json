@@ -1,0 +1,1463 @@
+{
+    "addons": [
+        {
+            "productCode": "PRD3772",
+            "parentProductCode": "PRD3341",
+            "productName": "Plaza Premium Lounge Sakura Shrimp Spice (50g)",
+            "productType": "Add-On",
+            "productDescription": "<p>Sweet Sakura shrimp combined with garlic and chilli delivers a bold yet balanced savoury-umami profile, pairing perfectly with signature lounge dishes such as fish ball noodles. Please collect your Plaza Premium Lounge Sakura Shrimp Spice during the same visit as your lounge access.</p><p>T&amp;C apply <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://apc01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.plazapremiumlounge.com%2Fen-uk%2Flanding-pages%2Fhkg-sakura-shrimp-spice-tnc%3Futm_source%3DNetcore%26utm_campaign%3DHKG-Sakura-Shrimp-Spice_EN%26utm_medium%3DWeb%2520Message%26utm_term%3DOnsite%26__sta%3D%257CHTI%26__stm_medium%3Dwebmsg%26__stm_source%3Dsmartech&amp;data=05%7C02%7Ckienyik.ong%40plaza-network.com%7C000bd652d3d6447af85c08df0fce30fe%7C57c780997a6f42de9103b6ff47502aac%7C0%7C0%7C639247051122630342%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&amp;sdata=iDayahUgpG7kPJa3Cg%2BNvGd%2F8vIBMqKnh5KYCvxDCHI%3D&amp;reserved=0\"><span style=\"color:hsl(240,75%,60%);\">Terms and Conditions | Plaza Premium Lounge</span></a></p>",
+            "shortProductDescription": "<p>Sweet Sakura shrimp combined with garlic and chilli delivers a bold yet balanced savoury-umami profile, pairing perfectly with signature lounge dishes such as fish ball noodles. Please collect your Plaza Premium Lounge Sakura Shrimp Spice during the same visit as your lounge access.</p><p>T&amp;C apply <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://apc01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.plazapremiumlounge.com%2Fen-uk%2Flanding-pages%2Fhkg-sakura-shrimp-spice-tnc%3Futm_source%3DNetcore%26utm_campaign%3DHKG-Sakura-Shrimp-Spice_EN%26utm_medium%3DWeb%2520Message%26utm_term%3DOnsite%26__sta%3D%257CHTI%26__stm_medium%3Dwebmsg%26__stm_source%3Dsmartech&amp;data=05%7C02%7Ckienyik.ong%40plaza-network.com%7C000bd652d3d6447af85c08df0fce30fe%7C57c780997a6f42de9103b6ff47502aac%7C0%7C0%7C639247051122630342%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&amp;sdata=iDayahUgpG7kPJa3Cg%2BNvGd%2F8vIBMqKnh5KYCvxDCHI%3D&amp;reserved=0\"><span style=\"color:hsl(240,75%,60%);\">Terms and Conditions | Plaza Premium Lounge</span></a></p>",
+            "packages": [],
+            "createdDate": "2026-04-27 07:46:38",
+            "lastModifiedDate": "2026-09-22 07:57:53",
+            "serviceCode": "SRVC1638",
+            "serviceName": "Lounge Retail",
+            "serviceDisplayName": "Lounge Retail",
+            "serviceDescription": "<p>Lounge Retail Product</p>",
+            "serviceSequence": 10003,
+            "basedOn": "Per Unit",
+            "availability": true,
+            "images": [
+                {
+                    "name": "Sakura Shrimp Spice PPL IBE KV.png",
+                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prd_images/Sakura Shrimp Spice PPL IBE KV_product_3772.png"
+                }
+            ],
+            "productVarients": [],
+            "prices": [
+                {
+                    "priceCode": "RTPLN3832",
+                    "priceName": "Plaza Premium Lounge Sakura Shrimp Spice (50gm)",
+                    "isSTRatePlan": false,
+                    "baseRate": [
+                        {
+                            "price": "13.78",
+                            "currency": "USD"
+                        }
+                    ],
+                    "basePrice": 13.78,
+                    "taxes": [],
+                    "discounts": [],
+                    "termsPolicies": [
+                        {
+                            "termsName": "CANCELLATIONS  &  AMENDMENTS",
+                            "termsCode": "SLSTRM1371",
+                            "description": "<p>Private Relaxation Area: Cancellation/ amendments may be made up to 24 hours before the indicated check-in time. A fee of AUD 10 per person or 25% of the total booking amount, whichever is higher, is payable.</p><p>All other services: Cancellation/ amendments may be made up to 6 hours before the indicated arrival time. A fee of AUD 10 per person is payable.</p><p>Late cancellation and/ or failure to arrive at the facility will be considered as No Show and the booking will not be refunded. Please refer to our full <a href=\"\">Terms &amp; Conditions</a>.</p>"
+                        }
+                    ],
+                    "additionalCharges": [],
+                    "availableInventory": 150,
+                    "startDate": "2025-12-16",
+                    "catalogueCode": "PRD3772-Add-On-PRPRTY815-LOUNGE-LCTN517-RTPLN3832",
+                    "totalPrice": 13.78,
+                    "basePriceWithDiscount": 13.78,
+                    "isMinimumAmountMet": true,
+                    "isInventoryAvailable": true,
+                    "lastModifiedDate": 1794248665000
+                },
+                {
+                    "priceCode": "RTPLN3771",
+                    "priceName": "Plaza Premium Lounge Sakura Shrimp Spice (50g) T2",
+                    "isSTRatePlan": false,
+                    "baseRate": [
+                        {
+                            "price": "13.78",
+                            "currency": "USD"
+                        }
+                    ],
+                    "basePrice": 13.78,
+                    "taxes": [],
+                    "discounts": [],
+                    "termsPolicies": [
+                        {
+                            "termsName": "CANCELLATIONS & AMENDMENTS",
+                            "termsCode": "SLSTRM1611",
+                            "description": "<p>Private Relaxation Area: Cancellation/ amendments may be made up to 24 hours before the indicated\ncheck-in time. A fee of USD10 per person or 25% of the total booking amount, whichever is higher, is payable.</p>\n<p>All other services: Cancellation/amendments may be made up to 6 hours before the indicated arrival time. A fee of USD10 per person is payable.</p>\n<p>Late cancellation and/or failure to arrive at the facility will be considered as No Show and the booking will not be refunded. Please refer to\nhttps://www.plazapremiumlounge.com/terms for complete Terms and Conditions.</p>\n<hr>"
+                        }
+                    ],
+                    "additionalCharges": [],
+                    "availableInventory": 21,
+                    "startDate": "2026-03-11",
+                    "catalogueCode": "PRD3772-Add-On-PRPRTY1318-LOUNGE-LCTN517-RTPLN3771",
+                    "totalPrice": 13.78,
+                    "basePriceWithDiscount": 13.78,
+                    "isMinimumAmountMet": true,
+                    "isInventoryAvailable": true,
+                    "lastModifiedDate": 1777276318000
+                },
+                {
+                    "priceCode": "RTPLN3773",
+                    "priceName": "Plaza Premium Lounge Sakura Shrimp Spice (50g) G1",
+                    "isSTRatePlan": false,
+                    "baseRate": [
+                        {
+                            "price": "22.96",
+                            "currency": "USD"
+                        }
+                    ],
+                    "basePrice": 22.96,
+                    "taxes": [],
+                    "discounts": [],
+                    "termsPolicies": [
+                        {
+                            "termsName": "CANCELLATIONS & AMENDMENTS",
+                            "termsCode": "SLSTRM1611",
+                            "description": "<p>Private Relaxation Area: Cancellation/ amendments may be made up to 24 hours before the indicated\ncheck-in time. A fee of USD10 per person or 25% of the total booking amount, whichever is higher, is payable.</p>\n<p>All other services: Cancellation/amendments may be made up to 6 hours before the indicated arrival time. A fee of USD10 per person is payable.</p>\n<p>Late cancellation and/or failure to arrive at the facility will be considered as No Show and the booking will not be refunded. Please refer to\nhttps://www.plazapremiumlounge.com/terms for complete Terms and Conditions.</p>\n<hr>"
+                        }
+                    ],
+                    "additionalCharges": [],
+                    "availableInventory": 25,
+                    "startDate": "2025-12-16",
+                    "catalogueCode": "PRD3772-Add-On-PRPRTY816-LOUNGE-LCTN517-RTPLN3773",
+                    "totalPrice": 22.96,
+                    "basePriceWithDiscount": 22.96,
+                    "isMinimumAmountMet": true,
+                    "isInventoryAvailable": true,
+                    "lastModifiedDate": 1789986007000
+                },
+                {
+                    "priceCode": "RTPLN3774",
+                    "priceName": "Plaza Premium Lounge Sakura Shrimp Spice 50g PPFG1",
+                    "isSTRatePlan": false,
+                    "baseRate": [
+                        {
+                            "price": "22.96",
+                            "currency": "USD"
+                        }
+                    ],
+                    "basePrice": 22.96,
+                    "taxes": [],
+                    "discounts": [],
+                    "termsPolicies": [
+                        {
+                            "termsName": "CANCELLATIONS & AMENDMENTS",
+                            "termsCode": "SLSTRM1611",
+                            "description": "<p>Private Relaxation Area: Cancellation/ amendments may be made up to 24 hours before the indicated\ncheck-in time. A fee of USD10 per person or 25% of the total booking amount, whichever is higher, is payable.</p>\n<p>All other services: Cancellation/amendments may be made up to 6 hours before the indicated arrival time. A fee of USD10 per person is payable.</p>\n<p>Late cancellation and/or failure to arrive at the facility will be considered as No Show and the booking will not be refunded. Please refer to\nhttps://www.plazapremiumlounge.com/terms for complete Terms and Conditions.</p>\n<hr>"
+                        }
+                    ],
+                    "additionalCharges": [],
+                    "availableInventory": 50,
+                    "startDate": "2025-12-16",
+                    "catalogueCode": "PRD3772-Add-On-PRPRTY815-LOUNGE-LCTN517-RTPLN3774",
+                    "totalPrice": 22.96,
+                    "basePriceWithDiscount": 22.96,
+                    "isMinimumAmountMet": true,
+                    "isInventoryAvailable": true,
+                    "lastModifiedDate": 1778206397000
+                },
+                {
+                    "priceCode": "RTPLN3833",
+                    "priceName": "Plaza Premium First XO Sauce (100gm)",
+                    "isSTRatePlan": false,
+                    "baseRate": [
+                        {
+                            "price": "23.98",
+                            "currency": "USD"
+                        }
+                    ],
+                    "basePrice": 23.98,
+                    "taxes": [],
+                    "discounts": [],
+                    "termsPolicies": [
+                        {
+                            "termsName": "CANCELLATIONS  &  AMENDMENTS",
+                            "termsCode": "SLSTRM1371",
+                            "description": "<p>Private Relaxation Area: Cancellation/ amendments may be made up to 24 hours before the indicated check-in time. A fee of AUD 10 per person or 25% of the total booking amount, whichever is higher, is payable.</p><p>All other services: Cancellation/ amendments may be made up to 6 hours before the indicated arrival time. A fee of AUD 10 per person is payable.</p><p>Late cancellation and/ or failure to arrive at the facility will be considered as No Show and the booking will not be refunded. Please refer to our full <a href=\"\">Terms &amp; Conditions</a>.</p>"
+                        }
+                    ],
+                    "additionalCharges": [],
+                    "availableInventory": 150,
+                    "startDate": "2025-12-16",
+                    "catalogueCode": "PRD3772-Add-On-PRPRTY815-LOUNGE-LCTN517-RTPLN3833",
+                    "totalPrice": 23.98,
+                    "basePriceWithDiscount": 23.98,
+                    "isMinimumAmountMet": true,
+                    "isInventoryAvailable": true,
+                    "lastModifiedDate": 1787563855000
+                }
+            ],
+            "locations": [
+                {
+                    "locationCode": "LCTN517",
+                    "locationName": "Hong Kong International Airport",
+                    "countryCode": "HK",
+                    "countryName": "Hong Kong SAR, China",
+                    "properties": [
+                        {
+                            "code": "PRPRTY814",
+                            "name": "Plaza Premium Lounge  (Near Gate 60, Departures)",
+                            "propertyTypeCode": "LOUNGE",
+                            "propertyType": "Lounge",
+                            "description": "<h4 class=\"smallTitle\"><font style=\"vertical-align: inherit;\"><font style=\"vertical-align: inherit;\">THE LOUNGE</font></font></h4>\nStep into a peaceful sanctuary near Gate 60 in Terminal 1 of Hong Kong International Airport, relax in comfortable seating while enjoying the natural light and a breathtaking tarmac view beneath you&mdash;a perfect backdrop for your travel experience, your true destination before departure.&nbsp;<br />\n<br />\nIndulge in our culinary delights blending local and global influences, including our &quot;Proudly Local&quot; Hong Kong-style fish ball noodles paired with our signature XO sauce and a refreshing selection of beverages&mdash;from selected house wine and beer to premium coffee, tea, and soft drinks. Whether you wish to enjoy freshly made meals or freshen up in our showers, we are here to ensure your airport experience is both enjoyable and memorable.<br />\n<br />\nIntroducing Lounge To-Go, our innovative option for travelers on the move. Grab a delicious meal that serves as a perfect inflight replacement, allowing you to savor the flavors of our lounge even while you travel.<br />\n&nbsp;",
+                            "address": "Level 7, Departures Level, Terminal 1, Hong Kong International Airport (near Gate 60)",
+                            "propertyDisplayName": "Plaza Premium Lounge ",
+                            "shortLocation": "Near Gate 60, Departures, Terminal 1",
+                            "featureList": [
+                                "Bar",
+                                "Charging Station",
+                                "Flight Information",
+                                "Food & Beverage",
+                                "Lounge Chairs/ Bay",
+                                "Vegetarian Options",
+                                "Wi-Fi",
+                                "Lounge To-Go"
+                            ],
+                            "images": [
+                                {
+                                    "name": "HKG_T1_Dep_G60_1",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G60-01.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "HKG_T1_Dep_G60_2",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G60-02.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "HKG_T1_Dep_G60_3",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G60-03.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "HKG_T1_Dep_G60_4",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G60-04.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "HKG_T1_Dep_G60_5",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G60-05.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "HKG_T1_Dep_G6_Food_1",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_Food_1_1600x800.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "HKG_T1_Dep_G6_Food_2",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_Food_2_1600x800.jpg?ext=.jpg"
+                                }
+                            ]
+                        },
+                        {
+                            "code": "PRPRTY815",
+                            "name": "Plaza Premium First  (Near Gate 1, East Hall)",
+                            "propertyTypeCode": "LOUNGE",
+                            "propertyType": "Lounge",
+                            "description": "The Lounge<br />\n<br />\n<strong>An Elevated Lounge Experience for Elite Travellers</strong><br />\n<br />\nNestled conveniently near <strong>Gate 1 at Hong Kong International Airport, Plaza Premium First (Gate 1, East Hall)</strong> brings about an elevated airport lounge concept offering an array of all-inclusive personalised services and exquisite dining experiences amid a relaxing lounge ambiance adorned with crafted interior. &nbsp;Indulge in sumptuous international and local gourmet dishes, complemented by an assortment of delectable desserts. Guests can also enjoy our signature craft cocktails inspired by local flavors, as well as a curated selection of fine spirits and wines.<br />\n<br />\nFor an unparalleled travel experience, discover Infinity Room, a unique &ldquo;Lounge within a Lounge&rdquo; offering an immersive environment that guarantees exclusive privacy, exquisite dining and exceptional service for selected elite travelers. The culinary journey in the Infinity Room features a delightful a-la-carte menu that artfully blends locally-inspired specialties with international delicacies, along with a refined selection of wines, spirits, Chinese and Western teas, juices, and other refreshing beverages.<br />\n<br />\nPlease visit&nbsp;<a href=\"https://www.plazapremiumfirst.com/\">PlazapremiumFirst</a>&nbsp;for more details.<br />\n&nbsp;",
+                            "address": "Near Gate 1, Level 6, Departures Level, Terminal 1, Hong Kong International Airport",
+                            "propertyDisplayName": "Plaza Premium First ",
+                            "shortLocation": "Near Gate 1, East Hall",
+                            "featureList": [
+                                "Baggage Storage Service",
+                                "Bar (w/ charges may apply)",
+                                "Charging Station",
+                                "E-magazines",
+                                "Flight Information",
+                                "Food & Beverage",
+                                "Lounge Chairs/ Bay",
+                                "TV Channels",
+                                "Vegetarian Options",
+                                "Wi-Fi"
+                            ],
+                            "images": [
+                                {
+                                    "name": "1.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/1_property_815.jpg",
+                                    "size": 235818,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "1",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "2.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/2_property_815.jpg",
+                                    "size": 256644,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "2",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "3.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/3_property_815.jpg",
+                                    "size": 166440,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "3",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "4.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/4_property_815.jpg",
+                                    "size": 212152,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "4",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "5.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/5_property_815.jpg",
+                                    "size": 224265,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "5",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "6.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/6_property_815.jpg",
+                                    "size": 233484,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "6",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                }
+                            ]
+                        },
+                        {
+                            "code": "PRPRTY813",
+                            "name": "Plaza Premium Lounge  (Near Gate 35, Departures)",
+                            "propertyTypeCode": "LOUNGE",
+                            "propertyType": "Lounge",
+                            "description": "<h4 class=\"smallTitle\"><br />\n<strong>THE LOUNGE</strong></h4>\n\n<p>Discover a tranquil green hideaway near Gate 35 in Terminal 1 of Hong Kong International Airport, offering a stunning tarmac view and fully certified halal cuisines blending local and global influences&mdash;perfect for unwinding and relaxing before your onward journey, your true destination before departure.<br />\n<br />\nIndulge in our sumptuous buffet featuring freshly made meals, light refreshments, and a diverse range of beverages&mdash;from selected house wine and beer to premium coffee, tea, and soft drinks. Elevated culinary options are available exclusively for Smart Traveller members through ST Point redemptions. What&#39;s more, enjoy access to our cozy relaxation zone, where we are dedicated to taking care of your needs and helping you create unforgettable airport moments.<br />\n<br />\nJoin now and get 150 welcome bonus points and explore exclusive privileges: <a href=\"https://www.mysmarttraveller.com/en-gb/login\">ST sign up&nbsp;</a><br />\n<br />\nIntroducing Lounge To-Go, our innovative option for travelers on the move. Grab a delicious halal meal that serves as a perfect inflight replacement, allowing you to savor the flavors of our lounge experience even while you travel.<br />\n<br />\nFor lounge access outside of our operating hours, we invite our guests to visit the Plaza Premium Lounge located near <a href=\"https://www.plazapremiumlounge.com/en-uk/find/china-regions/hong-kong/hong-kong/hong-kong-international-airport/departures-near-gate-sixty\">Gate 60 in the Departures area</a><br />\n&nbsp;</p>",
+                            "address": "Level 6, Departures Level, Terminal 1, Hong Kong International Airport (near Gate 35)",
+                            "propertyDisplayName": "Plaza Premium Lounge ",
+                            "shortLocation": "Near Gate 35, Departures",
+                            "featureList": [
+                                "Charging Station",
+                                "Flight Information",
+                                "Food & Beverage",
+                                "Lounge Chairs/ Bay",
+                                "Shower Facilities (Charges may apply)",
+                                "Vegetarian Options",
+                                "Wi-Fi",
+                                "Lounge To-Go"
+                            ],
+                            "images": [
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G35_2",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-02.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "1"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G35_3",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-03.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "2"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G35_4",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-04.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "3"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G35_5",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-05.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "4"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G35_6",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-06.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "5"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G35_7",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-07.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "6"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G35_8",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-08.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "7"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G35_9",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-09.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "8"
+                                },
+                                {
+                                    "name": "HKG_T1_Dep_G35_1_property_813.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_T1_Dep_G35_1_property_813_property_813.jpg",
+                                    "size": 1385683,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "9",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1785485117175
+                                }
+                            ]
+                        },
+                        {
+                            "code": "PRPRTY816",
+                            "name": "Plaza Premium Lounge  (Near Gate 1, Departures)",
+                            "propertyTypeCode": "LOUNGE",
+                            "propertyType": "Lounge",
+                            "description": "<p>Nestled conveniently near Gate 1 in Terminal 1 of Hong Kong International Airport, our lounge offers a stylish space filled with comfortable seating, a dedicated dining area and private shower rooms, making it the perfect place for relaxation and rejuvenation — your true destination before departure.<br><br>Indulge in our culinary delights blending local and global influences, including our \"Proudly Local\" Hong Kong-style fish ball noodles paired with our signature XO sauce and a refreshing selection of beverages— from selected house wine and beer to premium coffee, tea, and soft drinks. Elevated culinary options are available exclusively for Smart Traveller members through ST Point redemptions. &nbsp;Whether you wish to cozy up in the lounge bay or freshen up in our showers, we are here to ensure your airport experience is both enjoyable and memorable.<br><br>Introducing Lounge To-Go, our innovative option for travellers on the move. Grab a delicious meal that serves as a perfect inflight replacement, allowing you to savour the flavours of our lounge even while you travel.<br>&nbsp;</p>",
+                            "address": "Level 6, Departures Level, Terminal 1, Hong Kong International Airport (near Gate 1)",
+                            "propertyDisplayName": "Plaza Premium Lounge",
+                            "shortLocation": "Near Gate 1, Departures",
+                            "featureList": [
+                                "Bar (w/ charges may apply)",
+                                "Charging Station",
+                                "Flight Information",
+                                "Food & Beverage",
+                                "Lounge Chairs/ Bay",
+                                "Nursing Room",
+                                "Shower Facilities (Charges may apply)",
+                                "TV Channels",
+                                "Vegetarian Options",
+                                "Wi-Fi",
+                                "Lounge To-Go"
+                            ],
+                            "images": [
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G1_1",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_Gate1_Dep_T1_1600x800_Web1.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "1"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G1_2",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_Gate1_Dep_T1_1600x800_Web2.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "2"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G1_3",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_Gate1_Dep_T1_1600x800_Web3.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "3"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G1_4",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_Gate1_Dep_T1_1600x800_Web4.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "4"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G1_5",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_Gate1_Dep_T1_1600x800_Web5.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "5"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G1_Food_1",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_Food_1_1600x800.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "6"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G1_Food_2",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_Food_2_1600x800.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "7"
+                                }
+                            ]
+                        },
+                        {
+                            "code": "PRPRTY817",
+                            "name": "Plaza Premium First  (Near Gate 35, West Hall)",
+                            "propertyTypeCode": "LOUNGE",
+                            "propertyType": "Lounge",
+                            "description": "<br />\nTHE LOUNGE<br />\n<strong>An Elevated Lounge Experience for Elite Travellers</strong><br />\n<br />\nLocated near Gate 35 at Hong Kong International Airport, Plaza Premium First (Gate 35, West Hall) brings about an elevated airport lounge concept offering an array of all-inclusive personalised services and exquisite dining experiences amid a relaxing lounge ambiance adorned with crafted interior.<br />\n&nbsp;<br />\nIndulge in a variety of fully certified halal cuisines, ranging from an exquisite semi-buffet to delectable a-la-carte main courses, all inspired by the rich flavours of Southeast Asia. To complement your dining experience, enjoy a selection of complimentary refined spirits, sparkling wines, house wines, cocktails, fresh juices, soft drinks, and an array of teas. Plaza Premium First promises an exclusive and relaxing escape before your journey.<br />\n<br />\nPlease visit&nbsp;<a href=\"https://www.plazapremiumfirst.com/\">PlazapremiumFirst</a>&nbsp;for more details.<br />\n&nbsp;",
+                            "address": "Level 6, Departures Level, Terminal 1, Hong Kong International Airport (near Gate 35)",
+                            "propertyDisplayName": "Plaza Premium First ",
+                            "shortLocation": "Near Gate 35, West Hall",
+                            "featureList": [
+                                "Baggage Storage Service",
+                                "Bar",
+                                "Charging Station",
+                                "Flight Information",
+                                "Food & Beverage",
+                                "Lounge Chairs/ Bay",
+                                "Newspapers / Magazines",
+                                "Wi-Fi"
+                            ],
+                            "images": [
+                                {
+                                    "name": "PPF_35_v1",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v1.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "PPF_35_v2",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v2.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "PPF_35_v3",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v3.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "PPF_35_v4",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v4.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "PPF_35_v5",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v5.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "PPF_35_v6",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v6.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "PPF_35_v7",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v7.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "PPF_35_v8",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v8.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "PPF_35_v9",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v9.jpg?ext=.jpg"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "journeyTypes": [],
+            "addOnDiscounts": {
+                "value": "0",
+                "type": "Percentage",
+                "currency": "null"
+            },
+            "quantityLabel": "Pieces",
+            "masNoOfProductsAllowed": 10,
+            "isFlightNumberMandatory": false,
+            "isStLoginMandatory": false,
+            "serviceType": "Per Unit",
+            "arrtureSku": "",
+            "giftCardName": "",
+            "productDisplayName": "Plaza Premium Lounge Sakura Shrimp Spice (50g)",
+            "isThirdPartyFulfilment": false,
+            "thirdPartyEmail": "",
+            "fulfillmentType": "",
+            "productDurationInMinutes": 0
+        },
+        {
+            "productCode": "PRD3877",
+            "parentProductCode": "PRD3341",
+            "productName": "PPL G60 - Plaza Premium First XO Sauce (100g)",
+            "productType": "Add-On",
+            "productDescription": "<p>Handcrafted with fresh ingredients, our secret-recipe XO Sauce offers a perfect blend of savoury, spicy and umami notes to elevate any dish. Please collect your Plaza Premium First XO Sauce on the same day as your lounge access</p><p>T&amp;C apply <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://apc01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.plazapremiumlounge.com%2Fen-uk%2Flanding-pages%2Fhkg-sakura-shrimp-spice-tnc%3Futm_source%3DNetcore%26utm_campaign%3DHKG-Sakura-Shrimp-Spice_EN%26utm_medium%3DWeb%2520Message%26utm_term%3DOnsite%26__sta%3D%257CHTI%26__stm_medium%3Dwebmsg%26__stm_source%3Dsmartech&amp;data=05%7C02%7Ckienyik.ong%40plaza-network.com%7C000bd652d3d6447af85c08df0fce30fe%7C57c780997a6f42de9103b6ff47502aac%7C0%7C0%7C639247051122630342%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&amp;sdata=iDayahUgpG7kPJa3Cg%2BNvGd%2F8vIBMqKnh5KYCvxDCHI%3D&amp;reserved=0\">Terms and Conditions | Plaza Premium Lounge</a></p>",
+            "shortProductDescription": "<p>Handcrafted with fresh ingredients, our secret-recipe XO Sauce offers a perfect blend of savoury, spicy and umami notes to elevate any dish. Please collect your Plaza Premium First XO Sauce on the same day as your lounge access</p><p>T&amp;C apply <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://apc01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.plazapremiumlounge.com%2Fen-uk%2Flanding-pages%2Fhkg-sakura-shrimp-spice-tnc%3Futm_source%3DNetcore%26utm_campaign%3DHKG-Sakura-Shrimp-Spice_EN%26utm_medium%3DWeb%2520Message%26utm_term%3DOnsite%26__sta%3D%257CHTI%26__stm_medium%3Dwebmsg%26__stm_source%3Dsmartech&amp;data=05%7C02%7Ckienyik.ong%40plaza-network.com%7C000bd652d3d6447af85c08df0fce30fe%7C57c780997a6f42de9103b6ff47502aac%7C0%7C0%7C639247051122630342%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&amp;sdata=iDayahUgpG7kPJa3Cg%2BNvGd%2F8vIBMqKnh5KYCvxDCHI%3D&amp;reserved=0\">Terms and Conditions | Plaza Premium Lounge</a></p>",
+            "packages": [],
+            "createdDate": "2026-09-15 08:36:22",
+            "lastModifiedDate": "2026-09-18 03:35:44",
+            "serviceCode": "SRVC1638",
+            "serviceName": "Lounge Retail",
+            "serviceDisplayName": "Lounge Retail",
+            "serviceDescription": "<p>Lounge Retail Product</p>",
+            "serviceSequence": 10003,
+            "basedOn": "Per Unit",
+            "availability": true,
+            "images": [
+                {
+                    "name": "XO sauce 100g_product_3837.jpg",
+                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prd_images/XO sauce 100g_product_3837_product_3877.jpg"
+                }
+            ],
+            "productVarients": [],
+            "prices": [
+                {
+                    "priceCode": "RTPLN3861",
+                    "priceName": "PPFG35 - Plaza Premium First XO Sauce (100g)",
+                    "isSTRatePlan": false,
+                    "baseRate": [
+                        {
+                            "price": "13.78",
+                            "currency": "USD"
+                        }
+                    ],
+                    "basePrice": 13.78,
+                    "taxes": [],
+                    "discounts": [],
+                    "termsPolicies": [
+                        {
+                            "termsName": ".",
+                            "termsCode": "SLSTRM3681",
+                            "description": "<p>______________________________</p>"
+                        }
+                    ],
+                    "additionalCharges": [],
+                    "availableInventory": 30,
+                    "startDate": "2025-12-16",
+                    "catalogueCode": "PRD3877-Add-On-PRPRTY817-LOUNGE-LCTN517-RTPLN3861",
+                    "totalPrice": 13.78,
+                    "basePriceWithDiscount": 13.78,
+                    "isMinimumAmountMet": true,
+                    "isInventoryAvailable": true,
+                    "lastModifiedDate": 1789988608000
+                },
+                {
+                    "priceCode": "RTPLN3858",
+                    "priceName": "PPLG35 - Plaza Premium First XO Sauce (100g)",
+                    "isSTRatePlan": false,
+                    "baseRate": [
+                        {
+                            "price": "13.78",
+                            "currency": "USD"
+                        }
+                    ],
+                    "basePrice": 13.78,
+                    "taxes": [],
+                    "discounts": [],
+                    "termsPolicies": [
+                        {
+                            "termsName": ".",
+                            "termsCode": "SLSTRM3681",
+                            "description": "<p>______________________________</p>"
+                        }
+                    ],
+                    "additionalCharges": [],
+                    "availableInventory": 15,
+                    "startDate": "2025-12-16",
+                    "catalogueCode": "PRD3877-Add-On-PRPRTY813-LOUNGE-LCTN517-RTPLN3858",
+                    "totalPrice": 13.78,
+                    "basePriceWithDiscount": 13.78,
+                    "isMinimumAmountMet": true,
+                    "isInventoryAvailable": true,
+                    "lastModifiedDate": 1789988608000
+                },
+                {
+                    "priceCode": "RTPLN3857",
+                    "priceName": "PPLG60 - Plaza Premium First XO Sauce (100g)",
+                    "isSTRatePlan": false,
+                    "baseRate": [
+                        {
+                            "price": "13.78",
+                            "currency": "USD"
+                        }
+                    ],
+                    "basePrice": 13.78,
+                    "taxes": [],
+                    "discounts": [],
+                    "termsPolicies": [
+                        {
+                            "termsName": ".",
+                            "termsCode": "SLSTRM3681",
+                            "description": "<p>______________________________</p>"
+                        }
+                    ],
+                    "additionalCharges": [],
+                    "availableInventory": 30,
+                    "startDate": "2025-12-16",
+                    "catalogueCode": "PRD3877-Add-On-PRPRTY814-LOUNGE-LCTN517-RTPLN3857",
+                    "totalPrice": 13.78,
+                    "basePriceWithDiscount": 13.78,
+                    "isMinimumAmountMet": true,
+                    "isInventoryAvailable": true,
+                    "lastModifiedDate": 1789988608000
+                },
+                {
+                    "priceCode": "RTPLN3859",
+                    "priceName": "PPF -G1 - Plaza Premium First XO Sauce (100g)",
+                    "isSTRatePlan": false,
+                    "baseRate": [
+                        {
+                            "price": "13.78",
+                            "currency": "USD"
+                        }
+                    ],
+                    "basePrice": 13.78,
+                    "taxes": [],
+                    "discounts": [],
+                    "termsPolicies": [
+                        {
+                            "termsName": ".",
+                            "termsCode": "SLSTRM3681",
+                            "description": "<p>______________________________</p>"
+                        }
+                    ],
+                    "additionalCharges": [],
+                    "availableInventory": 10,
+                    "startDate": "2025-12-16",
+                    "catalogueCode": "PRD3877-Add-On-PRPRTY815-LOUNGE-LCTN517-RTPLN3859",
+                    "totalPrice": 13.78,
+                    "basePriceWithDiscount": 13.78,
+                    "isMinimumAmountMet": true,
+                    "isInventoryAvailable": true,
+                    "lastModifiedDate": 1789988608000
+                }
+            ],
+            "locations": [
+                {
+                    "locationCode": "LCTN517",
+                    "locationName": "Hong Kong International Airport",
+                    "countryCode": "HK",
+                    "countryName": "Hong Kong SAR, China",
+                    "properties": [
+                        {
+                            "code": "PRPRTY815",
+                            "name": "Plaza Premium First  (Near Gate 1, East Hall)",
+                            "propertyTypeCode": "LOUNGE",
+                            "propertyType": "Lounge",
+                            "description": "The Lounge<br />\n<br />\n<strong>An Elevated Lounge Experience for Elite Travellers</strong><br />\n<br />\nNestled conveniently near <strong>Gate 1 at Hong Kong International Airport, Plaza Premium First (Gate 1, East Hall)</strong> brings about an elevated airport lounge concept offering an array of all-inclusive personalised services and exquisite dining experiences amid a relaxing lounge ambiance adorned with crafted interior. &nbsp;Indulge in sumptuous international and local gourmet dishes, complemented by an assortment of delectable desserts. Guests can also enjoy our signature craft cocktails inspired by local flavors, as well as a curated selection of fine spirits and wines.<br />\n<br />\nFor an unparalleled travel experience, discover Infinity Room, a unique &ldquo;Lounge within a Lounge&rdquo; offering an immersive environment that guarantees exclusive privacy, exquisite dining and exceptional service for selected elite travelers. The culinary journey in the Infinity Room features a delightful a-la-carte menu that artfully blends locally-inspired specialties with international delicacies, along with a refined selection of wines, spirits, Chinese and Western teas, juices, and other refreshing beverages.<br />\n<br />\nPlease visit&nbsp;<a href=\"https://www.plazapremiumfirst.com/\">PlazapremiumFirst</a>&nbsp;for more details.<br />\n&nbsp;",
+                            "address": "Near Gate 1, Level 6, Departures Level, Terminal 1, Hong Kong International Airport",
+                            "propertyDisplayName": "Plaza Premium First ",
+                            "shortLocation": "Near Gate 1, East Hall",
+                            "featureList": [
+                                "Baggage Storage Service",
+                                "Bar (w/ charges may apply)",
+                                "Charging Station",
+                                "E-magazines",
+                                "Flight Information",
+                                "Food & Beverage",
+                                "Lounge Chairs/ Bay",
+                                "TV Channels",
+                                "Vegetarian Options",
+                                "Wi-Fi"
+                            ],
+                            "images": [
+                                {
+                                    "name": "1.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/1_property_815.jpg",
+                                    "size": 235818,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "1",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "2.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/2_property_815.jpg",
+                                    "size": 256644,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "2",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "3.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/3_property_815.jpg",
+                                    "size": 166440,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "3",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "4.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/4_property_815.jpg",
+                                    "size": 212152,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "4",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "5.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/5_property_815.jpg",
+                                    "size": 224265,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "5",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "6.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/6_property_815.jpg",
+                                    "size": 233484,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "6",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                }
+                            ]
+                        },
+                        {
+                            "code": "PRPRTY816",
+                            "name": "Plaza Premium Lounge  (Near Gate 1, Departures)",
+                            "propertyTypeCode": "LOUNGE",
+                            "propertyType": "Lounge",
+                            "description": "<p>Nestled conveniently near Gate 1 in Terminal 1 of Hong Kong International Airport, our lounge offers a stylish space filled with comfortable seating, a dedicated dining area and private shower rooms, making it the perfect place for relaxation and rejuvenation — your true destination before departure.<br><br>Indulge in our culinary delights blending local and global influences, including our \"Proudly Local\" Hong Kong-style fish ball noodles paired with our signature XO sauce and a refreshing selection of beverages— from selected house wine and beer to premium coffee, tea, and soft drinks. Elevated culinary options are available exclusively for Smart Traveller members through ST Point redemptions. &nbsp;Whether you wish to cozy up in the lounge bay or freshen up in our showers, we are here to ensure your airport experience is both enjoyable and memorable.<br><br>Introducing Lounge To-Go, our innovative option for travellers on the move. Grab a delicious meal that serves as a perfect inflight replacement, allowing you to savour the flavours of our lounge even while you travel.<br>&nbsp;</p>",
+                            "address": "Level 6, Departures Level, Terminal 1, Hong Kong International Airport (near Gate 1)",
+                            "propertyDisplayName": "Plaza Premium Lounge",
+                            "shortLocation": "Near Gate 1, Departures",
+                            "featureList": [
+                                "Bar (w/ charges may apply)",
+                                "Charging Station",
+                                "Flight Information",
+                                "Food & Beverage",
+                                "Lounge Chairs/ Bay",
+                                "Nursing Room",
+                                "Shower Facilities (Charges may apply)",
+                                "TV Channels",
+                                "Vegetarian Options",
+                                "Wi-Fi",
+                                "Lounge To-Go"
+                            ],
+                            "images": [
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G1_1",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_Gate1_Dep_T1_1600x800_Web1.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "1"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G1_2",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_Gate1_Dep_T1_1600x800_Web2.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "2"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G1_3",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_Gate1_Dep_T1_1600x800_Web3.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "3"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G1_4",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_Gate1_Dep_T1_1600x800_Web4.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "4"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G1_5",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_Gate1_Dep_T1_1600x800_Web5.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "5"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G1_Food_1",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_Food_1_1600x800.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "6"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G1_Food_2",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_Food_2_1600x800.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "7"
+                                }
+                            ]
+                        },
+                        {
+                            "code": "PRPRTY813",
+                            "name": "Plaza Premium Lounge  (Near Gate 35, Departures)",
+                            "propertyTypeCode": "LOUNGE",
+                            "propertyType": "Lounge",
+                            "description": "<h4 class=\"smallTitle\"><br />\n<strong>THE LOUNGE</strong></h4>\n\n<p>Discover a tranquil green hideaway near Gate 35 in Terminal 1 of Hong Kong International Airport, offering a stunning tarmac view and fully certified halal cuisines blending local and global influences&mdash;perfect for unwinding and relaxing before your onward journey, your true destination before departure.<br />\n<br />\nIndulge in our sumptuous buffet featuring freshly made meals, light refreshments, and a diverse range of beverages&mdash;from selected house wine and beer to premium coffee, tea, and soft drinks. Elevated culinary options are available exclusively for Smart Traveller members through ST Point redemptions. What&#39;s more, enjoy access to our cozy relaxation zone, where we are dedicated to taking care of your needs and helping you create unforgettable airport moments.<br />\n<br />\nJoin now and get 150 welcome bonus points and explore exclusive privileges: <a href=\"https://www.mysmarttraveller.com/en-gb/login\">ST sign up&nbsp;</a><br />\n<br />\nIntroducing Lounge To-Go, our innovative option for travelers on the move. Grab a delicious halal meal that serves as a perfect inflight replacement, allowing you to savor the flavors of our lounge experience even while you travel.<br />\n<br />\nFor lounge access outside of our operating hours, we invite our guests to visit the Plaza Premium Lounge located near <a href=\"https://www.plazapremiumlounge.com/en-uk/find/china-regions/hong-kong/hong-kong/hong-kong-international-airport/departures-near-gate-sixty\">Gate 60 in the Departures area</a><br />\n&nbsp;</p>",
+                            "address": "Level 6, Departures Level, Terminal 1, Hong Kong International Airport (near Gate 35)",
+                            "propertyDisplayName": "Plaza Premium Lounge ",
+                            "shortLocation": "Near Gate 35, Departures",
+                            "featureList": [
+                                "Charging Station",
+                                "Flight Information",
+                                "Food & Beverage",
+                                "Lounge Chairs/ Bay",
+                                "Shower Facilities (Charges may apply)",
+                                "Vegetarian Options",
+                                "Wi-Fi",
+                                "Lounge To-Go"
+                            ],
+                            "images": [
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G35_2",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-02.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "1"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G35_3",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-03.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "2"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G35_4",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-04.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "3"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G35_5",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-05.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "4"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G35_6",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-06.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "5"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G35_7",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-07.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "6"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G35_8",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-08.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "7"
+                                },
+                                {
+                                    "desc": "",
+                                    "name": "HKG_T1_Dep_G35_9",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G35-09.jpg?ext=.jpg",
+                                    "type": "",
+                                    "sequence": "8"
+                                },
+                                {
+                                    "name": "HKG_T1_Dep_G35_1_property_813.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_T1_Dep_G35_1_property_813_property_813.jpg",
+                                    "size": 1385683,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "9",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1785485117175
+                                }
+                            ]
+                        },
+                        {
+                            "code": "PRPRTY814",
+                            "name": "Plaza Premium Lounge  (Near Gate 60, Departures)",
+                            "propertyTypeCode": "LOUNGE",
+                            "propertyType": "Lounge",
+                            "description": "<h4 class=\"smallTitle\"><font style=\"vertical-align: inherit;\"><font style=\"vertical-align: inherit;\">THE LOUNGE</font></font></h4>\nStep into a peaceful sanctuary near Gate 60 in Terminal 1 of Hong Kong International Airport, relax in comfortable seating while enjoying the natural light and a breathtaking tarmac view beneath you&mdash;a perfect backdrop for your travel experience, your true destination before departure.&nbsp;<br />\n<br />\nIndulge in our culinary delights blending local and global influences, including our &quot;Proudly Local&quot; Hong Kong-style fish ball noodles paired with our signature XO sauce and a refreshing selection of beverages&mdash;from selected house wine and beer to premium coffee, tea, and soft drinks. Whether you wish to enjoy freshly made meals or freshen up in our showers, we are here to ensure your airport experience is both enjoyable and memorable.<br />\n<br />\nIntroducing Lounge To-Go, our innovative option for travelers on the move. Grab a delicious meal that serves as a perfect inflight replacement, allowing you to savor the flavors of our lounge even while you travel.<br />\n&nbsp;",
+                            "address": "Level 7, Departures Level, Terminal 1, Hong Kong International Airport (near Gate 60)",
+                            "propertyDisplayName": "Plaza Premium Lounge ",
+                            "shortLocation": "Near Gate 60, Departures, Terminal 1",
+                            "featureList": [
+                                "Bar",
+                                "Charging Station",
+                                "Flight Information",
+                                "Food & Beverage",
+                                "Lounge Chairs/ Bay",
+                                "Vegetarian Options",
+                                "Wi-Fi",
+                                "Lounge To-Go"
+                            ],
+                            "images": [
+                                {
+                                    "name": "HKG_T1_Dep_G60_1",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G60-01.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "HKG_T1_Dep_G60_2",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G60-02.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "HKG_T1_Dep_G60_3",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G60-03.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "HKG_T1_Dep_G60_4",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G60-04.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "HKG_T1_Dep_G60_5",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/G60-05.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "HKG_T1_Dep_G6_Food_1",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_Food_1_1600x800.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "HKG_T1_Dep_G6_Food_2",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/HKG_Food_2_1600x800.jpg?ext=.jpg"
+                                }
+                            ]
+                        },
+                        {
+                            "code": "PRPRTY817",
+                            "name": "Plaza Premium First  (Near Gate 35, West Hall)",
+                            "propertyTypeCode": "LOUNGE",
+                            "propertyType": "Lounge",
+                            "description": "<br />\nTHE LOUNGE<br />\n<strong>An Elevated Lounge Experience for Elite Travellers</strong><br />\n<br />\nLocated near Gate 35 at Hong Kong International Airport, Plaza Premium First (Gate 35, West Hall) brings about an elevated airport lounge concept offering an array of all-inclusive personalised services and exquisite dining experiences amid a relaxing lounge ambiance adorned with crafted interior.<br />\n&nbsp;<br />\nIndulge in a variety of fully certified halal cuisines, ranging from an exquisite semi-buffet to delectable a-la-carte main courses, all inspired by the rich flavours of Southeast Asia. To complement your dining experience, enjoy a selection of complimentary refined spirits, sparkling wines, house wines, cocktails, fresh juices, soft drinks, and an array of teas. Plaza Premium First promises an exclusive and relaxing escape before your journey.<br />\n<br />\nPlease visit&nbsp;<a href=\"https://www.plazapremiumfirst.com/\">PlazapremiumFirst</a>&nbsp;for more details.<br />\n&nbsp;",
+                            "address": "Level 6, Departures Level, Terminal 1, Hong Kong International Airport (near Gate 35)",
+                            "propertyDisplayName": "Plaza Premium First ",
+                            "shortLocation": "Near Gate 35, West Hall",
+                            "featureList": [
+                                "Baggage Storage Service",
+                                "Bar",
+                                "Charging Station",
+                                "Flight Information",
+                                "Food & Beverage",
+                                "Lounge Chairs/ Bay",
+                                "Newspapers / Magazines",
+                                "Wi-Fi"
+                            ],
+                            "images": [
+                                {
+                                    "name": "PPF_35_v1",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v1.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "PPF_35_v2",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v2.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "PPF_35_v3",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v3.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "PPF_35_v4",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v4.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "PPF_35_v5",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v5.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "PPF_35_v6",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v6.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "PPF_35_v7",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v7.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "PPF_35_v8",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v8.jpg?ext=.jpg"
+                                },
+                                {
+                                    "name": "PPF_35_v9",
+                                    "path": "https://sit-ppl2-images.plazapremiumlounge.com/static_images/prop_images/PPF_G35_v9.jpg?ext=.jpg"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "journeyTypes": [],
+            "addOnDiscounts": {
+                "value": "0",
+                "type": "Percentage",
+                "currency": "null"
+            },
+            "quantityLabel": "Pieces",
+            "masNoOfProductsAllowed": 10,
+            "isFlightNumberMandatory": false,
+            "isStLoginMandatory": false,
+            "serviceType": "Per Unit",
+            "arrtureSku": "",
+            "giftCardName": "",
+            "productDisplayName": "Plaza Premium Lounge XO Sauce (100g)",
+            "isThirdPartyFulfilment": false,
+            "thirdPartyEmail": "",
+            "fulfillmentType": "",
+            "productDurationInMinutes": 0
+        }
+    ],
+    "upsell": [
+        {
+            "productCode": "PRD3136",
+            "parentProductCode": "PRD3341",
+            "productName": "Lounge Use - 5 Hours",
+            "productType": "Regular",
+            "productDescription": "Lounge Use - 5 hours",
+            "shortProductDescription": "Lounge Use - 5 hours",
+            "packages": [],
+            "createdDate": "2026-01-21 00:00:00",
+            "lastModifiedDate": "2026-09-15 09:31:53",
+            "serviceCode": "SRVC1619",
+            "serviceName": "Lounge",
+            "serviceDisplayName": "Lounge",
+            "serviceDescription": "<p>PPL Lounge</p>",
+            "serviceSequence": 0,
+            "basedOn": "Per Person",
+            "availability": true,
+            "images": [
+                {
+                    "name": "20241121_PPG_lounge-1397_1.jpg",
+                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prd_images/20241121_PPG_lounge-1397_1_product_3136.jpg"
+                }
+            ],
+            "productVarients": [
+                {
+                    "name": "Duration",
+                    "mandatory": false
+                }
+            ],
+            "prices": [
+                {
+                    "priceCode": "RTPLN3496",
+                    "priceName": "Standard Lounge",
+                    "isSTRatePlan": false,
+                    "baseRate": [
+                        {
+                            "price": 0.0,
+                            "groups": "adult",
+                            "currency": "USD",
+                            "priceWithMarkup": 0.0
+                        },
+                        {
+                            "price": 0.0,
+                            "groups": "child",
+                            "currency": "USD",
+                            "priceWithMarkup": 0.0
+                        }
+                    ],
+                    "basePrice": 0.0,
+                    "taxes": [],
+                    "discounts": [],
+                    "termsPolicies": [
+                        {
+                            "termsName": "CANCELLATIONS AND AMENDMENTS",
+                            "termsCode": "SLSTRM1600",
+                            "description": "<p>Private Relaxation Area: Cancellation/ amendments may be made up to 24 hours before the indicated\ncheck-in time. A fee of USD10 per person or 25% of the total booking amount, whichever is higher, is payable.</p>\n<p>All other services: Cancellation/ amendments may be made up to 6 hours before the indicated arrival time. A fee of USD10 per person is payable.</p>\n<p>Late cancellation and/ or failure to arrive at the facility will be considered as No Show and the booking will not be refunded. Please refer to our full <a href=\"\"https://www.plazapremiumlounge.com/terms\"\">Terms & Conditions</a>.<p>\n</p> The baggage wrapping service is only available from 5:00 - 00:00 daily at departure hall in Hong Kong International Airport. Please ensure you approach to the designated baggage wrap counter to wrap your bags for checking them in during this operation hours even your flight may depart after mid night time.</p>\n</p> No baggage wrapping service e.g. cabin baggage is provided at restricted area when you are accessing our lounges in Airside after passing through the security and passport control. </p>\n</p> This service covers wrapping for regular sized baggage with total dimension not exceeding 199cm (Length + Width + Height) for one piece. </p>\n<hr>"
+                        }
+                    ],
+                    "additionalCharges": [],
+                    "availableInventory": 30,
+                    "startDate": "2025-12-16",
+                    "catalogueCode": "PRD3136-Regular-PRPRTY815-LOUNGE-LCTN517-RTPLN3496",
+                    "totalPrice": 0.0,
+                    "basePriceWithDiscount": 0.0,
+                    "isMinimumAmountMet": true,
+                    "isInventoryAvailable": true,
+                    "lastModifiedDate": 1793839755000
+                }
+            ],
+            "locations": [
+                {
+                    "locationCode": "LCTN517",
+                    "locationName": "Hong Kong International Airport",
+                    "countryCode": "HK",
+                    "countryName": "Hong Kong SAR, China",
+                    "properties": [
+                        {
+                            "code": "PRPRTY815",
+                            "name": "Plaza Premium First  (Near Gate 1, East Hall)",
+                            "propertyTypeCode": "LOUNGE",
+                            "propertyType": "Lounge",
+                            "description": "The Lounge<br />\n<br />\n<strong>An Elevated Lounge Experience for Elite Travellers</strong><br />\n<br />\nNestled conveniently near <strong>Gate 1 at Hong Kong International Airport, Plaza Premium First (Gate 1, East Hall)</strong> brings about an elevated airport lounge concept offering an array of all-inclusive personalised services and exquisite dining experiences amid a relaxing lounge ambiance adorned with crafted interior. &nbsp;Indulge in sumptuous international and local gourmet dishes, complemented by an assortment of delectable desserts. Guests can also enjoy our signature craft cocktails inspired by local flavors, as well as a curated selection of fine spirits and wines.<br />\n<br />\nFor an unparalleled travel experience, discover Infinity Room, a unique &ldquo;Lounge within a Lounge&rdquo; offering an immersive environment that guarantees exclusive privacy, exquisite dining and exceptional service for selected elite travelers. The culinary journey in the Infinity Room features a delightful a-la-carte menu that artfully blends locally-inspired specialties with international delicacies, along with a refined selection of wines, spirits, Chinese and Western teas, juices, and other refreshing beverages.<br />\n<br />\nPlease visit&nbsp;<a href=\"https://www.plazapremiumfirst.com/\">PlazapremiumFirst</a>&nbsp;for more details.<br />\n&nbsp;",
+                            "address": "Near Gate 1, Level 6, Departures Level, Terminal 1, Hong Kong International Airport",
+                            "propertyDisplayName": "Plaza Premium First ",
+                            "shortLocation": "Near Gate 1, East Hall",
+                            "featureList": [
+                                "Baggage Storage Service",
+                                "Bar (w/ charges may apply)",
+                                "Charging Station",
+                                "E-magazines",
+                                "Flight Information",
+                                "Food & Beverage",
+                                "Lounge Chairs/ Bay",
+                                "TV Channels",
+                                "Vegetarian Options",
+                                "Wi-Fi"
+                            ],
+                            "images": [
+                                {
+                                    "name": "1.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/1_property_815.jpg",
+                                    "size": 235818,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "1",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "2.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/2_property_815.jpg",
+                                    "size": 256644,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "2",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "3.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/3_property_815.jpg",
+                                    "size": 166440,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "3",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "4.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/4_property_815.jpg",
+                                    "size": 212152,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "4",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "5.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/5_property_815.jpg",
+                                    "size": 224265,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "5",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "6.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/6_property_815.jpg",
+                                    "size": 233484,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "6",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "journeyTypes": [],
+            "addOnDiscounts": {
+                "value": "0",
+                "type": "Percentage",
+                "currency": "",
+                "isUpsell": "Yes"
+            },
+            "quantityLabel": "",
+            "masNoOfProductsAllowed": 10,
+            "isFlightNumberMandatory": false,
+            "isStLoginMandatory": false,
+            "serviceType": "Per Person",
+            "arrtureSku": "",
+            "giftCardName": "",
+            "productDisplayName": "Lounge Use - 5 Hours",
+            "isThirdPartyFulfilment": false,
+            "fulfillmentType": "LMS",
+            "accuralPoints": "",
+            "productDurationInMinutes": 300
+        },
+        {
+            "productCode": "PRD3137",
+            "parentProductCode": "PRD3341",
+            "productName": "Lounge Use - 8 Hours",
+            "productType": "Regular",
+            "productDescription": "Lounge Use - 8 hours",
+            "shortProductDescription": "Lounge Use - 8 hours",
+            "packages": [],
+            "createdDate": "2026-01-21 00:00:00",
+            "lastModifiedDate": "2026-06-18 07:36:59",
+            "serviceCode": "SRVC1619",
+            "serviceName": "Lounge",
+            "serviceDisplayName": "Lounge",
+            "serviceDescription": "<p>PPL Lounge</p>",
+            "serviceSequence": 0,
+            "basedOn": "Per Person",
+            "availability": true,
+            "images": [
+                {
+                    "name": "PPF_HKG_T1D_AeroBar03.jpg",
+                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prd_images/PPF_HKG_T1D_AeroBar03_product_3137.jpg"
+                }
+            ],
+            "productVarients": [
+                {
+                    "name": "Duration",
+                    "mandatory": false
+                }
+            ],
+            "prices": [
+                {
+                    "priceCode": "RTPLN3496",
+                    "priceName": "Standard Lounge",
+                    "isSTRatePlan": false,
+                    "baseRate": [
+                        {
+                            "price": 0.0,
+                            "groups": "adult",
+                            "currency": "USD",
+                            "priceWithMarkup": 0.0
+                        },
+                        {
+                            "price": 0.0,
+                            "groups": "child",
+                            "currency": "USD",
+                            "priceWithMarkup": 0.0
+                        }
+                    ],
+                    "basePrice": 0.0,
+                    "taxes": [],
+                    "discounts": [],
+                    "termsPolicies": [
+                        {
+                            "termsName": "CANCELLATIONS AND AMENDMENTS",
+                            "termsCode": "SLSTRM1600",
+                            "description": "<p>Private Relaxation Area: Cancellation/ amendments may be made up to 24 hours before the indicated\ncheck-in time. A fee of USD10 per person or 25% of the total booking amount, whichever is higher, is payable.</p>\n<p>All other services: Cancellation/ amendments may be made up to 6 hours before the indicated arrival time. A fee of USD10 per person is payable.</p>\n<p>Late cancellation and/ or failure to arrive at the facility will be considered as No Show and the booking will not be refunded. Please refer to our full <a href=\"\"https://www.plazapremiumlounge.com/terms\"\">Terms & Conditions</a>.<p>\n</p> The baggage wrapping service is only available from 5:00 - 00:00 daily at departure hall in Hong Kong International Airport. Please ensure you approach to the designated baggage wrap counter to wrap your bags for checking them in during this operation hours even your flight may depart after mid night time.</p>\n</p> No baggage wrapping service e.g. cabin baggage is provided at restricted area when you are accessing our lounges in Airside after passing through the security and passport control. </p>\n</p> This service covers wrapping for regular sized baggage with total dimension not exceeding 199cm (Length + Width + Height) for one piece. </p>\n<hr>"
+                        }
+                    ],
+                    "additionalCharges": [],
+                    "availableInventory": 20,
+                    "startDate": "2025-12-16",
+                    "catalogueCode": "PRD3137-Regular-PRPRTY815-LOUNGE-LCTN517-RTPLN3496",
+                    "totalPrice": 0.0,
+                    "basePriceWithDiscount": 0.0,
+                    "isMinimumAmountMet": true,
+                    "isInventoryAvailable": true,
+                    "lastModifiedDate": 1793839755000
+                }
+            ],
+            "locations": [
+                {
+                    "locationCode": "LCTN517",
+                    "locationName": "Hong Kong International Airport",
+                    "countryCode": "HK",
+                    "countryName": "Hong Kong SAR, China",
+                    "properties": [
+                        {
+                            "code": "PRPRTY815",
+                            "name": "Plaza Premium First  (Near Gate 1, East Hall)",
+                            "propertyTypeCode": "LOUNGE",
+                            "propertyType": "Lounge",
+                            "description": "The Lounge<br />\n<br />\n<strong>An Elevated Lounge Experience for Elite Travellers</strong><br />\n<br />\nNestled conveniently near <strong>Gate 1 at Hong Kong International Airport, Plaza Premium First (Gate 1, East Hall)</strong> brings about an elevated airport lounge concept offering an array of all-inclusive personalised services and exquisite dining experiences amid a relaxing lounge ambiance adorned with crafted interior. &nbsp;Indulge in sumptuous international and local gourmet dishes, complemented by an assortment of delectable desserts. Guests can also enjoy our signature craft cocktails inspired by local flavors, as well as a curated selection of fine spirits and wines.<br />\n<br />\nFor an unparalleled travel experience, discover Infinity Room, a unique &ldquo;Lounge within a Lounge&rdquo; offering an immersive environment that guarantees exclusive privacy, exquisite dining and exceptional service for selected elite travelers. The culinary journey in the Infinity Room features a delightful a-la-carte menu that artfully blends locally-inspired specialties with international delicacies, along with a refined selection of wines, spirits, Chinese and Western teas, juices, and other refreshing beverages.<br />\n<br />\nPlease visit&nbsp;<a href=\"https://www.plazapremiumfirst.com/\">PlazapremiumFirst</a>&nbsp;for more details.<br />\n&nbsp;",
+                            "address": "Near Gate 1, Level 6, Departures Level, Terminal 1, Hong Kong International Airport",
+                            "propertyDisplayName": "Plaza Premium First ",
+                            "shortLocation": "Near Gate 1, East Hall",
+                            "featureList": [
+                                "Baggage Storage Service",
+                                "Bar (w/ charges may apply)",
+                                "Charging Station",
+                                "E-magazines",
+                                "Flight Information",
+                                "Food & Beverage",
+                                "Lounge Chairs/ Bay",
+                                "TV Channels",
+                                "Vegetarian Options",
+                                "Wi-Fi"
+                            ],
+                            "images": [
+                                {
+                                    "name": "1.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/1_property_815.jpg",
+                                    "size": 235818,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "1",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "2.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/2_property_815.jpg",
+                                    "size": 256644,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "2",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "3.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/3_property_815.jpg",
+                                    "size": 166440,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "3",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "4.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/4_property_815.jpg",
+                                    "size": 212152,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "4",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "5.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/5_property_815.jpg",
+                                    "size": 224265,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "5",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                },
+                                {
+                                    "name": "6.jpg",
+                                    "path": "https://uat-ppl2-images.plazapremiumlounge.com/static_images/prop_images/6_property_815.jpg",
+                                    "size": 233484,
+                                    "width": "1350",
+                                    "height": "900",
+                                    "sequence": "6",
+                                    "imageRatio": "1.5",
+                                    "createdDate": 1770198302801
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "journeyTypes": [],
+            "addOnDiscounts": {
+                "value": "0",
+                "type": "Percentage",
+                "currency": "",
+                "isUpsell": "Yes"
+            },
+            "quantityLabel": "",
+            "masNoOfProductsAllowed": 10,
+            "isFlightNumberMandatory": false,
+            "isStLoginMandatory": false,
+            "serviceType": "Per Person",
+            "arrtureSku": "",
+            "giftCardName": "",
+            "productDisplayName": "Lounge Use - 8 Hours",
+            "isThirdPartyFulfilment": false,
+            "fulfillmentType": "LMS",
+            "accuralPoints": "",
+            "productDurationInMinutes": 480
+        }
+    ],
+    "addOnsCount": 2,
+    "upsellCount": 2,
+    "entity": "addOns"
+}

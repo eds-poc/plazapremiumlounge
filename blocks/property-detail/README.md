@@ -113,7 +113,11 @@ shared. Lounge cards in the [Property List](../property-list/README.md) link her
 - **Get Price** asks the price service for the chosen service, duration, guests, start and promo
   code, and shows the price as the source: "Subtotal", the price before a discount struck through
   (when there's one), and the price, with **Reserve Now** in place of Get Price. Any change to the
-  choices clears it again. Reserve Now has no action yet: it announces the choice and its price (a
+  choices clears it again. **Reserve Now** first checks the cart, as the source's (`validtoaddcart`):
+  when the cart already holds an item (a lounge or passes), the source's **Checkout Cart** dialog
+  shows ("Please proceed to checkout before adding new item into cart.", View Cart opens the mini
+  cart; on phones over the Book Your Visit dialog), and the cart doesn't change. Otherwise it
+  announces the choice and its price (a
   `property-detail:reserve` event) for the booking hand-off to come (`property-detail:get-price`
   and `property-detail:price` are announced too). When the service rejects the promo code
   (`isPromoRejected` on any item of its answer), its message shows under the promo code field

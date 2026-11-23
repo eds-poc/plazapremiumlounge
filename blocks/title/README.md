@@ -119,7 +119,7 @@ On an offer page, put it with the cards it introduces in a section with `Style` 
 
 | Title (back) |
 | --- |
-| # [Back to Edit Booking](/en-uk/makeabooking) |
+| # [Back to Edit Booking](/en-uk/book-your-visit) |
 
 On the guest checkout it follows the Booking Steps band and comes before the Smart Traveller
 banner (see the Checkout guide).

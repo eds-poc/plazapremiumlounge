@@ -37,9 +37,10 @@ the page after ⊗ → Yes, and that reload adds the promotional address's pass 
     (`HKD 1,755.00`)
   - **Check Out**: a link to this site's checkout page, `/{lang}/guest-checkout` (unless the page
     metadata names another), announced too (`cart:checkout`).
-  - **Edit** (only with a lounge): a link to the page the metadata names, announced too
-    (`cart:edit`); without one it only announces, and on the preview site a note under the buttons
-    names the missing row (see [Check Out and Edit](#check-out-and-edit-for-authors)).
+  - **Edit** (only with a lounge): a link to this site's Book Your Visit page,
+    `/{lang}/book-your-visit` (unless the page metadata names another), announced too
+    (`cart:edit`). There the visit's date and time can be changed and add-ons added (the Book Your
+    Visit and Add-ons blocks).
 - **⊗**: "Would you like to remove this order from the shopping cart?" with the product, over the
   mini cart (both show).
   - **Cancel** (maroon) closes only the question.
@@ -137,21 +138,21 @@ the page after ⊗ → Yes, and that reload adds the promotional address's pass 
   `scripts/mini-cart.js`), and the line's "Additional Services: 2x …" shows when the cart has
   add-ons. No link shows until the add-ons API exists (see [Add-ons](#add-ons-view-more-options)).
 
-Not there yet: the add-ons modal itself, and the checkout (the pages Check Out and Edit link to).
+Not there yet: the mini cart's add-ons modal ("View more options"; Book Your Visit's Add-ons block adds them meanwhile).
 
 ### Check Out and Edit (for authors)
 
 - **Check Out** goes to **this site's checkout page**, `/{lang}/guest-checkout` (the Checkout
   block), in the visitor's language folder (`/zh-cn/guest-checkout` on a Chinese page). It reads
   the same cart (the id in localStorage, the data in sessionStorage). No metadata row is needed.
-- **Edit** has no page of this site's yet: it stays a button that only announces `cart:edit` until
-  a `cart-edit-url` row names one (on the preview, a note under the buttons says so).
+- **Edit** goes to **this site's Book Your Visit page**, `/{lang}/book-your-visit` (the Book Your
+  Visit block), in the visitor's language folder. No metadata row is needed.
 - Either can be set (or Check Out changed) in the **bulk metadata sheet** (`/metadata` in Document
   Authoring), one row per language folder, without a code change:
 
 | URL | cart-checkout-url | cart-edit-url |
 | --- | --- | --- |
-| `/**` | (none: this site's `/{lang}/guest-checkout`) | e.g. `https://www.plazapremiumlounge.com/{lang}/book-your-visit` |
+| `/**` | (none: this site's `/{lang}/guest-checkout`) | (none: this site's `/{lang}/book-your-visit`) |
 
 (One `/**` row with `{lang}` covers every folder. A row's value wins over the default, even one
 that isn't a web address: then Check Out is a button that only announces.)
@@ -172,8 +173,8 @@ that isn't a web address: then Check Out is a button that only announces.)
 | File | What it does |
 | --- | --- |
 | `scripts/cart-state.js` | The cart on this site (small: the header loads it on every page), see [Where the cart is kept](#where-the-cart-is-kept). `getCartId`, `getCart`, `needsRead`, `cartCount`, `isInCart`, `saveCart`, `forgetCart`, `onCartChange` (`cart:change` on document, other tabs too), `cart:stale`. |
-| `scripts/cart.js` | The cart without UI. `addToCart(item)`: the type's adapter (`lounge`, `pass`), the cart's rules (`RULES`), then POST for an empty cart, or PUT for a pass joining passes. Also `refreshCart()`, `convertCart(currency)` (a cart of passes, PUT), `deleteCart(cartId)`, `removeFromCart(catalogueCode)` (PUT with the other lines, or DELETE for the last), `passStart()`, `registerAdapter(type, adapter)`. One add, and one removal, at a time. |
-| `scripts/mini-cart.js` + `styles/cart.css` | The UI in the site's dialog (`modal-dialog.js`, with its `static` content and `stack` options): the mini cart, Checkout Cart, the remove confirmation (stacked over the mini cart), the failure message; the site's loader (`showLoader` / `hideLoader` from `scripts.js`) while the booking system answers. `addAndShow(item, trigger)`, `openMiniCart(trigger)`: a cart this tab hasn't read is read behind the loader first. |
+| `scripts/cart.js` | The cart without UI. `addToCart(item)`: the type's adapter (`lounge`, `pass`), the cart's rules (`RULES`), then POST for an empty cart, or PUT for a pass joining passes. Also `refreshCart()`, `convertCart(currency)` (a cart of passes, PUT), `deleteCart(cartId)`, `removeFromCart(catalogueCode)` (PUT with the other lines, or DELETE for the last), `passStart()`, `registerAdapter(type, adapter)`. `checkAdd(item)`: the same rules on the cart as the booking system has it, without adding (`allowed` / `refused` / `failed`). One add, and one removal, at a time. |
+| `scripts/mini-cart.js` + `styles/cart.css` | The UI in the site's dialog (`modal-dialog.js`, with its `static` content and `stack` options): the mini cart, Checkout Cart, the remove confirmation (stacked over the mini cart), the failure message; the site's loader (`showLoader` / `hideLoader` from `scripts.js`) while the booking system answers. `addAndShow(item, trigger)`, `openMiniCart(trigger)`: a cart this tab hasn't read is read behind the loader first. `checkAndShow(item, trigger)`: the lounge page's Reserve Now, Checkout Cart when the cart may not take it (no loader, as the source's; over an open dialog). |
 | `scripts/scripts.js` | `installCart()`: what the blocks announce → the cart (`CART_EVENTS`: `booking-widget:book` is a `lounge`; `quick-buy:add-to-cart`, `pass-finder:add-to-cart`, `product-passes:add-to-cart` and `embed:add-to-cart` are a `pass`). `embed:add-to-cart` comes from the global `AddToCart(button, catalogueCode, …)` it defines for campaign pages whose Embed Code script calls the source's (a pass's catalogue code only, in the visitor's currency), and `cart:remove` (`detail.catalogueCode`). The button off and the loader at once; the cart's code loads on the first product or removal. It reads a cart this tab hasn't got (a new tab, data past its 2 hours, another tab's change) after the load, when the tab is shown again, and on `cart:stale`. Also the site's full-page loader (`showLoader`, `hideLoader`). |
 | `scripts/passes.js` | `buildAddButton`: a pass's Add to Cart (cards and Learn more), labelled from the cart (Add More), all of them relabelled on `cart:change`. `takeSelectedPass`: the promotional address's pass, called by Quick Buy and Pass Finder once their passes are in (the first that lists it takes it). |
 | `blocks/header` | The count on the cart icon; the icon opens the mini cart when the cart holds something. |
@@ -336,10 +337,22 @@ Observed on stage on 2026-11-12, with PASS10PW and test pass and lounge carts:
   sections, Next / Checkout / Close, Learn more, Upgrade, Add / Added, the success messages,
   Service total, Quantity, Adult(s), Child(ren), All Guests).
 
-**This site:** waiting for the add-ons API.
-- Wire it with `registerAddons({ available(line), open(line, trigger) })` from
-  `scripts/mini-cart.js`.
-- The cart's lines need `addons: [{ name, quantity }]` from the GET (the shape isn't known).
+**This site:**
+- **The cart's add-ons** (since Book Your Visit): the booking system's cart holds each add-on as a
+  product line (`productType` "Add-On", its `catalogueCode` `…-Add-On-…`, `quantity`), sent with
+  its lounge in a PUT (the lounge's start). `readCart` attaches them to the lounge's line as
+  `addons: [{ id, catalogueCode, productCode, name, quantity, total, start }]`, so the cart still
+  has one line (the rules, the mini cart, the checkout see a lounge).
+  - **The count** adds their quantities (as the source's).
+  - **Every PUT sends them again**: `cartProducts` (a promo code taken off, a lounge changed).
+- **Changing the cart's lounge** (Book Your Visit): `updateLounge({ start })` (the visit's start;
+  its add-ons follow) and `setAddon({ catalogueCode, name, quantity })` (0 takes it out). Each is a
+  PUT with the lounge and its add-ons, then the promo code put back (`keepPromo`) and the cart read
+  again; one at a time, after an add, a removal, a conversion or a promo code under way.
+- **The add-ons to offer** come from `scripts/add-ons.js` (`fetchAddOns`; the client API's sample
+  answer for now; see `blocks/add-ons/README.md`).
+- **The mini cart's View more options** isn't wired yet: `registerAddons({ available(line),
+  open(line, trigger) })` from `scripts/mini-cart.js` takes it.
 
 ### The mini cart from the GET answer
 

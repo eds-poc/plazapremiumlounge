@@ -773,8 +773,10 @@ function trackReserve(lounge, form, { price }) {
  * start time). Get Price asks for the price of the chosen service, duration, guests and start
  * (`requestPrice`, with the page's loader up meanwhile) and shows it as the source: Subtotal,
  * the price before a discount struck through, the price, and Reserve Now instead of Get Price.
- * Any change clears it again. Reserve Now has no action yet: it announces the choice and its
- * price (`property-detail:reserve`) for the booking hand-off to come; `property-detail:get-price`
+ * Any change clears it again. Reserve Now first checks, as the source's, that the cart may take a
+ * lounge (a cart with an item gets the source's Checkout Cart dialog, and nothing else happens);
+ * then it announces the choice and its price (`property-detail:reserve`) for the booking hand-off
+ * to come; `property-detail:get-price`
  * and `property-detail:price` are announced too.
  * @param {Object} lounge
  * @param {Object} slot The chosen date and time (see chooseSlot)
@@ -966,11 +968,30 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
   // any change to the choices clears the price, as the source
   form.addEventListener('change', clearPrice);
   form.addEventListener('input', (e) => { if (e.target.name === 'promo') clearPrice(); });
-  reserve.addEventListener('click', () => {
-    if (!priced) return;
-    form.dispatchEvent(new CustomEvent('property-detail:reserve', { bubbles: true, detail: priced }));
+  // Reserve Now: first, as the source's (`validtoaddcart`), whether the cart may take a lounge; a
+  // cart that already holds an item gets the source's Checkout Cart dialog ("Please proceed to
+  // checkout before adding new item into cart."), and nothing else happens. One check at a time
+  let checking = false;
+  reserve.addEventListener('click', async () => {
+    if (!priced || checking) return;
+    const chosen = priced;
+    checking = true;
+    let allowed = true;
+    try {
+      const { checkAndShow } = await import('../../scripts/mini-cart.js');
+      allowed = await checkAndShow({ type: 'lounge' }, reserve);
+    } catch (error) {
+      // (the cart's code didn't load: Reserve Now as before)
+      // eslint-disable-next-line no-console
+      console.error('property-detail: the cart could not be checked', error);
+    } finally {
+      checking = false;
+    }
+    // (a change meanwhile cleared the price: nothing to reserve)
+    if (!allowed || priced !== chosen) return;
+    form.dispatchEvent(new CustomEvent('property-detail:reserve', { bubbles: true, detail: chosen }));
     // the data layer's Reserve Now click, with the price shown
-    trackReserve(lounge, form, priced);
+    trackReserve(lounge, form, chosen);
   });
 
   let services = [];
