@@ -51,6 +51,7 @@ of its own under the block, so the bar sits right on the footer.
 | confirmYes | Yes |
 | confirmNo | No |
 | cancellationReason | Change of travel plans |
+| confirmationPage | [/en-uk/booking-cancel-confirmation](/en-uk/booking-cancel-confirmation) |
 | notCancellable | This booking can’t be cancelled online. |
 | loading | Loading your booking… |
 | notFound | We couldn’t find this booking. |
@@ -77,6 +78,9 @@ of its own under the block, so the bar sits right on the footer.
   and a click beside it keep it. Without **confirmText** or **confirmYes** there's no second popup:
   the notice's Confirm cancels.
 - **cancellationReason**: the reason sent with the cancellation.
+- **confirmationPage** (optional): the Order Cancelled! page, a link or path on this site, opened
+  once the booking is cancelled with the booking added (`?bookingid=HKBC-11339-64UJUF`). Without
+  the row, the language site's `/booking-cancel-confirmation` page.
 - **loading**, **notFound**, **error**: the messages (loading for screen readers, while the
   site's loader shows; error with Try again). Row names ignore capitals.
 
@@ -101,8 +105,13 @@ of its own under the block, so the bar sits right on the footer.
 `/api/v1/web/ppg-app/cancel-booking` in `scripts/endpoints.js`) to cancel the booking: a `POST` of
 JSON `{ "orderId": "HKBC-10240-64UIS3", "cancellationReason": "Change of travel plans" }` with the
 member's login token (`Authorization: Bearer <token>`, `scripts/auth.js`). The site's loader shows
-and the button is disabled while it runs. Its answer isn't read yet: what the page does after a
-cancellation, or when it fails, comes later.
+and the button is disabled while it runs.
+
+- **Cancelled** (the API answers 200, with `{ "orderId": "HKBC-11339-64UJUF" }`): the page goes to
+  the **confirmationPage** for the booking (`/en-uk/booking-cancel-confirmation?bookingid=…`), the
+  loader staying up while it loads.
+- **Any other answer, or no answer:** the loader goes and the button is back; the browser console
+  says what the API answered. A message for the member comes later.
 
 The fee: GetOrderDetail's `cancellationCharge` is 0 for a booking not yet cancelled, so the
 amounts show "- HKD 0.00" and the whole total as the refund. The source's fee (e.g. HKD 77.97, the

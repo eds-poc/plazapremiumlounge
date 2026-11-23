@@ -7,8 +7,8 @@
  *   time, guests, services, its add-ons, price);
  * - the total, the cancellation fee and the refund amount;
  * - a bar with the Cancel Booking button: a notice popup (the refund and when it comes), then a
- *   confirmation popup, whose Yes asks the cancel booking API to cancel it (its answer isn't
- *   shown yet).
+ *   confirmation popup, whose Yes asks the cancel booking API to cancel it; once it has (a 200),
+ *   the Order Cancelled! page for the booking.
  * The booking comes from GetOrderDetail (scripts/bookings.js) for the address's `bookingid`, with
  * the member's login token. Every text the block shows is authored, a Key | Text row each.
  */
@@ -18,9 +18,12 @@ import {
   bookingId, bookingLoader, fetchOrder, groupItems, itemPrice, money, orderCurrency, readTexts,
   visitTime,
 } from '../../scripts/bookings.js';
-import { translate } from '../../scripts/i18n.js';
+import { DEFAULT_SITE, getSiteFolder, translate } from '../../scripts/i18n.js';
 import { setLoading } from '../../scripts/properties.js';
 
+// the Order Cancelled! page, in the language site without a confirmationPage row (the booking
+// added as `?bookingid=`)
+const CONFIRMATION_PAGE = 'booking-cancel-confirmation';
 // the popups before cancelling (the notice, then the confirmation): one popup, built once (its
 // key) and refilled for each
 const POPUP_KEY = 'cancel-booking-popup';
@@ -56,17 +59,36 @@ function readAmounts(order) {
 
 /**
  * Asks the cancel booking API to cancel a booking: a POST of the order and the reason, with the
- * member's login token. Its answer isn't read yet (success and failure come later).
+ * member's login token. It answers 200 (and `{ orderId }`) once the booking is cancelled.
  * @param {string} orderId
  * @param {string} reason The authored cancellationReason
- * @returns {Promise<void>}
+ * @returns {Promise<number>} The answer's HTTP status
  */
 async function cancelBooking(orderId, reason) {
-  await fetch(apiUrl('cancelBooking'), {
+  const res = await fetch(apiUrl('cancelBooking'), {
     method: 'POST',
     headers: { ...authHeaders(), 'Content-Type': 'application/json' },
     body: JSON.stringify({ orderId, cancellationReason: reason }),
   });
+  return res.status;
+}
+
+/**
+ * The Order Cancelled! page's address for a booking: the authored confirmationPage link (a page on
+ * this site), else the language site's /booking-cancel-confirmation, with `?bookingid=`.
+ * @param {HTMLAnchorElement|undefined} authored
+ * @param {string} orderId
+ * @returns {string}
+ */
+function confirmationHref(authored, orderId) {
+  const fallback = `/${getSiteFolder() || DEFAULT_SITE}/${CONFIRMATION_PAGE}`;
+  let url = new URL(fallback, window.location.href);
+  try {
+    const own = authored && new URL(authored.getAttribute('href'), window.location.href);
+    if (own && own.origin === window.location.origin) url = own;
+  } catch { /* the language site's page */ }
+  url.searchParams.set('bookingid', orderId);
+  return `${url.pathname}${url.search}`;
 }
 
 /**
@@ -283,18 +305,26 @@ export default function decorate(block) {
           no: text('confirmNo'),
         };
         if (confirmation.text && confirmation.yes && !(await ask(button, confirmation))) return;
-        // the site's loader while the booking is cancelled
+        // the site's loader while the booking is cancelled; once it is (a 200), the Order
+        // Cancelled! page (the loader stays while it loads). Otherwise the button again (what the
+        // page says about a failure comes later)
+        const id = order.orderId || orderId;
         button.disabled = true;
         setLoading(true);
         try {
-          await cancelBooking(order.orderId || orderId, text('cancellationReason'));
+          const status = await cancelBooking(id, text('cancellationReason'));
+          if (status === 200) {
+            window.location.assign(confirmationHref(link('confirmationPage'), id));
+            return;
+          }
+          // eslint-disable-next-line no-console
+          console.error(`cancel-booking: the cancel request answered ${status}`);
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error('cancel-booking: the cancel request failed', error);
-        } finally {
-          setLoading(false);
-          button.disabled = false;
         }
+        setLoading(false);
+        button.disabled = false;
       });
       bar.append(button);
     } else if (!cancellable && text('notCancellable')) {
