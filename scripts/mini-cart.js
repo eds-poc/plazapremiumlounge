@@ -327,6 +327,8 @@ export function buildPromo(cart, { prefix = 'mini-cart', redraw, root } = {}) {
     if (!code) {
       promo.message = translate('cartPromoEmpty');
       promo.error = true;
+      // GA4's all_error (asked of no service, so no code)
+      trackAllError(promo.message);
       show();
       return;
     }
