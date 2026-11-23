@@ -755,18 +755,53 @@ export function trackViewCart(cart, cartType = 'mini_cart') {
 
 // the mini cart's Check Out click, noted for the checkout page it opens (see trackBeginCheckout)
 const CHECKOUT_KEY = 'ppl-begin-checkout';
+// the passes' number of visits by catalogue code, as the passes service gives it when a pass goes
+// into the cart (the cart's answer has none), for the GA4 begin_checkout
+const PASS_VISITS_KEY = 'ppl-pass-visits';
 
 /**
  * Notes the mini cart's Check Out click for the page its link opens (this browser session; a
- * later click replaces it). Without a link, nothing opens and nothing is noted.
+ * later click replaces it), with the list's source as the mini cart's view_cart has it (on the
+ * home page, its search widget's; else how the visitor came, see viewSource). Without a link,
+ * nothing opens and nothing is noted.
  * @param {Object} cart The cart's summary (see readCart in cart.js)
  */
 function noteCheckout(cart) {
   const href = cartLink('checkout', cart);
   if (!href) return;
+  const source = HOMEPAGE_PATH.test(window.location.pathname)
+    ? 'hp_search_widget_click' : viewSource();
+  const { pathname } = new URL(href);
   try {
-    sessionStorage.setItem(CHECKOUT_KEY, JSON.stringify({ pathname: new URL(href).pathname }));
+    sessionStorage.setItem(CHECKOUT_KEY, JSON.stringify({ pathname, source }));
   } catch { /* storage blocked: no begin_checkout */ }
+}
+
+/**
+ * Keeps a pass's number of visits (its Add to Cart's `visits`) by its catalogue code.
+ * @param {{catalogueCode: string, visits?: number}} item
+ */
+function notePassVisits(item) {
+  if (!item.catalogueCode || !item.visits) return;
+  try {
+    const visits = JSON.parse(localStorage.getItem(PASS_VISITS_KEY) || '{}');
+    visits[item.catalogueCode] = item.visits;
+    localStorage.setItem(PASS_VISITS_KEY, JSON.stringify(visits));
+  } catch { /* storage blocked: no number of visits */ }
+}
+
+/**
+ * A pass's number of visits as text ("5"), '' when it isn't known (see notePassVisits).
+ * @param {string} catalogueCode
+ * @returns {string}
+ */
+function passVisits(catalogueCode) {
+  try {
+    const visits = JSON.parse(localStorage.getItem(PASS_VISITS_KEY) || '{}');
+    return visits[catalogueCode] ? String(visits[catalogueCode]) : '';
+  } catch {
+    return '';
+  }
 }
 
 /**
@@ -782,11 +817,13 @@ function couponOf(line) {
  * The GA4 `begin_checkout` (window.dataLayer, scripts/gtag-datalayer.js) as the checkout page
  * (blocks/checkout) first shows the cart, when the visitor came from the mini cart's Check Out
  * (noted for this page and used once: a reload sends none). From the cart: its currency and total,
- * its coupon (the first line's with one), and every line as an item (the property, its coupon
- * and discount, the product, the airport with its code, the city and country code, its price and
- * quantity, and for a lounge the visit and guests). The list, as view_cart's: how the visitor
- * came with the cart's airport ("Other - HKG" / "Other - Hong Kong International Airport"); a
- * cart of passes, the passes' list ("Other - Airport Lounge Passes").
+ * its coupon (the first line's with one), and every line as an item: a lounge's property, its
+ * coupon and discount, the product, the airport with its code, the city and country code, its
+ * price, visit and guests; a pass's catalogue code and name, its coupon and discount ('' without
+ * them), its number of visits and service, its price and quantity. The list, as the mini cart's
+ * view_cart had it (see noteCheckout) with the cart's airport ("HP Search Widget - HKG" / "HP
+ * Search Widget - Hong Kong International Airport" from the home page); a cart of passes, the
+ * passes' list ("Other - Airport Lounge Passes").
  * @param {Object} cart The cart's summary (see readCart in cart.js)
  */
 export function trackBeginCheckout(cart) {
@@ -800,7 +837,8 @@ export function trackBeginCheckout(cart) {
     return;
   }
   const [bookedItem] = cart.lines;
-  const source = viewSource();
+  // the mini cart's (see noteCheckout)
+  const source = noted.source || 'others';
   const isPassCart = bookedItem.kind === 'pass';
   const listId = listLabel(source, isPassCart ? PASSES_LIST_NAME : bookedItem.iataCode);
   const listName = listLabel(source, isPassCart ? PASSES_LIST_NAME : bookedItem.locationName);
@@ -810,11 +848,34 @@ export function trackBeginCheckout(cart) {
     value: cart.totals.total,
     coupon: cartCoupon,
     items: cart.lines.map((line) => {
-      const isPass = line.kind === 'pass';
-      // a lounge's visit (its startDate, the lounge's local time "2026-11-28 15:00:00":
-      // "28-Nov-2026", "1500") and guests; a pass has neither
-      const [, date = '', hour = '', minute = ''] = isPass ? []
-        : String(line.start || '').match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/) || [];
+      if (line.kind === 'pass') {
+        // a pass: no airport, city or visit (as its view_item)
+        return {
+          item_id: line.catalogueCode,
+          item_name: line.product,
+          coupon: couponOf(line),
+          discount: line.discount || '',
+          item_brand: BRAND,
+          item_category: passVisits(line.catalogueCode),
+          item_category2: '',
+          item_category3: line.category,
+          item_category4: '',
+          item_category5: '',
+          item_list_id: listId,
+          item_list_name: listName,
+          price: line.total,
+          quantity: line.quantity,
+          checkInDate: '',
+          checkInTime: '',
+          adults: '',
+          children: '',
+          total_guest_count: '',
+        };
+      }
+      // a lounge's visit: its startDate, the lounge's local time ("2026-11-28 15:00:00":
+      // "28-Nov-2026", "1500")
+      const [, date = '', hour = '', minute = ''] = String(line.start || '')
+        .match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/) || [];
       const totalGuestCount = line.adults + line.children;
       return {
         item_id: line.propertyCode,
@@ -831,15 +892,14 @@ export function trackBeginCheckout(cart) {
         item_category5: cart.countryCode,
         item_list_id: listId,
         item_list_name: listName,
-        // a lounge: the cart's total (cartTotalPrice.totalPrice, its add-ons included); a pass:
-        // its own line's
-        price: isPass ? line.total : cart.totals.total,
-        quantity: isPass ? line.quantity : totalGuestCount,
+        // the cart's total (cartTotalPrice.totalPrice, its add-ons included)
+        price: cart.totals.total,
+        quantity: totalGuestCount,
         checkInDate: toCheckInDate(date),
         checkInTime: `${hour}${minute}`,
-        adults: isPass ? '' : line.adults,
-        children: isPass ? '' : line.children,
-        total_guest_count: isPass ? '' : totalGuestCount,
+        adults: line.adults,
+        children: line.children,
+        total_guest_count: totalGuestCount,
       };
     }),
   });
@@ -979,7 +1039,11 @@ export async function addAndShow(item, trigger) {
     setBusy(from, false);
   }
   if (result.status === 'added') {
-    if (item.type === 'pass') trackAddToCart(item, result.cart);
+    if (item.type === 'pass') {
+      trackAddToCart(item, result.cart);
+      // its number of visits, for the GA4 begin_checkout
+      notePassVisits(item);
+    }
     await openMiniCart(from, { fresh: true });
   } else if (result.reason === 'checkout-first') {
     // eslint-disable-next-line no-use-before-define
