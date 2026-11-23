@@ -21,6 +21,8 @@ const MOBILE = '(width < 768px)';
 const GROUPS = ['airport', 'service', 'feature'];
 
 let blockCount = 0;
+// the GA4 list the listing's view_item_list named (trackItemList), for its select_item
+let shownList = { id: '', name: '' };
 
 /**
  * The breadcrumb, as the source city pages: "Home < Lounges in {country}", both as text (the
@@ -201,6 +203,8 @@ function trackItemList(properties, selected) {
   const city = shown.find((p) => p.city)?.city || '';
   const listId = listLabel(source, airport ? airport.iata : city);
   const listName = listLabel(source, airport ? airport.location.name : city);
+  // (also the list of a lounge selected from it: see trackSelectItem)
+  shownList = { id: listId, name: listName };
   pushEcommerce('view_item_list', {
     // the first lounge's own currency
     currency: shown[0].currency,
@@ -220,8 +224,10 @@ function trackItemList(properties, selected) {
 /**
  * The GA4 `select_item` as a lounge's name or View button is clicked (before its page opens),
  * window.dataLayer (scripts/gtag-datalayer.js): in the lounge's own currency, the lounge as an
- * item at its position in the list. The lists are blank for now; the listing has no promo code
- * or discount, so `coupon` and `discount` aren't sent. (Not for the passes, as view_item_list.)
+ * item at its position in the list, in the listing's list, as its view_item_list names it
+ * (trackItemList: "Mega Menu - Beijing", "HP Search Widget - JFK" / "HP Search Widget - John F.
+ * Kennedy International Airport" …; blank without one). The listing has no promo code or
+ * discount, so `coupon` and `discount` aren't sent. (Not for the passes, as view_item_list.)
  * @param {Object} property
  * @param {number} rank The card's position in the list as shown (1 for the first)
  */
@@ -229,12 +235,12 @@ function trackSelectItem(property, rank) {
   if (property.pass) return;
   pushEcommerce('select_item', {
     currency: property.currency,
-    item_list_id: '',
-    item_list_name: '',
+    item_list_id: shownList.id,
+    item_list_name: shownList.name,
     items: [{
       ...listingItem(property, rank),
-      item_list_id: '',
-      item_list_name: '',
+      item_list_id: shownList.id,
+      item_list_name: shownList.name,
     }],
   });
 }
