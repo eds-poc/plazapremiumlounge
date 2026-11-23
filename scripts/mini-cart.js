@@ -22,7 +22,7 @@ import { PAGE_VIEW, pushEvent } from './adobe-datalayer.js';
 import { BRAND, pushEcommerce } from './gtag-datalayer.js';
 // eslint-disable-next-line import/no-cycle
 import { hideLoader, showLoader } from './scripts.js';
-import { daysUntil, toDayMonthYear, toUtcDateTime } from './utility.js';
+import { daysUntil, toCheckInDate, toUtcDateTime } from './utility.js';
 
 const styles = loadCSS(`${window.hlx.codeBasePath}/styles/cart.css`);
 
@@ -706,9 +706,11 @@ export function trackViewCart(cart, cartType = 'mini_cart') {
     cart_type: cartType,
     items: cart.lines.map((line) => {
       const isPass = line.kind === 'pass';
-      // a lounge's visit and guests (a pass has neither, as in its view_item_list)
-      // (its start is the lounge's local time, "2026-11-28 15:00:00": "28-Nov-2026", "1500")
-      const visit = isPass ? { date: '', time: '' } : toDayMonthYear(line.start);
+      // a lounge's visit and guests (a pass has neither, as in its view_item_list): its start is
+      // the lounge's local time, "2026-11-28 15:00:00": "28-Nov-2026", "1500"
+      const [, date = '', hour = '', minute = ''] = isPass ? []
+        : String(line.start || '').match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/) || [];
+      const visit = { date: toCheckInDate(date), time: `${hour}${minute}` };
       return {
         item_id: line.propertyCode,
         item_name: line.shortLocation ? `${line.name} (${line.shortLocation})` : line.name,

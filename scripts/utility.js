@@ -64,20 +64,6 @@ export function daysUntil(date, timeZone) {
 }
 
 /**
- * A date and time as written ("2026-11-28 15:00:00" or "2026-11-28T15:00", kept as is, with no
- * time zone change) as DD-MMM-YYYY and HHmm (24h): "28-Nov-2026", "1500"; blank if it isn't one.
- * @param {string} value YYYY-MM-DD HH:mm…
- * @returns {{date: string, time: string}}
- */
-export function toDayMonthYear(value) {
-  const [, y, m, d, hh, mm] = String(value ?? '').match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/) || [];
-  if (!y) return { date: '', time: '' };
-  // the month's short English name ("Nov")
-  const month = new Date(Date.UTC(y, m - 1, 1)).toLocaleString('en', { month: 'short', timeZone: 'UTC' });
-  return { date: `${d}-${month}-${y}`, time: `${hh}${mm}` };
-}
-
-/**
  * The SHA-256 of a text, as lowercase hex.
  * @param {string} text
  * @returns {Promise<string>}
@@ -85,4 +71,17 @@ export function toDayMonthYear(value) {
 export async function sha256(text) {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+// the months as the GA4 events write a date (see toCheckInDate)
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/**
+ * A date as the GA4 events write it: DD-MMM-YYYY (2026-11-19 → 19-Nov-2026), '' for another value.
+ * @param {string} date YYYY-MM-DD
+ * @returns {string}
+ */
+export function toCheckInDate(date) {
+  const [, y, m, d] = String(date || '').match(/^(\d{4})-(\d{2})-(\d{2})$/) || [];
+  return y && MONTHS[Number(m) - 1] ? `${d}-${MONTHS[Number(m) - 1]}-${y}` : '';
 }
