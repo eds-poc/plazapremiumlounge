@@ -34,20 +34,18 @@ function el(tag, className, text) {
 }
 
 /**
- * The cancelled booking's summary: a POST of the order id with the login token. A refused token
- * (401) logs out and goes home (the promise then gives null); a missing booking rejects with
- * `notFound`, any other failure without. On the preview and local sites a failure shows the
- * sample answer instead (the API isn't live yet).
+ * The cancelled booking's summary: a GET with the order id (`?orderId=`) and the login token. A
+ * refused token (401) logs out and goes home (the promise then gives null); a missing booking
+ * rejects with `notFound`, any other failure without. On the preview and local sites a failure
+ * shows the sample answer instead (the API isn't live yet).
  * @param {string} orderId
  * @returns {Promise<object|null>}
  */
 async function fetchSummary(orderId) {
   try {
-    const res = await fetch(apiUrl('cancellationSummary'), {
-      method: 'POST',
-      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId }),
-    });
+    const url = apiUrl('cancellationSummary');
+    url.searchParams.set('orderId', orderId);
+    const res = await fetch(url, { headers: authHeaders() });
     if (res.status === 401) {
       logout();
       return null;

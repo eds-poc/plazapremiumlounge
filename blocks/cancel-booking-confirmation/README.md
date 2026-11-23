@@ -60,8 +60,8 @@ Authors write the texts; the summary comes from the **cancellation summary** API
 ## The cancellation summary API
 
 `apiUrl('cancellationSummary')`: the booking system's `/api/v1/web/ppg-app/cancellation-summary`
-(`scripts/endpoints.js`), a `POST` of JSON `{ "orderId": "HKBC-11339-64UJVG" }` with the member's
-login token (`Authorization: Bearer <token>`).
+(`scripts/endpoints.js`), a `GET` with the order in the address (`?orderId=HKBC-11339-64UJVG`) and
+the member's login token (`Authorization: Bearer <token>`).
 
 **Not live yet.** Until it is, on the preview and local sites only (`.aem.page`, localhost) a
 failure shows the sample answer `sample-cancellation-summary.json` (the order HKBC-11339-64UIPS),
