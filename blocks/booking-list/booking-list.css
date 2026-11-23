@@ -372,76 +372,14 @@
   }
 }
 
-/* ---------- the cancel confirmation (the site's popup, outside the block), as the source's:
-   everything centred, the title in the body (the maroon bar keeps only the close), the order
-   number and the lounge's name in bold, Confirm outlined beside Cancel filled ---------- */
-dialog.modal.booking-list-modal {
-  /* the source's buttons (180px), and its popup from 992px (Bootstrap modal-lg) */
-  --booking-list-confirm-button: 180px;
-  --booking-list-modal-width: 800px;
-}
-
-dialog.modal.booking-list-modal .modal-body {
-  padding: var(--spacing-9) var(--modal-padding);
-  text-align: center;
-}
-
-dialog.modal.booking-list-modal .booking-list-confirm-title {
-  margin: 0 0 var(--spacing-7);
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-semi-bold);
-  line-height: var(--line-height-heading);
-}
-
-dialog.modal.booking-list-modal .booking-list-confirm-question,
-dialog.modal.booking-list-modal .booking-list-confirm-lounge {
-  margin: 0 0 var(--spacing-7);
-  font-size: var(--font-size-md);
-}
-
-dialog.modal.booking-list-modal .booking-list-confirm-question b,
-dialog.modal.booking-list-modal .booking-list-confirm-lounge b {
-  font-weight: var(--font-weight-semi-bold);
-}
-
-dialog.modal.booking-list-modal .booking-list-confirm-lounge span {
+/* the cancel confirmation (the site's confirmation popup, outside the block; its look in
+   styles/modal.css): the lounge's place in the airport smaller than its name */
+dialog.modal.confirm .booking-list-confirm-lounge span {
   font-size: var(--font-size-sm);
 }
 
-dialog.modal.booking-list-modal .booking-list-confirm-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--spacing-6) var(--spacing-11);
-}
-
-dialog.modal.booking-list-modal .booking-list-confirm-actions .button {
-  width: var(--booking-list-confirm-button);
-  min-width: 0;
-  padding-block: var(--spacing-3);
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-medium);
-}
-
 @media (width >= 768px) {
-  dialog.modal.booking-list-modal .booking-list-confirm-title {
-    font-size: var(--font-size-3xl);
-  }
-
-  dialog.modal.booking-list-modal .booking-list-confirm-question,
-  dialog.modal.booking-list-modal .booking-list-confirm-lounge {
-    font-size: var(--font-size-lg);
-  }
-
-  dialog.modal.booking-list-modal .booking-list-confirm-lounge span {
+  dialog.modal.confirm .booking-list-confirm-lounge span {
     font-size: var(--font-size-md);
-  }
-}
-
-/* breakpoint-exception: the source Bootstrap modal-lg breakpoint (992px) */
-@media (width >= 992px) {
-  dialog.modal.booking-list-modal {
-    width: var(--booking-list-modal-width);
-    max-width: var(--booking-list-modal-width);
   }
 }

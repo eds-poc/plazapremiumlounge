@@ -12,9 +12,8 @@
  */
 import { getToken, isTokenValid, logout } from '../../scripts/auth.js';
 import apiUrl from '../../scripts/endpoints.js';
-import {
-  DEFAULT_SITE, getLanguage, getSiteFolder, translate,
-} from '../../scripts/i18n.js';
+import { getLanguage, translate } from '../../scripts/i18n.js';
+import { bookingHref, bookingPage } from '../../scripts/bookings.js';
 import { createPager, readPageSize, setPage } from '../../scripts/pagination.js';
 import {
   buildSlider, el, getApiLanguage, isPreview, setLoading, toKey, toUrl,
@@ -93,8 +92,6 @@ const SERVICE_DATE = /^(\d{1,2}) ([A-Za-z]{3}) (\d{4}) (\d{1,2}):(\d{2})/;
 let blockCount = 0;
 // each card's booking, for its actions (the cancel confirmation shows the lounge)
 const bookingOf = new WeakMap();
-// each block's cancel confirmation content, refilled for each booking (the dialog is built once)
-const confirmRoots = new Map();
 
 /**
  * API or authored text, trimmed, its runs of spaces made one ("Plaza Premium First " →
@@ -122,15 +119,6 @@ function readSettings(block) {
   const cell = (name) => rows.find((cells) => cells.length >= 2
     && toKey(cells[0].textContent) === toKey(name))?.[1];
   const value = (c) => (c?.querySelector('a[href]')?.getAttribute('href') || c?.textContent || '').trim();
-  const sameSite = (raw) => {
-    if (!raw) return '';
-    try {
-      const url = new URL(raw, window.location.href);
-      return url.origin === window.location.origin ? `${url.pathname}${url.search}` : '';
-    } catch {
-      return '';
-    }
-  };
   const texts = Object.fromEntries(Object.entries(TEXTS).map(([key, name]) => {
     const authored = clean(cell(name)?.textContent);
     const placeholder = VALUE_AT[key]?.match(/\{(id|n)\}/)[0];
@@ -153,22 +141,10 @@ function readSettings(block) {
     text: (key, values = {}) => (texts[key] || '')
       .replace(/\{(\w+)\}/g, (all, name) => values[name] ?? all),
     template: (key) => texts[key] || '',
-    viewPage: sameSite(value(cell('View page'))) || `/${getSiteFolder() || DEFAULT_SITE}/${VIEW_PAGE}`,
-    cancelPage: sameSite(value(cell('Cancel page'))) || `/${getSiteFolder() || DEFAULT_SITE}/${CANCEL_PAGE}`,
+    viewPage: bookingPage(value(cell('View page')), VIEW_PAGE),
+    cancelPage: bookingPage(value(cell('Cancel page')), CANCEL_PAGE),
     pageSize: readPageSize(value(cell('Page size'))),
   };
-}
-
-/**
- * A booking page's address for one booking: the page, with the booking as `?bookingid=`.
- * @param {string} page A path (see readSettings)
- * @param {string} orderId
- * @returns {string} e.g. /en-uk/view-booking?bookingid=HKBC-11339-64SCYL
- */
-function bookingHref(page, orderId) {
-  const url = new URL(page, window.location.href);
-  url.searchParams.set('bookingid', orderId);
-  return `${url.pathname}${url.search}`;
 }
 
 /**
@@ -507,11 +483,10 @@ function buildCard(booking, {
 }
 
 /**
- * Asks before cancelling, as the source: the site's popup with the Cancel title, the Cancel
- * confirm question (the order number in bold), the lounge (its name in bold, then its place in the
- * airport) and the Cancel yes and Cancel no buttons. Resolves true for Cancel yes only (the
- * caller goes to the cancel page); Cancel no, the close button, Esc and a click beside the popup
- * keep the booking.
+ * Asks before cancelling, as the source: the site's confirmation popup (scripts/confirm-dialog.js,
+ * wide) with the Cancel title, the Cancel confirm question (the order number in bold), the lounge
+ * (its name in bold, then its place in the airport) and the Cancel yes and Cancel no buttons.
+ * Resolves true for Cancel yes only (the caller goes to the cancel page).
  * @param {Object} booking See readBookings
  * @param {HTMLElement} trigger The Cancel Booking button (focus returns there)
  * @param {{ text: function(string, Object=): string, template: function(string): string }} settings
@@ -519,52 +494,20 @@ function buildCard(booking, {
  * @returns {Promise<boolean>}
  */
 async function confirmCancel(booking, trigger, { text, template }, key) {
-  const { openModal } = await import('../../scripts/modal-dialog.js');
-  if (!confirmRoots.has(key)) confirmRoots.set(key, el('div', 'booking-list-confirm'));
-  const root = confirmRoots.get(key);
-
-  // the title stays in the popup's body, as the source's (a heading would go to its maroon bar)
-  const title = el('p', 'booking-list-confirm-title', text('cancelTitle'));
-  title.id = `${key}-title`;
-  title.setAttribute('role', 'heading');
-  title.setAttribute('aria-level', '2');
-  const question = el('p', 'booking-list-confirm-question');
+  const { default: confirmDialog } = await import('../../scripts/confirm-dialog.js');
+  const question = el('p', 'confirm-text');
   const [before, ...after] = template('cancelConfirm').split('{id}');
   question.append(before, el('b', '', booking.orderId), after.join(booking.orderId));
-  const lounge = el('p', 'booking-list-confirm-lounge');
+  const lounge = el('p', 'confirm-text booking-list-confirm-lounge');
   if (booking.name) lounge.append(el('b', '', booking.name));
   if (booking.place) lounge.append(' ', el('span', '', booking.place));
-
-  const actions = el('div', 'booking-list-confirm-actions');
-  // as the source: Confirm outlined, Cancel (keep the booking) filled
-  const choice = (label, look) => {
-    const b = el('button', `button ${look}`, label);
-    b.type = 'button';
-    actions.append(b);
-    return b;
-  };
-  const yes = choice(text('cancelYes'), 'tertiary');
-  const no = text('cancelNo') ? choice(text('cancelNo'), 'primary') : null;
-  root.replaceChildren(...[
-    text('cancelTitle') && title, question, lounge.childNodes.length && lounge, actions,
-  ].filter(Boolean));
-
-  const dialog = await openModal({
+  return confirmDialog(trigger, {
     key,
-    trigger,
-    content: () => Object.assign([root], { styles: ['booking-list-modal'] }),
-  });
-  if (!dialog) return false;
-  if (text('cancelTitle')) dialog.setAttribute('aria-labelledby', title.id);
-  else dialog.removeAttribute('aria-labelledby');
-  return new Promise((resolve) => {
-    let confirmed = false;
-    yes.addEventListener('click', () => {
-      confirmed = true;
-      dialog.close();
-    });
-    no?.addEventListener('click', () => dialog.close());
-    dialog.addEventListener('close', () => resolve(confirmed), { once: true });
+    title: text('cancelTitle'),
+    body: [question, lounge.childNodes.length && lounge].filter(Boolean),
+    yes: text('cancelYes'),
+    no: text('cancelNo'),
+    wide: true,
   });
 }
 

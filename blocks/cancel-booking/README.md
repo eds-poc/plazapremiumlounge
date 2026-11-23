@@ -67,9 +67,9 @@ of its own under the block, so the bar sits right on the footer.
   never cancelled without asking); a booking that can't be cancelled shows **notCancellable**
   instead.
 - **noticeTitle**, **notice**, **noticeConfirm**, **noticeCancel**: the popup the button opens, as
-  the source's: the site's dialog (the maroon bar with the close button, then, centred, the
-  title, the text with `{amount}` as the refund amount, "HKD 442.32", and Confirm (outlined) and
-  Cancel (filled)). **noticeConfirm** goes on to the confirmation; **noticeCancel**, the close
+  the source's: the site's confirmation popup (`scripts/confirm-dialog.js`: the maroon bar with
+  the close button, then, centred, the title, the text with `{amount}` as the refund amount, "HKD
+  442.32", and Confirm (outlined) and Cancel (filled)). **noticeConfirm** goes on to the confirmation; **noticeCancel**, the close
   button, Esc and a click beside the popup keep the booking (focus back on the button). Without
   **noticeTitle** the popup has no title; without **noticeCancel**, only Confirm.
 - **confirmTitle**, **confirmText**, **confirmYes**, **confirmNo**: the second popup, after the
@@ -110,6 +110,7 @@ and the button is disabled while it runs.
 - **Cancelled** (the API answers 200, with `{ "orderId": "HKBC-11339-64UJUF" }`): the page goes to
   the **confirmationPage** for the booking (`/en-uk/booking-cancel-confirmation?bookingid=…`), the
   loader staying up while it loads.
+- **A refused login (401):** logs out and goes home, as when the booking itself can't be loaded.
 - **Any other answer, or no answer:** the loader goes and the button is back; the browser console
   says what the API answered. A message for the member comes later.
 

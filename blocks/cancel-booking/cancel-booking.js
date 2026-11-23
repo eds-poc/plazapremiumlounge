@@ -12,13 +12,13 @@
  * The booking comes from GetOrderDetail (scripts/bookings.js) for the address's `bookingid`, with
  * the member's login token. Every text the block shows is authored, a Key | Text row each.
  */
-import { authHeaders, getToken } from '../../scripts/auth.js';
+import { authHeaders, getToken, logout } from '../../scripts/auth.js';
 import apiUrl from '../../scripts/endpoints.js';
 import {
-  bookingId, bookingLoader, fetchOrder, groupItems, itemPrice, money, orderCurrency, readTexts,
-  visitTime,
+  bookingHref, bookingId, bookingLoader, bookingPage, fetchOrder, groupItems, itemPrice, money,
+  orderCurrency, readTexts, visitTime,
 } from '../../scripts/bookings.js';
-import { DEFAULT_SITE, getSiteFolder, translate } from '../../scripts/i18n.js';
+import { translate } from '../../scripts/i18n.js';
 import { setLoading } from '../../scripts/properties.js';
 
 // the Order Cancelled! page, in the language site without a confirmationPage row (the booking
@@ -27,7 +27,6 @@ const CONFIRMATION_PAGE = 'booking-cancel-confirmation';
 // the popups before cancelling (the notice, then the confirmation): one popup, built once (its
 // key) and refilled for each
 const POPUP_KEY = 'cancel-booking-popup';
-let popupRoot;
 
 /**
  * Creates an element with an optional class name and text.
@@ -59,7 +58,8 @@ function readAmounts(order) {
 
 /**
  * Asks the cancel booking API to cancel a booking: a POST of the order and the reason, with the
- * member's login token. It answers 200 (and `{ orderId }`) once the booking is cancelled.
+ * member's login token. It answers 200 (and `{ orderId }`) once the booking is cancelled; a
+ * refused token (401) logs out and goes home, as the booking's own request does.
  * @param {string} orderId
  * @param {string} reason The authored cancellationReason
  * @returns {Promise<number>} The answer's HTTP status
@@ -70,76 +70,24 @@ async function cancelBooking(orderId, reason) {
     headers: { ...authHeaders(), 'Content-Type': 'application/json' },
     body: JSON.stringify({ orderId, cancellationReason: reason }),
   });
+  if (res.status === 401) logout();
   return res.status;
 }
 
 /**
- * The Order Cancelled! page's address for a booking: the authored confirmationPage link (a page on
- * this site), else the language site's /booking-cancel-confirmation, with `?bookingid=`.
- * @param {HTMLAnchorElement|undefined} authored
- * @param {string} orderId
- * @returns {string}
- */
-function confirmationHref(authored, orderId) {
-  const fallback = `/${getSiteFolder() || DEFAULT_SITE}/${CONFIRMATION_PAGE}`;
-  let url = new URL(fallback, window.location.href);
-  try {
-    const own = authored && new URL(authored.getAttribute('href'), window.location.href);
-    if (own && own.origin === window.location.origin) url = own;
-  } catch { /* the language site's page */ }
-  url.searchParams.set('bookingid', orderId);
-  return `${url.pathname}${url.search}`;
-}
-
-/**
- * One of the popups before cancelling, as the source's: the site's popup with a title, a text and
- * two buttons, centred (the title in the body, the maroon bar keeping only the close; the yes
- * button outlined, the no button filled). Resolves true for the yes button only; the no button,
- * the close button, Esc and a click beside the popup resolve false. The popup is built once and
- * refilled for each question.
+ * Asks one question before cancelling, in the site's confirmation popup
+ * (scripts/confirm-dialog.js): the notice, then the confirmation, in one popup refilled for each.
+ * Resolves true for its yes button only.
  * @param {HTMLElement} trigger The Cancel Booking button (focus returns there)
  * @param {{title: string, text: string, yes: string, no: string}} question The authored texts
- *   ('' for a title or a no button left out)
  * @returns {Promise<boolean>}
  */
-async function ask(trigger, question) {
-  const { openModal } = await import('../../scripts/modal-dialog.js');
-  popupRoot = popupRoot || el('div', 'cancel-booking-popup');
-  // the title stays in the popup's body, as the source's (a heading would go to its maroon bar)
-  const title = el('p', 'cancel-booking-popup-title', question.title);
-  title.id = 'cancel-booking-popup-title';
-  title.setAttribute('role', 'heading');
-  title.setAttribute('aria-level', '2');
-  const actions = el('div', 'cancel-booking-popup-actions');
-  const choice = (label, look) => {
-    const b = el('button', `button ${look}`, label);
-    b.type = 'button';
-    actions.append(b);
-    return b;
-  };
-  const yes = choice(question.yes, 'tertiary');
-  const no = question.no ? choice(question.no, 'primary') : null;
-  popupRoot.replaceChildren(...[
-    question.title && title, el('p', 'cancel-booking-popup-text', question.text), actions,
-  ].filter(Boolean));
-
-  const root = popupRoot;
-  const dialog = await openModal({
-    key: POPUP_KEY,
-    trigger,
-    content: () => Object.assign([root], { styles: ['cancel-booking-modal'] }),
-  });
-  if (!dialog) return false;
-  if (question.title) dialog.setAttribute('aria-labelledby', title.id);
-  else dialog.removeAttribute('aria-labelledby');
-  return new Promise((resolve) => {
-    let confirmed = false;
-    yes.addEventListener('click', () => {
-      confirmed = true;
-      dialog.close();
-    });
-    no?.addEventListener('click', () => dialog.close());
-    dialog.addEventListener('close', () => resolve(confirmed), { once: true });
+async function ask(trigger, {
+  title, text, yes, no,
+}) {
+  const { default: confirmDialog } = await import('../../scripts/confirm-dialog.js');
+  return confirmDialog(trigger, {
+    key: POPUP_KEY, title, body: [text], yes, no,
   });
 }
 
@@ -314,9 +262,12 @@ export default function decorate(block) {
         try {
           const status = await cancelBooking(id, text('cancellationReason'));
           if (status === 200) {
-            window.location.assign(confirmationHref(link('confirmationPage'), id));
+            const page = bookingPage(link('confirmationPage')?.getAttribute('href'), CONFIRMATION_PAGE);
+            window.location.assign(bookingHref(page, id));
             return;
           }
+          // a refused login is logging out (the loader stays meanwhile)
+          if (status === 401) return;
           // eslint-disable-next-line no-console
           console.error(`cancel-booking: the cancel request answered ${status}`);
         } catch (error) {
