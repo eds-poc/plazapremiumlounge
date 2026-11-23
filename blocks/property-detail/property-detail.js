@@ -124,9 +124,9 @@ function readPromoRejection(json) {
 
 /**
  * The price in a price response (the first product's first price): the total, the price before
- * discounts, the discount (the price before discounts less the total), the applied promo code
- * and its amount ('' and 0 without one), the currency, and the product's and service's names.
- * Null when there's none (not available for that start or guests).
+ * discounts, the discount (the first discount's amount, else the promo code's, else 0), the
+ * applied promo code and its amount ('' and 0 without one), the currency, and the product's and
+ * service's names. Null when there's none (not available for that start or guests).
  * @param {Object} json
  * @param {string} currency The currency asked for
  * @returns {{total: number, base: number, discountValue: number, promoCode: string,
@@ -142,11 +142,14 @@ function readPrice(json, currency) {
   const base = Number(price.basePrice);
   // only with an applied promo code, e.g. promocode: [{ "code": "ACG20", "discountValue": 217.6 }]
   const promoData = Array.isArray(price.promocode) ? price.promocode[0] : null;
+  // e.g. discounts: [{ "name": "10% Online Discount [Lounge Booking]", "discountValue": 175.5 }]
+  const discountData = Array.isArray(price.discounts) ? price.discounts[0] : null;
   return {
     total,
     base: Number.isFinite(base) ? base : total,
-    // basePrice less totalPrice, to the cent (1088 - 870.4: 217.6); 0 without a basePrice
-    discountValue: Math.round((base - total) * 100) / 100 || 0,
+    // the first discount's amount (discounts[0].discountValue), else the promo code's
+    // (promocode[0].discountValue), else 0
+    discountValue: Number(discountData?.discountValue) || Number(promoData?.discountValue) || 0,
     // the applied promo code and its amount; '' and 0 without one
     promoCode: (promoData?.code || '').trim(),
     promoValue: Number(promoData?.discountValue) || 0,
@@ -571,7 +574,7 @@ function trackGetPrice(lounge, request, formFieldsData, price) {
       sku: price.catalogueCode,
       name: formFieldsData.product,
       actualPricePayCurr: price.base,
-      // basePrice less totalPrice
+      // the first discount's amount, else the promo code's, else 0 (see readPrice)
       discount: price.discountValue,
       sellPricePayCurr: price.total,
       category: formFieldsData.service,
@@ -618,6 +621,66 @@ function trackGetPrice(lounge, request, formFieldsData, price) {
         promocodeValuePayCurr: price?.promoValue || 0,
       },
     },
+  });
+}
+
+/**
+ * GA4's `property_getprice_click` for Get Price, once the price service has answered
+ * (window.dataLayer, scripts/gtag-datalayer.js): the lounge with its airport, city and country,
+ * the product with its price, discount and promo code, the visit chosen, in the list of the
+ * airport with how the visitor came ("Other - HKG" / "Other - Hong Kong International Airport");
+ * and the promo code's rejection and the error shown, when there are. Without a price (none for
+ * the choices, an error), the price, discount and promo code are blank and the product is the
+ * form's.
+ * @param {Object} lounge
+ * @param {Object} request The price request (see buildBooking)
+ * @param {{product: string, date: string, time: string}} formFieldsData The chosen product's
+ *   name, and the form's date (YYYY-MM-DD) and time (HHmm)
+ * @param {{price: Object|null, promoMessage: string, errorMessage: string, errorCode: string}}
+ *   outcome The price (see readPrice), the promo code's rejection, and the error shown with the
+ *   service's code ('' without them)
+ */
+function trackGetPriceClick(lounge, request, formFieldsData, outcome) {
+  const { price } = outcome;
+  // how the visitor came (the same for every event on the page, see viewSource)
+  const source = viewSource();
+  const { adult, child } = request.guests;
+  const totalGuestCount = adult + child;
+  const total = price ? price.total : '';
+  // the first discount's amount, else the promo code's (see readPrice), else ""
+  const discount = price?.discountValue || '';
+  pushEcommerce('property_getprice_click', {
+    currency: lounge.defaultCurrency,
+    value: total,
+    promo_code_message: outcome.promoMessage,
+    promo_code_message_code: '',
+    error_message: outcome.errorMessage,
+    error_message_code: outcome.errorCode,
+    items: [
+      {
+        item_id: lounge.code,
+        item_name: clean(lounge.fullName),
+        // the applied promo code (promocode[0].code)
+        coupon: price?.promoCode || '',
+        discount,
+        item_brand: BRAND,
+        item_category: price?.productName || formFieldsData.product,
+        // the airport with its code: "Hong Kong International Airport (HKG)"
+        item_category2: lounge.airport,
+        item_category3: lounge.name,
+        item_category4: lounge.city,
+        item_category5: lounge.country,
+        item_list_id: listLabel(source, lounge.iata),
+        item_list_name: listLabel(source, lounge.location.name),
+        price: total,
+        quantity: totalGuestCount,
+        checkInDate: toCheckInDate(formFieldsData.date),
+        checkInTime: formFieldsData.time,
+        adults: adult,
+        children: child,
+        total_guest_count: totalGuestCount,
+      },
+    ],
   });
 }
 
@@ -689,7 +752,7 @@ function trackReserve(lounge, form, { price }) {
           category: price.serviceName,
           // the prices are for all the guests already (basePrice, totalPrice)
           actualPricePayCurr: price.base,
-          // basePrice less totalPrice
+          // the first discount's amount, else the promo code's, else 0 (see readPrice)
           discountPayCurr: price.discountValue,
           sellPricePayCurr: price.total,
           quantity: totalGuestCount,
@@ -1011,6 +1074,10 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
     };
     // the price for these choices; null until (and unless) the price service gives one
     let price = null;
+    // for GA4's Get Price: the promo code's rejection, and the error shown with the service's code
+    let promoMessage = '';
+    let errorMessage = '';
+    let errorCode = '';
     clearPrice();
     const controller = new AbortController();
     pricing = controller;
@@ -1023,6 +1090,7 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
       // a rejected promo code: only its message; no price, and Get Price stays
       if (price.promoRejected) rejectPromo(price.promoRejected);
       else showPrice(request, price);
+      promoMessage = price.promoRejected;
     } catch (error) {
       if (controller.signal.aborted) return;
       // eslint-disable-next-line no-console
@@ -1030,11 +1098,19 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
       message.textContent = translate(error.unavailable ? 'propertyPriceUnavailable' : 'propertyPriceError');
       message.hidden = false;
       if (error.promoRejected) rejectPromo(error.promoRejected);
+      promoMessage = error.promoRejected || '';
+      // the service's own message when it gave one (e.g. "Inventory not found"), else the page's
+      errorMessage = error.service?.message || message.textContent;
+      errorCode = String(error.service?.errorCode || '');
     } finally {
       setLoading(false);
       if (pricing === controller) form.removeAttribute('aria-busy');
       // the data layer's Get Price click, with the price (one push a click)
       trackGetPrice(lounge, request, formFieldsData, price);
+      // GA4's Get Price click, with the price, the promo code's rejection and the error
+      trackGetPriceClick(lounge, request, formFieldsData, {
+        price, promoMessage, errorMessage, errorCode,
+      });
     }
   });
   panel.append(header, form);
