@@ -448,8 +448,12 @@ function renderResults(results, properties, selected, status, onClear, prefix, s
         view: settings.view,
         signup: settings.signup,
         rank: n + 1,
-        onView: trackViewLounge,
-        onSelect: trackSelectItem,
+        // View: the data layer's "view lounge" and GA4's select_item; the name: select_item
+        onView: (property, rank) => {
+          trackViewLounge(property, rank);
+          trackSelectItem(property, rank);
+        },
+        onTitleClick: trackSelectItem,
       }));
       n += 1;
     });
