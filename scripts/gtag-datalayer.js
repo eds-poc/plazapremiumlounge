@@ -9,7 +9,7 @@
  * (`hp_search_widget_click`) is noted for the page it opens (trackViewSource, on every page);
  * anything else is `others`. The lists are named after it: "Mega Menu - Beijing", "Other -
  * Beijing", "HP Search Widget - JFK" (id) / "HP Search Widget - John F. Kennedy International
- * Airport" (name). A cart viewed on a page is in the page's list (see cartList in mini-cart.js).
+ * Airport" (name).
  */
 
 const SOURCE_KEY = 'ppl-view-source';
@@ -17,8 +17,6 @@ const SOURCES = {
   mega_menu: 'Mega Menu',
   hp_search_widget_click: 'HP Search Widget',
   others: 'Other',
-  // the cart's own page (the checkout, the source's /book-your-visit): "View Cart - HKG"
-  view_cart: 'View Cart',
 };
 // the links whose clicks are noted: every link in the header's main menu (the top links, the
 // dropdowns, the mega menu and the phones' drill-down) and the home page search widget's
@@ -45,30 +43,24 @@ export function trackViewSource() {
   }, true);
 }
 
-// how the visitor came to this page, once read (see viewSource)
-let pageSource;
-
 /**
  * How the visitor came to this page: the noted click for it, used once (so a reload is
- * `others`), else `others`; kept for the page, so every event on it says the same (e.g. the
- * passes' view_item_list and a pass's view_item).
+ * `others`), else `others`.
  * @returns {'mega_menu'|'hp_search_widget_click'|'others'}
  */
 export function viewSource() {
-  if (pageSource) return pageSource;
-  pageSource = 'others';
   try {
     const noted = JSON.parse(sessionStorage.getItem(SOURCE_KEY) || 'null');
     if (noted && noted.pathname === window.location.pathname && SOURCES[noted.source]) {
       sessionStorage.removeItem(SOURCE_KEY);
-      pageSource = noted.source;
+      return noted.source;
     }
   } catch { /* nothing noted */ }
-  return pageSource;
+  return 'others';
 }
 
 /**
- * A list's id or name with how the visitor came: "Mega Menu - Beijing", "Other - SIN".
+ * A list's id or name with how the visitor came: "Mega Menu - PEK", "Other - Beijing".
  * @param {string} source See viewSource
  * @param {string} value
  * @returns {string}

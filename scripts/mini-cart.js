@@ -19,9 +19,7 @@ import {
 import { getCurrency } from './currency.js';
 // eslint-disable-next-line import/no-cycle
 import { PAGE_VIEW, pushEvent } from './adobe-datalayer.js';
-import {
-  BRAND, listLabel, pushEcommerce, viewSource,
-} from './gtag-datalayer.js';
+import { BRAND, pushEcommerce } from './gtag-datalayer.js';
 // eslint-disable-next-line import/no-cycle
 import { hideLoader, showLoader } from './scripts.js';
 import { daysUntil, toDayMonthYear, toUtcDateTime } from './utility.js';
@@ -685,53 +683,23 @@ function trackCartView(cart) {
   });
 }
 
-// the home page's address: / or a site folder's (/en-uk/ …)
-const HOMEPAGE_PATH = /^\/([a-z]{2}-[a-z]{2}\/?)?$/;
-// the passes' list name in the GA4 events, as the pass finder's ("Other - Airport Lounge Passes")
-const PASSES_LIST_NAME = 'Airport Lounge Passes';
-
-/**
- * The list a cart is viewed from: how the visitor came to the page they view it on (viewSource:
- * the mega menu, the home page search widget, else others; on the home page, its search widget),
- * with the cart's airport, its code in the id and its name in the name: "HP Search Widget - HKG" /
- * "HP Search Widget - Hong Kong International Airport", "Mega Menu - HKG" / "Mega Menu - Hong Kong
- * International Airport", "Other - HKG" / "Other - Hong Kong International Airport". A cart of
- * passes (they have no airport) is in the passes' list ("Other - Airport Lounge Passes").
- * @param {Object} line The cart's first line (see readLine in cart.js)
- * @returns {{id: string, name: string}}
- */
-function cartList(line) {
-  const source = HOMEPAGE_PATH.test(window.location.pathname)
-    ? 'hp_search_widget_click' : viewSource();
-  const { iataCode, locationName } = line;
-  if (line.kind === 'pass' || (!iataCode && !locationName)) {
-    const label = listLabel(source, PASSES_LIST_NAME);
-    return { id: label, name: label };
-  }
-  return {
-    id: listLabel(source, iataCode || locationName),
-    name: listLabel(source, locationName || iataCode),
-  };
-}
-
 /**
  * The GA4 `view_cart` (window.dataLayer, scripts/gtag-datalayer.js) as the mini cart opens
  * ("mini_cart"), or as the checkout page shows the cart ("full_page", blocks/checkout), from the
  * cart as shown: in the visitor's currency, the cart's total, and every line as an item (the
  * property, its promo code and discount, the product, the airport with its code, the city and
- * country code, its price and quantity, and for a lounge the visit and guests), in the list of
- * where it's viewed (the mini cart: see cartList; the checkout: "View Cart - HKG").
+ * country code, its price and quantity, and for a lounge the visit and guests). The list
+ * (`item_list_id`, `item_list_name`): the page's list, as its view_item_list in the data layer
+ * names it (a listing's, e.g. "Mega Menu - Singapore"; the passes page's), as select_item's;
+ * blank on a page without one (and on the checkout).
  * @param {Object} cart The cart's summary (see readCart in cart.js)
  * @param {'mini_cart'|'full_page'} [cartType]
  */
 export function trackViewCart(cart, cartType = 'mini_cart') {
-  const [bookedItem] = cart.lines;
-  const list = cartType === 'full_page'
-    ? {
-      id: listLabel('view_cart', bookedItem.iataCode),
-      name: listLabel('view_cart', bookedItem.locationName),
-    }
-    : cartList(bookedItem);
+  const pageList = cartType === 'mini_cart'
+    ? (window.dataLayer || []).findLast((e) => e?.event === 'view_item_list')?.ecommerce : null;
+  const listId = pageList?.item_list_id || '';
+  const listName = pageList?.item_list_name || '';
   pushEcommerce('view_cart', {
     currency: getCurrency(),
     value: cart.totals.total,
@@ -753,8 +721,8 @@ export function trackViewCart(cart, cartType = 'mini_cart') {
         item_category3: line.name,
         item_category4: cart.cityName,
         item_category5: cart.countryCode,
-        item_list_id: list.id,
-        item_list_name: list.name,
+        item_list_id: listId,
+        item_list_name: listName,
         price: line.total,
         quantity: line.quantity,
         checkInDate: visit.date,

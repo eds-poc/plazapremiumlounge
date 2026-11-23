@@ -154,11 +154,9 @@ function trackListingView(properties, selected, count) {
 
 /**
  * The GA4 `view_item_list` for the listing (window.dataLayer, scripts/gtag-datalayer.js): the
- * lounges shown (not the passes), in their order. The list's id has the airport's code (the one
- * chosen, else, on a city listing, its first lounge's; the city without one, as a station): "Mega
- * Menu - SIN", "HP Search Widget - JFK", "Other - LHR". Its name: from the mega menu, the city's
- * ("Mega Menu - Singapore"); from the home page search widget, the airport's ("HP Search Widget -
- * John F. Kennedy International Airport", the city's without one chosen); else the id.
+ * lounges shown (not the passes), in their order. The list is named after the city ("Mega Menu -
+ * Beijing", "Other - Beijing"); from the home page search widget, after its airport ("HP Search
+ * Widget - JFK" as the id, "HP Search Widget - John F. Kennedy International Airport" as the name).
  * @param {Object[]} properties
  * @param {Object<string, Set<string>>} selected The filters from the page address
  */
@@ -168,17 +166,11 @@ function trackItemList(properties, selected) {
     .flatMap((group) => group.items);
   if (!shown.length) return;
   const source = viewSource();
-  // the airport chosen (an airport listing), if one
-  const chosen = selected.airport.size === 1
+  const airport = source === 'hp_search_widget_click' && selected.airport.size === 1
     ? shown.find((p) => selected.airport.has(p.location.key)) : null;
   const city = shown.find((p) => p.city)?.city || '';
-  const code = chosen ? chosen.iata : shown.find((p) => p.iata)?.iata;
-  const listId = listLabel(source, code || city);
-  let listName = listId;
-  if (source === 'mega_menu') listName = listLabel(source, city);
-  if (source === 'hp_search_widget_click') {
-    listName = listLabel(source, chosen ? chosen.location.name : city);
-  }
+  const listId = listLabel(source, airport ? airport.iata : city);
+  const listName = listLabel(source, airport ? airport.location.name : city);
   pushEcommerce('view_item_list', {
     // the first lounge's own currency
     currency: shown[0].currency,
