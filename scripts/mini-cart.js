@@ -20,9 +20,12 @@ import {
 import { getCurrency } from './currency.js';
 // eslint-disable-next-line import/no-cycle
 import { PAGE_VIEW, pushEvent } from './adobe-datalayer.js';
+import {
+  BRAND, listLabel, pushEcommerce, viewSource,
+} from './gtag-datalayer.js';
 // eslint-disable-next-line import/no-cycle
 import { hideLoader, showLoader } from './scripts.js';
-import { daysUntil, toUtcDateTime } from './utility.js';
+import { daysUntil, toCheckInDate, toUtcDateTime } from './utility.js';
 
 const styles = loadCSS(`${window.hlx.codeBasePath}/styles/cart.css`);
 
@@ -684,6 +687,70 @@ function trackCartView(cart) {
   });
 }
 
+// the home page's address: / or a site folder's (/en-uk/ …)
+const HOMEPAGE_PATH = /^\/([a-z]{2}-[a-z]{2}\/?)?$/;
+// the passes' list name in the GA4 events, as PASSES_LIST_NAME in passes.js (not imported: it
+// would make an import cycle through properties.js and scripts.js)
+const PASSES_LIST_NAME = 'Airport Lounge Passes';
+
+/**
+ * The GA4 `view_cart` (window.dataLayer, scripts/gtag-datalayer.js) as the mini cart opens
+ * ("mini_cart"), or as the checkout page shows the cart ("full_page", blocks/checkout), from the
+ * cart as shown: in the visitor's currency, the cart's total, and every line as an item (the
+ * property, its promo code and discount, the product, the airport with its code, the city and
+ * country code, its price and quantity, and for a lounge the visit and guests). The list, as
+ * view_item's (blocks/property-detail, booking-widget-lounge-card.js, scripts/passes.js): how the
+ * visitor came to the page (viewSource; on the home page, its search widget) with the cart's
+ * airport, its code in the id and its name in the name ("HP Search Widget - HKG" / "HP Search
+ * Widget - Hong Kong International Airport", "Other - HKG" / "Other - Hong Kong International
+ * Airport" …); a cart of passes, the passes' list ("Other - Airport Lounge Passes").
+ * @param {Object} cart The cart's summary (see readCart in cart.js)
+ * @param {'mini_cart'|'full_page'} [cartType]
+ */
+export function trackViewCart(cart, cartType = 'mini_cart') {
+  const [bookedItem] = cart.lines;
+  const source = HOMEPAGE_PATH.test(window.location.pathname)
+    ? 'hp_search_widget_click' : viewSource();
+  const isPassCart = bookedItem.kind === 'pass';
+  const listId = listLabel(source, isPassCart ? PASSES_LIST_NAME : bookedItem.iataCode);
+  const listName = listLabel(source, isPassCart ? PASSES_LIST_NAME : bookedItem.locationName);
+  pushEcommerce('view_cart', {
+    currency: getCurrency(),
+    value: cart.totals.total,
+    cart_type: cartType,
+    items: cart.lines.map((line) => {
+      const isPass = line.kind === 'pass';
+      // a lounge's visit and guests (a pass has neither, as in its view_item_list): its start is
+      // the lounge's local time, "2026-11-28 15:00:00": "28-Nov-2026", "1500"
+      const [, date = '', hour = '', minute = ''] = isPass ? []
+        : String(line.start || '').match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/) || [];
+      const visit = { date: toCheckInDate(date), time: `${hour}${minute}` };
+      return {
+        item_id: line.propertyCode,
+        item_name: line.shortLocation ? `${line.name} (${line.shortLocation})` : line.name,
+        coupon: line.promo?.code || '',
+        discount: line.discount,
+        item_brand: BRAND,
+        item_category: line.product,
+        // the airport with its code, e.g. Hong Kong International Airport (HKG)
+        item_category2: line.iataCode ? `${line.locationName} (${line.iataCode})` : line.locationName,
+        item_category3: line.name,
+        item_category4: cart.cityName,
+        item_category5: cart.countryCode,
+        item_list_id: listId,
+        item_list_name: listName,
+        price: line.total,
+        quantity: line.quantity,
+        checkInDate: visit.date,
+        checkInTime: visit.time,
+        adults: isPass ? '' : line.adults,
+        children: isPass ? '' : line.children,
+        total_guest_count: isPass ? '' : line.adults + line.children,
+      };
+    }),
+  });
+}
+
 /**
  * Opens the mini cart (when the cart holds something), then reads the cart again in the
  * background, so it shows at once and stays right. A cart of passes in another currency than the
@@ -725,7 +792,10 @@ export async function openMiniCart(trigger, { fresh = false } = {}) {
   }
   renderMiniCart(cart);
   const dialog = await mini.open(trigger);
-  if (dialog) trackCartView(cart);
+  if (dialog) {
+    trackCartView(cart);
+    trackViewCart(cart);
+  }
   // (not when the cart was just read: after an add, a first read or a conversion)
   if (!read && !convert) refreshCart().catch(() => {});
   return dialog;

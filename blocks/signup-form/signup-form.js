@@ -1,6 +1,7 @@
 // eslint-disable-next-line import/no-cycle
 import { PAGE_VIEW, pushEvent, setPageDetails } from '../../scripts/adobe-datalayer.js';
 import { buildForm } from '../../scripts/forms.js';
+import { pushGtagEvent } from '../../scripts/gtag-datalayer.js';
 import { sha256 } from '../../scripts/utility.js';
 
 /*
@@ -140,6 +141,22 @@ async function trackSignupSuccess(data) {
 }
 
 /**
+ * GA4's `sign_up` (window.dataLayer, scripts/gtag-datalayer.js), once the Register API has
+ * accepted the sign up: how (by email), the new Smart Traveller member's ID (the answer's
+ * membershipID, '' without one) and their residence country's code ('' for now).
+ * @param {Object} data The Register API's answer
+ */
+function trackSignUp(data) {
+  pushGtagEvent('sign_up', {
+    method: 'email',
+    user_id: data?.membershipID ? String(data.membershipID) : '',
+    user_properties: {
+      residence_country_code: '',
+    },
+  });
+}
+
+/**
  * Decorates the Signup Form block: the sign up form (the source /en-uk/sign-up). One authored row
  * per field (Field | Label | Placeholder | Required | Error), one-cell rows as text, and the rows
  * submit / error. Sent to the Register API (endpoint signUp), then the confirmation page in the
@@ -160,6 +177,10 @@ export default function decorate(block) {
   trackPageLoad();
   // the data layer's Create Account click, as the form is sent (forms:submit: after the checks)
   form.addEventListener('forms:submit', trackCreateAccount);
-  // the data layer's successful sign up, with the Register API's answer (before the next page)
-  form.addEventListener('forms:success', (e) => trackSignupSuccess(e.detail.data));
+  // the successful sign up, with the Register API's answer (before the next page): the Adobe data
+  // layer's signup success and GA4's sign_up
+  form.addEventListener('forms:success', (e) => {
+    trackSignupSuccess(e.detail.data);
+    trackSignUp(e.detail.data);
+  });
 }
