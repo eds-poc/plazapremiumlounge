@@ -276,7 +276,43 @@ const CART_EVENTS = {
   'quick-buy:add-to-cart': 'pass',
   'pass-finder:add-to-cart': 'pass',
   'product-passes:add-to-cart': 'pass',
+  // a campaign page's own Add to Cart (an Embed Code block's script, as the source's: see
+  // installEmbedAddToCart)
+  'embed:add-to-cart': 'pass',
 };
+
+/**
+ * The source's global AddToCart(button, catalogueCode, …), for the campaign pages whose own script
+ * (an Embed Code block's, as on the source) calls it from a pass card's button, e.g. Beyond The
+ * Event's `AddToCart(btn, data-prd, region, 'False', '', partnerCode, '')`: the pass goes into
+ * this site's cart as the pass blocks' Add to Cart does (`embed:add-to-cart`, from the button, in
+ * the visitor's currency). Only a pass's catalogue code (…-GFTCRD-…) is taken; the source's other
+ * arguments (the pass list's region, must log in, promo and partner codes, a property) aren't the
+ * cart API's and aren't used. Not defined over a page's own AddToCart.
+ */
+function installEmbedAddToCart() {
+  if (typeof window.AddToCart === 'function') return;
+  window.AddToCart = (button, catalogueCode) => {
+    const code = String(catalogueCode ?? '').trim();
+    if (!/-GFTCRD-/i.test(code)) {
+      // eslint-disable-next-line no-console
+      console.warn('AddToCart: not a pass\'s catalogue code, nothing added', catalogueCode);
+      return;
+    }
+    const from = button instanceof Element ? button : document;
+    import('./currency.js').then(({ getCurrency }) => {
+      const currency = getCurrency();
+      from.dispatchEvent(new CustomEvent('embed:add-to-cart', {
+        bubbles: true,
+        detail: {
+          catalogueCode: code,
+          productCode: code.split('-')[0],
+          currency: /^[A-Z]{3}$/.test(currency) ? currency : 'USD',
+        },
+      }));
+    });
+  };
+}
 
 let reading = null;
 
@@ -294,11 +330,13 @@ function readCartIfNeeded() {
 }
 
 /**
- * Puts announced products into the cart (`CART_EVENTS`), and takes them out on `cart:remove`
+ * Puts announced products into the cart (`CART_EVENTS`; a campaign page's AddToCart() call too),
+ * and takes them out on `cart:remove`
  * (`detail.catalogueCode`, e.g. the lounge card's Remove From Cart). A cart this tab hasn't read is
  * read once the page has loaded, when the tab is shown again, and when another tab changed it.
  */
 function installCart() {
+  installEmbedAddToCart();
   window.addEventListener('load', () => setTimeout(readCartIfNeeded, 0), { once: true });
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') readCartIfNeeded();

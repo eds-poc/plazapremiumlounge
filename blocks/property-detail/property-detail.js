@@ -4,6 +4,9 @@ import {
 import { applyButtonAction } from '../../scripts/button-actions.js';
 // eslint-disable-next-line import/no-cycle
 import { PAGE_VIEW, pushEvent, setPageDetails } from '../../scripts/adobe-datalayer.js';
+import {
+  BRAND, chosenVisit, listLabel, pushEcommerce, viewSource,
+} from '../../scripts/gtag-datalayer.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { translate } from '../../scripts/i18n.js';
 import openGallery from '../../scripts/gallery.js';
@@ -17,7 +20,9 @@ import {
   AIRPORT_DINING, EXTERNAL, LOUNGE, PASS, buildBadge, buildSlider, el, fetchJson, getApiLanguage,
   isPreview, readProperty, safeHtml, setLoading, toKey, toUrl,
 } from '../../scripts/properties.js';
-import { clean, daysUntil, toUtcDateTime } from '../../scripts/utility.js';
+import {
+  clean, daysUntil, toCheckInDate, toUtcDateTime,
+} from '../../scripts/utility.js';
 
 // the detail service answers in about 0.2-2s; the services one in 3-7s (at times far longer)
 const DETAIL_TIMEOUT_MS = 15000;
@@ -443,6 +448,60 @@ function readBookingDetails(lounge, form) {
 }
 
 /**
+ * The GA4 `view_item` for the lounge page (window.dataLayer, scripts/gtag-datalayer.js), as the
+ * page loads: the lounge with its airport, city and country, its lowest price ("" without one) and
+ * the visit as the booking form has it (its date, time and guests); without a booking form, as the
+ * page address has it (see chosenVisit). The list is the airport, with how the visitor came
+ * ("Other - HKG" as the id, "Other - Hong Kong International Airport" as the name).
+ * @param {Object} lounge
+ * @param {HTMLFormElement} [form] The booking form (none when the lounge isn't bookable)
+ */
+function trackViewItem(lounge, form) {
+  let visit = chosenVisit(lounge.timeZone);
+  if (form) {
+    const formData = new FormData(form);
+    const adults = Number(formData.get('adults')) || 1;
+    const children = Number(formData.get('children')) || 0;
+    visit = {
+      checkInDate: toCheckInDate(formData.get('date')),
+      checkInTime: String(formData.get('time') || ''),
+      adults,
+      children,
+      total_guest_count: adults + children,
+    };
+  }
+  const source = viewSource();
+  const listId = listLabel(source, lounge.iata);
+  const listName = listLabel(source, lounge.location.name);
+  // the lounge's lowest price, "" without one (as the listing's view_item_list)
+  const price = lounge.price ? lounge.price.amount : '';
+  pushEcommerce('view_item', {
+    currency: lounge.defaultCurrency,
+    value: price,
+    items: [
+      {
+        item_id: lounge.code,
+        item_name: clean(lounge.fullName),
+        coupon: '',
+        discount: '',
+        item_brand: BRAND,
+        // the product's display name: none before Get Price
+        item_category: '',
+        item_category2: lounge.location.name,
+        item_category3: lounge.name,
+        item_category4: lounge.city,
+        item_category5: lounge.country,
+        item_list_id: listId,
+        item_list_name: listName,
+        price,
+        quantity: visit.total_guest_count,
+        ...visit,
+      },
+    ],
+  });
+}
+
+/**
  * The data layer's "page load" page view, once the booking form has its first services: the
  * page's name and site section, the booking as the form has it (the date and time in UTC, the
  * guests), the lounge and its airport or station, and the chosen product (its code as the SKU;
@@ -477,6 +536,8 @@ function trackPageLoad(lounge, form) {
     },
     _plazapremiumloungemanagementli: details,
   });
+  // and GA4's view_item, at the same moment, with the same booking form
+  trackViewItem(lounge, form);
 }
 
 /**

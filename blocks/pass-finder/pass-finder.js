@@ -3,16 +3,14 @@ import {
 } from '../../scripts/gtag-datalayer.js';
 import { translate } from '../../scripts/i18n.js';
 import {
-  PASSES_TIMEOUT_MS, buildAddButton, buildPoints, formatPrice, icon, locationName, openPassDetails,
-  readCurrency, readPass, takeSelectedPass,
+  PASSES_LIST_NAME, PASSES_TIMEOUT_MS, buildAddButton, buildPoints, formatPrice, icon, locationName,
+  openPassDetails, readCurrency, readPass, takeSelectedPass, trackPassView,
 } from '../../scripts/passes.js';
 import {
   el, fetchPassList, getApiContext, isPreview, readApiRow, readPassList,
 } from '../../scripts/properties.js';
 
 const PAGE_SIZE = 9;
-// the passes list's name in the GA4 events ("Other - Airport Lounge Passes")
-const LIST_NAME = 'Airport Lounge Passes';
 const MAX_TAGS = 4;
 const MAX_PLACES = 4;
 const ADD_TO_CART = 'pass-finder:add-to-cart';
@@ -147,7 +145,7 @@ function choose(passes, { region, search, sort }) {
 function trackPassList(list) {
   if (!list.length) return;
   const source = viewSource();
-  const label = listLabel(source, LIST_NAME);
+  const label = listLabel(source, PASSES_LIST_NAME);
   pushEcommerce('view_item_list', {
     currency: readCurrency(),
     item_list_id: label,
@@ -264,7 +262,11 @@ function buildCard(pass, note, bestValue) {
   learn.type = 'button';
   learn.setAttribute('aria-haspopup', 'dialog');
   learn.setAttribute('aria-label', `${translate('quickBuyLearnMore')}: ${pass.name}`);
-  learn.addEventListener('click', () => openPassDetails(pass, learn, ADD_TO_CART));
+  learn.addEventListener('click', () => {
+    openPassDetails(pass, learn, ADD_TO_CART);
+    // GA4's view_item for the pass
+    trackPassView(pass);
+  });
   actions.append(learn, buildAddButton(pass, 'pass-finder-add', ADD_TO_CART));
   body.append(actions);
   card.append(media, body);
