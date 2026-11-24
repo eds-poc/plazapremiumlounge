@@ -10,10 +10,9 @@ const HEADINGS = 'h1, h2, h3, h4, h5, h6';
 const BUTTON_DEFAULT = ['outline'];
 const DRAG_THRESHOLD = 30;
 // the settings rows (name | value; names ignore capitals and spaces): a query index of offer
-// pages to show instead of authored cards, how many of its newest, and the cards' link text
-const SETTINGS = { source: 'source', count: 'count', linkText: 'link-text' };
-// the offers shown from a Source without a Count
-const DEFAULT_COUNT = 6;
+// pages whose homepage offers (their showOnHomepage metadata) show instead of authored cards,
+// and the cards' link text
+const SETTINGS = { source: 'source', linkText: 'link-text' };
 // the placeholder cards while a Source's offers load (as many as a row shows from 650px)
 const PLACEHOLDERS = 2;
 
@@ -126,13 +125,11 @@ function buildCard(row, eager) {
 /**
  * The settings rows (see SETTINGS): a row of two cells whose first cell is a setting's name.
  * @param {Element[]} rows The block's rows
- * @returns {{ source: string, count: number, linkText: string, rows: Element[] }} `rows`: the
- *   settings rows themselves (left out of the cards)
+ * @returns {{ source: string, linkText: string, rows: Element[] }} `rows`: the settings rows
+ *   themselves (left out of the cards)
  */
 function readSettings(rows) {
-  const settings = {
-    source: '', count: DEFAULT_COUNT, linkText: '', rows: [],
-  };
+  const settings = { source: '', linkText: '', rows: [] };
   rows.forEach((row) => {
     const [name, value] = row.children;
     if (row.children.length !== 2 || isImageOnly(name)) return;
@@ -140,9 +137,6 @@ function readSettings(rows) {
     const text = value.textContent.trim();
     if (key === SETTINGS.source) {
       settings.source = value.querySelector('a[href]')?.getAttribute('href') || text;
-    } else if (key === SETTINGS.count) {
-      const count = Number.parseInt(text, 10);
-      if (count > 0) settings.count = count;
     } else if (key === SETTINGS.linkText) {
       settings.linkText = text;
     } else {
@@ -198,16 +192,17 @@ function offerRow(offer, linkText) {
 }
 
 /**
- * The newest offers of the Source (as many as the Count), as card rows; null when it can't be
- * read (the browser console says why).
- * @param {{ source: string, count: number, linkText: string }} settings
+ * The Source's homepage offers (showOnHomepage true), newest first, as card rows; null when it
+ * can't be read (the browser console says why).
+ * @param {{ source: string, linkText: string }} settings
  * @returns {Promise<HTMLElement[]|null>}
  */
-async function offerRows({ source, count, linkText }) {
+async function offerRows({ source, linkText }) {
   const url = toSourceUrl(source);
   try {
     if (!url) throw new Error('not an address on this site');
-    const offers = newestFirst(readOffers(await fetchRows(url))).slice(0, count);
+    const offers = newestFirst(readOffers(await fetchRows(url)))
+      .filter((offer) => offer.showOnHomepage);
     return offers.map((offer) => offerRow(offer, linkText));
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -446,9 +441,9 @@ function render(block, rows, buttons, { eager, placeholders }) {
 }
 
 /**
- * Decorates the carousel cards block: the authored cards, or with a Source row the newest offers
- * of that query index (as many as the Count, 6 without it; the authored cards if it can't be
- * read), then the optional buttons below them. A Source's offers load in the background (the
+ * Decorates the carousel cards block: the authored cards, or with a Source row that query index's
+ * homepage offers (showOnHomepage), newest first (the authored cards if it can't be read or has
+ * none), then the optional buttons below them. A Source's offers load in the background (the
  * page doesn't wait for them): placeholder cards hold the carousel's place meanwhile.
  * @param {Element} block The carousel-cards block element
  */
@@ -472,7 +467,7 @@ export default function decorate(block) {
   render(block, [], buttons, { eager, placeholders });
   block.setAttribute('aria-busy', 'true');
   offerRows(settings).then((offers) => {
-    render(block, offers || cardRows, buttons, { eager });
+    render(block, offers?.length ? offers : cardRows, buttons, { eager });
     block.removeAttribute('aria-busy');
   });
 }

@@ -1,8 +1,9 @@
 /*
  * The site's offers, from a query index of the offer pages (e.g. /en-uk-offers.json: path,
- * lastModified, title, description, image, tag and optionally date): the language site's index,
- * reading it in one request, its rows as offers (a page link, a title, a description, an image,
- * the tags and a date), and the newest first.
+ * lastModified, title, description, image, tag and optionally date and showOnHomepage): the
+ * language site's index, reading it in one request, its rows as offers (a page link, a title, a
+ * description, an image, the tags, a date and whether it's a homepage offer), and the newest
+ * first.
  */
 import { DEFAULT_SITE, getSiteFolder } from './i18n.js';
 import fetchJson from './fetch-json.js';
@@ -102,10 +103,12 @@ function toImagePath(value) {
 /**
  * The offers of the rows, in the file's order: each with a page link and a title (rows without
  * one, or repeating a page, are left out, as is the page showing them, e.g. the offers listing
- * page an index of the offers folder can include); the tags are the `tag` column split at commas.
+ * page an index of the offers folder can include); the tags are the `tag` column split at commas;
+ * `showOnHomepage` is the column's `true` (the offer page's metadata).
  * @param {Object[]} rows
  * @returns {{ path: string, title: string, description: string, image: string,
- *   tags: { key: string, name: string }[], time: number, index: number }[]}
+ *   tags: { key: string, name: string }[], time: number, showOnHomepage: boolean,
+ *   index: number }[]}
  */
 export function readOffers(rows) {
   const seen = new Set([window.location.pathname.replace(/\/$/, '')]);
@@ -129,6 +132,7 @@ export function readOffers(rows) {
       image: image && toImagePath(image),
       tags,
       time: readTime(row),
+      showOnHomepage: String(row.showOnHomepage ?? '').trim().toLowerCase() === 'true',
     };
   }).filter(Boolean).map((offer, index) => ({ ...offer, index }));
 }

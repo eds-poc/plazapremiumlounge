@@ -30,27 +30,28 @@ Add a row with a small **Buttons** table inside, written like a Buttons block, t
 
 ## Cards from the offers index (optional)
 
-Instead of typing the cards, the carousel can show the newest offers from a query index of the
+Instead of typing the cards, the carousel can show the homepage offers from a query index of the
 offer pages (as on the homepage). Add these rows, before or after any Buttons row:
 
 | Carousel Cards |  |
 | --- | --- |
 | Source | [/en-uk-offers.json](/en-uk-offers.json) |
-| Count | 6 |
 | Link text | Explore Offer |
 
 - **Source:** the index, as a link or plain text (a path on this site, e.g. `/en-uk-offers.json`;
   another site's address isn't read). With it, the block's typed cards aren't shown.
-- **Count** (optional): how many of the newest offers, a whole number. 6 without it.
 - **Link text** (optional): each card's link, e.g. "Explore Offer →". Without it, the card's title
   is the link.
+- **Which offers:** only those marked for the homepage: an offer page with `showOnHomepage` =
+  `true` in its Metadata block. Every marked offer shows, newest first: by the `date` column when
+  the index has one (the offer page's Date), else by `lastModified`. The index must have a
+  `showOnHomepage` column, read from the page's `showonhomepage` meta tag (the site's index
+  configuration, as its `tag` column); a page's mark reaches the index when the page is published.
 - **Each card** is an offer from the index: its `image`, its `title` (a trailing " | Plaza Premium
   Lounge" is dropped), its `description` and a link to its `path`. Offers without a path or a title
-  are left out, and the page itself isn't shown. Newest first: by the `date` column when the index
-  has one (the offer page's Date), else by `lastModified`.
+  are left out, and the page itself isn't shown.
 - **While the index loads**, two placeholder cards (the image's place and two shimmering lines)
   hold the carousel's place; the rest of the page doesn't wait for it.
-- **If the index can't be read**, the typed cards show instead (none: an empty carousel), and the
-  browser console says why.
+- **If the index can't be read, or has no homepage offers**, the typed cards show instead (none: an
+  empty carousel), and when it can't be read the browser console says why.
 - Row names ignore capitals and spaces (`Link text`, `link-text`).
-
