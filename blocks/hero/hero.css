@@ -160,7 +160,7 @@
 .hero.booking {
   --hero-booking-note: rgb(255 255 255 / 90%);
   --hero-booking-tablet-height: 595px;
-  --hero-booking-phone-height: 420px;
+  --hero-booking-phone-height: auto;
   --hero-booking-top: 130px;
   --hero-booking-note-width: 800px;
   --hero-booking-width: 1400px;
