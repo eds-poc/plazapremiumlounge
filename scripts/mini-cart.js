@@ -699,7 +699,7 @@ const PASSES_LIST_NAME = 'Airport Lounge Passes';
 
 /**
  * The GA4 `view_cart` (window.dataLayer, scripts/gtag-datalayer.js) as the mini cart opens
- * ("mini_cart"), or as the checkout page shows the cart ("full_page", blocks/checkout), from the
+ * ("mini_cart"), or as Book Your Visit shows the cart ("full_page", its block), from the
  * cart as shown: in the visitor's currency, the cart's total, and every line as an item (the
  * property, its promo code and discount, the product, the airport with its code, the city and
  * country code, its price and quantity, and for a lounge the visit and guests). The list, as
