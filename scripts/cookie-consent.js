@@ -10,9 +10,12 @@ const ONE_YEAR = 365 * 24 * 60 * 60;
 
 export default async function initCookieConsent() {
   if (document.cookie.split('; ').includes(COOKIE)) return;
-  const resp = await fetch(`${getSharedPagePath('cookie-consent')}.plain.html`);
+  // the content and the styles load together; the banner shows once both are there
+  const [resp] = await Promise.all([
+    fetch(`${getSharedPagePath('cookie-consent')}.plain.html`),
+    loadCSS(`${window.hlx.codeBasePath}/styles/cookie-consent.css`),
+  ]);
   if (!resp.ok) return;
-  await loadCSS(`${window.hlx.codeBasePath}/styles/cookie-consent.css`);
 
   const banner = document.createElement('section');
   banner.className = 'cookie-consent';
