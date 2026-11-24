@@ -17,7 +17,7 @@ const SOURCES = {
   mega_menu: 'Mega Menu',
   hp_search_widget_click: 'HP Search Widget',
   others: 'Other',
-  // the cart's own page (Book Your Visit) opened from the mini cart's Edit: "View Cart - HKG"
+  // Book Your Visit's view_cart (cart_page) opened from the mini cart's Edit: "View Cart - HKG"
   view_cart: 'View Cart',
 };
 // the links whose clicks are noted: every link in the header's main menu (the top links, the
@@ -30,19 +30,6 @@ export const BRAND = 'PPL';
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /**
- * Notes how the visitor leaves for a page, for that page (see viewSource): the next time it opens
- * in this browser session; a later one replaces it.
- * @param {string} source See SOURCES, e.g. view_cart (the mini cart's Edit)
- * @param {string} href The page's address
- */
-export function noteViewSource(source, href) {
-  try {
-    const { pathname } = new URL(href, window.location.href);
-    sessionStorage.setItem(SOURCE_KEY, JSON.stringify({ source, pathname }));
-  } catch { /* storage blocked: the page counts as others */ }
-}
-
-/**
  * Notes, on every page, a click on a header menu or home page search widget link, for the page it
  * opens (the next time it opens in this browser session; a later click replaces it).
  */
@@ -50,7 +37,11 @@ export function trackViewSource() {
   document.addEventListener('click', (e) => {
     const link = e.target.closest('a[href]');
     const source = link && SOURCE_LINKS.find(([selector]) => link.matches(selector))?.[1];
-    if (source) noteViewSource(source, link.href);
+    if (!source) return;
+    try {
+      const { pathname } = new URL(link.href, window.location.href);
+      sessionStorage.setItem(SOURCE_KEY, JSON.stringify({ source, pathname }));
+    } catch { /* storage blocked: the page counts as others */ }
   }, true);
 }
 

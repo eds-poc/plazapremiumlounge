@@ -21,7 +21,7 @@ import { getCurrency } from './currency.js';
 // eslint-disable-next-line import/no-cycle
 import { PAGE_VIEW, pushEvent } from './adobe-datalayer.js';
 import {
-  BRAND, listLabel, noteViewSource, pushEcommerce, trackAllError, viewSource,
+  BRAND, listLabel, pushEcommerce, trackAllError, viewSource,
 } from './gtag-datalayer.js';
 // eslint-disable-next-line import/no-cycle
 import { hideLoader, showLoader } from './scripts.js';
@@ -694,12 +694,36 @@ function trackCartView(cart) {
 // the home page's address: / or a site folder's (/en-uk/ …)
 const HOMEPAGE_PATH = /^\/([a-z]{2}-[a-z]{2}\/?)?$/;
 
-// the mini cart's Edit (`cart:edit`), noted for the page it opens (Book Your Visit), whose
-// view_cart is then in the "View Cart" list (see trackViewCart and viewSource)
+// the mini cart's Edit, noted for the page it opens (Book Your Visit): only its cart_page view_cart
+// is then in the "View Cart" list (see openedFromEdit); every other event there keeps its list
+const EDIT_KEY = 'ppl-cart-edit';
+// whether this page was opened from the mini cart's Edit, once read (see openedFromEdit)
+let fromEdit;
+
 document.addEventListener('cart:edit', (e) => {
   const href = cartLink('edit', e.detail.cart);
-  if (href) noteViewSource('view_cart', href);
+  if (!href) return;
+  try {
+    sessionStorage.setItem(EDIT_KEY, new URL(href).pathname);
+  } catch { /* storage blocked: the page's view_cart keeps the mini cart's list */ }
 });
+
+/**
+ * Whether this page is the one the mini cart's Edit opened: its note, used once (so a reload
+ * isn't), and kept for the page.
+ * @returns {boolean}
+ */
+function openedFromEdit() {
+  if (fromEdit !== undefined) return fromEdit;
+  fromEdit = false;
+  try {
+    if (sessionStorage.getItem(EDIT_KEY) === window.location.pathname) {
+      sessionStorage.removeItem(EDIT_KEY);
+      fromEdit = true;
+    }
+  } catch { /* nothing noted */ }
+  return fromEdit;
+}
 // the passes' list name in the GA4 events, as PASSES_LIST_NAME in passes.js (not imported: it
 // would make an import cycle through properties.js and scripts.js)
 const PASSES_LIST_NAME = 'Airport Lounge Passes';
@@ -715,15 +739,18 @@ const PASSES_LIST_NAME = 'Airport Lounge Passes';
  * airport, its code in the id and its name in the name ("HP Search Widget - HKG" / "HP Search
  * Widget - Hong Kong International Airport", "Other - HKG" / "Other - Hong Kong International
  * Airport" …); a cart of passes, the passes' list ("Other - Airport Lounge Passes"). Book Your
- * Visit ("cart_page") opened from the mini cart's Edit (noted on its `cart:edit`): "View
- * Cart - HKG" / "View Cart - Hong Kong International Airport"; opened another way, as above.
+ * Visit ("cart_page") opened from the mini cart's Edit (see openedFromEdit): "View Cart - HKG" /
+ * "View Cart - Hong Kong International Airport"; opened another way, as above. (Only this event:
+ * the other events on the page keep their lists.)
  * @param {Object} cart The cart's summary (see readCart in cart.js)
  * @param {'mini_cart'|'cart_page'} [cartType]
  */
 export function trackViewCart(cart, cartType = 'mini_cart') {
   const [bookedItem] = cart.lines;
-  const source = HOMEPAGE_PATH.test(window.location.pathname)
+  let source = HOMEPAGE_PATH.test(window.location.pathname)
     ? 'hp_search_widget_click' : viewSource();
+  // Book Your Visit opened from the mini cart's Edit: "View Cart - HKG" (this event only)
+  if (cartType === 'cart_page' && openedFromEdit()) source = 'view_cart';
   const isPassCart = bookedItem.kind === 'pass';
   const listId = listLabel(source, isPassCart ? PASSES_LIST_NAME : bookedItem.iataCode);
   const listName = listLabel(source, isPassCart ? PASSES_LIST_NAME : bookedItem.locationName);
