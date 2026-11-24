@@ -30,6 +30,9 @@ const BOOKING_ENDPOINTS = {
   // optionally productCode, one code or a list, and startDateTime "YYYY-MM-DD HH:mm:ss"; every
   // pass without productCode)
   productPasses: '/api/v1/web/ppg-app/GetProductPasses',
+  // the Contact Form submit (POST, JSON: name, email, subject, message, then the form's other
+  // fields and the captcha token; see blocks/contact-form/README.md)
+  contact: '/api/v1/web/ppg-app/contact-us',
 };
 
 // endpoint paths, joined to the API domain
@@ -41,8 +44,6 @@ const ENDPOINTS = {
   signUp: '/api/v1/web/app_demo/Register',
   // the Newsletter submit: a placeholder path until the newsletter API exists
   newsletter: '/api/v1/web/app_demo/Newsletter',
-  // the Contact Form submit: a placeholder path until the contact API exists
-  contact: '/api/v1/web/app_demo/Contact',
   // the Booking Form (group-form) submit, and the areas of service of a location (POST, JSON:
   // locationOfService, languageCode; answer: { items: [{ value, text }] }): placeholder paths until
   // the group booking APIs exist

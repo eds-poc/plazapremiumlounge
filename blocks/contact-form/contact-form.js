@@ -94,11 +94,32 @@ function trackSubmit() {
 }
 
 /**
+ * The contact API's data: its keys first, from the form's fields (`name` the first and last name,
+ * `email`, `subject` the chosen Type of Enquiry as shown, `message`), then every other field under
+ * its own key and the captcha token. Changes the values sent (forms:submit's detail) in place.
+ * @param {HTMLFormElement} form
+ * @param {object} values
+ */
+function toContactApi(form, values) {
+  const enquiry = form.querySelector('.form-field[data-key="typeOfEnquiry"] select');
+  const api = {
+    name: [values.firstName, values.lastName].filter(Boolean).join(' '),
+    email: values.email,
+    subject: enquiry?.selectedOptions[0]?.textContent.trim() || values.typeOfEnquiry || '',
+    message: values.message,
+  };
+  const rest = { ...values };
+  Object.keys(values).forEach((key) => delete values[key]);
+  Object.assign(values, api, rest);
+}
+
+/**
  * Decorates the Contact Form block: the contact us form (the source /en-uk/contact-us). One
  * authored row per field (Field | Label | Placeholder | Required | Error), one-cell rows as text,
  * and the rows submit / success / error, and captcha (its Error cell: the message when the box
  * isn't ticked). Two columns from 768px (Email Address starts the second), a captcha before the
- * button (scripts/captcha.js), sent to the contact endpoint.
+ * button (scripts/captcha.js), sent to the contact endpoint in the contact API's keys
+ * (toContactApi).
  * @param {Element} block The Contact Form block element
  */
 export default function decorate(block) {
@@ -113,4 +134,6 @@ export default function decorate(block) {
   trackPageLoad();
   // the data layer's Submit click, as the form is sent (forms:submit comes after the checks)
   form.addEventListener('forms:submit', trackSubmit);
+  // the contact API's keys, just before the data is sent
+  form.addEventListener('forms:submit', (e) => toContactApi(form, e.detail.values));
 }

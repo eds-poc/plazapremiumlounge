@@ -2,7 +2,7 @@
 
 The contact us form (the live site's `/en-uk/contact-us`). Authors write the texts and the dropdown
 lists; the block's code sets the field types, the keys sent, the rules, the two-column layout and
-where the form is sent (the `contact` endpoint, a placeholder until the contact API exists).
+where the form is sent (the `contact` endpoint: the contact API, see "What's sent").
 
 ## Table: 5 columns
 
@@ -37,6 +37,21 @@ where the form is sent (the `contact` endpoint, a placeholder until the contact 
 | `subscribeNewsletter` | Newsletter checkbox |
 | `consent` ✱ | Privacy checkbox |
 
+## What's sent
+
+`POST https://1074235-ppginternal-stage.adobeioruntime.net/api/v1/web/ppg-app/contact-us` (JSON).
+The contact API's keys come first, from the fields; then every field under its own key and the
+captcha token:
+
+| Key | From |
+| --- | --- |
+| `name` | First Name and Last Name, with a space between |
+| `email` | Email Address |
+| `subject` | Type of Enquiry, as shown (e.g. `Lounge Booking`) |
+| `message` | Message (`""` when empty) |
+| `location`, `typeOfEnquiry`, `title`, `firstName`, `lastName`, `contactNumber`, `countryOfResidence` (its id, a number), `bookingReference`, `subscribeNewsletter`, `consent` | The fields above |
+| `h-captcha-response` | The captcha token |
+
 ## Look
 
 Two columns from 768px, as the live site: the first seven fields on the left; Email Address,
@@ -68,4 +83,5 @@ Before go-live:
    another key can't be used) and the visitor's `remoteip`; it accepts only `success: true`, and
    otherwise answers with a `serviceResponseCode` of 400 or more and a `serviceResponseMsg` (shown
    at the top of the form). hCaptcha's `hostname` is only a statistic, not a check.
-3. **Endpoint**: the real `contact` path (and the production API domain) in `scripts/endpoints.js`.
+3. **Endpoint**: the production API domain for `contact` in `scripts/endpoints.js` (today the
+   ppg-app stage domain).
