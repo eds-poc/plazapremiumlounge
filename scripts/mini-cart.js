@@ -699,7 +699,7 @@ const PASSES_LIST_NAME = 'Airport Lounge Passes';
 
 /**
  * The GA4 `view_cart` (window.dataLayer, scripts/gtag-datalayer.js) as the mini cart opens
- * ("mini_cart"), or as Book Your Visit shows the cart ("full_page", its block), from the
+ * ("mini_cart"), or as Book Your Visit shows the cart ("cart_page", its block), from the
  * cart as shown: in the visitor's currency, the cart's total, and every line as an item (the
  * property, its promo code and discount, the product, the airport with its code, the city and
  * country code, its price and quantity, and for a lounge the visit and guests). The list, as
@@ -707,14 +707,18 @@ const PASSES_LIST_NAME = 'Airport Lounge Passes';
  * visitor came to the page (viewSource; on the home page, its search widget) with the cart's
  * airport, its code in the id and its name in the name ("HP Search Widget - HKG" / "HP Search
  * Widget - Hong Kong International Airport", "Other - HKG" / "Other - Hong Kong International
- * Airport" …); a cart of passes, the passes' list ("Other - Airport Lounge Passes").
+ * Airport" …); a cart of passes, the passes' list ("Other - Airport Lounge Passes"). On Book Your
+ * Visit ("cart_page"), "View Cart - HKG" / "View Cart - Hong Kong International Airport".
  * @param {Object} cart The cart's summary (see readCart in cart.js)
- * @param {'mini_cart'|'full_page'} [cartType]
+ * @param {'mini_cart'|'cart_page'} [cartType]
  */
 export function trackViewCart(cart, cartType = 'mini_cart') {
   const [bookedItem] = cart.lines;
-  const source = HOMEPAGE_PATH.test(window.location.pathname)
+  // Book Your Visit (cart_page): "View Cart - HKG" / "View Cart - Hong Kong International Airport",
+  // however the visitor came
+  let source = HOMEPAGE_PATH.test(window.location.pathname)
     ? 'hp_search_widget_click' : viewSource();
+  if (cartType === 'cart_page') source = 'view_cart';
   const isPassCart = bookedItem.kind === 'pass';
   const listId = listLabel(source, isPassCart ? PASSES_LIST_NAME : bookedItem.iataCode);
   const listName = listLabel(source, isPassCart ? PASSES_LIST_NAME : bookedItem.locationName);

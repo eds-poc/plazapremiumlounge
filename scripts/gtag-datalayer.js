@@ -17,6 +17,8 @@ const SOURCES = {
   mega_menu: 'Mega Menu',
   hp_search_widget_click: 'HP Search Widget',
   others: 'Other',
+  // the cart's own page (Book Your Visit, the source's /book-your-visit): "View Cart - HKG"
+  view_cart: 'View Cart',
 };
 // the links whose clicks are noted: every link in the header's main menu (the top links, the
 // dropdowns, the mega menu and the phones' drill-down) and the home page search widget's

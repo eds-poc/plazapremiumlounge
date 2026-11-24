@@ -476,7 +476,7 @@ export default function decorate(block) {
     line = lounge0;
     // GA4's view_cart for the cart's own page, once, as it first shows the cart (not the block
     // library's sample)
-    if (firstShow && !inLibrary()) trackViewCart(now, 'full_page');
+    if (firstShow && !inLibrary()) trackViewCart(now, 'cart_page');
     if (firstShow) {
       const [d, t] = [line.start.slice(0, 10), line.start.slice(11, 16).replace(':', '')];
       first = firstSlot(line.timeZone, lounge.leadMinutes);
