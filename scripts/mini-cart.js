@@ -210,12 +210,12 @@ function confirmRemove(line, from) {
       confirm.dialog?.close();
       showLoader();
       // the cart as it is, for GA4's remove_from_cart (the line is gone after)
-      const before = getCart();
+      const cartBeforeRemoval = getCart();
       let result;
       try {
         result = await removeFromCart(line.catalogueCode);
         // eslint-disable-next-line no-use-before-define
-        trackRemoved(before, line.catalogueCode, result);
+        trackRemoved(cartBeforeRemoval, line.catalogueCode, result);
       } finally {
         hideLoader();
       }
@@ -1087,11 +1087,11 @@ export async function removeAndShow(catalogueCode, trigger) {
   setBusy(from, true);
   showLoader();
   // the cart as it is, for GA4's remove_from_cart (the line is gone after)
-  const before = getCart();
+  const cartBeforeRemoval = getCart();
   let result;
   try {
     result = await removeFromCart(catalogueCode);
-    trackRemoved(before, catalogueCode, result);
+    trackRemoved(cartBeforeRemoval, catalogueCode, result);
   } finally {
     hideLoader();
     setBusy(from, false);
