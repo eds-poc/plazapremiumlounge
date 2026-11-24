@@ -842,6 +842,121 @@ function setBusy(from, busy) {
 }
 
 /**
+ * A cart line as a GA4 item for add_to_cart: the property, its promo code and discount, the
+ * product, the airport with its code, the city and country code, the line's price and quantity,
+ * and for a lounge the visit and guests (as view_cart's items).
+ * @param {Object} cart The cart's summary (see readCart in cart.js)
+ * @param {Object} line One of its lines
+ * @returns {Object}
+ */
+function cartItem(cart, line) {
+  const isPass = line.kind === 'pass';
+  // a lounge's visit and guests (a pass has neither): its start is the lounge's local time,
+  // "2026-11-28 15:00:00": "28-Nov-2026", "1500"
+  const [, date = '', hour = '', minute = ''] = isPass ? []
+    : String(line.start || '').match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/) || [];
+  return {
+    item_id: line.propertyCode,
+    item_name: line.shortLocation ? `${line.name} (${line.shortLocation})` : line.name,
+    coupon: line.promo?.code || '',
+    discount: line.discount,
+    item_brand: BRAND,
+    item_category: line.product,
+    // the airport with its code, e.g. Hong Kong International Airport (HKG)
+    item_category2: line.iataCode ? `${line.locationName} (${line.iataCode})` : line.locationName,
+    item_category3: line.name,
+    item_category4: cart.cityName,
+    item_category5: cart.countryCode,
+    price: line.total,
+    quantity: line.quantity,
+    checkInDate: toCheckInDate(date),
+    checkInTime: `${hour}${minute}`,
+    adults: isPass ? '' : line.adults,
+    children: isPass ? '' : line.children,
+    total_guest_count: isPass ? '' : line.adults + line.children,
+  };
+}
+
+// an amount to the cent
+const cents = (amount) => Math.round((Number(amount) || 0) * 100) / 100;
+
+/**
+ * A cart line's list, as view_cart's (see trackViewCart): how the visitor came to the page (on
+ * the home page, its search widget; else viewSource) with the line's airport, its code in the id
+ * and its name in the name ("HP Search Widget - HKG" / "HP Search Widget - Hong Kong
+ * International Airport"); a pass, the passes' list ("Other - Airport Lounge Passes").
+ * @param {Object} line See readLine in cart.js
+ * @returns {{id: string, name: string}}
+ */
+function cartLineList(line) {
+  const source = HOMEPAGE_PATH.test(window.location.pathname)
+    ? 'hp_search_widget_click' : viewSource();
+  const isPass = line.kind === 'pass';
+  return {
+    id: listLabel(source, isPass ? PASSES_LIST_NAME : line.iataCode),
+    name: listLabel(source, isPass ? PASSES_LIST_NAME : line.locationName),
+  };
+}
+
+/**
+ * The GA4 `add_to_cart` (window.dataLayer, scripts/gtag-datalayer.js) once the booking system has
+ * what was just added, with only that: a new line (the home page's Book Now, a pass's Add to
+ * Cart), more of a pass already in (its Add More: the added quantity), or an add-on (Book Your
+ * Visit's Additional Services: the add-on's name as the product). In the cart's currency; each
+ * item at its unit price, its discount and the added quantity; the value their total; where it
+ * was added (`trigger_source`); the list as view_cart's (cartLineList). `upgrade` is "no" (no
+ * upgrade on the site yet).
+ * @param {Object} cart The cart's summary after the add (see readCart in cart.js)
+ * @param {{line: Object, quantity: number, addon?: Object}[]} added The line, how many were
+ *   added, and the add-on when it's one of the line's
+ * @param {'homepage'|'PDP'|'view_cart_page'|'mini_cart'|''} [triggerSource] Where: the home
+ *   page's Book Now, a lounge's or a pass's page (PDP), Book Your Visit, the mini cart
+ */
+export function trackCartAdd(cart, added, triggerSource = '') {
+  const items = added.filter(({ line, quantity }) => line && quantity > 0)
+    .map(({ line, quantity, addon }) => {
+      // the line's (or the add-on's) total and discount for one
+      const of = addon || line;
+      const count = of.quantity || 1;
+      const list = cartLineList(line);
+      return {
+        ...cartItem(cart, line),
+        ...(addon && { coupon: '', item_category: addon.name }),
+        discount: addon ? 0 : cents(line.discount / count),
+        item_list_id: list.id,
+        item_list_name: list.name,
+        price: cents(of.total / count),
+        quantity,
+        upgrade: 'no',
+        trigger_source: triggerSource,
+      };
+    });
+  if (!items.length) return;
+  pushEcommerce('add_to_cart', {
+    currency: cart.currency,
+    value: cents(items.reduce((sum, item) => sum + item.price * item.quantity, 0)),
+    items,
+  });
+}
+
+/**
+ * GA4's add_to_cart for an add (addAndShow) the booking system took: the product's line, with how
+ * many of it were added (one more of a pass after its Add More), and where: the home page (its
+ * Book Now) is "homepage"; any other page is a lounge's or a pass's page, "PDP" (the PPL pass
+ * page, the offers' passes, the lounge page).
+ * @param {Object} item The product, as its type's adapter in cart.js takes it
+ * @param {number} had How many of it the cart had before
+ * @param {{status: string, cart?: Object}} result addToCart's answer
+ */
+function trackAdded(item, had, result) {
+  if (result.status !== 'added') return;
+  const line = result.cart?.lines.find((l) => l.catalogueCode === item.catalogueCode);
+  if (!line) return;
+  const triggerSource = HOMEPAGE_PATH.test(window.location.pathname) ? 'homepage' : 'PDP';
+  trackCartAdd(result.cart, [{ line, quantity: Math.max(1, line.quantity - had) }], triggerSource);
+}
+
+/**
  * The data layer's link click for a pass's Add to Cart (and Add More) once the booking system has
  * it ("add to cart"): the pass's line in the cart as it answered (its catalogue code, display
  * name, service's display name, its totals and its quantity in the cart: 2 after Add More).
@@ -882,9 +997,13 @@ export async function addAndShow(item, trigger) {
   const from = trigger instanceof Element ? trigger.closest('button, a') || trigger : null;
   setBusy(from, true);
   showLoader();
+  // how many of it the cart had (a pass's Add More: one more of it), for GA4's add_to_cart
+  const had = getCart()?.lines.find((l) => l.catalogueCode === item.catalogueCode)?.quantity || 0;
   let result;
   try {
     result = await addToCart(item);
+    // GA4's add_to_cart: only what was just added
+    trackAdded(item, had, result);
   } finally {
     hideLoader();
     setBusy(from, false);
