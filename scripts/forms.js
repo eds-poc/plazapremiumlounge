@@ -18,6 +18,7 @@ import apiUrl from './endpoints.js';
 import { addCaptcha, CAPTCHA_KEY } from './captcha.js';
 // eslint-disable-next-line import/no-cycle
 import { trackError } from './adobe-datalayer.js';
+import { trackAllError } from './gtag-datalayer.js';
 
 const INPUT_TYPES = ['text', 'email', 'password', 'tel', 'number', 'date', 'url'];
 const FIELD_TYPES = [...INPUT_TYPES, 'textarea', 'select', 'checkbox', 'checkboxes', 'country', 'phone', 'stepper'];
@@ -1243,8 +1244,11 @@ export function buildForm(block, definition) {
     if (invalid.length) {
       // validateForm has moved focus to the first invalid field
       setBusy(false);
-      // the data layer's error: each field's message, as shown under it
-      trackError(invalid.map((wrap) => ({ errorMessage: fields.get(wrap).error.textContent })));
+      // the data layer's error: each field's message, as shown under it; and GA4's all_error, one
+      // for each
+      const messages = invalid.map((wrap) => fields.get(wrap).error.textContent);
+      trackError(messages.map((errorMessage) => ({ errorMessage })));
+      messages.forEach((errorMessage) => trackAllError(errorMessage));
       return;
     }
 
@@ -1312,6 +1316,8 @@ export function buildForm(block, definition) {
             errorMessage,
           },
         ]);
+        // and GA4's all_error, with the API's own code when it gives one
+        trackAllError(errorMessage, data?.errorCode || data?.serviceResponseCode || '');
         return;
       }
       form.dispatchEvent(new CustomEvent('forms:success', { bubbles: true, detail: { data, values, form } }));
@@ -1332,13 +1338,14 @@ export function buildForm(block, definition) {
       const errorMessage = translate('formNetworkError');
       showStatus(errorMessage);
       form.dispatchEvent(new CustomEvent('forms:error', { bubbles: true, detail: { status: 0, form } }));
-      // the data layer's error: no answer
+      // the data layer's error: no answer; and GA4's all_error (no code)
       trackError([
         {
           errorCode: 'network',
           errorMessage,
         },
       ]);
+      trackAllError(errorMessage);
     } finally {
       setBusy(false);
     }

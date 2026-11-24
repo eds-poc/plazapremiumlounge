@@ -21,6 +21,7 @@ import {
 import apiUrl from '../../scripts/endpoints.js';
 import { DEFAULT_SITE, getSiteFolder, translate } from '../../scripts/i18n.js';
 import { attachValidation, buildField, validateForm } from '../../scripts/forms.js';
+import { trackAllError } from '../../scripts/gtag-datalayer.js';
 
 const PARTNER_PARAM = 'partner';
 const RETURN_PARAM = 'returnUrl';
@@ -174,7 +175,8 @@ function tokenExpiry(token, expiresIn) {
  * @param {string} partner The partner-member-name
  * @param {string} password
  * @returns {Promise<{ok: boolean, reason?: 'invalid'|'mismatch'|'token'|'error'|'network',
- *   message?: string}>} message: the API's own message for a refused login
+ *   message?: string, code?: string}>} message and code: the API's own for a refused login (its
+ *   `errorCode`, else `statusCode`)
  */
 async function partnerLogin(partner, password) {
   let response;
@@ -197,7 +199,10 @@ async function partnerLogin(partner, password) {
   const status = Number(data?.statusCode) || response.status;
   if (!response.ok || status >= 400) {
     const message = typeof data?.message === 'string' ? data.message.trim() : '';
-    return { ok: false, reason: response.status >= 500 ? 'error' : 'invalid', message };
+    const code = String(data?.errorCode || data?.statusCode || '');
+    return {
+      ok: false, reason: response.status >= 500 ? 'error' : 'invalid', message, code,
+    };
   }
   const answered = toPartnerName(data?.partnername ?? data?.partnerName);
   if (answered && answered !== partner) return { ok: false, reason: 'mismatch' };
@@ -339,7 +344,12 @@ export default function decorate(block) {
     e.preventDefault();
     if (sending) return;
     showMessage('');
-    if (validateForm(form).length) return;
+    const invalid = validateForm(form);
+    if (invalid.length) {
+      // GA4's all_error: the field's message, as shown under it
+      invalid.forEach((wrap) => trackAllError(wrap.querySelector('.form-error')?.textContent));
+      return;
+    }
     sending = true;
     setBusy(true);
     const result = partner ? await partnerLogin(partner, input.value) : { ok: false, reason: 'mismatch' };
@@ -350,6 +360,9 @@ export default function decorate(block) {
     }
     sending = false;
     setBusy(false);
-    showMessage(failureMessage(result, texts), { error: true, focus: true });
+    const failure = failureMessage(result, texts);
+    showMessage(failure, { error: true, focus: true });
+    // GA4's all_error: the message shown, with the API's code for a refused login
+    trackAllError(failure, result.code);
   });
 }

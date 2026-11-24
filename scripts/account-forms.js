@@ -17,7 +17,7 @@ import apiUrl from './endpoints.js';
 import { translate } from './i18n.js';
 import { isTokenValid, redirectTarget, setToken } from './auth.js';
 import { pushEvent } from './adobe-datalayer.js';
-import { pushGtagEvent } from './gtag-datalayer.js';
+import { pushGtagEvent, trackAllError } from './gtag-datalayer.js';
 import { storeMember } from './member.js';
 
 /**
@@ -38,18 +38,21 @@ function trackLogin(userId) {
 
 /**
  * Posts a form's data as JSON with its button busy, then hands the answer to `done`; a network
- * failure shows the connection message.
+ * failure shows the connection message. An error shown (not a success) is also GA4's all_error,
+ * with the service's code when `done` gives one.
  * @param {HTMLFormElement} form
  * @param {string} endpoint An endpoint name (scripts/endpoints.js)
  * @param {object} body
- * @param {(answer: {res: Response, data: *}, show: (text: string) => void) => void} done
+ * @param {(answer: {res: Response, data: *},
+ *   show: (text: string, success?: boolean, code?: string) => void) => void} done
  * @returns {Promise<void>}
  */
 function send(form, endpoint, body, done) {
   const button = form.querySelector('button[type="submit"]');
   const status = form.querySelector('.form-status');
   if (!button || button.disabled) return Promise.resolve();
-  const show = (text, success = false) => {
+  const show = (text, success = false, code = '') => {
+    if (text && !success) trackAllError(text, code);
     if (!status) return;
     status.textContent = text;
     status.hidden = !text;
@@ -114,7 +117,7 @@ function login(form) {
       });
     }
     // a refusal (its message), or an answer whose token is missing, broken or expired
-    show((!token && (data?.message || data?.error)) || translate('loginError'));
+    show((!token && (data?.message || data?.error)) || translate('loginError'), false, data?.errorCode);
     return Promise.resolve();
   });
 }
@@ -130,7 +133,11 @@ function forgotPassword(form) {
   return send(form, 'forgotPassword', body, ({ res, data }, show) => {
     const refused = !res.ok || data?.error || data?.errorCode || /^E/i.test(data?.resetCode || '');
     if (refused) {
-      show(data?.resetMsg || data?.message || data?.error || translate('formError'));
+      show(
+        data?.resetMsg || data?.message || data?.error || translate('formError'),
+        false,
+        data?.errorCode || data?.resetCode,
+      );
       return;
     }
     form.classList.add('is-sent');
