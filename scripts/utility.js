@@ -85,3 +85,16 @@ export function toCheckInDate(date) {
   const [, y, m, d] = String(date || '').match(/^(\d{4})-(\d{2})-(\d{2})$/) || [];
   return y && MONTHS[Number(m) - 1] ? `${d}-${MONTHS[Number(m) - 1]}-${y}` : '';
 }
+
+/**
+ * A stable filter key for a value: lower case, words joined by dashes.
+ * @param {string} value
+ * @returns {string}
+ */
+export function toKey(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
+    .replace(/^-|-$/g, '');
+}

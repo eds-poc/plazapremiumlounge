@@ -48,8 +48,9 @@ offer pages (as on the homepage). Add these rows, before or after any Buttons ro
   Lounge" is dropped), its `description` and a link to its `path`. Offers without a path or a title
   are left out, and the page itself isn't shown. Newest first: by the `date` column when the index
   has one (the offer page's Date), else by `lastModified`.
+- **While the index loads**, two placeholder cards (the image's place and two shimmering lines)
+  hold the carousel's place; the rest of the page doesn't wait for it.
 - **If the index can't be read**, the typed cards show instead (none: an empty carousel), and the
-  browser console says why. The page's section waits for the index before it shows, so the
-  carousel appears once, already filled.
+  browser console says why.
 - Row names ignore capitals and spaces (`Link text`, `link-text`).
 
