@@ -108,24 +108,18 @@ export default function decorate(block) {
     // (the block library's sample: nothing saved, the pop-up closes)
     if (library) return true;
     showLoader();
-    // the cart as it is: a removed add-on is gone after (for GA4's remove_from_cart)
-    const before = getCart();
     try {
       const result = await setAddon({
         catalogueCode: item.catalogueCode, name: item.name, quantity,
       });
       const saved = result.status === 'updated';
-      // GA4's add_to_cart for an add-on put in, with it alone, or remove_from_cart for one taken
-      // out, as the cart had it; the mini cart's code only loads now
-      const cart = quantity > 0 ? result.cart : before;
-      const line = saved && cart?.lines.find((l) => l.kind !== 'pass');
+      // GA4's add_to_cart for an add-on put in (not a removal), with it alone; the mini cart's code
+      // only loads now
+      const line = saved && quantity > 0 && result.cart?.lines.find((l) => l.kind !== 'pass');
       const addon = line?.addons?.find((a) => a.catalogueCode === item.catalogueCode);
       if (addon) {
         import('../../scripts/mini-cart.js')
-          .then(({ trackCartAdd, trackCartRemove }) => {
-            if (quantity > 0) trackCartAdd(cart, [{ line, quantity, addon }], 'view_cart_page');
-            else trackCartRemove(cart, [{ line, quantity: addon.quantity, addon }]);
-          })
+          .then(({ trackCartAdd }) => trackCartAdd(result.cart, [{ line, quantity, addon }], 'view_cart_page'))
           .catch(() => { /* (no analytics without it) */ });
       }
       return saved;

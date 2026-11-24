@@ -209,13 +209,9 @@ function confirmRemove(line, from) {
     button(translate('cartYes'), 'soft', async () => {
       confirm.dialog?.close();
       showLoader();
-      // the cart as it is, for GA4's remove_from_cart (the line is gone after)
-      const before = getCart();
       let result;
       try {
         result = await removeFromCart(line.catalogueCode);
-        // eslint-disable-next-line no-use-before-define
-        trackRemoved(before, line.catalogueCode, result);
       } finally {
         hideLoader();
       }
@@ -903,18 +899,21 @@ function cartLineList(line) {
 }
 
 /**
- * Lines of the cart as GA4 items (add_to_cart, remove_from_cart): each as view_cart's (cartItem)
- * in its list (cartLineList), at its unit price and discount, with a quantity (what was added or
- * taken out); an add-on (Book Your Visit's Additional Services) as its lounge with the add-on's
- * name as the product, its own price, no promo code or discount. Lines without a quantity are
- * left out.
- * @param {Object} cart The cart's summary (see readCart in cart.js)
- * @param {{line: Object, quantity: number, addon?: Object}[]} lines The line, how many, and the
- *   add-on when it's one of the line's
- * @returns {Object[]}
+ * The GA4 `add_to_cart` (window.dataLayer, scripts/gtag-datalayer.js) once the booking system has
+ * what was just added, with only that: a new line (the home page's Book Now, a pass's Add to
+ * Cart), more of a pass already in (its Add More: the added quantity), or an add-on (Book Your
+ * Visit's Additional Services: the add-on's name as the product). In the cart's currency; each
+ * item at its unit price, its discount and the added quantity; the value their total; where it
+ * was added (`trigger_source`); the list as view_cart's (cartLineList). `upgrade` is "no" (no
+ * upgrade on the site yet).
+ * @param {Object} cart The cart's summary after the add (see readCart in cart.js)
+ * @param {{line: Object, quantity: number, addon?: Object}[]} added The line, how many were
+ *   added, and the add-on when it's one of the line's
+ * @param {'homepage'|'PDP'|'view_cart_page'|'mini_cart'|''} [triggerSource] Where: the home
+ *   page's Book Now, a lounge's or a pass's page (PDP), Book Your Visit, the mini cart
  */
-function cartEventItems(cart, lines) {
-  return lines.filter(({ line, quantity }) => line && quantity > 0)
+export function trackCartAdd(cart, added, triggerSource = '') {
+  const items = added.filter(({ line, quantity }) => line && quantity > 0)
     .map(({ line, quantity, addon }) => {
       // the line's (or the add-on's) total and discount for one
       const of = addon || line;
@@ -928,76 +927,16 @@ function cartEventItems(cart, lines) {
         item_list_name: list.name,
         price: cents(of.total / count),
         quantity,
+        upgrade: 'no',
+        trigger_source: triggerSource,
       };
     });
-}
-
-/**
- * Pushes a GA4 cart event (add_to_cart, remove_from_cart) with its items: in the cart's currency,
- * the value their total. Nothing without an item.
- * @param {string} event
- * @param {Object} cart The cart's summary (see readCart in cart.js)
- * @param {Object[]} items See cartEventItems
- */
-function pushCartEvent(event, cart, items) {
   if (!items.length) return;
-  pushEcommerce(event, {
+  pushEcommerce('add_to_cart', {
     currency: cart.currency,
     value: cents(items.reduce((sum, item) => sum + item.price * item.quantity, 0)),
     items,
   });
-}
-
-/**
- * The GA4 `add_to_cart` (window.dataLayer, scripts/gtag-datalayer.js) once the booking system has
- * what was just added, with only that: a new line (the home page's Book Now, a pass's Add to
- * Cart), more of a pass already in (its Add More: the added quantity), or an add-on (Book Your
- * Visit's Additional Services: the add-on's name as the product). Each item as cartEventItems
- * has it, with where it was added (`trigger_source`); `upgrade` is "no" (no upgrade on the site
- * yet).
- * @param {Object} cart The cart's summary after the add (see readCart in cart.js)
- * @param {{line: Object, quantity: number, addon?: Object}[]} added The line, how many were
- *   added, and the add-on when it's one of the line's
- * @param {'homepage'|'PDP'|'view_cart_page'|'mini_cart'|''} [triggerSource] Where: the home
- *   page's Book Now, a lounge's or a pass's page (PDP), Book Your Visit, the mini cart
- */
-export function trackCartAdd(cart, added, triggerSource = '') {
-  pushCartEvent('add_to_cart', cart, cartEventItems(cart, added).map((item) => ({
-    ...item,
-    upgrade: 'no',
-    trigger_source: triggerSource,
-  })));
-}
-
-/**
- * The GA4 `remove_from_cart` (window.dataLayer, scripts/gtag-datalayer.js) once the booking
- * system has taken products out, with only those, as the cart had them before: a line with its
- * whole quantity (the mini cart's ⊗, the home page lounge card's Remove From Cart), a lounge with
- * its add-ons (they go with it), or an add-on (Book Your Visit's Remove). Each item as
- * cartEventItems has it.
- * @param {Object} cart The cart's summary before the removal (see readCart in cart.js)
- * @param {{line: Object, quantity: number, addon?: Object}[]} removed The line, how many were
- *   taken out, and the add-on when it's one of the line's
- */
-export function trackCartRemove(cart, removed) {
-  pushCartEvent('remove_from_cart', cart, cartEventItems(cart, removed));
-}
-
-/**
- * GA4's remove_from_cart for a line the booking system took out (the mini cart's ⊗, the lounge
- * card's Remove From Cart): the line as the cart had it, all of it, and a lounge's add-ons with it.
- * @param {Object|null} cart The cart's summary before the removal
- * @param {string} catalogueCode The line's
- * @param {{status: string}} result removeFromCart's answer
- */
-function trackRemoved(cart, catalogueCode, result) {
-  if (result.status !== 'removed') return;
-  const line = cart?.lines.find((l) => l.catalogueCode === catalogueCode);
-  if (!line) return;
-  trackCartRemove(cart, [
-    { line, quantity: line.quantity },
-    ...(line.addons || []).map((addon) => ({ line, quantity: addon.quantity, addon })),
-  ]);
 }
 
 /**
@@ -1151,12 +1090,9 @@ export async function removeAndShow(catalogueCode, trigger) {
   const from = trigger instanceof Element ? trigger.closest('button, a') || trigger : null;
   setBusy(from, true);
   showLoader();
-  // the cart as it is, for GA4's remove_from_cart (the line is gone after)
-  const before = getCart();
   let result;
   try {
     result = await removeFromCart(catalogueCode);
-    trackRemoved(before, catalogueCode, result);
   } finally {
     hideLoader();
     setBusy(from, false);
