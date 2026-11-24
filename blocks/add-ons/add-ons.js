@@ -108,11 +108,25 @@ export default function decorate(block) {
     // (the block library's sample: nothing saved, the pop-up closes)
     if (library) return true;
     showLoader();
+    // the cart as it is: a removed add-on is gone after (for GA4's remove_from_cart)
+    const before = getCart();
     try {
       const result = await setAddon({
         catalogueCode: item.catalogueCode, name: item.name, quantity,
       });
-      return result.status === 'updated';
+      const saved = result.status === 'updated';
+      // GA4's remove_from_cart for an add-on taken out, as the cart had it; the mini cart's code
+      // only loads now
+      const line = saved && quantity === 0 && before?.lines.find((l) => l.kind !== 'pass');
+      const addon = line?.addons?.find((a) => a.catalogueCode === item.catalogueCode);
+      if (addon) {
+        import('../../scripts/mini-cart.js')
+          .then(({ trackCartRemove }) => {
+            trackCartRemove(before, [{ line, quantity: addon.quantity, addon }]);
+          })
+          .catch(() => { /* (no analytics without it) */ });
+      }
+      return saved;
     } finally {
       hideLoader();
     }
