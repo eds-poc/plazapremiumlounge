@@ -1,10 +1,19 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
 import { readNestedButtons } from '../../scripts/buttons.js';
+import {
+  fetchRows, newestFirst, readOffers, toSourceUrl,
+} from '../../scripts/offers.js';
+import { toKey } from '../../scripts/properties.js';
 
 const HEADINGS = 'h1, h2, h3, h4, h5, h6';
 // the source "Explore Latest Offers" button below the offer carousel
 const BUTTON_DEFAULT = ['outline'];
 const DRAG_THRESHOLD = 30;
+// the settings rows (name | value; names ignore capitals and spaces): a query index of offer
+// pages to show instead of authored cards, how many of its newest, and the cards' link text
+const SETTINGS = { source: 'source', count: 'count', linkText: 'link-text' };
+// the offers shown from a Source without a Count
+const DEFAULT_COUNT = 6;
 
 /**
  * Creates an element with an optional class name.
@@ -110,6 +119,98 @@ function buildCard(row, eager) {
   }
   if (body) card.append(body);
   return card;
+}
+
+/**
+ * The settings rows (see SETTINGS): a row of two cells whose first cell is a setting's name.
+ * @param {Element[]} rows The block's rows
+ * @returns {{ source: string, count: number, linkText: string, rows: Element[] }} `rows`: the
+ *   settings rows themselves (left out of the cards)
+ */
+function readSettings(rows) {
+  const settings = {
+    source: '', count: DEFAULT_COUNT, linkText: '', rows: [],
+  };
+  rows.forEach((row) => {
+    const [name, value] = row.children;
+    if (row.children.length !== 2 || isImageOnly(name)) return;
+    const key = toKey(name.textContent);
+    const text = value.textContent.trim();
+    if (key === SETTINGS.source) {
+      settings.source = value.querySelector('a[href]')?.getAttribute('href') || text;
+    } else if (key === SETTINGS.count) {
+      const count = Number.parseInt(text, 10);
+      if (count > 0) settings.count = count;
+    } else if (key === SETTINGS.linkText) {
+      settings.linkText = text;
+    } else {
+      return;
+    }
+    settings.rows.push(row);
+  });
+  return settings;
+}
+
+/**
+ * An offer as an authored card's row (an image cell, then a text cell: the title as a heading,
+ * the description, the link), so it's built and styled as any card. Without a link text, the
+ * title links to the offer.
+ * @param {Object} offer See scripts/offers.js readOffers
+ * @param {string} linkText
+ * @returns {HTMLElement}
+ */
+function offerRow(offer, linkText) {
+  const row = el('div');
+  const media = el('div');
+  if (offer.image) {
+    const img = el('img');
+    img.src = offer.image;
+    img.alt = offer.title;
+    media.append(img);
+  }
+  const text = el('div');
+  const title = el('h3');
+  const link = el('a');
+  link.href = offer.path;
+  if (linkText) {
+    title.textContent = offer.title;
+    link.textContent = linkText;
+  } else {
+    link.textContent = offer.title;
+    title.append(link);
+  }
+  text.append(title);
+  if (offer.description) {
+    const description = el('p');
+    description.textContent = offer.description;
+    text.append(description);
+  }
+  if (linkText) {
+    const line = el('p');
+    line.append(link);
+    text.append(line);
+  }
+  row.append(media, text);
+  return row;
+}
+
+/**
+ * The newest offers of the Source (as many as the Count), as card rows; null when it can't be
+ * read (the browser console says why).
+ * @param {{ source: string, count: number, linkText: string }} settings
+ * @returns {Promise<HTMLElement[]|null>}
+ */
+async function offerRows({ source, count, linkText }) {
+  const url = toSourceUrl(source);
+  try {
+    if (!url) throw new Error('not an address on this site');
+    const offers = newestFirst(readOffers(await fetchRows(url))).slice(0, count);
+    return offers.map((offer) => offerRow(offer, linkText));
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`carousel-cards: couldn't load the offers of "${source}" (${error.message})`);
+    return null;
+  }
 }
 
 /**
@@ -281,20 +382,29 @@ function setupCarousel(block, stage, viewport, list) {
 }
 
 /**
- * loads and decorates the carousel cards block
+ * Decorates the carousel cards block: the authored cards, or with a Source row the newest offers
+ * of that query index (as many as the Count, 6 without it; the authored cards if it can't be
+ * read), then the optional buttons below them.
  * @param {Element} block The carousel-cards block element
  */
-export default function decorate(block) {
+export default async function decorate(block) {
   const eager = !!block.closest('main > .section:first-child');
   // plain containers: each card is a carousel slide (role group), which a list item can't be
   const list = el('div', 'carousel-cards-list');
   const buttons = [];
-  [...block.children].forEach((row) => {
+  const rows = [...block.children];
+  const settings = readSettings(rows);
+  // the authored rows: the buttons, and the cards
+  const cardRows = [];
+  rows.filter((row) => !settings.rows.includes(row)).forEach((row) => {
     const nested = readNestedButtons(row, BUTTON_DEFAULT);
-    if (nested) {
-      buttons.push(...nested);
-      return;
-    }
+    if (nested) buttons.push(...nested);
+    else cardRows.push(row);
+  });
+  // with a Source, its offers are the cards (the section waits for them, so the carousel shows
+  // once, built); the authored cards when it can't be read
+  const offers = settings.source ? await offerRows(settings) : null;
+  (offers || cardRows).forEach((row) => {
     const card = buildCard(row, eager && list.children.length < 2);
     if (card) list.append(card);
   });
