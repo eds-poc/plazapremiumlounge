@@ -1343,3 +1343,48 @@ header .header-cart-dropdown p {
     top: var(--header-link-line);
   }
 }
+
+/* cookie consent banner (scripts/cookie-consent.js): kept in the header's stylesheet, which
+   every page loads, so the banner needs no stylesheet of its own. As the source's: fixed along
+   the bottom, the text then the I agree button; side by side from 480px */
+.cookie-consent {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: calc(var(--z-header) - 1);
+  padding: var(--spacing-6);
+  border-top: 2px solid var(--color-brand-primary-action);
+  background-color: var(--color-background);
+}
+
+.cookie-consent > div > p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-body);
+}
+
+.cookie-consent a:any-link {
+  color: inherit;
+  font-weight: var(--font-weight-regular);
+  text-decoration: underline;
+}
+
+.cookie-consent .button {
+  flex: none;
+  margin-top: var(--spacing-3);
+  font-size: var(--font-size-xs);
+}
+
+/* breakpoint-exception: the source's banner goes side by side at 480px */
+@media (width >= 480px) {
+  .cookie-consent {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+  }
+
+  .cookie-consent .button {
+    font-size: var(--font-size-sm);
+  }
+}

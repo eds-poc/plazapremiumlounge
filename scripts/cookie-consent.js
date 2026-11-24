@@ -1,8 +1,8 @@
 /*
  * Cookie consent banner, as the source's: shown until "I agree" sets CMSCookieLevel=1000 for a
- * year. Its content is the site's /<site>/cookie-consent page. See docs/cookie-consent.md.
+ * year. Its content is the site's /<site>/cookie-consent page; its styles are in
+ * blocks/header/header.css. See docs/cookie-consent.md.
  */
-import { loadCSS } from './aem.js';
 import { getSharedPagePath } from './i18n.js';
 
 const COOKIE = 'CMSCookieLevel=1000';
@@ -10,11 +10,7 @@ const ONE_YEAR = 365 * 24 * 60 * 60;
 
 export default async function initCookieConsent() {
   if (document.cookie.split('; ').includes(COOKIE)) return;
-  // the content and the styles load together; the banner shows once both are there
-  const [resp] = await Promise.all([
-    fetch(`${getSharedPagePath('cookie-consent')}.plain.html`),
-    loadCSS(`${window.hlx.codeBasePath}/styles/cookie-consent.css`),
-  ]);
+  const resp = await fetch(`${getSharedPagePath('cookie-consent')}.plain.html`);
   if (!resp.ok) return;
 
   const banner = document.createElement('section');

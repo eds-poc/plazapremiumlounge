@@ -4,8 +4,9 @@ The source's cookie banner: along the bottom of every page until the visitor cli
 
 ## How it works
 
-- `scripts/cookie-consent.js` is loaded with the footer (`scripts/scripts.js`, lazy phase); the look
-  is `styles/cookie-consent.css`.
+- `scripts/cookie-consent.js` is loaded with the footer (`scripts/scripts.js`, lazy phase). Its
+  look is at the end of `blocks/header/header.css`: the header loads on every page, so the banner
+  needs no stylesheet of its own.
 - No banner when the cookie `CMSCookieLevel=1000` is there: the source's consent cookie (Kentico's
   "all cookies" level), so a visitor who agreed on the source isn't asked again.
 - Otherwise the banner shows the language site's `/<site>/cookie-consent` page. **I agree** sets the
