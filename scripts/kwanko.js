@@ -37,20 +37,21 @@ async function pageTag(params) {
 
 // the products every listing on this page has tagged, in the order they were tagged: Kwanko keeps
 // one listing tag a page (the last), so each tag carries them all
-const listed = [];
+const taggedProducts = [];
 
 /**
- * A listing's page tag: the products shown (lounges' property codes, passes' product codes), in
+ * A listing's page tag: the products shown (lounges' property codes, passes' catalogue codes), in
  * their order, with those of the page's other listings tagged before (e.g. the passes page's
  * Quick Buy and Pass Finder).
  * @param {string[]} codes e.g. ['PRPRTY1368', 'PRPRTY1205']
  * @returns {Promise<void>}
  */
 export function listingTag(codes) {
-  const fresh = codes.filter((code) => code && !listed.includes(code));
-  if (!fresh.length) return Promise.resolve();
-  listed.push(...new Set(fresh));
-  return pageTag({ zone: 'listing', products: [...listed], categoryId: '' });
+  // this listing's products not tagged yet on this page
+  const newProducts = codes.filter((code) => code && !taggedProducts.includes(code));
+  if (!newProducts.length) return Promise.resolve();
+  taggedProducts.push(...new Set(newProducts));
+  return pageTag({ zone: 'listing', products: [...taggedProducts], categoryId: '' });
 }
 
 /**
