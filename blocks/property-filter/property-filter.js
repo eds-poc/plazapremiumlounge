@@ -52,6 +52,9 @@ const TEXTS = {
   hours: 'Hours label',
   location: 'Location label',
   updated: 'Updated',
+  // (optional) the message on a lounge already in the cart, e.g. "This Lounge is already in your
+  // cart": without it, the cards aren't marked
+  inCart: 'In cart',
 };
 // the texts each layout uses (the lounge-name-only layout's `Regions label` is its region links'
 // label; its `Updated`, e.g. "Last updated: 03 Jul 2026", shows under them, and is optional)
@@ -483,7 +486,7 @@ function renderListing(listing, city, { view, signup, text }, prefix) {
       .sort((a, b) => a.seq - b.seq || a.name.localeCompare(b.name))
       .map((property) => {
         const card = buildPropertyCard(property, {
-          id: `${prefix}-card-${n}`, eager: n === 0, view, signup, rank: n + 1,
+          id: `${prefix}-card-${n}`, eager: n === 0, view, signup, rank: n + 1, inCart: text('inCart'),
         });
         n += 1;
         return { property, card };

@@ -14,7 +14,7 @@ import {
 import {
   el, fetchJson, getApiLanguage, isPreview, readProperty, setLoading, toKey,
 } from '../../scripts/properties.js';
-import { toUtcDateTime } from '../../scripts/utility.js';
+import { clean, toUtcDateTime } from '../../scripts/utility.js';
 
 const TIMEOUT_MS = 8000;
 const MOBILE = '(width < 768px)';
@@ -448,6 +448,7 @@ function renderResults(results, properties, selected, status, onClear, prefix, s
         view: settings.view,
         signup: settings.signup,
         rank: n + 1,
+        inCart: settings.inCart,
         // View: the data layer's "view lounge" and GA4's select_item; the name: select_item
         onView: (property, rank) => {
           trackViewLounge(property, rank);
@@ -500,14 +501,18 @@ function showMessage(results, text, retry, hint) {
 /**
  * The authored settings: rows of name | value, `city-code` (e.g. HKHKG), `view-button` (a link,
  * e.g. [View now](/en-uk/find/lounge), or plain text) and `signup-button` (a link, e.g.
- * [Join here](…)); names ignore capitals and spaces. A table with a single value is read as the
- * city code.
+ * [Join here](…)) and `in-cart` (the message on a lounge already in the cart, e.g. "This Lounge is
+ * already in your cart"; without it, the cards aren't marked); names ignore capitals and spaces.
+ * A table with a single value is read as the city code.
  * @param {HTMLElement} block
- * @returns {{city: string, view: Object|null, signup: {href: string, label: string}|null}}
+ * @returns {{city: string, view: Object|null, signup: {href: string, label: string}|null,
+ *   inCart: string}}
  */
 function readSettings(block) {
   const rows = [...block.children].map((row) => [...row.children]);
-  const settings = { city: '', view: null, signup: null };
+  const settings = {
+    city: '', view: null, signup: null, inCart: '',
+  };
   const pairs = rows.filter((cells) => cells.length >= 2);
   if (!pairs.length) {
     settings.city = block.textContent.trim().replace(/\s+/g, '').toUpperCase();
@@ -518,6 +523,7 @@ function readSettings(block) {
     if (key === 'city-code') settings.city = value.textContent.trim().replace(/\s+/g, '').toUpperCase();
     if (key === 'view-button') settings.view = readViewButton(value, 'property-list');
     if (key === 'signup-button') settings.signup = readSignupButton(value);
+    if (key === 'in-cart') settings.inCart = clean(value.textContent);
   });
   return settings;
 }

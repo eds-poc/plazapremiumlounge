@@ -15,6 +15,7 @@ A city's lounges, loaded live from the Plaza Premium properties service, as the 
 | city-code | HKHKG |
 | view-button | [View now](/en-uk/find/lounge) |
 | signup-button | [Join here](https://www.plazapremiumlounge.com/en-uk/sign-up?pid=plp) |
+| In cart | This Lounge is already in your cart |
 
 - **city-code** (required): the code the properties service uses for the city, e.g. `HKHKG`
   (Hong Kong) or `SGSIN` (Singapore). Capitals don't matter.
@@ -31,6 +32,12 @@ A city's lounges, loaded live from the Plaza Premium properties service, as the 
 - **signup-button** (optional): a link. Its text and address are shown at the end of each card's
   Smart Traveller line (e.g. "… 20% off … per eligible visit. **Join here**"). Leave the row out for
   no link. Links to other websites open in a new tab.
+- **In cart** (optional): the message on a lounge that's already in the visitor's cart, e.g. "This
+  Lounge is already in your cart", as the source's listings. That lounge's card is faded with the
+  message over it (and a check), and it can't be opened: its name and View button can't be
+  clicked or reached with the keyboard. Any booking at the lounge counts (whatever the product,
+  date or guests); passes don't. It follows the cart as it changes, in other tabs too. Leave the
+  row out and no card is marked.
 - Setting names ignore capitals and spaces (`City code` works too). A table with just one value
   (the city code) also works.
 - Everything else comes from the service or the site settings:

@@ -147,6 +147,7 @@ const ADAPTERS = {
         id: '',
         catalogueCode: item.catalogueCode,
         productCode: '',
+        propertyCode: text(item.propertyCode),
         type: 'lounge',
         kind: 'lounge',
         name: text(item.propertyName),
@@ -265,7 +266,8 @@ function readLine(p) {
     // category, and the line's price before discounts and its discounts, the rate plan's and an
     // applied promo code's (as `total`, the line's: its quantity included)
     outletId: text(p?.lmsOutletCode),
-    // the lounge's codes (Book Your Visit's add-ons request): its property and service
+    // the lounge's codes (Book Your Visit's add-ons request; the property also for the listings'
+    // lounges in the cart): its property and service
     propertyCode: text(p?.propertyCode),
     serviceCode: text(p?.serviceCode),
     locationName: text(p?.locationName),

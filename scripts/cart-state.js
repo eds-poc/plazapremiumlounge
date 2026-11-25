@@ -2,9 +2,10 @@
  * The cart's state on this site, shared by the header, the blocks that sell and the cart itself
  * (kept small, so the header can show the count without loading the cart):
  * - the cart's id in localStorage `ppl-cart-id` (every tab's): `{ id, expires, changed, count,
- *   codes, sig }`, for 24 hours from when the cart was made (as the source's cart cookie). With
- *   it, the count and the products in the cart (their catalogue codes, no prices), so a new tab
- *   shows the header count and the buttons' labels at once; `changed` (and `sig`, what changed)
+ *   codes, lounges, sig }`, for 24 hours from when the cart was made (as the source's cart cookie).
+ *   With it, the count, the products in the cart (their catalogue codes, no prices) and its
+ *   lounges (their property codes), so a new tab shows the header count, the buttons' labels and
+ *   the listings' lounges in the cart at once; `changed` (and `sig`, what changed)
  *   tell other tabs the cart changed;
  * - the cart's data (the booking system's last answer: lines, prices, totals, currency, promo) in
  *   sessionStorage `ppl-cart` (this tab's), for 2 hours from that answer, then read again: prices
@@ -206,6 +207,16 @@ export function cartCount(cart = getCart()) {
 }
 
 /**
+ * The property codes of the cart's lounges (its pass lines left out).
+ * @param {Object[]} lines
+ * @returns {string[]}
+ */
+function loungeCodes(lines) {
+  return lines.filter((line) => line.kind !== 'pass').map((line) => line.propertyCode)
+    .filter(Boolean);
+}
+
+/**
  * Whether the cart holds this product (its catalogue code): from this tab's data, else from the
  * codes kept with the cart's id.
  * @param {string} catalogueCode
@@ -216,6 +227,20 @@ export function isInCart(catalogueCode) {
   const cart = getCart();
   if (cart) return cart.lines.some((line) => line.catalogueCode === catalogueCode);
   return !!readEntry()?.codes?.includes(catalogueCode);
+}
+
+/**
+ * Whether the cart holds a booking at this lounge (its property code), whatever the product, date
+ * or guests: from this tab's data, else from the lounges kept with the cart's id. Passes don't
+ * count.
+ * @param {string} propertyCode e.g. PRPRTY816
+ * @returns {boolean}
+ */
+export function isPropertyInCart(propertyCode) {
+  if (!propertyCode) return false;
+  const cart = getCart();
+  if (cart) return loungeCodes(cart.lines).includes(propertyCode);
+  return !!readEntry()?.lounges?.includes(propertyCode);
 }
 
 /**
@@ -241,6 +266,7 @@ export function saveCart(cart) {
     changed: same ? known.changed : now,
     count: countOf(lines),
     codes: lines.map((line) => line.catalogueCode).filter(Boolean),
+    lounges: loungeCodes(lines),
     sig,
   });
   const kept = { ...cart, fetchedAt: now, expires: now + DATA_LIFETIME_MS };

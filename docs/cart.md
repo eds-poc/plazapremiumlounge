@@ -184,7 +184,7 @@ that isn't a web address: then Check Out is a button that only announces.)
 
 | What | Where | For how long |
 | --- | --- | --- |
-| The cart's id, its count and its products' catalogue codes (no prices), and a change stamp | localStorage `ppl-cart-id`: `{ id, expires, changed, count, codes, sig }` (every tab's) | 24 hours from when the cart was made, as the source's cart cookie |
+| The cart's id, its count and its products' catalogue codes (no prices), and a change stamp | localStorage `ppl-cart-id`: `{ id, expires, changed, count, codes, lounges, sig }` (every tab's; `lounges`: the property codes of its lounge lines, for the listings' "already in your cart") | 24 hours from when the cart was made, as the source's cart cookie |
 | The cart's data: the booking system's last answer (lines, prices, totals, currency, promo) | sessionStorage `ppl-cart` (this tab's), with `fetchedAt` and `expires` | 2 hours from that answer; every read starts the 2 hours again |
 
 - **Prices come from the booking system.** The tab's data is only there so the mini cart shows at
@@ -198,7 +198,8 @@ that isn't a web address: then Check Out is a button that only announces.)
 - **A new tab** (or a new session: typing the address, a bookmark, Ctrl/middle-click, Open in new
   tab):
   - It has the id but no data: the header count and the buttons' labels (Remove From Cart, Add
-    More) show at once from the id's count and codes.
+    More) show at once from the id's count and codes, and the listings' lounges in the cart from
+    its `lounges`.
   - The cart is read once in the background after the load.
   - An add or a removal before that reads the cart first, so it joins the same cart and the rules
     apply. A second cart is never made.

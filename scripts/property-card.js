@@ -1,12 +1,14 @@
 /*
  * Property card: a property's card, as the source city pages' (styles/property-card.css): a photo
  * slider, then the details (badge, name, location, hours, icons, note, features with "+N more",
- * price, View button, loyalty line); parts without data are left out. For the properties
- * scripts/properties.js readProperty reads. Blocks call loadPropertyCardStyles before showing
- * cards, so they don't show unstyled.
+ * price, View button, loyalty line); parts without data are left out. A lounge already in the cart
+ * (scripts/cart-state.js) is faded, can't be opened, and says so (the block's authored text). For
+ * the properties scripts/properties.js readProperty reads. Blocks call loadPropertyCardStyles
+ * before showing cards, so they don't show unstyled.
  */
 import { loadCSS } from './aem.js';
 import { applyButtonAction } from './button-actions.js';
+import { isPropertyInCart, onCartChange } from './cart-state.js';
 import { getLanguage, translate } from './i18n.js';
 import {
   buildBadge, buildSlider, el, isPreview, propertyDetailPath, propertyDetailUrl, safeNote, toUrl,
@@ -15,6 +17,8 @@ import {
 const VISIBLE_TAGS = 5;
 
 let styles;
+// the cards' "in the cart" look follows the cart (one listener for every card on the page)
+let watchingCart = false;
 
 /**
  * The cards' stylesheet (styles/property-card.css), loaded once per page.
@@ -23,6 +27,19 @@ let styles;
 export function loadPropertyCardStyles() {
   styles = styles || loadCSS(`${window.hlx?.codeBasePath || ''}/styles/property-card.css`);
   return styles;
+}
+
+/**
+ * Shows whether a card's lounge is in the cart: faded, its content out of reach (no link, no
+ * focus, hidden from screen readers) and the message over it; else as usual. Passes aren't marked.
+ * @param {HTMLElement} card A card with `data-property-code` and its message
+ */
+function showInCart(card) {
+  const inCart = isPropertyInCart(card.dataset.propertyCode);
+  card.classList.toggle('is-in-cart', inCart);
+  card.querySelector(':scope > .property-card-in-cart').hidden = !inCart;
+  [...card.children].filter((part) => !part.matches('.property-card-in-cart'))
+    .forEach((part) => { part.inert = inCart; });
 }
 
 /**
@@ -162,10 +179,12 @@ function buildLoyalty(text, signup) {
  * @param {function(Object, number): void} [options.onTitleClick] Called as the lounge's name (the
  *   card's title link) is clicked, with the property and its rank (e.g. for analytics), before
  *   the page moves on
+ * @param {string} [options.inCart] The message on a lounge already in the cart (the block's
+ *   authored text, e.g. "This Lounge is already in your cart"); without it, the card isn't marked
  * @returns {HTMLElement}
  */
 export function buildPropertyCard(property, {
-  id, eager = false, view = null, signup = null, rank = 1, onView, onTitleClick,
+  id, eager = false, view = null, signup = null, rank = 1, onView, onTitleClick, inCart = '',
 } = {}) {
   const card = el('li', 'property-card');
   if (property.first) card.classList.add('property-card-first');
@@ -247,6 +266,20 @@ export function buildPropertyCard(property, {
   if (property.loyalty) bottom.append(buildLoyalty(property.loyalty, signup));
   body.append(top, bottom);
   card.append(buildSlider(property, eager), body);
+  // a lounge (not a pass) already in the cart: the authored message over the faded card (the
+  // lounge's name first, for screen readers, which don't reach the faded card)
+  if (inCart && property.code && !property.pass) {
+    card.dataset.propertyCode = property.code;
+    const message = el('p', 'property-card-in-cart');
+    message.append(el('span', 'visually-hidden', `${property.name}: `), el('span', '', inCart), el('span', 'property-card-in-cart-icon'));
+    message.setAttribute('role', 'status');
+    card.append(message);
+    showInCart(card);
+    if (!watchingCart) {
+      watchingCart = true;
+      onCartChange(() => document.querySelectorAll('.property-card[data-property-code]').forEach(showInCart));
+    }
+  }
   return card;
 }
 
