@@ -6,9 +6,12 @@
  * - the home page: `{ zone: 'homepage' }`, once UniJS is in;
  * - a listing page (the Property List, Property Filter, Product Passes, Quick Buy and Pass Finder
  *   blocks): `{ zone: 'listing', products: [codes], categoryId: '' }`, the lounges' property codes
- *   or the passes' product codes, sent by the block once they're shown (listingTag); a page's
- *   listings share one tag (Kwanko keeps the last). It waits for UniJS, so a block never loads it
- *   before the delayed phase.
+ *   or the passes' catalogue codes, sent by the block once they're shown (listingTag); a page's
+ *   listings share one tag (Kwanko keeps the last);
+ * - a product page, the lounge detail page (the Property Detail block): `{ zone: 'product',
+ *   productId: property code, categoryId: '' }`, sent by the block once the lounge is in
+ *   (productTag).
+ * The blocks' tags wait for UniJS, so a block never loads it before the delayed phase.
  * Without the metadata (or with an address that isn't https), nothing loads and no tag is sent.
  */
 import { getMetadata, loadScript } from './aem.js';
@@ -52,6 +55,18 @@ export function listingTag(codes) {
   if (!newProducts.length) return Promise.resolve();
   taggedProducts.push(...new Set(newProducts));
   return pageTag({ zone: 'listing', products: [...taggedProducts], categoryId: '' });
+}
+
+/**
+ * A product page's page tag (the lounge detail page): its property code as the product, and its
+ * category ('' by default, as the listing's).
+ * @param {string} productId e.g. 'PRPRTY815'
+ * @param {string} [categoryId]
+ * @returns {Promise<void>}
+ */
+export function productTag(productId, categoryId = '') {
+  if (!productId) return Promise.resolve();
+  return pageTag({ zone: 'product', productId, categoryId });
 }
 
 /**
