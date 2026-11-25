@@ -5,8 +5,11 @@
  * (KWKUniJS.ptag):
  * - the home page: `{ zone: 'homepage' }`, once UniJS is in;
  * - a lounge listing page (the Property List block): `{ zone: 'listing', products: [property
- *   codes], categoryId: '' }`, sent by the block once its lounges are in (listingTag). It waits
- *   for UniJS, so the block never loads it before the delayed phase.
+ *   codes], categoryId: '' }`, sent by the block once its lounges are in (listingTag);
+ * - a product page, the lounge detail page (the Property Detail block): `{ zone: 'product',
+ *   productId: property code, categoryId: '' }`, sent by the block once the lounge is in
+ *   (productTag).
+ * The blocks' tags wait for UniJS, so a block never loads it before the delayed phase.
  * Without the metadata (or with an address that isn't https), nothing loads and no tag is sent.
  */
 import { getMetadata, loadScript } from './aem.js';
@@ -42,6 +45,18 @@ export function listingTag(codes) {
   const products = [...new Set(codes.filter(Boolean))];
   if (!products.length) return Promise.resolve();
   return pageTag({ zone: 'listing', products, categoryId: '' });
+}
+
+/**
+ * A product page's page tag (the lounge detail page): its property code as the product, and its
+ * category ('' by default, as the listing's).
+ * @param {string} productId e.g. 'PRPRTY815'
+ * @param {string} [categoryId]
+ * @returns {Promise<void>}
+ */
+export function productTag(productId, categoryId = '') {
+  if (!productId) return Promise.resolve();
+  return pageTag({ zone: 'product', productId, categoryId });
 }
 
 /**
