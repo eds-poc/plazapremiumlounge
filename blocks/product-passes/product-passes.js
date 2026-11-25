@@ -188,6 +188,8 @@ export default function decorate(block) {
   const grid = el('ul', 'product-passes-grid');
   let shown = '';
   let count = 0;
+  // the Kwanko listing tag went out (once a page, the first time passes are shown)
+  let tagged = false;
   /**
    * Shows the passes from a list (the same list again leaves the cards as they are).
    * @param {Map<string, Object>} list By product code
@@ -206,6 +208,13 @@ export default function decorate(block) {
     }
     grid.replaceChildren(...passes.map(buildCard));
     block.replaceChildren(grid);
+    // the Kwanko listing tag: the passes' catalogue codes, in the order shown (it waits for Kwanko
+    // UniJS, which loads with the other tags)
+    if (!tagged) {
+      tagged = true;
+      const codes = passes.map((pass) => pass.catalogueCode);
+      import('../../scripts/kwanko.js').then(({ listingTag }) => listingTag(codes));
+    }
   };
   const load = () => {
     const currency = readCurrency();

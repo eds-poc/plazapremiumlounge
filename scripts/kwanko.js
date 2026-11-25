@@ -4,8 +4,10 @@
  * https://lkh.plazapremiumlounge.com/js/na/na/u/45bd0b8913.js), and its page tags
  * (KWKUniJS.ptag):
  * - the home page: `{ zone: 'homepage' }`, once UniJS is in;
- * - a lounge listing page (the Property List block): `{ zone: 'listing', products: [property
- *   codes], categoryId: '' }`, sent by the block once its lounges are in (listingTag);
+ * - a listing page (the Property List, Property Filter, Product Passes, Quick Buy and Pass Finder
+ *   blocks): `{ zone: 'listing', products: [codes], categoryId: '' }`, the lounges' property codes
+ *   or the passes' catalogue codes, sent by the block once they're shown (listingTag); a page's
+ *   listings share one tag (Kwanko keeps the last);
  * - a product page, the lounge detail page (the Property Detail block): `{ zone: 'product',
  *   productId: property code, categoryId: '' }`, sent by the block once the lounge is in
  *   (productTag).
@@ -36,15 +38,23 @@ async function pageTag(params) {
   }
 }
 
+// the products every listing on this page has tagged, in the order they were tagged: Kwanko keeps
+// one listing tag a page (the last), so each tag carries them all
+const taggedProducts = [];
+
 /**
- * The lounge listing's page tag: the property codes shown on the page, in their order.
+ * A listing's page tag: the products shown (lounges' property codes, passes' catalogue codes), in
+ * their order, with those of the page's other listings tagged before (e.g. the passes page's
+ * Quick Buy and Pass Finder).
  * @param {string[]} codes e.g. ['PRPRTY1368', 'PRPRTY1205']
  * @returns {Promise<void>}
  */
 export function listingTag(codes) {
-  const products = [...new Set(codes.filter(Boolean))];
-  if (!products.length) return Promise.resolve();
-  return pageTag({ zone: 'listing', products, categoryId: '' });
+  // this listing's products not tagged yet on this page
+  const newProducts = codes.filter((code) => code && !taggedProducts.includes(code));
+  if (!newProducts.length) return Promise.resolve();
+  taggedProducts.push(...new Set(newProducts));
+  return pageTag({ zone: 'listing', products: [...taggedProducts], categoryId: '' });
 }
 
 /**

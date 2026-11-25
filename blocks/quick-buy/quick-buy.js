@@ -187,6 +187,8 @@ export default function decorate(block) {
   }
 
   const currency = readCurrency();
+  // the Kwanko listing tag went out (once a page, once the service has answered)
+  let tagged = false;
   const load = () => {
     const grid = el('ul', 'quick-buy-grid');
     const cards = products.map((product) => ({ product, ...buildCard(product) }));
@@ -248,6 +250,17 @@ export default function decorate(block) {
           });
         return Promise.allSettled(others.map(askOne)).then(() => {
           finish(list);
+          // the Kwanko listing tag: the passes shown (the cards kept), their catalogue codes in the
+          // page's order (it waits for Kwanko UniJS, which loads with the other tags)
+          const catalogueCodes = cards
+            .filter(({ card, isFilled }) => card.isConnected && isFilled())
+            .map(({ product }) => list.get(product.code) || kept?.get(product.code))
+            .map((item) => (item ? readPass(item)?.catalogueCode : ''))
+            .filter(Boolean);
+          if (!tagged && catalogueCodes.length) {
+            tagged = true;
+            import('../../scripts/kwanko.js').then(({ listingTag }) => listingTag(catalogueCodes));
+          }
           // the promotional address's pass (?selectedPassID=) into the cart
           takeSelectedPass(list, block, ADD_TO_CART);
         });
