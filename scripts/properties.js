@@ -9,8 +9,7 @@ import apiUrl from './endpoints.js';
 import { DEFAULT_SITE, getSiteFolder, translate } from './i18n.js';
 import { hideLoader, showLoader } from './scripts.js';
 import { isIsoDate } from './booking.js';
-import fetchJson from './fetch-json.js';
-import { toKey } from './utility.js';
+import { fetchJson, toKey } from './utility.js';
 
 // (re-exported: the blocks that import them from here keep working)
 export { fetchJson, toKey };

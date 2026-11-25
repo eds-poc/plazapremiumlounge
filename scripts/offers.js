@@ -6,8 +6,7 @@
  * first.
  */
 import { DEFAULT_SITE, getSiteFolder } from './i18n.js';
-import fetchJson from './fetch-json.js';
-import { toKey } from './utility.js';
+import { fetchJson, toKey } from './utility.js';
 
 const TIMEOUT_MS = 8000;
 // rows asked for in the one request (the JSON gives 1000 by default without a limit)
