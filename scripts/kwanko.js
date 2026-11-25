@@ -4,9 +4,11 @@
  * https://lkh.plazapremiumlounge.com/js/na/na/u/45bd0b8913.js), and its page tags
  * (KWKUniJS.ptag):
  * - the home page: `{ zone: 'homepage' }`, once UniJS is in;
- * - a lounge listing page (the Property List block): `{ zone: 'listing', products: [property
- *   codes], categoryId: '' }`, sent by the block once its lounges are in (listingTag). It waits
- *   for UniJS, so the block never loads it before the delayed phase.
+ * - a listing page (the Property List, Property Filter, Product Passes, Quick Buy and Pass Finder
+ *   blocks): `{ zone: 'listing', products: [codes], categoryId: '' }`, the lounges' property codes
+ *   or the passes' product codes, sent by the block once they're shown (listingTag); a page's
+ *   listings share one tag (Kwanko keeps the last). It waits for UniJS, so a block never loads it
+ *   before the delayed phase.
  * Without the metadata (or with an address that isn't https), nothing loads and no tag is sent.
  */
 import { getMetadata, loadScript } from './aem.js';
@@ -33,15 +35,22 @@ async function pageTag(params) {
   }
 }
 
+// the products every listing on this page has tagged, in the order they were tagged: Kwanko keeps
+// one listing tag a page (the last), so each tag carries them all
+const listed = [];
+
 /**
- * The lounge listing's page tag: the property codes shown on the page, in their order.
+ * A listing's page tag: the products shown (lounges' property codes, passes' product codes), in
+ * their order, with those of the page's other listings tagged before (e.g. the passes page's
+ * Quick Buy and Pass Finder).
  * @param {string[]} codes e.g. ['PRPRTY1368', 'PRPRTY1205']
  * @returns {Promise<void>}
  */
 export function listingTag(codes) {
-  const products = [...new Set(codes.filter(Boolean))];
-  if (!products.length) return Promise.resolve();
-  return pageTag({ zone: 'listing', products, categoryId: '' });
+  const fresh = codes.filter((code) => code && !listed.includes(code));
+  if (!fresh.length) return Promise.resolve();
+  listed.push(...new Set(fresh));
+  return pageTag({ zone: 'listing', products: [...listed], categoryId: '' });
 }
 
 /**

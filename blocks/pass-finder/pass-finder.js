@@ -506,6 +506,8 @@ export default function decorate(block) {
   let shown = '';
   // the GA4 view_item_list went out (once a page, when the passes first show)
   let listed = false;
+  // the Kwanko listing tag went out (once a page, when the passes first show)
+  let tagged = false;
   const grid = el('ul', 'pass-finder-grid');
   const empty = el('div', 'pass-finder-empty');
   empty.hidden = true;
@@ -596,6 +598,14 @@ export default function decorate(block) {
     if (!listed && passes.length) {
       listed = true;
       trackPassList(choose(passes, state));
+    }
+    // the Kwanko listing tag: the passes shown for the visitor's choices (as the view_item_list),
+    // their product codes in the list's order (it waits for Kwanko UniJS, which loads with the
+    // other tags)
+    if (!tagged && passes.length) {
+      tagged = true;
+      const productCodes = choose(passes, state).map((pass) => pass.code);
+      import('../../scripts/kwanko.js').then(({ listingTag }) => listingTag(productCodes));
     }
   };
 
