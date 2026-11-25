@@ -2,7 +2,7 @@
  * Property card: a property's card, as the source city pages' (styles/property-card.css): a photo
  * slider, then the details (badge, name, location, hours, icons, note, features with "+N more",
  * price, View button, loyalty line); parts without data are left out. A lounge already in the cart
- * (scripts/cart-state.js) is faded, can't be opened, and says so (the block's authored text). For
+ * (scripts/cart-state.js) is faded, can't be opened, and says so (the site's translation). For
  * the properties scripts/properties.js readProperty reads. Blocks call loadPropertyCardStyles
  * before showing cards, so they don't show unstyled.
  */
@@ -179,12 +179,10 @@ function buildLoyalty(text, signup) {
  * @param {function(Object, number): void} [options.onTitleClick] Called as the lounge's name (the
  *   card's title link) is clicked, with the property and its rank (e.g. for analytics), before
  *   the page moves on
- * @param {string} [options.inCart] The message on a lounge already in the cart (the block's
- *   authored text, e.g. "This Lounge is already in your cart"); without it, the card isn't marked
  * @returns {HTMLElement}
  */
 export function buildPropertyCard(property, {
-  id, eager = false, view = null, signup = null, rank = 1, onView, onTitleClick, inCart = '',
+  id, eager = false, view = null, signup = null, rank = 1, onView, onTitleClick,
 } = {}) {
   const card = el('li', 'property-card');
   if (property.first) card.classList.add('property-card-first');
@@ -266,12 +264,12 @@ export function buildPropertyCard(property, {
   if (property.loyalty) bottom.append(buildLoyalty(property.loyalty, signup));
   body.append(top, bottom);
   card.append(buildSlider(property, eager), body);
-  // a lounge (not a pass) already in the cart: the authored message over the faded card (the
-  // lounge's name first, for screen readers, which don't reach the faded card)
-  if (inCart && property.code && !property.pass) {
+  // a lounge (not a pass) already in the cart: the message over the faded card (the lounge's name
+  // first, for screen readers, which don't reach the faded card)
+  if (property.code && !property.pass) {
     card.dataset.propertyCode = property.code;
     const message = el('p', 'property-card-in-cart');
-    message.append(el('span', 'visually-hidden', `${property.name}: `), el('span', '', inCart), el('span', 'property-card-in-cart-icon'));
+    message.append(el('span', 'visually-hidden', `${property.name}: `), el('span', '', translate('propertyInCart')), el('span', 'property-card-in-cart-icon'));
     message.setAttribute('role', 'status');
     card.append(message);
     showInCart(card);

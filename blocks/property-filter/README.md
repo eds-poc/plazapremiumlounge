@@ -47,7 +47,6 @@ offered (a region without lounges in the answer, a mistyped code) gives the firs
 | Countries label | Countries and cities |
 | Services label | Services |
 | Status | {n} results in {city} |
-| In cart | This Lounge is already in your cart |
 
 The first four rows are **what the block asks the property filter service for**: their codes
 are sent as they are (a row left out or empty sends no codes for that level). The Region, Country
@@ -69,15 +68,15 @@ At least one of the four is needed.
   label, to the language folder's lounge page. Leave the row out for no button.
 - **Signup button** (optional): a link, shown at the end of each card's Smart Traveller line
   (e.g. "… 20% off … per eligible visit. **Join here**"). Leave the row out for no link.
-- **In cart** (optional): the message on a lounge that's already in the visitor's cart, e.g. "This
-  Lounge is already in your cart", as the source's listings. That lounge's card is faded with the
-  message over it (and a check), and it can't be opened: its name and View button can't be
-  clicked or reached with the keyboard. Any booking at the lounge counts (whatever the product,
-  date or guests); passes don't. It follows the cart as it changes, in other tabs too. Leave the
-  row out and no card is marked.
 
 Codes are separated by commas (or spaces, or one per line); capitals don't matter. Row names
 ignore capitals and spaces.
+
+- **A lounge already in the cart:** its card is faded with "This Lounge is already in your cart"
+  (and a check) over it, as the source's, and it can't be opened: its name and View button can't be
+  clicked or reached with the keyboard. Any booking at the lounge counts (whatever the product, date
+  or guests); passes don't. It follows the cart as it changes, in other tabs too. Nothing to
+  author: the message is the site's, in each language.
 
 ### The texts
 
