@@ -4,16 +4,16 @@
  * - Upcoming / Past Bookings / Cancelled tabs, the tab kept in the page address (`?status=past`);
  * - a card per booking: the lounge's photos, the order number, the lounge and where it is, date,
  *   time, guests, services, price and the booking's actions (resend the confirmation, view or
- *   modify, cancel), a page at a time (scripts/pagination.js).
+ *   modify, cancel: after a confirmation popup, the cancel page), a page at a time
+ *   (scripts/pagination.js).
  * The bookings come from the booking list API with the login token (scripts/auth.js). Every text
  * the block shows is authored, a row of the block's table each (see TEXTS); a text left out isn't
  * shown.
  */
 import { getToken, isTokenValid, logout } from '../../scripts/auth.js';
 import apiUrl from '../../scripts/endpoints.js';
-import {
-  DEFAULT_SITE, getLanguage, getSiteFolder, translate,
-} from '../../scripts/i18n.js';
+import { getLanguage, translate } from '../../scripts/i18n.js';
+import { bookingHref, bookingPage } from '../../scripts/bookings.js';
 import { createPager, readPageSize, setPage } from '../../scripts/pagination.js';
 import {
   buildSlider, el, getApiLanguage, isPreview, setLoading, toKey, toUrl,
@@ -58,8 +58,11 @@ const TEXTS = {
   viewModify: 'View and modify',
   view: 'View',
   cancel: 'Cancel',
+  // the cancel confirmation popup: its title, the question, and its two buttons
+  cancelTitle: 'Cancel title',
   cancelConfirm: 'Cancel confirm',
-  cancelDone: 'Cancelled message',
+  cancelYes: 'Cancel yes',
+  cancelNo: 'Cancel no',
   resent: 'Resent',
   actionError: 'Action error',
   noUpcoming: 'No upcoming',
@@ -71,17 +74,24 @@ const TEXTS = {
 // the default text has it ("Order No." → "Order No. HKBC-…", "Adults" → "2 Adults")
 const VALUE_AT = {
   order: '{text} {id}',
+  cancelConfirm: '{text} {id}',
   adults: '{n} {text}',
   children: '{n} {text}',
 };
 // the settings rows (not texts)
-const SETTINGS = ['View page', 'Page size'];
+const SETTINGS = ['View page', 'Cancel page', 'Page size'];
+// the booking pages a card links to, in the language site without their rows (the booking added
+// as `?bookingid=`)
+const VIEW_PAGE = 'view-booking';
+const CANCEL_PAGE = 'cancel-your-booking';
 // the source's English month names (its dates are 30-Nov-2026); other languages use their own
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 // the API's service date: "30 Nov 2026 16:00:00", the lounge's local time (shown as it is)
 const SERVICE_DATE = /^(\d{1,2}) ([A-Za-z]{3}) (\d{4}) (\d{1,2}):(\d{2})/;
 
 let blockCount = 0;
+// each card's booking, for its actions (the cancel confirmation shows the lounge)
+const bookingOf = new WeakMap();
 
 /**
  * API or authored text, trimmed, its runs of spaces made one ("Plaza Premium First " →
@@ -95,26 +105,20 @@ function clean(value) {
 
 /**
  * The authored settings, rows of name | value (names ignore capitals and spaces): `View page` (the
- * booking page, a link or path; else /{site}/view-booking), `Page size` (bookings per page, 10
- * without it), and the texts (TEXTS).
+ * booking page, a link or path; else /{site}/view-booking), `Cancel page` (the page that cancels
+ * a booking; else /{site}/cancel-your-booking), `Page size` (bookings per page, 10 without it),
+ * and the texts (TEXTS).
  * @param {HTMLElement} block
- * @returns {{ text: function(string, Object=): string, viewPage: string, pageSize: number }}
- *   `text`: an authored text by its TEXTS key, `{id}` and `{n}` filled in; '' when not authored
+ * @returns {{ text: function(string, Object=): string, template: function(string): string,
+ *   viewPage: string, cancelPage: string, pageSize: number }} `text`: an authored text by its
+ *   TEXTS key, `{id}` and `{n}` filled in; `template`: the same, its `{id}` and `{n}` left in; ''
+ *   when not authored
  */
 function readSettings(block) {
   const rows = [...block.children].map((row) => [...row.children]);
   const cell = (name) => rows.find((cells) => cells.length >= 2
     && toKey(cells[0].textContent) === toKey(name))?.[1];
   const value = (c) => (c?.querySelector('a[href]')?.getAttribute('href') || c?.textContent || '').trim();
-  const sameSite = (raw) => {
-    if (!raw) return '';
-    try {
-      const url = new URL(raw, window.location.href);
-      return url.origin === window.location.origin ? `${url.pathname}${url.search}` : '';
-    } catch {
-      return '';
-    }
-  };
   const texts = Object.fromEntries(Object.entries(TEXTS).map(([key, name]) => {
     const authored = clean(cell(name)?.textContent);
     const placeholder = VALUE_AT[key]?.match(/\{(id|n)\}/)[0];
@@ -136,7 +140,9 @@ function readSettings(block) {
   return {
     text: (key, values = {}) => (texts[key] || '')
       .replace(/\{(\w+)\}/g, (all, name) => values[name] ?? all),
-    viewPage: sameSite(value(cell('View page'))) || `/${getSiteFolder() || DEFAULT_SITE}/view-booking`,
+    template: (key) => texts[key] || '',
+    viewPage: bookingPage(value(cell('View page')), VIEW_PAGE),
+    cancelPage: bookingPage(value(cell('Cancel page')), CANCEL_PAGE),
     pageSize: readPageSize(value(cell('Page size'))),
   };
 }
@@ -227,6 +233,8 @@ function readBookings(items, tab, text) {
       // the lounge's place in the airport, then the airport, as the source's address line
       line: [clean(lounge.shortLocation), clean(lounge.locationName || row.locationName)]
         .filter(Boolean).join(', '),
+      // the lounge's place in the airport alone (the cancel confirmation's)
+      place: clean(lounge.shortLocation),
       date: readServiceDate(row.serviceDate),
       guests: formatGuests(row.guests, text),
       service: serviceName(service),
@@ -379,7 +387,7 @@ function buildTabs(prefix, panelId, tabs, name, onSelect) {
 /**
  * A booking's card: the photos, the order number, the lounge, the details, the price and the
  * actions (by tab, the API's flags and the authored texts: an action without its text isn't
- * shown, nor Cancel without its confirmation).
+ * shown, nor Cancel without its confirmation's question and Cancel yes button).
  * @param {Object} booking
  * @param {{ text: function(string, Object=): string, viewPage: string, eager: boolean,
  *   prefix: string }} options
@@ -390,12 +398,11 @@ function buildCard(booking, {
 }) {
   const card = el('li', 'booking-list-card');
   card.dataset.orderId = booking.orderId;
+  bookingOf.set(card, booking);
   const media = el('div', 'booking-list-media');
   media.append(buildSlider({ images: booking.images, name: booking.name, line: booking.line }, eager, 'booking-list-slider'));
 
-  const view = new URL(viewPage, window.location.href);
-  view.searchParams.set('bookingid', booking.orderId);
-  const viewHref = `${view.pathname}${view.search}`;
+  const viewHref = bookingHref(viewPage, booking.orderId);
 
   const details = el('div', 'booking-list-details');
   const title = el('h3', 'booking-list-order');
@@ -459,7 +466,11 @@ function buildCard(booking, {
   };
   if (booking.canResend) action(button('resend', 'resend'));
   action(link(booking.canModify ? 'viewModify' : 'view'));
-  if (booking.canCancel && text('cancelConfirm')) action(button('cancel', 'cancel'));
+  if (booking.canCancel && text('cancelConfirm') && text('cancelYes')) {
+    const cancel = button('cancel', 'cancel');
+    cancel.setAttribute('aria-haspopup', 'dialog');
+    action(cancel);
+  }
 
   const note = el('p', 'booking-list-note');
   note.setAttribute('aria-live', 'polite');
@@ -472,14 +483,42 @@ function buildCard(booking, {
 }
 
 /**
+ * Asks before cancelling, as the source: the site's confirmation popup (scripts/confirm-dialog.js,
+ * wide) with the Cancel title, the Cancel confirm question (the order number in bold), the lounge
+ * (its name in bold, then its place in the airport) and the Cancel yes and Cancel no buttons.
+ * Resolves true for Cancel yes only (the caller goes to the cancel page).
+ * @param {Object} booking See readBookings
+ * @param {HTMLElement} trigger The Cancel Booking button (focus returns there)
+ * @param {{ text: function(string, Object=): string, template: function(string): string }} settings
+ * @param {string} key The block's popup (built once, refilled for each booking)
+ * @returns {Promise<boolean>}
+ */
+async function confirmCancel(booking, trigger, { text, template }, key) {
+  const { default: confirmDialog } = await import('../../scripts/confirm-dialog.js');
+  const question = el('p', 'confirm-text');
+  const [before, ...after] = template('cancelConfirm').split('{id}');
+  question.append(before, el('b', '', booking.orderId), after.join(booking.orderId));
+  const lounge = el('p', 'confirm-text booking-list-confirm-lounge');
+  if (booking.name) lounge.append(el('b', '', booking.name));
+  if (booking.place) lounge.append(' ', el('span', '', booking.place));
+  return confirmDialog(trigger, {
+    key,
+    title: text('cancelTitle'),
+    body: [question, lounge.childNodes.length && lounge].filter(Boolean),
+    yes: text('cancelYes'),
+    no: text('cancelNo'),
+    wide: true,
+  });
+}
+
+/**
  * Fills the block with the member's bookings; nothing when nobody is logged in (a members' page
- * sends them home: scripts/auth.js checkSession). Runs again after a cancellation.
+ * sends them home: scripts/auth.js checkSession).
  * @param {HTMLElement} block
  * @param {Object} settings
  * @param {string} prefix
- * @param {string} [notice] A message shown above the tabs (e.g. a booking was cancelled)
  */
-async function load(block, settings, prefix, notice = '') {
+async function load(block, settings, prefix) {
   const { text } = settings;
   const token = getToken();
   if (!token || !isTokenValid(token)) {
@@ -572,25 +611,24 @@ async function load(block, settings, prefix, notice = '') {
     })
     : null;
 
-  // resend the confirmation, or cancel the booking (after a confirmation), with the API
+  // Cancel Booking: after the confirmation popup, the cancel page for that booking (it cancels
+  // it); Resend: the API sends the confirmation again
   panel.addEventListener('click', async (e) => {
     const b = e.target.closest('button.booking-list-action');
     if (!b || b.disabled) return;
     const card = b.closest('.booking-list-card');
     const { orderId } = card.dataset;
+    if (b.dataset.action === 'cancel') {
+      if (await confirmCancel(bookingOf.get(card), b, settings, `${prefix}-cancel`)) {
+        window.location.assign(bookingHref(settings.cancelPage, orderId));
+      }
+      return;
+    }
     const note = card.querySelector('.booking-list-note');
-    const cancel = b.dataset.action === 'cancel';
-    // eslint-disable-next-line no-alert
-    if (cancel && !window.confirm(text('cancelConfirm', { id: orderId }))) return;
     b.disabled = true;
     note.textContent = '';
     try {
-      await request(apiUrl(cancel ? 'cancelBooking' : 'resendBookingConfirmation').href, { orderId });
-      // a cancelled booking moves to the Cancelled tab: the list is loaded again, with the message
-      if (cancel) {
-        load(block, settings, prefix, text('cancelDone', { id: orderId }));
-        return;
-      }
+      await request(apiUrl('resendBookingConfirmation').href, { orderId });
       note.textContent = text('resent');
     } catch (error) {
       note.textContent = text('actionError');
@@ -602,12 +640,6 @@ async function load(block, settings, prefix, notice = '') {
       b.disabled = false;
     }
   });
-
-  if (notice) {
-    const done = el('p', 'booking-list-notice', notice);
-    done.setAttribute('role', 'status');
-    results.append(done);
-  }
   if (tabs) results.append(tabs.element);
   results.append(panel, pager.element);
   // the page buttons' look first, then the tab's bookings, all still hidden: shown at once
@@ -638,7 +670,7 @@ async function load(block, settings, prefix, notice = '') {
 
 /**
  * Decorates the Booking List block: the visitor's bookings once they're logged in. Rows: the texts
- * (TEXTS) and, optional, `View page` and `Page size` (see readSettings).
+ * (TEXTS) and, optional, `View page`, `Cancel page` and `Page size` (see readSettings).
  * @param {HTMLElement} block
  */
 export default function decorate(block) {
