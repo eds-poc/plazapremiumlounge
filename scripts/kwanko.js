@@ -8,7 +8,9 @@
  *   codes], categoryId: '' }`, sent by the block once its lounges are in (listingTag);
  * - a product page, the lounge detail page (the Property Detail block): `{ zone: 'product',
  *   productId: property code, categoryId: '' }`, sent by the block once the lounge is in
- *   (productTag).
+ *   (productTag);
+ * - the basket pages (the Book Your Visit and Checkout blocks): `{ zone: 'basket', products: [{
+ *   id, price, quantity }], currency }`, sent by the block once it shows the cart (basketTag).
  * The blocks' tags wait for UniJS, so a block never loads it before the delayed phase.
  * Without the metadata (or with an address that isn't https), nothing loads and no tag is sent.
  */
@@ -89,4 +91,29 @@ export default async function initKwanko() {
   }
   markReady();
   if (isHomePath(window.location.pathname)) pageTag({ zone: 'homepage' });
+}
+
+// an amount as Kwanko takes it: a number to the cent (a dot for decimals, no thousands separator)
+const amount = (value) => Math.round((Number(value) || 0) * 100) / 100;
+
+/**
+ * A basket page's page tag (the Book Your Visit and Checkout blocks, once they show the cart):
+ * each of the cart's products in its order, with its unit price (after discounts) and quantity,
+ * in the cart's currency (ISO 4217). A product is its lounge's or pass's property code (as the
+ * listing and product tags); a lounge's add-ons follow it, by their product code.
+ * @param {Object} cart The cart's summary (see readCart in cart.js)
+ * @returns {Promise<void>}
+ */
+export function basketTag(cart) {
+  const product = (id, total, quantity) => ({
+    id, price: amount(total / (quantity || 1)), quantity: quantity || 1,
+  });
+  const products = (cart?.lines || []).flatMap((line) => [
+    product(line.propertyCode || line.catalogueCode, line.total, line.quantity),
+    ...(line.addons || [])
+      .map((a) => product(a.productCode || a.catalogueCode, a.total, a.quantity)),
+  ]).filter((p) => p.id);
+  const currency = String(cart?.currency || '').toUpperCase();
+  if (!products.length || !/^[A-Z]{3}$/.test(currency)) return Promise.resolve();
+  return pageTag({ zone: 'basket', products, currency });
 }

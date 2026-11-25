@@ -350,6 +350,9 @@ export default function decorate(block) {
   const termsSlot = el('div', 'checkout-terms-slot');
   (fieldElement(form, 'termsAgreed') || form.lastElementChild)?.after(termsSlot);
 
+  // the Kwanko basket page tag went out: once a page, the first time the cart shows (see render)
+  let basketTagged = false;
+
   /**
    * Shows the cart (or its absence): the summary, the phone bar, the lounge's flight fields and
    * the terms.
@@ -387,6 +390,13 @@ export default function decorate(block) {
         el('small', 'checkout-bar-note', translate('cartTotalNote')),
       );
       bar.replaceChildren(barTotal, paymentButton(text('payment'), formId, 'checkout-payment-bar'));
+      // the Kwanko basket page tag, once (not the block library's sample; the tag waits for
+      // Kwanko UniJS, which loads with the other tags)
+      if (!basketTagged && !window.location.pathname.includes('/docs/library/')) {
+        basketTagged = true;
+        const tagged = lastCart;
+        import('../../scripts/kwanko.js').then(({ basketTag }) => basketTag(tagged));
+      }
     }
     // a lounge asks for the flight; a pass doesn't (its fields out of the form and its data)
     const lounge = !lastCart || lastCart.lines.some((line) => line.kind !== 'pass');
