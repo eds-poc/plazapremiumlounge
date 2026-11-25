@@ -220,3 +220,17 @@
     height: 24px;
   }
 }
+
+/* while a Source's offers load: placeholder cards (the image's place and two lines, shimmering:
+   .skeleton), the title's line as tall as a card title, the text's shorter */
+.carousel-cards .carousel-cards-bone {
+  display: block;
+  height: var(--heading-card-size);
+  margin-bottom: var(--spacing-4);
+  border-radius: var(--radius-xs);
+}
+
+.carousel-cards .carousel-cards-bone + .carousel-cards-bone {
+  width: 60%;
+  height: var(--body-font-size);
+}

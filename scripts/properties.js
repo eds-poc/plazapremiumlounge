@@ -9,6 +9,10 @@ import apiUrl from './endpoints.js';
 import { DEFAULT_SITE, getSiteFolder, translate } from './i18n.js';
 import { hideLoader, showLoader } from './scripts.js';
 import { isIsoDate } from './booking.js';
+import { fetchJson, toKey } from './utility.js';
+
+// (re-exported: the blocks that import them from here keep working)
+export { fetchJson, toKey };
 
 // property types shown, as the source pages: lounges, and passes (gift cards); the detail page
 // also shows external partners' services and airport dining
@@ -58,58 +62,6 @@ export function setLoading(busy) {
   loading = Math.max(0, loading + (busy ? 1 : -1));
   if (loading) showLoader();
   else hideLoader();
-}
-
-/**
- * Fetches JSON, giving up after `timeout` ms. With `body`, it's a POST of that object as JSON. A
- * `signal` cancels it early (e.g. a newer request replaces it). Rejects with an Error carrying
- * `status` (HTTP status, 0 for a network failure, the timeout or a cancel); an answer that isn't
- * JSON, or a 200 with the service's error object (`{ errorCode, message }`, or nested as
- * `{ error: { errorCode, message, details } }`, kept as the Error's `service`), is a failure too.
- * @param {string} url
- * @param {number} timeout
- * @param {{body?: Object, signal?: AbortSignal}} [options]
- * @returns {Promise<Object>}
- */
-export async function fetchJson(url, timeout, { body, signal } = {}) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeout);
-  signal?.addEventListener('abort', () => controller.abort(), { once: true });
-  try {
-    const resp = await fetch(url, {
-      signal: controller.signal,
-      ...(body && {
-        method: 'POST',
-        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      }),
-    });
-    if (!resp.ok) throw Object.assign(new Error(`HTTP ${resp.status}`), { status: resp.status });
-    const json = await resp.json();
-    const failure = json?.errorCode ? json : json?.error && typeof json.error === 'object' && json.error;
-    if (failure) {
-      throw Object.assign(new Error(`${failure.errorCode || 'error'}: ${failure.message || ''}`), { status: resp.status, service: failure });
-    }
-    return json;
-  } catch (error) {
-    if (error.status === undefined) error.status = 0;
-    throw error;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-/**
- * A stable filter key for a value: lower case, words joined by dashes.
- * @param {string} value
- * @returns {string}
- */
-export function toKey(value) {
-  return String(value || '')
-    .trim()
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, '-')
-    .replace(/^-|-$/g, '');
 }
 
 /**
