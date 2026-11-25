@@ -8,7 +8,7 @@
  */
 import { loadCSS } from './aem.js';
 import { applyButtonAction } from './button-actions.js';
-import { isPropertyInCart, onCartChange } from './cart-state.js';
+import { cartLounges, onCartChange } from './cart-state.js';
 import { getLanguage, translate } from './i18n.js';
 import {
   buildBadge, buildSlider, el, isPreview, propertyDetailPath, propertyDetailUrl, safeNote, toUrl,
@@ -17,8 +17,9 @@ import {
 const VISIBLE_TAGS = 5;
 
 let styles;
-// the cards' "in the cart" look follows the cart (one listener for every card on the page)
-let watchingCart = false;
+// the cart's lounges (cartLounges), read once for the page's first lounge card and again on each
+// cart change (one listener for every card on the page), not once per card
+let lounges;
 
 /**
  * The cards' stylesheet (styles/property-card.css), loaded once per page.
@@ -35,7 +36,7 @@ export function loadPropertyCardStyles() {
  * @param {HTMLElement} card A card with `data-property-code` and its message
  */
 function showInCart(card) {
-  const inCart = isPropertyInCart(card.dataset.propertyCode);
+  const inCart = lounges.has(card.dataset.propertyCode);
   card.classList.toggle('is-in-cart', inCart);
   card.querySelector(':scope > .property-card-in-cart').hidden = !inCart;
   [...card.children].filter((part) => !part.matches('.property-card-in-cart'))
@@ -269,14 +270,21 @@ export function buildPropertyCard(property, {
   if (property.code && !property.pass) {
     card.dataset.propertyCode = property.code;
     const message = el('p', 'property-card-in-cart');
-    message.append(el('span', 'visually-hidden', `${property.name}: `), el('span', '', translate('propertyInCart')), el('span', 'property-card-in-cart-icon'));
+    message.append(
+      el('span', 'visually-hidden', `${property.name}: `),
+      el('span', '', translate('propertyInCart')),
+      el('span', 'property-card-in-cart-icon'),
+    );
     message.setAttribute('role', 'status');
     card.append(message);
-    showInCart(card);
-    if (!watchingCart) {
-      watchingCart = true;
-      onCartChange(() => document.querySelectorAll('.property-card[data-property-code]').forEach(showInCart));
+    if (!lounges) {
+      lounges = cartLounges();
+      onCartChange(() => {
+        lounges = cartLounges();
+        document.querySelectorAll('.property-card[data-property-code]').forEach(showInCart);
+      });
     }
+    showInCart(card);
   }
   return card;
 }

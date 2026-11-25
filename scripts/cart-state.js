@@ -230,17 +230,14 @@ export function isInCart(catalogueCode) {
 }
 
 /**
- * Whether the cart holds a booking at this lounge (its property code), whatever the product, date
- * or guests: from this tab's data, else from the lounges kept with the cart's id. Passes don't
- * count.
- * @param {string} propertyCode e.g. PRPRTY816
- * @returns {boolean}
+ * The lounges the cart holds a booking at (their property codes), whatever the product, date or
+ * guests: from this tab's data, else from the lounges kept with the cart's id. Passes don't count.
+ * Read once for many lounges (e.g. a listing's cards).
+ * @returns {Set<string>} e.g. PRPRTY816
  */
-export function isPropertyInCart(propertyCode) {
-  if (!propertyCode) return false;
+export function cartLounges() {
   const cart = getCart();
-  if (cart) return loungeCodes(cart.lines).includes(propertyCode);
-  return !!readEntry()?.lounges?.includes(propertyCode);
+  return new Set(cart ? loungeCodes(cart.lines) : readEntry()?.lounges || []);
 }
 
 /**

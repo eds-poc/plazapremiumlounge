@@ -50,8 +50,8 @@
     background-color var(--duration-normal) ease-in;
 }
 
-/* lifts and greys on hover, as the source */
-.property-card:hover {
+/* lifts and greys on hover, as the source (not a lounge in the cart: it can't be opened) */
+.property-card:not(.is-in-cart):hover {
   background-color: var(--property-card-bg-hover);
   box-shadow: var(--property-card-shadow-hover);
   transform: translateY(var(--property-card-lift));
@@ -207,7 +207,7 @@
 }
 
 /* the grey hover background is too light for the muted note */
-.property-card:hover .property-card-note {
+.property-card:not(.is-in-cart):hover .property-card-note {
   color: var(--color-text);
 }
 
@@ -520,13 +520,6 @@
 
 .property-card.is-in-cart > :not(.property-card-in-cart) {
   opacity: var(--property-card-faded);
-}
-
-/* (it can't be opened: no lift or grey on hover) */
-.property-card.is-in-cart:hover {
-  background-color: var(--color-background);
-  box-shadow: var(--property-card-shadow);
-  transform: none;
 }
 
 .property-card .property-card-in-cart {
