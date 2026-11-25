@@ -600,12 +600,12 @@ export default function decorate(block) {
       trackPassList(choose(passes, state));
     }
     // the Kwanko listing tag: the passes shown for the visitor's choices (as the view_item_list),
-    // their product codes in the list's order (it waits for Kwanko UniJS, which loads with the
+    // their catalogue codes in the list's order (it waits for Kwanko UniJS, which loads with the
     // other tags)
     if (!tagged && passes.length) {
       tagged = true;
-      const productCodes = choose(passes, state).map((pass) => pass.code);
-      import('../../scripts/kwanko.js').then(({ listingTag }) => listingTag(productCodes));
+      const catalogueCodes = choose(passes, state).map((pass) => pass.catalogueCode);
+      import('../../scripts/kwanko.js').then(({ listingTag }) => listingTag(catalogueCodes));
     }
   };
 

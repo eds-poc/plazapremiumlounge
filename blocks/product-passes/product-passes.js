@@ -208,11 +208,11 @@ export default function decorate(block) {
     }
     grid.replaceChildren(...passes.map(buildCard));
     block.replaceChildren(grid);
-    // the Kwanko listing tag: the passes' product codes, in the order shown (it waits for Kwanko
+    // the Kwanko listing tag: the passes' catalogue codes, in the order shown (it waits for Kwanko
     // UniJS, which loads with the other tags)
     if (!tagged) {
       tagged = true;
-      const codes = passes.map((pass) => pass.code);
+      const codes = passes.map((pass) => pass.catalogueCode);
       import('../../scripts/kwanko.js').then(({ listingTag }) => listingTag(codes));
     }
   };
