@@ -233,10 +233,10 @@ export function isInCart(catalogueCode) {
  * The lounges the cart holds a booking at (their property codes), whatever the product, date or
  * guests: from this tab's data, else from the lounges kept with the cart's id. Passes don't count.
  * Read once for many lounges (e.g. a listing's cards).
+ * @param {Object|null} [cart] This tab's data, when the caller has it (e.g. onCartChange's)
  * @returns {Set<string>} e.g. PRPRTY816
  */
-export function cartLounges() {
-  const cart = getCart();
+export function cartLounges(cart = getCart()) {
   return new Set(cart ? loungeCodes(cart.lines) : readEntry()?.lounges || []);
 }
 
@@ -284,7 +284,8 @@ window.addEventListener('storage', (e) => {
 
 /**
  * Calls `listener(cart)` whenever the cart changes, here or in another tab (`cart` is this tab's
- * data, or null: no cart, or not read yet; cartCount and isInCart still answer from the id).
+ * data, or null: no cart, or not read yet; cartCount, isInCart and cartLounges still answer from
+ * the id).
  * @param {(cart: Object|null) => void} listener
  */
 export function onCartChange(listener) {

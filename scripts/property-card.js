@@ -279,8 +279,8 @@ export function buildPropertyCard(property, {
     card.append(message);
     if (!lounges) {
       lounges = cartLounges();
-      onCartChange(() => {
-        lounges = cartLounges();
+      onCartChange((cart) => {
+        lounges = cartLounges(cart);
         document.querySelectorAll('.property-card[data-property-code]').forEach(showInCart);
       });
     }
