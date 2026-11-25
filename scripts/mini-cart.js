@@ -805,6 +805,30 @@ function passVisits(catalogueCode) {
 }
 
 /**
+ * Keeps the passes' numbers of visits only while their pass is in the cart (see notePassVisits):
+ * the others go, and all of them once there's no cart. While the cart is known by its id only
+ * (another tab changed it, not read here yet), they stay.
+ * @param {Object|null} cart The cart's summary (see readCart in cart.js)
+ */
+function removePassVisitsNotInCart(cart) {
+  try {
+    if (!cart) {
+      if (!getCartId()) localStorage.removeItem(PASS_VISITS_KEY);
+      return;
+    }
+    const visits = JSON.parse(localStorage.getItem(PASS_VISITS_KEY) || 'null');
+    if (!visits) return;
+    const inCart = new Set(cart.lines.filter((line) => line.kind === 'pass').map((line) => line.catalogueCode));
+    const kept = Object.fromEntries(Object.entries(visits).filter(([code]) => inCart.has(code)));
+    if (Object.keys(kept).length) localStorage.setItem(PASS_VISITS_KEY, JSON.stringify(kept));
+    else localStorage.removeItem(PASS_VISITS_KEY);
+  } catch { /* storage blocked */ }
+}
+// as the cart changes (here or in another tab), and once now (a cart forgotten meanwhile)
+onCartChange(removePassVisitsNotInCart);
+removePassVisitsNotInCart(getCart());
+
+/**
  * A cart line's coupon: its first discount's code, else its promo code's, else ''.
  * @param {Object} line See readLine in cart.js
  * @returns {string}
