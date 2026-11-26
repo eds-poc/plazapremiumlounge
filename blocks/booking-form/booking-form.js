@@ -1,8 +1,6 @@
 import {
   buildForm, datePickerOf, fieldElement, setFieldError,
 } from '../../scripts/forms.js';
-import apiUrl from '../../scripts/endpoints.js';
-import { getApiLanguage } from '../../scripts/properties.js';
 import buildDatePicker from '../../scripts/date-picker.js';
 import { formatDate } from '../../scripts/booking.js';
 
@@ -53,6 +51,25 @@ const timeAt = (key, minutes, extra = {}) => ({
     format: 'time', step: 30, default: minutes, ...extra,
   },
 });
+
+// the areas of service of each location: the site's sheet (one row per area: Country, as in the
+// Location of Service dropdown, Country Code, Area as shown, Value as sent); read once per page
+const AREAS_SHEET = '/data/area-of-service.json';
+let areas;
+
+/**
+ * The areas of service, from the sheet; none when it can't be read (the next call tries again).
+ * @returns {Promise<{Country: string, Area: string, Value: string}[]>}
+ */
+function getAreas() {
+  if (!areas) {
+    areas = fetch(AREAS_SHEET)
+      .then((res) => (res.ok ? res.json() : { data: [] }))
+      .then((sheet) => (Array.isArray(sheet?.data) ? sheet.data : []));
+    areas.catch(() => { areas = null; });
+  }
+  return areas.catch(() => []);
+}
 
 const FORMS = {
   // option group-form, the source /en-uk/group-booking: at least 10 people, a start and a length
@@ -108,7 +125,7 @@ const FORMS = {
  * Error), and the rows submit / success / error / captcha, as the Contact Form; the row `people`
  * (its Error cell) is the group booking's message when there are fewer than 10 people. Two columns
  * from 768px (No. of Adults starts the second); the group booking's captcha and button under them.
- * The areas of service follow the chosen location (the groupBookingAreas endpoint).
+ * The areas of service follow the chosen location (the data/area-of-service sheet).
  * @param {Element} block The Booking Form block element
  */
 export default function decorate(block) {
@@ -152,30 +169,20 @@ export default function decorate(block) {
   const star = Object.assign(document.createElement('span'), { className: 'form-required', textContent: ' *' });
   star.setAttribute('aria-hidden', 'true');
   areaField?.querySelector('.form-label').append(star);
-  let pending;
+  // (only the latest choice fills the list, if the sheet answers after a second change)
+  let choice = 0;
   location?.addEventListener('change', () => {
-    pending?.abort();
-    pending = new AbortController();
+    choice += 1;
+    const current = choice;
     [...area.options].slice(1).forEach((option) => option.remove());
     if (!location.value) return;
-    fetch(apiUrl('groupBookingAreas'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        locationOfService: location.value,
-        languageCode: getApiLanguage(),
-        ...(name === 'booking-request' ? { form: 'bookingRequest' } : {}),
-      }),
-      signal: pending.signal,
-    })
-      .then((res) => (res.ok ? res.json() : { items: [] }))
-      .then((data) => (Array.isArray(data?.items) ? data.items : []).forEach((item) => {
-        if (!item?.value) return;
-        area.append(Object.assign(document.createElement('option'), {
-          value: String(item.value), textContent: String(item.text || item.value),
-        }));
-      }))
-      .catch(() => { /* no areas: the field stays empty and optional */ });
+    getAreas().then((rows) => {
+      if (current !== choice) return;
+      rows.filter((row) => String(row.Country ?? '').trim() === location.value && row.Value)
+        .forEach((row) => area.append(Object.assign(document.createElement('option'), {
+          value: String(row.Value).trim(), textContent: String(row.Area || row.Value).trim(),
+        })));
+    });
   });
 
   // the group booking: at least 10 people, adults and children together (as the visitor chooses,

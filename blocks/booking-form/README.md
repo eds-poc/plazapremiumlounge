@@ -40,7 +40,7 @@ second column, side by side when it has room (as the source).
 | Field | What it is |
 | --- | --- |
 | `locationOfService` ✱ | Location dropdown, authored list |
-| `areaOfService` ✱ | The areas of the chosen location, from the `groupBookingAreas` endpoint (a placeholder; the request adds `form: "bookingRequest"`). A choice is asked for once the list has areas; its Error cell is the message. Sent as `locationOfServiceCity` |
+| `areaOfService` ✱ | The areas of the chosen location, from the `data/area-of-service` sheet (below). A choice is asked for once the list has areas; its Error cell is the message. Sent as `locationOfServiceCity` |
 | `emailAddress` ✱ | Email address, at most 200 |
 | `contactNumber` ✱ | Numbers only (the number keypad on phones; anything else typed or pasted is left out), at most 12 |
 | `smartTravellerMembershipNumber` | Text, at most 200 |
@@ -76,9 +76,23 @@ second column, side by side when it has room (as the source).
 
 - **bookingRequest**, **groupBooking** (POST, JSON): the fields above by key, and
   `h-captcha-response`.
-- **groupBookingAreas** (POST, JSON `{ locationOfService, languageCode }`, plus
-  `form: "bookingRequest"` from the Booking Form): answers `{ items: [{ value, text }] }`. Until it
-  exists, Area of Service stays empty and optional.
+
+## The areas of service: the `data/area-of-service` sheet
+
+One sheet in Document Authoring (`/data/area-of-service.json`) for both forms and every language:
+one row per area.
+
+| Country | Country Code | Area | Value |
+| --- | --- | --- | --- |
+| Australia | AU | Adelaide (ADL) | Adelaide(ADL) |
+| Hong Kong SAR | HK | Hong Kong (HKG) | HongKong(HKG) |
+
+- **Country**: as in the Location of Service dropdown (the option sent, e.g. `Hong Kong SAR`);
+  choosing it lists its rows, in the sheet's order.
+- **Country Code**: the ISO code (for reference).
+- **Area**: what the visitor sees. **Value**: what's sent as `locationOfServiceCity`.
+- A country without rows leaves Area of Service empty and optional. A new area, or a new country,
+  is a new row; it shows once the sheet is previewed (and on the live site once it's published).
 
 ## The dates
 
