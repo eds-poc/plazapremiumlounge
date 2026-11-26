@@ -1425,6 +1425,8 @@ export default async function decorate(block) {
   url.searchParams.set('languageCode', getApiLanguage());
 
   let load;
+  // the Kwanko product tag went out (see render)
+  let productTagged = false;
   const render = async () => {
     let lounge;
     try {
@@ -1442,6 +1444,12 @@ export default async function decorate(block) {
     if (!lounge) {
       showMessage(block, translate('propertyNotFound'), null, `Property "${params.code}" isn't active or isn't a type this page shows.`);
       return;
+    }
+    // the Kwanko product page tag: the lounge's property code (once a page; the tag waits for
+    // Kwanko UniJS, which loads with the other tags)
+    if (!productTagged) {
+      productTagged = true;
+      import('../../scripts/kwanko.js').then(({ productTag }) => productTag(lounge.code));
     }
     if (lounge.passProperty && lounge.bookable) {
       await renderPasses(block, lounge);

@@ -112,7 +112,17 @@ export default function decorate(block) {
       const result = await setAddon({
         catalogueCode: item.catalogueCode, name: item.name, quantity,
       });
-      return result.status === 'updated';
+      const saved = result.status === 'updated';
+      // GA4's add_to_cart for an add-on put in (not a removal), with it alone; the mini cart's code
+      // only loads now
+      const line = saved && quantity > 0 && result.cart?.lines.find((l) => l.kind !== 'pass');
+      const addon = line?.addons?.find((a) => a.catalogueCode === item.catalogueCode);
+      if (addon) {
+        import('../../scripts/mini-cart.js')
+          .then(({ trackCartAdd }) => trackCartAdd(result.cart, [{ line, quantity, addon }], 'view_cart_page'))
+          .catch(() => { /* (no analytics without it) */ });
+      }
+      return saved;
     } finally {
       hideLoader();
     }

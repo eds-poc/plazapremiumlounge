@@ -466,8 +466,10 @@ function buildServiceTabs(cards, groupLabel) {
  * @param {Object} city
  * @param {{view: Object|null, signup: Object|null, text: function(string): string}} settings
  * @param {string} prefix
+ * @returns {string[]} The lounges' property codes, in the order shown (for the Kwanko tag)
  */
 function renderListing(listing, city, { view, signup, text }, prefix) {
+  const codes = [];
   const airports = new Map();
   city.properties.forEach((p) => {
     const key = p.location.key || p.iata;
@@ -486,6 +488,7 @@ function renderListing(listing, city, { view, signup, text }, prefix) {
           id: `${prefix}-card-${n}`, eager: n === 0, view, signup, rank: n + 1,
         });
         n += 1;
+        codes.push(property.code);
         return { property, card };
       });
     list.append(...cards.map(({ card }) => card));
@@ -494,6 +497,16 @@ function renderListing(listing, city, { view, signup, text }, prefix) {
     group.append(list);
     return group;
   }));
+  return codes;
+}
+
+/**
+ * The Kwanko listing tag for the lounges shown (scripts/kwanko.js: it waits for Kwanko UniJS,
+ * which loads with the other tags).
+ * @param {string[]} codes The property codes, in the order shown
+ */
+function tagListing(codes) {
+  import('../../scripts/kwanko.js').then(({ listingTag }) => listingTag(codes));
 }
 
 /**
@@ -784,6 +797,10 @@ async function load(block, settings, prefix) {
         return;
       }
       await renderTree(block, tree, settings, prefix);
+      // the Kwanko listing tag: every lounge listed, in the list's order
+      tagListing(tree.flatMap((region) => region.countries)
+        .flatMap((country) => country.airports)
+        .flatMap((airport) => airport.lounges.map((lounge) => lounge.code)));
       return;
     }
   } catch (error) {
@@ -808,6 +825,8 @@ async function load(block, settings, prefix) {
   const status = el('p', 'visually-hidden');
   status.setAttribute('role', 'status');
   let choice;
+  // the Kwanko listing tag went out (once a page, for the lounges shown first)
+  let tagged = false;
   // the filters (each calls apply, which shows the choice in all of them)
   const filters = {};
   const apply = (next) => {
@@ -816,7 +835,11 @@ async function load(block, settings, prefix) {
     panel.setAttribute('aria-labelledby', `${prefix}-region-${toKey(choice.region.code)}`);
     filters.selects.show(choice);
     filters.countries.show(choice);
-    renderListing(listing, choice.city, settings, prefix);
+    const codes = renderListing(listing, choice.city, settings, prefix);
+    if (!tagged) {
+      tagged = true;
+      tagListing(codes);
+    }
     status.textContent = settings.text('status', {
       n: choice.city.properties.length, city: choice.city.label,
     });

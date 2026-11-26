@@ -443,6 +443,8 @@ async function loadLazy(doc) {
   if (hash && element) element.scrollIntoView();
 
   loadFooter(doc.querySelector('body > footer'));
+  // the cookie consent banner, until the visitor agrees
+  import('./cookie-consent.js').then(({ default: initCookieConsent }) => initCookieConsent());
 
   loadCSS(`${window.hlx.codeBasePath}/styles/lazy-styles.css`);
   loadFonts();
@@ -456,7 +458,6 @@ function loadDelayed() {
   // the leave-site popup before links to other websites in `leave-site` sections (and the
   // footer's Social column)
   import('./leave-site.js').then(({ installLeaveSitePrompt }) => installLeaveSitePrompt());
-  import('./consent-check.js');
   // the back to top button, on every page
   import('./back-to-top.js').then(({ default: initBackToTop }) => initBackToTop());
   // Kwanko UniJS (the affiliate tag)

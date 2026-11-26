@@ -25,7 +25,9 @@ import {
 } from './gtag-datalayer.js';
 // eslint-disable-next-line import/no-cycle
 import { hideLoader, holdLoader, showLoader } from './scripts.js';
-import { daysUntil, toCheckInDate, toUtcDateTime } from './utility.js';
+import {
+  clean, daysUntil, toCheckInDate, toUtcDateTime,
+} from './utility.js';
 
 const styles = loadCSS(`${window.hlx.codeBasePath}/styles/cart.css`);
 
@@ -693,13 +695,44 @@ function trackCartView(cart) {
 
 // the home page's address: / or a site folder's (/en-uk/ …)
 const HOMEPAGE_PATH = /^\/([a-z]{2}-[a-z]{2}\/?)?$/;
+
+// the mini cart's Edit, noted for the page it opens (Book Your Visit): only its cart_page view_cart
+// is then in the "View Cart" list (see openedFromEdit); every other event there keeps its list
+const EDIT_KEY = 'ppl-cart-edit';
+// whether this page was opened from the mini cart's Edit, once read (see openedFromEdit)
+let fromEdit;
+
+document.addEventListener('cart:edit', (e) => {
+  const href = cartLink('edit', e.detail.cart);
+  if (!href) return;
+  try {
+    sessionStorage.setItem(EDIT_KEY, new URL(href).pathname);
+  } catch { /* storage blocked: the page's view_cart keeps the mini cart's list */ }
+});
+
+/**
+ * Whether this page is the one the mini cart's Edit opened: its note, used once (so a reload
+ * isn't), and kept for the page.
+ * @returns {boolean}
+ */
+function openedFromEdit() {
+  if (fromEdit !== undefined) return fromEdit;
+  fromEdit = false;
+  try {
+    if (sessionStorage.getItem(EDIT_KEY) === window.location.pathname) {
+      sessionStorage.removeItem(EDIT_KEY);
+      fromEdit = true;
+    }
+  } catch { /* nothing noted */ }
+  return fromEdit;
+}
 // the passes' list name in the GA4 events, as PASSES_LIST_NAME in passes.js (not imported: it
 // would make an import cycle through properties.js and scripts.js)
 const PASSES_LIST_NAME = 'Airport Lounge Passes';
 
 /**
  * The GA4 `view_cart` (window.dataLayer, scripts/gtag-datalayer.js) as the mini cart opens
- * ("mini_cart"), or as the checkout page shows the cart ("full_page", blocks/checkout), from the
+ * ("mini_cart"), or as Book Your Visit shows the cart ("cart_page", its block), from the
  * cart as shown: in the visitor's currency, the cart's total, and every line as an item (the
  * property, its promo code and discount, the product, the airport with its code, the city and
  * country code, its price and quantity, and for a lounge the visit and guests). The list, as
@@ -707,14 +740,19 @@ const PASSES_LIST_NAME = 'Airport Lounge Passes';
  * visitor came to the page (viewSource; on the home page, its search widget) with the cart's
  * airport, its code in the id and its name in the name ("HP Search Widget - HKG" / "HP Search
  * Widget - Hong Kong International Airport", "Other - HKG" / "Other - Hong Kong International
- * Airport" …); a cart of passes, the passes' list ("Other - Airport Lounge Passes").
+ * Airport" …); a cart of passes, the passes' list ("Other - Airport Lounge Passes"). Book Your
+ * Visit ("cart_page") opened from the mini cart's Edit (see openedFromEdit): "View Cart - HKG" /
+ * "View Cart - Hong Kong International Airport"; opened another way, as above. (Only this event:
+ * the other events on the page keep their lists.)
  * @param {Object} cart The cart's summary (see readCart in cart.js)
- * @param {'mini_cart'|'full_page'} [cartType]
+ * @param {'mini_cart'|'cart_page'} [cartType]
  */
 export function trackViewCart(cart, cartType = 'mini_cart') {
   const [bookedItem] = cart.lines;
-  const source = HOMEPAGE_PATH.test(window.location.pathname)
+  let source = HOMEPAGE_PATH.test(window.location.pathname)
     ? 'hp_search_widget_click' : viewSource();
+  // Book Your Visit opened from the mini cart's Edit: "View Cart - HKG" (this event only)
+  if (cartType === 'cart_page' && openedFromEdit()) source = 'view_cart';
   const isPassCart = bookedItem.kind === 'pass';
   const listId = listLabel(source, isPassCart ? PASSES_LIST_NAME : bookedItem.iataCode);
   const listName = listLabel(source, isPassCart ? PASSES_LIST_NAME : bookedItem.locationName);
@@ -750,6 +788,129 @@ export function trackViewCart(cart, cartType = 'mini_cart') {
         adults: isPass ? '' : line.adults,
         children: isPass ? '' : line.children,
         total_guest_count: isPass ? '' : line.adults + line.children,
+      };
+    }),
+  });
+}
+
+// the mini cart's Check Out click, noted for the checkout page it opens (see trackBeginCheckout)
+const CHECKOUT_KEY = 'ppl-begin-checkout';
+
+/**
+ * Notes the mini cart's Check Out click for the page its link opens (this browser session; a
+ * later click replaces it), with the list's source as the mini cart's view_cart has it (on the
+ * home page, its search widget's; else how the visitor came, see viewSource). Without a link,
+ * nothing opens and nothing is noted.
+ * @param {Object} cart The cart's summary (see readCart in cart.js)
+ */
+function noteCheckout(cart) {
+  const href = cartLink('checkout', cart);
+  if (!href) return;
+  const source = HOMEPAGE_PATH.test(window.location.pathname)
+    ? 'hp_search_widget_click' : viewSource();
+  const { pathname } = new URL(href);
+  try {
+    sessionStorage.setItem(CHECKOUT_KEY, JSON.stringify({ pathname, source }));
+  } catch { /* storage blocked: no begin_checkout */ }
+}
+
+/**
+ * A cart line's coupon: its first discount's code, else its promo code's, else ''.
+ * @param {Object} line See readLine in cart.js
+ * @returns {string}
+ */
+function couponOf(line) {
+  return line.discountCode || line.promo?.code || '';
+}
+
+/**
+ * The GA4 `begin_checkout` (window.dataLayer, scripts/gtag-datalayer.js) as the checkout page
+ * (blocks/checkout) first shows the cart, when the visitor came from the mini cart's Check Out
+ * (noted for this page and used once: a reload sends none). From the cart: its currency and total,
+ * its coupon (the first line's with one), and every line as an item: a lounge's property, its
+ * coupon and discount, the product, the airport with its code, the city and country code, its
+ * price, visit and guests; a pass's catalogue code and name, its coupon and discount ('' without
+ * them), its number of visits and service, its price and quantity. The list, as the mini cart's
+ * view_cart had it (see noteCheckout) with the cart's airport ("HP Search Widget - HKG" / "HP
+ * Search Widget - Hong Kong International Airport" from the home page); a cart of passes, the
+ * passes' list ("Other - Airport Lounge Passes").
+ * @param {Object} cart The cart's summary (see readCart in cart.js)
+ */
+export function trackBeginCheckout(cart) {
+  let noted = null;
+  try {
+    noted = JSON.parse(sessionStorage.getItem(CHECKOUT_KEY) || 'null');
+    if (noted?.pathname !== window.location.pathname) return;
+    sessionStorage.removeItem(CHECKOUT_KEY);
+  } catch {
+    // nothing noted
+    return;
+  }
+  const [bookedItem] = cart.lines;
+  // the mini cart's (see noteCheckout)
+  const source = noted.source || 'others';
+  const isPassCart = bookedItem.kind === 'pass';
+  const listId = listLabel(source, isPassCart ? PASSES_LIST_NAME : bookedItem.iataCode);
+  const listName = listLabel(source, isPassCart ? PASSES_LIST_NAME : bookedItem.locationName);
+  const cartCoupon = cart.lines.map(couponOf).find(Boolean) || '';
+  pushEcommerce('begin_checkout', {
+    currency: cart.currency,
+    value: cart.totals.total,
+    coupon: cartCoupon,
+    items: cart.lines.map((line) => {
+      if (line.kind === 'pass') {
+        // a pass: no airport, city or visit (as its view_item)
+        return {
+          item_id: line.catalogueCode,
+          item_name: line.product,
+          coupon: couponOf(line),
+          discount: line.discount || '',
+          item_brand: BRAND,
+          // the number of visits (the cart's numberOfVisits), '' without it
+          item_category: line.visits ? String(line.visits) : '',
+          item_category2: '',
+          item_category3: line.category,
+          item_category4: '',
+          item_category5: '',
+          item_list_id: listId,
+          item_list_name: listName,
+          price: line.total,
+          quantity: line.quantity,
+          checkInDate: '',
+          checkInTime: '',
+          adults: '',
+          children: '',
+          total_guest_count: '',
+        };
+      }
+      // a lounge's visit: its startDate, the lounge's local time ("2026-11-28 15:00:00":
+      // "28-Nov-2026", "1500")
+      const [, date = '', hour = '', minute = ''] = String(line.start || '')
+        .match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/) || [];
+      const totalGuestCount = line.adults + line.children;
+      return {
+        item_id: line.propertyCode,
+        item_name: clean(line.propertyName) || line.name,
+        coupon: couponOf(line),
+        // the line's totalDiscounts and totalPromocodeAmount
+        discount: line.discount,
+        item_brand: BRAND,
+        item_category: line.product,
+        // the airport with its code, e.g. Hong Kong International Airport (HKG)
+        item_category2: line.iataCode ? `${line.locationName} (${line.iataCode})` : line.locationName,
+        item_category3: line.name,
+        item_category4: cart.cityName,
+        item_category5: cart.countryCode,
+        item_list_id: listId,
+        item_list_name: listName,
+        // the cart's total (cartTotalPrice.totalPrice, its add-ons included)
+        price: cart.totals.total,
+        quantity: totalGuestCount,
+        checkInDate: toCheckInDate(date),
+        checkInTime: `${hour}${minute}`,
+        adults: line.adults,
+        children: line.children,
+        total_guest_count: totalGuestCount,
       };
     }),
   });
@@ -842,6 +1003,121 @@ function setBusy(from, busy) {
 }
 
 /**
+ * A cart line as a GA4 item for add_to_cart: the property, its promo code and discount, the
+ * product, the airport with its code, the city and country code, the line's price and quantity,
+ * and for a lounge the visit and guests (as view_cart's items).
+ * @param {Object} cart The cart's summary (see readCart in cart.js)
+ * @param {Object} line One of its lines
+ * @returns {Object}
+ */
+function cartItem(cart, line) {
+  const isPass = line.kind === 'pass';
+  // a lounge's visit and guests (a pass has neither): its start is the lounge's local time,
+  // "2026-11-28 15:00:00": "28-Nov-2026", "1500"
+  const [, date = '', hour = '', minute = ''] = isPass ? []
+    : String(line.start || '').match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/) || [];
+  return {
+    item_id: line.propertyCode,
+    item_name: line.shortLocation ? `${line.name} (${line.shortLocation})` : line.name,
+    coupon: line.promo?.code || '',
+    discount: line.discount,
+    item_brand: BRAND,
+    item_category: line.product,
+    // the airport with its code, e.g. Hong Kong International Airport (HKG)
+    item_category2: line.iataCode ? `${line.locationName} (${line.iataCode})` : line.locationName,
+    item_category3: line.name,
+    item_category4: cart.cityName,
+    item_category5: cart.countryCode,
+    price: line.total,
+    quantity: line.quantity,
+    checkInDate: toCheckInDate(date),
+    checkInTime: `${hour}${minute}`,
+    adults: isPass ? '' : line.adults,
+    children: isPass ? '' : line.children,
+    total_guest_count: isPass ? '' : line.adults + line.children,
+  };
+}
+
+// an amount to the cent
+const cents = (amount) => Math.round((Number(amount) || 0) * 100) / 100;
+
+/**
+ * A cart line's list, as view_cart's (see trackViewCart): how the visitor came to the page (on
+ * the home page, its search widget; else viewSource) with the line's airport, its code in the id
+ * and its name in the name ("HP Search Widget - HKG" / "HP Search Widget - Hong Kong
+ * International Airport"); a pass, the passes' list ("Other - Airport Lounge Passes").
+ * @param {Object} line See readLine in cart.js
+ * @returns {{id: string, name: string}}
+ */
+function cartLineList(line) {
+  const source = HOMEPAGE_PATH.test(window.location.pathname)
+    ? 'hp_search_widget_click' : viewSource();
+  const isPass = line.kind === 'pass';
+  return {
+    id: listLabel(source, isPass ? PASSES_LIST_NAME : line.iataCode),
+    name: listLabel(source, isPass ? PASSES_LIST_NAME : line.locationName),
+  };
+}
+
+/**
+ * The GA4 `add_to_cart` (window.dataLayer, scripts/gtag-datalayer.js) once the booking system has
+ * what was just added, with only that: a new line (the home page's Book Now, a pass's Add to
+ * Cart), more of a pass already in (its Add More: the added quantity), or an add-on (Book Your
+ * Visit's Additional Services: the add-on's name as the product). In the cart's currency; each
+ * item at its unit price, its discount and the added quantity; the value their total; where it
+ * was added (`trigger_source`); the list as view_cart's (cartLineList). `upgrade` is "no" (no
+ * upgrade on the site yet).
+ * @param {Object} cart The cart's summary after the add (see readCart in cart.js)
+ * @param {{line: Object, quantity: number, addon?: Object}[]} added The line, how many were
+ *   added, and the add-on when it's one of the line's
+ * @param {'homepage'|'PDP'|'view_cart_page'|'mini_cart'|''} [triggerSource] Where: the home
+ *   page's Book Now, a lounge's or a pass's page (PDP), Book Your Visit, the mini cart
+ */
+export function trackCartAdd(cart, added, triggerSource = '') {
+  const items = added.filter(({ line, quantity }) => line && quantity > 0)
+    .map(({ line, quantity, addon }) => {
+      // the line's (or the add-on's) total and discount for one
+      const of = addon || line;
+      const count = of.quantity || 1;
+      const list = cartLineList(line);
+      return {
+        ...cartItem(cart, line),
+        ...(addon && { coupon: '', item_category: addon.name }),
+        discount: addon ? 0 : cents(line.discount / count),
+        item_list_id: list.id,
+        item_list_name: list.name,
+        price: cents(of.total / count),
+        quantity,
+        upgrade: 'no',
+        trigger_source: triggerSource,
+      };
+    });
+  if (!items.length) return;
+  pushEcommerce('add_to_cart', {
+    currency: cart.currency,
+    value: cents(items.reduce((sum, item) => sum + item.price * item.quantity, 0)),
+    items,
+  });
+}
+
+/**
+ * GA4's add_to_cart for an add (addAndShow) the booking system took: the product's line, with how
+ * many of it were added (one more of a pass after its Add More), and where: the home page (its
+ * Book Now) is "homepage"; any other page is a lounge's or a pass's page, "PDP" (the PPL pass
+ * page, the offers' passes, the lounge page).
+ * @param {Object} item The product, as its type's adapter in cart.js takes it
+ * @param {number} had How many of it the cart had before
+ * @param {{status: string, cart?: Object}} result addToCart's answer
+ */
+function trackAdded(item, had, result) {
+  if (result.status !== 'added') return;
+  const line = result.cart?.lines.find((l) => l.catalogueCode === item.catalogueCode);
+  if (!line) return;
+  const triggerSource = HOMEPAGE_PATH.test(window.location.pathname) ? 'homepage' : 'PDP';
+  trackCartAdd(result.cart, [{ line, quantity: Math.max(1, line.quantity - had) }], triggerSource);
+}
+
+/**
  * The data layer's link click for a pass's Add to Cart (and Add More) once the booking system has
  * it ("add to cart"): the pass's line in the cart as it answered (its catalogue code, display
  * name, service's display name, its totals and its quantity in the cart: 2 after Add More).
@@ -887,9 +1163,13 @@ export async function addAndShow(item, trigger, { next = '' } = {}) {
   const stack = !!next && !!from?.closest('dialog[open]');
   setBusy(from, true);
   showLoader();
+  // how many of it the cart had (a pass's Add More: one more of it), for GA4's add_to_cart
+  const had = getCart()?.lines.find((l) => l.catalogueCode === item.catalogueCode)?.quantity || 0;
   let result;
   try {
     result = await addToCart(item);
+    // GA4's add_to_cart: only what was just added
+    trackAdded(item, had, result);
   } finally {
     hideLoader();
     setBusy(from, false);
@@ -999,5 +1279,9 @@ export async function removeAndShow(catalogueCode, trigger) {
 }
 
 // the data layer's Check Out and Edit clicks (the buttons announce them, see renderMiniCart)
-document.addEventListener('cart:checkout', (e) => trackCheckout(e.detail.cart));
+document.addEventListener('cart:checkout', (e) => {
+  trackCheckout(e.detail.cart);
+  // the checkout page's GA4 begin_checkout, as it loads
+  noteCheckout(e.detail.cart);
+});
 document.addEventListener('cart:edit', (e) => trackCheckout(e.detail.cart));
