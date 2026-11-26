@@ -483,6 +483,9 @@ export default function decorate(block) {
       renderFields();
       choose(date, time);
       linkBack();
+      // the Kwanko basket page tag, once, as the page first shows the cart (not the block
+      // library's sample; the tag waits for Kwanko UniJS, which loads with the other tags)
+      if (!inLibrary()) import('../../scripts/kwanko.js').then(({ basketTag }) => basketTag(now));
     }
     renderPhone();
     renderSummary();
