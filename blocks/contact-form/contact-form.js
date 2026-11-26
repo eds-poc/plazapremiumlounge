@@ -7,7 +7,11 @@ import { buildForm } from '../../scripts/forms.js';
  * field's label, placeholder (and the dropdowns' options), required and error texts (see README).
  */
 const FIELDS = {
-  location: { type: 'select', key: 'location', required: true },
+  // which lounge (country) to reach, from the countries service (as Country of Residence), sent as
+  // the country's name; the authored Placeholder cell is only its empty choice ("Select")
+  location: {
+    type: 'country', key: 'location', required: true, settings: { value: 'countryName' },
+  },
   typeOfEnquiry: { type: 'select', key: 'typeOfEnquiry', required: true },
   title: { type: 'select', key: 'title' },
   firstName: {

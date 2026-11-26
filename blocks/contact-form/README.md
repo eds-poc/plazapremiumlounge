@@ -11,9 +11,10 @@ where the form is sent (the `contact` endpoint: the contact API, see "What's sen
 | *Field* | *Label* | *Placeholder* | *Required* | *Error* |
 
 - **Field**: the field's name (below). **Label**: the visible label (checkbox labels keep links).
-- **Placeholder**: the hint in an empty field. For the dropdowns (`location`, `typeOfEnquiry`,
-  `title`): the empty choice on the first line (`Select`), then one option per line;
-  `Hong Kong SAR = HongKongSAR` shows the first and sends the second.
+- **Placeholder**: the hint in an empty field. For the dropdowns `typeOfEnquiry` and `title`: the
+  empty choice on the first line (`Select`), then one option per line; `Lounge Booking = LoungeBooking`
+  shows the first and sends the second. For `location` and `countryOfResidence` (lists from the
+  countries service): only the empty choice (`Select`, or nothing); any other line is left out.
 - **Required**: `yes`, or empty; ✱ fields are always required.
 - **Error**: line 1, the message when empty; line 2 (optional), the message when the format is wrong.
 - **submit**, **success**, **error** rows: the button text, the message after sending, the message
@@ -25,12 +26,12 @@ where the form is sent (the `contact` endpoint: the contact API, see "What's sen
 
 | Field | What it is |
 | --- | --- |
-| `location` ✱ | Which Plaza Premium Lounge: dropdown, authored list |
+| `location` ✱ | Which Plaza Premium Lounge: the countries from the countries service (as Country of Residence), sent as the country's name |
 | `typeOfEnquiry` ✱ | Type of enquiry: dropdown, authored list |
 | `title` | Title dropdown |
 | `firstName` ✱, `lastName` ✱ | Names, at most 200 |
 | `contactNumber` ✱ | Numbers only (the number keypad on phones; anything else typed or pasted is left out), at most 12 |
-| `countryOfResidence` ✱ | Country, from the countries service |
+| `countryOfResidence` ✱ | Country, from the countries service, sent as its id (a number) |
 | `email` ✱ | Email address, at most 200; **starts the second column** |
 | `bookingReference` | At most 200 |
 | `message` | A 12-line text box |
@@ -49,7 +50,7 @@ captcha token:
 | `email` | Email Address |
 | `subject` | Type of Enquiry, as shown (e.g. `Lounge Booking`) |
 | `message` | Message (`""` when empty) |
-| `location`, `typeOfEnquiry`, `title`, `firstName`, `lastName`, `contactNumber`, `countryOfResidence` (its id, a number), `bookingReference`, `subscribeNewsletter`, `consent` | The fields above |
+| `location` (the country's name), `typeOfEnquiry`, `title`, `firstName`, `lastName`, `contactNumber`, `countryOfResidence` (its id, a number), `bookingReference`, `subscribeNewsletter`, `consent` | The fields above |
 | `h-captcha-response` | The captcha token |
 
 ## Look
