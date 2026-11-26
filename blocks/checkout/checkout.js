@@ -9,7 +9,7 @@ import { buildSummaryBox } from '../../scripts/booking-summary.js';
 import { getCart, getCartId, onCartChange } from '../../scripts/cart-state.js';
 import { refreshCart } from '../../scripts/cart.js';
 import { DEFAULT_SITE, getSiteFolder, translate } from '../../scripts/i18n.js';
-import { trackViewCart } from '../../scripts/mini-cart.js';
+import { trackBeginCheckout, trackViewCart } from '../../scripts/mini-cart.js';
 import { isPreview } from '../../scripts/properties.js';
 import { holdLoader } from '../../scripts/scripts.js';
 
@@ -361,6 +361,8 @@ export default function decorate(block) {
     if (lastCart && !viewed) {
       viewed = true;
       trackViewCart(lastCart, 'full_page');
+      // the GA4 begin_checkout, when the visitor came from the mini cart's Check Out
+      trackBeginCheckout(lastCart);
     }
     const title = el('h2', 'checkout-summary-title', text('summary'));
     title.id = `${formId}-summary`;
