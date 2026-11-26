@@ -113,8 +113,9 @@ function passProduct(catalogueCode, quantity) {
  * (`toLine`), shown when the cart was made but couldn't be read back.
  */
 const ADAPTERS = {
-  // a lounge booking from the homepage's lounge card (`booking-widget:book`): the product's
-  // catalogue code, the visit's date and time at the lounge, and the guests
+  // a lounge booking from the homepage's lounge card (`booking-widget:book`) or the lounge page's
+  // Reserve Now (`property-detail:reserve`): the product's catalogue code, the visit's date and
+  // time at the lounge, and the guests
   lounge: {
     check(item) {
       const adults = Number.parseInt(item.adult, 10);
@@ -501,10 +502,11 @@ async function sendPromo(cartId, promocode) {
 export const PROMO_DROPPED_EVENT = 'cart:promo-dropped';
 
 /**
- * Puts the cart's promo code back after a PUT (every PUT takes it off): the same code again; a
- * refusal (e.g. no line it applies to any more) is announced as `cart:promo-dropped`.
+ * Puts the cart's promo code back after a PUT (every PUT takes it off), or onto a new cart (the
+ * code its product was priced with): the code again; a refusal (e.g. no line it applies to any
+ * more) is announced as `cart:promo-dropped`.
  * @param {string} cartId
- * @param {string} code The code the cart had before the PUT ('' for none)
+ * @param {string} code The code the cart had before the PUT, or the product's ('' for none)
  */
 async function keepPromo(cartId, code) {
   if (!code) return;
@@ -573,10 +575,11 @@ export async function checkAdd(item) {
 }
 
 /**
- * Adds a product to the cart. An empty cart is made with it (POST); a pass joins the cart's passes
- * (PUT with them all), and the same pass again is one more of it. One at a time: while an add is
- * under way, another click gets the same answer.
- * @param {{type: string}} item The product, as its type's adapter takes it
+ * Adds a product to the cart. An empty cart is made with it (POST), with the promo code it was
+ * priced with (`item.promoCode`, the lounge page's); a pass joins the cart's passes (PUT with them
+ * all), and the same pass again is one more of it. One at a time: while an add is under way,
+ * another click gets the same answer.
+ * @param {{type: string, promoCode?: string}} item The product, as its type's adapter takes it
  * @returns {Promise<{status: 'added'|'refused'|'failed', reason?: string, cart?: Object,
  *   error?: Error}>} refused: a rule or the adapter's check said no (`reason`); failed: the
  *   booking system didn't take it
@@ -614,6 +617,9 @@ export function addToCart(item) {
         });
         cartId = text(answer?.cartId);
         if (!cartId) throw new Error('no cartId');
+        // a promo code the product was priced with (the lounge page's): on the new cart too; a
+        // refusal keeps the product, without it (`cart:promo-dropped`)
+        await keepPromo(cartId, text(item.promoCode));
       }
       try {
         return { status: 'added', cart: await refreshCart(cartId) };
