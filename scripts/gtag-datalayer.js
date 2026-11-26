@@ -17,6 +17,8 @@ const SOURCES = {
   mega_menu: 'Mega Menu',
   hp_search_widget_click: 'HP Search Widget',
   others: 'Other',
+  // Book Your Visit's view_cart (cart_page) opened from the mini cart's Edit: "View Cart - HKG"
+  view_cart: 'View Cart',
 };
 // the links whose clicks are noted: every link in the header's main menu (the top links, the
 // dropdowns, the mega menu and the phones' drill-down) and the home page search widget's
@@ -184,9 +186,9 @@ const HOMEPAGE_PATH = /^\/([a-z]{2}-[a-z]{2}\/?)?$/;
 const PASSES_LIST_NAME = 'Airport Lounge Passes';
 
 /**
- * A cart line as a GA4 item for remove_from_cart: the property, its promo code and discount, the
- * product, the airport with its code, the city and country code, the line's price and quantity,
- * and for a lounge the visit and guests (as view_cart's items).
+ * A cart line as a GA4 item for add_to_cart and remove_from_cart: the property, its promo code
+ * and discount, the product, the airport with its code, the city and country code, the line's
+ * price and quantity, and for a lounge the visit and guests (as view_cart's items).
  * @param {Object} cart The cart's summary (see readCart in cart.js)
  * @param {Object} line One of its lines
  * @returns {Object}
@@ -242,19 +244,19 @@ function cartLineList(line) {
 }
 
 /**
- * The GA4 `remove_from_cart` once the booking system has taken products out, with only those, as
- * the cart had them before. Called by scripts/mini-cart.js (the mini cart's ⊗, the home page
- * lounge card's Remove From Cart: a line with its whole quantity, a lounge with its add-ons) and
- * the Add-ons block (Book Your Visit's Remove: an add-on). Each item as view_cart's
- * (cartItem) in its list (cartLineList), at its unit price and discount, with the quantity taken
- * out; an add-on as its lounge with the add-on's name as the product, its own price, no promo code
- * or discount. In the cart's currency, the value the items' total.
- * @param {Object} cart The cart's summary before the removal (see readCart in cart.js)
- * @param {{line: Object, quantity: number, addon?: Object}[]} removed The line, how many were
- *   taken out, and the add-on when it's one of the line's
+ * Pushes a GA4 cart event for products just put in or taken out, with only those: each item as
+ * view_cart's (cartItem) in its list (cartLineList), at its unit price and discount, with the
+ * quantity added or taken out, and the given fields; an add-on as its lounge with the add-on's
+ * name as the product, its own price, no promo code or discount. In the cart's currency, the value
+ * the items' total. Nothing without an item.
+ * @param {'add_to_cart'|'remove_from_cart'} event
+ * @param {Object} cart The cart's summary (see readCart in cart.js): after an add, before a removal
+ * @param {{line: Object, quantity: number, addon?: Object}[]} changed The line, how many were
+ *   added or taken out, and the add-on when it's one of the line's
+ * @param {Object} [fields] More fields for each item (add_to_cart's upgrade and trigger_source)
  */
-export function trackCartRemove(cart, removed) {
-  const items = removed.filter(({ line, quantity }) => line && quantity > 0)
+export function pushCartEvent(event, cart, changed, fields = {}) {
+  const items = changed.filter(({ line, quantity }) => line && quantity > 0)
     .map(({ line, quantity, addon }) => {
       // the line's (or the add-on's) total and discount for one
       const of = addon || line;
@@ -268,12 +270,26 @@ export function trackCartRemove(cart, removed) {
         item_list_name: list.name,
         price: cents(of.total / count),
         quantity,
+        ...fields,
       };
     });
   if (!items.length) return;
-  pushEcommerce('remove_from_cart', {
+  pushEcommerce(event, {
     currency: cart.currency,
     value: cents(items.reduce((sum, item) => sum + item.price * item.quantity, 0)),
     items,
   });
+}
+
+/**
+ * The GA4 `remove_from_cart` once the booking system has taken products out, as the cart had
+ * them before (see pushCartEvent). Called by scripts/mini-cart.js (the mini cart's ⊗, the home
+ * page lounge card's Remove From Cart: a line with its whole quantity, a lounge with its add-ons)
+ * and the Add-ons block (Book Your Visit's Remove: an add-on).
+ * @param {Object} cart The cart's summary before the removal (see readCart in cart.js)
+ * @param {{line: Object, quantity: number, addon?: Object}[]} removed The line, how many were
+ *   taken out, and the add-on when it's one of the line's
+ */
+export function trackCartRemove(cart, removed) {
+  pushCartEvent('remove_from_cart', cart, removed);
 }

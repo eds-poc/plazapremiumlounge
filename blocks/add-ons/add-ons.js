@@ -116,10 +116,18 @@ export default function decorate(block) {
         catalogueCode: item.catalogueCode, name: item.name, quantity,
       });
       const saved = result.status === 'updated';
-      // GA4's remove_from_cart for an add-on taken out, as the cart had it
-      const line = saved && quantity === 0 && cartBeforeSave?.lines.find((l) => l.kind !== 'pass');
+      // GA4's add_to_cart for an add-on put in, with it alone, as the cart has it after (the mini
+      // cart's code only loads now); remove_from_cart for one taken out, as the cart had it
+      const cartOfIt = quantity > 0 ? result.cart : cartBeforeSave;
+      const line = saved && cartOfIt?.lines.find((l) => l.kind !== 'pass');
       const addon = line?.addons?.find((a) => a.catalogueCode === item.catalogueCode);
-      if (addon) trackCartRemove(cartBeforeSave, [{ line, quantity: addon.quantity, addon }]);
+      if (addon && quantity > 0) {
+        import('../../scripts/mini-cart.js')
+          .then(({ trackCartAdd }) => trackCartAdd(result.cart, [{ line, quantity, addon }], 'view_cart_page'))
+          .catch(() => { /* (no analytics without it) */ });
+      } else if (addon) {
+        trackCartRemove(cartBeforeSave, [{ line, quantity: addon.quantity, addon }]);
+      }
       return saved;
     } finally {
       hideLoader();

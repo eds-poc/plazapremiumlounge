@@ -1,10 +1,20 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
 import { readNestedButtons } from '../../scripts/buttons.js';
+import {
+  fetchRows, newestFirst, readOffers, toSourceUrl,
+} from '../../scripts/offers.js';
+import { toKey } from '../../scripts/utility.js';
 
 const HEADINGS = 'h1, h2, h3, h4, h5, h6';
 // the source "Explore Latest Offers" button below the offer carousel
 const BUTTON_DEFAULT = ['outline'];
 const DRAG_THRESHOLD = 30;
+// the settings rows (name | value; names ignore capitals and spaces): a query index of offer
+// pages whose homepage offers (their showOnHomepage metadata) show instead of authored cards,
+// and the cards' link text
+const SETTINGS = { source: 'source', linkText: 'link-text' };
+// the placeholder cards while a Source's offers load (as many as a row shows from 650px)
+const PLACEHOLDERS = 2;
 
 /**
  * Creates an element with an optional class name.
@@ -110,6 +120,95 @@ function buildCard(row, eager) {
   }
   if (body) card.append(body);
   return card;
+}
+
+/**
+ * The settings rows (see SETTINGS): a row of two cells whose first cell is a setting's name.
+ * @param {Element[]} rows The block's rows
+ * @returns {{ source: string, linkText: string, rows: Element[] }} `rows`: the settings rows
+ *   themselves (left out of the cards)
+ */
+function readSettings(rows) {
+  const settings = { source: '', linkText: '', rows: [] };
+  rows.forEach((row) => {
+    const [name, value] = row.children;
+    if (row.children.length !== 2 || isImageOnly(name)) return;
+    const key = toKey(name.textContent);
+    const text = value.textContent.trim();
+    if (key === SETTINGS.source) {
+      settings.source = value.querySelector('a[href]')?.getAttribute('href') || text;
+    } else if (key === SETTINGS.linkText) {
+      settings.linkText = text;
+    } else {
+      return;
+    }
+    settings.rows.push(row);
+  });
+  return settings;
+}
+
+/**
+ * An offer as an authored card's row (an image cell, then a text cell: the title as a heading,
+ * the description, the link), so it's built and styled as any card. Without a link text, the
+ * title links to the offer.
+ * @param {Object} offer See scripts/offers.js readOffers
+ * @param {string} linkText
+ * @returns {HTMLElement}
+ */
+function offerRow(offer, linkText) {
+  const row = el('div');
+  const media = el('div');
+  if (offer.image) {
+    // (decorative: the card's title says what it is, as on the offers page)
+    const img = el('img');
+    img.src = offer.image;
+    img.alt = '';
+    media.append(img);
+  }
+  const text = el('div');
+  const title = el('h3');
+  const link = el('a');
+  link.href = offer.path;
+  if (linkText) {
+    title.textContent = offer.title;
+    link.textContent = linkText;
+  } else {
+    link.textContent = offer.title;
+    title.append(link);
+  }
+  text.append(title);
+  if (offer.description) {
+    const description = el('p');
+    description.textContent = offer.description;
+    text.append(description);
+  }
+  if (linkText) {
+    const line = el('p');
+    line.append(link);
+    text.append(line);
+  }
+  row.append(media, text);
+  return row;
+}
+
+/**
+ * The Source's homepage offers (showOnHomepage true), newest first, as card rows; null when it
+ * can't be read (the browser console says why).
+ * @param {{ source: string, linkText: string }} settings
+ * @returns {Promise<HTMLElement[]|null>}
+ */
+async function offerRows({ source, linkText }) {
+  const url = toSourceUrl(source);
+  try {
+    if (!url) throw new Error('not an address on this site');
+    const offers = newestFirst(readOffers(await fetchRows(url)))
+      .filter((offer) => offer.showOnHomepage);
+    return offers.map((offer) => offerRow(offer, linkText));
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`carousel-cards: couldn't load the offers of "${source}" (${error.message})`);
+    return null;
+  }
 }
 
 /**
@@ -281,23 +380,39 @@ function setupCarousel(block, stage, viewport, list) {
 }
 
 /**
- * loads and decorates the carousel cards block
- * @param {Element} block The carousel-cards block element
+ * A card's placeholder while the offers load: the image's place and two lines, shimmering (the
+ * site's .skeleton); hidden from screen readers.
+ * @returns {HTMLElement}
  */
-export default function decorate(block) {
-  const eager = !!block.closest('main > .section:first-child');
+function placeholderCard() {
+  const card = el('div', 'carousel-cards-card is-placeholder');
+  const body = el('div', 'carousel-cards-body');
+  body.append(el('span', 'carousel-cards-bone skeleton'), el('span', 'carousel-cards-bone skeleton'));
+  card.append(el('div', 'carousel-cards-media skeleton'), body);
+  return card;
+}
+
+/**
+ * Draws the carousel: its cards (from the rows), the arrows when there's more than one, and the
+ * buttons below them. With `placeholders`, those cards instead and no carousel yet (the offers
+ * are loading).
+ * @param {HTMLElement} block
+ * @param {Element[]} rows The cards' rows (authored, or offers made into rows)
+ * @param {HTMLElement[]} buttons
+ * @param {{ eager: boolean, placeholders?: HTMLElement[] }} options
+ */
+function render(block, rows, buttons, { eager, placeholders }) {
   // plain containers: each card is a carousel slide (role group), which a list item can't be
   const list = el('div', 'carousel-cards-list');
-  const buttons = [];
-  [...block.children].forEach((row) => {
-    const nested = readNestedButtons(row, BUTTON_DEFAULT);
-    if (nested) {
-      buttons.push(...nested);
-      return;
-    }
-    const card = buildCard(row, eager && list.children.length < 2);
-    if (card) list.append(card);
-  });
+  if (placeholders) {
+    list.append(...placeholders);
+    list.setAttribute('aria-hidden', 'true');
+  } else {
+    rows.forEach((row) => {
+      const card = buildCard(row, eager && list.children.length < 2);
+      if (card) list.append(card);
+    });
+  }
   // the stage keeps the source's 50px side gutters for the arrows
   const stage = el('div', 'carousel-cards-stage');
   const viewport = el('div', 'carousel-cards-viewport');
@@ -308,12 +423,14 @@ export default function decorate(block) {
   block.setAttribute('aria-roledescription', 'carousel');
   const heading = block.closest('.section')?.querySelector('.default-content-wrapper :is(h1, h2, h3)');
   block.setAttribute('aria-label', heading?.textContent.trim() || 'Cards');
-  [...list.children].forEach((card, i, all) => {
-    card.setAttribute('role', 'group');
-    card.setAttribute('aria-roledescription', 'slide');
-    card.setAttribute('aria-label', `${i + 1} of ${all.length}`);
-  });
-  if (list.children.length > 1) setupCarousel(block, stage, viewport, list);
+  if (!placeholders) {
+    [...list.children].forEach((card, i, all) => {
+      card.setAttribute('role', 'group');
+      card.setAttribute('aria-roledescription', 'slide');
+      card.setAttribute('aria-label', `${i + 1} of ${all.length}`);
+    });
+    if (list.children.length > 1) setupCarousel(block, stage, viewport, list);
+  }
 
   // optional buttons, centred below the cards (source "Explore Latest Offers")
   if (buttons.length) {
@@ -321,4 +438,36 @@ export default function decorate(block) {
     actions.append(...buttons);
     block.append(actions);
   }
+}
+
+/**
+ * Decorates the carousel cards block: the authored cards, or with a Source row that query index's
+ * homepage offers (showOnHomepage), newest first (the authored cards if it can't be read or has
+ * none), then the optional buttons below them. A Source's offers load in the background (the
+ * page doesn't wait for them): placeholder cards hold the carousel's place meanwhile.
+ * @param {Element} block The carousel-cards block element
+ */
+export default function decorate(block) {
+  const eager = !!block.closest('main > .section:first-child');
+  const rows = [...block.children];
+  const settings = readSettings(rows);
+  // the authored rows: the buttons, and the cards
+  const buttons = [];
+  const cardRows = [];
+  rows.filter((row) => !settings.rows.includes(row)).forEach((row) => {
+    const nested = readNestedButtons(row, BUTTON_DEFAULT);
+    if (nested) buttons.push(...nested);
+    else cardRows.push(row);
+  });
+  if (!settings.source) {
+    render(block, cardRows, buttons, { eager });
+    return;
+  }
+  const placeholders = Array.from({ length: PLACEHOLDERS }, placeholderCard);
+  render(block, [], buttons, { eager, placeholders });
+  block.setAttribute('aria-busy', 'true');
+  offerRows(settings).then((offers) => {
+    render(block, offers?.length ? offers : cardRows, buttons, { eager });
+    block.removeAttribute('aria-busy');
+  });
 }
