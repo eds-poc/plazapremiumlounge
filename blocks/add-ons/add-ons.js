@@ -2,6 +2,7 @@ import { addOnsRequest, fetchAddOns } from '../../scripts/add-ons.js';
 import { formatAmount } from '../../scripts/cart-summary.js';
 import { getCart, onCartChange } from '../../scripts/cart-state.js';
 import { readCart, setAddon } from '../../scripts/cart.js';
+import { trackCartRemove } from '../../scripts/gtag-datalayer.js';
 import { translate } from '../../scripts/i18n.js';
 import { openModal } from '../../scripts/modal-dialog.js';
 import { safeHtml } from '../../scripts/properties.js';
@@ -115,17 +116,10 @@ export default function decorate(block) {
         catalogueCode: item.catalogueCode, name: item.name, quantity,
       });
       const saved = result.status === 'updated';
-      // GA4's remove_from_cart for an add-on taken out, as the cart had it; the mini cart's code
-      // only loads now
+      // GA4's remove_from_cart for an add-on taken out, as the cart had it
       const line = saved && quantity === 0 && cartBeforeSave?.lines.find((l) => l.kind !== 'pass');
       const addon = line?.addons?.find((a) => a.catalogueCode === item.catalogueCode);
-      if (addon) {
-        import('../../scripts/mini-cart.js')
-          .then(({ trackCartRemove }) => {
-            trackCartRemove(cartBeforeSave, [{ line, quantity: addon.quantity, addon }]);
-          })
-          .catch(() => { /* (no analytics without it) */ });
-      }
+      if (addon) trackCartRemove(cartBeforeSave, [{ line, quantity: addon.quantity, addon }]);
       return saved;
     } finally {
       hideLoader();

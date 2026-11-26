@@ -21,7 +21,7 @@ import { getCurrency } from './currency.js';
 // eslint-disable-next-line import/no-cycle
 import { PAGE_VIEW, pushEvent } from './adobe-datalayer.js';
 import {
-  BRAND, listLabel, pushEcommerce, trackAllError, viewSource,
+  BRAND, listLabel, pushEcommerce, trackAllError, trackCartRemove, viewSource,
 } from './gtag-datalayer.js';
 // eslint-disable-next-line import/no-cycle
 import { hideLoader, showLoader } from './scripts.js';
@@ -842,100 +842,6 @@ function setBusy(from, busy) {
   ['aria-disabled', 'aria-busy'].forEach((name) => {
     if (busy) from.setAttribute(name, 'true');
     else from.removeAttribute(name);
-  });
-}
-
-/**
- * A cart line as a GA4 item for remove_from_cart: the property, its promo code and discount, the
- * product, the airport with its code, the city and country code, the line's price and quantity,
- * and for a lounge the visit and guests (as view_cart's items).
- * @param {Object} cart The cart's summary (see readCart in cart.js)
- * @param {Object} line One of its lines
- * @returns {Object}
- */
-function cartItem(cart, line) {
-  const isPass = line.kind === 'pass';
-  // a lounge's visit and guests (a pass has neither): its start is the lounge's local time,
-  // "2026-11-28 15:00:00": "28-Nov-2026", "1500"
-  const [, date = '', hour = '', minute = ''] = isPass ? []
-    : String(line.start || '').match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/) || [];
-  return {
-    item_id: line.propertyCode,
-    item_name: line.shortLocation ? `${line.name} (${line.shortLocation})` : line.name,
-    coupon: line.promo?.code || '',
-    discount: line.discount,
-    item_brand: BRAND,
-    item_category: line.product,
-    // the airport with its code, e.g. Hong Kong International Airport (HKG)
-    item_category2: line.iataCode ? `${line.locationName} (${line.iataCode})` : line.locationName,
-    item_category3: line.name,
-    item_category4: cart.cityName,
-    item_category5: cart.countryCode,
-    price: line.total,
-    quantity: line.quantity,
-    checkInDate: toCheckInDate(date),
-    checkInTime: `${hour}${minute}`,
-    adults: isPass ? '' : line.adults,
-    children: isPass ? '' : line.children,
-    total_guest_count: isPass ? '' : line.adults + line.children,
-  };
-}
-
-// an amount to the cent
-const cents = (amount) => Math.round((Number(amount) || 0) * 100) / 100;
-
-/**
- * A cart line's list, as view_cart's (see trackViewCart): how the visitor came to the page (on
- * the home page, its search widget; else viewSource) with the line's airport, its code in the id
- * and its name in the name ("HP Search Widget - HKG" / "HP Search Widget - Hong Kong
- * International Airport"); a pass, the passes' list ("Other - Airport Lounge Passes").
- * @param {Object} line See readLine in cart.js
- * @returns {{id: string, name: string}}
- */
-function cartLineList(line) {
-  const source = HOMEPAGE_PATH.test(window.location.pathname)
-    ? 'hp_search_widget_click' : viewSource();
-  const isPass = line.kind === 'pass';
-  return {
-    id: listLabel(source, isPass ? PASSES_LIST_NAME : line.iataCode),
-    name: listLabel(source, isPass ? PASSES_LIST_NAME : line.locationName),
-  };
-}
-
-/**
- * The GA4 `remove_from_cart` (window.dataLayer, scripts/gtag-datalayer.js) once the booking
- * system has taken products out, with only those, as the cart had them before: a line with its
- * whole quantity (the mini cart's ⊗, the home page lounge card's Remove From Cart), a lounge with
- * its add-ons (they go with it), or an add-on (Book Your Visit's Remove). Each item as view_cart's
- * (cartItem) in its list (cartLineList), at its unit price and discount, with the quantity taken
- * out; an add-on as its lounge with the add-on's name as the product, its own price, no promo code
- * or discount. In the cart's currency, the value the items' total.
- * @param {Object} cart The cart's summary before the removal (see readCart in cart.js)
- * @param {{line: Object, quantity: number, addon?: Object}[]} removed The line, how many were
- *   taken out, and the add-on when it's one of the line's
- */
-export function trackCartRemove(cart, removed) {
-  const items = removed.filter(({ line, quantity }) => line && quantity > 0)
-    .map(({ line, quantity, addon }) => {
-      // the line's (or the add-on's) total and discount for one
-      const of = addon || line;
-      const count = of.quantity || 1;
-      const list = cartLineList(line);
-      return {
-        ...cartItem(cart, line),
-        ...(addon && { coupon: '', item_category: addon.name }),
-        discount: addon ? 0 : cents(line.discount / count),
-        item_list_id: list.id,
-        item_list_name: list.name,
-        price: cents(of.total / count),
-        quantity,
-      };
-    });
-  if (!items.length) return;
-  pushEcommerce('remove_from_cart', {
-    currency: cart.currency,
-    value: cents(items.reduce((sum, item) => sum + item.price * item.quantity, 0)),
-    items,
   });
 }
 
