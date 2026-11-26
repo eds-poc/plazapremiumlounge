@@ -20,6 +20,12 @@ const json = (body, status = 200) => ({
   status, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: typeof body === 'string' ? body : JSON.stringify(body),
 });
 const wait = (ms) => new Promise((r) => { setTimeout(r, ms); });
+// the sample carts' starts from today (a start that's over is dropped from the cart, so the cart
+// would be empty): the lounge's a week ahead at 15:00 (Hong Kong), the pass's tomorrow
+const day = (n) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Hong_Kong' }).format(new Date(Date.now() + n * 864e5));
+const VISIT_DAY = day(7);
+CART.products[0].startDate = `${VISIT_DAY} 15:00:00`;
+PASS_CART.products.forEach((product) => { product.startDate = `${day(1)} 20:00:00`; });
 const LINE = CART.products[0];
 // the stage service's refusals (2026-11-12)
 const promoError = (errorCode, details, message = details) => json({ details, errorCode, message });
@@ -235,7 +241,7 @@ for (const width of WIDTHS) {
   const m = await mini(page);
   const [checkout, edit] = m.actions;
   check(`${width} Check Out: a link to the metadata's page, {lang} and {cartId} filled`, checkout?.tag === 'A' && checkout.text === 'Check Out' && checkout.href === 'https://www.plazapremiumlounge.com/en-uk/guest-checkout?cart=CRT_MC', JSON.stringify(checkout));
-  check(`${width} Edit: a link with the lounge's date, time, guests and product`, edit?.tag === 'A' && edit.text === 'Edit' && edit.href === `https://www.plazapremiumlounge.com/en-uk/book-your-visit?date=2026-11-28&time=1500&adults=1&children=0&product=${encodeURIComponent(LINE.catalogueCode)}`, JSON.stringify(edit));
+  check(`${width} Edit: a link with the lounge's date, time, guests and product`, edit?.tag === 'A' && edit.text === 'Edit' && edit.href === `https://www.plazapremiumlounge.com/en-uk/book-your-visit?date=${VISIT_DAY}&time=1500&adults=1&children=0&product=${encodeURIComponent(LINE.catalogueCode)}`, JSON.stringify(edit));
   check(`${width} no author hint when both are set`, !m.hint);
   const looks = await page.evaluate(() => [...document.querySelectorAll('dialog.mini-cart-modal[open] .mini-cart-actions > a')].map((a) => { const s = getComputedStyle(a); return [s.backgroundColor, s.color, s.textDecorationLine, s.display]; }));
   check(`${width} the links look like the buttons (filled maroon; outlined)`, JSON.stringify(looks) === JSON.stringify([['rgb(104, 18, 53)', 'rgb(255, 255, 255)', 'none', 'flex'], ['rgb(255, 255, 255)', 'rgb(83, 14, 42)', 'none', 'flex']]), JSON.stringify(looks));
@@ -270,7 +276,7 @@ for (const width of WIDTHS) {
   const page = await openWithCart({ path: '/zh-cn/', meta: { 'cart-checkout-url': CHECKOUT, 'cart-edit-url': '/{lang}/edit?d={date}' } });
   await openCart(page);
   const m = await mini(page);
-  check('zh-cn: {lang} is zh-cn; a path is made absolute; the texts (结账, 编辑)', m.actions[0]?.href === 'https://www.plazapremiumlounge.com/zh-cn/guest-checkout?cart=CRT_MC' && /^http:\/\/localhost:\d+\/zh-cn\/edit\?d=2026-11-28$/.test(m.actions[1]?.href || '') && m.actions[0].text === '结账' && m.actions[1].text === '编辑', JSON.stringify(m.actions));
+  check('zh-cn: {lang} is zh-cn; a path is made absolute; the texts (结账, 编辑)', m.actions[0]?.href === 'https://www.plazapremiumlounge.com/zh-cn/guest-checkout?cart=CRT_MC' && new RegExp(`^http://localhost:\\d+/zh-cn/edit\\?d=${VISIT_DAY}$`).test(m.actions[1]?.href || '') && m.actions[0].text === '结账' && m.actions[1].text === '编辑', JSON.stringify(m.actions));
   check('zh-cn: the promo texts (促销代码, 输入代码)', m.label === '促销代码' && m.placeholder === '输入代码', `${m.label} ${m.placeholder}`);
   await page.close();
 }

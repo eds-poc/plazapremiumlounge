@@ -40,7 +40,8 @@ as for the passes, with each card's name and price. It covers:
 - no page errors from the site's code (the local copy's section-metadata table, loaded there as a
   block, aside)
 
-`node mini-cart.test.mjs [width]` — the mini cart (100 checks).
+`node mini-cart.test.mjs [width]` — the mini cart (100 checks; the sample carts' starts from today:
+the lounge's a week ahead, the pass's tomorrow).
 - The source's look (the 2026-11-12 audit's high and medium items) at 375 and 1440: the panel,
   header, promo callout and field, the cross, the arrow, the spacing, the amounts, the lines; the
   low items (with a child booking) at 375, 1100 and 1440; the cross's hover (0.5, then a steady
