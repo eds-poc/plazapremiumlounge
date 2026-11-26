@@ -9,6 +9,7 @@ import { buildSummaryBox } from '../../scripts/booking-summary.js';
 import { getCart, getCartId, onCartChange } from '../../scripts/cart-state.js';
 import { refreshCart } from '../../scripts/cart.js';
 import { DEFAULT_SITE, getSiteFolder, translate } from '../../scripts/i18n.js';
+import { trackBeginCheckout } from '../../scripts/mini-cart.js';
 import { isPreview } from '../../scripts/properties.js';
 import { holdLoader } from '../../scripts/scripts.js';
 
@@ -272,6 +273,8 @@ export default function decorate(block) {
   const text = (key) => texts.get(key)?.textContent.trim() || '';
   const formId = `checkout-form-${count}`;
   let lastCart = null;
+  // the GA4 begin_checkout went out: once a page, the first time the cart shows
+  let beginCheckoutTracked = false;
 
   const { form } = buildForm(block, {
     fields: FIELDS,
@@ -347,6 +350,9 @@ export default function decorate(block) {
   const termsSlot = el('div', 'checkout-terms-slot');
   (fieldElement(form, 'termsAgreed') || form.lastElementChild)?.after(termsSlot);
 
+  // the Kwanko basket page tag went out: once a page, the first time the cart shows (see render)
+  let basketTagged = false;
+
   /**
    * Shows the cart (or its absence): the summary, the phone bar, the lounge's flight fields and
    * the terms.
@@ -355,6 +361,12 @@ export default function decorate(block) {
    */
   const render = (cart, failure = '') => {
     lastCart = cart?.lines.length ? cart : null;
+    // the GA4 begin_checkout (once a page, the first time the cart shows), when the visitor came
+    // from the mini cart's Check Out
+    if (lastCart && !beginCheckoutTracked) {
+      beginCheckoutTracked = true;
+      trackBeginCheckout(lastCart);
+    }
     const title = el('h2', 'checkout-summary-title', text('summary'));
     title.id = `${formId}-summary`;
     if (!lastCart) {
@@ -380,6 +392,13 @@ export default function decorate(block) {
         el('small', 'checkout-bar-note', translate('cartTotalNote')),
       );
       bar.replaceChildren(barTotal, paymentButton(text('payment'), formId, 'checkout-payment-bar'));
+      // the Kwanko basket page tag, once (not the block library's sample; the tag waits for
+      // Kwanko UniJS, which loads with the other tags)
+      if (!basketTagged && !window.location.pathname.includes('/docs/library/')) {
+        basketTagged = true;
+        const tagged = lastCart;
+        import('../../scripts/kwanko.js').then(({ basketTag }) => basketTag(tagged));
+      }
     }
     // a lounge asks for the flight; a pass doesn't (its fields out of the form and its data)
     const lounge = !lastCart || lastCart.lines.some((line) => line.kind !== 'pass');

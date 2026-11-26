@@ -45,8 +45,10 @@ and the rows it doesn't know, so a mistyped row name (`Veiw` for `View`) shows u
 | View and modify | View/Modify Booking |
 | View | View Booking |
 | Cancel | Cancel Booking |
-| Cancel confirm | Cancel booking {id}? |
-| Cancelled message | Booking {id} was cancelled. |
+| Cancel title | Confirmation |
+| Cancel confirm | Are you sure you wish to Cancel the Lounge Booking of Order No.# {id} |
+| Cancel yes | Confirm |
+| Cancel no | Cancel |
 | Resent | The booking confirmation was sent again. |
 | Action error | That didn't work. Please try again. |
 | No upcoming | You have no upcoming bookings. |
@@ -54,6 +56,7 @@ and the rows it doesn't know, so a mistyped row name (`Veiw` for `View`) shows u
 | No cancelled | You have no cancelled bookings. |
 | Error | We couldn't load your bookings. |
 | View page | [/en-uk/view-booking](/en-uk/view-booking) |
+| Cancel page | [/en-uk/cancel-your-booking](/en-uk/cancel-your-booking) |
 | Page size | 10 |
 
 | Row | Where it shows |
@@ -65,8 +68,7 @@ and the rows it doesn't know, so a mistyped row name (`Veiw` for `View`) shows u
 | Adult, Adults, Child, Children | The guests: one adult, more adults, one child, more children (`2 Adults, 1 Child`) |
 | Price note | Below the price |
 | Resend, View and modify, View, Cancel | The card's actions (see [Actions](#actions)) |
-| Cancel confirm | The question asked before cancelling |
-| Cancelled message | Above the tabs once a booking is cancelled |
+| Cancel title, Cancel confirm, Cancel yes, Cancel no | The cancel confirmation popup: its title, the question (`{id}`, the order number, in bold; without `{id}`, the number goes at the end), the button that cancels and the one that keeps the booking |
 | Resent, Action error | On the card, after resending, or when an action fails |
 | No upcoming, No past, No cancelled | Instead of the cards when a tab has no bookings |
 | Error | Instead of the cards when the bookings can't be loaded |
@@ -75,6 +77,10 @@ and the rows it doesn't know, so a mistyped row name (`Veiw` for `View`) shows u
   Each card's order number and **View Booking** / **View/Modify Booking** link go to it with
   the booking added (`/en-uk/view-booking?bookingid=HKBC-11339-64SCYL`). Without the row, the
   language site's `/view-booking` page (`/en-uk/view-booking` on `/en-uk/` pages).
+- **Cancel page** (optional): the page that cancels a booking, as a link or path on this site.
+  **Confirm** in the cancel popup goes to it with the booking added
+  (`/en-uk/cancel-your-booking?bookingid=HKBC-11339-64UIR1`). Without the row, the language
+  site's `/cancel-your-booking` page (`/en-uk/cancel-your-booking` on `/en-uk/` pages).
 - **Page size** (optional): bookings per page, a whole number. 10 without it.
 - Row names ignore capitals and spaces. The block's rows can be in any order.
 
@@ -89,7 +95,9 @@ and the rows it doesn't know, so a mistyped row name (`Veiw` for `View`) shows u
 | Adult, Adults, Child or Children | Leaves that count out of the guests |
 | Price note | Shows the price alone |
 | An action (Resend, View and modify, View, Cancel) | Doesn't show that action |
-| Cancel confirm | Doesn't show **Cancel Booking** (a booking is never cancelled without asking) |
+| Cancel confirm or Cancel yes | Doesn't show **Cancel Booking** (a booking is never cancelled without asking) |
+| Cancel title | Shows the popup without its title |
+| Cancel no | Shows only **Confirm** (the close button keeps the booking) |
 | A message | Shows nothing in its place |
 
 ## What each card shows
@@ -118,8 +126,15 @@ carry the lounge.
 
 - **Resend Booking Confirmation** asks the API to send it again and shows the **Resent** text on
   the card.
-- **Cancel Booking** asks the **Cancel confirm** question first. When it's done, the list loads
-  again (the booking moves to Cancelled) with the **Cancelled message** above the tabs.
+- **Cancel Booking** asks first, in a popup as the source's (the site's dialog: the maroon bar
+  with the close button, then, centred, the **Cancel title**, the **Cancel confirm** question,
+  the lounge's name in bold and its place in the airport (`Plaza Premium First` Near Gate 35, West
+  Hall), and the **Cancel yes** (outlined) and **Cancel no** (filled) buttons; 800px wide from
+  992px, 500px from 576px, the screen's width on phones, where the buttons stack).
+  - **Cancel yes** goes to the **Cancel page** for that booking
+    (`/en-uk/cancel-your-booking?bookingid=HKBC-11339-64UIR1`), which cancels it.
+  - **Cancel no**, the close button, Esc and a click beside the popup keep the booking; the focus
+    goes back to **Cancel Booking**.
 - If an action fails, the card shows the **Action error** text.
 
 ## The page address
@@ -149,8 +164,7 @@ names (English: `30-Nov-2026`, as the source).
   tab's, as the API spells it (case-sensitive): `Upcoming booking`, `Past booking` or
   `Cancelled`. The response is the tab's list of bookings (`{ items: [...] }` works too).
 - Each tab is asked for once, the first time it's shown, and kept for the page; a failed request
-  isn't kept, so opening the tab again asks again. A cancellation loads the list again (the
-  current tab asked for anew).
+  isn't kept, so opening the tab again asks again.
 - A 401 or 403 (`{ "error": "…" }`) logs the visitor out and goes home (`logout`). Any other
   failure, or a `{ error }` or `{ errorCode, message }` answer, shows the **Error** text in that
   tab.
@@ -159,9 +173,9 @@ names (English: `30-Nov-2026`, as the source).
 - `decorate` doesn't wait for the bookings: the section (the side nav beside the block) and the
   footer show straight away, the block keeping its room (`aria-busy`, at least the window's height)
   and the site's loader showing until the first tab's bookings are in.
-- **Placeholder paths:** the resend and cancel APIs don't exist yet. `resendBookingConfirmation`
-  and `cancelBooking` (`POST`, JSON `{ orderId }`, with the token) are in `scripts/endpoints.js`
-  with placeholder paths, to be set to the real ones.
+- **Placeholder path:** the resend API doesn't exist yet. `resendBookingConfirmation` (`POST`,
+  JSON `{ orderId }`, with the token) is in `scripts/endpoints.js` with a placeholder path, to be
+  set to the real one.
 - The photo slider is `buildSlider` from `scripts/properties.js` (prefix `booking-list-slider`),
   the pages `createPager` from `scripts/pagination.js` (`setItems` per tab, `sync` on
   Back/Forward).

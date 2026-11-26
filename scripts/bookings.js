@@ -1,11 +1,12 @@
 /*
- * A member's booking, shared by the booking blocks (View Booking, Edit Booking): the booking id in
- * the address, the booking from GetOrderDetail with the login token, its items grouped (the lounge
- * service and its add-ons), and the prices and dates written as the source does.
+ * A member's booking, shared by the booking blocks: the booking id in the address, the booking
+ * pages' addresses for a booking, the booking from GetOrderDetail with the login token, its items
+ * grouped (the lounge service and its add-ons), and the prices and dates written as the source
+ * does.
  */
 import apiUrl from './endpoints.js';
 import { authHeaders, logout } from './auth.js';
-import { getLanguage } from './i18n.js';
+import { DEFAULT_SITE, getLanguage, getSiteFolder } from './i18n.js';
 import { hideLoader, showLoader } from './scripts.js';
 
 // an order id as in the address (?bookingid=HKBC-11339-64SCYL)
@@ -20,6 +21,35 @@ export function bookingId() {
   const params = new URLSearchParams(window.location.search);
   const id = (params.get('bookingid') || params.get('orderId') || '').trim();
   return ORDER_ID.test(id) ? id : '';
+}
+
+/**
+ * A booking page's path: the authored one (a link or path on this site, its query kept), else the
+ * language site's page of that name.
+ * @param {string} [authored] An authored href or path ('' or another site's: the default)
+ * @param {string} page The page's name in the language site, e.g. 'view-booking'
+ * @returns {string} e.g. /en-uk/view-booking
+ */
+export function bookingPage(authored, page) {
+  if (authored) {
+    try {
+      const url = new URL(authored, window.location.href);
+      if (url.origin === window.location.origin) return `${url.pathname}${url.search}`;
+    } catch { /* the language site's page */ }
+  }
+  return `/${getSiteFolder() || DEFAULT_SITE}/${page}`;
+}
+
+/**
+ * A booking page's address for one booking: the page, with the booking as `?bookingid=`.
+ * @param {string} page A path (see bookingPage)
+ * @param {string} orderId
+ * @returns {string} e.g. /en-uk/view-booking?bookingid=HKBC-11339-64SCYL
+ */
+export function bookingHref(page, orderId) {
+  const url = new URL(page, window.location.href);
+  url.searchParams.set('bookingid', orderId);
+  return `${url.pathname}${url.search}`;
 }
 
 /**
