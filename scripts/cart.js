@@ -278,9 +278,11 @@ function readLine(p) {
     // short location ("International Departures, Terminal 1")
     shortLocation: text(p?.shortLocation),
     // for the GA4 begin_checkout (scripts/mini-cart.js trackBeginCheckout): the property's full
-    // name ("Plaza Premium Lounge (Near Gate 1, Departures)") and the first discount's code
+    // name ("Plaza Premium Lounge (Near Gate 1, Departures)"), the first discount's code and a
+    // pass's number of visits (numberOfVisits; 0 while the cart API doesn't give it)
     propertyName: text(p?.propertyName),
     discountCode: text(p?.itemPriceDetails?.discounts?.[0]?.code),
+    visits: Number.parseInt(p?.numberOfVisits, 10) || 0,
   };
 }
 

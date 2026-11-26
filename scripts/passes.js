@@ -212,8 +212,6 @@ export function addToCart(from, pass, eventName) {
       name: pass.name,
       price: pass.total,
       currency: pass.currency,
-      // the number of visits (numberOfVisits), for the GA4 begin_checkout (scripts/mini-cart.js)
-      visits: pass.visits,
     },
   }));
 }

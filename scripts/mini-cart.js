@@ -755,9 +755,6 @@ export function trackViewCart(cart, cartType = 'mini_cart') {
 
 // the mini cart's Check Out click, noted for the checkout page it opens (see trackBeginCheckout)
 const CHECKOUT_KEY = 'ppl-begin-checkout';
-// the passes' number of visits by catalogue code, as the passes service gives it when a pass goes
-// into the cart (the cart's answer has none), for the GA4 begin_checkout
-const PASS_VISITS_KEY = 'ppl-pass-visits';
 
 /**
  * Notes the mini cart's Check Out click for the page its link opens (this browser session; a
@@ -776,57 +773,6 @@ function noteCheckout(cart) {
     sessionStorage.setItem(CHECKOUT_KEY, JSON.stringify({ pathname, source }));
   } catch { /* storage blocked: no begin_checkout */ }
 }
-
-/**
- * Keeps a pass's number of visits (its Add to Cart's `visits`) by its catalogue code.
- * @param {{catalogueCode: string, visits?: number}} item
- */
-function notePassVisits(item) {
-  if (!item.catalogueCode || !item.visits) return;
-  try {
-    const visits = JSON.parse(localStorage.getItem(PASS_VISITS_KEY) || '{}');
-    visits[item.catalogueCode] = item.visits;
-    localStorage.setItem(PASS_VISITS_KEY, JSON.stringify(visits));
-  } catch { /* storage blocked: no number of visits */ }
-}
-
-/**
- * A pass's number of visits as text ("5"), '' when it isn't known (see notePassVisits).
- * @param {string} catalogueCode
- * @returns {string}
- */
-function passVisits(catalogueCode) {
-  try {
-    const visits = JSON.parse(localStorage.getItem(PASS_VISITS_KEY) || '{}');
-    return visits[catalogueCode] ? String(visits[catalogueCode]) : '';
-  } catch {
-    return '';
-  }
-}
-
-/**
- * Keeps the passes' numbers of visits only while their pass is in the cart (see notePassVisits):
- * the others go, and all of them once there's no cart. While the cart is known by its id only
- * (another tab changed it, not read here yet), they stay.
- * @param {Object|null} cart The cart's summary (see readCart in cart.js)
- */
-function removePassVisitsNotInCart(cart) {
-  try {
-    if (!cart) {
-      if (!getCartId()) localStorage.removeItem(PASS_VISITS_KEY);
-      return;
-    }
-    const visits = JSON.parse(localStorage.getItem(PASS_VISITS_KEY) || 'null');
-    if (!visits) return;
-    const inCart = new Set(cart.lines.filter((line) => line.kind === 'pass').map((line) => line.catalogueCode));
-    const kept = Object.fromEntries(Object.entries(visits).filter(([code]) => inCart.has(code)));
-    if (Object.keys(kept).length) localStorage.setItem(PASS_VISITS_KEY, JSON.stringify(kept));
-    else localStorage.removeItem(PASS_VISITS_KEY);
-  } catch { /* storage blocked */ }
-}
-// as the cart changes (here or in another tab), and once now (a cart forgotten meanwhile)
-onCartChange(removePassVisitsNotInCart);
-removePassVisitsNotInCart(getCart());
 
 /**
  * A cart line's coupon: its first discount's code, else its promo code's, else ''.
@@ -880,7 +826,8 @@ export function trackBeginCheckout(cart) {
           coupon: couponOf(line),
           discount: line.discount || '',
           item_brand: BRAND,
-          item_category: passVisits(line.catalogueCode),
+          // the number of visits (the cart's numberOfVisits), '' without it
+          item_category: line.visits ? String(line.visits) : '',
           item_category2: '',
           item_category3: line.category,
           item_category4: '',
@@ -1063,11 +1010,7 @@ export async function addAndShow(item, trigger) {
     setBusy(from, false);
   }
   if (result.status === 'added') {
-    if (item.type === 'pass') {
-      trackAddToCart(item, result.cart);
-      // its number of visits, for the GA4 begin_checkout
-      notePassVisits(item);
-    }
+    if (item.type === 'pass') trackAddToCart(item, result.cart);
     await openMiniCart(from, { fresh: true });
   } else if (result.reason === 'checkout-first') {
     // eslint-disable-next-line no-use-before-define
