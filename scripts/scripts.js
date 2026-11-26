@@ -461,6 +461,8 @@ function loadDelayed() {
   import('./kwanko.js').then(({ default: initKwanko }) => { initKwanko(); });
   // consenTag (metadata `consentag-id`)
   import('./consentag.js').then(({ default: initConsenTag }) => initConsenTag());
+  // Netcore Smartech (metadata `smartech-create-id` and `smartech-register-id`)
+  import('./smartech.js').then(({ default: initSmartech }) => initSmartech());
   // analytics: the page view in the data layer, then the Launch script (metadata
   // `launch-script`)
   import('./adobe-datalayer.js').then(({ default: initDataLayer }) => initDataLayer());
