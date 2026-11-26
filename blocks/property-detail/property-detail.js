@@ -793,7 +793,8 @@ function toCartItem(lounge, { request, price }) {
     catalogueCode: price.catalogueCode,
     price: price.total,
     currency: price.currency,
-    promoCode: price.promoCode || request.promocode,
+    // the code the price service applied (readPrice: '' without one), not just any code typed
+    promoCode: price.promoCode,
   };
 }
 

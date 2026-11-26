@@ -325,6 +325,30 @@ for (const [label, fail, before] of [
   check(`a failed add, ${label}: the button's label unchanged, usable again`, JSON.stringify(await labels(page, A)) === (before ? '["Add More","Add More"]' : '["Add to Cart","Add to Cart"]') && await button.isEnabled(), JSON.stringify(await labels(page, A)));
   await page.close();
 }
+// from a pass's Learn more pop-up: the message over it (as the Reserve Now's over its dialog);
+// ✕ goes back to the pop-up
+for (const [label, setup] of [
+  ['a failed add (500)', { fail: true }],
+  ['Checkout Cart (a lounge in the cart)', { lounge: true }],
+]) {
+  const service = cartService(setup.lounge ? { carts: new Map([['CRT_LOUNGE', 'lounge']]) } : {});
+  const page = await openPasses({ service, ...(setup.lounge && { init: storedLounge }) });
+  const { 'Global 5-Visit Pass': C } = await codes(page);
+  if (setup.fail) {
+    await page.route(/ppg-app\/cart(\?|$)/, async (r) => (r.request().method() === 'POST' ? r.fulfill(json('oops', 500)) : r.fallback()));
+  }
+  await page.locator(`.pass-finder button[data-catalogue-code="${C}"]`).locator('xpath=preceding-sibling::button[contains(@class, "pass-finder-learn")]').click();
+  await page.waitForSelector('dialog.pass-modal[open]', { timeout: 10000 });
+  await page.locator('dialog.pass-modal[open] .pass-modal-add').click();
+  await page.waitForSelector('dialog.cart-message-modal[open]', { timeout: 15000 });
+  const opened = (await state(page)).open;
+  check(`Learn more, ${label}: the message over the pop-up`, JSON.stringify(opened) === '["pass-modal","cart-message-modal"]', JSON.stringify(opened));
+  await page.locator('dialog.cart-message-modal[open] .modal-close').click();
+  await page.waitForTimeout(500);
+  const after = (await state(page)).open;
+  check(`Learn more, ${label}: ✕ closes it, the pop-up stays open`, JSON.stringify(after) === '["pass-modal"]', JSON.stringify(after));
+  await page.close();
+}
 {
   // removing one of two fails: the cart kept, the message over the mini cart
   const service = cartService();

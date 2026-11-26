@@ -1153,14 +1153,15 @@ function trackAddToCart(item, cart) {
  * cart), or the failure message.
  * @param {Object} item The product, as its type's adapter in cart.js takes it
  * @param {HTMLElement} [trigger] The button (or what holds it)
+ * Checkout Cart and the failure message show over a dialog the button is in (a pass's Learn more
+ * pop-up, the phone's booking form), which stays, as checkAndShow's; the mini cart replaces it.
  * @param {{next?: 'edit'}} [options] next: once added, go to that cart link (see cartLink)
- *   instead of opening the mini cart; its messages show over a dialog the button is in (e.g. the
- *   phone's booking form), which stays, as the visitor stays on the page
+ *   instead of opening the mini cart
  */
 export async function addAndShow(item, trigger, { next = '' } = {}) {
   // (the event may come from anything: only an element is a trigger)
   const from = trigger instanceof Element ? trigger.closest('button, a') || trigger : null;
-  const stack = !!next && !!from?.closest('dialog[open]');
+  const stack = !!from?.closest('dialog[open]');
   setBusy(from, true);
   showLoader();
   // how many of it the cart had (a pass's Add More: one more of it), for GA4's add_to_cart

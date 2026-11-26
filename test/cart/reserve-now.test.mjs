@@ -36,6 +36,8 @@ async function open({
 } = {}) {
   const page = await browser.newPage({ viewport: { width, height }, userAgent: UA });
   page.setDefaultTimeout(20000);
+  // the cookie banner already answered (scripts/cookie-consent.js), so it doesn't cover the page
+  await page.context().addCookies([{ name: 'CMSCookieLevel', value: '1000', url: HOST }]);
   page.calls = [];
   page.posts = [];
   page.promos = [];
@@ -43,6 +45,9 @@ async function open({
   // Reserve Now's announced products, kept here (the page goes on to Book Your Visit)
   page.reserved = [];
   await page.exposeFunction('recordReserve', (detail) => page.reserved.push(detail));
+  // GA4's add_to_cart events on the lounge page (scripts/gtag-datalayer.js), kept here too
+  page.adds = [];
+  await page.exposeFunction('recordAdd', (entry) => page.adds.push(entry));
   // whether the mini cart opened on the lounge page
   page.miniOpened = false;
   await page.exposeFunction('recordMini', () => { page.miniOpened = true; });
@@ -72,6 +77,8 @@ async function open({
     if (made) start = `${day(8)} 17:00:00`;
     else if (cart === 'pass') start = `${day(1)} 20:00:00`;
     body.products[0].startDate = start;
+    // (the new cart holds what was posted)
+    if (made && page.posts[0]) body.products[0].catalogueCode = page.posts[0].products[0].catalogueCode;
     return r.fulfill({
       status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body),
     });
@@ -100,6 +107,12 @@ async function open({
   }
   await page.addInitScript(() => {
     window.reserved = [];
+    window.dataLayer = [];
+    const push = window.dataLayer.push.bind(window.dataLayer);
+    window.dataLayer.push = (...entries) => {
+      entries.filter((entry) => entry?.event === 'add_to_cart').forEach((entry) => window.recordAdd(entry));
+      return push(...entries);
+    };
     new MutationObserver(() => {
       if (document.querySelector('dialog.mini-cart-modal[open]')) window.recordMini();
     }).observe(document, {
@@ -217,6 +230,8 @@ const dialog = (page) => page.evaluate(() => {
   const product = body?.products?.[0] || {};
   check('…one POST: that product, at the start (17:00 on the day), 1 adult, in USD', page.posts.length === 1 && product.catalogueCode === item.catalogueCode && product.startDate === `${day(8)} 17:00:00` && product.guestsCount?.adult === '1' && product.guestsCount?.child === '0' && body.currency === 'USD', JSON.stringify(body));
   check('…no promo code sent (none typed)', !page.promos.length, JSON.stringify(page.promos));
+  const added = page.adds[0]?.ecommerce?.items?.[0] || {};
+  check('…GA4 add_to_cart once, from the lounge\'s page (trigger_source PDP), one of it (the item as the cart has it: the fixture\'s lounge)', page.adds.length === 1 && added.trigger_source === 'PDP' && added.quantity === 1, JSON.stringify(page.adds.map((a) => a.ecommerce)));
   const went = await navigated;
   check('…then Book Your Visit (/en-uk/book-your-visit), no mini cart on the lounge page first', went && !page.miniOpened, JSON.stringify({ url: page.url(), mini: page.miniOpened }));
   await page.close();
