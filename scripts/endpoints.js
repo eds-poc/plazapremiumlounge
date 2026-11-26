@@ -37,6 +37,9 @@ const BOOKING_ENDPOINTS = {
   // ?orderId=; Authorization: Bearer <jwt>; the answer: see
   // blocks/cancel-booking-confirmation/README.md)
   cancellationSummary: '/api/v1/web/ppg-app/cancellation-summary',
+  // the site's currencies (GET): [{ currencyCode, currencyName, isBooking, markupRates }], the
+  // language and currency modal's Currency choices (blocks/form/form.js)
+  currencies: '/api/v1/web/ppg-app/currencies',
 };
 
 // endpoint paths, joined to the API domain

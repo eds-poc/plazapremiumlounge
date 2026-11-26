@@ -7,6 +7,11 @@
  */
 
 import { CURRENCY_EVENT, getCurrency, setCurrency } from '../../scripts/currency.js';
+import apiUrl from '../../scripts/endpoints.js';
+import { fetchJson } from '../../scripts/utility.js';
+
+// the currencies service answers in about 0.2-2s
+const CURRENCIES_TIMEOUT_MS = 10000;
 
 const FIELD_TYPES = ['text', 'email', 'password', 'tel', 'number', 'checkbox'];
 // autofill hints by type, or by label for name fields
@@ -178,6 +183,30 @@ function buildChoice({
 }
 
 /**
+ * Fills the Currency group with the currencies service's codes (the bookable ones, in its order);
+ * the visitor's currency is selected, as for any Currency group (see buildChoice).
+ * @param {HTMLElement} fieldset The Currency group (see buildChoice)
+ * @param {{label: string, id: string, name: string}} group
+ */
+async function loadCurrencies(fieldset, group) {
+  try {
+    const currencies = await fetchJson(apiUrl('currencies').href, CURRENCIES_TIMEOUT_MS);
+    const lines = (Array.isArray(currencies) ? currencies : [])
+      .filter((currency) => currency?.currencyCode && currency.isBooking !== false)
+      .map((currency) => {
+        const line = document.createElement('div');
+        line.textContent = currency.currencyCode;
+        return line;
+      });
+    const list = buildChoice({ ...group, lines }).querySelector('.form-choice-list');
+    fieldset.querySelector('.form-choice-list').replaceWith(list);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('form: the currencies did not load', error);
+  }
+}
+
+/**
  * Shows or clears a field's error message.
  * @param {HTMLInputElement} input
  * @param {string} message Empty to clear
@@ -239,9 +268,11 @@ export default function decorate(block) {
       if (!label) return;
       const { lines, name: explicit } = readChoiceCell(cells[2]);
       const name = nameFor(explicit, label);
-      form.append(buildChoice({
-        label, lines, name, id: `form-${formCount}-${name}`,
-      }));
+      const group = { label, name, id: `form-${formCount}-${name}` };
+      // the Currency group's choices come from the currencies service, not the page
+      const fieldset = buildChoice({ ...group, lines: name === 'currency' ? [] : lines });
+      form.append(fieldset);
+      if (name === 'currency') loadCurrencies(fieldset, group);
       return;
     }
     const options = readOptions(cells[2]);
