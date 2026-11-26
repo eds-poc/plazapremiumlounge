@@ -10,7 +10,7 @@ import { readCart, refreshCart, updateLounge } from '../../scripts/cart.js';
 import buildDatePicker from '../../scripts/date-picker.js';
 import apiUrl from '../../scripts/endpoints.js';
 import { DEFAULT_SITE, getSiteFolder, translate } from '../../scripts/i18n.js';
-import { buildPromo } from '../../scripts/mini-cart.js';
+import { buildPromo, trackViewCart } from '../../scripts/mini-cart.js';
 import { openModal } from '../../scripts/modal-dialog.js';
 import {
   fetchJson, getApiLanguage, propertyDetailUrl,
@@ -474,6 +474,9 @@ export default function decorate(block) {
     const firstShow = !line;
     cart = now;
     line = lounge0;
+    // GA4's view_cart for the cart's own page, once, as it first shows the cart (not the block
+    // library's sample)
+    if (firstShow && !inLibrary()) trackViewCart(now, 'cart_page');
     if (firstShow) {
       const [d, t] = [line.start.slice(0, 10), line.start.slice(11, 16).replace(':', '')];
       first = firstSlot(line.timeZone, lounge.leadMinutes);

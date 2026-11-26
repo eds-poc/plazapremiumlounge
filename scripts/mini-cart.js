@@ -695,13 +695,44 @@ function trackCartView(cart) {
 
 // the home page's address: / or a site folder's (/en-uk/ …)
 const HOMEPAGE_PATH = /^\/([a-z]{2}-[a-z]{2}\/?)?$/;
+
+// the mini cart's Edit, noted for the page it opens (Book Your Visit): only its cart_page view_cart
+// is then in the "View Cart" list (see openedFromEdit); every other event there keeps its list
+const EDIT_KEY = 'ppl-cart-edit';
+// whether this page was opened from the mini cart's Edit, once read (see openedFromEdit)
+let fromEdit;
+
+document.addEventListener('cart:edit', (e) => {
+  const href = cartLink('edit', e.detail.cart);
+  if (!href) return;
+  try {
+    sessionStorage.setItem(EDIT_KEY, new URL(href).pathname);
+  } catch { /* storage blocked: the page's view_cart keeps the mini cart's list */ }
+});
+
+/**
+ * Whether this page is the one the mini cart's Edit opened: its note, used once (so a reload
+ * isn't), and kept for the page.
+ * @returns {boolean}
+ */
+function openedFromEdit() {
+  if (fromEdit !== undefined) return fromEdit;
+  fromEdit = false;
+  try {
+    if (sessionStorage.getItem(EDIT_KEY) === window.location.pathname) {
+      sessionStorage.removeItem(EDIT_KEY);
+      fromEdit = true;
+    }
+  } catch { /* nothing noted */ }
+  return fromEdit;
+}
 // the passes' list name in the GA4 events, as PASSES_LIST_NAME in passes.js (not imported: it
 // would make an import cycle through properties.js and scripts.js)
 const PASSES_LIST_NAME = 'Airport Lounge Passes';
 
 /**
  * The GA4 `view_cart` (window.dataLayer, scripts/gtag-datalayer.js) as the mini cart opens
- * ("mini_cart"), or as the checkout page shows the cart ("full_page", blocks/checkout), from the
+ * ("mini_cart"), or as Book Your Visit shows the cart ("cart_page", its block), from the
  * cart as shown: in the visitor's currency, the cart's total, and every line as an item (the
  * property, its promo code and discount, the product, the airport with its code, the city and
  * country code, its price and quantity, and for a lounge the visit and guests). The list, as
@@ -709,14 +740,19 @@ const PASSES_LIST_NAME = 'Airport Lounge Passes';
  * visitor came to the page (viewSource; on the home page, its search widget) with the cart's
  * airport, its code in the id and its name in the name ("HP Search Widget - HKG" / "HP Search
  * Widget - Hong Kong International Airport", "Other - HKG" / "Other - Hong Kong International
- * Airport" …); a cart of passes, the passes' list ("Other - Airport Lounge Passes").
+ * Airport" …); a cart of passes, the passes' list ("Other - Airport Lounge Passes"). Book Your
+ * Visit ("cart_page") opened from the mini cart's Edit (see openedFromEdit): "View Cart - HKG" /
+ * "View Cart - Hong Kong International Airport"; opened another way, as above. (Only this event:
+ * the other events on the page keep their lists.)
  * @param {Object} cart The cart's summary (see readCart in cart.js)
- * @param {'mini_cart'|'full_page'} [cartType]
+ * @param {'mini_cart'|'cart_page'} [cartType]
  */
 export function trackViewCart(cart, cartType = 'mini_cart') {
   const [bookedItem] = cart.lines;
-  const source = HOMEPAGE_PATH.test(window.location.pathname)
+  let source = HOMEPAGE_PATH.test(window.location.pathname)
     ? 'hp_search_widget_click' : viewSource();
+  // Book Your Visit opened from the mini cart's Edit: "View Cart - HKG" (this event only)
+  if (cartType === 'cart_page' && openedFromEdit()) source = 'view_cart';
   const isPassCart = bookedItem.kind === 'pass';
   const listId = listLabel(source, isPassCart ? PASSES_LIST_NAME : bookedItem.iataCode);
   const listName = listLabel(source, isPassCart ? PASSES_LIST_NAME : bookedItem.locationName);
