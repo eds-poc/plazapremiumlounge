@@ -192,8 +192,8 @@ function buildChoice({
  */
 async function readCurrencies() {
   try {
-    const kept = JSON.parse(sessionStorage.getItem(CURRENCIES_KEY) || 'null');
-    if (Array.isArray(kept) && kept.length) return kept;
+    const sessionCurrencies = JSON.parse(sessionStorage.getItem(CURRENCIES_KEY) || 'null');
+    if (Array.isArray(sessionCurrencies) && sessionCurrencies.length) return sessionCurrencies;
   } catch { /* nothing kept */ }
   const currencies = await fetchJson(apiUrl('currencies').href, CURRENCIES_TIMEOUT_MS);
   const codes = (Array.isArray(currencies) ? currencies : [])
