@@ -10,8 +10,11 @@ import { CURRENCY_EVENT, getCurrency, setCurrency } from '../../scripts/currency
 import apiUrl from '../../scripts/endpoints.js';
 import { fetchJson } from '../../scripts/utility.js';
 
-// the currencies service answers in about 0.2-2s
+// how long fetchJson waits for the currencies service before giving up (it needs one: it cancels
+// the request after it); the service answers in about 0.2-2s
 const CURRENCIES_TIMEOUT_MS = 10000;
+// the currencies service's codes, kept for the browser session (it's asked once a session)
+const CURRENCIES_KEY = 'ppl-currencies';
 
 const FIELD_TYPES = ['text', 'email', 'password', 'tel', 'number', 'checkbox'];
 // autofill hints by type, or by label for name fields
@@ -183,21 +186,38 @@ function buildChoice({
 }
 
 /**
- * Fills the Currency group with the currencies service's codes (the bookable ones, in its order);
- * the visitor's currency is selected, as for any Currency group (see buildChoice).
+ * The currencies service's codes (the bookable ones, in its order): this session's, else asked for
+ * and kept for the session.
+ * @returns {Promise<string[]>}
+ */
+async function readCurrencies() {
+  try {
+    const kept = JSON.parse(sessionStorage.getItem(CURRENCIES_KEY) || 'null');
+    if (Array.isArray(kept) && kept.length) return kept;
+  } catch { /* nothing kept */ }
+  const currencies = await fetchJson(apiUrl('currencies').href, CURRENCIES_TIMEOUT_MS);
+  const codes = (Array.isArray(currencies) ? currencies : [])
+    .filter((currency) => currency?.currencyCode && currency.isBooking !== false)
+    .map((currency) => currency.currencyCode);
+  try {
+    if (codes.length) sessionStorage.setItem(CURRENCIES_KEY, JSON.stringify(codes));
+  } catch { /* storage blocked: asked again on the next page */ }
+  return codes;
+}
+
+/**
+ * Fills the Currency group with the currencies service's codes (see readCurrencies); the
+ * visitor's currency is selected, as for any Currency group (see buildChoice).
  * @param {HTMLElement} fieldset The Currency group (see buildChoice)
  * @param {{label: string, id: string, name: string}} group
  */
 async function loadCurrencies(fieldset, group) {
   try {
-    const currencies = await fetchJson(apiUrl('currencies').href, CURRENCIES_TIMEOUT_MS);
-    const lines = (Array.isArray(currencies) ? currencies : [])
-      .filter((currency) => currency?.currencyCode && currency.isBooking !== false)
-      .map((currency) => {
-        const line = document.createElement('div');
-        line.textContent = currency.currencyCode;
-        return line;
-      });
+    const lines = (await readCurrencies()).map((code) => {
+      const line = document.createElement('div');
+      line.textContent = code;
+      return line;
+    });
     const list = buildChoice({ ...group, lines }).querySelector('.form-choice-list');
     fieldset.querySelector('.form-choice-list').replaceWith(list);
   } catch (error) {
