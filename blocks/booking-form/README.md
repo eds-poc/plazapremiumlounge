@@ -23,7 +23,8 @@ then this block.
 - **Field**: the field's name (below). **Label**: the visible label (checkbox labels keep links).
 - **Placeholder**: the hint in an empty field. For the dropdowns: the empty choice on the first
   line (`Select`), then one option per line; `Hong Kong SAR = HKG` shows the first and sends the
-  second. For `servicesRequired`: one service per line (`Lounge Use = LoungeUse`). For
+  second (`locationOfService`: only the empty choice, `Select`; its countries come from the
+  country sheet). For `servicesRequired`: one service per line (`Lounge Use = LoungeUse`). For
   `lengthOfStay`: the unit after the number (`hours`).
 - **Required**: `yes`, or empty; ✱ fields are always required.
 - **Error**: line 1, the message when empty; line 2 (optional), the message when the format is wrong.
@@ -39,8 +40,8 @@ second column, side by side when it has room (as the source).
 
 | Field | What it is |
 | --- | --- |
-| `locationOfService` ✱ | Location dropdown, authored list |
-| `areaOfService` ✱ | The areas of the chosen location, from the `groupBookingAreas` endpoint (a placeholder; the request adds `form: "bookingRequest"`). A choice is asked for once the list has areas; its Error cell is the message. Sent as `locationOfServiceCity` |
+| `locationOfService` ✱ | The countries of the `data/country` sheet that have areas, in the page's language (below); sent as the Country Code (`HK`) |
+| `areaOfService` ✱ | The areas of the chosen country, from the `data/area-of-service` sheet, in the page's language (below). A choice is asked for once the list has areas; its Error cell is the message. Sent as `locationOfServiceCity` |
 | `emailAddress` ✱ | Email address, at most 200 |
 | `contactNumber` ✱ | Numbers only (the number keypad on phones; anything else typed or pasted is left out), at most 12 |
 | `smartTravellerMembershipNumber` | Text, at most 200 |
@@ -62,7 +63,8 @@ second column, side by side when it has room (as the source).
 | Field | What it is |
 | --- | --- |
 | `emailAddress` ✱, `title` ✱, `firstName` ✱, `lastName` ✱, `contactNumber` ✱ | As above |
-| `locationOfService` ✱, `areaOfService` ✱ | As above |
+| `locationOfService` ✱ | Every country of the `data/country` sheet, in the page's language; sent as the Country Code |
+| `areaOfService` ✱ | As above |
 | `servicesRequired` ✱ | As above |
 | `noOfAdults` ✱ (**starts the second column**), `noOfChildren` | Dropdowns, side by side; together at least 10 (the `people` message) |
 | `serviceStartDate` ✱ | Date on the site's calendar, starting today, days before today not pickable; sent as `2026-11-20` |
@@ -76,9 +78,32 @@ second column, side by side when it has room (as the source).
 
 - **bookingRequest**, **groupBooking** (POST, JSON): the fields above by key, and
   `h-captcha-response`.
-- **groupBookingAreas** (POST, JSON `{ locationOfService, languageCode }`, plus
-  `form: "bookingRequest"` from the Booking Form): answers `{ items: [{ value, text }] }`. Until it
-  exists, Area of Service stays empty and optional.
+
+## The countries and the areas of service: two sheets
+
+Two sheets in Document Authoring for both forms and every language, joined by the country's ISO
+code. Each language column holds the name shown on that language's pages (`en-uk`, `zh-cn`,
+`zh-hk`, `ja-jp`, `pt-br`); an empty cell shows the `en-uk` name. The rows' order is the
+dropdowns' order.
+
+**`data/country`** (`/data/country.json`): one row per country.
+
+| Country Code | en-uk | zh-cn | zh-hk | ja-jp | pt-br |
+| --- | --- | --- | --- | --- | --- |
+| HK | Hong Kong SAR | 中国香港特别行政区 | 中國香港特別行政區 | 香港特別行政区 | Hong Kong (RAE) |
+
+**`data/area-of-service`** (`/data/area-of-service.json`): one row per area.
+
+| Country Code | Value | en-uk | zh-cn | zh-hk | ja-jp | pt-br |
+| --- | --- | --- | --- | --- | --- | --- |
+| HK | HongKong(HKG) | Hong Kong (HKG) | 香港 (HKG) | 香港 (HKG) | 香港 (HKG) | Hong Kong (HKG) |
+
+- **Country Code** is what's sent as `locationOfService`; **Value** is what's sent as
+  `locationOfServiceCity`, the same in every language.
+- The lounge booking request lists only the countries that have areas; the group booking lists every
+  country. A country without areas leaves Area of Service empty and optional.
+- A new country or area is a new row; it shows once the sheet is previewed (and on the live site once
+  it's published). If the sheets can't be read, the dropdown keeps any list authored in its row.
 
 ## The dates
 

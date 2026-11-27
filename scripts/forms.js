@@ -787,6 +787,23 @@ export function setFieldError(wrap, text) {
 }
 
 /**
+ * Makes a field required or optional while the form is in use, e.g. a list that only sometimes has
+ * choices: checked with the other fields from then on (on submit and as the visitor goes). An
+ * optional field's error goes.
+ * @param {HTMLElement} wrap The field
+ * @param {string|null} emptyMessage Its message when empty ('' for the default); null: optional
+ */
+export function setFieldRequired(wrap, emptyMessage) {
+  const state = fields.get(wrap);
+  if (!state) return;
+  const required = emptyMessage !== null;
+  if (required) state.def.settings.set('required', emptyMessage);
+  else state.def.settings.delete('required');
+  state.controls.forEach((control) => { control.required = required; });
+  if (!required) setFieldError(wrap, '');
+}
+
+/**
  * Whether a field's value passes its rules, without showing anything (validateField shows the
  * message): e.g. before locking a value filled in for the visitor.
  * @param {HTMLElement} wrap
