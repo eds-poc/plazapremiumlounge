@@ -2,6 +2,7 @@ import { addOnsRequest, fetchAddOns } from '../../scripts/add-ons.js';
 import { formatAmount } from '../../scripts/cart-summary.js';
 import { getCart, onCartChange } from '../../scripts/cart-state.js';
 import { readCart, setAddon } from '../../scripts/cart.js';
+import { trackCartRemove } from '../../scripts/gtag-datalayer.js';
 import { translate } from '../../scripts/i18n.js';
 import { openModal } from '../../scripts/modal-dialog.js';
 import { safeHtml } from '../../scripts/properties.js';
@@ -108,19 +109,24 @@ export default function decorate(block) {
     // (the block library's sample: nothing saved, the pop-up closes)
     if (library) return true;
     showLoader();
+    // the cart as it is: a removed add-on is gone after (for GA4's remove_from_cart)
+    const cartBeforeSave = getCart();
     try {
       const result = await setAddon({
         catalogueCode: item.catalogueCode, name: item.name, quantity,
       });
       const saved = result.status === 'updated';
-      // GA4's add_to_cart for an add-on put in (not a removal), with it alone; the mini cart's code
-      // only loads now
-      const line = saved && quantity > 0 && result.cart?.lines.find((l) => l.kind !== 'pass');
+      // GA4's add_to_cart for an add-on put in, with it alone, as the cart has it after (the mini
+      // cart's code only loads now); remove_from_cart for one taken out, as the cart had it
+      const cartOfIt = quantity > 0 ? result.cart : cartBeforeSave;
+      const line = saved && cartOfIt?.lines.find((l) => l.kind !== 'pass');
       const addon = line?.addons?.find((a) => a.catalogueCode === item.catalogueCode);
-      if (addon) {
+      if (addon && quantity > 0) {
         import('../../scripts/mini-cart.js')
           .then(({ trackCartAdd }) => trackCartAdd(result.cart, [{ line, quantity, addon }], 'view_cart_page'))
           .catch(() => { /* (no analytics without it) */ });
+      } else if (addon) {
+        trackCartRemove(cartBeforeSave, [{ line, quantity: addon.quantity, addon }]);
       }
       return saved;
     } finally {

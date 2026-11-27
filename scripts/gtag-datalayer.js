@@ -179,3 +179,117 @@ export function pushEcommerce(event, ecommerce) {
   window.dataLayer.push(entry);
   return entry;
 }
+
+// the home page's address: / or a site folder's (/en-uk/ …), as in scripts/mini-cart.js
+const HOMEPAGE_PATH = /^\/([a-z]{2}-[a-z]{2}\/?)?$/;
+// the passes' list name, as PASSES_LIST_NAME in scripts/passes.js (this file imports nothing)
+const PASSES_LIST_NAME = 'Airport Lounge Passes';
+
+/**
+ * A cart line as a GA4 item for add_to_cart and remove_from_cart: the property, its promo code
+ * and discount, the product, the airport with its code, the city and country code, the line's
+ * price and quantity, and for a lounge the visit and guests (as view_cart's items).
+ * @param {Object} cart The cart's summary (see readCart in cart.js)
+ * @param {Object} line One of its lines
+ * @returns {Object}
+ */
+function cartItem(cart, line) {
+  const isPass = line.kind === 'pass';
+  // a lounge's visit and guests (a pass has neither): its start is the lounge's local time,
+  // "2026-11-28 15:00:00": "28-Nov-2026", "1500"
+  const [, y, m, d, hour = '', minute = ''] = isPass ? []
+    : String(line.start || '').match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/) || [];
+  return {
+    item_id: line.propertyCode,
+    item_name: line.shortLocation ? `${line.name} (${line.shortLocation})` : line.name,
+    coupon: line.promo?.code || '',
+    discount: line.discount,
+    item_brand: BRAND,
+    item_category: line.product,
+    // the airport with its code, e.g. Hong Kong International Airport (HKG)
+    item_category2: line.iataCode ? `${line.locationName} (${line.iataCode})` : line.locationName,
+    item_category3: line.name,
+    item_category4: cart.cityName,
+    item_category5: cart.countryCode,
+    price: line.total,
+    quantity: line.quantity,
+    checkInDate: y && MONTHS[Number(m) - 1] ? `${d}-${MONTHS[Number(m) - 1]}-${y}` : '',
+    checkInTime: `${hour}${minute}`,
+    adults: isPass ? '' : line.adults,
+    children: isPass ? '' : line.children,
+    total_guest_count: isPass ? '' : line.adults + line.children,
+  };
+}
+
+// an amount to the cent
+const cents = (amount) => Math.round((Number(amount) || 0) * 100) / 100;
+
+/**
+ * A cart line's list, as view_cart's (trackViewCart in scripts/mini-cart.js): how the visitor
+ * came to the page (on the home page, its search widget; else viewSource) with the line's
+ * airport, its code in the id and its name in the name ("HP Search Widget - HKG" / "HP Search
+ * Widget - Hong Kong International Airport"); a pass, the passes' list ("Other - Airport Lounge
+ * Passes").
+ * @param {Object} line See readLine in cart.js
+ * @returns {{id: string, name: string}}
+ */
+function cartLineList(line) {
+  const source = HOMEPAGE_PATH.test(window.location.pathname)
+    ? 'hp_search_widget_click' : viewSource();
+  const isPass = line.kind === 'pass';
+  return {
+    id: listLabel(source, isPass ? PASSES_LIST_NAME : line.iataCode),
+    name: listLabel(source, isPass ? PASSES_LIST_NAME : line.locationName),
+  };
+}
+
+/**
+ * Pushes a GA4 cart event for products just put in or taken out, with only those: each item as
+ * view_cart's (cartItem) in its list (cartLineList), at its unit price and discount, with the
+ * quantity added or taken out, and the given fields; an add-on as its lounge with the add-on's
+ * name as the product, its own price, no promo code or discount. In the cart's currency, the value
+ * the items' total. Nothing without an item.
+ * @param {'add_to_cart'|'remove_from_cart'} event
+ * @param {Object} cart The cart's summary (see readCart in cart.js): after an add, before a removal
+ * @param {{line: Object, quantity: number, addon?: Object}[]} changed The line, how many were
+ *   added or taken out, and the add-on when it's one of the line's
+ * @param {Object} [fields] More fields for each item (add_to_cart's upgrade and trigger_source)
+ */
+export function pushCartEvent(event, cart, changed, fields = {}) {
+  const items = changed.filter(({ line, quantity }) => line && quantity > 0)
+    .map(({ line, quantity, addon }) => {
+      // the line's (or the add-on's) total and discount for one
+      const of = addon || line;
+      const count = of.quantity || 1;
+      const list = cartLineList(line);
+      return {
+        ...cartItem(cart, line),
+        ...(addon && { coupon: '', item_category: addon.name }),
+        discount: addon ? 0 : cents(line.discount / count),
+        item_list_id: list.id,
+        item_list_name: list.name,
+        price: cents(of.total / count),
+        quantity,
+        ...fields,
+      };
+    });
+  if (!items.length) return;
+  pushEcommerce(event, {
+    currency: cart.currency,
+    value: cents(items.reduce((sum, item) => sum + item.price * item.quantity, 0)),
+    items,
+  });
+}
+
+/**
+ * The GA4 `remove_from_cart` once the booking system has taken products out, as the cart had
+ * them before (see pushCartEvent). Called by scripts/mini-cart.js (the mini cart's ⊗, the home
+ * page lounge card's Remove From Cart: a line with its whole quantity, a lounge with its add-ons)
+ * and the Add-ons block (Book Your Visit's Remove: an add-on).
+ * @param {Object} cart The cart's summary before the removal (see readCart in cart.js)
+ * @param {{line: Object, quantity: number, addon?: Object}[]} removed The line, how many were
+ *   taken out, and the add-on when it's one of the line's
+ */
+export function trackCartRemove(cart, removed) {
+  pushCartEvent('remove_from_cart', cart, removed);
+}
