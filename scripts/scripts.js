@@ -267,18 +267,21 @@ export function decorateMain(main) {
   decorateButtons(main);
 }
 
-// the cart: what the blocks that sell announce, and the cart type each product is (the cart's code
-// loads on the first one; see scripts/cart.js and scripts/mini-cart.js)
+// the cart: what the blocks that sell announce, the cart type each product is, and where an added
+// product goes next (`next`: 'edit', the cart's Book Your Visit page; else the mini cart opens).
+// The cart's code loads on the first one; see scripts/cart.js and scripts/mini-cart.js
 const CART_EVENTS = {
   // the homepage lounge card's Book Now
-  'booking-widget:book': 'lounge',
+  'booking-widget:book': { type: 'lounge' },
+  // the lounge page's Reserve Now (Property Detail), as the source's: on to Book Your Visit
+  'property-detail:reserve': { type: 'lounge', next: 'edit' },
   // a pass's Add to Cart (or Add More): its card's or its Learn more pop-up's
-  'quick-buy:add-to-cart': 'pass',
-  'pass-finder:add-to-cart': 'pass',
-  'product-passes:add-to-cart': 'pass',
+  'quick-buy:add-to-cart': { type: 'pass' },
+  'pass-finder:add-to-cart': { type: 'pass' },
+  'product-passes:add-to-cart': { type: 'pass' },
   // a campaign page's own Add to Cart (an Embed Code block's script, as the source's: see
   // installEmbedAddToCart)
-  'embed:add-to-cart': 'pass',
+  'embed:add-to-cart': { type: 'pass' },
 };
 
 /**
@@ -344,7 +347,7 @@ function installCart() {
   document.addEventListener(STALE_EVENT, () => {
     if (document.visibilityState === 'visible') readCartIfNeeded();
   });
-  Object.entries(CART_EVENTS).forEach(([name, type]) => {
+  Object.entries(CART_EVENTS).forEach(([name, { type, next }]) => {
     document.addEventListener(name, (e) => {
       // (as the source's, at once: the button off and the site's loader, while the cart's code
       // loads; the cart keeps them until the booking system has answered)
@@ -357,7 +360,7 @@ function installCart() {
       // (the cart's UI takes the loader from here: loaded only after this script has run)
       // eslint-disable-next-line import/no-cycle
       import('./mini-cart.js')
-        .then(({ addAndShow }) => addAndShow({ ...e.detail, type }, e.target))
+        .then(({ addAndShow }) => addAndShow({ ...e.detail, type }, e.target, { next }))
         .finally(() => {
           hideLoader();
           if (!from) return;

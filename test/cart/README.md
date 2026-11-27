@@ -15,12 +15,13 @@ the routed GET carries what was posted).
   read
 - a stored cart, expiry, BKNG001, another tab, zh-cn, axe
 
-`node passes.test.mjs [width]` — passes on the passes page (82 checks). The passes are
+`node passes.test.mjs [width]` — passes on the passes page (86 checks). The passes are
 `fixtures/passes.json` (the passes service's real answer, five passes). The cart API is emulated
 as stage answers: POST, PUT replacing the products, GET from `fixtures/cart-pass.json`'s real pass
 line, DELETE. It covers:
 - each entry point, Add More, several passes, removing a line and the last (no reload)
-- the labels (reload, another tab), both refusals, the failures
+- the labels (reload, another tab), both refusals, the failures; from Learn more, a failure and
+  Checkout Cart over the pop-up, which stays
 - `?selectedPassID=`, the currency (the session's, a cart of passes converted, a lounge's not), the
   other languages (live's Add to Cart and Add More), axe
 
@@ -39,7 +40,8 @@ as for the passes, with each card's name and price. It covers:
 - no page errors from the site's code (the local copy's section-metadata table, loaded there as a
   block, aside)
 
-`node mini-cart.test.mjs [width]` — the mini cart (100 checks).
+`node mini-cart.test.mjs [width]` — the mini cart (100 checks; the sample carts' starts from today:
+the lounge's a week ahead, the pass's tomorrow).
 - The source's look (the 2026-11-12 audit's high and medium items) at 375 and 1440: the panel,
   header, promo callout and field, the cross, the arrow, the spacing, the amounts, the lines; the
   low items (with a child booking) at 375, 1100 and 1440; the cross's hover (0.5, then a steady
@@ -63,14 +65,21 @@ as for the passes, with each card's name and price. It covers:
   booking system's new price only); the tab shown again.
 - Two tabs (they follow and settle); the earlier cookie moved; blocked storage.
 
-`node reserve-now.test.mjs` — the lounge page's Reserve Now with the cart (12 checks), on
-`/en-uk/find/lounge?propertycode=PRPRTY1219` (the lounge's services as they are; the cart routed).
+`node reserve-now.test.mjs` — the lounge page's Reserve Now with the cart (19 checks), on
+`/en-uk/find/lounge?propertycode=PRPRTY1219` (the lounge's services as they are; the cart and its
+promo code routed; for the promo check, the price answer with a code applied; the cookie banner
+already answered).
 Set `AXE_CORE` for the axe check.
 - A lounge in the cart: Get Price, Reserve Now → the source's Checkout Cart dialog (its texts and
   look: centred 500px, the maroon title bar, the 21px title), the cart only read, nothing reserved;
   static (Esc), View Cart (the mini cart), ✕.
-- Passes in the cart: the same dialog. No cart: no dialog, `property-detail:reserve` as before.
-- 375: over the Book Your Visit dialog, which stays open after ✕. axe.
+- Passes in the cart: the same dialog.
+- No cart: the cart's product announced (`property-detail:reserve`), one POST with it (the start,
+  the guests, the currency), no promo code, GA4's add_to_cart once (`PDP`), then Book Your Visit
+  without the mini cart. With a
+  promo code: it's put on the new cart. A failed add: "Unable to add to cart.", the page stays.
+- 375: over the Book Your Visit dialog, which stays open after ✕ (Checkout Cart, and a failed
+  add). axe.
 
 `node book-your-visit.test.mjs` — the Book Your Visit page and its Add-ons (35 checks), on the
 local `/{lang}/book-your-visit` pages (`BW_HOST` with local content). The cart service is routed

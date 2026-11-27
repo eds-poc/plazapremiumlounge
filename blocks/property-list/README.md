@@ -37,6 +37,11 @@ A city's lounges, loaded live from the Plaza Premium properties service, as the 
   - photos, names, locations, hours, features, prices
   - the location groups and the filter options
 - **Page heading:** put the page's heading and any intro above the block, as normal page content.
+- **A lounge already in the cart:** its card is faded with "This Lounge is already in your cart"
+  (and a check) over it, as the source's, and it can't be opened: its name and View button can't be
+  clicked or reached with the keyboard. Any booking at the lounge counts (whatever the product, date
+  or guests); passes don't. It follows the cart as it changes, in other tabs too. Nothing to
+  author: the message is the site's, in each language.
 
 ## Where the rest comes from
 

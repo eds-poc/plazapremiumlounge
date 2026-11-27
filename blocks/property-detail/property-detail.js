@@ -767,6 +767,38 @@ function trackReserve(lounge, form, { price }) {
 }
 
 /**
+ * The cart's lounge product for the priced choices, as the homepage lounge card's Book Now gives it
+ * (scripts/cart.js, the lounge adapter): the catalogue code, the visit's date and time at the
+ * lounge, the guests, the price and its currency, and the promo code the price was given with.
+ * @param {Object} lounge
+ * @param {{request: Object, price: Object}} priced The price's request and the price (readPrice)
+ * @returns {Object}
+ */
+function toCartItem(lounge, { request, price }) {
+  // the start as asked: "2026-12-04 17:00:00", the lounge's local time
+  const [date, clock = ''] = request.startDateTime.split(' ');
+  return {
+    date,
+    time: clock.slice(0, 5).replace(':', ''),
+    adult: String(request.guests.adult),
+    children: String(request.guests.child),
+    // (the cart checks the start is still bookable there)
+    location: { timeZone: lounge.timeZone, lead: lounge.leadMinutes },
+    propertyCode: lounge.code,
+    propertyName: lounge.fullName,
+    place: lounge.place,
+    serviceCode: request.serviceCode,
+    productCode: request.productCode,
+    productName: price.productName,
+    catalogueCode: price.catalogueCode,
+    price: price.total,
+    currency: price.currency,
+    // the code the price service applied (readPrice: '' without one), not just any code typed
+    promoCode: price.promoCode,
+  };
+}
+
+/**
  * The booking panel (desktop) / form (in the phone's Book Your Visit dialog), as the source:
  * date, time, adults, children, service, service details, promo code and Get Price. Changing the
  * date or time updates the page address and calls `onSlotChange` (the services depend on the
@@ -775,9 +807,9 @@ function trackReserve(lounge, form, { price }) {
  * the price before a discount struck through, the price, and Reserve Now instead of Get Price.
  * Any change clears it again. Reserve Now first checks, as the source's, that the cart may take a
  * lounge (a cart with an item gets the source's Checkout Cart dialog, and nothing else happens);
- * then it announces the choice and its price (`property-detail:reserve`) for the booking hand-off
- * to come; `property-detail:get-price`
- * and `property-detail:price` are announced too.
+ * then it announces the cart's product (`property-detail:reserve`, see toCartItem): the cart
+ * takes it and goes on to Book Your Visit (scripts/scripts.js CART_EVENTS);
+ * `property-detail:get-price` and `property-detail:price` are announced too.
  * @param {Object} lounge
  * @param {Object} slot The chosen date and time (see chooseSlot)
  * @param {Object} settings
@@ -970,7 +1002,8 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
   form.addEventListener('input', (e) => { if (e.target.name === 'promo') clearPrice(); });
   // Reserve Now: first, as the source's (`validtoaddcart`), whether the cart may take a lounge; a
   // cart that already holds an item gets the source's Checkout Cart dialog ("Please proceed to
-  // checkout before adding new item into cart."), and nothing else happens. One check at a time
+  // checkout before adding new item into cart."), and nothing else happens. Then the product goes
+  // into the cart and the page on to Book Your Visit, as the source's. One check at a time
   let checking = false;
   reserve.addEventListener('click', async () => {
     if (!priced || checking) return;
@@ -989,7 +1022,10 @@ function buildBooking(lounge, slot, settings, { currency, onSlotChange, requestP
     }
     // (a change meanwhile cleared the price: nothing to reserve)
     if (!allowed || priced !== chosen) return;
-    form.dispatchEvent(new CustomEvent('property-detail:reserve', { bubbles: true, detail: chosen }));
+    // (from the button: the cart turns it off and shows its messages over the phone's dialog)
+    reserve.dispatchEvent(new CustomEvent('property-detail:reserve', {
+      bubbles: true, detail: toCartItem(lounge, chosen),
+    }));
     // the data layer's Reserve Now click, with the price shown
     trackReserve(lounge, form, chosen);
   });

@@ -72,6 +72,12 @@ At least one of the four is needed.
 Codes are separated by commas (or spaces, or one per line); capitals don't matter. Row names
 ignore capitals and spaces.
 
+- **A lounge already in the cart:** its card is faded with "This Lounge is already in your cart"
+  (and a check) over it, as the source's, and it can't be opened: its name and View button can't be
+  clicked or reached with the keyboard. Any booking at the lounge counts (whatever the product, date
+  or guests); passes don't. It follows the cart as it changes, in other tabs too. Nothing to
+  author: the message is the site's, in each language.
+
 ### The texts
 
 Every text of the filters is authored, in the page's language, a row each; a text left out isn't

@@ -24,7 +24,7 @@ import {
   BRAND, listLabel, pushEcommerce, trackAllError, viewSource,
 } from './gtag-datalayer.js';
 // eslint-disable-next-line import/no-cycle
-import { hideLoader, showLoader } from './scripts.js';
+import { hideLoader, holdLoader, showLoader } from './scripts.js';
 import {
   clean, daysUntil, toCheckInDate, toUtcDateTime,
 } from './utility.js';
@@ -1148,14 +1148,20 @@ function trackAddToCart(item, cart) {
 
 /**
  * Adds a product and shows the answer, as the source: the site's loader while the booking system
- * answers (the button that asked off), then the mini cart, "Checkout Cart" (its View Cart opens
- * the mini cart), or the failure message.
+ * answers (the button that asked off), then the mini cart (or, with `next`, that cart page, e.g.
+ * the lounge page's Reserve Now: Book Your Visit), "Checkout Cart" (its View Cart opens the mini
+ * cart), or the failure message.
  * @param {Object} item The product, as its type's adapter in cart.js takes it
  * @param {HTMLElement} [trigger] The button (or what holds it)
+ * Checkout Cart and the failure message show over a dialog the button is in (a pass's Learn more
+ * pop-up, the phone's booking form), which stays, as checkAndShow's; the mini cart replaces it.
+ * @param {{next?: 'edit'}} [options] next: once added, go to that cart link (see cartLink)
+ *   instead of opening the mini cart
  */
-export async function addAndShow(item, trigger) {
+export async function addAndShow(item, trigger, { next = '' } = {}) {
   // (the event may come from anything: only an element is a trigger)
   const from = trigger instanceof Element ? trigger.closest('button, a') || trigger : null;
+  const stack = !!from?.closest('dialog[open]');
   setBusy(from, true);
   showLoader();
   // how many of it the cart had (a pass's Add More: one more of it), for GA4's add_to_cart
@@ -1171,17 +1177,29 @@ export async function addAndShow(item, trigger) {
   }
   if (result.status === 'added') {
     if (item.type === 'pass') trackAddToCart(item, result.cart);
+    const href = next ? cartLink(next, result.cart) : '';
+    if (href) {
+      // the loader stays up until the next page shows; back on this page from the browser's
+      // cache (Back), it goes
+      holdLoader(new Promise((resolve) => {
+        window.addEventListener('pageshow', (e) => { if (e.persisted) resolve(); });
+      }));
+      window.location.assign(href);
+      return;
+    }
     await openMiniCart(from, { fresh: true });
   } else if (result.reason === 'checkout-first') {
     // eslint-disable-next-line no-use-before-define
-    await showCheckoutFirst(from);
+    await showCheckoutFirst(from, { stack });
   } else if (item.type === 'pass') {
     // (the source's pass page: its notice)
     // eslint-disable-next-line no-use-before-define
-    await showFailure('cartPassAddFailed', from, { title: 'cartNotice', code: errorCode(result) });
+    const notice = { title: 'cartNotice', code: errorCode(result), stack };
+    // eslint-disable-next-line no-use-before-define
+    await showFailure('cartPassAddFailed', from, notice);
   } else {
     // eslint-disable-next-line no-use-before-define
-    await showFailure('cartAddFailed', from, { code: errorCode(result) });
+    await showFailure('cartAddFailed', from, { code: errorCode(result), stack });
   }
 }
 

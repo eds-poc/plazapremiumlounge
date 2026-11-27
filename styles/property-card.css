@@ -50,8 +50,8 @@
     background-color var(--duration-normal) ease-in;
 }
 
-/* lifts and greys on hover, as the source */
-.property-card:hover {
+/* lifts and greys on hover, as the source (not a lounge in the cart: it can't be opened) */
+.property-card:not(.is-in-cart):hover {
   background-color: var(--property-card-bg-hover);
   box-shadow: var(--property-card-shadow-hover);
   transform: translateY(var(--property-card-lift));
@@ -207,7 +207,7 @@
 }
 
 /* the grey hover background is too light for the muted note */
-.property-card:hover .property-card-note {
+.property-card:not(.is-in-cart):hover .property-card-note {
   color: var(--color-text);
 }
 
@@ -508,6 +508,46 @@
 
 .property-slider-dot[aria-current='true'] {
   opacity: 1;
+}
+
+/* a lounge already in the cart (scripts/property-card.js showInCart), as the source's: the card
+   faded and out of reach, the message centred over it in maroon (medium, 18px) with a check */
+.property-card.is-in-cart {
+  --property-card-faded: 0.25;
+
+  position: relative;
+}
+
+.property-card.is-in-cart > :not(.property-card-in-cart) {
+  opacity: var(--property-card-faded);
+}
+
+.property-card .property-card-in-cart {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-3);
+  margin: 0;
+  padding: var(--spacing-7);
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+}
+
+.property-card .property-card-in-cart[hidden] {
+  display: none;
+}
+
+.property-card .property-card-in-cart-icon {
+  flex: none;
+  width: 1.1em;
+  height: 1.1em;
+  background-color: currentcolor;
+  mask: url('../icons/check-circle.svg') center / contain no-repeat;
 }
 
 @media (prefers-reduced-motion: reduce) {

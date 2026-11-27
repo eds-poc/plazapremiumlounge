@@ -1,12 +1,14 @@
 /*
  * Property card: a property's card, as the source city pages' (styles/property-card.css): a photo
  * slider, then the details (badge, name, location, hours, icons, note, features with "+N more",
- * price, View button, loyalty line); parts without data are left out. For the properties
- * scripts/properties.js readProperty reads. Blocks call loadPropertyCardStyles before showing
- * cards, so they don't show unstyled.
+ * price, View button, loyalty line); parts without data are left out. A lounge already in the cart
+ * (scripts/cart-state.js) is faded, can't be opened, and says so (the site's translation). For
+ * the properties scripts/properties.js readProperty reads. Blocks call loadPropertyCardStyles
+ * before showing cards, so they don't show unstyled.
  */
 import { loadCSS } from './aem.js';
 import { applyButtonAction } from './button-actions.js';
+import { cartLounges, onCartChange } from './cart-state.js';
 import { getLanguage, translate } from './i18n.js';
 import {
   buildBadge, buildSlider, el, isPreview, propertyDetailPath, propertyDetailUrl, safeNote, toUrl,
@@ -15,6 +17,9 @@ import {
 const VISIBLE_TAGS = 5;
 
 let styles;
+// the cart's lounges (cartLounges), read once for the page's first lounge card and again on each
+// cart change (one listener for every card on the page), not once per card
+let lounges;
 
 /**
  * The cards' stylesheet (styles/property-card.css), loaded once per page.
@@ -23,6 +28,19 @@ let styles;
 export function loadPropertyCardStyles() {
   styles = styles || loadCSS(`${window.hlx?.codeBasePath || ''}/styles/property-card.css`);
   return styles;
+}
+
+/**
+ * Shows whether a card's lounge is in the cart: faded, its content out of reach (no link, no
+ * focus, hidden from screen readers) and the message over it; else as usual. Passes aren't marked.
+ * @param {HTMLElement} card A card with `data-property-code` and its message
+ */
+function showInCart(card) {
+  const inCart = lounges.has(card.dataset.propertyCode);
+  card.classList.toggle('is-in-cart', inCart);
+  card.querySelector(':scope > .property-card-in-cart').hidden = !inCart;
+  [...card.children].filter((part) => !part.matches('.property-card-in-cart'))
+    .forEach((part) => { part.inert = inCart; });
 }
 
 /**
@@ -247,6 +265,27 @@ export function buildPropertyCard(property, {
   if (property.loyalty) bottom.append(buildLoyalty(property.loyalty, signup));
   body.append(top, bottom);
   card.append(buildSlider(property, eager), body);
+  // a lounge (not a pass) already in the cart: the message over the faded card (the lounge's name
+  // first, for screen readers, which don't reach the faded card)
+  if (property.code && !property.pass) {
+    card.dataset.propertyCode = property.code;
+    const message = el('p', 'property-card-in-cart');
+    message.append(
+      el('span', 'visually-hidden', `${property.name}: `),
+      el('span', '', translate('propertyInCart')),
+      el('span', 'property-card-in-cart-icon'),
+    );
+    message.setAttribute('role', 'status');
+    card.append(message);
+    if (!lounges) {
+      lounges = cartLounges();
+      onCartChange((cart) => {
+        lounges = cartLounges(cart);
+        document.querySelectorAll('.property-card[data-property-code]').forEach(showInCart);
+      });
+    }
+    showInCart(card);
+  }
   return card;
 }
 

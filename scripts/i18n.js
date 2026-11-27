@@ -192,6 +192,10 @@ const TEXTS = {
   propertyFrom: {
     en: 'from', zh: '起', 'zh-HK': '起', ja: '〜', pt: 'a partir de',
   },
+  // (the listings' card of a lounge already in the cart, as the source's)
+  propertyInCart: {
+    en: 'This Lounge is already in your cart', zh: '此贵宾室已在您的购物车中', 'zh-HK': '此貴賓室已在您的購物車中', ja: 'このラウンジはすでにカートに入っています', pt: 'Este lounge já está no seu carrinho',
+  },
   propertyMore: {
     en: '+{n} more', zh: '+{n} 项', 'zh-HK': '+{n} 項', ja: '他 {n} 件', pt: '+{n} mais',
   },

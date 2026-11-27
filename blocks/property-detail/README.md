@@ -116,10 +116,13 @@ shared. Lounge cards in the [Property List](../property-list/README.md) link her
   choices clears it again. **Reserve Now** first checks the cart, as the source's (`validtoaddcart`):
   when the cart already holds an item (a lounge or passes), the source's **Checkout Cart** dialog
   shows ("Please proceed to checkout before adding new item into cart.", View Cart opens the mini
-  cart; on phones over the Book Your Visit dialog), and the cart doesn't change. Otherwise it
-  announces the choice and its price (a
-  `property-detail:reserve` event) for the booking hand-off to come (`property-detail:get-price`
-  and `property-detail:price` are announced too). When the service rejects the promo code
+  cart; on phones over the Book Your Visit dialog), and the cart doesn't change. Otherwise, as the
+  source's, the lounge goes into the cart (the chosen product, date, time and guests, at the
+  price shown; a promo code the price was given with goes onto the cart too) behind the site's
+  loader, and the page goes on to **Book Your Visit** (`/{lang}/book-your-visit`; no mini cart).
+  A failed add shows "Unable to add to cart." and the page stays (on phones over the Book Your
+  Visit dialog). The page announces the cart's product as `property-detail:reserve`
+  (`property-detail:get-price` and `property-detail:price` are announced too). When the service rejects the promo code
   (`isPromoRejected` on any item of its answer), its message shows under the promo code field
   (e.g. "No campaign found with given promocode"); the code stays in the field to be corrected,
   no price is shown and the button stays Get Price. Typing in the field hides the message.

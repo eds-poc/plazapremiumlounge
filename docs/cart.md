@@ -2,8 +2,9 @@
 
 The source's cart, on this site: a product goes into the cart from the block that sells it, the
 header's cart icon shows the count, and the mini cart shows what's in it. Two types sell today:
-the homepage lounge card's **Book Now** (a lounge booking), and the passes page's **Add to Cart**
-on Quick Buy, Pass Finder and their Learn more pop-up (lounge passes). Other products plug in the
+the homepage lounge card's **Book Now** and the lounge page's **Reserve Now** (a lounge booking),
+and the passes page's **Add to Cart** on Quick Buy, Pass Finder and their Learn more pop-up
+(lounge passes). Other products plug in the
 same way (see [Adding a product type](#adding-a-product-type)).
 
 **The cart's rules** (as the source's):
@@ -25,6 +26,15 @@ the page after ⊗ → Yes, and that reload adds the promotional address's pass 
   back) the loader goes, the **mini cart** opens, the header's cart shows **1**, and the card's
   button reads **Remove From Cart**: no question asked, the button off and the loader while the
   booking system deletes the cart, then **Book Now** again and no count (no reload).
+- **Reserve Now** on the lounge page (Property Detail, once Get Price has a price), as the
+  source's: the cart is checked first, without the loader (a cart with an item: **Checkout
+  Cart**, and nothing changes). Then the button is off and the loader shows while the booking
+  system makes the cart with the priced product (the date, time and guests chosen). A promo code
+  the price was given with goes onto the cart too; a refusal there keeps the lounge, without it.
+  There's **no mini cart**: the loader stays up and the page goes on to **Book Your Visit**
+  (`/{lang}/book-your-visit`, the mini cart's Edit link, so its page metadata applies). A failed
+  add shows "Unable to add to cart." and the page stays; on phones these messages show over the
+  Book Your Visit dialog, which stays open.
 - **The cart's dialogs stay open on Esc and a click beside them** (they bounce), as the source's
   (`data-bs-backdrop="static" data-bs-keyboard="false"`): only their own controls close them.
 - **The mini cart** (as the source's: a 420px panel at the top right from 768px; below it the
@@ -52,7 +62,8 @@ the page after ⊗ → Yes, and that reload adds the promotional address's pass 
     widget's choices and the Pass Finder's filters.
 - **A pass's Add to Cart** (Quick Buy, Pass Finder, or its Learn more pop-up):
   - The loader shows and the button is off, then the mini cart opens; from Learn more, the pop-up
-    closes first, as the source's.
+    closes first, as the source's. Checkout Cart or a failure from Learn more shows over the pop-up,
+    which stays (✕ goes back to it).
   - The pass's line: its name with ⊗, then **Quantity: N** with the line's price beside it. No
     Date/Time/Guests, and no **Edit** in a cart of passes (as the source's).
   - **Add More:** while a pass is in the cart, every button for it on the page reads **Add More**:
@@ -173,18 +184,19 @@ that isn't a web address: then Check Out is a button that only announces.)
 | File | What it does |
 | --- | --- |
 | `scripts/cart-state.js` | The cart on this site (small: the header loads it on every page), see [Where the cart is kept](#where-the-cart-is-kept). `getCartId`, `getCart`, `needsRead`, `cartCount`, `isInCart`, `saveCart`, `forgetCart`, `onCartChange` (`cart:change` on document, other tabs too), `cart:stale`. |
-| `scripts/cart.js` | The cart without UI. `addToCart(item)`: the type's adapter (`lounge`, `pass`), the cart's rules (`RULES`), then POST for an empty cart, or PUT for a pass joining passes. Also `refreshCart()`, `convertCart(currency)` (a cart of passes, PUT), `deleteCart(cartId)`, `removeFromCart(catalogueCode)` (PUT with the other lines, or DELETE for the last), `passStart()`, `registerAdapter(type, adapter)`. `checkAdd(item)`: the same rules on the cart as the booking system has it, without adding (`allowed` / `refused` / `failed`). One add, and one removal, at a time. |
-| `scripts/mini-cart.js` + `styles/cart.css` | The UI in the site's dialog (`modal-dialog.js`, with its `static` content and `stack` options): the mini cart, Checkout Cart, the remove confirmation (stacked over the mini cart), the failure message; the site's loader (`showLoader` / `hideLoader` from `scripts.js`) while the booking system answers. `addAndShow(item, trigger)`, `openMiniCart(trigger)`: a cart this tab hasn't read is read behind the loader first. `checkAndShow(item, trigger)`: the lounge page's Reserve Now, Checkout Cart when the cart may not take it (no loader, as the source's; over an open dialog). |
-| `scripts/scripts.js` | `installCart()`: what the blocks announce → the cart (`CART_EVENTS`: `booking-widget:book` is a `lounge`; `quick-buy:add-to-cart`, `pass-finder:add-to-cart`, `product-passes:add-to-cart` and `embed:add-to-cart` are a `pass`). `embed:add-to-cart` comes from the global `AddToCart(button, catalogueCode, …)` it defines for campaign pages whose Embed Code script calls the source's (a pass's catalogue code only, in the visitor's currency), and `cart:remove` (`detail.catalogueCode`). The button off and the loader at once; the cart's code loads on the first product or removal. It reads a cart this tab hasn't got (a new tab, data past its 2 hours, another tab's change) after the load, when the tab is shown again, and on `cart:stale`. Also the site's full-page loader (`showLoader`, `hideLoader`). |
+| `scripts/cart.js` | The cart without UI. `addToCart(item)`: the type's adapter (`lounge`, `pass`), the cart's rules (`RULES`), then POST for an empty cart (and the item's `promoCode`, the lounge page's, put on it), or PUT for a pass joining passes. Also `refreshCart()`, `convertCart(currency)` (a cart of passes, PUT), `deleteCart(cartId)`, `removeFromCart(catalogueCode)` (PUT with the other lines, or DELETE for the last), `passStart()`, `registerAdapter(type, adapter)`. `checkAdd(item)`: the same rules on the cart as the booking system has it, without adding (`allowed` / `refused` / `failed`). One add, and one removal, at a time. |
+| `scripts/mini-cart.js` + `styles/cart.css` | The UI in the site's dialog (`modal-dialog.js`, with its `static` content and `stack` options): the mini cart, Checkout Cart, the remove confirmation (stacked over the mini cart), the failure message; the site's loader (`showLoader` / `hideLoader` from `scripts.js`) while the booking system answers. `addAndShow(item, trigger, { next })`, `openMiniCart(trigger)`: a cart this tab hasn't read is read behind the loader first; with `next: 'edit'` an added product goes on to that cart link (Book Your Visit, the loader held) instead of the mini cart. Checkout Cart and the failure message show over a dialog the button is in (a pass's Learn more pop-up, the phone's booking form), which stays; the mini cart replaces it. `checkAndShow(item, trigger)`: the lounge page's Reserve Now, Checkout Cart when the cart may not take it (no loader, as the source's; over an open dialog). |
+| `scripts/scripts.js` | `installCart()`: what the blocks announce → the cart (`CART_EVENTS`, each `{ type, next }`: `booking-widget:book` is a `lounge`; `property-detail:reserve` a `lounge` going on to Book Your Visit (`next: 'edit'`); `quick-buy:add-to-cart`, `pass-finder:add-to-cart`, `product-passes:add-to-cart` and `embed:add-to-cart` are a `pass`). `embed:add-to-cart` comes from the global `AddToCart(button, catalogueCode, …)` it defines for campaign pages whose Embed Code script calls the source's (a pass's catalogue code only, in the visitor's currency), and `cart:remove` (`detail.catalogueCode`). The button off and the loader at once; the cart's code loads on the first product or removal. It reads a cart this tab hasn't got (a new tab, data past its 2 hours, another tab's change) after the load, when the tab is shown again, and on `cart:stale`. Also the site's full-page loader (`showLoader`, `hideLoader`). |
 | `scripts/passes.js` | `buildAddButton`: a pass's Add to Cart (cards and Learn more), labelled from the cart (Add More), all of them relabelled on `cart:change`. `takeSelectedPass`: the promotional address's pass, called by Quick Buy and Pass Finder once their passes are in (the first that lists it takes it). |
 | `blocks/header` | The count on the cart icon; the icon opens the mini cart when the cart holds something. |
 | `blocks/booking-widget` (lounge card) | Book Now announces `booking-widget:book` (the choice, `catalogueCode`, `currency`, the names and price); Remove From Cart announces `cart:remove`. |
+| `blocks/property-detail` (lounge page) | Reserve Now, after `checkAndShow`, announces `property-detail:reserve` from the button: the lounge item as Book Now gives it (`toCartItem`: the priced `catalogueCode`, date, time, guests, `currency`, price, names, the lounge's time zone and lead time) and the `promoCode` the price was given with. |
 
 ### Where the cart is kept
 
 | What | Where | For how long |
 | --- | --- | --- |
-| The cart's id, its count and its products' catalogue codes (no prices), and a change stamp | localStorage `ppl-cart-id`: `{ id, expires, changed, count, codes, sig }` (every tab's) | 24 hours from when the cart was made, as the source's cart cookie |
+| The cart's id, its count and its products' catalogue codes (no prices), and a change stamp | localStorage `ppl-cart-id`: `{ id, expires, changed, count, codes, lounges, sig }` (every tab's; `lounges`: the property codes of its lounge lines, for the listings' "already in your cart") | 24 hours from when the cart was made, as the source's cart cookie |
 | The cart's data: the booking system's last answer (lines, prices, totals, currency, promo) | sessionStorage `ppl-cart` (this tab's), with `fetchedAt` and `expires` | 2 hours from that answer; every read starts the 2 hours again |
 
 - **Prices come from the booking system.** The tab's data is only there so the mini cart shows at
@@ -198,7 +210,8 @@ that isn't a web address: then Check Out is a button that only announces.)
 - **A new tab** (or a new session: typing the address, a bookmark, Ctrl/middle-click, Open in new
   tab):
   - It has the id but no data: the header count and the buttons' labels (Remove From Cart, Add
-    More) show at once from the id's count and codes.
+    More) show at once from the id's count and codes, and the listings' lounges in the cart from
+    its `lounges`.
   - The cart is read once in the background after the load.
   - An add or a removal before that reads the cart first, so it joins the same cart and the rules
     apply. A second cart is never made.
