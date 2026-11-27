@@ -1,5 +1,5 @@
 import {
-  buildForm, datePickerOf, fieldElement, setFieldError,
+  buildForm, datePickerOf, fieldElement, setFieldError, setFieldRequired,
 } from '../../scripts/forms.js';
 import buildDatePicker from '../../scripts/date-picker.js';
 import { formatDate } from '../../scripts/booking.js';
@@ -205,11 +205,17 @@ export default function decorate(block) {
     choice += 1;
     const current = choice;
     [...area.options].slice(1).forEach((old) => old.remove());
+    setFieldRequired(areaField, null);
     if (!location.value) return;
     readSheet('areas').then((rows) => {
       if (current !== choice) return;
-      area.append(...rows.filter((row) => codeOf(row) === location.value && row.Value)
-        .map((row) => option(String(row.Value).trim(), nameOf(row) || String(row.Value).trim())));
+      const list = rows.filter((row) => codeOf(row) === location.value && row.Value);
+      area.append(...list.map((row) => {
+        const value = String(row.Value).trim();
+        return option(value, nameOf(row) || value);
+      }));
+      // with areas, a choice is required, checked with the other fields
+      if (list.length) setFieldRequired(areaField, areaMessage || '');
     }).catch(() => { /* no areas: the field stays empty and optional */ });
   });
 
@@ -248,12 +254,9 @@ export default function decorate(block) {
   }
 
   form.addEventListener('forms:submit', (e) => {
-    const missingArea = area?.options.length > 1 && !area.value;
-    if (missingArea) setFieldError(areaField, areaMessage || area.options[0].textContent);
     if (!enough()) setFieldError(adults, peopleMessage);
     if (endTooEarly()) setFieldError(endField, endMessage);
-    const first = [missingArea && area, !enough() && adults.querySelector('select'), endTooEarly() && end]
-      .find(Boolean);
+    const first = [!enough() && adults.querySelector('select'), endTooEarly() && end].find(Boolean);
     if (first) {
       e.preventDefault();
       first.focus();
